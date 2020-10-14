@@ -1,0 +1,82 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Attributes : MonoBehaviour
+{
+    [Serializable]
+    public struct Sword
+    {
+        public float length;
+        public float width;
+        public float weight;
+    }
+
+    /*
+    [Serializable]
+    public struct BaseStatistics
+    {
+        public int blockLevel; // 0 = no block; 1 = block from front only; 2 = block all
+        public float stunResistance;
+        public float pierceResistance;
+        public float slashResitance;
+    }
+    */
+
+    public Sword sword;
+    public int health;
+    public int currentHealth;
+    public float poise;
+    public float currentPoise;
+    public float poiseRegenRate;
+    public float staggerThreshold;
+    public float knockdownThreshold;
+
+    private void Awake()
+    {
+        currentHealth = health;
+        currentPoise = poise;
+    }
+
+    private void Update()
+    {
+        if (currentPoise < poise)
+        {
+            currentPoise += poiseRegenRate * Time.deltaTime;
+        } else if (currentPoise > poise)
+        {
+            currentPoise = poise;
+        }
+    }
+
+    public void ReduceHealth(int dmg)
+    {
+        currentHealth -= dmg;
+    }
+    public void ReducePoise(int kb)
+    {
+        currentPoise -= kb;
+    }
+    public bool ShouldKnockdown()
+    {
+        return currentPoise < knockdownThreshold;
+    }
+    public bool ShouldStagger()
+    {
+        return currentPoise < staggerThreshold;
+    }
+    public bool HasPoiseRemaining()
+    {
+        return currentPoise > 0;
+    }
+    public float GetSwordLength()
+    {
+        return sword.length;
+    }
+
+    public float GetSwordHeft()
+    {
+        return 1f / sword.weight;
+    }
+}

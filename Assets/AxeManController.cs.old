@@ -1,0 +1,156 @@
+﻿using CustomUtilities;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class AxeManController : Actionable
+{
+    /*
+    public enum Action
+    {
+        None,           // 0
+
+        Stab,           // 1
+        PLACEHOLDER_2,  // 2
+        Slash,          // 3
+        Slash2,         // 4
+        PLACEHOLDER_5,  // 5
+        ChargeStab,     // 6
+        ChargeStab2,    // 7
+        ChargeSlash,    // 8
+
+        PLACEHOLDER_9,  // 9
+        PLACEHOLDER_10, // 10
+
+        Dodge,          // 11
+
+        Neutral,        // 12
+
+        Sheathe,        // 13
+        Unsheathe,      // 14
+
+        Slay,           // 15
+    }
+    */
+    // Start is called before the first frame update
+    Animator animator;
+    RagdollHurtboxController hurtbox;
+    LockonShoulderCam cameraController;
+
+    public Transform player;
+    public float attackDistance = 5f;
+
+    CharacterController cc;
+
+    public float MaxRunSpeed = 5f;
+    
+    public DamageKnockback[] swingDamages;
+
+    public int action;
+    public float clock;
+
+    void Start()
+    {
+        animator = GetComponent<Animator>();
+        hurtbox = GetComponent<RagdollHurtboxController>();
+
+        cc = GetComponent<CharacterController>();
+
+        animator.SetFloat("Heft", 1f);
+        animator.SetFloat("Agility", 1f);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        float dist = Vector3.Distance(transform.position, player.position);
+        Vector3 dir = (player.position - transform.position).normalized;
+        if (clock <= 0f)
+        {
+            if (hurtbox.stunRemaining > 0f)
+            {
+                action = 3; // counter attack
+                animator.SetBool("HasNewAction", true);
+            }
+            else if (dist < attackDistance + 1f)
+            {
+                action = 8; // main attack
+                animator.SetBool("HasNewAction", true);
+            }
+            else
+            {
+                action = 0; // get closer
+                animator.SetBool("HasNewAction", false);
+            }
+            clock = 2.5f;
+        }
+        else
+        {
+            clock -= Time.deltaTime;
+        }
+
+        if (action == 0 && CanMove())
+        {
+            if (dist > attackDistance)
+            {
+                animator.SetFloat("ForwardVelocity", 1f);
+                transform.rotation = Quaternion.LookRotation(dir);
+                cc.SimpleMove(dir * MaxRunSpeed);
+            }
+            else
+            {
+                animator.SetFloat("ForwardVelocity", 0f);
+            }
+        }
+
+        
+    }
+
+    public DamageKnockback GetDamageFromAttack(int attack)
+    {
+        DamageKnockback swing = new DamageKnockback(swingDamages[attack]);
+        swing.kbForce = swing.kbForce.z * Camera.main.transform.forward + swing.kbForce.y * Vector3.up;
+
+        Vector3 dir = (player.position - transform.position).normalized;
+        transform.rotation = Quaternion.LookRotation(dir);
+
+
+        return swing;
+    }
+   
+
+    private bool CanMove()
+    {
+        string MOVABLE_TAG = "MOVABLE";
+        bool ALLOW_IN_TRANSITION = true;
+
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag(MOVABLE_TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(0));
+
+
+        string[] MOVEABLE_STATES = new string[]
+        {
+            "Idle",
+            "Move"
+        };
+
+        foreach (string state in MOVEABLE_STATES)
+        {
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName(state))
+            {
+                return true;
+            }
+        }
+        return false;
+
+    }
+
+    public override int GetBufferedAction()
+    {
+        animator.SetBool("HasNewAction", false);
+        int act = action;
+        action = 0;
+        return act;
+    }
+}

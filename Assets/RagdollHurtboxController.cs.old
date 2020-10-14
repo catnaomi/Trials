@@ -1,0 +1,368 @@
+﻿using CustomUtilities;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[Obsolete]
+public class RagdollHurtboxController : HurtboxController
+{
+    Animator animator;
+    CharacterController cc;
+    Attributes attributes;
+    Collider mainCollider;
+    Collider[] colliders;
+    public Rigidbody body;
+    public Vector3 force;
+    public float additionalVertical = 2;
+    public bool isFacingUp;
+    public bool isStaggered;
+    public bool isKnockedDown;
+    public bool isInvulnerable;
+
+    public float autoGetupVelocity = 0.1f;
+    public float autoGetupDelay = 3f;
+    float autoGetupTimer;
+    Vector3 spineUp;
+    [Space(10)]
+    public DamageKnockback testDamage;
+    public bool apply;
+    public bool getup;
+
+    public float stunAmount = 0f;
+    public float stunRemaining = 0f;
+    [Space(20)]
+    public string status;
+    public DamageKnockback lastDamage;
+    // Start is called before the first frame update
+    void Start()
+    {
+        animator = GetComponent<Animator>();
+        cc = GetComponent<CharacterController>();
+        attributes = GetComponent<Attributes>();
+        autoGetupTimer = 0f;
+        mainCollider = GetComponent<Collider>();
+        colliders = GetComponentsInChildren<Collider>();
+        UpdateColliders(false);
+
+        Physics.IgnoreLayerCollision(0, 10);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (apply)
+        {
+            ProcessDamageKnockback(testDamage);
+            apply = false;
+        }
+
+        if (isKnockedDown && body.velocity.magnitude < autoGetupVelocity)
+        {
+            autoGetupTimer += Time.deltaTime;
+        }
+        else
+        {
+            autoGetupTimer = 0f;
+        }
+
+        if (attributes.currentHealth > 0 && (getup || (isKnockedDown && autoGetupTimer > autoGetupDelay)))
+        {
+            GetUp();
+            getup = false;
+        }
+
+        spineUp = -body.transform.up;
+        spineUp.Scale(new Vector3(1, 0, 1));
+        spineUp.Normalize();
+
+        float upDist = Vector3.Distance(body.transform.forward, Vector3.up);
+        float downDist = Vector3.Distance(-body.transform.forward, Vector3.up);
+        isFacingUp = upDist < downDist;
+
+
+        animator.SetFloat("StunRemaining", stunRemaining);
+        if (stunRemaining >= 0f)
+        {
+            stunRemaining -= Time.deltaTime;
+        }
+        else if (attributes.currentPoise < 0f)
+        {
+            stunRemaining = 0.5f;
+        }
+        else
+        {
+            isStaggered = false;
+        }
+    }
+
+    public override void ProcessDamageKnockback(DamageKnockback damageKnockback)
+    {
+
+        status = "[" + (int)((Time.time * 1000) % 1000) + "] ";
+
+        ReducePoise((int)damageKnockback.poiseDamage);
+
+        if (isInvulnerable || isKnockedDown)
+        {
+            status += "attack missed!";
+        }
+        else if (Block(damageKnockback))
+        {
+            // attack blocked
+            status += "attack blocked! blockstun: " + stunAmount;
+        }
+        else
+        {
+            if (Knockback(damageKnockback))
+            {
+                // knocked down
+                status += "knocked down!";
+                Damage(damageKnockback);
+                Damage(damageKnockback);
+
+            }
+            else if (Stagger(damageKnockback))
+            {
+                // staggered
+                status = "staggered! staggerstun: " + stunAmount;
+            }
+            
+
+            if (Damage(damageKnockback))
+            {
+                status += " dmg: " + damageKnockback.healthDamage;
+            }
+        }
+
+        lastDamage = damageKnockback;
+    }
+
+    public bool Block(DamageKnockback damageKnockback)
+    {
+        if (!CanMove() && stunRemaining <= 0)
+        {
+            return false;
+        }
+
+        if (AxisUtilities.DirectionToAxisDirection(damageKnockback.kbForce, this.transform, "SAGITTAL") != AxisUtilities.AxisDirection.Backward)
+        {
+            //return false;
+        }
+
+        if (!attributes.HasPoiseRemaining())
+        {
+            return false;
+        }
+
+        Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
+        turnTowards = -(turnTowards.normalized);
+
+        stunAmount = damageKnockback.blockStun;
+        stunRemaining = stunAmount;
+
+        transform.LookAt(transform.position + turnTowards);
+        animator.SetTrigger("ShouldBlock");
+        animator.SetFloat("StunRemaining", stunRemaining);
+
+        return true;
+    }
+
+    public bool Stagger(DamageKnockback damageKnockback)
+    {
+        if (!damageKnockback.canStagger)
+        {
+            return false;
+        }
+
+        Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
+        turnTowards = -(turnTowards.normalized);
+
+        stunAmount = damageKnockback.staggerStun;
+        stunRemaining = stunAmount;
+
+        transform.LookAt(transform.position + turnTowards);
+        animator.SetTrigger("ShouldStagger");
+        animator.SetFloat("StunRemaining", stunRemaining);
+
+        isStaggered = true;
+
+        return true;
+    }
+    public override bool Knockback(DamageKnockback damageKnockback)
+    {
+        if (!damageKnockback.canKnockback)
+        {
+            return false;
+        }
+        if (attributes.HasPoiseRemaining())
+        {
+            return false;
+        }
+
+        Vector3 force = damageKnockback.kbForce + Vector3.up * additionalVertical;
+
+        animator.enabled = false;
+        cc.enabled = false;
+
+
+        UpdateColliders(true);
+
+        foreach (Rigidbody rigidbody in GetComponentsInChildren<Rigidbody>())
+        {
+            rigidbody.velocity = Vector3.zero;
+        }
+
+        body.AddForce(force, ForceMode.Impulse);
+
+        isKnockedDown = true;
+
+        return true;
+    }
+
+    public override bool Damage(DamageKnockback damageKnockback)
+    {
+        if (damageKnockback.healthDamage <= 0)
+        {
+            return false;
+        }
+
+        ReduceHealth(damageKnockback.healthDamage);
+
+        return true;
+    }
+    public void GetUp()
+    {
+        animator.enabled = true;
+        cc.enabled = true;
+
+        cc.Move((body.transform.position - transform.position) + spineUp);
+        transform.rotation = Quaternion.LookRotation(spineUp * (isFacingUp ? 1 : -1));
+        body.transform.position = Vector3.zero;
+
+        animator.SetTrigger(isFacingUp ? "GetUpFaceUp" : "GetUpFaceDown");
+        UpdateColliders(false);
+
+        attributes.currentPoise = attributes.poise / 2;
+        isKnockedDown = false;
+    }
+
+    private bool CanMove()
+    {
+        string MOVABLE_TAG = "MOVABLE";
+        bool ALLOW_IN_TRANSITION = true;
+
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag(MOVABLE_TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(0));
+    }
+
+    private void OnDrawGizmos()
+    {
+        try
+        {
+            string poiseText = "poise: [";
+
+            for (int i = 0; i < attributes.poise; i += 10)
+            {
+                poiseText += (i < attributes.currentPoise) ? "|" : " ";
+            }
+            poiseText += "] " + (int)attributes.currentPoise;
+
+            InterfaceUtilities.GizmosDrawText(transform.position + Vector3.up * 2f, new Color(0, 0.5f, 0), poiseText);
+
+            string stunText = "stun: [";
+
+            for (float f = 0; f < stunRemaining; f += 0.1f)
+            {
+                stunText += "|";
+            }
+
+            stunText += "] " + (int)(stunRemaining * 100f);
+
+            if (stunRemaining > 0)
+            {
+                InterfaceUtilities.GizmosDrawText(transform.position + Vector3.up * 2.1f, new Color(0.5f, 0.5f, 0.5f), stunText);
+            }
+
+            string hpText = "hp : [";
+            for (int h = 1; h <= attributes.currentHealth; h++)
+            {
+                hpText += "|";
+            }
+            hpText += "] " + attributes.currentHealth;
+
+            InterfaceUtilities.GizmosDrawText(transform.position + Vector3.up * 2.2f, new Color(0.5f, 0, 0), hpText);
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+
+    protected override void OnHitboxEnter(HitboxController hitbox)
+    {
+        ProcessDamageKnockback(hitbox.damageKnockback);
+    }
+
+    public void Invulnerable(int active)
+    {
+        isInvulnerable = false;//(active > 0);
+    }
+
+    public void EndStagger()
+    {
+        isStaggered = false;
+    }
+
+    private void ReduceHealth(int dmg)
+    {
+        if (attributes != null)
+        {
+            attributes.ReduceHealth(dmg);
+        }
+        
+    }
+
+    private void ReducePoise(int kb)
+    {
+        if (attributes != null)
+        {
+            attributes.ReducePoise(kb);
+        }
+    }
+
+    private bool ShouldStagger()
+    {
+        if (attributes != null)
+        {
+            return attributes.ShouldStagger();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private bool ShouldKnockdown()
+    {
+        if (attributes != null)
+        {
+            return attributes.ShouldKnockdown();
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    private void UpdateColliders(bool isRagdolled)
+    {
+        foreach (Collider collider in colliders)
+        {
+            collider.enabled = isRagdolled;
+        }
+        mainCollider.enabled = !isRagdolled;
+        body.GetComponent<Collider>().enabled = true;
+    }
+
+}

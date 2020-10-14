@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80c771ecc062b1847a75bd78f00a348f, type: 3}
+  m_Name: DebugBow
+  m_EditorClassIdentifier: 
+  itemName: DebugBow
+  itemDesc: debug bow
+  holder: {fileID: 0}
+  MaxStackSize: 1
+  invID: 0
+  prefab: {fileID: 6227314725866584499, guid: 3b9ceda05e36fe843a92d126dbe8d801, type: 3}
+  isEquipped: 1
+  EquippableMain: 1
+  EquippableOff: 0
+  OneHanded: 0
+  TwoHanded: 1
+  ParentLeftAsMain: 1
+  ParentRightAsOff: 0
+  MainHandEquipSlot: 5
+  OffHandEquipSlot: 0
+  PrfMainHandStance:
+    animatorStance: 0
+    lightThrustStyle: 0
+    lightSlashStyle: 0
+    heavyAttack: {fileID: 0}
+  PrfOffHandStance:
+    animatorStance: 0
+    lightThrustStyle: 0
+    lightSlashStyle: 0
+    heavyAttack: {fileID: 0}
+  PrfTwoHandStance:
+    animatorStance: 5
+    lightThrustStyle: 0
+    lightSlashStyle: 0
+    heavyAttack: {fileID: 11400000, guid: eaad1cfda33217a47b67cbe245862a10, type: 2}
+  AttackSpeed: 1
+  OnEquip:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnequip:
+    m_PersistentCalls:
+      m_Calls: []
+  model: {fileID: 0}
+  arrowPrefab: {fileID: 4805927410726168974, guid: 1be0e19a8c8967c4eb39716d4edc5885,
+    type: 3}
+  damageKnockback:
+    poiseDamage: 20
+    staminaDamage: 5
+    kbForce: {x: 0, y: 0, z: 20}
+    damage:
+      potential: 20
+      truedmg: 0
+      slash: 0
+      pierce: 1
+      earth: 0
+      light: 0
+      dark: 0
+      fire: 0
+      water: 0
+      air: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    breaksArmor: 0
+    unblockable: 0
+    staggerType: 1
+    hitClip: {fileID: 0}
+  drawTime: 1

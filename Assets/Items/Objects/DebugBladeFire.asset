@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f5b2d60248716348904e0a95c23587b, type: 3}
+  m_Name: DebugBladeFire
+  m_EditorClassIdentifier: 
+  itemName: DebugBlade
+  itemDesc: a weapon of choice for developers
+  holder: {fileID: 0}
+  MaxStackSize: 1
+  invID: 0
+  prefab: {fileID: 1804189005472518104, guid: f251dc646a8b5dc4ea23a4ea09af7651, type: 3}
+  isEquipped: 0
+  EquippableMain: 1
+  EquippableOff: 1
+  OneHanded: 1
+  TwoHanded: 1
+  ParentLeftAsMain: 0
+  ParentRightAsOff: 0
+  MainHandEquipSlot: 1
+  OffHandEquipSlot: 2
+  PrfMainHandStance:
+    animatorStance: 1
+    lightThrustStyle: 1
+    lightSlashStyle: 6
+    heavyAttack: {fileID: 0}
+  PrfOffHandStance:
+    animatorStance: 6
+    lightThrustStyle: 4
+    lightSlashStyle: 4
+    heavyAttack: {fileID: 0}
+  PrfTwoHandStance:
+    animatorStance: 2
+    lightThrustStyle: 2
+    lightSlashStyle: 7
+    heavyAttack: {fileID: 0}
+  AttackSpeed: 1
+  OnEquip:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnequip:
+    m_PersistentCalls:
+      m_Calls: []
+  model: {fileID: 0}
+  width: 0.25
+  length: 1.25
+  weight: 3
+  elementRatios:
+    potential: 0
+    truedmg: 0
+    slash: -0.5
+    pierce: -0.5
+    earth: 0
+    light: 0
+    dark: 0
+    fire: 0.6
+    water: 0
+    air: 0

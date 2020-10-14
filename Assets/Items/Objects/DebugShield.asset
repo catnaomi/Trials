@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7690a8c48c333f6418d1729d9eaa3864, type: 3}
+  m_Name: DebugShield
+  m_EditorClassIdentifier: 
+  itemName: Debug Shield
+  itemDesc: is a shield of debuggin'
+  holder: {fileID: 0}
+  MaxStackSize: 1
+  invID: 0
+  prefab: {fileID: 6502720667461261439, guid: adccd86633c83de4191e8ae9ba17b285, type: 3}
+  isEquipped: 1
+  EquippableMain: 0
+  EquippableOff: 1
+  OneHanded: 1
+  TwoHanded: 0
+  ParentLeftAsMain: 1
+  ParentRightAsOff: 0
+  MainHandEquipSlot: 0
+  OffHandEquipSlot: 5
+  PrfMainHandStance:
+    animatorStance: 0
+    lightThrustStyle: 0
+    lightSlashStyle: 0
+    heavyAttack: {fileID: 0}
+  PrfOffHandStance:
+    animatorStance: 3
+    lightThrustStyle: 3
+    lightSlashStyle: 1
+    heavyAttack: {fileID: 0}
+  PrfTwoHandStance:
+    animatorStance: 0
+    lightThrustStyle: 0
+    lightSlashStyle: 0
+    heavyAttack: {fileID: 0}
+  AttackSpeed: 1
+  OnEquip:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnequip:
+    m_PersistentCalls:
+      m_Calls: []
+  model: {fileID: 0}
+  reductionStrength: 0.1
+  BlockResistance:
+    potential: 0
+    truedmg: 0
+    slash: 0
+    pierce: 0
+    earth: 0.9
+    light: 0.25
+    dark: 0.25
+    fire: 0.25
+    water: 0.25
+    air: 0.25
+  bashCost: 20
+  bashDamage:
+    poiseDamage: 20
+    staminaDamage: 20
+    kbForce: {x: 0, y: 0, z: 10}
+    damage:
+      potential: 5
+      truedmg: 0
+      slash: 0
+      pierce: 0
+      earth: 1
+      light: 0
+      dark: 0
+      fire: 0
+      water: 0
+      air: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    breaksArmor: 1
+    unblockable: 0
+    staggerType: 5
+    hitClip: {fileID: 8300000, guid: 8cf0a475e2a2ccc48bf5bb14d8c24c2e, type: 3}

@@ -1,0 +1,479 @@
+﻿using CustomUtilities;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[Obsolete]
+public class PlayerController : Actionable
+{
+    public enum Action { 
+        None,           // 0
+
+        Stab,           // 1
+        PLACEHOLDER_2,  // 2
+        Slash,          // 3
+        Slash2,         // 4
+        PLACEHOLDER_5,  // 5
+        ChargeStab,     // 6
+        ChargeStab2,    // 7
+        ChargeSlash,    // 8
+
+        PLACEHOLDER_9,  // 9
+        PLACEHOLDER_10, // 10
+
+        Dodge,          // 11
+
+        Neutral,        // 12
+
+        Sheathe,        // 13
+        Unsheathe,      // 14
+
+        Slay,           // 15
+    }
+    // Start is called before the first frame update
+    Animator animator;
+    RagdollHurtboxController hurtbox;
+    LockonShoulderCam cameraController;
+
+    public HitboxController hitbox;
+
+    CharacterController cc;
+
+    public float MaxRunSpeed = 10f;
+    public float ForwardMultiplier = 1f;
+    public float StrafeMultiplier = .5f;
+    public float BackwardMultiplier = .5f;
+    public float rotateSpeed = 180f;
+
+    public float unlockTime = 1f;
+    public float lockDistance = 20f;
+
+    public float additionalRollSpeed = 1f;
+    AxisUtilities.AxisDirection dodgeDirection;
+    [HideInInspector] public Vector3 camRotation;
+
+    public DamageKnockback[] swingDamages;
+    int lastAttackID = 0;
+
+    public int attackComboLength = 4;
+    public int attackComboProgress = 0;
+    public float neutralInputClock = 0f;
+    public float bufferLength = 1f;
+    bool canAttack;
+
+    [Serializable]
+    public struct BufferedAction
+    {
+        public float creationTime;
+        public Action action;
+        public bool processed;
+    }
+    public Queue<Action> inputBuffer;
+    public List<BufferedAction> inputHistory;
+    public Action lastAction;
+    Camera cam;
+
+    void Start()
+    {
+        animator = GetComponent<Animator>();
+        hurtbox = GetComponent<RagdollHurtboxController>();
+        hitbox = GetComponentInChildren<HitboxController>();
+
+        cc = GetComponent<CharacterController>();
+
+        camRotation = transform.forward;
+
+        cam = Camera.main;
+
+        cameraController = cam.GetComponent<LockonShoulderCam>();
+
+        //hitbox.OnChange.AddListener(() => { ProcessNextInput(); UpdateKnockback(); });
+
+        inputBuffer = new Queue<Action>();
+        inputHistory = new List<BufferedAction>();
+
+        animator.SetFloat("Heft", 1f);
+        animator.SetFloat("Agility", 1f);
+
+        canAttack = true;
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        float primaryVertical = Input.GetAxisRaw("Vertical");
+        float primaryHorizontal = Input.GetAxisRaw("Horizontal");
+        float secondaryVertical = Input.GetAxisRaw("SecondaryVertical");
+        float secondaryHorizontal = Input.GetAxisRaw("SecondaryHorizontal");
+
+        bool buttonPressed = HandleInput();
+
+        bool shouldAlign = false;
+        bool canMove = CanMove();
+
+        bool isGrounded = cc.isGrounded;
+
+
+        /*
+        List<string> preview = new List<string>();
+        foreach (Action action in inputBuffer.ToArray())
+        {
+            preview.Add(Enum.GetName(typeof(Action), action));
+        }
+        bufferPreview = preview.ToArray();
+        */
+
+        if (canMove)
+        {
+            shouldAlign = true;
+            //attackComboProgress = 0;
+            
+            if (buttonPressed)
+            {
+                //ProcessNextInput();
+            }
+            else
+            {
+                neutralInputClock += Time.deltaTime;
+                if (neutralInputClock > 1f)
+                {
+                    attackComboProgress = 0;
+                    canAttack = true;
+                }
+            }
+        }
+        else if (cameraController.lockedOn)
+        {
+            shouldAlign = true;
+        }
+
+        animator.SetBool("HasNewAction", (inputBuffer.Count > 0));
+
+
+        Vector3 forward = cam.transform.forward;
+        forward.y = 0;
+        forward = forward.normalized;
+
+        Vector3 right = cam.transform.right;
+        right.y = 0;
+        right = right.normalized;
+
+        Vector3 stickDirection = Vector3.ClampMagnitude(primaryVertical * forward + primaryHorizontal * right, 1f);
+        Vector3 moveDirection = Vector3.ClampMagnitude(
+            (
+                Mathf.Clamp(primaryVertical, -BackwardMultiplier, ForwardMultiplier) * forward * MaxRunSpeed +
+                Mathf.Clamp(primaryHorizontal, -StrafeMultiplier, StrafeMultiplier) * right * MaxRunSpeed
+            ),
+            MaxRunSpeed);
+
+
+        animator.SetBool("Running", primaryVertical > 0);
+        animator.SetFloat("ForwardVelocity", primaryVertical);
+        animator.SetFloat("StrafingVelocity", primaryHorizontal);
+
+        AxisUtilities.AxisDirection stickAxis = GetStickAxis();
+
+        camRotation = Quaternion.AngleAxis(secondaryHorizontal * rotateSpeed * Time.deltaTime, transform.up) * camRotation;
+
+        
+        if (IsDodging())
+        {
+            Vector3 ternaryDodgeDir = AxisUtilities.AxisDirectionsToTernaryVector(dodgeDirection);
+
+
+            float adjustment = 0f;
+
+            bool slow = AxisUtilities.InvertAxis(stickAxis, true, false, true) == dodgeDirection;
+
+            
+            if (!slow)
+            {
+                adjustment = 1f;
+            }
+            
+            cc.Move((forward * ternaryDodgeDir.z + right * ternaryDodgeDir.x).normalized * adjustment * additionalRollSpeed * Time.deltaTime);
+            shouldAlign = true;
+            hurtbox.isInvulnerable = true;
+        }
+        else
+        {
+            hurtbox.isInvulnerable = false;
+        }
+
+        if (shouldAlign)
+        {
+            transform.rotation = Quaternion.LookRotation(cameraController.GetPlayerFaceForward());
+        }
+        //transform.Rotate(Vector3.up, horizontal * rotateSpeed * Time.deltaTime);
+        if (canMove && !hurtbox.isKnockedDown)
+        {
+            cc.SimpleMove(moveDirection);
+        }
+
+        
+
+        if (hurtbox.isKnockedDown)
+        {
+            //hitbox.hitboxActive = false;
+        }
+
+    }
+
+    public DamageKnockback GetDamageFromAttack(int attack)
+    {
+        DamageKnockback swing = new DamageKnockback(swingDamages[attack]);
+        swing.kbForce = swing.kbForce.z * cam.transform.forward + swing.kbForce.y * Vector3.up;
+
+        return swing;
+    }
+    private void UpdateKnockback()
+    {
+        DamageKnockback swing = new DamageKnockback(swingDamages[hitbox.attackID]);
+        hitbox.damageKnockback = swing;
+        hitbox.damageKnockback.kbForce = hitbox.damageKnockback.kbForce.magnitude * transform.forward;
+        lastAttackID = hitbox.attackID;
+    }
+
+    private bool CanMove()
+    {
+        string MOVABLE_TAG = "MOVABLE";
+        bool ALLOW_IN_TRANSITION = true;
+
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag(MOVABLE_TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(0));
+
+        
+        string[] MOVEABLE_STATES = new string[]
+        {
+            "Idle",
+            "Move"
+        };
+
+        foreach(string state in MOVEABLE_STATES)
+        {
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName(state))
+            {
+                return true;
+            }
+        }
+        return false;
+        
+    }
+
+    private bool IsDodging()
+    {
+        string DODGING_TAG = "DODGING";
+        bool ALLOW_IN_TRANSITION = true;
+
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag(DODGING_TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(0));
+    }
+    
+    public void BeginTransition()
+    {
+        cam.SendMessage("BeginTransition");
+    }
+
+    private void OnDrawGizmos()
+    {
+        try
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawRay(hitbox.hitbox.bounds.center, hitbox.damageKnockback.kbForce.magnitude * transform.forward);
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+
+    private bool HandleInput()
+    {
+        bool slashDown = Input.GetButtonDown("Attack1");
+        bool slashHeld = Input.GetButton("Attack1");
+        bool slashUp = Input.GetButtonUp("Attack1");
+        bool stabDown = Input.GetButtonDown("Attack2");
+        bool stabHeld = Input.GetButton("Attack2");
+        bool stabUp = Input.GetButtonUp("Attack2");
+
+        bool roll = Input.GetButtonDown("Dodge");
+
+        Action ToQueue = Action.None;
+
+        bool canBufferNextAction = true; 
+        if (roll)
+        {
+            ToQueue = Action.Dodge;
+        }
+        else if (slashDown)
+        {
+            
+            if (attackComboProgress >= attackComboLength)
+            {
+                ToQueue = Action.ChargeSlash;
+                attackComboProgress = 0;
+                canBufferNextAction = false;
+            }
+            else if (lastAction == Action.Slash || lastAction == Action.Stab)
+            {
+                ToQueue = Action.Slash2;
+                attackComboProgress++;
+            }
+            else
+            {
+                ToQueue = Action.Slash;
+                attackComboProgress++;
+            }
+            
+        }
+        else if (stabDown)
+        {
+            
+            if (attackComboProgress >= attackComboLength)
+            {
+                ToQueue = Action.ChargeStab;
+                attackComboProgress = 0;
+                canBufferNextAction = false;
+            }
+            else
+            {
+                ToQueue = Action.Stab;
+                attackComboProgress++;
+            }
+            
+            
+            /*
+            if (attackComboProgress == attackComboLength)
+            {
+                ToQueue = Action.ChargeStab;
+            }
+            else if (attackComboProgress < attackComboLength)
+            {
+                ToQueue = Action.Stab;
+            }
+            */
+        }
+
+        BufferedAction bufferedAction = new BufferedAction
+        {
+            action = ToQueue,
+            creationTime = Time.time,
+            processed = false,
+        };
+
+        /*
+        if (ToQueue != Action.None)
+        {
+            inputBuffer.Add(bufferedAction);
+        }
+        */
+        bool shouldBuffer = false;
+
+        if (canAttack && ToQueue != Action.None)
+        {
+            shouldBuffer = true;
+            inputBuffer.Enqueue(ToQueue);
+            lastAction = ToQueue;
+        }
+
+        if (!canBufferNextAction)
+        {
+            canAttack = false;
+        }
+        
+
+        /*
+        if (shouldBuffer)
+        {
+            inputHistory.Insert(0, bufferedAction);
+
+
+            neutralInputClock = 0f;
+
+            if (inputHistory.Count > 10)
+            {
+                inputHistory.RemoveAt(10);
+            }
+        }
+        */
+
+        return (slashDown || stabDown || roll);
+    }
+    /*
+    private void ProcessNextInput()
+    {
+        Action action = Action.None;
+
+        if (inputBuffer.Count > 0)
+        {
+            //action = inputBuffer.Dequeue();
+            animator.SetTrigger("TakeAction");
+        }
+        /*
+
+        for (int i = 0; i < inputHistory.Count; i++)
+        {
+            BufferedAction bufferedAction = inputHistory[i];
+            if (!inputHistory[i].processed)
+            {
+                if (inputHistory[i].creationTime > Time.time - bufferLength)
+                {
+                    if (inputHistory[i].action != Action.None)
+                    {
+                        action = inputHistory[i].action;
+                        inputHistory[i] = new BufferedAction
+                        {
+                            action = action,
+                            creationTime = 0f,
+                            processed = true,
+                        };
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (action != Action.None)
+        {
+            //animator.SetInteger("ActionType", (int)action);
+            inputBuffer.Enqueue(action);
+            animator.SetTrigger("TakeAction");
+            lastAction = action;
+        }
+        else
+        {
+            //inputBuffer.Clear();
+        }
+
+        //Debug.Log("Buffer: " + Enum.GetName(typeof(Action), action));
+        
+    }
+    */
+
+    public override int GetBufferedAction()
+    {
+        int act = -1;
+        if (inputBuffer.Count > 0)
+        {
+            act = (int) inputBuffer.Dequeue();
+        }
+        return act;
+    }
+
+    public override void SetDodgeDirection(AxisUtilities.AxisDirection axis)
+    {
+        dodgeDirection = axis;
+    }
+
+    public override AxisUtilities.AxisDirection GetStickAxis()
+    {
+        AxisUtilities.AxisDirection stickAxis = AxisUtilities.ConvertAxis(InputHandler.main.PrimaryQuadrant, "VERTICAL", "SAGGITAL");
+        if (stickAxis == AxisUtilities.AxisDirection.Zero)
+        {
+            stickAxis = AxisUtilities.AxisDirection.Forward;
+        }
+        return stickAxis;
+    }
+}
