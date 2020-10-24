@@ -31,6 +31,7 @@ public class PlayerActor : HumanoidActor
     Vector3 stickDirection;
     Vector3 moveDirection;
 
+    Vector3 airDirection;
     public override void ActorStart()
     {
         base.ActorStart();
@@ -85,18 +86,7 @@ public class PlayerActor : HumanoidActor
     public float SpringMultiplier = 4f;
          */
 
-        if (inventory.IsMainDrawn())
-        {
-            slowMultiplier = Mathf.Min(WeaponDrawnMultiplier, slowMultiplier);
-        }
-        if (IsBlocking())
-        {
-            slowMultiplier = Mathf.Min(BlockMultiplier, slowMultiplier);
-        }
-        if (IsAiming())
-        {
-            slowMultiplier = Mathf.Min(AimMultipler, slowMultiplier);
-        }
+        slowMultiplier = GetSlowMultiplier();
 
         /*
         if (lockedOn)
@@ -123,7 +113,6 @@ public class PlayerActor : HumanoidActor
 
         stickDirection = Vector3.ClampMagnitude(primaryVertical * forward + primaryHorizontal * right, 1f);
 
-
         if (lockedOn && !IsSprinting())
         {
             moveDirection = Vector3.ClampMagnitude(
@@ -134,10 +123,11 @@ public class PlayerActor : HumanoidActor
                 BaseMovementSpeed * slowMultiplier
             );
         }
-        else
+        else if (true)
         {
             moveDirection = stickDirection * BaseMovementSpeed * slowMultiplier;
         }
+
         //animator.SetLayerWeight(StanceHandler.ActionLowerLayer, (stickDirection == Vector3.zero) ? 1f : 0f);
 
         if (IsSprinting())
@@ -145,9 +135,18 @@ public class PlayerActor : HumanoidActor
             moveDirection *= SprintMultiplier;
         }
 
+        if (isGrounded && moveDirection != Vector3.zero)
+        {
+            airDirection = moveDirection;
+        }
+
         if (isAiming)
         {
             alignMode = AlignMode.Camera;
+        }
+        else if (!cc.isGrounded && airTime > 0.25f)
+        {
+            alignMode = AlignMode.None;
         }
         else if (IsSprinting() || IsDodging() || startDodge)
         {
@@ -185,7 +184,7 @@ public class PlayerActor : HumanoidActor
                 animator.SetFloat("StrafingVelocity", 0f);
             }
         }
-        else if (!IsDodging())
+        else if (!IsDodging() && !IsJumping() && false)
         {
             animator.SetFloat("ForwardVelocity", 0f);
             animator.SetFloat("StrafingVelocity", 0f);
@@ -213,7 +212,7 @@ public class PlayerActor : HumanoidActor
 
         if (alignMode == AlignMode.Camera)
         {
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(cameraController.GetPlayerFaceForward()), 720f * Time.fixedDeltaTime);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(cameraController.GetPlayerFaceForward()), 360f * Time.fixedDeltaTime);
         }
         else if (alignMode == AlignMode.Stick)
         {
@@ -223,8 +222,9 @@ public class PlayerActor : HumanoidActor
         startDodge = false;
     }
 
-    private void FixedUpdate()
+    protected new void FixedUpdate()
     {
+        base.FixedUpdate();
         //transform.Rotate(Vector3.up, horizontal * rotateSpeed * Time.deltaTime);
         if (CanMove() && humanoidState == HumanoidState.Actionable)
         {
@@ -235,14 +235,20 @@ public class PlayerActor : HumanoidActor
                 cc.Move(Vector3.Cross(temp, hit.normal) * Time.fixedDeltaTime);
                 //transform.Translate(0, (hit.point - transform.position).y * Time.fixedDeltaTime * GetCurrentSpeed() * 2f, 0);
             }
+            else if (IsAerial())
+            {
+                cc.Move((airDirection + gravity) * Time.fixedDeltaTime);
+                Debug.Log(airDirection);
+            }
             else
             {
-                cc.SimpleMove(moveDirection);
+
+                cc.Move((moveDirection + gravity) * Time.fixedDeltaTime);
             }
         }
         else if (!IsJumping())
         {
-            cc.SimpleMove(Vector3.zero);
+            cc.Move(gravity * Time.fixedDeltaTime);
         }
     }
 
@@ -265,7 +271,6 @@ public class PlayerActor : HumanoidActor
         //animator.SetBool("MirrorBlockingStance", false);
         //animator.SetInteger("LightAttackStyle", 1);
         animator.SetBool("Blocking", animator.GetBool("Armed") && InputHandler.main.blockHeld);
-
         GetInventoryInput();
         if (!animator.GetBool("Armed"))
         {
@@ -279,11 +284,13 @@ public class PlayerActor : HumanoidActor
             if (InputHandler.main.slashUp)
             {
                 animator.SetTrigger("Input-SlashUp");
+                RegisterPlayerInput();
                 //animator.ResetTrigger("Input-SlashDown");
             }
             if (InputHandler.main.slashDown)
             {
                 animator.SetTrigger("Input-SlashDown");
+                RegisterPlayerInput();
                 //animator.ResetTrigger("Input-SlashUp");
             }
             animator.SetFloat("Input-SlashHeldTime", InputHandler.main.slashHeldTime);
@@ -292,11 +299,13 @@ public class PlayerActor : HumanoidActor
             if (InputHandler.main.thrustUp)
             {
                 animator.SetTrigger("Input-ThrustUp");
+                RegisterPlayerInput();
                 //animator.ResetTrigger("Input-ThrustDown");
             }
             if (InputHandler.main.thrustDown)
             {
                 animator.SetTrigger("Input-ThrustDown");
+                RegisterPlayerInput();
                 //animator.ResetTrigger("Input-ThrustUp");
             }
             animator.SetFloat("Input-ThrustHeldTime", InputHandler.main.thrustHeldTime);
@@ -304,13 +313,20 @@ public class PlayerActor : HumanoidActor
             if (InputHandler.main.heavyDown)
             {
                 animator.SetTrigger("Input-HeavyDown");
+                RegisterPlayerInput();
             }
             if (InputHandler.main.heavyUp)
             {
                 animator.SetTrigger("Input-HeavyUp");
+                RegisterPlayerInput();
             }
             animator.SetFloat("Input-HeavyHeldTime", InputHandler.main.heavyHeldTime);
             animator.SetBool("Input-HeavyHeld", InputHandler.main.heavyHeld);
+
+            if (InputHandler.main.slashHeld && InputHandler.main.thrustHeld)
+            {
+                RegisterPlayerInput();
+            }
         }
         else
         {
@@ -323,14 +339,29 @@ public class PlayerActor : HumanoidActor
 
        
         animator.SetInteger("AxisDirection", (int)InputHandler.main.PrimaryQuadrant);
-        if (InputHandler.main.jumpDown && attributes.HasAttributeRemaining(attributes.stamina))
+
+        if (attributes.HasAttributeRemaining(attributes.stamina))
         {
-            animator.SetTrigger("Input-DodgeDown");
-            startDodge = true;
+            if (InputHandler.main.jumpDown)
+            {
+                animator.SetTrigger("Input-DodgeDown");
+                RegisterPlayerInput();
+            }
+            if (InputHandler.main.jumpUp)
+            {
+                animator.SetTrigger("Input-DodgeUp");
+                RegisterPlayerInput();
+                startDodge = true;
+            }
         }
         animator.SetBool("Input-DodgeHeld", InputHandler.main.jumpHeld);
-        animator.SetBool("Sprinting", InputHandler.main.sprintHeld && attributes.HasAttributeRemaining(attributes.stamina) && animator.GetFloat("ForwardVelocity") > 0f);
+        animator.SetBool("Sprinting", InputHandler.main.sprintHeld && attributes.HasAttributeRemaining(attributes.stamina) && stickDirection != Vector3.zero);
 
+        if (Input.GetButtonDown("Sneak"))
+        {
+            shouldSneak = !shouldSneak;
+        }
+        animator.SetBool("Sneaking", shouldSneak);
 
         if (Input.GetButtonDown("Interact")) {
             if (false) // TODO: check for interactable items here
@@ -341,6 +372,17 @@ public class PlayerActor : HumanoidActor
                 }
             }
         }
+    }
+
+    public new void TriggerSheath(bool draw, Inventory.EquipSlot slot, bool targetMain)
+    {
+        base.TriggerSheath(draw, slot, targetMain);
+        RegisterPlayerInput();
+    }
+
+    private void RegisterPlayerInput()
+    {
+        animator.SetBool("Input-Player", true);
     }
 
     private void GetInventoryInput()

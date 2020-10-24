@@ -8,14 +8,25 @@ public class HeavyAttackStateHandler : StateMachineBehaviour
     public bool exit;
     public bool update;
     public bool ik;
+    public bool isSpecial = false;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         if (enter && animator.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
         {
-            if (actor.stance != null && actor.stance.heavyAttack != null)
+            if (!isSpecial)
             {
-                actor.stance.heavyAttack.OnHeavyEnter();
+                if (actor.stance != null && actor.stance.heavyAttack != null)
+                {
+                    actor.stance.heavyAttack.OnHeavyEnter();
+                }
+            }
+            else
+            {
+                if (actor.stance != null && actor.stance.specialAttack != null)
+                {
+                    actor.stance.specialAttack.OnHeavyEnter();
+                }
             }
         }
     }
@@ -25,9 +36,19 @@ public class HeavyAttackStateHandler : StateMachineBehaviour
     {
         if (update && animator.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
         {
-            if (actor.stance != null && actor.stance.heavyAttack != null)
+            if (!isSpecial)
             {
-                actor.stance.heavyAttack.OnHeavyUpdate();
+                if (actor.stance != null && actor.stance.heavyAttack != null)
+                {
+                    actor.stance.heavyAttack.OnHeavyUpdate();
+                }
+            }
+            else
+            {
+                if (actor.stance != null && actor.stance.specialAttack != null)
+                {
+                    actor.stance.specialAttack.OnHeavyUpdate();
+                }
             }
         }
     }
@@ -37,9 +58,19 @@ public class HeavyAttackStateHandler : StateMachineBehaviour
     {
         if (exit && animator.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
         {
-            if (actor.stance != null && actor.stance.heavyAttack != null)
+            if (!isSpecial)
             {
-                actor.stance.heavyAttack.OnHeavyExit();
+                if (actor.stance != null && actor.stance.heavyAttack != null)
+                {
+                    actor.stance.heavyAttack.OnHeavyExit();
+                }
+            }
+            else
+            {
+                if (actor.stance != null && actor.stance.specialAttack != null)
+                {
+                    actor.stance.specialAttack.OnHeavyExit();
+                }
             }
         }
     }
@@ -55,9 +86,19 @@ public class HeavyAttackStateHandler : StateMachineBehaviour
     {
         if (ik && animator.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
         {
-            if (actor.stance != null && actor.stance.heavyAttack != null)
+            if (!isSpecial)
             {
-                actor.stance.heavyAttack.OnHeavyIK();
+                if (actor.stance != null && actor.stance.heavyAttack != null)
+                {
+                    actor.stance.heavyAttack.OnHeavyIK();
+                }
+            }
+            else
+            {
+                if (actor.stance != null && actor.stance.specialAttack != null)
+                {
+                    actor.stance.specialAttack.OnHeavyIK();
+                }
             }
         }
     }

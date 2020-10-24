@@ -185,12 +185,21 @@ public class CraftableWeapon : BladeWeapon
             this.OffHandEquipSlot = Inventory.EquipSlot.lHip;
         }
         this.elementRatios = new Damage();
+        int leadSP = -9;
         foreach (WeaponComponent component in GetAllComponents())
         {
-            if (component != null && component.ratios != null)
+            if (component != null)
             {
-                elementRatios.Add(component.ratios);
-            }
+                if (component.ratios != null)
+                {
+                    elementRatios.Add(component.ratios);
+                }
+                if (component.PrfMainHandStance.specialAttack != null && component.PrfMainHandStance.specialPriority > leadSP)
+                {
+                    this.PrfMainHandStance.specialAttack = component.PrfMainHandStance.specialAttack;
+                    leadSP = component.PrfMainHandStance.specialPriority;
+                }
+            } 
         }
     }
 

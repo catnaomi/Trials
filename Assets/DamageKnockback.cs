@@ -42,6 +42,7 @@ public class DamageKnockback
         GuardBreak,     // 7
 
         Recoil,          // 8 shorter stun
+        FallDamage,       // 9
     }
 
     //public bool breaksArmor;

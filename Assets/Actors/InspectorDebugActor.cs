@@ -28,6 +28,9 @@ public class InspectorDebugActor : MonoBehaviour
     [ReadOnly] public bool armored;
     [ReadOnly] public bool isHitboxActive;
     [ReadOnly] public bool invulnerable;
+    [ReadOnly] public bool isJumping;
+    [ReadOnly] public bool isSprinting;
+    [ReadOnly] public bool isAerial;
 
     public bool ForceBlock;
     private void Start()
@@ -90,5 +93,8 @@ public class InspectorDebugActor : MonoBehaviour
         armored = actor.IsArmored();
         isHitboxActive = actor.IsHitboxActive();
         invulnerable = actor.isInvulnerable;
+        isSprinting = actor.IsSprinting();
+        isJumping = actor.IsJumping();
+        isAerial = actor.IsAerial();
     }
 }

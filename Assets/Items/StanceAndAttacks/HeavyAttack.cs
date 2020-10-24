@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class HeavyAttack : ScriptableObject
 {
     [ReadOnly] public HumanoidActor actor;
-
+    public bool isSpecialAttack;
     public bool armored;
     /*
     [Header("Single Attack, Charge Start, & Aim Start")]

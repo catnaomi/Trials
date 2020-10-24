@@ -37,7 +37,7 @@ public class HumanoidActor : Actor
     private float reviveDelay = 30f;
     private float reviveClock;
 
-    private float airTime = 0f;
+    protected float airTime = 0f;
     private float fallDamage = 0f;
 
     [HideInInspector] public Vector3 lastForce;
@@ -58,6 +58,8 @@ public class HumanoidActor : Actor
     public bool wasAttackingLastFrame;
     public bool isGrounded;
 
+    public bool shouldSneak;
+
     float fallClock;
 
     public bool shouldForceLeft;
@@ -69,6 +71,7 @@ public class HumanoidActor : Actor
 
     public GameObject damageDisplay;
 
+    public Vector3 gravity;
     [Serializable]
     public struct PositionReference
     {
@@ -103,6 +106,7 @@ public class HumanoidActor : Actor
     public float WeaponDrawnMultiplier = 0.9f;
     public float BlockMultiplier = 0.5f;
     public float SprintMultiplier = 4f;
+    public float SneakMultiplier = 0.5f;
     public float AimMultipler = 0.5f;
 
     public enum HumanoidState
@@ -145,7 +149,7 @@ public class HumanoidActor : Actor
 
         //animator.SetFloat("Agility", 1f);
 
-        animator.SetFloat("AirTime", this.airTime);
+        
 
         attributes.Reset();
 
@@ -170,7 +174,7 @@ public class HumanoidActor : Actor
     {
         if (humanoidState != HumanoidState.Ragdolled && cc.enabled && !IsJumping())
         {
-            cc.SimpleMove(Vector3.zero);
+            cc.Move(gravity);
         }
     }
     public override void ActorPostUpdate()
@@ -346,19 +350,28 @@ public class HumanoidActor : Actor
         {
             airTime += Time.deltaTime;
             fallDamage = (100f / 3f) * airTime;
+            animator.SetFloat("AirTime", airTime);
         }
         else
         {
             airTime = 0f;
         }
-        animator.SetFloat("AirTime", airTime);
+        animator.SetFloat("AirTimeReal", airTime);
 
         this.isGrounded = cc.isGrounded;
         animator.SetBool("Grounded", cc.isGrounded);
     }
-    private void FixedUpdate()
+    protected void FixedUpdate()
     {
         inventory.FixedUpdateWeapon();
+        if (!cc.isGrounded)
+        {
+            gravity += Physics.gravity * Time.fixedDeltaTime;
+        }
+        else
+        {
+            gravity = Vector3.zero;
+        }
     }
 
     public override void TakeAction(InputAction action)
@@ -385,7 +398,7 @@ public class HumanoidActor : Actor
             (!attributes.HasHealthRemaining() && (ragdollStillClock > helplessGetupDelay)) // get up faster when helpless
             )
         {
-            if (attributes.HasHealthRemaining())
+            if (attributes.HasHealthRemaining() || this is PlayerActor)
             {
                 Getup();
             }
@@ -612,6 +625,10 @@ public class HumanoidActor : Actor
                 {
                     Knockback(damageKnockback);
                 }
+                else if (damageKnockback.staggerType == DamageKnockback.StaggerType.FallDamage)
+                {
+                    Flinch(damageKnockback);
+                }
                 else
                 {
                     Stun(damageKnockback);
@@ -621,8 +638,11 @@ public class HumanoidActor : Actor
             else // get hit normally
             {
                 Damage(damageKnockback);
-
-                if (attributes.HasAttributeRemaining(attributes.poise) && (!IsArmored() || damageKnockback.breaksArmor)) // has poise remaining, but not armored
+                if (damageKnockback.staggerType == DamageKnockback.StaggerType.FallDamage)
+                {
+                    Flinch(damageKnockback);
+                }
+                else if (attributes.HasAttributeRemaining(attributes.poise) && (!IsArmored() || damageKnockback.breaksArmor)) // has poise remaining, but not armored
                 {
                     switch (damageKnockback.staggerType)
                     {
@@ -1136,9 +1156,10 @@ public class HumanoidActor : Actor
             damage = new Damage(fallDamage * mult, DamageType.TrueDamage),
             poiseDamage = 999f,
             kbForce = Vector3.zero,
-            staggerType = ragdoll ? DamageKnockback.StaggerType.Knockdown : DamageKnockback.StaggerType.None,
+            staggerType = ragdoll ? DamageKnockback.StaggerType.Knockdown : DamageKnockback.StaggerType.FallDamage,
             unblockable = true,
             breaksArmor = true,
+            hitClip = FXController.clipDictionary["shield_bash_hit"]
         };
         this.ProcessDamageKnockback(dk);
     }
@@ -1200,8 +1221,39 @@ public class HumanoidActor : Actor
         {
             speed *= AimMultipler;
         }
+        if (IsSneaking())
+        {
+            speed *= SneakMultiplier;
+        }
         return speed;
     }
+
+    public float GetSlowMultiplier()
+    {
+        float speed = 1f;
+        if (IsBlocking())
+        {
+            speed *= BlockMultiplier;
+        }
+        if (inventory.IsMainDrawn() || inventory.IsOffDrawn())
+        {
+            speed *= WeaponDrawnMultiplier;
+        }
+        //if (IsSprinting())
+        //{
+            //speed *= SprintMultiplier;
+        //}
+        if (IsAiming())
+        {
+            speed *= AimMultipler;
+        }
+        if (IsSneaking())
+        {
+            speed *= SneakMultiplier;
+        }
+        return speed;
+    }
+
     public void AnimDrawWeapon(int slot)
     {
         //Inventory.EquipSlot equipSlot = (Inventory.EquipSlot)slot;
@@ -1287,6 +1339,7 @@ public class HumanoidActor : Actor
             if (this.stance != null)
             {
                 stance.RemoveHeavyAttack(this);
+                stance.RemoveSpecialAttack(this);
             }
             stance = inventory.GetStance();
             ApplyStance();
@@ -1302,8 +1355,10 @@ public class HumanoidActor : Actor
             this.animator.SetFloat("ArmedStyle", (int)stance.GetArmedStyle());
             this.animator.SetFloat("BlockStyle", (int)stance.GetBlockStyle());
             this.animator.SetInteger("HeavyStyle", (int)stance.GetHeavyStyle());
+            this.animator.SetInteger("SpecialStyle", (int)stance.GetSpecialStyle());
 
             stance.ApplyHeavyAttack(this);
+            stance.ApplySpecialAttack(this);
         }
         this.animator.SetFloat("AttackSpeed1", inventory.GetAttackSpeed());
         this.animator.SetFloat("AttackSpeed2", inventory.GetOffAttackSpeed());
@@ -1335,6 +1390,11 @@ public class HumanoidActor : Actor
         isInvulnerable = true;
         yield return new WaitForSeconds(duration);
         isInvulnerable = false;
+    }
+
+    public bool IsAerial()
+    {
+        return !cc.isGrounded && airTime > 0.25f;
     }
     public bool CanMove()
     {
@@ -1409,7 +1469,7 @@ public class HumanoidActor : Actor
         return animator.GetCurrentAnimatorStateInfo(0).IsTag(MOVABLE_TAG) &&
                 (ALLOW_IN_TRANSITION || !animator.IsInTransition(0));*/
 
-        if (IsHeavyAttacking())
+        if (IsHeavyAttacking() || IsSpecialAttacking())
         {
             if (!wasAttackingLastFrame)
             {
@@ -1418,7 +1478,7 @@ public class HumanoidActor : Actor
             }
             return true;
         }
-
+ 
         string[] MOVEABLE_STATES = new string[]
         {
             "ATTACKING",
@@ -1442,8 +1502,8 @@ public class HumanoidActor : Actor
             }
         }
         return false;
-
     }
+
     public bool IsDodging()
     {
         string[] STATES = new string[]
@@ -1488,6 +1548,15 @@ public class HumanoidActor : Actor
         return animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(TAG) &&
                 (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.ActionLayer));
     }
+
+    public bool IsSneaking()
+    {
+        string TAG = "SNEAKING";
+        bool ALLOW_IN_TRANSITION = true;
+
+        return !IsSprinting() && !IsAttacking() && animator.GetCurrentAnimatorStateInfo(StanceHandler.BaseLayer).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.BaseLayer));
+    }
     public bool IsHeavyAttacking()
     {
         /*string MOVABLE_TAG = "MOVABLE";
@@ -1503,6 +1572,33 @@ public class HumanoidActor : Actor
             "HEAVY_START",
             "HEAVY_LOOP",
             "HEAVY_END"
+        };
+
+        foreach (string state in MOVEABLE_STATES)
+        {
+            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool IsSpecialAttacking()
+    {
+        /*string MOVABLE_TAG = "MOVABLE";
+        bool ALLOW_IN_TRANSITION = true;
+
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag(MOVABLE_TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(0));*/
+
+
+        string[] MOVEABLE_STATES = new string[]
+        {
+            "SPECIAL_ATTACK",
+            "SPECIAL_START",
+            "SPECIAL_LOOP",
+            "SPECIAL_END"
         };
 
         foreach (string state in MOVEABLE_STATES)
@@ -1556,13 +1652,29 @@ public class HumanoidActor : Actor
         return animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(TAG) &&
                 (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.ActionLayer));
     }
+    bool sprint;
     public bool IsSprinting()
     {
-        string TAG = "SPRINTING";
-        bool ALLOW_IN_TRANSITION = true;
+        string[] STATES = new string[]
+        {
+            "SPRINTING",
+            "LEAPING"
+        };
 
-        return animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.ActionLayer));
+        foreach (string state in STATES)
+        {
+            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            {
+                sprint = true;
+                return sprint;
+            }
+        }
+
+        if (isGrounded)
+        {
+            sprint = false;
+        }
+        return sprint;
     }
 
     public bool IsArmored()
@@ -1581,6 +1693,11 @@ public class HumanoidActor : Actor
             return true;
         }
 
+        if (IsSpecialAttacking() && stance != null && stance.specialAttack != null && stance.specialAttack.IsArmored())
+        {
+            return true;
+        }
+
         return false;
     }
 
@@ -1590,6 +1707,7 @@ public class HumanoidActor : Actor
         {
             "JUMPING",
             "JUMP_ATTACK",
+            "LEAPING"
         };
 
         foreach (string state in STATES)

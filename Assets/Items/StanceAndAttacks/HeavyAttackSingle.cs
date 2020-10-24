@@ -11,14 +11,28 @@ public class HeavyAttackSingle : HeavyAttack
     {
         base.OnEquip(actor);
 
-        actor.animator.SetFloat("HeavySpeed1", speed);
+        if (!isSpecialAttack)
+        {
+            actor.animator.SetFloat("HeavySpeed1", speed);
+        }
+        else
+        {
+            actor.animator.SetFloat("SpecialSpeed1", speed);
+        }
     }
 
     public override void SetOverrides(AnimatorOverrideController controller)
     {
         overrides = new AnimationClipOverrides(controller.overridesCount);
         controller.GetOverrides(overrides);
-        if (clip != null) overrides["-replace_heavy-single"] = clip;
+        if (!isSpecialAttack)
+        {
+            if (clip != null) overrides["-replace_heavy-single"] = clip;
+        }
+        else
+        {
+            if (clip != null) overrides["-replace_special-single"] = clip;
+        }
 
         controller.ApplyOverrides(overrides);
 

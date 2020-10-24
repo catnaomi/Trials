@@ -456,6 +456,22 @@ public class Inventory : MonoBehaviour
             stance = StanceHandler.MergeStances(stance, GetMainWeapon().PrfTwoHandStance);
         }
 
+        /*
+        if (IsOffEquipped() && IsOffDrawn() && GetOffHand().PrfOffHandStance.heavyAttack != null)
+        {
+            stance.heavyAttack = GetOffHand().PrfOffHandStance.heavyAttack;
+        }
+        else if (IsMainEquipped() && IsMainDrawn())
+        {
+            stance.heavyAttack = GetMainWeapon().PrfMainHandStance.heavyAttack;
+        }
+        */
+
+        if (IsMainDrawn())
+        {
+            stance.specialAttack = GetMainWeapon().PrfMainHandStance.specialAttack;
+        }
+
         return stance;
     }
 

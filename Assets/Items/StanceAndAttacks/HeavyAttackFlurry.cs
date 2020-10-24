@@ -26,7 +26,7 @@ public class HeavyAttackFlurry : HeavyAttackSingle
         {
             return;
         }
-        if (actor.IsHeavyAttacking())
+        if ((isSpecialAttack && actor.IsSpecialAttacking()) || actor.IsHeavyAttacking())
         {
             index = 0;
             actor.nextAttackType = attacks[index];

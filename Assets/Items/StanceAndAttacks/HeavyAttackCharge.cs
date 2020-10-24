@@ -15,17 +15,34 @@ public class HeavyAttackCharge : HeavyAttack
     {
         base.OnEquip(actor);
 
-        actor.animator.SetFloat("HeavySpeed1", startSpeed);
-        actor.animator.SetFloat("HeavySpeed2", loopSpeed);
-        actor.animator.SetFloat("HeavySpeed3", releaseSpeed);
+        if (!isSpecialAttack)
+        {
+            actor.animator.SetFloat("HeavySpeed1", startSpeed);
+            actor.animator.SetFloat("HeavySpeed2", loopSpeed);
+            actor.animator.SetFloat("HeavySpeed3", releaseSpeed);
+        }
+        else
+        {
+            actor.animator.SetFloat("SpecialSpeed1", startSpeed);
+            actor.animator.SetFloat("SpecialSpeed2", loopSpeed);
+            actor.animator.SetFloat("SpecialSpeed3", releaseSpeed);
+        }
     }
     public override void SetOverrides(AnimatorOverrideController controller)
     {
         overrides = new AnimationClipOverrides(controller.overridesCount);
         controller.GetOverrides(overrides);
-        if (start != null) overrides["-replace_heavy-charge-start"] = start;
-        if (loop != null) overrides["-replace_heavy-charge-loop"] = loop;
-        if (release != null) overrides["-replace_heavy-charge-release"] = release;
+        if (!isSpecialAttack)
+        {
+            if (start != null) overrides["-replace_heavy-charge-start"] = start;
+            if (loop != null) overrides["-replace_heavy-charge-loop"] = loop;
+            if (release != null) overrides["-replace_heavy-charge-release"] = release;
+        }
+        else {
+            if (start != null) overrides["-replace_special-charge-start"] = start;
+            if (loop != null) overrides["-replace_special-charge-loop"] = loop;
+            if (release != null) overrides["-replace_special-charge-release"] = release;
+        }
 
         controller.ApplyOverrides(overrides);
     }

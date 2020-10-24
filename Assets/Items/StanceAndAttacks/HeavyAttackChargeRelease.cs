@@ -11,7 +11,9 @@ public class HeavyAttackChargeRelease : HeavyAttackCharge
     {
         if (actor is PlayerActor)
         {
-            float time = actor.animator.GetFloat("Input-HeavyHeldTime");
+            float time = isSpecialAttack ?
+                Mathf.Min(actor.animator.GetFloat("Input-SlashHeldTime"), actor.animator.GetFloat("Input-ThrustHeldTime")) :
+                actor.animator.GetFloat("Input-HeavyHeldTime");
             if (time > chargeTime)
             {
                 actor.nextAttackType = longAttack;

@@ -7,9 +7,9 @@ using UnityEngine;
 public class StanceHandler
 {
     public static int BaseLayer = 0;
-    public static int ActionLayer = 2;
-    public static int ImpactLayer = 6;
-    public static int AILayer = 8;
+    public static int ActionLayer = 3;
+    public static int ImpactLayer = 7;
+    public static int AILayer = 9;
 
     public static bool ResourcesLoaded = false;
     private static Dictionary<AnimatorStance, AnimatorOverrideController> stanceDict;
@@ -17,7 +17,11 @@ public class StanceHandler
     public AnimatorStance animatorStance;
     public LightThrustStyle lightThrustStyle;
     public LightSlashStyle lightSlashStyle;
+    [Space(10)]
     public HeavyAttack heavyAttack;
+    [Space(5)]
+    public HeavyAttack specialAttack;
+    public int specialPriority;
 
     public enum AnimatorStance
     {
@@ -81,6 +85,8 @@ public class StanceHandler
         this.lightSlashStyle = original.lightSlashStyle;
         this.lightThrustStyle = original.lightThrustStyle;
         this.heavyAttack = original.heavyAttack;
+        this.specialAttack = original.specialAttack;
+        this.specialPriority = original.specialPriority;
     }
     public StanceHandler() {
     }
@@ -108,6 +114,11 @@ public class StanceHandler
             stance.heavyAttack = highPriority.heavyAttack;
         }
 
+        if (highPriority.specialAttack != null)
+        {
+            stance.specialAttack = highPriority.specialAttack;
+        }
+
         return stance;
     }
 
@@ -121,6 +132,10 @@ public class StanceHandler
         if (heavyAttack != null)
         {
             heavyAttack.SetOverrides(animatorOverrideController);
+        }
+        if (specialAttack != null)
+        {
+            specialAttack.SetOverrides(animatorOverrideController);
         }
         return animatorOverrideController;
     }
@@ -231,20 +246,6 @@ public class StanceHandler
         }
     }
 
-    public HeavyStyle GetHeavyStyle()
-    {
-        if (heavyAttack != null)
-        {
-            return heavyAttack.GetHeavyStyle();
-        }
-        return HeavyStyle.None;
-    }
-
-    public void SetHeavyAttack(HeavyAttack heavyAttack)
-    {
-        this.heavyAttack = heavyAttack;
-    }
-
     public bool BlockWithMain()
     {
         switch (animatorStance)
@@ -285,6 +286,56 @@ public class StanceHandler
         if (heavyAttack != null)
         {
             heavyAttack.OnUnequip(actor);
+        }
+    }
+
+    public HeavyStyle GetHeavyStyle()
+    {
+        if (heavyAttack != null)
+        {
+            return heavyAttack.GetHeavyStyle();
+        }
+        return HeavyStyle.None;
+    }
+
+    public void SetHeavyAttack(HeavyAttack heavyAttack)
+    {
+        if (!heavyAttack.isSpecialAttack)
+        {
+            this.heavyAttack = heavyAttack;
+        }
+    }
+
+    public void ApplySpecialAttack(HumanoidActor actor)
+    {
+        if (specialAttack != null)
+        {
+            specialAttack.OnEquip(actor);
+        }
+    }
+
+    public void RemoveSpecialAttack(HumanoidActor actor)
+    {
+        if (specialAttack != null)
+        {
+            specialAttack.OnUnequip(actor);
+        }
+    }
+
+    public HeavyStyle GetSpecialStyle()
+    {
+        if (specialAttack != null)
+        {
+            return specialAttack.GetHeavyStyle();
+        }
+        return HeavyStyle.None;
+    }
+
+    public void SetSpecialAttack(HeavyAttack specialAttack)
+    {
+        if (specialAttack.isSpecialAttack)
+        {
+            this.specialAttack = specialAttack;
         }
     }
 }
