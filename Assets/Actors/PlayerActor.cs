@@ -26,6 +26,8 @@ public class PlayerActor : HumanoidActor
     public float chargeTime;
     private bool buttonHasBeenReleased;
 
+    public Transform centerTransform;
+
     bool startDodge;
 
     Vector3 stickDirection;
@@ -53,7 +55,8 @@ public class PlayerActor : HumanoidActor
     {
         None,
         Camera,
-        Stick
+        Stick,
+        Target
     }
 
     public override void ActorPreUpdate()
@@ -73,7 +76,10 @@ public class PlayerActor : HumanoidActor
         bool weaponDrawn = inventory.IsWeaponDrawn();
         bool isGrounded = cc.isGrounded;
         bool isAiming = IsAiming();
-        bool lockedOn = false;//cameraController.lockedOn;
+        bool lockedOn = this.GetCombatTarget() != null;//cameraController.lockedOn;
+
+        animator.SetBool("Cam-Locked", lockedOn);
+        animator.SetBool("Cam-Aiming", isAiming);
 
         float slowMultiplier = 1f;
 
@@ -161,7 +167,7 @@ public class PlayerActor : HumanoidActor
         }
         else if (lockedOn && Vector3.Distance(this.transform.position, this.GetCombatTarget().transform.position) > 0.25f)
         {
-            alignMode = AlignMode.Camera;
+            alignMode = AlignMode.Target;
         }
         else if (stickDirection.magnitude > 0 && CanMove())
         {
@@ -173,7 +179,7 @@ public class PlayerActor : HumanoidActor
         float stickVel = Mathf.Min(stickDirection.magnitude, slowMultiplier);
         if (CanMove())
         {
-            if (alignMode == AlignMode.Camera || alignMode == AlignMode.None)
+            if (alignMode == AlignMode.Camera || alignMode == AlignMode.None || alignMode == AlignMode.Target)
             {
                 animator.SetFloat("ForwardVelocity", Mathf.Lerp(animator.GetFloat("ForwardVelocity"), forwardVel, 0.2f));
                 animator.SetFloat("StrafingVelocity", Mathf.Lerp(animator.GetFloat("StrafingVelocity"), strafeVel, 0.2f));
@@ -213,11 +219,19 @@ public class PlayerActor : HumanoidActor
         
         if (alignMode == AlignMode.Camera)
         {
-            //transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(cameraController.GetPlayerFaceForward()), 720f * Time.fixedDeltaTime);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(forward), 720f * Time.fixedDeltaTime);
         }
         else if (alignMode == AlignMode.Stick)
         {
             transform.rotation = Quaternion.LookRotation(stickDirection.normalized);//Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(stickDirection.normalized), 720f * 5f * Time.fixedDeltaTime);
+        }
+        else if (alignMode == AlignMode.Target)
+        {
+            Vector3 tv = GetCombatTarget().transform.position - player.positionReference.Hips.position;
+            tv.y = 0;
+            tv.Normalize();
+            transform.rotation = Quaternion.LookRotation(tv, Vector3.up);
+            //transform.LookAt(this.GetCombatTarget().transform.position, Vector3.up);
         }
 
         startDodge = false;
@@ -766,29 +780,33 @@ public class PlayerActor : HumanoidActor
 
     public override Vector3 GetLaunchVector(Vector3 origin)
     {
-        /*
+        
         GameObject target = this.GetCombatTarget();
         if (target != null)
         {
-            if (Vector3.Distance(target.GetComponentInChildren<Renderer>().bounds.center, origin) > 2)
+            if (Vector3.Distance(target.transform.position, origin) > 2)
             {
-                return (target.GetComponentInChildren<Renderer>().bounds.center - origin).normalized;
+                return (target.transform.position - origin).normalized;
             }
             else
             {
                 return this.transform.forward;
             }
         }
-        else if (cameraController.crosshairMode)
+        else if (IsAiming())
         {
-            return (cameraController.GetCrosshairPosition() - origin).normalized;
+            Vector3 aimPos = cam.transform.position + cam.transform.forward * 100f;
+
+            if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, 100f))
+            {
+                aimPos = hit.point;
+            }
+            return (aimPos - origin).normalized;
         }
         else
         {
             return this.transform.forward;
         }
-        */
-        return Vector3.zero;
     }
 
     private void OnAnimatorIK(int layerIndex)

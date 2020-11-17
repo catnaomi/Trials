@@ -1,4 +1,6 @@
 ﻿using Cinemachine;
+using CustomUtilities;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,48 +12,168 @@ public class PlayerTargetManager : MonoBehaviour
     public float maxPlayerDistance = 20f;
     public float maxCamDistance = 20f;
     public List<GameObject> targets;
-    public Dictionary<GameObject, Transform> targetMidpoints;
 
-    int index = 0;
-    public bool shiftOnDebug = true;
+    public int index = 0;
+    public bool lockedOn;
     public GameObject currentTarget;
 
     CinemachineTargetGroup cmtg;
 
+    Dictionary<AxisUtilities.AxisDirection, Transform> directionToTarget;
+
+    public Transform upTarget;
+    public Transform downTarget;
+    public Transform leftTarget;
+    public Transform rightTarget;
+
+    List<Ray> rays;
     // Start is called before the first frame update
     void Start()
     {
         targets = new List<GameObject>();
+        cmtg = GetComponent<CinemachineTargetGroup>();
+        InputHandler.main.SecondaryStickFlick.AddListener(SwitchTargets);
+        StartCoroutine(UpdateTargets());
+        lockedOn = false;
+    }
+
+    IEnumerator UpdateTargets()
+    {
+        while (true)
+        {
+            GameObject[] allLockTargets = GameObject.FindGameObjectsWithTag("LockTarget");
+
+            targets.Clear();
+
+            List<GameObject> invalidTargets = new List<GameObject>();
+
+            rays = new List<Ray>();
+            foreach (GameObject target in allLockTargets)
+            {
+                float playerDist = Vector3.Distance(target.transform.position, player.centerTransform.position);
+                float camDist = Vector3.Distance(target.transform.position, cam.transform.position);
+
+                Ray pRay = new Ray(player.centerTransform.position, (target.transform.position - player.centerTransform.position));
+                Ray cRay = new Ray(cam.transform.position, (target.transform.position - cam.transform.position));
+
+                bool playerTerrainBlocked = Physics.Raycast(pRay, playerDist, LayerMask.GetMask("Terrain"));
+                bool camTerrainBlocked = Physics.Raycast(cRay, camDist, LayerMask.GetMask("Terrain"));
+
+                bool playerInRange = playerDist < maxPlayerDistance;
+                bool camInRange = camDist < maxCamDistance;
+
+                bool invalid = (!playerInRange || playerTerrainBlocked) && (!camInRange || camTerrainBlocked);
+
+
+                if (!invalid)
+                {
+                    rays.Add(pRay);
+                    rays.Add(cRay);
+                }
+
+                //Debug.Log(string.Format("object:{0}, pterr:{1}, prang:{2}, cterr:{3}, crang:{4}, invalid:{5}", target.name, playerTerrainBlocked, (int)playerDist, camTerrainBlocked, (int)camDist, invalid));
+                if (invalid)
+                {
+                    invalidTargets.Add(currentTarget);
+                }
+                else
+                {
+                    targets.Add(target);
+                }
+            }
+
+            yield return new WaitForSecondsRealtime(2f);
+        }
     }
 
     // Update is called once per frame
     void Update()
-    {
-        GameObject[] allLockTargets = GameObject.FindGameObjectsWithTag("LockTarget");
+    {      
 
-        foreach (GameObject lockTarget in allLockTargets)
+        if (Input.GetButtonDown("Target"))
         {
-            if (!targets.Contains(lockTarget))
+            Debug.Log("target?");
+            if (!lockedOn && targets.Count > 0)
             {
-                targets.Add(lockTarget);
+                lockedOn = true;
+                SetTarget(targets[0]);
+                UpdateDirections();
+            }
+            else
+            {
+                lockedOn = false;
+                SetTarget(null);
             }
         }
 
-        if (Input.GetButtonDown("Debug"))
+
+        if (currentTarget != null && player.GetCombatTarget() != currentTarget)
         {
-            index++;
+            if (cmtg.m_Targets.Length > 1)
+            {
+                cmtg.m_Targets[1].target = currentTarget.transform;
+            }
+            else
+            {
+                cmtg.AddMember(currentTarget.transform, 1f, 2f);
+            }
+
+            //cmtg.AddMember(currentTarget.transform, 1f, 2f);
+            player.SetCombatTarget(currentTarget);
         }
-        if (index > targets.Count)
+        else if (currentTarget == null)
         {
-            index = 0;
+            player.SetCombatTarget(null);
+            lockedOn = false;
         }
-        if (targets.Count > 0)
+    }
+
+    private void UpdateDirections()
+    {
+        if (!lockedOn || currentTarget == null) return;
+        List<Transform> otherTransforms = new List<Transform>();
+        foreach (GameObject target in targets)
         {
-            currentTarget = targets[index];
+            if (target != currentTarget)
+            {
+                otherTransforms.Add(target.transform);
+            }
         }
-        else
+
+        directionToTarget = AxisUtilities.MapTransformsToAxisDirections(cam.transform, currentTarget.transform.position, otherTransforms);
+
+        upTarget = directionToTarget[AxisUtilities.AxisDirection.Up];
+        downTarget = directionToTarget[AxisUtilities.AxisDirection.Down];
+        leftTarget = directionToTarget[AxisUtilities.AxisDirection.Left];
+        rightTarget = directionToTarget[AxisUtilities.AxisDirection.Right];
+    }
+
+    void SwitchTargets()
+    {
+        if (lockedOn)
         {
-            currentTarget = null;
+            AxisUtilities.AxisDirection direction = AxisUtilities.InvertAxis(InputHandler.main.SecondaryFlickDirection, false, false, false);
+            if (directionToTarget.TryGetValue(direction, out Transform target) && target != null)
+            {
+                SetTarget(target.gameObject);
+                UpdateDirections();
+            }            
         }
+    }
+
+    void SetTarget(GameObject t)
+    {
+        currentTarget = t;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        /*
+        Gizmos.color = Color.red;
+        foreach (Ray ray in rays)
+        {
+            Gizmos.DrawRay(ray);
+        }
+        */
     }
 }
