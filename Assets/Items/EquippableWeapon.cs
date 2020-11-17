@@ -24,6 +24,7 @@ public class EquippableWeapon : Item
     public StanceHandler PrfTwoHandStance;
     [Header("Stats")]
     public float AttackSpeed;
+    public float weight;
     
     public UnityEvent OnEquip = new UnityEvent();
     public UnityEvent OnUnequip = new UnityEvent();
@@ -81,5 +82,15 @@ public class EquippableWeapon : Item
     public virtual Damage GetBlockResistance()
     {
         return new Damage();
+    }
+
+    public virtual float GetBlockPoiseDamage()
+    {
+        return 0f;
+    }
+
+    public virtual float GetWeight()
+    {
+        return weight;
     }
 }

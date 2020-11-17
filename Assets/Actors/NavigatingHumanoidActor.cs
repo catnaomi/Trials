@@ -105,7 +105,8 @@ public class NavigatingHumanoidActor : HumanoidActor
         {
             nav.isStopped = true;
         }
-        Vector3 movement = (nav.desiredVelocity.normalized + additMove);
+        moveDirection = (nav.desiredVelocity.normalized + additMove);
+        Vector3 movement = moveDirection;
 
         float animVel = (movement.magnitude > 0 ? 1f : 0f);
 

@@ -11,7 +11,8 @@ public class HeavyAttackMovementHold : HeavyAttackCharge
     public float speed = 1f;
     public override void OnHeavyEnter()
     {
-        actor.nextAttackType = holdAttack;
+        actor.SetNextAttackType(holdAttack, true);
+        //actor.nextAttackType = holdAttack;
     }
 
     public override void OnHeavyUpdate()
@@ -28,6 +29,6 @@ public class HeavyAttackMovementHold : HeavyAttackCharge
 
     public override void OnHeavyExit()
     {
-        actor.nextAttackType = releaseAttack;
+        actor.SetNextAttackType(releaseAttack, true);
     }
 }

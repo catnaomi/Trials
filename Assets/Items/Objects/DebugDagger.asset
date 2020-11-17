@@ -31,17 +31,23 @@ MonoBehaviour:
     animatorStance: 4
     lightThrustStyle: 1
     lightSlashStyle: 1
-    heavyStyle: 0
+    heavyAttack: {fileID: 0}
+    specialAttack: {fileID: 0}
+    specialPriority: 0
   PrfOffHandStance:
     animatorStance: 6
     lightThrustStyle: 4
     lightSlashStyle: 4
-    heavyStyle: 0
+    heavyAttack: {fileID: 11400000, guid: 2d962d18ed5c2bf4ba6e9d38a4f15691, type: 2}
+    specialAttack: {fileID: 0}
+    specialPriority: 0
   PrfTwoHandStance:
     animatorStance: 0
     lightThrustStyle: 0
     lightSlashStyle: 0
-    heavyStyle: 0
+    heavyAttack: {fileID: 0}
+    specialAttack: {fileID: 0}
+    specialPriority: 0
   AttackSpeed: 1.25
   OnEquip:
     m_PersistentCalls:
@@ -53,3 +59,14 @@ MonoBehaviour:
   width: 0.1
   length: 0.5
   weight: 2
+  elementRatios:
+    potential: 0
+    truedmg: 0
+    slash: 0
+    pierce: 0
+    earth: 0
+    light: 0
+    dark: 0
+    fire: 0
+    water: 0
+    air: 0

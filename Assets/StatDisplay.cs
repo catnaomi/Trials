@@ -42,10 +42,10 @@ public class StatDisplay : MonoBehaviour
         staminaMaxDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.stamina.max * 5f);
         staminaText.text = Mathf.Floor(actor.attributes.stamina.current).ToString();
 
-        poiseDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.poise.current * 5f);
-        poiseSpentDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.smoothedPoise * 5f);
-        poiseMaxDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.poise.max * 5f);
-        poiseText.text = Mathf.Floor(actor.attributes.poise.current).ToString();
+        poiseDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.poise * 5f);
+        //poiseSpentDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.smoothedPoise * 5f);
+        //poiseMaxDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.poise.max * 5f);
+        poiseText.text = Mathf.Floor(actor.attributes.poise).ToString();
 
 
     }

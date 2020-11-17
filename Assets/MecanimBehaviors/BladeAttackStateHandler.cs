@@ -12,7 +12,7 @@ public class BladeAttackStateHandler : StateMachineBehaviour
     {
         if (animator.gameObject.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
         {
-            actor.nextAttackType = attackType;
+            actor.SetNextAttackType(attackType, true);
         }
     }
 }

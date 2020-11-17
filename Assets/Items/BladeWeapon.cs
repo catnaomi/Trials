@@ -7,7 +7,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
 {
     public float width = 1f;
     public float length = 1.5f;
-    public float weight = 1f;
+    //public float weight = 1f;
     bool wall;
     bool active;
     //[HideInInspector] WeaponController weaponController;
@@ -85,50 +85,49 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             //holder.attributes.ReduceAttribute(holder.attributes.stamina, this.GetPoiseCost(((HumanoidActor)holder).nextAttackType));
 
             AudioClip sound;
-            float poiseCost = 0f;
             float staminaCost = 0f;
             switch (nextAttackType)
             {
                 default:
                 case AttackType.SlashingLight:
-                    poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
+                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
                     staminaCost = (10 + 1 * GetWeight() + 15 * Mathf.Abs(GetBalance())) * 1;
                     sound = FXController.clipDictionary["sword_swing_light"];
                     break;
                 case AttackType.ThrustingLight:
-                    poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
+                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
                     staminaCost = (10 + 1 * GetWeight() + 15 * Mathf.Abs(GetBalance())) * 1;
                     sound = FXController.clipDictionary["sword_swing_light"];
                     break;
                 case AttackType.SlashingMedium:
-                    poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2;
+                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2;
                     staminaCost = (5 + 1 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1.5f;
                     sound = FXController.clipDictionary["sword_swing_medium"];
                     break;
                 case AttackType.ThrustingMedium:
                     sound = FXController.clipDictionary["sword_swing_medium"];
-                    poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2;
+                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2;
                     staminaCost = (5 + 1 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1.5f;
                     break;
                 case AttackType.SlashingHeavy:
                     sound = FXController.clipDictionary["sword_swing_heavy"];
-                    poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 3;
+                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 3;
                     staminaCost = (5 + 1 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2f;
                     break;
                 case AttackType.ThrustingHeavy:
                     sound = FXController.clipDictionary["sword_swing_heavy"];
-                    poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 3;
+                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 3;
                     staminaCost = (5 + 1 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2f;
                     break;
                 case AttackType.Bash:
                     sound = FXController.clipDictionary["sword_swing_heavy"];
-                    poiseCost = (1 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
+                    //poiseCost = (1 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
                     staminaCost = (5 + 1 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
                     break;
             }
 
             holder.attributes.ReduceAttribute(holder.attributes.stamina, staminaCost);
-            holder.attributes.ReduceAttributeToMin(holder.attributes.poise, poiseCost, 20f);
+            //holder.attributes.ReduceAttributeToMin(holder.attributes.poise, poiseCost, 20f);
             holder.PlayAudioClip(sound);
 
             /*
@@ -142,6 +141,26 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         SetTrails(AttackIsThrusting(nextAttackType) && active, AttackIsSlashing(nextAttackType) && active);
         SetTrailColor(dk.damage.GetHighestType(DamageType.Slashing, DamageType.Piercing));
         this.active = active;
+    }
+
+    public float GetPoiseFromAttack(AttackType type)
+    {
+        switch (type)
+        {
+            default:
+            case AttackType.SlashingLight:
+                return 0f;
+            case AttackType.ThrustingLight:
+                return 0f;
+            case AttackType.SlashingMedium:
+                return 50f;
+            case AttackType.ThrustingMedium:
+                return 50f;
+            case AttackType.SlashingHeavy:
+                return 100f;
+            case AttackType.ThrustingHeavy:
+                return 100f;
+        }
     }
 
 
@@ -230,6 +249,11 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         }
         baseDamage.Add(elementRatios);
         return baseDamage;
+    }
+    
+    public virtual float GetBasePoiseDamage()
+    {
+        return 25f + 5f * GetWeight();
     }
 
     public override Damage GetBlockResistance()
@@ -366,12 +390,13 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 {
                     damage = GetBaseDamage(true).MultPotential(1),
                     staminaDamage = (10f + 3f * GetWeight()) * 1f,
-                    poiseDamage = (10f + 6f * GetWeight()) * 1f,
+                    poiseDamage = GetBasePoiseDamage() * 1f,//(10f + 6f * GetWeight()) * 1f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             lightKB,
                             actor.transform
                         ),
+                    minStaggerType = DamageKnockback.StaggerType.Flinch,
                     staggerType = DamageKnockback.StaggerType.Stagger,
                 };           
             case AttackType.SlashingMedium:
@@ -379,12 +404,13 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 {
                     damage = GetBaseDamage(true).MultPotential(2),
                     staminaDamage = (10f + 3f * GetWeight()) * 2f,
-                    poiseDamage = (10f + 6f * GetWeight()) * 2f,
+                    poiseDamage = GetBasePoiseDamage() * 2f,//(10f + 6f * GetWeight()) * 2f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             heavyKB,
                             actor.transform
                         ),
+                    minStaggerType = DamageKnockback.StaggerType.Flinch,
                     staggerType = DamageKnockback.StaggerType.HeavyStagger,
                 };
             case AttackType.SlashingHeavy:
@@ -392,12 +418,13 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 {
                     damage = GetBaseDamage(true).MultPotential(3),
                     staminaDamage = (10f + 3f * GetWeight()) * 3f,
-                    poiseDamage = (10f + 6f * GetWeight()) * 3f,
+                    poiseDamage = GetBasePoiseDamage() * 3f,//(10f + 6f * GetWeight()) * 3f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             heavyKB,
                             actor.transform
                         ),
+                    minStaggerType = DamageKnockback.StaggerType.Flinch,
                     staggerType = DamageKnockback.StaggerType.Knockdown,
                     breaksArmor = true,
                 };
@@ -406,12 +433,13 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 {
                     damage = GetBaseDamage(false).MultPotential(1),
                     staminaDamage = (10f + 3f * GetWeight()) * 1f,
-                    poiseDamage = (10f + 6f * GetWeight()) * 1f,
+                    poiseDamage = GetBasePoiseDamage() * 1f,//(10f + 6f * GetWeight()) * 1f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             lightKB,
                             actor.transform
                         ),
+                    minStaggerType = DamageKnockback.StaggerType.Flinch,
                     staggerType = DamageKnockback.StaggerType.Stagger,
                 };
             case AttackType.ThrustingMedium:
@@ -419,12 +447,13 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 {
                     damage = GetBaseDamage(false).MultPotential(2),
                     staminaDamage = (10f + 3f * GetWeight()) * 2f,
-                    poiseDamage = (10f + 6f * GetWeight()) * 2f,
+                    poiseDamage = GetBasePoiseDamage() * 2f,//(10f + 6f * GetWeight()) * 2f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             heavyKB,
                             actor.transform
                         ),
+                    minStaggerType = DamageKnockback.StaggerType.Flinch,
                     staggerType = DamageKnockback.StaggerType.HeavyStagger,
                 };
             case AttackType.ThrustingHeavy:
@@ -432,12 +461,13 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 {
                     damage = GetBaseDamage(false).MultPotential(3),
                     staminaDamage = (10f + 3f * GetWeight()) * 3f,
-                    poiseDamage = (10f + 6f * GetWeight()) * 3f,
+                    poiseDamage = GetBasePoiseDamage() * 3f,//(10f + 6f * GetWeight()) * 3f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             heavyKB,
                             actor.transform
                         ),
+                    minStaggerType = DamageKnockback.StaggerType.Flinch,
                     staggerType = DamageKnockback.StaggerType.Knockdown,
                     breaksArmor = true,
                 };
@@ -491,6 +521,11 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
     public float GetHeft()
     {
         return 1f / weight; 
+    }
+
+    public override float GetBlockPoiseDamage()
+    {
+        return 10f * GetWeight();
     }
 
     public float GetPoiseRecoveryRate()

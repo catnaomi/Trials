@@ -7,7 +7,7 @@ public class PlayerActor : HumanoidActor
 {
     public static PlayerActor player;
 
-    LockonShoulderCam cameraController;
+    //CursorCam cameraController;
     Camera cam;
     bool shouldSecondSwing = false;
 
@@ -29,7 +29,7 @@ public class PlayerActor : HumanoidActor
     bool startDodge;
 
     Vector3 stickDirection;
-    Vector3 moveDirection;
+    //Vector3 moveDirection;
 
     Vector3 airDirection;
     public override void ActorStart()
@@ -37,7 +37,7 @@ public class PlayerActor : HumanoidActor
         base.ActorStart();
 
         cam = Camera.main;
-        cameraController =  cam.GetComponent<LockonShoulderCam>();
+        //cameraController =  cam.GetComponent<CursorCam>();
 
         camRotation = transform.forward;
 
@@ -73,7 +73,7 @@ public class PlayerActor : HumanoidActor
         bool weaponDrawn = inventory.IsWeaponDrawn();
         bool isGrounded = cc.isGrounded;
         bool isAiming = IsAiming();
-        bool lockedOn = cameraController.lockedOn;
+        bool lockedOn = false;//cameraController.lockedOn;
 
         float slowMultiplier = 1f;
 
@@ -159,7 +159,7 @@ public class PlayerActor : HumanoidActor
                 alignMode = AlignMode.None;
             }
         }
-        else if (cameraController.lockedOn && Vector3.Distance(this.transform.position, cameraController.currentTarget.transform.position) > 0.25f)
+        else if (lockedOn && Vector3.Distance(this.transform.position, this.GetCombatTarget().transform.position) > 0.25f)
         {
             alignMode = AlignMode.Camera;
         }
@@ -184,7 +184,7 @@ public class PlayerActor : HumanoidActor
                 animator.SetFloat("StrafingVelocity", 0f);
             }
         }
-        else if (!IsDodging() && !IsJumping() && false)
+        else if (!IsDodging() && !IsJumping())
         {
             animator.SetFloat("ForwardVelocity", 0f);
             animator.SetFloat("StrafingVelocity", 0f);
@@ -210,9 +210,10 @@ public class PlayerActor : HumanoidActor
 
         SetCrosshairMode(isAiming);
 
+        
         if (alignMode == AlignMode.Camera)
         {
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(cameraController.GetPlayerFaceForward()), 360f * Time.fixedDeltaTime);
+            //transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(cameraController.GetPlayerFaceForward()), 720f * Time.fixedDeltaTime);
         }
         else if (alignMode == AlignMode.Stick)
         {
@@ -252,16 +253,20 @@ public class PlayerActor : HumanoidActor
         }
     }
 
+    // TODO: redo camera controller and make aiming more flexible for different weapons
+    // use VTMB style crosshair on ground for aiming, and press a bumper to move camera to over the shoulder position?
     protected void LateUpdate()
     {
         base.LateUpdate();
-        if (IsAiming() && cameraController.crosshairMode)
+        /*
+        if (IsAiming() && //cameraController.crosshairMode)
         {
             Vector3 eyePos = transform.position + cameraController.playerEyeHeight * Vector3.up;
             Vector3 aimDir = (cameraController.focusPosition - eyePos).normalized;
             Quaternion aimRot = Quaternion.LookRotation(aimDir, Vector3.up) * Quaternion.AngleAxis(BowAimRotation, Vector3.up);
             positionReference.Spine.rotation = aimRot;
         }
+        */
     }
 
     private void GetInput()
@@ -554,9 +559,10 @@ public class PlayerActor : HumanoidActor
         }
         
     }
+    /*
     private bool HandleInput()
     {
-        /*
+        
         bool slashDown = Input.GetButtonDown("Attack1");
         bool slashHeld = Input.GetButton("Attack1");
         bool slashUp = Input.GetButtonUp("Attack1");
@@ -573,13 +579,13 @@ public class PlayerActor : HumanoidActor
         bool blockDown = Input.GetButtonDown("Block");
         bool blockHeld = Input.GetButton("Block");
         bool blockUp = Input.GetButtonUp("Block");
-        */
+        
 
         bool lightDown = Input.GetButtonDown("Attack1");
-        bool heavyDown = InputHandler.main.trigger1Down;
+        bool heavyDown = InputHandler.main.heavyTDown;
 
-        bool blockDown = InputHandler.main.trigger2Down;
-        bool blockUp = InputHandler.main.trigger2Up;
+        bool blockDown = InputHandler.main.blockTDown;
+        bool blockUp = InputHandler.main.blockTUp;
 
         bool offHandDown = Input.GetButtonDown("Attack2");
 
@@ -678,6 +684,7 @@ public class PlayerActor : HumanoidActor
 
         return (lightDown || rollUp);
     }
+    */
 
     /*
     private bool CanMove()
@@ -698,7 +705,7 @@ public class PlayerActor : HumanoidActor
 
     public override bool ShouldEndContinuousAttack()
     {
-        return base.ShouldEndContinuousAttack() || InputHandler.main.trigger1Up;
+        return base.ShouldEndContinuousAttack() || InputHandler.main.heavyTUp;
     }
 
     public bool WasLastAttackCharged()
@@ -743,7 +750,7 @@ public class PlayerActor : HumanoidActor
     */
     public void SetCrosshairMode(bool mode)
     {
-        cameraController.SetCrosshairMode(mode);
+        //cameraController.SetCrosshairMode(mode);
     }
 
     public AxisUtilities.AxisDirection GetStickAxis()
@@ -759,6 +766,7 @@ public class PlayerActor : HumanoidActor
 
     public override Vector3 GetLaunchVector(Vector3 origin)
     {
+        /*
         GameObject target = this.GetCombatTarget();
         if (target != null)
         {
@@ -779,6 +787,8 @@ public class PlayerActor : HumanoidActor
         {
             return this.transform.forward;
         }
+        */
+        return Vector3.zero;
     }
 
     private void OnAnimatorIK(int layerIndex)
@@ -787,7 +797,7 @@ public class PlayerActor : HumanoidActor
         {
             animator.SetLookAtWeight(0f);
             //animator.bodyRotation = cam.transform.rotation;
-            animator.SetLookAtPosition(cameraController.playerIKPosition);
+            //animator.SetLookAtPosition(cameraController.playerIKPosition);
         }
         else
         {
@@ -808,7 +818,7 @@ public class PlayerActor : HumanoidActor
                 {
                     c = '=';
                 }
-                else if (i < attributes.smoothedPoise)
+                else if (i < attributes.smoothedStamina)
                 {
                     c = '+';
                 }

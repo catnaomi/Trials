@@ -8,6 +8,7 @@ public class OffHandShield : EquippableWeapon, HitboxHandler
     public float reductionStrength;
 
     public Damage BlockResistance;
+    public float blockPoiseDamage;
 
     public float bashCost;
     public DamageKnockback bashDamage;
@@ -74,5 +75,10 @@ public class OffHandShield : EquippableWeapon, HitboxHandler
     public override Damage GetBlockResistance()
     {
         return BlockResistance;
+    }
+
+    public override float GetBlockPoiseDamage()
+    {
+        return blockPoiseDamage;
     }
 }

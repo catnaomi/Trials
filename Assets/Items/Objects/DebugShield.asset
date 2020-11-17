@@ -23,7 +23,7 @@ MonoBehaviour:
   EquippableOff: 1
   OneHanded: 1
   TwoHanded: 0
-  ParentLeftAsMain: 1
+  ParentLeftAsMain: 0
   ParentRightAsOff: 0
   MainHandEquipSlot: 0
   OffHandEquipSlot: 5
@@ -32,17 +32,24 @@ MonoBehaviour:
     lightThrustStyle: 0
     lightSlashStyle: 0
     heavyAttack: {fileID: 0}
+    specialAttack: {fileID: 0}
+    specialPriority: 0
   PrfOffHandStance:
     animatorStance: 3
     lightThrustStyle: 3
     lightSlashStyle: 1
     heavyAttack: {fileID: 0}
+    specialAttack: {fileID: 0}
+    specialPriority: 0
   PrfTwoHandStance:
     animatorStance: 0
     lightThrustStyle: 0
     lightSlashStyle: 0
     heavyAttack: {fileID: 0}
+    specialAttack: {fileID: 0}
+    specialPriority: 0
   AttackSpeed: 1
+  weight: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -62,6 +69,7 @@ MonoBehaviour:
     fire: 0.25
     water: 0.25
     air: 0.25
+  blockPoiseDamage: 100
   bashCost: 20
   bashDamage:
     poiseDamage: 20
@@ -82,5 +90,6 @@ MonoBehaviour:
     source: {fileID: 0}
     breaksArmor: 1
     unblockable: 0
+    minStaggerType: 0
     staggerType: 5
     hitClip: {fileID: 8300000, guid: 8cf0a475e2a2ccc48bf5bb14d8c24c2e, type: 3}

@@ -29,7 +29,7 @@ public class HeavyAttackFlurry : HeavyAttackSingle
         if ((isSpecialAttack && actor.IsSpecialAttacking()) || actor.IsHeavyAttacking())
         {
             index = 0;
-            actor.nextAttackType = attacks[index];
+            actor.SetNextAttackType(attacks[index], true);
         }
     }
 
@@ -39,7 +39,7 @@ public class HeavyAttackFlurry : HeavyAttackSingle
         {
             return;
         }
-        actor.nextAttackType = attacks[index];
+        actor.SetNextAttackType(attacks[index], false);
         index = (index + 1) % attacks.Length;
     }
 }

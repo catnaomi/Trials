@@ -24,6 +24,7 @@ public class DamageKnockback
     public bool breaksArmor;
     public bool unblockable;
 
+    public StaggerType minStaggerType;
     public StaggerType staggerType;
     public enum StaggerType
     {
@@ -60,6 +61,7 @@ public class DamageKnockback
         this.kbForce = damageKnockback.kbForce.normalized * damageKnockback.kbForce.magnitude;
         this.poiseDamage = damageKnockback.poiseDamage;
         this.staggerType = damageKnockback.staggerType;
+        this.minStaggerType = damageKnockback.minStaggerType;
         this.hitClip = damageKnockback.hitClip;
         this.breaksArmor = damageKnockback.breaksArmor;
 

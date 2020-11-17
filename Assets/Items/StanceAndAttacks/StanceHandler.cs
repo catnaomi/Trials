@@ -8,8 +8,8 @@ public class StanceHandler
 {
     public static int BaseLayer = 0;
     public static int ActionLayer = 3;
-    public static int ImpactLayer = 7;
-    public static int AILayer = 9;
+    //public static int ImpactLayer = 7;
+    public static int AILayer = 8;
 
     public static bool ResourcesLoaded = false;
     private static Dictionary<AnimatorStance, AnimatorOverrideController> stanceDict;
@@ -296,6 +296,15 @@ public class StanceHandler
             return heavyAttack.GetHeavyStyle();
         }
         return HeavyStyle.None;
+    }
+
+    public bool ShouldHeavyBackStep()
+    {
+        if (heavyAttack != null)
+        {
+            return heavyAttack.shouldBackStep;
+        }
+        return false;
     }
 
     public void SetHeavyAttack(HeavyAttack heavyAttack)

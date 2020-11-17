@@ -7,6 +7,7 @@ public class HeavyAttack : ScriptableObject
     [ReadOnly] public HumanoidActor actor;
     public bool isSpecialAttack;
     public bool armored;
+    public bool shouldBackStep;
     /*
     [Header("Single Attack, Charge Start, & Aim Start")]
     public AnimationClip attack1;

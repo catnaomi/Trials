@@ -34,6 +34,7 @@ public class Inventory : MonoBehaviour
 
     public UnityEvent OnChange;
 
+    public bool weaponChanged;
 
     public enum EquipSlot
     {
@@ -186,6 +187,7 @@ public class Inventory : MonoBehaviour
         }
 
         OnChange.Invoke();
+        weaponChanged = true;
     }
     public void EquipMainWeapon(EquippableWeapon weapon)
     {
@@ -230,6 +232,7 @@ public class Inventory : MonoBehaviour
         }
 
         OnChange.Invoke();
+        weaponChanged = true;
     }
 
     public void EquipOffHandWeapon(EquippableWeapon weapon)
@@ -254,6 +257,7 @@ public class Inventory : MonoBehaviour
         PositionWeapon();
 
         OnChange.Invoke();
+        weaponChanged = true;
     }
 
     public void UnequipOffHandWeapon()
@@ -273,6 +277,7 @@ public class Inventory : MonoBehaviour
         PositionWeapon();
 
         OnChange.Invoke();
+        weaponChanged = true;
     }
 
     public void GenerateMainModel()
@@ -317,6 +322,7 @@ public class Inventory : MonoBehaviour
             UnequipOffHandWeapon();
         }
         OnChange.Invoke();
+        weaponChanged = true;
     }
     public void PositionWeapon()
     {
@@ -475,6 +481,31 @@ public class Inventory : MonoBehaviour
         return stance;
     }
 
+    public float GetEquipWeight()
+    {
+        float weight = 0f;
+        if (IsMainEquipped())
+        {
+            weight += GetMainWeapon().GetWeight();
+        }
+
+        if (IsOffEquipped())
+        {
+            weight += GetOffHand().GetWeight();
+        }
+
+        return weight;
+    }
+
+    public float GetPoiseFromAttack(BladeWeapon.AttackType attackType)
+    {
+        if (IsMainEquipped() && MainWeapon is BladeWeapon mb)
+        {
+            return mb.GetPoiseFromAttack(attackType);
+        }
+        return 0f;
+    }
+
     public void SetDrawn(bool main, bool drawn)
     {
         if (main)
@@ -492,6 +523,7 @@ public class Inventory : MonoBehaviour
             }
         }
         PositionWeapon();
+        weaponChanged = true;
     }
 
     public void EquipToSlot(EquippableWeapon weapon, int slot)
@@ -612,6 +644,22 @@ public class Inventory : MonoBehaviour
             return new Damage();
         }
     }
+
+    public float GetBlockPoiseDamage(bool main)
+    {
+        if (main && IsMainEquipped())
+        {
+            return GetMainWeapon().GetBlockPoiseDamage();
+        }
+        else if (!main && IsOffEquipped())
+        {
+            return GetOffHand().GetBlockPoiseDamage();
+        }
+        else
+        {
+            return 0f;
+        }
+    }
     // gets which hand the current Equipped Weapon is Equipped to
     //  0 - not equipped
     //  1 - main hand
@@ -630,5 +678,15 @@ public class Inventory : MonoBehaviour
         {
             return 0;
         }
+    }
+
+    public bool CheckWeaponChanged()
+    {
+        if (weaponChanged)
+        {
+            weaponChanged = false;
+            return true;
+        }
+        return false;
     }
 }

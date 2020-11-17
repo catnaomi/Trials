@@ -28,15 +28,16 @@ public class InputHandler : MonoBehaviour
 
     public float targetClock;
 
-    public bool trigger1Down;
-    bool trigger1Lock;
-    public bool trigger2Down;
-    bool trigger2Lock;
+    
+    public bool heavyTDown;
+    bool heavyTLockDown;
+    public bool blockTDown;
+    bool blockTLockDown;
 
-    public bool trigger1Up;
-    bool trigger1LockUp;
-    public bool trigger2Up;
-    bool trigger2LockUp;
+    public bool heavyTUp;
+    bool heavyTLockUp;
+    public bool blockTUp;
+    bool blockTLockUp;
 
     [Header("Inputs")]
     public bool slashDown;
@@ -151,68 +152,69 @@ public class InputHandler : MonoBehaviour
 
         // handle press trigger input 
 
-        if (Input.GetAxis("Attack3") >= 0.9f && !trigger1Lock)
+        
+        if (Input.GetAxis("Attack3") >= 0.9f && !heavyTLockDown)
         {
-            trigger1Down = true;
-            trigger1Lock = true;
+            heavyTDown = true;
+            heavyTLockDown = true;
         }
         else
         {
-            trigger1Down = false;
+            heavyTDown = false;
         }
 
-        if (Input.GetAxis("Trigger1") <= 0.1f && trigger1Lock)
+        if (Input.GetAxis("Attack3") <= 0.1f && heavyTLockDown)
         {
-            trigger1Lock = false;
+            heavyTLockDown = false;
         }
 
-        if (Input.GetAxis("Trigger2") >= 0.9f && !trigger2Lock)
+        if (Input.GetAxis("Block") >= 0.9f && !blockTLockDown)
         {
-            trigger2Down = true;
-            trigger2Lock = true;
+            blockTDown = true;
+            blockTLockDown = true;
         }
         else
         {
-            trigger2Down = false;
+            blockTDown = false;
         }
 
-        if (Input.GetAxis("Trigger2") <= 0.1f && trigger2Lock)
+        if (Input.GetAxis("Block") <= 0.1f && blockTLockDown)
         {
-            trigger2Lock = false;
+            blockTLockDown = false;
         }
 
         // handle release trigger input
 
-        if (Input.GetAxis("Trigger1") <= 0.1f && !trigger1LockUp)
+        if (Input.GetAxis("Attack3") <= 0.1f && !heavyTLockUp)
         {
-            trigger1Up = true;
-            trigger1LockUp = true;
+            heavyTUp = true;
+            heavyTLockUp = true;
         }
         else
         {
-            trigger1Up = false;
+            heavyTUp = false;
         }
 
-        if (Input.GetAxis("Trigger1") >= 0.9f && trigger1LockUp)
+        if (Input.GetAxis("Attack3") >= 0.9f && heavyTLockUp)
         {
-            trigger1LockUp = false;
+            heavyTLockUp = false;
         }
 
-        if (Input.GetAxis("Trigger2") <= 0.1f && !trigger2LockUp)
+        if (Input.GetAxis("Block") <= 0.1f && !blockTLockUp)
         {
-            trigger2Up = true;
-            trigger2LockUp = true;
+            blockTUp = true;
+            blockTLockUp = true;
         }
         else
         {
-            trigger2Up = false;
+            blockTUp = false;
         }
 
-        if (Input.GetAxis("Trigger2") >= 0.9f && trigger2LockUp)
+        if (Input.GetAxis("Block") >= 0.9f && blockTLockUp)
         {
-            trigger2LockUp = false;
+            blockTLockUp = false;
         }
-
+        
         // inputs redone
         if (slashHeld)
         {
@@ -264,9 +266,9 @@ public class InputHandler : MonoBehaviour
             heavyReset = true;
         }
 
-        heavyHeld = Input.GetAxis("Trigger1") >= 0.9f;
-        heavyDown = trigger1Down;
-        heavyUp = trigger1Up;
+        heavyHeld = Input.GetAxis("Attack3") >= 0.9f;
+        heavyDown = heavyTDown;
+        heavyUp = heavyTUp;
 
         if (blockHeld)
         {
@@ -282,9 +284,9 @@ public class InputHandler : MonoBehaviour
             blockReset = true;
         }
 
-        blockHeld = Input.GetAxis("Trigger2") >= 0.9f;
-        blockDown = trigger2Down;
-        blockUp = trigger2Up;
+        blockHeld = Input.GetAxis("Block") >= 0.9f;
+        blockDown = blockTDown;
+        blockUp = blockTUp;
 
         if (jumpHeld)
         {

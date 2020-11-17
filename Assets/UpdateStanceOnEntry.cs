@@ -9,8 +9,14 @@ public class UpdateStanceOnEntry : StateMachineBehaviour
     {
         if (animator.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
         {
+            /*
             StanceHandler.AnimatorStance current = actor.stance.animatorStance;
             if (current != actor.inventory.GetStance().animatorStance)
+            {
+                actor.GetStance();
+            }
+            */
+            if (actor.inventory.CheckWeaponChanged())
             {
                 actor.GetStance();
             }

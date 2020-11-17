@@ -33,6 +33,8 @@ public class Actor : MonoBehaviour
     public UnityEvent OnHit;
     private  int mercyId; //hitbox
 
+    public Vector3 moveDirection;
+
     // targets
 
     public GameObject CombatTarget;

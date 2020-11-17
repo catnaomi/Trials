@@ -16,16 +16,16 @@ public class HeavyAttackChargeRelease : HeavyAttackCharge
                 actor.animator.GetFloat("Input-HeavyHeldTime");
             if (time > chargeTime)
             {
-                actor.nextAttackType = longAttack;
+                actor.SetNextAttackType(longAttack, true);
             }
             else
             {
-                actor.nextAttackType = shortAttack;
+                actor.SetNextAttackType(shortAttack, true);
             }
         }
         else
         {
-            actor.nextAttackType = longAttack;
+            actor.SetNextAttackType(longAttack, true);
         }
     }
 }

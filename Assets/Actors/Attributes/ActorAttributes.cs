@@ -31,12 +31,19 @@ public class ActorAttributes : MonoBehaviour
     public AttributeValue stamina;
     public AttributeValue staminaRecoveryRate;
 
+    /*
     [ReadOnly] public float smoothedPoise;
-    private float poiseRecoveryClock;
+    
     private float poiseSmoothClock;
     private float poiseLast;
-    public AttributeValue poise;
     public AttributeValue poiseRecoveryRate;
+    */
+    private float poiseRecoveryClock;
+    private float poiseLast;
+    private bool poiseIncreased;
+    public float poise;
+    public float weightPoise = 50f; // poise of character weight during attacks and movement
+    public float poiseLossRate = 100f;
 
     [Space(5)]
     public float attributeRecoveryDelay = 3f;
@@ -57,7 +64,7 @@ public class ActorAttributes : MonoBehaviour
     {
         smoothedHealth = NumberUtilities.TimeDelayedSmoothDelta(smoothedHealth, health.current, healthSmoothClock + SMOOTHING_DELAY, health.max / SMOOTHING_MAX_DELTA, Time.time);
         smoothedStamina = NumberUtilities.TimeDelayedSmoothDelta(smoothedStamina, stamina.current, staminaSmoothClock + SMOOTHING_DELAY, stamina.max / SMOOTHING_MAX_DELTA, Time.time);
-        smoothedPoise = NumberUtilities.TimeDelayedSmoothDelta(smoothedPoise, poise.current, poiseSmoothClock + SMOOTHING_DELAY, poise.max / SMOOTHING_MAX_DELTA, Time.time);
+        //smoothedPoise = NumberUtilities.TimeDelayedSmoothDelta(smoothedPoise, poise.current, poiseSmoothClock + SMOOTHING_DELAY, poise.max / SMOOTHING_MAX_DELTA, Time.time);
 
         if (health.current < healthLast)
         {
@@ -101,7 +108,13 @@ public class ActorAttributes : MonoBehaviour
             this.RecoverAttribute(stamina, staminaRecoveryRate.current * Time.deltaTime);
         }
 
-        if (poise.current < poiseLast)
+
+        if (poiseIncreased)
+        {
+            poiseRecoveryClock = 0f;
+            poiseIncreased = false;
+        }
+        else if (poise > poiseLast || health.current < healthLast)
         {
             poiseRecoveryClock = 0f;
         }
@@ -109,22 +122,18 @@ public class ActorAttributes : MonoBehaviour
         {
             poiseRecoveryClock += Time.deltaTime;
         }
-        if (smoothedPoise == poise.current)
-        {
-            poiseSmoothClock = Time.time;
-        }
-        else if (smoothedPoise < poise.current)
-        {
-            smoothedPoise = poise.current;
-        }
         if (poiseRecoveryClock > attributeRecoveryDelay)
         {
-            this.RecoverAttribute(poise, poiseRecoveryRate.current * Time.deltaTime);
+            //this.ReduceAttribute(poise, poiseLossRate * Time.deltaTime);
+
+            float targetPoise = (this.TryGetComponent<HumanoidActor>(out HumanoidActor human) && (!human.CanMove() || human.moveDirection == Vector3.zero)) ? 0f : GetBasePoise();
+
+            this.poise = Mathf.MoveTowards(this.poise, targetPoise, poiseLossRate * Time.deltaTime);
         }
 
         healthLast = health.current;
         staminaLast = stamina.current;
-        poiseLast = poise.current;
+        poiseLast = poise;
 
         effectClock += Time.deltaTime;
         if (effectClock > EFFECT_UPDATE_FREQUENCY)
@@ -147,8 +156,9 @@ public class ActorAttributes : MonoBehaviour
         healthRecoveryRate.current = healthRecoveryRate.max = healthRecoveryRate.baseValue;
         smoothedStamina = stamina.current = stamina.max = stamina.baseValue;
         staminaRecoveryRate.current = staminaRecoveryRate.max = staminaRecoveryRate.baseValue;
-        smoothedPoise = poise.current = poise.max = poise.baseValue;
-        poiseRecoveryRate.current = poiseRecoveryRate.max = poiseRecoveryRate.baseValue;
+
+        poise = 0f;
+
         effects.Clear();
 
         // TODO: resistances
@@ -159,6 +169,10 @@ public class ActorAttributes : MonoBehaviour
         return value.current > 0f;
     }
 
+    public bool HasPoiseRemaining()
+    {
+        return poise > 0f;
+    }
     public void RecoverAttribute(AttributeValue value, float amount)
     {
         RecoverAttributeToMax(value, amount, value.max);
@@ -192,46 +206,28 @@ public class ActorAttributes : MonoBehaviour
         }
     }
 
-
-
-    public float GetPoiseRecoveryRate()
+    public void IncreasePoiseTo(float poise)
     {
-        float DEFAULT = 1f;
-
-        if (false)//sword != null)
-        {
-            //return sword.GetPoiseRecoveryRate();
-        }
-        else
-        {
-            return DEFAULT;
-        }
+        this.poise = poise + weightPoise;
+        poiseIncreased = true;
     }
 
-    public float GetPoiseCost(bool charged)
+    public void SetPoise(float poise)
     {
-        float DEFAULT = 30f;
-        float DEFAULT_CHARGED = 20f;
-
-        if (false)//sword != null)
-        {
-            //return sword.GetPoiseCost(charged);
-        }
-        else if (charged)
-        {
-            return DEFAULT_CHARGED;
-        }
-        else
-        {
-            return DEFAULT;
-        }
+        this.poise = poise;
+        poiseIncreased = true;
     }
 
-    public float GetDodgePoiseCost()
+    public void ReducePoise(float poise)
     {
-        return 10f;
+        this.poise -= poise;
+        poiseIncreased = true;
     }
 
+    public float GetBasePoise()
+    {
+        return weightPoise + this.GetComponent<Inventory>().GetEquipWeight();
+    }
     public bool HasHealthRemaining()
     {
         return health.current > 0;
