@@ -28,6 +28,11 @@ public class PlayerActor : HumanoidActor
 
     public Transform centerTransform;
 
+    [Space(5)]
+    public Moveset moveset;
+    [ReadOnly]
+    public Moveset.AttackStyle currentAttackInput;
+
     bool startDodge;
 
     Vector3 stickDirection;
@@ -293,42 +298,183 @@ public class PlayerActor : HumanoidActor
         GetInventoryInput();
         if (!animator.GetBool("Armed"))
         {
-            if (CanMove() && (InputHandler.main.slashDown || InputHandler.main.thrustDown))
+            if (CanMove() && (InputHandler.main.atk1Down || InputHandler.main.atk2Down))
             {
                 //animator.SetTrigger("Unsheath-Main");
             }
         }
         else if (attributes.HasAttributeRemaining(attributes.stamina))
         {
-            if (InputHandler.main.slashUp)
+            bool mainSlashUp = InputHandler.main.atk3Up;
+            bool mainSlashDown = InputHandler.main.atk3Down;
+            bool mainSlashHeld = InputHandler.main.atk3Held;
+            float mainSlashHeldTime = InputHandler.main.atk3HeldTime;
+            bool mainSlashLong = InputHandler.main.atk3LongPress;
+
+            bool mainThrustUp = InputHandler.main.atk1Up;
+            bool mainThrustDown = InputHandler.main.atk1Down;
+            bool mainThrustHeld = InputHandler.main.atk1Held;
+            float mainThrustHeldTime = InputHandler.main.atk1HeldTime;
+            bool mainThrustLong = InputHandler.main.atk1LongPress;
+
+            bool offSlashUp = InputHandler.main.atk4Up;
+            bool offSlashDown = InputHandler.main.atk4Down;
+            bool offSlashHeld = InputHandler.main.atk4Held;
+            float offSlashHeldTime = InputHandler.main.atk4HeldTime;
+            bool offSlashLong = InputHandler.main.atk4LongPress;
+
+            bool offThrustUp = InputHandler.main.atk2Up;
+            bool offThrustDown = InputHandler.main.atk2Down;
+            bool offThrustHeld = InputHandler.main.atk2Held;
+            float offThrustHeldTime = InputHandler.main.atk2HeldTime;
+            bool offThrustLong = InputHandler.main.atk2LongPress;
+
+            bool bothSlashDown =  (mainSlashHeld && offSlashDown) || (mainSlashDown && offSlashHeld);
+            bool bothSlashHeld = (mainSlashHeld && offSlashHeld);
+
+            bool bothThrustDown = (mainThrustHeld && offThrustDown) || (mainThrustDown && offThrustHeld);
+            bool bothThrustHeld = (mainThrustHeld && offThrustHeld);
+
+            bool inputtedAttack = false;
+
+            if (bothSlashDown && moveset.GetAttackFromInput(Moveset.AttackStyle.BothStrong) != null)
+            {
+                currentAttackInput = Moveset.AttackStyle.BothStrong;
+                inputtedAttack = true;
+            }
+            else if (bothThrustDown && moveset.GetAttackFromInput(Moveset.AttackStyle.BothQuick) != null)
+            {
+                currentAttackInput = Moveset.AttackStyle.BothQuick;
+                inputtedAttack = true;
+            }
+            else if ((mainThrustUp || (mainThrustLong && !offThrustHeld)) && moveset.GetAttackFromInput(Moveset.AttackStyle.MainQuick) != null)
+            {
+                currentAttackInput = Moveset.AttackStyle.MainQuick;
+                inputtedAttack = true;
+            }
+            else if ((mainSlashUp || (mainSlashLong && !offSlashHeld)) && moveset.GetAttackFromInput(Moveset.AttackStyle.MainStrong) != null)
+            {
+                currentAttackInput = Moveset.AttackStyle.MainStrong;
+                inputtedAttack = true;
+            }
+            else if ((offThrustUp || (offThrustLong && !mainThrustHeld)) && moveset.GetAttackFromInput(Moveset.AttackStyle.OffQuick) != null)
+            {
+                currentAttackInput = Moveset.AttackStyle.OffQuick;
+                inputtedAttack = true;
+            }
+            else if ((offSlashUp || (offSlashLong && !mainSlashHeld)) && moveset.GetAttackFromInput(Moveset.AttackStyle.OffStrong) != null)
+            {
+                currentAttackInput = Moveset.AttackStyle.OffStrong;
+                inputtedAttack = true;
+            }
+
+            bool up = false;
+            bool down = false;
+            bool held = false;
+            float heldTime = 0f;
+
+
+            if (currentAttackInput == Moveset.AttackStyle.BothStrong)
+            {
+                down = bothSlashDown;
+                held = bothSlashHeld;
+                heldTime = Mathf.Min(mainSlashHeldTime, offSlashHeldTime);
+            }
+            else if (currentAttackInput == Moveset.AttackStyle.BothQuick)
+            {
+                down = bothThrustDown;
+                held = bothThrustHeld;
+                heldTime = Mathf.Min(mainThrustHeldTime, offThrustHeldTime);
+            }
+            else if (currentAttackInput == Moveset.AttackStyle.MainStrong)
+            {
+                up = mainSlashUp;
+                down = mainSlashDown;
+                held = mainSlashHeld;
+                heldTime = mainSlashHeldTime;
+            }
+            else if (currentAttackInput == Moveset.AttackStyle.MainQuick)
+            {
+                up = mainThrustUp;
+                down = mainThrustDown;
+                held = mainThrustHeld;
+                heldTime = mainThrustHeldTime;
+            }
+            else if (currentAttackInput == Moveset.AttackStyle.OffQuick)
+            {
+                up = offThrustUp;
+                down = offThrustDown;
+                held = offThrustHeld;
+                heldTime = offThrustHeldTime;
+            }
+            else if (currentAttackInput == Moveset.AttackStyle.OffStrong)
+            {
+                up = offSlashUp;
+                down = offSlashDown;
+                held = offSlashHeld;
+                heldTime = offSlashHeldTime;
+            }
+
+            if (up)
+            {
+                animator.SetTrigger("Input-AttackUp");
+            }
+            if (down)
+            {
+                animator.SetTrigger("Input-AttackDown");
+            }
+            animator.SetBool("Input-AttackHeld", held);
+            animator.SetFloat("Input-AttackHeldTime", heldTime);
+
+            if (inputtedAttack)
+            {
+                animator.SetTrigger("Input-Attack");
+            }
+            InputAttack atk = moveset.GetAttackFromInput(currentAttackInput);
+            if (atk != null)
+            {
+                int id = atk.GetAttackID();
+                animator.SetInteger("Input-AttackID", id);
+                animator.SetBool("Input-AttackBlockOkay", atk.IsBlockOkay());
+            }
+        }
+        else if (false)
+        {
+            if (InputHandler.main.atk1Up)
             {
                 animator.SetTrigger("Input-SlashUp");
+                animator.SetTrigger("Input-AttackUp");
+                animator.SetTrigger("Input-Attack");
                 RegisterPlayerInput();
                 //animator.ResetTrigger("Input-SlashDown");
             }
-            if (InputHandler.main.slashDown)
+            if (InputHandler.main.atk1Down)
             {
                 animator.SetTrigger("Input-SlashDown");
+                animator.SetTrigger("Input-AttackDown");
+                animator.SetTrigger("Input-Attack");
                 RegisterPlayerInput();
                 //animator.ResetTrigger("Input-SlashUp");
             }
-            animator.SetFloat("Input-SlashHeldTime", InputHandler.main.slashHeldTime);
-            animator.SetBool("Input-SlashHeld", InputHandler.main.slashHeld);
+            animator.SetFloat("Input-SlashHeldTime", InputHandler.main.atk1HeldTime);
+            animator.SetFloat("Input-AttackHeldTime", InputHandler.main.atk1HeldTime);
+            animator.SetBool("Input-SlashHeld", InputHandler.main.atk1Held);
+            animator.SetBool("Input-AttackHeld", InputHandler.main.atk1Held);
 
-            if (InputHandler.main.thrustUp)
+            if (InputHandler.main.atk2Up)
             {
                 animator.SetTrigger("Input-ThrustUp");
                 RegisterPlayerInput();
                 //animator.ResetTrigger("Input-ThrustDown");
             }
-            if (InputHandler.main.thrustDown)
+            if (InputHandler.main.atk2Down)
             {
                 animator.SetTrigger("Input-ThrustDown");
                 RegisterPlayerInput();
                 //animator.ResetTrigger("Input-ThrustUp");
             }
-            animator.SetFloat("Input-ThrustHeldTime", InputHandler.main.thrustHeldTime);
-            animator.SetBool("Input-ThrustHeld", InputHandler.main.thrustHeld);
+            animator.SetFloat("Input-ThrustHeldTime", InputHandler.main.atk2HeldTime);
+            animator.SetBool("Input-ThrustHeld", InputHandler.main.atk2Held);
             if (InputHandler.main.heavyDown)
             {
                 animator.SetTrigger("Input-HeavyDown");
@@ -342,7 +488,7 @@ public class PlayerActor : HumanoidActor
             animator.SetFloat("Input-HeavyHeldTime", InputHandler.main.heavyHeldTime);
             animator.SetBool("Input-HeavyHeld", InputHandler.main.heavyHeld);
 
-            if (InputHandler.main.slashHeld && InputHandler.main.thrustHeld)
+            if (InputHandler.main.atk1Held && InputHandler.main.atk2Held)
             {
                 RegisterPlayerInput();
             }
@@ -560,7 +706,7 @@ public class PlayerActor : HumanoidActor
             }
         }
         
-        if (CanMove() && (InputHandler.main.slashDown || InputHandler.main.thrustDown) && !inventory.IsWeaponDrawn())
+        if (CanMove() && (InputHandler.main.atk1Down || InputHandler.main.atk2Down) && !inventory.IsWeaponDrawn())
         {
             if (inventory.IsMainEquipped())
             {
@@ -719,7 +865,7 @@ public class PlayerActor : HumanoidActor
 
     public override bool ShouldEndContinuousAttack()
     {
-        return base.ShouldEndContinuousAttack() || InputHandler.main.heavyTUp;
+        return base.ShouldEndContinuousAttack() || InputHandler.main.atk3Up;
     }
 
     public bool WasLastAttackCharged()
@@ -797,7 +943,7 @@ public class PlayerActor : HumanoidActor
         {
             Vector3 aimPos = cam.transform.position + cam.transform.forward * 100f;
 
-            if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, 100f))
+            if (Physics.Raycast(cam.transform.position, cam.transform.forward, out RaycastHit hit, 100f) && !hit.transform.IsChildOf(this.transform.root))
             {
                 aimPos = hit.point;
             }
@@ -827,51 +973,8 @@ public class PlayerActor : HumanoidActor
     {
         try
         {
-            string poiseText = "poise: [";
-
-            for (int i = 0; i < attributes.stamina.max; i += 10)
-            {
-                char c;
-                if (i < attributes.stamina.current)
-                {
-                    c = '=';
-                }
-                else if (i < attributes.smoothedStamina)
-                {
-                    c = '+';
-                }
-                else
-                {
-                    c = '–';
-                }
-                poiseText += c;
-            }
-            poiseText += "] " + (int)attributes.stamina.current;
-
-            InterfaceUtilities.GizmosDrawText(Camera.main.ViewportToWorldPoint(new Vector3(0.02f, 0.9f, Camera.main.nearClipPlane)), new Color(0, 1f, 0), poiseText);
-
-            string stunText = "stun: [";
-
-            for (float f = 0; f < stunAmount; f += 0.1f)
-            {
-                stunText += "|";
-            }
-
-            stunText += "] " + (int)(stunAmount * 100f);
-
-            if (stunAmount > 0)
-            {
-                InterfaceUtilities.GizmosDrawText(Camera.main.ViewportToWorldPoint(new Vector3(0.02f, 0.93f, Camera.main.nearClipPlane)), new Color(1f, 1f, 1f), stunText);
-            }
-
-            string hpText = "hp : [";
-            for (int h = 1; h <= attributes.health.current; h++)
-            {
-                hpText += "|";
-            }
-            hpText += "] " + attributes.health.current;
-
-            InterfaceUtilities.GizmosDrawText(Camera.main.ViewportToWorldPoint(new Vector3(0.02f, 0.96f, Camera.main.nearClipPlane)), new Color(1f, 0, 0), hpText);
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(positionReference.Head.transform.position, positionReference.Head.transform.position + GetLaunchVector(positionReference.Head.transform.position) * 100f);
         }
         catch (Exception ex)
         {

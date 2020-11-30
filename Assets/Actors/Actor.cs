@@ -56,7 +56,7 @@ public class Actor : MonoBehaviour
     }
     public void Start()
     {
-        CurrentAction = ActionsLibrary.GetInputAction(0);
+        //CurrentAction = ActionsLibrary.GetInputAction(0);
 
         animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
@@ -125,7 +125,7 @@ public class Actor : MonoBehaviour
     public virtual void TakeAction(InputAction action)
     {
         CurrentAction = action;
-        animator.SetInteger("ActionType", action.animId);
+        //animator.SetInteger("ActionType", action.animId);
         animator.SetBool("HasNewAction", true);
         //animator.SetTrigger("TakeAction");
         OnActionCommand.Invoke();

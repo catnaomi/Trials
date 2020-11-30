@@ -78,12 +78,12 @@ public class OffHandBow : EquippableWeapon, HitboxHandler
 
             Debug.Log("aim assist: " + aimAssist.y*100f);
 
-            launchVector = (actor.GetCombatTarget().GetComponent<Collider>().bounds.center - actor.positionReference.OffHand.transform.position).normalized + aimAssist;
+            launchVector = (actor.GetCombatTarget().transform.position - actor.positionReference.OffHand.transform.position).normalized + aimAssist;
         }
 
 
         float launchStrength = 25f + (75f * fireStrength);
-        ArrowController arrow = ArrowController.LaunchArrow(arrowPrefab, actor.transform.position + launchVector + actor.transform.up * 1f, Quaternion.LookRotation(launchVector), launchVector * launchStrength, actor.transform, this.damageKnockback);
+        ArrowController arrow = ArrowController.Launch(arrowPrefab, actor.transform.position + launchVector + actor.transform.up * 1f, Quaternion.LookRotation(launchVector), launchVector * launchStrength, actor.transform, this.damageKnockback);
 
         Collider[] arrowColliders = arrow.GetComponentsInChildren<Collider>();
         foreach (Collider actorCollider in actor.transform.GetComponentsInChildren<Collider>())

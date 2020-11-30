@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ArrowController : MonoBehaviour
+public class ArrowController : Projectile
 {
     public Rigidbody tip;
     public Rigidbody feather;
@@ -215,7 +215,7 @@ public class ArrowController : MonoBehaviour
     }
 
     */
-    public static ArrowController LaunchArrow(GameObject arrowPrefab, Vector3 position, Quaternion angle, Vector3 force, Transform source, DamageKnockback damageKnockback)
+    public static new ArrowController Launch(GameObject arrowPrefab, Vector3 position, Quaternion angle, Vector3 force, Transform source, DamageKnockback damageKnockback)
     {
 
         GameObject arrowObj = GameObject.Instantiate(arrowPrefab, position, angle);

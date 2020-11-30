@@ -28,7 +28,7 @@ public class ArrowLauncher : MonoBehaviour
 
             //newArrow.GetComponentInChildren<ArrowController>().Launch(this.transform.forward * force, this.transform.root, damageKnockback);
 
-            ArrowController.LaunchArrow(arrow, transform.position, Quaternion.LookRotation(this.transform.forward), this.transform.forward * force, this.transform, this.damageKnockback);
+            ArrowController.Launch(arrow, transform.position, Quaternion.LookRotation(this.transform.forward), this.transform.forward * force, this.transform, this.damageKnockback);
             
         }
     }

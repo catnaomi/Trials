@@ -54,6 +54,11 @@ public class ResetInputTriggers : StateMachineBehaviour
         animator.ResetTrigger("Input-ThrustUp");
         animator.ResetTrigger("Input-HeavyDown");
         animator.ResetTrigger("Input-HeavyUp");
+
+        animator.ResetTrigger("Input-Attack");
+        animator.ResetTrigger("Input-AttackUp");
+        animator.ResetTrigger("Input-AttackDown");
+
         if (IncludingDodge)
         {
             animator.ResetTrigger("Input-DodgeDown");

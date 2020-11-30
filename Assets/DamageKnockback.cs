@@ -14,12 +14,16 @@ public class DamageKnockback
     [Space(10)]
     public Vector3 kbForce;
 
+    public bool kbRadial;
+
     public Damage damage;
 
-    [HideInInspector]
+    [ReadOnly]
     public GameObject hitboxSource;
-    [HideInInspector]
+    [ReadOnly]
     public GameObject source;
+
+    public Vector3 originPoint;
 
     public bool breaksArmor;
     public bool unblockable;
@@ -64,7 +68,7 @@ public class DamageKnockback
         this.minStaggerType = damageKnockback.minStaggerType;
         this.hitClip = damageKnockback.hitClip;
         this.breaksArmor = damageKnockback.breaksArmor;
-
+        this.kbRadial = damageKnockback.kbRadial;
         this.damage = new Damage(damageKnockback.damage);
     }
 

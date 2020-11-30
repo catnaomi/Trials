@@ -16,6 +16,8 @@ public class HeavyAttackAim : HeavyAttack
     public AnimationClip walkLeft;
     public AnimationClip walkRight;
 
+    public IKHandler ikHandler;
+
     public override void OnEquip(HumanoidActor actor)
     {
         base.OnEquip(actor);
@@ -69,5 +71,10 @@ public class HeavyAttackAim : HeavyAttack
     public override StanceHandler.HeavyStyle GetHeavyStyle()
     {
         return StanceHandler.HeavyStyle.Aim;
+    }
+
+    public override void OnHeavyIK(Animator animator)
+    {
+        ikHandler.OnIK(animator);
     }
 }

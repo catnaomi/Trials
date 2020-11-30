@@ -90,14 +90,14 @@ public class HeavyAttackStateHandler : StateMachineBehaviour
             {
                 if (actor.stance != null && actor.stance.heavyAttack != null)
                 {
-                    actor.stance.heavyAttack.OnHeavyIK();
+                    actor.stance.heavyAttack.OnHeavyIK(animator);
                 }
             }
             else
             {
                 if (actor.stance != null && actor.stance.specialAttack != null)
                 {
-                    actor.stance.specialAttack.OnHeavyIK();
+                    actor.stance.specialAttack.OnHeavyIK(animator);
                 }
             }
         }

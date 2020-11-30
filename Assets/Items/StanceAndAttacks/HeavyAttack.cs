@@ -43,7 +43,7 @@ public class HeavyAttack : ScriptableObject
         return;
     }
 
-    public virtual void OnHeavyIK()
+    public virtual void OnHeavyIK(Animator animator)
     {
         return;
     }

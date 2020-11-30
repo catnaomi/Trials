@@ -11,7 +11,7 @@ public class InputHandler : MonoBehaviour
     public float STICK_EDGE_THRESHOLD = 0.75f;
     public float FLICK_VELOCITY_THRESHOLD = 0.5f;
     public float STICK_STILLNESS_THRESHOLD = 0.1f;
-
+    public float LONG_PRESS_THRESHOLD = 0.1f;
     public AxisUtilities.AxisDirection PrimaryQuadrant;
     public AxisUtilities.AxisDirection SecondaryQuadrant;
     public Vector2 PrimaryInput;
@@ -28,29 +28,40 @@ public class InputHandler : MonoBehaviour
 
     public float targetClock;
 
-    
-    public bool heavyTDown;
-    bool heavyTLockDown;
-    public bool blockTDown;
-    bool blockTLockDown;
-
-    public bool heavyTUp;
-    bool heavyTLockUp;
-    public bool blockTUp;
-    bool blockTLockUp;
-
     [Header("Inputs")]
-    public bool slashDown;
-    public bool slashHeld;
-    public bool slashUp;
-    public float slashHeldTime;
-    bool slashReset;
+    // Attack1
+    public bool atk1Down;
+    public bool atk1Held;
+    public bool atk1Up;
+    public float atk1HeldTime;
+    bool atk1Reset;
+    public bool atk1LongPress;
+    bool atk1LongReset;
     [Space(5)]
-    public bool thrustDown;
-    public bool thrustHeld;
-    public bool thrustUp;
-    public float thrustHeldTime;
-    bool thrustReset;
+    // Attack2
+    public bool atk2Down;
+    public bool atk2Held;
+    public bool atk2Up;
+    public float atk2HeldTime;
+    bool atk2Reset;
+    public bool atk2LongPress;
+    bool atk2LongReset;
+    // Attack3
+    public bool atk3Down;
+    public bool atk3Held;
+    public bool atk3Up;
+    public float atk3HeldTime;
+    bool atk3Reset;
+    public bool atk3LongPress;
+    bool atk3LongReset;
+    // Attack4
+    public bool atk4Down;
+    public bool atk4Held;
+    public bool atk4Up;
+    public float atk4HeldTime;
+    bool atk4Reset;
+    public bool atk4LongPress;
+    bool atk4LongReset;
     [Space(5)]
     public bool blockDown;
     public bool blockHeld;
@@ -82,6 +93,12 @@ public class InputHandler : MonoBehaviour
     public bool equipDown;
     public bool equipHeld;
     public float equipHeldTime;
+
+    bool atk3LockDown;
+    bool atk4LockDown;
+
+    bool atk3LockUp;
+    bool atk4LockUp;
 
     bool equipReleased;
     private void Awake()
@@ -122,7 +139,7 @@ public class InputHandler : MonoBehaviour
             canPrimaryFlick = true;
         }
 
-        if(currentSecondaryDirection == currentSecondaryQuadrant && currentSecondarySpeed > STICK_STILLNESS_THRESHOLD && canSecondaryFlick)
+        if (currentSecondaryDirection == currentSecondaryQuadrant && currentSecondarySpeed > STICK_STILLNESS_THRESHOLD && canSecondaryFlick)
         {
             canSecondaryFlick = false;
             SecondaryFlickDirection = currentSecondaryDirection;
@@ -152,105 +169,185 @@ public class InputHandler : MonoBehaviour
 
         // handle press trigger input 
 
-        
-        if (Input.GetAxis("Attack3") >= 0.9f && !heavyTLockDown)
+
+        if (Input.GetAxis("Attack3") >= 0.9f && !atk3LockDown)
         {
-            heavyTDown = true;
-            heavyTLockDown = true;
+            atk3Down = true;
+            atk3LockDown = true;
         }
         else
         {
-            heavyTDown = false;
+            atk3Down = false;
         }
 
-        if (Input.GetAxis("Attack3") <= 0.1f && heavyTLockDown)
+        if (Input.GetAxis("Attack3") <= 0.1f && atk3LockDown)
         {
-            heavyTLockDown = false;
+            atk3LockDown = false;
         }
 
-        if (Input.GetAxis("Block") >= 0.9f && !blockTLockDown)
+        if (Input.GetAxis("Attack4") >= 0.9f && !atk4LockDown)
         {
-            blockTDown = true;
-            blockTLockDown = true;
+            atk4Down = true;
+            atk4LockDown = true;
         }
         else
         {
-            blockTDown = false;
+            atk4Down = false;
         }
 
-        if (Input.GetAxis("Block") <= 0.1f && blockTLockDown)
+        if (Input.GetAxis("Attack4") <= 0.1f && atk4LockDown)
         {
-            blockTLockDown = false;
+            atk4LockDown = false;
         }
 
         // handle release trigger input
 
-        if (Input.GetAxis("Attack3") <= 0.1f && !heavyTLockUp)
+        if (Input.GetAxis("Attack3") <= 0.1f && !atk3LockUp)
         {
-            heavyTUp = true;
-            heavyTLockUp = true;
+            atk3Up = true;
+            atk3LockUp = true;
         }
         else
         {
-            heavyTUp = false;
+            atk3Up = false;
         }
 
-        if (Input.GetAxis("Attack3") >= 0.9f && heavyTLockUp)
+        if (Input.GetAxis("Attack3") >= 0.9f && atk3LockUp)
         {
-            heavyTLockUp = false;
+            atk3LockUp = false;
         }
 
-        if (Input.GetAxis("Block") <= 0.1f && !blockTLockUp)
+        if (Input.GetAxis("Attack4") <= 0.1f && !atk4LockUp)
         {
-            blockTUp = true;
-            blockTLockUp = true;
+            atk4Up = true;
+            atk4LockUp = true;
         }
         else
         {
-            blockTUp = false;
+            atk4Up = false;
         }
 
-        if (Input.GetAxis("Block") >= 0.9f && blockTLockUp)
+        if (Input.GetAxis("Attack4") >= 0.9f && atk4LockUp)
         {
-            blockTLockUp = false;
+            atk4LockUp = false;
         }
-        
+
         // inputs redone
-        if (slashHeld)
+        if (atk1Held)
         {
-            if (slashReset)
+            if (atk1Reset)
             {
-                slashHeldTime = 0f;
-                slashReset = false;
+                atk1HeldTime = 0f;
+                atk1Reset = false;
             }
-            slashHeldTime += Time.deltaTime;
+            atk1HeldTime += Time.deltaTime;
         }
         else
         {
-            slashReset = true;
+            atk1Reset = true;
+            atk1LongReset = false;
         }
 
-        slashHeld = Input.GetButton("Attack1");       
-        slashDown = Input.GetButtonDown("Attack1");
-        slashUp = Input.GetButtonUp("Attack1");
-
-        if (thrustHeld)
+        if (atk1Held && atk1HeldTime > LONG_PRESS_THRESHOLD && !atk1LongReset)
         {
-            if (thrustReset)
-            {
-                thrustHeldTime = 0f;
-                thrustReset = false;
-            }
-            thrustHeldTime += Time.deltaTime;
+            atk1LongPress = true;
+            atk1LongReset = true;
         }
         else
         {
-            thrustReset = true;
+            atk1LongPress = false;
         }
 
-        thrustHeld = Input.GetButton("Attack2");
-        thrustDown = Input.GetButtonDown("Attack2");
-        thrustUp = Input.GetButtonUp("Attack2");
+        atk1Held = Input.GetButton("Attack1");
+        atk1Down = Input.GetButtonDown("Attack1");
+        atk1Up = Input.GetButtonUp("Attack1");
+
+        if (atk2Held)
+        {
+            if (atk2Reset)
+            {
+                atk2HeldTime = 0f;
+                atk2Reset = false;
+            }
+            atk2HeldTime += Time.deltaTime;
+        }
+        else
+        {
+            atk2Reset = true;
+            atk2LongReset = false;
+        }
+
+        if (atk2Held && atk2HeldTime > LONG_PRESS_THRESHOLD && !atk2LongReset)
+        {
+            atk2LongPress = true;
+            atk2LongReset = true;
+        }
+        else
+        {
+            atk2LongPress = false;
+        }
+
+        atk2Held = Input.GetButton("Attack2");
+        atk2Down = Input.GetButtonDown("Attack2");
+        atk2Up = Input.GetButtonUp("Attack2");
+
+        if (atk3Held)
+        {
+            if (atk3Reset)
+            {
+                atk3HeldTime = 0f;
+                atk3Reset = false;
+            }
+            atk3HeldTime += Time.deltaTime;
+        }
+        else
+        {
+            atk3Reset = true;
+            atk3LongReset = false;
+        }
+
+        if (atk3Held && atk3HeldTime > LONG_PRESS_THRESHOLD && !atk3LongReset)
+        {
+            atk3LongPress = true;
+            atk3LongReset = true;
+        }
+        else
+        {
+            atk3LongPress = false;
+        }
+
+        atk3Held = Input.GetAxis("Attack3") >= 0.9f;
+        //atk3Down = atk3Down;
+        //atk3Up = atk3Up;
+
+        if (atk4Held)
+        {
+            if (atk4Reset)
+            {
+                atk4HeldTime = 0f;
+                atk4Reset = false;
+            }
+            atk4HeldTime += Time.deltaTime;
+        }
+        else
+        {
+            atk4Reset = true;
+            atk4LongReset = false;
+        }
+
+        if (atk4Held && atk4HeldTime > LONG_PRESS_THRESHOLD && !atk4LongReset)
+        {
+            atk4LongPress = true;
+            atk4LongReset = true;
+        }
+        else
+        {
+            atk4LongPress = false;
+        }
+
+        atk4Held = Input.GetAxis("Attack4") >= 0.9f;
+        //atk4Down = atk4Down;
+        //atk4Up = atk4Up;
 
         if (heavyHeld)
         {
@@ -267,8 +364,8 @@ public class InputHandler : MonoBehaviour
         }
 
         heavyHeld = Input.GetAxis("Attack3") >= 0.9f;
-        heavyDown = heavyTDown;
-        heavyUp = heavyTUp;
+        heavyDown = atk3Down;
+        heavyUp = atk3Up;
 
         if (blockHeld)
         {
@@ -284,9 +381,16 @@ public class InputHandler : MonoBehaviour
             blockReset = true;
         }
 
+        blockHeld = Input.GetButton("Block");
+        blockDown = Input.GetButtonDown("Block");
+        blockUp = Input.GetButtonUp("Block");
+
+        /*
         blockHeld = Input.GetAxis("Block") >= 0.9f;
-        blockDown = blockTDown;
-        blockUp = blockTUp;
+        blockDown = atk4Down;
+        blockUp = atk4Up;
+        */
+
 
         if (jumpHeld)
         {

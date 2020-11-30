@@ -23,7 +23,7 @@ public class OffHandShield : EquippableWeapon, HitboxHandler
         
         if (down)
         {
-            action = ActionsLibrary.GetInputAction("Shield Bash");
+            //action = ActionsLibrary.GetInputAction("Shield Bash");
             return true;
         }
         else
@@ -50,7 +50,7 @@ public class OffHandShield : EquippableWeapon, HitboxHandler
         base.EquipWeapon(actor);
 
         HumanoidActor humanoidActor = (HumanoidActor)actor;
-        humanoidActor.blockType = ActionsLibrary.BlockType.Shield;
+        //humanoidActor.blockType = ActionsLibrary.BlockType.Shield;
 
         hitbox = Hitbox.CreateHitbox(
             ((HumanoidActor)holder).positionReference.OffHand.transform.position,
@@ -67,7 +67,7 @@ public class OffHandShield : EquippableWeapon, HitboxHandler
         base.UnequipWeapon(actor);
 
         HumanoidActor humanoidActor = (HumanoidActor)actor;
-        humanoidActor.blockType = ActionsLibrary.GetDefaultBlockType();
+        //humanoidActor.blockType = ActionsLibrary.GetDefaultBlockType();
 
         //humanoidActor.attributes.RemoveEffect(effect);
     }

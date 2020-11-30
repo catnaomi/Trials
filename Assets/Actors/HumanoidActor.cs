@@ -78,6 +78,7 @@ public class HumanoidActor : Actor
         [Header("Body & Joint Positions")]
         public Rigidbody Hips;
         public Transform Spine;
+        public Transform Head;
         [Header("Weapon Positions")]
         public GameObject MainHand;
         public GameObject OffHand;
@@ -97,7 +98,7 @@ public class HumanoidActor : Actor
 
     public BladeWeapon.AttackType nextAttackType;
 
-    public ActionsLibrary.BlockType blockType;
+    //public ActionsLibrary.BlockType blockType;
     [Header("Movement Settings")]
     public float BaseMovementSpeed = 5f;
     public float ForwardMultiplier = 1f;
@@ -158,8 +159,6 @@ public class HumanoidActor : Actor
             damageDisplay = Instantiate(damageDisplay);
             damageDisplay.GetComponent<DamageDisplay>().source = this.transform;
         }
-        
-        blockType = ActionsLibrary.GetDefaultBlockType();
 
         OnSheathe = new UnityEvent();
         OnOffhandAttack = new UnityEvent();
@@ -360,6 +359,11 @@ public class HumanoidActor : Actor
 
         this.isGrounded = cc.isGrounded;
         animator.SetBool("Grounded", cc.isGrounded);
+
+        if (IsAiming() && stance != null && stance.heavyAttack is HeavyAttackAim heavyAttackAim && heavyAttackAim.ikHandler != null)
+        {
+            heavyAttackAim.ikHandler.OnUpdate(this);
+        }
     }
     protected void FixedUpdate()
     {
@@ -501,7 +505,7 @@ public class HumanoidActor : Actor
 
     public void Kneel()
     {
-        TakeAction(ActionsLibrary.GetInputAction("Kneel"));
+        //TakeAction(ActionsLibrary.GetInputAction("Kneel"));
         animator.SetBool("Helpless", true);
         animator.SetBool("FacingUp", false);
 
@@ -1355,7 +1359,7 @@ public class HumanoidActor : Actor
     {
         if (stance != null && stance.animatorStance != StanceHandler.AnimatorStance.None)
         {
-            this.animator.runtimeAnimatorController = stance.GetController();
+            //this.animator.runtimeAnimatorController = stance.GetController();
             this.animator.SetInteger("LightSlashStyle", (int)stance.GetLightSlashStyle());
             this.animator.SetInteger("LightThrustStyle", (int)stance.GetLightThrustStyle());
             this.animator.SetFloat("ArmedStyle", (int)stance.GetArmedStyle());
@@ -1420,6 +1424,10 @@ public class HumanoidActor : Actor
                 (ALLOW_IN_TRANSITION || !animator.IsInTransition(0));
                 */
 
+        if (IsAiming() && !IsAttacking())
+        {
+            return true;
+        }
         if (humanoidState == HumanoidState.Ragdolled)
         {
             return false;
@@ -1432,8 +1440,6 @@ public class HumanoidActor : Actor
             "EMPTY",
             "MOVABLE",
             "BLEND_MOVE",
-            "AIMING",
-            "AIM_ATTACK",
             "BLOCK_MOVABLE",
             "SPRINTING",
             "PARRY_MOVABLE",
