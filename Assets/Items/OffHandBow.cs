@@ -6,7 +6,7 @@ public class OffHandBow : EquippableWeapon, HitboxHandler
 {
     public GameObject arrowPrefab;
     public DamageKnockback damageKnockback;
-
+    public IKHandler ikHandler;
     float fireStrength;
 
     public float drawTime = 1f;
@@ -45,6 +45,8 @@ public class OffHandBow : EquippableWeapon, HitboxHandler
     public override void EquipWeapon(Actor actor)
     {
         base.EquipWeapon(actor);
+
+        GetHumanoidHolder().aimIKHandler = ikHandler;
 
         //((HumanoidActor)actor).drawTime = drawTime;
         //((HumanoidActor)actor).OnOffhandAttack.AddListener(Fire);

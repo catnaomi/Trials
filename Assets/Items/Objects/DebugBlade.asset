@@ -21,33 +21,25 @@ MonoBehaviour:
   isEquipped: 0
   EquippableMain: 1
   EquippableOff: 1
-  OneHanded: 1
-  TwoHanded: 1
+  TwoHandOnly: 0
   ParentLeftAsMain: 0
   ParentRightAsOff: 0
   MainHandEquipSlot: 1
   OffHandEquipSlot: 2
-  PrfMainHandStance:
-    animatorStance: 4
-    lightThrustStyle: 1
-    lightSlashStyle: 6
-    heavyAttack: {fileID: 11400000, guid: f67e809652086124b8fa7f8d73c43f01, type: 2}
-    specialAttack: {fileID: 11400000, guid: 0e00e8711d3eca64ba014f1306bc5a5e, type: 2}
-    specialPriority: 0
-  PrfOffHandStance:
-    animatorStance: 6
-    lightThrustStyle: 4
-    lightSlashStyle: 4
-    heavyAttack: {fileID: 11400000, guid: dd74abcda275bc743bb58dc396c1ef30, type: 2}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
-  PrfTwoHandStance:
-    animatorStance: 2
-    lightThrustStyle: 2
-    lightSlashStyle: 7
-    heavyAttack: {fileID: 11400000, guid: 94c13eefe1b6e174fb166614b3cd1a70, type: 2}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
+  PrfStance:
+    rightHandStance: 1
+    leftHandStance: 1
+    twoHandStance: 2
+    blockStyle: 2
+    moveset:
+      mainStrong: {fileID: 11400000, guid: dc3fc31c8d025824da3945c67f459421, type: 2}
+      mainQuick: {fileID: 11400000, guid: dd58464c413cfee478c599729b1bc3f2, type: 2}
+      offStrong: {fileID: 11400000, guid: 3edf665f881e1854e8c499fd993eacfd, type: 2}
+      offQuick: {fileID: 11400000, guid: 7cb559ef66c64bb489882417b2263ac7, type: 2}
+      twoStrong: {fileID: 11400000, guid: 1f63bf86d06129a41b8c3756b3dcc671, type: 2}
+      twoQuick: {fileID: 11400000, guid: 7259afa655be39048bca293eeb5acf60, type: 2}
+      dualStrong: {fileID: 0}
+      dualQuick: {fileID: 0}
   AttackSpeed: 1
   weight: 3
   OnEquip:

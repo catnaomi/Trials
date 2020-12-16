@@ -7,21 +7,27 @@ using UnityEngine;
 public class StanceHandler
 {
     public static int BaseLayer = 0;
-    public static int ActionLayer = 3;
+    public static int ActionLayer = 6;
     //public static int ImpactLayer = 7;
     public static int AILayer = 8;
 
     public static bool ResourcesLoaded = false;
     private static Dictionary<AnimatorStance, AnimatorOverrideController> stanceDict;
 
-    public AnimatorStance animatorStance;
-    public LightThrustStyle lightThrustStyle;
-    public LightSlashStyle lightSlashStyle;
+    //public AnimatorStance animatorStance; // TODO: remove
+    //public LightThrustStyle lightThrustStyle; // TODO: remove
+    //public LightSlashStyle lightSlashStyle; // TODO: remove
+    public GripStyle rightHandStance;
+    public GripStyle leftHandStance;
+    public GripStyle twoHandStance;
+    public BlockStyle blockStyle;
     [Space(10)]
-    public HeavyAttack heavyAttack;
-    [Space(5)]
-    public HeavyAttack specialAttack;
-    public int specialPriority;
+    public Moveset moveset;
+    //[Space(10)]
+    //public HeavyAttack heavyAttack; // TODO: remove, adapt to new attack system
+    //[Space(5)]
+    //public HeavyAttack specialAttack; // TODO: remove
+    //public int specialPriority;
 
     public enum AnimatorStance
     {
@@ -34,42 +40,22 @@ public class StanceHandler
         Dual            // 6
     }
 
-    public enum LightThrustStyle
+    public enum GripStyle
     {
-        None,       // 0
-        RapierLunge_1H,   // 1
-        Stab_2H,    // 2
-        BackThrust_1H, // 3
-        AlternatingThrust // 4
+        Unarmed,            // 0 - hands relaxed.
+        OneHand_Light,      // 1 - blade out and down
+        TwoHand_Light,      // 2 - blade out in front
+        Shield,             // 3
+        Bow                 // 4
+        // TODO: add heavy (over shoulder) variations, and polearm variations
     }
 
-    public enum LightSlashStyle
-    {
-        None,           // 0
-        ComboSlash_1H,  // 1
-        WitchSlash_2H,  // 2
-        AgileSlash_2H,  // 3
-        DualCombo,      // 4
-        Highlander_2H,  // 5
-        SteadyCombo_1H, // 6
-        SteadyCombo_2H  // 7
-    }
     public enum BlockStyle
     {
         None,         // 0
-        OneHand,      // 1
-        TwoHand,      // 2
+        MainHeavy,    // 1
+        MainLight,    // 2
         Shield,       // 3
-        TwoHand_Shaft,// 4
-    }
-
-    public enum ArmedStyle
-    {
-        None,           // 0
-        OneHand_Front,  // 1
-        TwoHand,        // 2
-        OneHand_Rear,   // 3
-        Bow             // 4
     }
 
     public enum HeavyStyle
@@ -81,47 +67,55 @@ public class StanceHandler
     }
     public StanceHandler(StanceHandler original)
     {
-        this.animatorStance = original.animatorStance;
-        this.lightSlashStyle = original.lightSlashStyle;
-        this.lightThrustStyle = original.lightThrustStyle;
-        this.heavyAttack = original.heavyAttack;
-        this.specialAttack = original.specialAttack;
-        this.specialPriority = original.specialPriority;
+        this.leftHandStance = original.leftHandStance;
+        this.rightHandStance = original.rightHandStance;
+        this.moveset = original.moveset;
     }
     public StanceHandler() {
     }
-    public static StanceHandler MergeStances(StanceHandler lowPriority, StanceHandler highPriority)
+    public void MergeStance(StanceHandler main, StanceHandler off)
     {
-        StanceHandler stance = new StanceHandler(lowPriority);
+        bool twoHanding = (off == null);
 
-        if ((int)highPriority.animatorStance != 0)
+        this.rightHandStance = GripStyle.Unarmed;
+        this.leftHandStance = GripStyle.Unarmed;
+        this.twoHandStance = GripStyle.Unarmed;
+
+        if (main != null)
         {
-            stance.animatorStance = highPriority.animatorStance;
-        }
 
-        if ((int)highPriority.lightSlashStyle != 0)
+            this.moveset.mainQuick = main.moveset.mainQuick;
+            this.moveset.mainStrong = main.moveset.mainStrong;
+
+            this.moveset.twoQuick = main.moveset.twoQuick;
+            this.moveset.twoStrong = main.moveset.twoStrong;
+
+            
+            this.rightHandStance = main.rightHandStance;
+
+            this.twoHandStance = main.twoHandStance;
+        }
+        if (off != null)
         {
-            stance.lightSlashStyle = highPriority.lightSlashStyle;
+            this.moveset.offQuick = off.moveset.offQuick;
+            this.moveset.offStrong = off.moveset.offStrong;
+            this.leftHandStance = off.leftHandStance;
         }
-
-        if ((int)highPriority.lightThrustStyle != 0)
-        {
-            stance.lightThrustStyle = highPriority.lightThrustStyle;
-        }
-
-        if (highPriority.heavyAttack != null)
-        {
-            stance.heavyAttack = highPriority.heavyAttack;
-        }
-
-        if (highPriority.specialAttack != null)
-        {
-            stance.specialAttack = highPriority.specialAttack;
-        }
-
-        return stance;
     }
 
+    public void ApplyMoveset(StanceHandler newStance)
+    {
+        foreach (Moveset.AttackStyle style in Enum.GetValues(typeof(Moveset.AttackStyle)))
+        {
+            InputAttack atk = newStance.moveset.GetAttackFromInput(style);
+            if (atk != null)
+            {
+                this.moveset.SetAttackFromInput(style, atk);
+            }
+        }
+    }
+
+    /*
     public AnimatorOverrideController GetController()
     {
         if (!ResourcesLoaded)
@@ -153,75 +147,14 @@ public class StanceHandler
         stanceDict[AnimatorStance.Dual] = Resources.Load<AnimatorOverrideController>("Stances/stance_controller_1H-front");
         ResourcesLoaded = true;
     }
-
-    public LightThrustStyle GetLightThrustStyle()
-    {
-        return this.lightThrustStyle;
-        switch (animatorStance)
-        {
-            case AnimatorStance.OneHand_Front:
-                return LightThrustStyle.RapierLunge_1H;
-
-            case AnimatorStance.OneHand_Shield:
-                return LightThrustStyle.RapierLunge_1H;
-
-            case AnimatorStance.OneHand_Rear:
-                return LightThrustStyle.RapierLunge_1H;
-
-            case AnimatorStance.TwoHand:
-                return LightThrustStyle.Stab_2H;
-
-            default:
-                return LightThrustStyle.RapierLunge_1H;
-        }
-    }
-
-    public LightSlashStyle GetLightSlashStyle()
-    {
-        return this.lightSlashStyle;
-        switch (animatorStance)
-        {
-            case AnimatorStance.OneHand_Front:
-                return LightSlashStyle.ComboSlash_1H;
-
-            case AnimatorStance.OneHand_Shield:
-                return LightSlashStyle.ComboSlash_1H;
-
-            case AnimatorStance.OneHand_Rear:
-                return LightSlashStyle.ComboSlash_1H;
-
-            case AnimatorStance.TwoHand:
-                return LightSlashStyle.WitchSlash_2H;
-
-            default:
-                return LightSlashStyle.ComboSlash_1H;
-        }
-    }
+    */
 
     public BlockStyle GetBlockStyle()
     {
-        switch (animatorStance)
-        {
-            case AnimatorStance.OneHand_Front:
-                return BlockStyle.OneHand;
-
-            case AnimatorStance.OneHand_Shield:
-                return BlockStyle.Shield;
-
-            case AnimatorStance.OneHand_Rear:
-                return BlockStyle.TwoHand;
-
-            case AnimatorStance.TwoHand:
-                return BlockStyle.TwoHand;
-
-            case AnimatorStance.Bow:
-                return BlockStyle.TwoHand_Shaft;
-
-            default:
-                return BlockStyle.TwoHand;
-        }
+        return this.blockStyle;
     }
 
+    /*
     public ArmedStyle GetArmedStyle()
     {
         switch (animatorStance)
@@ -245,34 +178,15 @@ public class StanceHandler
                 return ArmedStyle.OneHand_Rear;
         }
     }
+    */
 
     public bool BlockWithMain()
     {
-        switch (animatorStance)
-        {
-            case AnimatorStance.OneHand_Front:
-                return true;
-
-            case AnimatorStance.OneHand_Shield:
-                return false;
-
-            case AnimatorStance.OneHand_Rear:
-                return true;
-
-            case AnimatorStance.TwoHand:
-                return true;
-
-            case AnimatorStance.Bow:
-                return true;
-
-            case AnimatorStance.Dual:
-                return false;
-
-            default:
-                return true;
-        }
+        // TODO: implement this based on block style
+        return true;
     }
 
+    /*
     public void ApplyHeavyAttack(HumanoidActor actor)
     {
         if (heavyAttack != null)
@@ -347,4 +261,5 @@ public class StanceHandler
             this.specialAttack = specialAttack;
         }
     }
+    */
 }

@@ -7,7 +7,7 @@ public class UpdateStanceOnEntry : StateMachineBehaviour
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (animator.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
+        if (animator.TryGetComponent<PlayerActor>(out PlayerActor actor))
         {
             /*
             StanceHandler.AnimatorStance current = actor.stance.animatorStance;

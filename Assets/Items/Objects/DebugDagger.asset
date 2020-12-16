@@ -21,34 +21,27 @@ MonoBehaviour:
   isEquipped: 1
   EquippableMain: 1
   EquippableOff: 1
-  OneHanded: 1
-  TwoHanded: 0
+  TwoHandOnly: 0
   ParentLeftAsMain: 0
   ParentRightAsOff: 0
   MainHandEquipSlot: 1
   OffHandEquipSlot: 2
-  PrfMainHandStance:
-    animatorStance: 4
-    lightThrustStyle: 1
-    lightSlashStyle: 1
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
-  PrfOffHandStance:
-    animatorStance: 6
-    lightThrustStyle: 4
-    lightSlashStyle: 4
-    heavyAttack: {fileID: 11400000, guid: 2d962d18ed5c2bf4ba6e9d38a4f15691, type: 2}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
-  PrfTwoHandStance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
+  PrfStance:
+    rightHandStance: 1
+    leftHandStance: 1
+    twoHandStance: 0
+    blockStyle: 0
+    moveset:
+      mainStrong: {fileID: 0}
+      mainQuick: {fileID: 0}
+      offStrong: {fileID: 0}
+      offQuick: {fileID: 0}
+      twoStrong: {fileID: 0}
+      twoQuick: {fileID: 0}
+      dualStrong: {fileID: 0}
+      dualQuick: {fileID: 0}
   AttackSpeed: 1.25
+  weight: 2
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -58,7 +51,6 @@ MonoBehaviour:
   model: {fileID: 0}
   width: 0.1
   length: 0.5
-  weight: 2
   elementRatios:
     potential: 0
     truedmg: 0

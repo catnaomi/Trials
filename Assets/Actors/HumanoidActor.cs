@@ -51,8 +51,9 @@ public class HumanoidActor : Actor
     [HideInInspector] public UnityEvent OnDodge;
     [HideInInspector] public UnityEvent OnInjure;
     [HideInInspector] public UnityEvent OnHitboxActive;
-    public StanceHandler stance;
+    //public StanceHandler stance;
 
+    [ReadOnly] public IKHandler aimIKHandler;
     public float heft;
 
     public bool wasAttackingLastFrame;
@@ -135,9 +136,9 @@ public class HumanoidActor : Actor
 
         inventory.Init();
 
-        inventory.OnChange.AddListener(GetStance);
+        //inventory.OnChange.AddListener(GetStance);
 
-        GetStance();
+        //GetStance();
 
         cc = GetComponent<CharacterController>();
 
@@ -360,9 +361,18 @@ public class HumanoidActor : Actor
         this.isGrounded = cc.isGrounded;
         animator.SetBool("Grounded", cc.isGrounded);
 
-        if (IsAiming() && stance != null && stance.heavyAttack is HeavyAttackAim heavyAttackAim && heavyAttackAim.ikHandler != null)
+        if (IsAiming() && aimIKHandler != null)
         {
-            heavyAttackAim.ikHandler.OnUpdate(this);
+            aimIKHandler.OnUpdate(this);
+        }
+
+    }
+
+    protected void OnAnimatorIK(int layerIndex)
+    {
+        if (IsAiming() && aimIKHandler != null)
+        {
+            aimIKHandler.OnIK(this.animator);
         }
     }
     protected void FixedUpdate()
@@ -581,13 +591,13 @@ public class HumanoidActor : Actor
 
         AdjustDefendingPosition(damageKnockback.source);
 
-        // TODO: implement resistances
+        //  implement resistances
         float totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances).GetTotal();
 
         if (this.IsDodging() || isInvulnerable)
         {
             // do nothing
-            // TODO: slowdown effect on player dodge!
+            // slowdown effect on player dodge!
             OnDodge.Invoke();
         }
         else if (this.IsParrying() && attributes.HasAttributeRemaining(attributes.stamina) && !damageKnockback.unblockable) // is actor parrying with stamina remaining
@@ -716,8 +726,9 @@ public class HumanoidActor : Actor
 
         if (damageKnockback.source != null && damageKnockback.source.TryGetComponent<HumanoidActor>(out HumanoidActor humanoid))
         {
-            humanoid.BlockRecoil(this.inventory.GetBlockPoiseDamage(stance.BlockWithMain()));
-            
+            //humanoid.BlockRecoil(this.inventory.GetBlockPoiseDamage(stance.BlockWithMain()));
+            // TODO: implement block resistance stat
+            humanoid.BlockRecoil(this.inventory.GetBlockPoiseDamage(true));
             //humanoid.HeavyStagger(parryDamage);
         }
     }
@@ -910,7 +921,7 @@ public class HumanoidActor : Actor
 
     public bool Damage(DamageKnockback damageKnockback, int multiplier, bool blocking)
     {
-        // TODO: account for resistances
+        // account for resistances
         float totalDamage;
         if (!blocking)
         {
@@ -918,7 +929,8 @@ public class HumanoidActor : Actor
         }
         else
         {
-            totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances, inventory.GetBlockResistance(stance.BlockWithMain())).GetTotal();
+            //totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances, inventory.GetBlockResistance(stance.BlockWithMain())).GetTotal();
+            totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances, inventory.GetBlockResistance(true)).GetTotal();
         }
 
         if (damageDisplay != null)
@@ -1009,12 +1021,13 @@ public class HumanoidActor : Actor
 
     public void HandleBlockIK()
     {
-        
+        /*
         if (stance.GetBlockStyle() == StanceHandler.BlockStyle.TwoHand && !animator.IsInTransition(StanceHandler.BaseLayer))
         {
             animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, tempValue1);
             animator.SetIKPosition(AvatarIKGoal.LeftHand, positionReference.MainHand.transform.position + positionReference.MainHand.transform.forward * tempValue2);
         }
+        */
     }
 
     public void SetNextAttackType(BladeWeapon.AttackType type, bool adjustPoise)
@@ -1342,39 +1355,6 @@ public class HumanoidActor : Actor
             AnimatorImpact(DamageKnockback.StaggerType.Recoil);
         }
     }
-    public void GetStance()
-    {
-        if (inventory.IsMainEquipped())
-        {
-            if (this.stance != null)
-            {
-                stance.RemoveHeavyAttack(this);
-                stance.RemoveSpecialAttack(this);
-            }
-            stance = inventory.GetStance();
-            ApplyStance();
-        }
-    }
-    public void ApplyStance()
-    {
-        if (stance != null && stance.animatorStance != StanceHandler.AnimatorStance.None)
-        {
-            //this.animator.runtimeAnimatorController = stance.GetController();
-            this.animator.SetInteger("LightSlashStyle", (int)stance.GetLightSlashStyle());
-            this.animator.SetInteger("LightThrustStyle", (int)stance.GetLightThrustStyle());
-            this.animator.SetFloat("ArmedStyle", (int)stance.GetArmedStyle());
-            this.animator.SetFloat("BlockStyle", (int)stance.GetBlockStyle());
-            this.animator.SetInteger("HeavyStyle", (int)stance.GetHeavyStyle());
-            this.animator.SetInteger("SpecialStyle", (int)stance.GetSpecialStyle());
-
-            stance.ApplyHeavyAttack(this);
-            stance.ApplySpecialAttack(this);
-
-            this.animator.SetBool("HeavyBackStep", stance.ShouldHeavyBackStep());
-        }
-        this.animator.SetFloat("AttackSpeed1", inventory.GetAttackSpeed());
-        this.animator.SetFloat("AttackSpeed2", inventory.GetOffAttackSpeed());
-    }
 
     public virtual Vector3 GetLaunchVector(Vector3 origin)
     {
@@ -1699,12 +1679,12 @@ public class HumanoidActor : Actor
             return true;
         }
 
-        if (IsHeavyAttacking() && stance != null && stance.heavyAttack != null && stance.heavyAttack.IsArmored())
+        if (IsHeavyAttacking())// && stance != null && stance.heavyAttack != null && stance.heavyAttack.IsArmored())
         {
             return true;
         }
 
-        if (IsSpecialAttacking() && stance != null && stance.specialAttack != null && stance.specialAttack.IsArmored())
+        if (IsSpecialAttacking())// && stance != null && stance.specialAttack != null && stance.specialAttack.IsArmored())
         {
             return true;
         }

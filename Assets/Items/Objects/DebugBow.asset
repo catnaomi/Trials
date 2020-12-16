@@ -21,28 +21,27 @@ MonoBehaviour:
   isEquipped: 1
   EquippableMain: 1
   EquippableOff: 0
-  OneHanded: 0
-  TwoHanded: 1
+  TwoHandOnly: 0
   ParentLeftAsMain: 1
   ParentRightAsOff: 0
   MainHandEquipSlot: 5
   OffHandEquipSlot: 0
-  PrfMainHandStance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-  PrfOffHandStance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-  PrfTwoHandStance:
-    animatorStance: 5
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 11400000, guid: eaad1cfda33217a47b67cbe245862a10, type: 2}
+  PrfStance:
+    rightHandStance: 1
+    leftHandStance: 1
+    twoHandStance: 4
+    blockStyle: 1
+    moveset:
+      mainStrong: {fileID: 0}
+      mainQuick: {fileID: 0}
+      offStrong: {fileID: 0}
+      offQuick: {fileID: 0}
+      twoStrong: {fileID: 11400000, guid: 9b24f26b5a396f2428423675f0c7fa0a, type: 2}
+      twoQuick: {fileID: 0}
+      dualStrong: {fileID: 0}
+      dualQuick: {fileID: 0}
   AttackSpeed: 1
+  weight: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -56,6 +55,7 @@ MonoBehaviour:
     poiseDamage: 20
     staminaDamage: 5
     kbForce: {x: 0, y: 0, z: 20}
+    kbRadial: 0
     damage:
       potential: 20
       truedmg: 0
@@ -69,8 +69,11 @@ MonoBehaviour:
       air: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
     breaksArmor: 0
     unblockable: 0
+    minStaggerType: 0
     staggerType: 1
     hitClip: {fileID: 0}
+  ikHandler: {fileID: 11400000, guid: 3e1da2a0b87efea48b403875a190a4af, type: 2}
   drawTime: 1

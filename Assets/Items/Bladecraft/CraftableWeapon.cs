@@ -11,8 +11,6 @@ public class CraftableWeapon : BladeWeapon
     public Blade blade;
     public Adornment adornment;
 
-    public Dictionary<string, DamageKnockback> attacks;
-
     #region stats
 
     public override float GetLength()
@@ -144,35 +142,25 @@ public class CraftableWeapon : BladeWeapon
 
     public void SetProperties()
     {
-        StanceHandler stance2h = new StanceHandler();
-        StanceHandler stancem = new StanceHandler();
-        StanceHandler stanceo = new StanceHandler();
-        if (blade != null) {
-            stance2h = StanceHandler.MergeStances(stance2h, blade.PrfTwoHandStance);
-            stancem = StanceHandler.MergeStances(stancem, blade.PrfMainHandStance);
-            stanceo = StanceHandler.MergeStances(stanceo, blade.PrfOffHandStance);
-        }
+        this.PrfStance = new StanceHandler();
+
         if (hilt != null)
         {
-            this.OneHanded = hilt.OneHanded;
-            this.TwoHanded = hilt.TwoHanded;
             this.EquippableMain = hilt.MainHanded;
             this.EquippableOff = hilt.OffHanded;
 
-            stance2h = StanceHandler.MergeStances(stance2h, hilt.PrfTwoHandStance);
-            stancem = StanceHandler.MergeStances(stancem, hilt.PrfMainHandStance);
-            stanceo = StanceHandler.MergeStances(stanceo, hilt.PrfOffHandStance);
+            this.PrfStance.ApplyMoveset(hilt.PrfStance);
         }
+
+        if (blade != null)
+        {
+            this.PrfStance.ApplyMoveset(blade.PrfStance);
+        }
+
         if (adornment != null)
         {
-            stance2h = StanceHandler.MergeStances(stance2h, adornment.PrfTwoHandStance);
-            stancem = StanceHandler.MergeStances(stancem, adornment.PrfMainHandStance);
-            stanceo = StanceHandler.MergeStances(stanceo, adornment.PrfOffHandStance);
+            this.PrfStance.ApplyMoveset(adornment.PrfStance);
         }
-        
-        this.PrfTwoHandStance = stance2h;
-        this.PrfMainHandStance = stancem;
-        this.PrfOffHandStance = stanceo;
 
         if (GetTotalLength() > 2 || GetTotalWeight() > 3)
         {
@@ -185,6 +173,7 @@ public class CraftableWeapon : BladeWeapon
             this.OffHandEquipSlot = Inventory.EquipSlot.lHip;
         }
         this.elementRatios = new Damage();
+        /*
         int leadSP = -9;
         foreach (WeaponComponent component in GetAllComponents())
         {
@@ -196,11 +185,12 @@ public class CraftableWeapon : BladeWeapon
                 }
                 if (component.PrfMainHandStance.specialAttack != null && component.PrfMainHandStance.specialPriority > leadSP)
                 {
-                    this.PrfMainHandStance.specialAttack = component.PrfMainHandStance.specialAttack;
+                    this.PrfStance.specialAttack = component.PrfMainHandStance.specialAttack;
                     leadSP = component.PrfMainHandStance.specialPriority;
                 }
             } 
         }
+        */
     }
 
     public List<WeaponComponent> GetAllComponents()

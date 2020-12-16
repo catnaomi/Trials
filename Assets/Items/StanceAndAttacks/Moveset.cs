@@ -11,8 +11,11 @@ public class Moveset
     public InputAttack offStrong;
     public InputAttack offQuick;
     [Space(5)]
-    public InputAttack bothStrong;
-    public InputAttack bothQuick;
+    public InputAttack twoStrong;
+    public InputAttack twoQuick;
+    [Space(5)]
+    public InputAttack dualStrong;
+    public InputAttack dualQuick;
 
     public enum AttackStyle
     {
@@ -21,6 +24,8 @@ public class Moveset
         MainQuick,
         OffStrong,
         OffQuick,
+        TwoStrong,
+        TwoQuick,
         BothStrong,
         BothQuick
     }
@@ -37,10 +42,47 @@ public class Moveset
                 return offStrong;
             case AttackStyle.OffQuick:
                 return offQuick;
+            case AttackStyle.TwoStrong:
+                return twoStrong;
+            case AttackStyle.TwoQuick:
+                return twoQuick;
             case AttackStyle.BothStrong:
-                return bothStrong;
+                return dualStrong;
             case AttackStyle.BothQuick:
-                return bothQuick;
+                return dualQuick;
+            default:
+                return null;
+        }
+    }
+
+    public InputAttack SetAttackFromInput(AttackStyle style, InputAttack atk)
+    {
+        switch (style)
+        {
+            case AttackStyle.MainStrong:
+                mainStrong = atk;
+                return mainStrong;
+            case AttackStyle.MainQuick:
+                mainQuick = atk;
+                return mainQuick;
+            case AttackStyle.OffStrong:
+                offStrong = atk;
+                return offStrong;
+            case AttackStyle.OffQuick:
+                offQuick = atk;
+                return offQuick;
+            case AttackStyle.TwoStrong:
+                twoStrong = atk;
+                return twoStrong;
+            case AttackStyle.TwoQuick:
+                twoQuick = atk;
+                return twoQuick;
+            case AttackStyle.BothStrong:
+                dualStrong = atk;
+                return dualStrong;
+            case AttackStyle.BothQuick:
+                dualQuick = atk;
+                return dualQuick;
             default:
                 return null;
         }

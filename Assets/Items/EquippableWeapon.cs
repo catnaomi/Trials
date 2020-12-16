@@ -9,9 +9,10 @@ public class EquippableWeapon : Item
     [Header("Equip Information")]
     public bool EquippableMain = true;
     public bool EquippableOff = true;
-    [Space(5)]
-    public bool OneHanded = true;
-    public bool TwoHanded = true;
+    public bool TwoHandOnly = false;
+    //[Space(5)]
+    //public bool OneHanded = true;
+    //public bool TwoHanded = true;
     [Space(5)]
     public bool ParentLeftAsMain = false;
     public bool ParentRightAsOff = false;
@@ -19,9 +20,7 @@ public class EquippableWeapon : Item
     public Inventory.EquipSlot MainHandEquipSlot;
     public Inventory.EquipSlot OffHandEquipSlot;
     [Header("Stance Information")]
-    public StanceHandler PrfMainHandStance;
-    public StanceHandler PrfOffHandStance;
-    public StanceHandler PrfTwoHandStance;
+    public StanceHandler PrfStance;
     [Header("Stats")]
     public float AttackSpeed;
     public float weight;

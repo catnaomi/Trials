@@ -34,7 +34,7 @@ public class Actor : MonoBehaviour
     private  int mercyId; //hitbox
 
     public Vector3 moveDirection;
-
+    public Vector3 moveAdditional;
     // targets
 
     public GameObject CombatTarget;
@@ -177,5 +177,11 @@ public class Actor : MonoBehaviour
         {
             audioSource.PlayOneShot(audioClip);
         }
+    }
+
+
+    public void SetAdditionalMovement(Vector3 move)
+    {
+        moveAdditional = move;
     }
 }

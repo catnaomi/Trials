@@ -29,7 +29,7 @@ public class PlayerActor : HumanoidActor
     public Transform centerTransform;
 
     [Space(5)]
-    public Moveset moveset;
+    public StanceHandler stance;
     [ReadOnly]
     public Moveset.AttackStyle currentAttackInput;
 
@@ -47,6 +47,8 @@ public class PlayerActor : HumanoidActor
         //cameraController =  cam.GetComponent<CursorCam>();
 
         camRotation = transform.forward;
+
+        GetStance();
 
         OnSheathe.AddListener(Spare);
 
@@ -84,7 +86,7 @@ public class PlayerActor : HumanoidActor
         bool lockedOn = this.GetCombatTarget() != null;//cameraController.lockedOn;
 
         animator.SetBool("Cam-Locked", lockedOn);
-        animator.SetBool("Cam-Aiming", isAiming);
+        animator.SetBool("Cam-Aiming", isAiming && Input.GetButton("Aim"));
 
         float slowMultiplier = 1f;
 
@@ -246,6 +248,37 @@ public class PlayerActor : HumanoidActor
     {
         base.FixedUpdate();
         //transform.Rotate(Vector3.up, horizontal * rotateSpeed * Time.deltaTime);
+
+        Vector3 finalMov = Vector3.zero;
+        if (CanMove() && humanoidState == HumanoidState.Actionable)
+        {
+            if (IsAerial())
+            {
+                finalMov += airDirection;
+            }
+            else
+            {
+                finalMov += moveDirection;
+            }
+        }
+        finalMov += moveAdditional;
+
+        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain")))
+        {
+            Vector3 temp = Vector3.Cross(hit.normal, finalMov);
+            cc.Move(Vector3.Cross(temp, hit.normal) * Time.fixedDeltaTime);
+            //transform.Translate(0, (hit.point - transform.position).y * Time.fixedDeltaTime * GetCurrentSpeed() * 2f, 0);
+        }
+        else if (!IsJumping())
+        {
+            cc.Move((finalMov + gravity) * Time.fixedDeltaTime);
+        }
+        else
+        {
+            cc.Move(finalMov * Time.fixedDeltaTime);
+        }
+
+        /*
         if (CanMove() && humanoidState == HumanoidState.Actionable)
         {
             // TODO: find a way to keep grounded when walking down slopes and stairs
@@ -270,6 +303,7 @@ public class PlayerActor : HumanoidActor
         {
             cc.Move(gravity * Time.fixedDeltaTime);
         }
+        */
     }
 
     // TODO: redo camera controller and make aiming more flexible for different weapons
@@ -277,6 +311,13 @@ public class PlayerActor : HumanoidActor
     protected void LateUpdate()
     {
         base.LateUpdate();
+
+        /*
+        if (IsAiming() && stance != null && stance.heavyAttack is HeavyAttackAim heavyAttackAim && heavyAttackAim.ikHandler != null)
+        {
+            heavyAttackAim.ikHandler.OnUpdate(this);
+        }
+        */
         /*
         if (IsAiming() && //cameraController.crosshairMode)
         {
@@ -305,67 +346,91 @@ public class PlayerActor : HumanoidActor
         }
         else if (attributes.HasAttributeRemaining(attributes.stamina))
         {
-            bool mainSlashUp = InputHandler.main.atk3Up;
-            bool mainSlashDown = InputHandler.main.atk3Down;
-            bool mainSlashHeld = InputHandler.main.atk3Held;
-            float mainSlashHeldTime = InputHandler.main.atk3HeldTime;
-            bool mainSlashLong = InputHandler.main.atk3LongPress;
+            bool mainStrongUp = InputHandler.main.atk3Up;
+            bool mainStrongDown = InputHandler.main.atk3Down;
+            bool mainStrongHeld = InputHandler.main.atk3Held;
+            float mainStrongHeldTime = InputHandler.main.atk3HeldTime;
+            bool mainStrongLong = InputHandler.main.atk3LongPress;
+            bool mainStrongUnderThreshold = mainStrongHeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
 
-            bool mainThrustUp = InputHandler.main.atk1Up;
-            bool mainThrustDown = InputHandler.main.atk1Down;
-            bool mainThrustHeld = InputHandler.main.atk1Held;
-            float mainThrustHeldTime = InputHandler.main.atk1HeldTime;
-            bool mainThrustLong = InputHandler.main.atk1LongPress;
+            bool mainQuickUp = InputHandler.main.atk1Up;
+            bool mainQuickDown = InputHandler.main.atk1Down;
+            bool mainQuickHeld = InputHandler.main.atk1Held;
+            float mainQuickHeldTime = InputHandler.main.atk1HeldTime;
+            bool mainQuickLong = InputHandler.main.atk1LongPress;
+            bool mainQuickUnderThreshold = mainQuickHeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
 
-            bool offSlashUp = InputHandler.main.atk4Up;
-            bool offSlashDown = InputHandler.main.atk4Down;
-            bool offSlashHeld = InputHandler.main.atk4Held;
-            float offSlashHeldTime = InputHandler.main.atk4HeldTime;
-            bool offSlashLong = InputHandler.main.atk4LongPress;
+            bool offStrongUp = InputHandler.main.atk4Up;
+            bool offStrongDown = InputHandler.main.atk4Down;
+            bool offStrongHeld = InputHandler.main.atk4Held;
+            float offStrongHeldTime = InputHandler.main.atk4HeldTime;
+            bool offStrongLong = InputHandler.main.atk4LongPress;
+            bool offStrongUnderThreshold = offStrongHeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
 
-            bool offThrustUp = InputHandler.main.atk2Up;
-            bool offThrustDown = InputHandler.main.atk2Down;
-            bool offThrustHeld = InputHandler.main.atk2Held;
-            float offThrustHeldTime = InputHandler.main.atk2HeldTime;
-            bool offThrustLong = InputHandler.main.atk2LongPress;
+            bool offQuickUp = InputHandler.main.atk2Up;
+            bool offQuickDown = InputHandler.main.atk2Down;
+            bool offQuickHeld = InputHandler.main.atk2Held;
+            float offQuickHeldTime = InputHandler.main.atk2HeldTime;
+            bool offQuickLong = InputHandler.main.atk2LongPress;
+            bool offQuickUnderThreshold = offQuickHeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
 
-            bool bothSlashDown =  (mainSlashHeld && offSlashDown) || (mainSlashDown && offSlashHeld);
-            bool bothSlashHeld = (mainSlashHeld && offSlashHeld);
+            bool bothStrongDown =  (mainStrongHeld && offStrongDown) || (mainStrongDown && offStrongHeld);
+            bool bothStrongHeld = (mainStrongHeld && offStrongHeld);
 
-            bool bothThrustDown = (mainThrustHeld && offThrustDown) || (mainThrustDown && offThrustHeld);
-            bool bothThrustHeld = (mainThrustHeld && offThrustHeld);
+            bool bothQuickDown = (mainQuickHeld && offQuickDown) || (mainQuickDown && offQuickHeld);
+            bool bothQuickHeld = (mainQuickHeld && offQuickHeld);
 
             bool inputtedAttack = false;
 
-            if (bothSlashDown && moveset.GetAttackFromInput(Moveset.AttackStyle.BothStrong) != null)
+            /*
+            if (bothStrongDown && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.BothStrong) != null)
             {
                 currentAttackInput = Moveset.AttackStyle.BothStrong;
                 inputtedAttack = true;
             }
-            else if (bothThrustDown && moveset.GetAttackFromInput(Moveset.AttackStyle.BothQuick) != null)
+            else if (bothQuickDown && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.BothQuick) != null)
             {
                 currentAttackInput = Moveset.AttackStyle.BothQuick;
                 inputtedAttack = true;
             }
-            else if ((mainThrustUp || (mainThrustLong && !offThrustHeld)) && moveset.GetAttackFromInput(Moveset.AttackStyle.MainQuick) != null)
+            */
+            //if ((mainQuickUp || (mainQuickLong && !offQuickHeld)) && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.MainQuick) != null)
+            if ((mainQuickDown) && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.MainQuick) != null)
             {
                 currentAttackInput = Moveset.AttackStyle.MainQuick;
                 inputtedAttack = true;
             }
-            else if ((mainSlashUp || (mainSlashLong && !offSlashHeld)) && moveset.GetAttackFromInput(Moveset.AttackStyle.MainStrong) != null)
+            else if ((mainStrongDown) && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.MainStrong) != null)
             {
                 currentAttackInput = Moveset.AttackStyle.MainStrong;
                 inputtedAttack = true;
             }
-            else if ((offThrustUp || (offThrustLong && !mainThrustHeld)) && moveset.GetAttackFromInput(Moveset.AttackStyle.OffQuick) != null)
+            //else if ((offQuickUp && offQuickUnderThreshold) || (offQuickLong && !mainQuickHeld))
+            else if ((offQuickDown))
             {
-                currentAttackInput = Moveset.AttackStyle.OffQuick;
-                inputtedAttack = true;
+                if (!inventory.IsTwoHanding() && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.OffQuick) != null)
+                {
+                    currentAttackInput = Moveset.AttackStyle.OffQuick;
+                    inputtedAttack = true;
+                }
+                else if (inventory.IsTwoHanding() && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.TwoQuick) != null)
+                {
+                    currentAttackInput = Moveset.AttackStyle.TwoQuick;
+                    inputtedAttack = true;
+                }
             }
-            else if ((offSlashUp || (offSlashLong && !mainSlashHeld)) && moveset.GetAttackFromInput(Moveset.AttackStyle.OffStrong) != null)
+            else if ((offStrongDown))
             {
-                currentAttackInput = Moveset.AttackStyle.OffStrong;
-                inputtedAttack = true;
+                if (!inventory.IsTwoHanding() && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.OffStrong) != null)
+                {
+                    currentAttackInput = Moveset.AttackStyle.OffStrong;
+                    inputtedAttack = true;
+                }
+                else if (inventory.IsTwoHanding() && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.TwoStrong) != null)
+                {
+                    currentAttackInput = Moveset.AttackStyle.TwoStrong;
+                    inputtedAttack = true;
+                }
             }
 
             bool up = false;
@@ -376,43 +441,43 @@ public class PlayerActor : HumanoidActor
 
             if (currentAttackInput == Moveset.AttackStyle.BothStrong)
             {
-                down = bothSlashDown;
-                held = bothSlashHeld;
-                heldTime = Mathf.Min(mainSlashHeldTime, offSlashHeldTime);
+                down = bothStrongDown;
+                held = bothStrongHeld;
+                heldTime = Mathf.Min(mainStrongHeldTime, offStrongHeldTime);
             }
             else if (currentAttackInput == Moveset.AttackStyle.BothQuick)
             {
-                down = bothThrustDown;
-                held = bothThrustHeld;
-                heldTime = Mathf.Min(mainThrustHeldTime, offThrustHeldTime);
+                down = bothQuickDown;
+                held = bothQuickHeld;
+                heldTime = Mathf.Min(mainQuickHeldTime, offQuickHeldTime);
             }
             else if (currentAttackInput == Moveset.AttackStyle.MainStrong)
             {
-                up = mainSlashUp;
-                down = mainSlashDown;
-                held = mainSlashHeld;
-                heldTime = mainSlashHeldTime;
+                up = mainStrongUp;
+                down = mainStrongDown;
+                held = mainStrongHeld;
+                heldTime = mainStrongHeldTime;
             }
             else if (currentAttackInput == Moveset.AttackStyle.MainQuick)
             {
-                up = mainThrustUp;
-                down = mainThrustDown;
-                held = mainThrustHeld;
-                heldTime = mainThrustHeldTime;
+                up = mainQuickUp;
+                down = mainQuickDown;
+                held = mainQuickHeld;
+                heldTime = mainQuickHeldTime;
             }
-            else if (currentAttackInput == Moveset.AttackStyle.OffQuick)
+            else if (currentAttackInput == Moveset.AttackStyle.OffQuick || currentAttackInput == Moveset.AttackStyle.TwoQuick)
             {
-                up = offThrustUp;
-                down = offThrustDown;
-                held = offThrustHeld;
-                heldTime = offThrustHeldTime;
+                up = offQuickUp;
+                down = offQuickDown;
+                held = offQuickHeld;
+                heldTime = offQuickHeldTime;
             }
-            else if (currentAttackInput == Moveset.AttackStyle.OffStrong)
+            else if (currentAttackInput == Moveset.AttackStyle.OffStrong || currentAttackInput == Moveset.AttackStyle.TwoStrong)
             {
-                up = offSlashUp;
-                down = offSlashDown;
-                held = offSlashHeld;
-                heldTime = offSlashHeldTime;
+                up = offStrongUp;
+                down = offStrongDown;
+                held = offStrongHeld;
+                heldTime = offStrongHeldTime;
             }
 
             if (up)
@@ -430,7 +495,7 @@ public class PlayerActor : HumanoidActor
             {
                 animator.SetTrigger("Input-Attack");
             }
-            InputAttack atk = moveset.GetAttackFromInput(currentAttackInput);
+            InputAttack atk = stance.moveset.GetAttackFromInput(currentAttackInput);
             if (atk != null)
             {
                 int id = atk.GetAttackID();
@@ -589,6 +654,7 @@ public class PlayerActor : HumanoidActor
             {
                 if (inventory.GetItemHand(weapon) >= 1) // equipped in main
                 {
+                    /*
                     if (inventory.IsMainDrawn())
                     {
                         if (inventory.IsTwoHanding() && weapon.OneHanded)
@@ -600,6 +666,7 @@ public class PlayerActor : HumanoidActor
                             inventory.UpdateTwoHand(true);
                         }
                     }
+                    */
                     // toggle two hand
                 }
                 else if (inventory.GetItemHand(weapon) <= -1 && !inventory.IsOffDrawn())
@@ -610,7 +677,7 @@ public class PlayerActor : HumanoidActor
                 {
                     inventory.EquipMainWeapon(weapon);
                 }
-                else if (weapon.EquippableOff && weapon.EquippableMain && inventory.IsTwoHanding()) // current weapon is two handed and thus can't have off hand
+                else if (false)//weapon.EquippableOff && weapon.EquippableMain && inventory.IsTwoHanding()) // current weapon is two handed and thus can't have off hand
                 {
                     inventory.EquipMainWeapon(weapon);
                 }
@@ -620,7 +687,7 @@ public class PlayerActor : HumanoidActor
                     {
                         inventory.EquipMainWeapon(weapon);
                     }
-                    else if (inventory.GetMainWeapon().OneHanded)
+                    else if (true)//inventory.GetMainWeapon().OneHanded)
                     {
                         inventory.EquipOffHandWeapon(weapon);
                     }
@@ -858,6 +925,54 @@ public class PlayerActor : HumanoidActor
     */
 
 
+    public void GetStance()
+    {
+        if (inventory.IsMainEquipped())
+        {
+            if (this.stance != null)
+            {
+                //stance.RemoveHeavyAttack(this);
+                //stance.RemoveSpecialAttack(this);
+            }
+            inventory.UpdateStance(stance);
+            ApplyStance();
+        }
+    }
+    public void ApplyStance()
+    {
+        //this.animator.runtimeAnimatorController = stance.GetController();
+
+        if (inventory.IsMainDrawn() && inventory.IsOffDrawn())
+        {
+            this.animator.SetFloat("Style-Left", (int)stance.leftHandStance);
+            this.animator.SetFloat("Style-Right", (int)stance.rightHandStance);
+        }
+        else if (inventory.IsMainDrawn() && inventory.IsTwoHanding())
+        {
+            this.animator.SetFloat("Style-Left", (int)stance.twoHandStance);
+            this.animator.SetFloat("Style-Right", (int)stance.twoHandStance);
+        }
+        else if (inventory.IsOffDrawn())
+        {
+            // this shouldn't happen?
+        }
+        else
+        {
+            this.animator.SetFloat("Style-Left", 0);
+            this.animator.SetFloat("Style-Right", 0);
+        }
+        
+
+        this.animator.SetFloat("BlockStyle", (int)stance.GetBlockStyle());
+
+        //stance.ApplyHeavyAttack(this);
+        //stance.ApplySpecialAttack(this);
+
+        //this.animator.SetBool("HeavyBackStep", stance.ShouldHeavyBackStep());
+
+        this.animator.SetFloat("AttackSpeed1", inventory.GetAttackSpeed());
+        this.animator.SetFloat("AttackSpeed2", inventory.GetOffAttackSpeed());
+    }
     public void StartHoldCheck()
     {
         buttonHasBeenReleased = false;

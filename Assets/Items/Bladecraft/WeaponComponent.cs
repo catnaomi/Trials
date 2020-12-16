@@ -10,9 +10,7 @@ public class WeaponComponent : Item
     public bool attached;
     public Damage ratios;
     [Space(5)]
-    public StanceHandler PrfMainHandStance;
-    public StanceHandler PrfOffHandStance;
-    public StanceHandler PrfTwoHandStance;
+    public StanceHandler PrfStance;
     protected GameObject model;
     public int ReduceDurability(int amt)
     {

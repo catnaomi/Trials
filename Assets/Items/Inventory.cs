@@ -14,7 +14,7 @@ public class Inventory : MonoBehaviour
     HumanoidActor actor;
     [ReadOnly] public EquippableWeapon MainWeapon;
     private bool MainIsDrawn;
-    private bool TwoHanding;
+    //private bool TwoHanding;
     
     [ReadOnly] public EquippableWeapon OffWeapon;
     private bool OffIsDrawn;
@@ -179,7 +179,7 @@ public class Inventory : MonoBehaviour
         weapon.isEquipped = true;
         weapon.EquipWeapon(actor);
 
-        UpdateTwoHand(weapon.TwoHanded && !weapon.OneHanded);
+        //UpdateTwoHand(weapon.TwoHanded && !weapon.OneHanded);
 
         if (draw)
         {
@@ -224,7 +224,7 @@ public class Inventory : MonoBehaviour
         weapon.isEquipped = true;
         weapon.EquipWeapon(actor);
 
-        UpdateTwoHand(false);
+        //UpdateTwoHand(false);
 
         if (draw)
         {
@@ -301,6 +301,7 @@ public class Inventory : MonoBehaviour
         GenerateOffModel();
     }
 
+    /*
     public void UpdateTwoHand(bool set2h)
     {
         if (MainWeapon == null)
@@ -324,6 +325,7 @@ public class Inventory : MonoBehaviour
         OnChange.Invoke();
         weaponChanged = true;
     }
+    */
     public void PositionWeapon()
     {
         // main
@@ -440,45 +442,28 @@ public class Inventory : MonoBehaviour
 
     public bool IsTwoHanding()
     {
-        return TwoHanding;
+        return IsMainDrawn() && !IsOffDrawn();
+        //return TwoHanding;
     }
 
-    public StanceHandler GetStance()
+    public void UpdateStance(StanceHandler stance)
     {
-        StanceHandler stance = new StanceHandler();
+        StanceHandler mainStance = null;
+        StanceHandler offStance = null;
 
         if (IsMainEquipped() && IsMainDrawn())
         {
-            stance = StanceHandler.MergeStances(stance, GetMainWeapon().PrfMainHandStance);
+            //stance = StanceHandler.MergeStances(stance, GetMainWeapon().PrfMainHandStance);
+            mainStance = GetMainWeapon().PrfStance;
         }
 
         if (IsOffEquipped() && IsOffDrawn())
         {
-            stance = StanceHandler.MergeStances(stance, GetOffHand().PrfOffHandStance);
+            //stance = StanceHandler.MergeStances(stance, GetOffHand().PrfOffHandStance);
+            offStance = GetOffHand().PrfStance;
         }
 
-        if (TwoHanding && IsMainEquipped())
-        {
-            stance = StanceHandler.MergeStances(stance, GetMainWeapon().PrfTwoHandStance);
-        }
-
-        /*
-        if (IsOffEquipped() && IsOffDrawn() && GetOffHand().PrfOffHandStance.heavyAttack != null)
-        {
-            stance.heavyAttack = GetOffHand().PrfOffHandStance.heavyAttack;
-        }
-        else if (IsMainEquipped() && IsMainDrawn())
-        {
-            stance.heavyAttack = GetMainWeapon().PrfMainHandStance.heavyAttack;
-        }
-        */
-
-        if (IsMainDrawn())
-        {
-            stance.specialAttack = GetMainWeapon().PrfMainHandStance.specialAttack;
-        }
-
-        return stance;
+        stance.MergeStance(mainStance, offStance);
     }
 
     public float GetEquipWeight()

@@ -1409,7 +1409,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BindingMode: 4
-  m_FollowOffset: {x: 0, y: 1.675612, z: -1.989647}
+  m_FollowOffset: {x: 0, y: 1.49781, z: -1.999998}
   m_XDamping: 0
   m_YDamping: 0
   m_ZDamping: 0
@@ -1556,6 +1556,7 @@ RectTransform:
   - {fileID: 1317215587}
   - {fileID: 2064946501}
   - {fileID: 1891983269}
+  - {fileID: 1355872927}
   m_Father: {fileID: 0}
   m_RootOrder: 18
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1871,8 +1872,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 88934918}
-  m_LocalRotation: {x: -0.000000014901159, y: -0, z: 2.2204458e-16, w: 1}
-  m_LocalPosition: {x: -2.842171e-14, y: 0, z: 0}
+  m_LocalRotation: {x: -0.000000014901159, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1165037465}
@@ -5069,6 +5070,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   moveDirection: {x: 0, y: 0, z: 0}
+  moveAdditional: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   boundingCollider: {fileID: 0}
@@ -5096,13 +5098,7 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  stance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
+  aimIKHandler: {fileID: 0}
   heft: 0
   wasAttackingLastFrame: 0
   isGrounded: 0
@@ -6926,7 +6922,7 @@ PrefabInstance:
     - target: {fileID: 7765154067957742603, guid: a65326aa15f9edd4fb3261d0c5e824b1,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 300.0002
+      value: 300.0001
       objectReference: {fileID: 0}
     - target: {fileID: 7765154067957742603, guid: a65326aa15f9edd4fb3261d0c5e824b1,
         type: 3}
@@ -7449,6 +7445,90 @@ Transform:
   m_Father: {fileID: 1864592385}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &585316077
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 585316078}
+  - component: {fileID: 585316080}
+  - component: {fileID: 585316079}
+  m_Layer: 5
+  m_Name: Text
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &585316078
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585316077}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1648712014}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 50, y: -50}
+  m_SizeDelta: {x: 1420, y: 300}
+  m_Pivot: {x: 0, y: 1}
+--- !u!114 &585316079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585316077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 48
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 4
+    m_MaxSize: 48
+    m_Alignment: 0
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque tristique
+    at magna eget semper. Aliquam lacinia scelerisque lorem at rutrum. Morbi aliquam
+    ante ut consectetur blandit. Morbi vitae bibendum massa. Ut consectetur purus
+    in ante tempor mattis. Cras quis placerat dui. Nunc condimentum tristique aliquam.
+    Aliquam consequat eget nibh vitae scelerisque. Cras imperdiet, justo nec posuere
+    convallis, nisi arcu ullamcorper enim, vitae dictum diam lorem ac tortor. Quisque
+    maximus et risus sed vehicula. Duis facilisis enim feugiat nisi bibendum consectetur
+    id sit amet magna. Phasellus sit amet nibh sapien. '
+--- !u!222 &585316080
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 585316077}
+  m_CullTransparentMesh: 0
 --- !u!1 &586199612
 GameObject:
   m_ObjectHideFlags: 0
@@ -8280,7 +8360,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BindingMode: 4
-  m_FollowOffset: {x: 0, y: 1.675612, z: -1.989647}
+  m_FollowOffset: {x: 0, y: 1.49781, z: -1.999998}
   m_XDamping: 0
   m_YDamping: 0
   m_ZDamping: 0
@@ -8770,6 +8850,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   moveDirection: {x: 0, y: 0, z: 0}
+  moveAdditional: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   boundingCollider: {fileID: 0}
@@ -8797,13 +8878,7 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  stance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
+  aimIKHandler: {fileID: 0}
   heft: 0
   wasAttackingLastFrame: 0
   isGrounded: 0
@@ -8846,13 +8921,20 @@ MonoBehaviour:
   camRotation: {x: 0, y: 0, z: 0}
   chargeTime: 0
   centerTransform: {fileID: 0}
-  moveset:
-    mainStrong: {fileID: 0}
-    mainQuick: {fileID: 0}
-    offStrong: {fileID: 0}
-    offQuick: {fileID: 0}
-    bothStrong: {fileID: 0}
-    bothQuick: {fileID: 0}
+  stance:
+    rightHandStance: 0
+    leftHandStance: 0
+    twoHandStance: 0
+    blockStyle: 0
+    moveset:
+      mainStrong: {fileID: 0}
+      mainQuick: {fileID: 0}
+      offStrong: {fileID: 0}
+      offQuick: {fileID: 0}
+      twoStrong: {fileID: 0}
+      twoQuick: {fileID: 0}
+      dualStrong: {fileID: 0}
+      dualQuick: {fileID: 0}
   currentAttackInput: 0
 --- !u!114 &686649983
 MonoBehaviour:
@@ -8992,7 +9074,7 @@ MonoBehaviour:
   startingMainSlot: -1
   startingOffSlot: -1
   Slot0Weapon: {fileID: 11400000, guid: 83393d613dc23204bb4b827e671d3b6b, type: 2}
-  Slot1Weapon: {fileID: 11400000, guid: e3a2b4aa72606174ebcb332c68dc8937, type: 2}
+  Slot1Weapon: {fileID: 11400000, guid: 83393d613dc23204bb4b827e671d3b6b, type: 2}
   Slot2Weapon: {fileID: 11400000, guid: e2125d81640ba49449339d95c9516c58, type: 2}
   Slot3Weapon: {fileID: 11400000, guid: a9f1ec4aadee4af4593c733a9f770813, type: 2}
   StartingContents:
@@ -9048,6 +9130,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   moveDirection: {x: 0, y: 0, z: 0}
+  moveAdditional: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   boundingCollider: {fileID: 0}
@@ -9075,13 +9158,7 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  stance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
+  aimIKHandler: {fileID: 0}
   heft: 0
   wasAttackingLastFrame: 0
   isGrounded: 0
@@ -9124,13 +9201,20 @@ MonoBehaviour:
   camRotation: {x: 0, y: 0, z: 0}
   chargeTime: 0
   centerTransform: {fileID: 1873066734}
-  moveset:
-    mainStrong: {fileID: 11400000, guid: bc812d46be1d80f48a1e3e2d4439e46a, type: 2}
-    mainQuick: {fileID: 11400000, guid: dd58464c413cfee478c599729b1bc3f2, type: 2}
-    offStrong: {fileID: 11400000, guid: d93516da798c3d642a0a6f175400b93f, type: 2}
-    offQuick: {fileID: 11400000, guid: 23317689e53911e4cb587a767fa7aebd, type: 2}
-    bothStrong: {fileID: 11400000, guid: cfa7b4c1f15012342b8938f3a48167e0, type: 2}
-    bothQuick: {fileID: 11400000, guid: 3edf665f881e1854e8c499fd993eacfd, type: 2}
+  stance:
+    rightHandStance: 0
+    leftHandStance: 0
+    twoHandStance: 0
+    blockStyle: 0
+    moveset:
+      mainStrong: {fileID: 0}
+      mainQuick: {fileID: 0}
+      offStrong: {fileID: 0}
+      offQuick: {fileID: 0}
+      twoStrong: {fileID: 0}
+      twoQuick: {fileID: 0}
+      dualStrong: {fileID: 0}
+      dualQuick: {fileID: 0}
   currentAttackInput: 0
 --- !u!82 &693636909
 AudioSource:
@@ -11788,7 +11872,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_AnimatedTarget: {fileID: 3166231814530290060}
-  m_LayerIndex: 9
+  m_LayerIndex: 13
   m_ShowDebugText: 0
   m_ChildCameras:
   - {fileID: 1895078453}
@@ -11831,8 +11915,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 944179744}
-  m_LocalRotation: {x: 0.12017329, y: 0.000000018693079, z: -0.0000000022628075, w: 0.99275297}
-  m_LocalPosition: {x: -0.00000015327247, y: 2.5000048, z: -4.07}
+  m_LocalRotation: {x: 0.12017329, y: 0.000000018778204, z: -0.0000000022731115, w: 0.99275297}
+  m_LocalPosition: {x: -0.00000015397042, y: 2.5000048, z: -4.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1895078454}
@@ -12097,8 +12181,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.12017329, y: 0.000000018693079, z: -0.0000000022628075, w: 0.99275297}
-  m_LocalPosition: {x: -0.00000015327247, y: 2.5000048, z: -4.07}
+  m_LocalRotation: {x: 0.12017329, y: 0.000000018778204, z: -0.0000000022731115, w: 0.99275297}
+  m_LocalPosition: {x: -0.00000015397042, y: 2.5000048, z: -4.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5006512736852180214}
@@ -13344,8 +13428,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1132656376}
-  m_LocalRotation: {x: 0.5943131, y: 0.14106758, z: -0.17672555, w: 0.7717901}
-  m_LocalPosition: {x: -0.07688512, y: 9.672304, z: 1.6532137}
+  m_LocalRotation: {x: 0.59350115, y: 0.14459768, z: -0.18114801, w: 0.7707355}
+  m_LocalPosition: {x: -0.07870065, y: 9.672521, z: 1.6540933}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1143833990}
@@ -14608,8 +14692,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1253622711}
-  m_LocalRotation: {x: -0.000000014901159, y: -0, z: 2.2204458e-16, w: 1}
-  m_LocalPosition: {x: -2.842171e-14, y: 0, z: 0}
+  m_LocalRotation: {x: -0.000000014901159, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 647875911}
@@ -14689,7 +14773,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BindingMode: 4
-  m_FollowOffset: {x: 0, y: 1.675612, z: -1.989647}
+  m_FollowOffset: {x: 0, y: 1.49781, z: -1.999998}
   m_XDamping: 0
   m_YDamping: 0
   m_ZDamping: 0
@@ -14779,7 +14863,7 @@ MonoBehaviour:
   targets: []
   index: 7
   lockedOn: 0
-  currentTarget: {fileID: 0}
+  currentTarget: {fileID: 345520452}
   upTarget: {fileID: 0}
   downTarget: {fileID: 0}
   leftTarget: {fileID: 0}
@@ -14814,7 +14898,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1257053858}
   m_LocalRotation: {x: 0, y: -0.6167491, z: -0, w: 0.78715986}
-  m_LocalPosition: {x: 1.4210855e-14, y: -0.48555827, z: 4.3103538}
+  m_LocalPosition: {x: -1.4210855e-14, y: -0.48555827, z: 4.3103538}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 944179746}
@@ -16562,6 +16646,42 @@ Transform:
   m_Father: {fileID: 753271617}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1355872926
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1355872927}
+  m_Layer: 5
+  m_Name: DialogueMajor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1355872927
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1355872926}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 1648712014}
+  m_Father: {fileID: 55527632}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0, y: 1}
 --- !u!1 &1357724490
 GameObject:
   m_ObjectHideFlags: 0
@@ -19481,6 +19601,80 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 28
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1648712013
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1648712014}
+  - component: {fileID: 1648712016}
+  - component: {fileID: 1648712015}
+  m_Layer: 5
+  m_Name: Panel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1648712014
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1648712013}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 585316078}
+  m_Father: {fileID: 1355872927}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 200, y: -580}
+  m_SizeDelta: {x: 1520, y: 400}
+  m_Pivot: {x: 0, y: 1}
+--- !u!114 &1648712015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1648712013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.392}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &1648712016
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1648712013}
+  m_CullTransparentMesh: 0
 --- !u!1 &1648927124
 GameObject:
   m_ObjectHideFlags: 0
@@ -19832,6 +20026,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   moveDirection: {x: 0, y: 0, z: 0}
+  moveAdditional: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   boundingCollider: {fileID: 0}
@@ -19859,13 +20054,7 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  stance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
+  aimIKHandler: {fileID: 0}
   heft: 0
   wasAttackingLastFrame: 0
   isGrounded: 0
@@ -22540,8 +22729,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1836596668}
-  m_LocalRotation: {x: -0.000000014901159, y: -0, z: 2.2204458e-16, w: 1}
-  m_LocalPosition: {x: -2.842171e-14, y: 0, z: 0}
+  m_LocalRotation: {x: -0.000000014901159, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 830254823}
@@ -23255,7 +23444,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1895078452}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.00000014800088, y: -0.93772143, z: -3.8164876}
+  m_LocalPosition: {x: 0.00000014867487, y: -0.93772143, z: -3.8164876}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1253622713}
@@ -33467,6 +33656,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   moveDirection: {x: 0, y: 0, z: 0}
+  moveAdditional: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   boundingCollider: {fileID: 0}
@@ -33494,13 +33684,7 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  stance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
+  aimIKHandler: {fileID: 0}
   heft: 0
   wasAttackingLastFrame: 0
   isGrounded: 0
@@ -33543,13 +33727,20 @@ MonoBehaviour:
   camRotation: {x: 0, y: 0, z: 0}
   chargeTime: 0
   centerTransform: {fileID: 0}
-  moveset:
-    mainStrong: {fileID: 0}
-    mainQuick: {fileID: 0}
-    offStrong: {fileID: 0}
-    offQuick: {fileID: 0}
-    bothStrong: {fileID: 0}
-    bothQuick: {fileID: 0}
+  stance:
+    rightHandStance: 0
+    leftHandStance: 0
+    twoHandStance: 0
+    blockStyle: 0
+    moveset:
+      mainStrong: {fileID: 0}
+      mainQuick: {fileID: 0}
+      offStrong: {fileID: 0}
+      offQuick: {fileID: 0}
+      twoStrong: {fileID: 0}
+      twoQuick: {fileID: 0}
+      dualStrong: {fileID: 0}
+      dualQuick: {fileID: 0}
   currentAttackInput: 0
 --- !u!143 &4099923385216488822
 CharacterController:
@@ -36093,6 +36284,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   moveDirection: {x: 0, y: 0, z: 0}
+  moveAdditional: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   boundingCollider: {fileID: 0}
@@ -36120,13 +36312,7 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  stance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
+  aimIKHandler: {fileID: 0}
   heft: 0
   wasAttackingLastFrame: 0
   isGrounded: 0
@@ -44413,6 +44599,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   moveDirection: {x: 0, y: 0, z: 0}
+  moveAdditional: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   boundingCollider: {fileID: 0}
@@ -44440,13 +44627,7 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  stance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
+  aimIKHandler: {fileID: 0}
   heft: 0
   wasAttackingLastFrame: 0
   isGrounded: 0
@@ -44489,13 +44670,20 @@ MonoBehaviour:
   camRotation: {x: 0, y: 0, z: 0}
   chargeTime: 0
   centerTransform: {fileID: 0}
-  moveset:
-    mainStrong: {fileID: 0}
-    mainQuick: {fileID: 0}
-    offStrong: {fileID: 0}
-    offQuick: {fileID: 0}
-    bothStrong: {fileID: 0}
-    bothQuick: {fileID: 0}
+  stance:
+    rightHandStance: 0
+    leftHandStance: 0
+    twoHandStance: 0
+    blockStyle: 0
+    moveset:
+      mainStrong: {fileID: 0}
+      mainQuick: {fileID: 0}
+      offStrong: {fileID: 0}
+      offQuick: {fileID: 0}
+      twoStrong: {fileID: 0}
+      twoQuick: {fileID: 0}
+      dualStrong: {fileID: 0}
+      dualQuick: {fileID: 0}
   currentAttackInput: 0
 --- !u!114 &8296172668859992507
 MonoBehaviour:
@@ -45799,6 +45987,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   moveDirection: {x: 0, y: 0, z: 0}
+  moveAdditional: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   boundingCollider: {fileID: 0}
@@ -45826,13 +46015,7 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  stance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
+  aimIKHandler: {fileID: 0}
   heft: 0
   wasAttackingLastFrame: 0
   isGrounded: 0
@@ -45875,13 +46058,20 @@ MonoBehaviour:
   camRotation: {x: 0, y: 0, z: 0}
   chargeTime: 0
   centerTransform: {fileID: 0}
-  moveset:
-    mainStrong: {fileID: 0}
-    mainQuick: {fileID: 0}
-    offStrong: {fileID: 0}
-    offQuick: {fileID: 0}
-    bothStrong: {fileID: 0}
-    bothQuick: {fileID: 0}
+  stance:
+    rightHandStance: 0
+    leftHandStance: 0
+    twoHandStance: 0
+    blockStyle: 0
+    moveset:
+      mainStrong: {fileID: 0}
+      mainQuick: {fileID: 0}
+      offStrong: {fileID: 0}
+      offQuick: {fileID: 0}
+      twoStrong: {fileID: 0}
+      twoQuick: {fileID: 0}
+      dualStrong: {fileID: 0}
+      dualQuick: {fileID: 0}
   currentAttackInput: 0
 --- !u!114 &9027950870533539077
 MonoBehaviour:
