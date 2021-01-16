@@ -2,6 +2,7 @@
 using System.Collections;
 using CustomUtilities;
 using System;
+using System.Collections.Generic;
 
 public class PlayerActor : HumanoidActor
 {
@@ -39,6 +40,23 @@ public class PlayerActor : HumanoidActor
     //Vector3 moveDirection;
 
     Vector3 airDirection;
+    Vector3 lastPos;
+
+    List<Interactable> interactables;
+    public Interactable highlightedInteractable;
+
+    [Header("Ledge Hang Settings")]
+    public Collider hangCollider;
+    public Collider hangBar;
+    public Transform hangMountR;
+    public Transform hangMountL;
+    public ClimbDetector currentClimb; // current ladder, ledge, wall, rope, etc.
+    Vector3 hangOffset;
+    public bool ledgeSnap;
+    public bool ledgeHanging;
+    public bool ladderSnap;
+    public bool ladderLockout;
+    
     public override void ActorStart()
     {
         base.ActorStart();
@@ -51,6 +69,8 @@ public class PlayerActor : HumanoidActor
         GetStance();
 
         OnSheathe.AddListener(Spare);
+
+        interactables = new List<Interactable>();
 
         this.OnInjure.AddListener(() => { FXController.SlowMo(0.5f, 3f); });
         this.OnDodge.AddListener(() => { FXController.SlowMo(0.1f, 0.5f); });
@@ -81,7 +101,7 @@ public class PlayerActor : HumanoidActor
 
         bool canMove = CanMove();
         bool weaponDrawn = inventory.IsWeaponDrawn();
-        bool isGrounded = cc.isGrounded;
+        bool isGrounded = GetGrounded();
         bool isAiming = IsAiming();
         bool lockedOn = this.GetCombatTarget() != null;//cameraController.lockedOn;
 
@@ -148,16 +168,22 @@ public class PlayerActor : HumanoidActor
             moveDirection *= SprintMultiplier;
         }
 
-        if (isGrounded && moveDirection != Vector3.zero)
+        if (GetGrounded()) //CanMove() && !IsJumping())// && moveDirection != Vector3.zero)
         {
             airDirection = moveDirection;
         }
+
+        if (IsJumping())
+        {
+            //airDirection = Vector3.Project(airDirection, this.transform.forward);
+        }
+        lastPos = transform.position;
 
         if (isAiming)
         {
             alignMode = AlignMode.Camera;
         }
-        else if (!cc.isGrounded && airTime > 0.25f)
+        else if (!GetGrounded() && airTime > 0.25f)
         {
             alignMode = AlignMode.None;
         }
@@ -184,6 +210,21 @@ public class PlayerActor : HumanoidActor
         float forwardVel = Mathf.Clamp(Mathf.Clamp(primaryVertical, -BackwardsMultiplier, ForwardMultiplier), -slowMultiplier, slowMultiplier);
         float strafeVel = Mathf.Clamp(Mathf.Clamp(primaryHorizontal, -StrafeMultiplier, StrafeMultiplier), -slowMultiplier, slowMultiplier);
         float stickVel = Mathf.Min(stickDirection.magnitude, slowMultiplier);
+
+        float descendClamp = 0f;
+        float ascendClamp = 0f;
+        bool dismountLadder = false;
+        if (IsHanging())
+        {
+            if (currentClimb != null && currentClimb is Ladder ladder)
+            {
+                descendClamp = (ladder.canDescend) ? -1 : 0;
+                ascendClamp = (ladder.canAscend) ? 1 : 0;
+
+                dismountLadder = ladder.SetCurrentHeight(this.transform.position);
+            }
+        }
+
         if (CanMove())
         {
             if (alignMode == AlignMode.Camera || alignMode == AlignMode.None || alignMode == AlignMode.Target)
@@ -197,11 +238,26 @@ public class PlayerActor : HumanoidActor
                 animator.SetFloat("StrafingVelocity", 0f);
             }
         }
-        else if (!IsDodging() && !IsJumping())
+        else if (!IsDodging() && !IsJumping() && isGrounded)
         {
             animator.SetFloat("ForwardVelocity", 0f);
             animator.SetFloat("StrafingVelocity", 0f);
         }
+        else if (IsHanging())
+        {
+            animator.SetFloat("ForwardVelocity", Mathf.Lerp(animator.GetFloat("ForwardVelocity"), Mathf.Clamp(primaryVertical, descendClamp, ascendClamp), 0.2f));
+        }
+
+        animator.SetBool("LedgeSnap", ledgeSnap);
+        animator.SetBool("LadderSnap", ladderSnap);
+        animator.SetBool("LadderClimb", dismountLadder);
+
+        if (ladderLockout && isGrounded)
+        {
+            ladderLockout = false;
+        }
+        animator.SetBool("LadderLockout", ladderLockout);
+        
 
         //animator.SetFloat("StickVelocity", stickDirection.magnitude);
         //animator.SetFloat("ForwardVelocity", primaryVertical);
@@ -250,8 +306,14 @@ public class PlayerActor : HumanoidActor
         //transform.Rotate(Vector3.up, horizontal * rotateSpeed * Time.deltaTime);
 
         Vector3 finalMov = Vector3.zero;
-        if (CanMove() && humanoidState == HumanoidState.Actionable)
+        if (!IsHanging() && (IsAerial() || IsFalling() || IsJumping()))
         {
+            finalMov += airDirection;
+        }
+        else if ((CanMove() && humanoidState == HumanoidState.Actionable))
+        {
+            finalMov += moveDirection;
+            /*
             if (IsAerial())
             {
                 finalMov += airDirection;
@@ -259,23 +321,30 @@ public class PlayerActor : HumanoidActor
             else
             {
                 finalMov += moveDirection;
-            }
+            }*/
         }
         finalMov += moveAdditional;
 
-        if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain")))
+        if (cc.enabled)
         {
-            Vector3 temp = Vector3.Cross(hit.normal, finalMov);
-            cc.Move(Vector3.Cross(temp, hit.normal) * Time.fixedDeltaTime);
-            //transform.Translate(0, (hit.point - transform.position).y * Time.fixedDeltaTime * GetCurrentSpeed() * 2f, 0);
-        }
-        else if (!IsJumping())
-        {
-            cc.Move((finalMov + gravity) * Time.fixedDeltaTime);
-        }
-        else
-        {
-            cc.Move(finalMov * Time.fixedDeltaTime);
+            if (IsJumping())
+            {
+                cc.Move(finalMov * Time.fixedDeltaTime);
+            }
+            else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain")))
+            {
+                Vector3 temp = Vector3.Cross(hit.normal, finalMov);
+                cc.Move((Vector3.Cross(temp, hit.normal) + gravity) * Time.fixedDeltaTime);
+                //transform.Translate(0, (hit.point - transform.position).y * Time.fixedDeltaTime * GetCurrentSpeed() * 2f, 0);
+            }
+            else if (!IsJumping() && !IsHanging())
+            {
+                cc.Move((finalMov + gravity) * Time.fixedDeltaTime);
+            }
+            else
+            {
+                cc.Move(finalMov * Time.fixedDeltaTime);
+            }
         }
 
         /*
@@ -346,138 +415,92 @@ public class PlayerActor : HumanoidActor
         }
         else if (attributes.HasAttributeRemaining(attributes.stamina))
         {
-            bool mainStrongUp = InputHandler.main.atk3Up;
-            bool mainStrongDown = InputHandler.main.atk3Down;
-            bool mainStrongHeld = InputHandler.main.atk3Held;
-            float mainStrongHeldTime = InputHandler.main.atk3HeldTime;
-            bool mainStrongLong = InputHandler.main.atk3LongPress;
-            bool mainStrongUnderThreshold = mainStrongHeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
+            
 
-            bool mainQuickUp = InputHandler.main.atk1Up;
-            bool mainQuickDown = InputHandler.main.atk1Down;
-            bool mainQuickHeld = InputHandler.main.atk1Held;
-            float mainQuickHeldTime = InputHandler.main.atk1HeldTime;
-            bool mainQuickLong = InputHandler.main.atk1LongPress;
-            bool mainQuickUnderThreshold = mainQuickHeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
+            bool atk1UnderThreshold = InputHandler.main.atk1HeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
+            bool atk2UnderThreshold = InputHandler.main.atk2HeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
+            bool atk3UnderThreshold = InputHandler.main.atk3HeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
+            bool atk4UnderThreshold = InputHandler.main.atk4HeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
 
-            bool offStrongUp = InputHandler.main.atk4Up;
-            bool offStrongDown = InputHandler.main.atk4Down;
-            bool offStrongHeld = InputHandler.main.atk4Held;
-            float offStrongHeldTime = InputHandler.main.atk4HeldTime;
-            bool offStrongLong = InputHandler.main.atk4LongPress;
-            bool offStrongUnderThreshold = offStrongHeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
 
-            bool offQuickUp = InputHandler.main.atk2Up;
-            bool offQuickDown = InputHandler.main.atk2Down;
-            bool offQuickHeld = InputHandler.main.atk2Held;
-            float offQuickHeldTime = InputHandler.main.atk2HeldTime;
-            bool offQuickLong = InputHandler.main.atk2LongPress;
-            bool offQuickUnderThreshold = offQuickHeldTime < InputHandler.main.LONG_PRESS_THRESHOLD;
+            bool skill1Up = InputHandler.main.atk3Up;
+            bool skill1Down = InputHandler.main.atk3Down;
+            bool skill1Held = InputHandler.main.atk3Held;
+            float skill1HeldTime = InputHandler.main.atk3HeldTime;
+            bool skill1Long = InputHandler.main.atk3LongPress;
 
-            bool bothStrongDown =  (mainStrongHeld && offStrongDown) || (mainStrongDown && offStrongHeld);
-            bool bothStrongHeld = (mainStrongHeld && offStrongHeld);
+            bool skill2Up = InputHandler.main.atk4Up;
+            bool skill2Down = InputHandler.main.atk4Down;
+            bool skill2Held = InputHandler.main.atk4Held;
+            float skill2HeldTime = InputHandler.main.atk4HeldTime;
+            bool skill2Long = InputHandler.main.atk4LongPress;
 
-            bool bothQuickDown = (mainQuickHeld && offQuickDown) || (mainQuickDown && offQuickHeld);
-            bool bothQuickHeld = (mainQuickHeld && offQuickHeld);
-
+            InputAttack atk = null;
             bool inputtedAttack = false;
-
-            /*
-            if (bothStrongDown && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.BothStrong) != null)
-            {
-                currentAttackInput = Moveset.AttackStyle.BothStrong;
-                inputtedAttack = true;
-            }
-            else if (bothQuickDown && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.BothQuick) != null)
-            {
-                currentAttackInput = Moveset.AttackStyle.BothQuick;
-                inputtedAttack = true;
-            }
-            */
-            //if ((mainQuickUp || (mainQuickLong && !offQuickHeld)) && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.MainQuick) != null)
-            if ((mainQuickDown) && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.MainQuick) != null)
-            {
-                currentAttackInput = Moveset.AttackStyle.MainQuick;
-                inputtedAttack = true;
-            }
-            else if ((mainStrongDown) && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.MainStrong) != null)
-            {
-                currentAttackInput = Moveset.AttackStyle.MainStrong;
-                inputtedAttack = true;
-            }
-            //else if ((offQuickUp && offQuickUnderThreshold) || (offQuickLong && !mainQuickHeld))
-            else if ((offQuickDown))
-            {
-                if (!inventory.IsTwoHanding() && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.OffQuick) != null)
-                {
-                    currentAttackInput = Moveset.AttackStyle.OffQuick;
-                    inputtedAttack = true;
-                }
-                else if (inventory.IsTwoHanding() && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.TwoQuick) != null)
-                {
-                    currentAttackInput = Moveset.AttackStyle.TwoQuick;
-                    inputtedAttack = true;
-                }
-            }
-            else if ((offStrongDown))
-            {
-                if (!inventory.IsTwoHanding() && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.OffStrong) != null)
-                {
-                    currentAttackInput = Moveset.AttackStyle.OffStrong;
-                    inputtedAttack = true;
-                }
-                else if (inventory.IsTwoHanding() && stance.moveset.GetAttackFromInput(Moveset.AttackStyle.TwoStrong) != null)
-                {
-                    currentAttackInput = Moveset.AttackStyle.TwoStrong;
-                    inputtedAttack = true;
-                }
-            }
-
             bool up = false;
             bool down = false;
             bool held = false;
             float heldTime = 0f;
 
+            if (InputHandler.main.atk1Down)
+            {
+                if (IsSprinting())
+                {
+                    atk = stance.moveset.dash;
+                }
+                else if (!GetGrounded())
+                {
+                    atk = stance.moveset.plunge;
+                }
+                else if (IsSneaking())
+                {
+                    atk = stance.moveset.sneak;
+                }
+                else if (inventory.IsTwoHanding())
+                {
+                    atk = stance.moveset.light2H;
+                }
+                else
+                {
+                    atk = stance.moveset.light1H;
+                }
+                currentAttackInput = Moveset.AttackStyle.Light;
+                inputtedAttack = true;
+            }
+            else if (InputHandler.main.atk3Down)
+            {
+                atk = stance.moveset.skill1;
+                currentAttackInput = Moveset.AttackStyle.Skill1;
+                inputtedAttack = true;
+            }
+            else if (InputHandler.main.atk4Down)
+            {
+                atk = stance.moveset.skill2;
+                currentAttackInput = Moveset.AttackStyle.Skill2;
+                inputtedAttack = true;
+            }
 
-            if (currentAttackInput == Moveset.AttackStyle.BothStrong)
+
+            if (currentAttackInput == Moveset.AttackStyle.Light)
             {
-                down = bothStrongDown;
-                held = bothStrongHeld;
-                heldTime = Mathf.Min(mainStrongHeldTime, offStrongHeldTime);
+                up = InputHandler.main.atk1Up;
+                down = InputHandler.main.atk1Down;
+                held = InputHandler.main.atk1Held;
+                heldTime = InputHandler.main.atk1HeldTime;
             }
-            else if (currentAttackInput == Moveset.AttackStyle.BothQuick)
+            else if (currentAttackInput == Moveset.AttackStyle.Skill1)
             {
-                down = bothQuickDown;
-                held = bothQuickHeld;
-                heldTime = Mathf.Min(mainQuickHeldTime, offQuickHeldTime);
+                up = InputHandler.main.atk3Up;
+                down = InputHandler.main.atk3Down;
+                held = InputHandler.main.atk3Held;
+                heldTime = InputHandler.main.atk3HeldTime;
             }
-            else if (currentAttackInput == Moveset.AttackStyle.MainStrong)
+            else if (currentAttackInput == Moveset.AttackStyle.Skill2)
             {
-                up = mainStrongUp;
-                down = mainStrongDown;
-                held = mainStrongHeld;
-                heldTime = mainStrongHeldTime;
-            }
-            else if (currentAttackInput == Moveset.AttackStyle.MainQuick)
-            {
-                up = mainQuickUp;
-                down = mainQuickDown;
-                held = mainQuickHeld;
-                heldTime = mainQuickHeldTime;
-            }
-            else if (currentAttackInput == Moveset.AttackStyle.OffQuick || currentAttackInput == Moveset.AttackStyle.TwoQuick)
-            {
-                up = offQuickUp;
-                down = offQuickDown;
-                held = offQuickHeld;
-                heldTime = offQuickHeldTime;
-            }
-            else if (currentAttackInput == Moveset.AttackStyle.OffStrong || currentAttackInput == Moveset.AttackStyle.TwoStrong)
-            {
-                up = offStrongUp;
-                down = offStrongDown;
-                held = offStrongHeld;
-                heldTime = offStrongHeldTime;
+                up = InputHandler.main.atk4Up;
+                down = InputHandler.main.atk4Down;
+                held = InputHandler.main.atk4Held;
+                heldTime = InputHandler.main.atk4HeldTime;
             }
 
             if (up)
@@ -495,12 +518,14 @@ public class PlayerActor : HumanoidActor
             {
                 animator.SetTrigger("Input-Attack");
             }
-            InputAttack atk = stance.moveset.GetAttackFromInput(currentAttackInput);
+            
             if (atk != null)
             {
                 int id = atk.GetAttackID();
                 animator.SetInteger("Input-AttackID", id);
                 animator.SetBool("Input-AttackBlockOkay", atk.IsBlockOkay());
+                animator.SetBool("Input-AttackSprintOkay", atk.IsSprintOkay());
+                animator.SetBool("Input-AttackFallingOkay", atk.IsFallingOkay());
             }
         }
         else if (false)
@@ -572,6 +597,12 @@ public class PlayerActor : HumanoidActor
 
         if (attributes.HasAttributeRemaining(attributes.stamina))
         {
+            bool jump = Input.GetButtonDown("Jump");
+            if (jump)
+            {
+                animator.SetBool("Input-Jump", true);
+            }
+            animator.SetBool("Input-JumpHeld", Input.GetButton("Jump"));
             if (InputHandler.main.jumpDown)
             {
                 animator.SetTrigger("Input-DodgeDown");
@@ -593,13 +624,30 @@ public class PlayerActor : HumanoidActor
         }
         animator.SetBool("Sneaking", shouldSneak);
 
-        if (Input.GetButtonDown("Interact")) {
-            if (false) // TODO: check for interactable items here
+        if (IsHanging())
+        {
+            if (Input.GetButtonDown("Jump"))
             {
-                if (inventory.IsWeaponDrawn())
+                animator.SetTrigger("LedgeClimb");
+            }
+            else if (Input.GetButtonDown("Dodge"))
+            {
+                if (currentClimb is Ledge)
                 {
-                    animator.SetTrigger("Sheath-Main");
+                    UnsnapFromLedge();
                 }
+                else if (currentClimb is Ladder)
+                {
+                    UnsnapFromLadder();
+                }
+            }
+        }
+        
+
+        if (Input.GetButtonDown("Interact")) {
+            if (highlightedInteractable != null) // TODO: check for interactable items here
+            {
+                highlightedInteractable.Interact(this);
             }
         }
     }
@@ -761,7 +809,7 @@ public class PlayerActor : HumanoidActor
             }*/
         }
         
-        if (interactDown)
+        if (interactDown && highlightedInteractable == null)
         {
             if (inventory.IsOffDrawn())
             {
@@ -1070,6 +1118,158 @@ public class PlayerActor : HumanoidActor
         }
     }
 
+    #region climbing
+
+    // ledge
+    public void SetLedge(Ledge ledge)
+    {
+        if (CanMove()|| IsJumping() || IsFalling())
+        {
+            ledgeSnap = true;
+            currentClimb = ledge;
+        }
+    }
+
+    public void UnsnapLedge(ClimbDetector ledge)
+    {
+        ledgeSnap = false;
+    }
+
+    public void SnapToCurrentLedge()
+    {
+
+        StartCoroutine(DelayedSnapToLedge());
+    }
+    
+    IEnumerator DelayedSnapToLedge()
+    {
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForFixedUpdate();
+        if (ledgeSnap == true && currentClimb != null)
+        {
+
+
+            this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
+
+            Vector3 offset = currentClimb.collider.transform.position - this.hangCollider.bounds.center;
+
+            Vector3 verticalOffset = Vector3.up * offset.y;
+             
+            Vector3 horizontalOffset = Vector3.Project(offset, currentClimb.collider.transform.forward);
+
+            boundingCollider.enabled = false;
+
+            transform.position = this.transform.position + (verticalOffset + horizontalOffset);
+
+            Debug.Log("movement! horiz" + horizontalOffset.magnitude);
+
+            ledgeHanging = true;
+
+        }
+    }
+    public void UnsnapHandsFromLedge()
+    {
+        ledgeHanging = false;
+    }
+
+    public void UnsnapFromLedge()
+    {
+        ledgeHanging = false;
+        ledgeSnap = false;
+        boundingCollider.enabled = true;
+    }
+
+    // ladder
+    public void SetLadder(Ladder ladder)
+    {
+        if (CanMove() || IsJumping() || IsFalling())
+        {
+            ladderSnap = true;
+            currentClimb = ladder;
+        }
+    }
+
+    public void SnapToCurrentLadder()
+    {
+        StartCoroutine(DelayedSnapToLadder());
+    }
+
+    IEnumerator DelayedSnapToLadder()
+    {
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForFixedUpdate();
+        if (ladderSnap == true && currentClimb != null)
+        {
+
+
+            this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
+
+            Vector3 offset = currentClimb.collider.transform.position - this.transform.position;
+
+            Vector3 forwardOffset = Vector3.Project(offset, currentClimb.collider.transform.forward);
+
+            Vector3 rightOffset = Vector3.Project(offset, currentClimb.collider.transform.right);
+
+            boundingCollider.enabled = false;
+
+            transform.position = this.transform.position + (forwardOffset + rightOffset);
+
+            //ledgeHanging = true;
+
+        }
+    }
+
+    public void UnsnapFromLadder()
+    {
+        ladderSnap = false;
+        ladderLockout = true;
+        boundingCollider.enabled = true;
+    }
+    #endregion
+
+    public void AddInteractable(Interactable interactable)
+    {
+        if (!interactables.Contains(interactable))
+        {
+            interactables.Add(interactable);
+            GetHighlightedInteractable();
+        }
+    }
+
+    public void RemoveInteractable(Interactable interactable)
+    {
+        interactables.Remove(interactable);
+        GetHighlightedInteractable();
+    }
+
+    public void ClearInteractables()
+    {
+        interactables.Clear();
+        GetHighlightedInteractable();
+    }
+
+    public Interactable GetHighlightedInteractable()
+    {
+        highlightedInteractable = null;
+        float leadDist = Mathf.Infinity;
+
+        foreach (Interactable interactable in interactables)
+        {
+            float dist = Vector3.Distance(this.transform.position, interactable.transform.position);
+            if (dist < leadDist)
+            {
+                leadDist = dist;
+                highlightedInteractable = interactable;
+            }
+            interactable.SetIconVisiblity(false);
+        }
+        if (highlightedInteractable != null)
+        {
+            highlightedInteractable.SetIconVisiblity(true);
+        }
+        return highlightedInteractable;
+    }
+
     private void OnAnimatorIK(int layerIndex)
     {
         if (IsAiming())
@@ -1082,6 +1282,20 @@ public class PlayerActor : HumanoidActor
         {
             animator.SetLookAtWeight(0);
         }
+        if (ledgeHanging)
+        {
+
+            animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1f);
+            animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1f);
+            animator.SetIKPosition(AvatarIKGoal.LeftHand, hangMountL.position);
+
+            animator.SetIKPosition(AvatarIKGoal.RightHand, hangMountR.position);
+        }
+        else
+        {
+            animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0f);
+            animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0f);
+        }
         
     }
     private void OnDrawGizmosSelected()
@@ -1089,7 +1303,8 @@ public class PlayerActor : HumanoidActor
         try
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(positionReference.Head.transform.position, positionReference.Head.transform.position + GetLaunchVector(positionReference.Head.transform.position) * 100f);
+            //Gizmos.DrawLine(positionReference.Head.transform.position, positionReference.Head.transform.position + GetLaunchVector(positionReference.Head.transform.position) * 100f);
+            Gizmos.DrawLine(this.transform.position, this.transform.position + Vector3.up * -0.1f);
         }
         catch (Exception ex)
         {

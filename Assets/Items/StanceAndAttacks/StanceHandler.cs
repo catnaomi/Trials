@@ -84,12 +84,7 @@ public class StanceHandler
         if (main != null)
         {
 
-            this.moveset.mainQuick = main.moveset.mainQuick;
-            this.moveset.mainStrong = main.moveset.mainStrong;
-
-            this.moveset.twoQuick = main.moveset.twoQuick;
-            this.moveset.twoStrong = main.moveset.twoStrong;
-
+            //this.moveset = main.moveset;
             
             this.rightHandStance = main.rightHandStance;
 
@@ -97,14 +92,13 @@ public class StanceHandler
         }
         if (off != null)
         {
-            this.moveset.offQuick = off.moveset.offQuick;
-            this.moveset.offStrong = off.moveset.offStrong;
             this.leftHandStance = off.leftHandStance;
         }
     }
 
     public void ApplyMoveset(StanceHandler newStance)
     {
+        /*
         foreach (Moveset.AttackStyle style in Enum.GetValues(typeof(Moveset.AttackStyle)))
         {
             InputAttack atk = newStance.moveset.GetAttackFromInput(style);
@@ -113,6 +107,7 @@ public class StanceHandler
                 this.moveset.SetAttackFromInput(style, atk);
             }
         }
+        */
     }
 
     /*

@@ -20,6 +20,10 @@ public class InspectorDebugActor : MonoBehaviour
 
     [Space(10)]
     public bool resetAttributes;
+    [Space(10)]
+    public bool ledgeOnDebug;
+    public bool ladderOnDebug;
+
 
     [Space(10)]
     [ReadOnly] public bool canMove;
@@ -86,6 +90,18 @@ public class InspectorDebugActor : MonoBehaviour
         if (ForceBlock)
         {
             actor.GetComponent<Animator>().SetBool("Blocking", true);
+        }
+
+        if (Input.GetButtonDown("Debug") && ledgeOnDebug)
+        {
+            bool snap = actor.GetComponent<Animator>().GetBool("LedgeSnap");
+            actor.GetComponent<Animator>().SetBool("LedgeSnap", !snap);
+        }
+        else if (Input.GetButtonDown("Debug") && ladderOnDebug)
+        {
+            bool snap = actor.GetComponent<Animator>().GetBool("LadderSnap");
+            actor.GetComponent<Animator>().SetBool("LadderSnap", !snap);
+
         }
 
         blocking = actor.IsBlocking();

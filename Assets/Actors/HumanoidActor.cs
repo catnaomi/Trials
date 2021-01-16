@@ -226,7 +226,7 @@ public class HumanoidActor : Actor
         animator.SetBool("Aiming", IsAiming());
         animator.SetBool("Injured", IsInjured());
         */
-        //animator.SetBool("Grounded", cc.isGrounded);
+        //animator.SetBool("Grounded", GetGrounded());
         //animator.SetBool("BlendMovement", animator.GetCurrentAnimatorStateInfo(0).IsTag("BLEND_MOVE"));
 
         animator.SetBool("Armed", inventory.IsWeaponDrawn());
@@ -346,7 +346,7 @@ public class HumanoidActor : Actor
     
     protected void LateUpdate()
     {
-        if (!cc.isGrounded)
+        if (!GetGrounded())
         {
             airTime += Time.deltaTime;
             fallDamage = (100f / 3f) * airTime;
@@ -356,16 +356,29 @@ public class HumanoidActor : Actor
         {
             airTime = 0f;
         }
+
+        if (IsHanging())
+        {
+            airTime = 0f;
+            animator.SetFloat("AirTime", 0f);
+            animator.SetFloat("AirTimeReal", 0f);
+        }
         animator.SetFloat("AirTimeReal", airTime);
 
-        this.isGrounded = cc.isGrounded;
-        animator.SetBool("Grounded", cc.isGrounded);
+
+        this.isGrounded = GetGrounded();
+        animator.SetBool("Grounded", GetGrounded());
 
         if (IsAiming() && aimIKHandler != null)
         {
             aimIKHandler.OnUpdate(this);
         }
+    }
 
+    public bool GetGrounded()
+    {
+        // return cc.isGrounded;
+        return Physics.Raycast(transform.position, Vector3.down, 0.1f, LayerMask.GetMask("Terrain"));
     }
 
     protected void OnAnimatorIK(int layerIndex)
@@ -378,7 +391,7 @@ public class HumanoidActor : Actor
     protected void FixedUpdate()
     {
         inventory.FixedUpdateWeapon();
-        if (!cc.isGrounded)
+        if (!GetGrounded() && !IsJumping() && !IsHanging())
         {
             gravity += Physics.gravity * Time.fixedDeltaTime;
         }
@@ -554,7 +567,7 @@ public class HumanoidActor : Actor
         {
             if (collider != null)
             {
-                collider.enabled = isRagdolled;
+                //collider.enabled = isRagdolled;
                 if (collider.TryGetComponent<Rigidbody>(out Rigidbody rigid))
                 {
                     rigid.isKinematic = !isRagdolled;
@@ -1386,7 +1399,7 @@ public class HumanoidActor : Actor
 
     public bool IsAerial()
     {
-        return !cc.isGrounded && airTime > 0.25f;
+        return !GetGrounded() && airTime > 0.25f;
     }
     public bool CanMove()
     {
@@ -1455,6 +1468,18 @@ public class HumanoidActor : Actor
                 (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.ActionLayer));
 
         return bufferable || CanMove();
+    }
+
+
+    public bool IsFalling()
+    {
+        string TAG = "FALLING";
+        bool ALLOW_IN_TRANSITION = true;
+
+        bool falling = animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.ActionLayer));
+
+        return falling;
     }
 
     public bool IsAttacking()
@@ -1699,6 +1724,24 @@ public class HumanoidActor : Actor
             "JUMPING",
             "JUMP_ATTACK",
             "LEAPING"
+        };
+
+        foreach (string state in STATES)
+        {
+            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool IsHanging()
+    {
+        string[] STATES = new string[]
+        {
+            "LEDGE",
+            "LADDER"
         };
 
         foreach (string state in STATES)

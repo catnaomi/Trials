@@ -15,7 +15,10 @@ public class InputAttack : InputAction
      * 
      */
     public int attackId;
-    public bool isBlockOK; // can attack be initiatiated from block
+    public bool isBlockOK; // can attack be initiated from block
+    public bool isSprintOK; // can attack be initiated from sprint
+    public bool isFallingOK; // can attack be initiated while falling
+
     public int GetAttackID()
     {
         return attackId;
@@ -24,5 +27,15 @@ public class InputAttack : InputAction
     public bool IsBlockOkay()
     {
         return isBlockOK;
+    }
+
+    public bool IsSprintOkay()
+    {
+        return isSprintOK;
+    }
+
+    public bool IsFallingOkay()
+    {
+        return isFallingOK;
     }
 }

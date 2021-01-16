@@ -15,6 +15,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
 
     TrailRenderer trailThrust;
     TrailRenderer trailSlash;
+    ParticleSystem trailSystem;
 
     public Damage elementRatios;
 
@@ -274,6 +275,9 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 trailSlash = trail;
             }
         }
+
+        trailSystem = GetModel().GetComponentInChildren<ParticleSystem>();
+
         if (trailThrust != null)
         {
             trailThrust.emitting = thrust;
@@ -281,6 +285,31 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         if (trailSlash != null)
         {
             trailSlash.emitting = slash;
+        }
+
+        if (trailSystem != null)
+        {
+            if (thrust || slash)
+            {
+                var t = trailSystem.trails;
+
+                //t.lifetimeMultiplier = 0.2f;
+
+                //t.lifetime = 0.2f;
+                trailSystem.GetComponent<FadeTrails>().Reset();
+
+                trailSystem.Play();
+
+            }
+            else
+            {
+                var t = trailSystem.trails;
+
+                trailSystem.GetComponent<FadeTrails>().StartFade();
+                //trailSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                //t.lifetimeMultiplier = 0f;
+                //t.lifetime = 0f;
+            }
         }
     }
 

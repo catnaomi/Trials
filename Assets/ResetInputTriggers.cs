@@ -6,8 +6,11 @@ public class ResetInputTriggers : StateMachineBehaviour
 {
     public bool IncludingDodge = false;
     public bool IncludingAttackRecoil = false;
+    bool IncludingJump = true;
+    public bool IncludingLadderLockout = false;
     public bool OnEntry = true;
     public bool OnExit = false;
+
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
@@ -67,6 +70,14 @@ public class ResetInputTriggers : StateMachineBehaviour
         if (IncludingAttackRecoil)
         {
             animator.ResetTrigger("AttackBlocked");
+        }
+        if (IncludingJump)
+        {
+            animator.SetBool("Input-Jump", false);
+        }
+        if (IncludingLadderLockout)
+        {
+            animator.SetBool("LadderLockout", false);
         }
         animator.SetBool("Input-Player", false);
     }
