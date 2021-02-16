@@ -46,6 +46,11 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         //weaponController.WeaponUpdate();
     }
 
+    public HitboxGroup GetHitboxes()
+    {
+        return hitboxes;
+    }
+
     protected void GenerateHitboxes()
     {
         if (hitboxes != null)
@@ -154,13 +159,13 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.ThrustingLight:
                 return 0f;
             case AttackType.SlashingMedium:
-                return 50f;
+                return 10f;
             case AttackType.ThrustingMedium:
-                return 50f;
+                return 10f;
             case AttackType.SlashingHeavy:
-                return 100f;
+                return 25f;
             case AttackType.ThrustingHeavy:
-                return 100f;
+                return 25f;
         }
     }
 

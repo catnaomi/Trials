@@ -31,6 +31,9 @@ public class ActorAttributes : MonoBehaviour
     public AttributeValue stamina;
     public AttributeValue staminaRecoveryRate;
 
+    [Header("AI Personality")]
+    public AttributeValue audacity;
+    public AttributeValue guile;
     /*
     [ReadOnly] public float smoothedPoise;
     
@@ -42,8 +45,9 @@ public class ActorAttributes : MonoBehaviour
     private float poiseLast;
     private bool poiseIncreased;
     public float poise;
-    public float weightPoise = 50f; // poise of character weight during attacks and movement
-    public float poiseLossRate = 100f;
+    public float weightPoise = 10f; // poise of character weight during attacks and movement
+    public float poiseRate = 100f;
+    public bool isOffBalance;
 
     [Space(5)]
     public float attributeRecoveryDelay = 3f;
@@ -108,6 +112,8 @@ public class ActorAttributes : MonoBehaviour
             this.RecoverAttribute(stamina, staminaRecoveryRate.current * Time.deltaTime);
         }
 
+        CheckOffBalance();
+
 
         if (poiseIncreased)
         {
@@ -126,9 +132,10 @@ public class ActorAttributes : MonoBehaviour
         {
             //this.ReduceAttribute(poise, poiseLossRate * Time.deltaTime);
 
-            float targetPoise = (this.TryGetComponent<HumanoidActor>(out HumanoidActor human) && (!human.CanMove() || human.moveDirection == Vector3.zero)) ? 0f : GetBasePoise();
+            //float targetPoise = (this.TryGetComponent<HumanoidActor>(out HumanoidActor human) && (!human.CanMove() || human.moveDirection == Vector3.zero)) ? 0f : GetBasePoise();
+            float targetPoise = 100f;
 
-            this.poise = Mathf.MoveTowards(this.poise, targetPoise, poiseLossRate * Time.deltaTime);
+            this.poise = Mathf.MoveTowards(this.poise, targetPoise, poiseRate * Time.deltaTime);
         }
 
         healthLast = health.current;
@@ -157,7 +164,7 @@ public class ActorAttributes : MonoBehaviour
         smoothedStamina = stamina.current = stamina.max = stamina.baseValue;
         staminaRecoveryRate.current = staminaRecoveryRate.max = staminaRecoveryRate.baseValue;
 
-        poise = 0f;
+        poise = 100f;
 
         effects.Clear();
 
@@ -206,31 +213,60 @@ public class ActorAttributes : MonoBehaviour
         }
     }
 
-    public void IncreasePoiseTo(float poise)
+    public void IncreasePoiseByWeight(float poise)
     {
-        this.poise = poise + weightPoise;
+        float totalWeightPoise = poise + weightPoise + this.GetComponent<Inventory>().GetEquipWeight();
+
+        if (this.poise <= totalWeightPoise + 100f)
+        {
+            this.poise += totalWeightPoise;
+            if (this.poise >= totalWeightPoise + 100f)
+            {
+                this.poise = totalWeightPoise + 100f;
+            }
+        }
         poiseIncreased = true;
+
+        CheckOffBalance();
     }
 
     public void SetPoise(float poise)
     {
         this.poise = poise;
         poiseIncreased = true;
+
+        CheckOffBalance();
     }
 
     public void ReducePoise(float poise)
     {
         this.poise -= poise;
         poiseIncreased = true;
+
+        CheckOffBalance();
     }
 
-    public float GetBasePoise()
-    {
-        return weightPoise + this.GetComponent<Inventory>().GetEquipWeight();
-    }
     public bool HasHealthRemaining()
     {
         return health.current > 0;
+    }
+
+    public void CheckOffBalance()
+    {
+        if (isOffBalance && poise >= 100f)
+        {
+            isOffBalance = false;
+        }
+
+        if (!isOffBalance && poise <= 0)
+        {
+            isOffBalance = true;
+        }
+    }
+
+    public bool GetOffBalance()
+    {
+        return isOffBalance;
     }
 
     public void AddEffect(Effect effect)

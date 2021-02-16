@@ -14,5 +14,9 @@ public class BladeAttackStateHandler : StateMachineBehaviour
         {
             actor.SetNextAttackType(attackType, true);
         }
+        if (animator.gameObject.TryGetComponent<NavigatingHumanoidActor>(out NavigatingHumanoidActor navActor))
+        {
+            navActor.RealignToTarget();
+        }
     }
 }

@@ -65,6 +65,11 @@ public class NavigatingHumanoidActor : HumanoidActor
         }
     }
 
+    public float GetDistanceToTarget()
+    {
+        return currentDistance;
+    }
+
     public bool IsClearLineToTarget()
     {
         if (shouldNavigate)
@@ -116,5 +121,13 @@ public class NavigatingHumanoidActor : HumanoidActor
 
         nav.nextPosition = transform.position + movement * GetCurrentSpeed() * Time.deltaTime;
         cc.Move(movement * GetCurrentSpeed() * Time.deltaTime);
+    }
+
+    public void RealignToTarget()
+    {
+        if (CombatTarget != null)
+        {
+            this.transform.rotation = Quaternion.LookRotation(NumberUtilities.FlattenVector(CombatTarget.transform.position - this.transform.position));
+        }
     }
 }

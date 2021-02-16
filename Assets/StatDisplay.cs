@@ -46,7 +46,7 @@ public class StatDisplay : MonoBehaviour
         //poiseSpentDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.smoothedPoise * 5f);
         //poiseMaxDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.poise.max * 5f);
         poiseText.text = Mathf.Floor(actor.attributes.poise).ToString();
-
+        poiseDisplay.GetComponent<Image>().color = (actor.attributes.GetOffBalance()) ? Color.red : Color.blue;
 
     }
 }

@@ -23,6 +23,11 @@ public class InspectorDebugActor : MonoBehaviour
     [Space(10)]
     public bool ledgeOnDebug;
     public bool ladderOnDebug;
+    [Space(10)]
+    public bool rotateMainWepOnDebug;
+    public bool rotateOffWepOnDebug;
+    public float weaponAngle;
+    public bool spinWeapons;
 
 
     [Space(10)]
@@ -102,6 +107,21 @@ public class InspectorDebugActor : MonoBehaviour
             bool snap = actor.GetComponent<Animator>().GetBool("LadderSnap");
             actor.GetComponent<Animator>().SetBool("LadderSnap", !snap);
 
+        }
+        
+        if (Input.GetButtonDown("Debug") && rotateMainWepOnDebug)
+        {
+            actor.RotateMainWeapon(weaponAngle);
+        }
+        if (Input.GetButtonDown("Debug") && rotateOffWepOnDebug)
+        {
+            actor.RotateOffWeapon(weaponAngle);
+        }
+        if (spinWeapons)
+        {
+            weaponAngle = (Time.time * 100) % 360f;
+            actor.RotateMainWeapon(weaponAngle);
+            actor.RotateOffWeapon(weaponAngle);
         }
 
         blocking = actor.IsBlocking();

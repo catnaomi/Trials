@@ -56,6 +56,9 @@ public class HumanoidActor : Actor
     [ReadOnly] public IKHandler aimIKHandler;
     public float heft;
 
+    public float mainWeaponAngle;
+    public float offWeaponAngle;
+
     public bool wasAttackingLastFrame;
     public bool isGrounded;
 
@@ -673,11 +676,11 @@ public class HumanoidActor : Actor
                     //Flinch(damageKnockback);
                     stagger = DamageKnockback.StaggerType.Flinch;
                 }
-                else if (attributes.HasPoiseRemaining() && (!IsArmored() || damageKnockback.breaksArmor)) // has poise remaining, but not armored
+                else if (!attributes.GetOffBalance() && (!IsArmored() || damageKnockback.breaksArmor)) // is not off balance, but not armored
                 {
                     stagger = damageKnockback.minStaggerType;
                 }
-                else if (attributes.HasPoiseRemaining() && IsArmored() && !damageKnockback.breaksArmor) // has poise remaining, and is armored
+                else if (attributes.GetOffBalance() && IsArmored() && !damageKnockback.breaksArmor) // is off balance but is armored
                 {
                     switch (damageKnockback.staggerType)
                     {
@@ -689,7 +692,7 @@ public class HumanoidActor : Actor
                             break;
                     }
                 }
-                else
+                else // if off balance and is not armored
                 {
                     stagger = damageKnockback.staggerType;
                 }
@@ -854,6 +857,7 @@ public class HumanoidActor : Actor
         if (damageKnockback.source != null && damageKnockback.source.TryGetComponent<HumanoidActor>(out HumanoidActor humanoid))
         {
             humanoid.Stun(parryDamage);
+            humanoid.attributes.SetPoise(0f);
             //humanoid.HeavyStagger(parryDamage);
         }
 
@@ -1035,7 +1039,7 @@ public class HumanoidActor : Actor
     public void HandleBlockIK()
     {
         /*
-        if (stance.GetBlockStyle() == StanceHandler.BlockStyle.TwoHand && !animator.IsInTransition(StanceHandler.BaseLayer))
+        if (stance.GetBlockStyle() == StanceHandler.BlockStyle.TwoHand && !animator.IsInTransition(animator.GetLayerIndex("Base Movement")))
         {
             animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, tempValue1);
             animator.SetIKPosition(AvatarIKGoal.LeftHand, positionReference.MainHand.transform.position + positionReference.MainHand.transform.forward * tempValue2);
@@ -1048,7 +1052,7 @@ public class HumanoidActor : Actor
         nextAttackType = type;
         if (adjustPoise)
         {
-            attributes.IncreasePoiseTo(inventory.GetPoiseFromAttack(type));
+            attributes.IncreasePoiseByWeight(inventory.GetPoiseFromAttack(type));
         }
     }
 
@@ -1355,6 +1359,53 @@ public class HumanoidActor : Actor
         
     }
 
+    // rotates the main weapon model around the upwards axis of the main hand mount
+    public void RotateMainWeapon(float angle)
+    {
+        if (!inventory.IsMainDrawn())
+        {
+            return;
+        }
+        EquippableWeapon weapon = inventory.GetMainWeapon();
+        GameObject weaponModel = weapon.model;
+        GameObject mount = this.positionReference.MainHand;
+
+        float angleDiff = mainWeaponAngle - angle;
+
+        //Quaternion rotation = Quaternion.AngleAxis(angle, mount.transform.up);
+
+        //weaponModel.transform.rotation = rotation;
+
+        weaponModel.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
+
+        if (weapon is BladeWeapon blade)
+        {
+            blade.GetHitboxes().root.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
+        }
+        mainWeaponAngle = angle;
+    }
+
+    // rotates the off hand weapon model around the upwards axis of the off hand mount
+    public void RotateOffWeapon(float angle)
+    {
+        if (!inventory.IsOffDrawn())
+        {
+            return;
+        }
+        EquippableWeapon weapon = inventory.GetOffHand();
+        GameObject weaponModel = weapon.model;
+        GameObject mount = this.positionReference.OffHand;
+
+        float angleDiff = offWeaponAngle - angle;
+
+        //Quaternion rotation = Quaternion.AngleAxis(angle, mount.transform.up);
+
+        //weaponModel.transform.rotation = rotation;
+
+        weaponModel.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
+        offWeaponAngle = angle;
+    }
+
     public void SetHeft(float heft)
     {
         this.heft = heft;
@@ -1413,7 +1464,7 @@ public class HumanoidActor : Actor
         string TAG = "IMMOBILE";
         bool ALLOW_IN_TRANSITION = true;
 
-        bool immobile = animator.GetCurrentAnimatorStateInfo(StanceHandler.BaseLayer).IsTag(TAG) &&
+        bool immobile = animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Movement")).IsTag(TAG) &&
                 (ALLOW_IN_TRANSITION || !animator.IsInTransition(0));
                 */
 
@@ -1442,7 +1493,7 @@ public class HumanoidActor : Actor
 
         foreach (string state in MOVEABLE_STATES)
         {
-            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
             {
                 actLayer = true;
             }
@@ -1464,8 +1515,8 @@ public class HumanoidActor : Actor
         string TAG = "BUFFERABLE";
         bool ALLOW_IN_TRANSITION = true;
 
-        bool bufferable = animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.ActionLayer));
+        bool bufferable = animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
 
         return bufferable || CanMove();
     }
@@ -1476,8 +1527,8 @@ public class HumanoidActor : Actor
         string TAG = "FALLING";
         bool ALLOW_IN_TRANSITION = true;
 
-        bool falling = animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.ActionLayer));
+        bool falling = animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
 
         return falling;
     }
@@ -1512,7 +1563,7 @@ public class HumanoidActor : Actor
 
         foreach (string state in MOVEABLE_STATES)
         {
-            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
             {
                 if (!wasAttackingLastFrame)
                 {
@@ -1535,7 +1586,7 @@ public class HumanoidActor : Actor
 
         foreach (string state in STATES)
         {
-            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
             {
                 return true;
             }
@@ -1553,7 +1604,7 @@ public class HumanoidActor : Actor
 
         foreach (string state in STATES)
         {
-            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
             {
                 return true;
             }
@@ -1566,8 +1617,8 @@ public class HumanoidActor : Actor
         string TAG = "HEAVY_STAGGER";
         bool ALLOW_IN_TRANSITION = true;
 
-        return animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.ActionLayer));
+        return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
     }
 
     public bool IsSneaking()
@@ -1575,8 +1626,8 @@ public class HumanoidActor : Actor
         string TAG = "SNEAKING";
         bool ALLOW_IN_TRANSITION = true;
 
-        return !IsSprinting() && !IsAttacking() && animator.GetCurrentAnimatorStateInfo(StanceHandler.BaseLayer).IsTag(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.BaseLayer));
+        return !IsSprinting() && !IsAttacking() && animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Movement")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Base Movement")));
     }
     public bool IsHeavyAttacking()
     {
@@ -1597,7 +1648,7 @@ public class HumanoidActor : Actor
 
         foreach (string state in MOVEABLE_STATES)
         {
-            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
             {
                 return true;
             }
@@ -1624,7 +1675,7 @@ public class HumanoidActor : Actor
 
         foreach (string state in MOVEABLE_STATES)
         {
-            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
             {
                 return true;
             }
@@ -1644,14 +1695,14 @@ public class HumanoidActor : Actor
             "BLOCK_MOVABLE",
         };
 
-        if (animator.GetCurrentAnimatorStateInfo(StanceHandler.BaseLayer).IsTag("BLOCKING"))
+        if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Movement")).IsTag("BLOCKING"))
         {
             baseLayer = true;
         }
         foreach (string state in BLOCKABLE_STATES)
         {
             
-            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
             {
                 actionLayer = true;
             }
@@ -1665,8 +1716,8 @@ public class HumanoidActor : Actor
         string TAG = "BLOCK_STAGGER";
         bool ALLOW_IN_TRANSITION = true;
 
-        return animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.ActionLayer));
+        return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
     }
     bool sprint;
     public bool IsSprinting()
@@ -1679,7 +1730,7 @@ public class HumanoidActor : Actor
 
         foreach (string state in STATES)
         {
-            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
             {
                 sprint = true;
                 return sprint;
@@ -1698,8 +1749,8 @@ public class HumanoidActor : Actor
         string TAG = "ARMOR_ATTACK";
         bool ALLOW_IN_TRANSITION = true;
 
-        if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.ActionLayer)))
+        if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions"))))
         {
             return true;
         }
@@ -1728,7 +1779,7 @@ public class HumanoidActor : Actor
 
         foreach (string state in STATES)
         {
-            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
             {
                 return true;
             }
@@ -1746,7 +1797,7 @@ public class HumanoidActor : Actor
 
         foreach (string state in STATES)
         {
-            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
             {
                 return true;
             }
@@ -1771,7 +1822,7 @@ public class HumanoidActor : Actor
 
         foreach (string state in MOVEABLE_STATES)
         {
-            if (animator.GetCurrentAnimatorStateInfo(StanceHandler.ActionLayer).IsTag(state))
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
             {
                 return true;
             }

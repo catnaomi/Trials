@@ -446,25 +446,50 @@ public class PlayerActor : HumanoidActor
             {
                 if (IsSprinting())
                 {
-                    atk = stance.moveset.dash;
+                    atk = stance.moveset.slashDash;
                 }
                 else if (!GetGrounded())
                 {
-                    atk = stance.moveset.plunge;
+                    atk = stance.moveset.slashPlunge;
                 }
                 else if (IsSneaking())
                 {
-                    atk = stance.moveset.sneak;
+                    atk = stance.moveset.slashSneak;
                 }
                 else if (inventory.IsTwoHanding())
                 {
-                    atk = stance.moveset.light2H;
+                    atk = stance.moveset.slash2H;
                 }
                 else
                 {
-                    atk = stance.moveset.light1H;
+                    atk = stance.moveset.slash1H;
                 }
-                currentAttackInput = Moveset.AttackStyle.Light;
+                currentAttackInput = Moveset.AttackStyle.Slash;
+                inputtedAttack = true;
+            }
+            else if (InputHandler.main.atk2Down)
+            {
+                if (IsSprinting())
+                {
+                    atk = stance.moveset.thrustDash;
+                }
+                else if (!GetGrounded())
+                {
+                    atk = stance.moveset.thrustPlunge;
+                }
+                else if (IsSneaking())
+                {
+                    atk = stance.moveset.thrustSneak;
+                }
+                else if (inventory.IsTwoHanding())
+                {
+                    atk = stance.moveset.thrust2H;
+                }
+                else
+                {
+                    atk = stance.moveset.thrust1H;
+                }
+                currentAttackInput = Moveset.AttackStyle.Slash;
                 inputtedAttack = true;
             }
             else if (InputHandler.main.atk3Down)
@@ -481,7 +506,7 @@ public class PlayerActor : HumanoidActor
             }
 
 
-            if (currentAttackInput == Moveset.AttackStyle.Light)
+            if (currentAttackInput == Moveset.AttackStyle.Slash)
             {
                 up = InputHandler.main.atk1Up;
                 down = InputHandler.main.atk1Down;
@@ -1298,13 +1323,17 @@ public class PlayerActor : HumanoidActor
         }
         
     }
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         try
         {
-            Gizmos.color = Color.red;
             //Gizmos.DrawLine(positionReference.Head.transform.position, positionReference.Head.transform.position + GetLaunchVector(positionReference.Head.transform.position) * 100f);
-            Gizmos.DrawLine(this.transform.position, this.transform.position + Vector3.up * -0.1f);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(this.positionReference.MainHand.transform.position, this.positionReference.MainHand.transform.position + this.positionReference.MainHand.transform.forward * 0.25f);
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(this.positionReference.MainHand.transform.position, this.positionReference.MainHand.transform.position + this.positionReference.MainHand.transform.right * 0.25f);
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(this.positionReference.MainHand.transform.position, this.positionReference.MainHand.transform.position + this.positionReference.MainHand.transform.up * 0.25f);
         }
         catch (Exception ex)
         {

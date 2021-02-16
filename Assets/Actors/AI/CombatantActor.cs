@@ -3,17 +3,19 @@ using System.Collections;
 
 public class CombatantActor : NavigatingHumanoidActor
 {
-    public float EngagementRange = 3f;
+    public float EngagementRange = 0.1f;
 
     public float clock;
 
     public float UpdateTime = 1f;
 
     public float Aggression = 0f;
-    public float AggressionIncrease = 10f;
-    public float AggressionDecrease = 20f;
+    float AggressionIncrease;
+    float AggressionDecrease;
 
+    public bool inCombat;
     public bool ranged;
+
     public override void ActorStart()
     {
         base.ActorStart();
@@ -61,40 +63,17 @@ public class CombatantActor : NavigatingHumanoidActor
     void UpdateCombatant()
     {
 
+        AggressionIncrease = 10f + attributes.audacity.current;
+        AggressionDecrease = 50f;
         if (IsInCombat())
         {
             Aggression += AggressionIncrease * UpdateTime;
-
-            if (inventory.IsMainEquipped() && !inventory.IsMainDrawn())
-            {
-                TriggerSheath(true, inventory.MainWeapon.MainHandEquipSlot, true);
-            }
-            else if (inventory.IsOffEquipped() && !inventory.IsOffDrawn())
-            {
-                TriggerSheath(true, inventory.OffWeapon.OffHandEquipSlot, false);
-            }
-            else if (ShouldAttack())
-            {
-                Attack();
-            }
-            else if (ShouldDefend())
-            {
-                if (!ranged)
-                {
-                    animator.SetBool("Blocking", true);
-                }
-                SetAdditionalMovement(new Vector3(0.25f, 0, 0.1f), true);
-            }
-            else
-            {
-                SetAdditionalMovement(Vector3.zero, false);
-            }
         }
         else
         {
             if (ShouldEnterCombat())
             {
-                animator.SetBool("AI-InCombat", true);
+                inCombat = true;
                 // starting combat
                 if (DetermineCombatTarget(out GameObject target))
                 {
@@ -106,9 +85,11 @@ public class CombatantActor : NavigatingHumanoidActor
         }
 
         Aggression = Mathf.Clamp(Aggression, 0f, 100f);
-        animator.SetFloat("AI-Aggression", Aggression);
-        animator.SetBool("AI-InRange", InRangeOfTarget());
-        animator.SetBool("AI-ClearLine", IsClearLineToTarget());
+        animator.SetFloat("Aggression", Aggression);
+        animator.SetFloat("DistanceToTarget", GetDistanceToTarget());
+        animator.SetBool("InRange", InRangeOfTarget());
+        animator.SetBool("LineOfSight", IsClearLineToTarget());
+        animator.SetBool("InCombat", IsInCombat());
     }
 
     public bool ShouldEnterCombat()
@@ -125,6 +106,7 @@ public class CombatantActor : NavigatingHumanoidActor
 
     public bool IsInCombat()
     {
+        return inCombat;
         string TAG = "COMBAT";
         bool ALLOW_IN_TRANSITION = true;
 

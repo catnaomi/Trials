@@ -100,7 +100,7 @@ public class Inventory : MonoBehaviour
 
         if (mweapon != null && oweapon != null)
         {
-            EquipMainWeapon(mweapon, true);
+            EquipMainWeapon(mweapon, false);
             EquipOffHandWeapon(oweapon, false);
         }
         else if (mweapon != null)
