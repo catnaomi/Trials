@@ -3,19 +3,16 @@ using System.Collections;
 
 public class CombatantActor : NavigatingHumanoidActor
 {
-    public float EngagementRange = 0.1f;
+    public float SightRange = 15f;
+    public float MaxEngageRange = 10f;
+    public float MinEngageRange = 5f;
+    public float AttackRange = 1.5f;
 
     public float clock;
+    public static float CLOCK_DEFAULT = 2f;
 
-    public float UpdateTime = 1f;
-
-    public float Aggression = 0f;
-    float AggressionIncrease;
-    float AggressionDecrease;
-
-    public bool inCombat;
-    public bool ranged;
-
+    public float LowHealthThreshold = 50f;
+    public bool isLowHealth;
     public override void ActorStart()
     {
         base.ActorStart();
@@ -25,138 +22,56 @@ public class CombatantActor : NavigatingHumanoidActor
     public override void ActorPostUpdate()
     {
         base.ActorPostUpdate();
-        clock += Time.deltaTime;
-
-        if (clock >= UpdateTime)
+        if (clock > -1)
         {
-            UpdateCombatant();
-            clock = 0f;
+            clock -= Time.deltaTime;
         }
-
-        this.OnAttack.AddListener(() =>
-        {
-            Aggression -= AggressionDecrease;
-        });
-
-        this.OnBlock.AddListener(() =>
-        {
-            Aggression += AggressionIncrease;
-        });
-
-        this.OnHurt.AddListener(() =>
-        {
-            Aggression += AggressionDecrease;
-        });
 
         this.OnInjure.AddListener(() => 
         {
             StartHelpless();
         });
 
-        if (CombatTarget != null && CombatTarget.TryGetComponent<HumanoidActor>(out HumanoidActor humanoid))
+        if (CombatTarget == null)
         {
-            //Physics.IgnoreCollision(this.GetComponent<Collider>(), CombatTarget.GetComponent<Collider>(), this.IsJumping() && !this.cc.isGrounded);
-        }
-        
-    }
-
-    void UpdateCombatant()
-    {
-
-        AggressionIncrease = 10f + attributes.audacity.current;
-        AggressionDecrease = 50f;
-        if (IsInCombat())
-        {
-            Aggression += AggressionIncrease * UpdateTime;
-        }
-        else
-        {
-            if (ShouldEnterCombat())
+            if (DetermineCombatTarget(out GameObject target))
             {
-                inCombat = true;
-                // starting combat
-                if (DetermineCombatTarget(out GameObject target))
-                {
-                    CombatTarget = target;
+                CombatTarget = target;
 
-                    NavigateToTarget(target, EngagementRange);
+                StartNavigationToTarget(target);
+
+                if (target.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
+                {
+                    actor.OnAttack.AddListener(BeingAttacked);
                 }
             }
         }
 
-        Aggression = Mathf.Clamp(Aggression, 0f, 100f);
-        animator.SetFloat("Aggression", Aggression);
-        animator.SetFloat("DistanceToTarget", GetDistanceToTarget());
-        animator.SetBool("InRange", InRangeOfTarget());
+        float dist = GetDistanceToTarget();
+        animator.SetFloat("DistanceToTarget", dist);
         animator.SetBool("LineOfSight", IsClearLineToTarget());
-        animator.SetBool("InCombat", IsInCombat());
+        animator.SetBool("InRange-Sight", dist <= SightRange);
+        animator.SetBool("InRange-MaxEngage", dist <= MaxEngageRange);
+        animator.SetBool("InRange-MinEngage", dist <= MinEngageRange);
+        animator.SetBool("InRange-Attack", dist <= AttackRange);
+        animator.SetFloat("Random", Random.value);
+        animator.SetFloat("ActionTimer", clock);
+        float timeInState = animator.GetFloat("TimeInState");
+        animator.SetFloat("TimeInState", timeInState + Time.deltaTime);
+
     }
 
-    public bool ShouldEnterCombat()
-    {
-        return true;
-    }
     public bool DetermineCombatTarget(out GameObject target)
     {
         target = PlayerActor.player.gameObject;
         return true;
     }
 
-    // anim details
-
-    public bool IsInCombat()
+    public void BeingAttacked()
     {
-        return inCombat;
-        string TAG = "COMBAT";
-        bool ALLOW_IN_TRANSITION = true;
-
-        return animator.GetCurrentAnimatorStateInfo(StanceHandler.AILayer).IsTag(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.AILayer));
-    }
-
-    public bool ShouldAttack()
-    {
-        string TAG = "ATTACKING";
-        bool ALLOW_IN_TRANSITION = true;
-
-        return animator.GetCurrentAnimatorStateInfo(StanceHandler.AILayer).IsName(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.AILayer)) && CanMove();
-    }
-
-    public bool ShouldDefend()
-    {
-        string TAG = "DEFENDING";
-        bool ALLOW_IN_TRANSITION = true;
-
-        return animator.GetCurrentAnimatorStateInfo(StanceHandler.AILayer).IsName(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.AILayer));
-    }
-
-    public virtual void Attack()
-    {
-        if (!ranged)
+        if (CombatTarget != null && currentDistance < MinEngageRange)
         {
-            int attack;
-            float rand = Random.Range(0f, 1f);
-
-            if (currentDistance > 4f)
-            {
-                attack = 2;
-            }
-            else if (rand < .50)
-            {
-                attack = 1;
-            }
-            else
-            {
-                attack = 0;
-            }
-            animator.SetInteger("AI-Attack-ID", attack);            
+            animator.SetTrigger("GettingAttacked");
         }
-        else
-        {
-            animator.SetInteger("AI-Attack-ID", -1);
-        }
-        animator.SetTrigger("AI-Attack");
     }
 }

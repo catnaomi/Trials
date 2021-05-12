@@ -41,6 +41,7 @@ public class ActorAttributes : MonoBehaviour
     private float poiseLast;
     public AttributeValue poiseRecoveryRate;
     */
+
     private float poiseRecoveryClock;
     private float poiseLast;
     private bool poiseIncreased;

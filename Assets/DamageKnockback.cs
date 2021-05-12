@@ -6,10 +6,8 @@ using System.Collections.Generic;
 [Serializable]
 public class DamageKnockback
 {
-
-    //public float healthDamagePotential;
-    public float poiseDamage;
     public float staminaDamage;
+    public float poiseDamage;
 
     [Space(10)]
     public Vector3 kbForce;
@@ -28,26 +26,37 @@ public class DamageKnockback
     public bool breaksArmor;
     public bool unblockable;
 
-    public StaggerType minStaggerType;
-    public StaggerType staggerType;
+    public StaggerData staggers;
+    
+    [Serializable]
+    public struct StaggerData
+    {
+        public StaggerType onHitOnBalance;
+        public StaggerType onHitOffBalance;
+
+        //public StaggerType onBlockOnBalance;
+        //public StaggerType onBlockOffBalance;
+
+        public StaggerType onInjure;
+        public StaggerType onKill;
+    }
     public enum StaggerType
     {
         None,           // 0
         // on hit
         Flinch,         // 1
-        Stagger,        // 2 AKA light stagger
-        // require low poise
-        HeavyStagger,      // 3 AKA heavy stagger
-        Knockdown,      // 4 also on injure
-        // special
-        Stun,         // 5 
+        LightStagger,   // 2
+        HeavyStagger,   // 3
+        Knockdown,      // 4
+        Stun,           // 5
+        Crumple,        // 6
 
         // on block
-        BlockStagger,   // 6
-        GuardBreak,     // 7
+        BlockStagger,   // 7
+        GuardBreak,     // 8
 
-        Recoil,          // 8 shorter stun
-        FallDamage,       // 9
+        Recoil,          // 9 shorter stun
+        FallDamage,       // 10
     }
 
     //public bool breaksArmor;
@@ -63,9 +72,8 @@ public class DamageKnockback
     {
         this.staminaDamage = damageKnockback.staminaDamage;
         this.kbForce = damageKnockback.kbForce.normalized * damageKnockback.kbForce.magnitude;
+        this.staggers = damageKnockback.staggers;
         this.poiseDamage = damageKnockback.poiseDamage;
-        this.staggerType = damageKnockback.staggerType;
-        this.minStaggerType = damageKnockback.minStaggerType;
         this.hitClip = damageKnockback.hitClip;
         this.breaksArmor = damageKnockback.breaksArmor;
         this.kbRadial = damageKnockback.kbRadial;
@@ -81,4 +89,12 @@ public class DamageKnockback
     {
         return transform.forward * vector.z + transform.right * vector.x + transform.up * vector.y;
     }
+
+    public static StaggerData StandardStaggerData = new StaggerData()
+    {
+        onHitOnBalance = StaggerType.LightStagger,
+        onHitOffBalance = StaggerType.HeavyStagger,
+        onInjure = StaggerType.Knockdown,
+        onKill = StaggerType.Crumple
+    };
 }

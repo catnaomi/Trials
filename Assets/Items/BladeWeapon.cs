@@ -351,6 +351,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
 
     public static bool AttackIsSlashing(AttackType type)
     {
+        return true;
         if (type == AttackType.SlashingLight ||
             type == AttackType.SlashingMedium ||
             type == AttackType.SlashingHeavy ||
@@ -363,6 +364,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
 
     public static bool AttackIsThrusting(AttackType type)
     {
+        return true;
         if (type == AttackType.ThrustingLight ||
             type == AttackType.ThrustingMedium ||
             type == AttackType.ThrustingHeavy ||
@@ -430,8 +432,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             lightKB,
                             actor.transform
                         ),
-                    minStaggerType = DamageKnockback.StaggerType.Flinch,
-                    staggerType = DamageKnockback.StaggerType.Stagger,
+                    staggers = DamageKnockback.StandardStaggerData
                 };           
             case AttackType.SlashingMedium:
                 return new DamageKnockback()
@@ -444,8 +445,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             heavyKB,
                             actor.transform
                         ),
-                    minStaggerType = DamageKnockback.StaggerType.Flinch,
-                    staggerType = DamageKnockback.StaggerType.HeavyStagger,
+                    staggers = DamageKnockback.StandardStaggerData
                 };
             case AttackType.SlashingHeavy:
                 return new DamageKnockback()
@@ -458,8 +458,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             heavyKB,
                             actor.transform
                         ),
-                    minStaggerType = DamageKnockback.StaggerType.Flinch,
-                    staggerType = DamageKnockback.StaggerType.Knockdown,
+                    staggers = DamageKnockback.StandardStaggerData,
                     breaksArmor = true,
                 };
             case AttackType.ThrustingLight:
@@ -473,8 +472,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             lightKB,
                             actor.transform
                         ),
-                    minStaggerType = DamageKnockback.StaggerType.Flinch,
-                    staggerType = DamageKnockback.StaggerType.Stagger,
+                    staggers = DamageKnockback.StandardStaggerData,
                 };
             case AttackType.ThrustingMedium:
                 return new DamageKnockback()
@@ -487,8 +485,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             heavyKB,
                             actor.transform
                         ),
-                    minStaggerType = DamageKnockback.StaggerType.Flinch,
-                    staggerType = DamageKnockback.StaggerType.HeavyStagger,
+                    staggers = DamageKnockback.StandardStaggerData,
                 };
             case AttackType.ThrustingHeavy:
                 return new DamageKnockback()
@@ -501,8 +498,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             heavyKB,
                             actor.transform
                         ),
-                    minStaggerType = DamageKnockback.StaggerType.Flinch,
-                    staggerType = DamageKnockback.StaggerType.Knockdown,
+                    staggers = DamageKnockback.StandardStaggerData,
                     breaksArmor = true,
                 };
             case AttackType.Bash:
@@ -516,7 +512,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             heavyKB,
                             actor.transform
                         ),
-                    staggerType = DamageKnockback.StaggerType.Stun,
+                    staggers = DamageKnockback.StandardStaggerData,
                 };
             case AttackType.SlashingCritical:
                 return new DamageKnockback()
@@ -529,7 +525,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             heavyKB,
                             actor.transform
                         ),
-                    staggerType = DamageKnockback.StaggerType.Knockdown,
+                    staggers = DamageKnockback.StandardStaggerData,
                     breaksArmor = true,
                     unblockable = true,
                 };
@@ -544,7 +540,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             heavyKB,
                             actor.transform
                         ),
-                    staggerType = DamageKnockback.StaggerType.Knockdown,
+                    staggers = DamageKnockback.StandardStaggerData,
                     breaksArmor = true,
                     unblockable = true,
                 };

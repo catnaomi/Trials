@@ -16,7 +16,7 @@ public class InteractIcon : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        bool held = Input.GetButton("Interact");
+        bool held = false;//Input.GetButton("Interact");
         Sprite targetIcon = (held ? iconSelected : icon);
         if (spriteRenderer.sprite != targetIcon)
         {

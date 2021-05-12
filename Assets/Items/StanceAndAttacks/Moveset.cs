@@ -6,11 +6,17 @@ using System;
 public class Moveset
 {
     [Header("Light Attacks")]
-    public InputAttack slash1H;
-    public InputAttack slash2H;
+    public InputAttack slashMain;
+    public InputAttack slashOff;
     [Space(5)]
-    public InputAttack thrust1H;
-    public InputAttack thrust2H;
+    public InputAttack thrustMain;
+    public InputAttack thrustOff;
+    [Header("Heavy Attacks")]
+    public InputAttack slashMainHeavy;
+    public InputAttack slashOffHeavy;
+    [Space(5)]
+    public InputAttack thrustMainHeavy;
+    public InputAttack thrustOffHeavy;
     [Header("Movement-Based Attacks")]
     public InputAttack slashDash;
     public InputAttack slashPlunge;

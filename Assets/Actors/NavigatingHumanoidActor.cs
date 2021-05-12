@@ -5,15 +5,15 @@ using CustomUtilities;
 
 public class NavigatingHumanoidActor : HumanoidActor
 {
-    private NavMeshAgent nav;
-
+    [HideInInspector]
+    public NavMeshAgent nav;
+    public float angleSpeed = 180f;
     [Header("Navigation Settings")]
 
     public float bufferRange = 2f;
 
     bool shouldNavigate;
     protected float currentDistance;
-    float followDistance;
 
     Vector3 additMove;
 
@@ -26,12 +26,12 @@ public class NavigatingHumanoidActor : HumanoidActor
         nav.updatePosition = false;
 
         nav.updateRotation = false;
-        
+
+        nav.angularSpeed = angleSpeed;
     }
 
-    public void NavigateToTarget(GameObject target, float distance)
+    public void StartNavigationToTarget(GameObject target)
     {
-        followDistance = distance;
         CombatTarget = target;
         shouldNavigate = true;
     }
@@ -41,8 +41,11 @@ public class NavigatingHumanoidActor : HumanoidActor
         shouldNavigate = false;
     }
 
-    public void SetAdditionalMovement(Vector3 move, bool relative)
+    /*
+    public void SetAdditionalMovement(Vector3 move)
     {
+        Debug.Log("additmovenav");
+        bool relative = false;
         if (relative)
         {
             additMove = transform.forward * move.z + transform.up * move.y + transform.right * move.x;
@@ -52,29 +55,34 @@ public class NavigatingHumanoidActor : HumanoidActor
             additMove = move;
         }
     }
-
-    public bool InRangeOfTarget()
-    {
-        if (shouldNavigate)
-        {
-            return currentDistance < followDistance;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    */
 
     public float GetDistanceToTarget()
     {
-        return currentDistance;
+        if (CombatTarget != null)
+        {
+            Vector3 targetAnimPos = CombatTarget.transform.position;
+            /*
+            if (CombatTarget.TryGetComponent<Animator>(out Animator targetAnim))
+            {
+                targetAnimPos = targetAnim.bodyPosition;
+            }*/
+            Vector3 thisPos = this.transform.position;//animator.bodyPosition;
+            thisPos.y = 0;
+            targetAnimPos.y = 0;
+            return Vector3.Distance(thisPos, targetAnimPos);
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     public bool IsClearLineToTarget()
     {
         if (shouldNavigate)
         {
-            if (Physics.Raycast(this.transform.position + Vector3.up, CombatTarget.transform.position - this.transform.position, out RaycastHit hit, followDistance * 2f))
+            if (Physics.Raycast(this.transform.position + Vector3.up, CombatTarget.transform.position - this.transform.position, out RaycastHit hit, 2f))
             {
                 if (hit.transform.root == CombatTarget.transform.root)
                 {
@@ -88,29 +96,43 @@ public class NavigatingHumanoidActor : HumanoidActor
     {
         base.ActorPostUpdate();
 
-        if (humanoidState != HumanoidState.Actionable || !CanMove() || !shouldNavigate)
+        if (humanoidState != HumanoidState.Actionable || !CanMove())
         {
             return;
         }
 
-        currentDistance = Vector3.Distance(this.transform.position, CombatTarget.transform.position);
-        if (currentDistance > (followDistance + bufferRange))
+        if (shouldNavigate)
         {
             nav.isStopped = false;
             nav.SetDestination(CombatTarget.transform.position);
         }
-        else if (currentDistance < followDistance)
+        else
         {
             nav.isStopped = true;
+            return;
         }
-        this.transform.rotation = Quaternion.LookRotation(NumberUtilities.FlattenVector(CombatTarget.transform.position - this.transform.position));
-        
+
+        currentDistance = GetDistanceToTarget();
+
+        Quaternion targetRot;
+        if (ShouldFaceTarget()) {
+            bool b = false;
+        }
+        if (CanMove() || ShouldFaceTarget())
+        {
+            targetRot = Quaternion.LookRotation(NumberUtilities.FlattenVector(nav.desiredVelocity));
+        }
+        else
+        {
+            targetRot = this.transform.rotation;
+        }
+        this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, targetRot, nav.angularSpeed * Time.deltaTime);
 
         if (!this.CanMove())
         {
-            nav.isStopped = true;
+            //nav.isStopped = true;
         }
-        moveDirection = (nav.desiredVelocity.normalized + additMove);
+        moveDirection = (currentDistance > 1.5) ? (nav.desiredVelocity.normalized) : Vector3.zero;
         Vector3 movement = moveDirection;
 
         float animVel = (movement.magnitude > 0 ? 1f : 0f);
@@ -119,8 +141,26 @@ public class NavigatingHumanoidActor : HumanoidActor
         animator.SetFloat("StrafingVelocity", Mathf.MoveTowards(animator.GetFloat("StrafingVelocity"), animVel * Vector3.Project(movement, transform.right).magnitude, Time.deltaTime / 0.25f));
         //animator.SetFloat("StickVelocity", Mathf.MoveTowards(animator.GetFloat("StickVelocity"), animVel, Time.deltaTime / 0.25f));
 
-        nav.nextPosition = transform.position + movement * GetCurrentSpeed() * Time.deltaTime;
-        cc.Move(movement * GetCurrentSpeed() * Time.deltaTime);
+        if (moveAdditional != Vector3.zero)
+        {
+            //Debug.Log(moveAdditional);
+        }
+        //nav.nextPosition = transform.position + (movement * GetCurrentSpeed()) + moveAdditional * Time.deltaTime;
+        //cc.Move(((movement * GetCurrentSpeed()) + moveAdditional) * Time.deltaTime);
+        Vector3 worldDeltaPosition = nav.nextPosition - transform.position;
+
+        if (worldDeltaPosition.magnitude > nav.radius)
+            nav.nextPosition = transform.position + 0.9f * worldDeltaPosition;
+
+
+    }
+
+    void OnAnimatorMove()
+    {
+        // Update position based on animation movement using navigation surface height
+        Vector3 position = animator.rootPosition;
+        position.y = nav.nextPosition.y;
+        transform.position = position;
     }
 
     public void RealignToTarget()
@@ -129,5 +169,21 @@ public class NavigatingHumanoidActor : HumanoidActor
         {
             this.transform.rotation = Quaternion.LookRotation(NumberUtilities.FlattenVector(CombatTarget.transform.position - this.transform.position));
         }
+    }
+    public bool ShouldFaceTarget()
+    {
+        string TAG = "FACE_TARGET";
+        bool ALLOW_IN_TRANSITION = true;
+
+        return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
+    }
+    public override bool IsBlocking()
+    {
+        string TAG = "BLOCKING";
+        bool ALLOW_IN_TRANSITION = true;
+
+        return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
     }
 }

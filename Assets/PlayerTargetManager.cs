@@ -32,9 +32,12 @@ public class PlayerTargetManager : MonoBehaviour
     {
         targets = new List<GameObject>();
         cmtg = GetComponent<CinemachineTargetGroup>();
-        InputHandler.main.SecondaryStickFlick.AddListener(SwitchTargets);
+        //InputHandler.main.SecondaryStickFlick.AddListener(SwitchTargets);
         StartCoroutine(UpdateTargets());
         lockedOn = false;
+
+        player.toggleTarget.AddListener(ToggleTarget);
+        player.secondaryStickFlick.AddListener(SwitchTargets);
     }
 
     IEnumerator UpdateTargets()
@@ -90,7 +93,7 @@ public class PlayerTargetManager : MonoBehaviour
     void Update()
     {      
 
-        if (Input.GetButtonDown("Target"))
+        if (false)//Input.GetButtonDown("Target"))
         {
             Debug.Log("target?");
             if (!lockedOn && targets.Count > 0)
@@ -148,11 +151,28 @@ public class PlayerTargetManager : MonoBehaviour
         rightTarget = directionToTarget[AxisUtilities.AxisDirection.Right];
     }
 
+    void ToggleTarget()
+    {
+        Debug.Log("target?");
+        if (!lockedOn && targets.Count > 0)
+        {
+            lockedOn = true;
+            SetTarget(targets[0]);
+            UpdateDirections();
+        }
+        else
+        {
+            lockedOn = false;
+            SetTarget(null);
+        }
+    }
     void SwitchTargets()
     {
         if (lockedOn)
         {
-            AxisUtilities.AxisDirection direction = AxisUtilities.InvertAxis(InputHandler.main.SecondaryFlickDirection, false, false, false);
+            AxisUtilities.AxisDirection direction = AxisUtilities.DirectionToAxisDirection(player.look, "HORIZONTAL", "VERTICAL");
+            //AxisUtilities.AxisDirection direction = AxisUtilities.InvertAxis(InputHandler.main.SecondaryFlickDirection, false, false, false);
+            Debug.Log("switch:" + direction + "--" + player.look);
             if (directionToTarget.TryGetValue(direction, out Transform target) && target != null)
             {
                 SetTarget(target.gameObject);
@@ -164,6 +184,7 @@ public class PlayerTargetManager : MonoBehaviour
     void SetTarget(GameObject t)
     {
         currentTarget = t;
+        //player.SetCombatTarget(currentTarget);
     }
 
     private void OnDrawGizmosSelected()

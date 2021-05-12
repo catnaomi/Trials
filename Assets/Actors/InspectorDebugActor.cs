@@ -49,7 +49,8 @@ public class InspectorDebugActor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (applyDamage || (applyOnDebug && Input.GetButtonDown("Debug")))
+        bool debug = false;
+        if (applyDamage || (applyOnDebug && debug))
         {
             applyDamage = false;
             actor.ProcessDamageKnockback(damageKnockback);
@@ -72,7 +73,7 @@ public class InspectorDebugActor : MonoBehaviour
                 GetComponent<Animator>().SetTrigger("Sheath-Main");
             }
         }
-        if (AIAttack || (attackOnDebug && Input.GetButtonDown("Debug")))
+        if (AIAttack || (attackOnDebug && debug))
         {
             AIAttack = false;
 
@@ -97,23 +98,23 @@ public class InspectorDebugActor : MonoBehaviour
             actor.GetComponent<Animator>().SetBool("Blocking", true);
         }
 
-        if (Input.GetButtonDown("Debug") && ledgeOnDebug)
+        if (debug && ledgeOnDebug)
         {
             bool snap = actor.GetComponent<Animator>().GetBool("LedgeSnap");
             actor.GetComponent<Animator>().SetBool("LedgeSnap", !snap);
         }
-        else if (Input.GetButtonDown("Debug") && ladderOnDebug)
+        else if (debug && ladderOnDebug)
         {
             bool snap = actor.GetComponent<Animator>().GetBool("LadderSnap");
             actor.GetComponent<Animator>().SetBool("LadderSnap", !snap);
 
         }
         
-        if (Input.GetButtonDown("Debug") && rotateMainWepOnDebug)
+        if (debug && rotateMainWepOnDebug)
         {
             actor.RotateMainWeapon(weaponAngle);
         }
-        if (Input.GetButtonDown("Debug") && rotateOffWepOnDebug)
+        if (debug && rotateOffWepOnDebug)
         {
             actor.RotateOffWeapon(weaponAngle);
         }

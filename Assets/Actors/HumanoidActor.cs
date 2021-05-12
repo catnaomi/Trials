@@ -610,6 +610,11 @@ public class HumanoidActor : Actor
         //  implement resistances
         float totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances).GetTotal();
 
+        bool offBalance = attributes.GetOffBalance();
+
+        bool willInjure = attributes.HasHealthRemaining() && (totalDamage >= attributes.health.current);
+        bool willKill = !attributes.HasHealthRemaining();
+
         if (this.IsDodging() || isInvulnerable)
         {
             // do nothing
@@ -619,107 +624,120 @@ public class HumanoidActor : Actor
         else if (this.IsParrying() && attributes.HasAttributeRemaining(attributes.stamina) && !damageKnockback.unblockable) // is actor parrying with stamina remaining
         {
             // take no damage / stamina damage, and stagger human opponents
-            Parry(damageKnockback);
+            // todo: Reimplement parrying
+            //Parry(damageKnockback);
         }
-        else if (this.IsBlocking() && !damageKnockback.unblockable) // is actor blocking
+        else if (this.IsBlocking() && !damageKnockback.unblockable) // is actor blocking. cannot die through block.
         {
             // blocking deals stamina damage
-            attributes.ReduceAttribute(attributes.stamina, damageKnockback.staminaDamage * attributes.BlockReduction);
+            attributes.ReduceAttribute(attributes.stamina, damageKnockback.staminaDamage);
+            //attributes.ReducePoise(damageKnockback.poiseDamage);
             Damage(damageKnockback, true);
-            if (attributes.HasAttributeRemaining(attributes.stamina) && attributes.HasAttributeRemaining(attributes.health)) // does actor have stamina remaining?
-            {
-                Block(damageKnockback); // block stagger
-            }
-            else if (!attributes.HasAttributeRemaining(attributes.health))
-            {
-                Stun(damageKnockback); // injure
+
+            if (!attributes.HasAttributeRemaining(attributes.health))
+            { // injure!
                 this.OnInjure.Invoke();
             }
-            else // no stamina remaining
+
+            if (attributes.HasAttributeRemaining(attributes.stamina))
             {
-                GuardBreak(damageKnockback); // guard break
+                ProcessStagger(DamageKnockback.StaggerType.BlockStagger, damageKnockback);
+            }
+            else
+            {
+                ProcessStagger(DamageKnockback.StaggerType.GuardBreak, damageKnockback);
             }
         }
-        else
+        else // get hit
         {
-            if (!attributes.HasHealthRemaining()) // die
+            //Die();
+            if (willKill)
             {
-                // send flying on death
-                Knockback(damageKnockback);
+                ProcessStagger(damageKnockback.staggers.onKill, damageKnockback);
                 Die();
             }
-            else if (totalDamage >= attributes.health.current) // injure
-            {
-                Damage(damageKnockback);
-                if (damageKnockback.staggerType == DamageKnockback.StaggerType.Knockdown)
+            else {
+                attributes.ReducePoise(damageKnockback.poiseDamage);
+                Damage(damageKnockback, true);
+                if (willInjure)
                 {
-                    Knockback(damageKnockback);
+                    ProcessStagger(damageKnockback.staggers.onInjure, damageKnockback);
                 }
-                else if (damageKnockback.staggerType == DamageKnockback.StaggerType.FallDamage)
+                else if (attributes.GetOffBalance())
                 {
-                    Flinch(damageKnockback);
+                    ProcessStagger(damageKnockback.staggers.onHitOffBalance, damageKnockback);
                 }
                 else
                 {
-                    Stun(damageKnockback);
+                    ProcessStagger(damageKnockback.staggers.onHitOnBalance, damageKnockback);
                 }
-                this.OnInjure.Invoke();
-            }
-            else // get hit normally
-            {
-                Damage(damageKnockback);
-
-                DamageKnockback.StaggerType stagger = DamageKnockback.StaggerType.None;
-
-                if (damageKnockback.staggerType == DamageKnockback.StaggerType.FallDamage)
-                {
-                    //Flinch(damageKnockback);
-                    stagger = DamageKnockback.StaggerType.Flinch;
-                }
-                else if (!attributes.GetOffBalance() && (!IsArmored() || damageKnockback.breaksArmor)) // is not off balance, but not armored
-                {
-                    stagger = damageKnockback.minStaggerType;
-                }
-                else if (attributes.GetOffBalance() && IsArmored() && !damageKnockback.breaksArmor) // is off balance but is armored
-                {
-                    switch (damageKnockback.staggerType)
-                    {
-                        case DamageKnockback.StaggerType.Stun:
-                            stagger = DamageKnockback.StaggerType.Stun;
-                            break;
-                        default:
-                            stagger = DamageKnockback.StaggerType.Flinch;
-                            break;
-                    }
-                }
-                else // if off balance and is not armored
-                {
-                    stagger = damageKnockback.staggerType;
-                }
- 
-                switch (stagger)
-                {
-                    case DamageKnockback.StaggerType.Stun:
-                        Stun(damageKnockback);
-                        break;
-                    case DamageKnockback.StaggerType.Flinch:
-                        Flinch(damageKnockback);
-                        break;
-                    case DamageKnockback.StaggerType.Stagger:
-                        LightStagger(damageKnockback);
-                        break;
-                    case DamageKnockback.StaggerType.HeavyStagger:
-                        HeavyStagger(damageKnockback);
-                        break;
-                    case DamageKnockback.StaggerType.Knockdown:
-                        Knockback(damageKnockback);
-                        break;
-                }
-            }
+                
+            } 
         }
-        
     }
 
+    public void ProcessStagger(DamageKnockback.StaggerType type, DamageKnockback damageKnockback)
+    {
+        bool turn = false;
+        bool isBlock = type == DamageKnockback.StaggerType.BlockStagger || type == DamageKnockback.StaggerType.GuardBreak;
+        if (isBlock)
+        {
+            OnBlock.Invoke();
+
+        }
+        else
+        {
+            OnHurt.Invoke();
+        }
+
+        Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
+
+        float sideStagger = Vector3.Project(turnTowards, this.transform.right).magnitude;
+        float forwardStagger = Vector3.Project(turnTowards, this.transform.forward).magnitude;
+        animator.SetFloat("Impact-SideStagger", sideStagger);
+        animator.SetFloat("Impact-ForwardStagger", forwardStagger);
+        turnTowards = -(turnTowards.normalized);
+        if (turn)
+        { 
+            transform.LookAt(transform.position + turnTowards);
+        }
+
+        // TODO: fx flexibility
+        FXController.CreateFX(FXController.FX.FX_Hit, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
+
+        if (!IsProne())
+        {
+            AnimatorImpact(type);
+        }
+        else
+        {
+            AnimatorImpact(DamageKnockback.StaggerType.Flinch);
+        }
+
+        if (type == DamageKnockback.StaggerType.BlockStagger)
+        {
+            if (damageKnockback.source != null && damageKnockback.source.TryGetComponent<HumanoidActor>(out HumanoidActor humanoid))
+            {
+                humanoid.BlockRecoil(this.inventory.GetBlockPoiseDamage(true));
+            }
+        }
+    }
+
+    public void AnimatorImpact(DamageKnockback.StaggerType type)
+    {
+        animator.SetInteger("ImpactType", (int)type);
+        animator.SetTrigger("Impact");
+    }
+
+    public void BlockRecoil(float poiseDamage)
+    {
+        attributes.ReducePoise(poiseDamage);
+        if (!IsArmored() && !IsAiming() && !attributes.HasPoiseRemaining())
+        {
+            animator.SetTrigger("AttackBlocked");
+        }
+    }
+    /*
     public void Block(DamageKnockback damageKnockback)
     {
         Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
@@ -749,14 +767,7 @@ public class HumanoidActor : Actor
         }
     }
 
-    public void BlockRecoil(float poiseDamage)
-    {
-        attributes.ReducePoise(poiseDamage);
-        if (!IsArmored() && !IsAiming() && !attributes.HasPoiseRemaining())
-        {
-            animator.SetTrigger("AttackBlocked");
-        }
-    }
+    
     public void Knockback(DamageKnockback damageKnockback)
     {
         Vector3 force = damageKnockback.kbForce;// + Vector3.up * 2f;
@@ -926,6 +937,7 @@ public class HumanoidActor : Actor
         animator.SetInteger("ImpactType", (int)type);
         animator.SetTrigger("Impact");
     }
+    */
     public bool Damage(DamageKnockback damageKnockback)
     {
         return Damage(damageKnockback, 1, false);
@@ -960,7 +972,7 @@ public class HumanoidActor : Actor
             return false;
         }
 
-        attributes.ReducePoise(damageKnockback.poiseDamage);
+        //attributes.ReducePoise(damageKnockback.poiseDamage);
         attributes.ReduceAttribute(attributes.health, totalDamage * multiplier);
         
         
@@ -1196,7 +1208,6 @@ public class HumanoidActor : Actor
             damage = new Damage(fallDamage * mult, DamageType.TrueDamage),
             poiseDamage = 999f,
             kbForce = Vector3.zero,
-            staggerType = ragdoll ? DamageKnockback.StaggerType.Knockdown : DamageKnockback.StaggerType.FallDamage,
             unblockable = true,
             breaksArmor = true,
             hitClip = FXController.clipDictionary["shield_bash_hit"]
@@ -1621,6 +1632,15 @@ public class HumanoidActor : Actor
                 (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
     }
 
+    public bool IsProne()
+    {
+        string TAG = "PRONE";
+        bool ALLOW_IN_TRANSITION = true;
+
+        return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
+    }
+
     public bool IsSneaking()
     {
         string TAG = "SNEAKING";
@@ -1683,7 +1703,7 @@ public class HumanoidActor : Actor
         return false;
     }
 
-    public bool IsBlocking()
+    public virtual bool IsBlocking()
     {
         bool baseLayer = false;
         bool actionLayer = false;
