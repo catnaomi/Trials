@@ -25,6 +25,10 @@ public class StatDisplay : MonoBehaviour
     public RectTransform poiseMaxDisplay;
     public Text poiseText;
 
+    private void Start()
+    {
+        actor = PlayerActor.player;
+    }
     private void OnGUI()
     {
         if (actor == null)

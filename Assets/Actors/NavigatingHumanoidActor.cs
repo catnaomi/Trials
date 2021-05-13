@@ -7,6 +7,8 @@ public class NavigatingHumanoidActor : HumanoidActor
 {
     [HideInInspector]
     public NavMeshAgent nav;
+    [HideInInspector]
+    public NavMeshObstacle obstacle;
     public float angleSpeed = 180f;
     [Header("Navigation Settings")]
 
@@ -22,12 +24,15 @@ public class NavigatingHumanoidActor : HumanoidActor
         base.ActorStart();
 
         nav = GetComponent<NavMeshAgent>();
+        obstacle = GetComponent<NavMeshObstacle>();
 
         nav.updatePosition = false;
 
         nav.updateRotation = false;
 
         nav.angularSpeed = angleSpeed;
+
+        obstacle.enabled = false;
     }
 
     public void StartNavigationToTarget(GameObject target)
@@ -36,6 +41,10 @@ public class NavigatingHumanoidActor : HumanoidActor
         shouldNavigate = true;
     }
 
+    public void ResumeNavigation()
+    {
+        shouldNavigate = true;
+    }
     public void StopNavigation()
     {
         shouldNavigate = false;
@@ -61,16 +70,24 @@ public class NavigatingHumanoidActor : HumanoidActor
     {
         if (CombatTarget != null)
         {
-            Vector3 targetAnimPos = CombatTarget.transform.position;
-            /*
-            if (CombatTarget.TryGetComponent<Animator>(out Animator targetAnim))
+            if (shouldNavigate && nav.hasPath)
             {
-                targetAnimPos = targetAnim.bodyPosition;
-            }*/
-            Vector3 thisPos = this.transform.position;//animator.bodyPosition;
-            thisPos.y = 0;
-            targetAnimPos.y = 0;
-            return Vector3.Distance(thisPos, targetAnimPos);
+                return nav.remainingDistance;
+            }
+            else
+            {
+                Vector3 targetAnimPos = CombatTarget.transform.position;
+                /*
+                if (CombatTarget.TryGetComponent<Animator>(out Animator targetAnim))
+                {
+                    targetAnimPos = targetAnim.bodyPosition;
+                }*/
+                Vector3 thisPos = this.transform.position;//animator.bodyPosition;
+                thisPos.y = 0;
+                targetAnimPos.y = 0;
+                return Vector3.Distance(thisPos, targetAnimPos);
+            }
+
         }
         else
         {
@@ -80,9 +97,9 @@ public class NavigatingHumanoidActor : HumanoidActor
 
     public bool IsClearLineToTarget()
     {
-        if (shouldNavigate)
+        if (true)
         {
-            if (Physics.Raycast(this.transform.position + Vector3.up, CombatTarget.transform.position - this.transform.position, out RaycastHit hit, 2f))
+            if (Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, CombatTarget.transform.position - this.transform.position, out RaycastHit hit, Vector3.Distance(CombatTarget.transform.position, this.transform.position), ~LayerMask.GetMask("Limbs","Hitboxes")))
             {
                 if (hit.transform.root == CombatTarget.transform.root)
                 {
@@ -98,27 +115,37 @@ public class NavigatingHumanoidActor : HumanoidActor
 
         if (humanoidState != HumanoidState.Actionable || !CanMove())
         {
-            return;
+            //return;
         }
 
         if (shouldNavigate)
         {
-            nav.isStopped = false;
+            nav.enabled = true;
+            obstacle.enabled = false;
+            //nav.isStopped = false;
             nav.SetDestination(CombatTarget.transform.position);
+            UpdateWithNav();
         }
         else
         {
-            nav.isStopped = true;
-            return;
+            //nav.isStopped = true;
+            nav.enabled = false;
+
+            obstacle.enabled = true;
+
+            UpdateWithoutNav();
         }
 
+        
+
+    }
+
+    private void UpdateWithNav()
+    {
         currentDistance = GetDistanceToTarget();
 
         Quaternion targetRot;
-        if (ShouldFaceTarget()) {
-            bool b = false;
-        }
-        if (CanMove() || ShouldFaceTarget())
+        if (CanMove() || ShouldFaceTarget() || IsBlocking())
         {
             targetRot = Quaternion.LookRotation(NumberUtilities.FlattenVector(nav.desiredVelocity));
         }
@@ -130,7 +157,7 @@ public class NavigatingHumanoidActor : HumanoidActor
 
         if (!this.CanMove())
         {
-            //nav.isStopped = true;
+            shouldNavigate = false;
         }
         moveDirection = (currentDistance > 1.5) ? (nav.desiredVelocity.normalized) : Vector3.zero;
         Vector3 movement = moveDirection;
@@ -152,7 +179,25 @@ public class NavigatingHumanoidActor : HumanoidActor
         if (worldDeltaPosition.magnitude > nav.radius)
             nav.nextPosition = transform.position + 0.9f * worldDeltaPosition;
 
+    }
 
+    private void UpdateWithoutNav()
+    {
+        if (this.CanMove())
+        {
+            shouldNavigate = true;
+        }
+
+        Quaternion targetRot;
+        if (ShouldFaceTarget() || IsBlocking())
+        {
+            targetRot = Quaternion.LookRotation(NumberUtilities.FlattenVector(CombatTarget.transform.position - this.transform.position));
+        }
+        else
+        {
+            targetRot = this.transform.rotation;
+        }
+        this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, targetRot, nav.angularSpeed * Time.deltaTime);
     }
 
     void OnAnimatorMove()
@@ -172,7 +217,7 @@ public class NavigatingHumanoidActor : HumanoidActor
     }
     public bool ShouldFaceTarget()
     {
-        string TAG = "FACE_TARGET";
+        string TAG = "FACING";
         bool ALLOW_IN_TRANSITION = true;
 
         return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&

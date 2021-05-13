@@ -85,7 +85,7 @@ public class EquippableWeapon : Item
 
     public virtual float GetBlockPoiseDamage()
     {
-        return 0f;
+        return 100f;
     }
 
     public virtual float GetWeight()

@@ -432,7 +432,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             lightKB,
                             actor.transform
                         ),
-                    staggers = DamageKnockback.StandardStaggerData
+                    staggers = DamageKnockback.StandardStaggerData,
+                    source = GetHumanoidHolder().gameObject,
                 };           
             case AttackType.SlashingMedium:
                 return new DamageKnockback()
@@ -445,7 +446,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             heavyKB,
                             actor.transform
                         ),
-                    staggers = DamageKnockback.StandardStaggerData
+                    staggers = DamageKnockback.StandardStaggerData,
+                    source = GetHumanoidHolder().gameObject,
                 };
             case AttackType.SlashingHeavy:
                 return new DamageKnockback()
@@ -460,6 +462,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
                     breaksArmor = true,
+                    source = GetHumanoidHolder().gameObject,
                 };
             case AttackType.ThrustingLight:
                 return new DamageKnockback()
@@ -473,6 +476,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             actor.transform
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
+                    source = GetHumanoidHolder().gameObject,
                 };
             case AttackType.ThrustingMedium:
                 return new DamageKnockback()
@@ -486,6 +490,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             actor.transform
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
+                    source = GetHumanoidHolder().gameObject,
                 };
             case AttackType.ThrustingHeavy:
                 return new DamageKnockback()
@@ -500,6 +505,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
                     breaksArmor = true,
+                    source = GetHumanoidHolder().gameObject,
                 };
             case AttackType.Bash:
                 return new DamageKnockback()
@@ -513,6 +519,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             actor.transform
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
+                    source = GetHumanoidHolder().gameObject,
                 };
             case AttackType.SlashingCritical:
                 return new DamageKnockback()
@@ -528,6 +535,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                     staggers = DamageKnockback.StandardStaggerData,
                     breaksArmor = true,
                     unblockable = true,
+                    source = GetHumanoidHolder().gameObject,
                 };
             case AttackType.ThrustingCritical:
                 return new DamageKnockback()
@@ -543,6 +551,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                     staggers = DamageKnockback.StandardStaggerData,
                     breaksArmor = true,
                     unblockable = true,
+                    source = GetHumanoidHolder().gameObject,
                 };
             default:
                 return new DamageKnockback();
@@ -555,7 +564,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
 
     public override float GetBlockPoiseDamage()
     {
-        return 10f * GetWeight();
+        return 100f;//10f * GetWeight();
     }
 
     public float GetPoiseRecoveryRate()

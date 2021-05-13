@@ -11,8 +11,6 @@ public class HumanoidActor : Actor
 
     protected CharacterController cc;
 
-    private bool shouldRagdoll;
-
     [HideInInspector]
     public Collider boundingCollider;
     [HideInInspector]
@@ -80,7 +78,7 @@ public class HumanoidActor : Actor
     public struct PositionReference
     {
         [Header("Body & Joint Positions")]
-        public Rigidbody Hips;
+        public Transform Hips;
         public Transform Spine;
         public Transform Head;
         [Header("Weapon Positions")]
@@ -146,9 +144,6 @@ public class HumanoidActor : Actor
         cc = GetComponent<CharacterController>();
 
         boundingCollider = GetComponent<Collider>();
-        joints = GetComponentsInChildren<Collider>();
-
-        UpdateColliders(false);
 
         SetHeft(1f);
 
@@ -411,57 +406,19 @@ public class HumanoidActor : Actor
     }
     public void TryGetup()
     {
-        ragdollClock += Time.deltaTime;
-
-        if (positionReference.Hips.velocity.magnitude < autoGetupVelocity)
+        if (attributes.HasHealthRemaining() || this is PlayerActor)
         {
-            ragdollStillClock += Time.deltaTime;
+            Getup();
         }
         else
         {
-            ragdollStillClock = 0f;
-        }
-
-        if (
-            ragdollClock > forceGetupDelay || // force getup
-            ragdollStillClock > autoGetupDelay || // auto getup
-            (!attributes.HasHealthRemaining() && (ragdollStillClock > helplessGetupDelay)) // get up faster when helpless
-            )
-        {
-            if (attributes.HasHealthRemaining() || this is PlayerActor)
-            {
-                Getup();
-            }
-            else
-            {
-                StartHelpless();
-            }
+            StartHelpless();
         }
     }
 
     public void Getup()
     {
-        animator.enabled = true;
-        cc.enabled = true;
-
-        Vector3 spineUp;
-        spineUp = -positionReference.Hips.transform.up;
-        spineUp.Scale(new Vector3(1, 0, 1));
-        spineUp.Normalize();
-
-        bool isFacingUp;
-        float upDist = Vector3.Distance(positionReference.Hips.transform.forward, Vector3.up);
-        float downDist = Vector3.Distance(-positionReference.Hips.transform.forward, Vector3.up);
-        isFacingUp = upDist < downDist;
-
-
-        cc.Move((positionReference.Hips.transform.position - transform.position) + spineUp);
-        transform.rotation = Quaternion.LookRotation(spineUp * (isFacingUp ? 1 : -1));
-        positionReference.Hips.transform.position = Vector3.zero;
-        animator.SetBool("FacingUp", isFacingUp);
         animator.SetTrigger("GetUp");
-        //animator.SetTrigger(isFacingUp ? "GetUpFaceUp" : "GetUpFaceDown");
-        UpdateColliders(false);
 
         attributes.RecoverAttribute(attributes.stamina, 50f);
 
@@ -470,34 +427,7 @@ public class HumanoidActor : Actor
 
     public void StartHelpless()
     {
-        if (!animator.enabled)
-        {
-            animator.enabled = true;
-            cc.enabled = true;
-
-            Vector3 spineUp;
-            spineUp = -positionReference.Hips.transform.up;
-            spineUp.Scale(new Vector3(1, 0, 1));
-            spineUp.Normalize();
-
-            bool isFacingUp;
-            float upDist = Vector3.Distance(positionReference.Hips.transform.forward, Vector3.up);
-            float downDist = Vector3.Distance(-positionReference.Hips.transform.forward, Vector3.up);
-            isFacingUp = upDist < downDist;
-
-
-            cc.Move((positionReference.Hips.transform.position - transform.position) + spineUp);
-            transform.rotation = Quaternion.LookRotation(spineUp * (isFacingUp ? 1 : -1));
-            positionReference.Hips.transform.position = Vector3.zero;
-
-            animator.SetBool("FacingUp", isFacingUp);
-        }
-        
         animator.SetBool("Helpless", true);
-        //animator.SetTrigger("ForceHelpless");
-        //animator.SetTrigger(isFacingUp ? "GetUpFaceUp" : "GetUpFaceDown");
-        //UpdateColliders(false);
-
         humanoidState = HumanoidState.Helpless;
     }
 
@@ -540,47 +470,8 @@ public class HumanoidActor : Actor
     public void Die()
     {
         this.gameObject.tag = "Corpse";
-        Ragdoll();
         humanoidState = HumanoidState.Dead;
     }
-
-    public void Ragdoll()
-    {
-        transform.position += Vector3.up * 0.1f;
-
-        animator.enabled = false;
-        cc.enabled = false;
-        UpdateColliders(true);
-
-        foreach (Rigidbody rigidbody in GetComponentsInChildren<Rigidbody>())
-        {
-            rigidbody.velocity = Vector3.zero;
-        }
-
-        humanoidState = HumanoidState.Ragdolled;
-
-        ragdollClock = 0f;
-        ragdollStillClock = 0f;
-    }
-
-    // on false: use bounding collider. on true: use joint colliders.
-    private void UpdateColliders(bool isRagdolled)
-    {
-        foreach (Collider collider in joints)
-        {
-            if (collider != null)
-            {
-                //collider.enabled = isRagdolled;
-                if (collider.TryGetComponent<Rigidbody>(out Rigidbody rigid))
-                {
-                    rigid.isKinematic = !isRagdolled;
-                }
-            }
-        }
-        boundingCollider.enabled = true;//!isRagdolled;
-        positionReference.Hips.GetComponent<Collider>().enabled = true;
-    }
-
 
     public bool Vulnerable()
     {
@@ -692,8 +583,8 @@ public class HumanoidActor : Actor
 
         Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
 
-        float sideStagger = Vector3.Project(turnTowards, this.transform.right).magnitude;
-        float forwardStagger = Vector3.Project(turnTowards, this.transform.forward).magnitude;
+        float sideStagger = -Vector3.Dot(turnTowards, this.transform.right);
+        float forwardStagger = Vector3.Dot(turnTowards, this.transform.forward);
         animator.SetFloat("Impact-SideStagger", sideStagger);
         animator.SetFloat("Impact-ForwardStagger", forwardStagger);
         turnTowards = -(turnTowards.normalized);
@@ -703,7 +594,8 @@ public class HumanoidActor : Actor
         }
 
         // TODO: fx flexibility
-        FXController.CreateFX(FXController.FX.FX_Hit, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
+        FXController.FX fx = (!isBlock) ? FXController.FX.FX_Hit : FXController.FX.FX_Block;
+        FXController.CreateFX(fx, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
 
         if (!IsProne())
         {
@@ -732,9 +624,10 @@ public class HumanoidActor : Actor
     public void BlockRecoil(float poiseDamage)
     {
         attributes.ReducePoise(poiseDamage);
-        if (!IsArmored() && !IsAiming() && !attributes.HasPoiseRemaining())
+        if (!IsArmored() && !IsAiming() && attributes.GetOffBalance())
         {
-            animator.SetTrigger("AttackBlocked");
+            //animator.SetTrigger("AttackBlocked");
+            AnimatorImpact(DamageKnockback.StaggerType.Recoil);
         }
     }
     /*

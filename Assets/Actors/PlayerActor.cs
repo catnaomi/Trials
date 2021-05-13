@@ -255,10 +255,21 @@ public class PlayerActor : HumanoidActor
 
         if (CanMove())
         {
-            if (alignMode == AlignMode.Camera || alignMode == AlignMode.None || alignMode == AlignMode.Target)
+            if (alignMode == AlignMode.Camera || alignMode == AlignMode.None)
             {
                 animator.SetFloat("ForwardVelocity", Mathf.Lerp(animator.GetFloat("ForwardVelocity"), forwardVel, 0.2f));
                 animator.SetFloat("StrafingVelocity", Mathf.Lerp(animator.GetFloat("StrafingVelocity"), strafeVel, 0.2f));
+            }
+            else if (alignMode == AlignMode.Target)
+            {
+                float fv = Vector3.Dot(moveDirection,this.transform.forward);
+                float sv = Vector3.Dot(moveDirection, this.transform.right);
+
+                Vector2 targetStrafing = new Vector2(fv, sv);
+                targetStrafing.Normalize();
+
+                animator.SetFloat("ForwardVelocity", Mathf.Lerp(animator.GetFloat("ForwardVelocity"), targetStrafing.x, 0.2f));
+                animator.SetFloat("StrafingVelocity", Mathf.Lerp(animator.GetFloat("StrafingVelocity"), targetStrafing.y, 0.2f));
             }
             else
             {

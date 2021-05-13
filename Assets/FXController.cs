@@ -32,7 +32,7 @@ public class FXController : MonoBehaviour
     }
     public static Dictionary<FX, GameObject> fxDictionary;
     public static Dictionary<string, AudioClip> clipDictionary;
-    private void Start()
+    private void OnEnable()
     {
         fxDictionary = new Dictionary<FX, GameObject>()
         {

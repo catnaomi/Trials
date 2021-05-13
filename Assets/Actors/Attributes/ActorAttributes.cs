@@ -242,9 +242,14 @@ public class ActorAttributes : MonoBehaviour
     public void ReducePoise(float poise)
     {
         this.poise -= poise;
+
         poiseIncreased = true;
 
         CheckOffBalance();
+        if (this.poise < 0)
+        {
+            this.poise = 0;
+        }
     }
 
     public bool HasHealthRemaining()

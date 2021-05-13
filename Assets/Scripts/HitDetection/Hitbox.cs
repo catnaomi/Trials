@@ -216,7 +216,7 @@ public class Hitbox : MonoBehaviour
         newHitbox.damageKnockback.source = source;
         newHitbox.damageKnockback.hitboxSource = newHitbox.gameObject;
         newHitbox.transform.SetParent(newRoot.transform, true);
-
+        newHitbox.gameObject.layer = LayerMask.NameToLayer("Hitboxes");
         return newHitbox;
     }
 
@@ -236,7 +236,7 @@ public class Hitbox : MonoBehaviour
         start.source = source;
         start.damageKnockback.source = source;
         start.damageKnockback.hitboxSource = start.gameObject;
-
+        start.gameObject.layer = LayerMask.NameToLayer("Hitboxes");
         hitboxes.Add(start);
 
 
@@ -248,7 +248,7 @@ public class Hitbox : MonoBehaviour
         end.source = source;
         end.damageKnockback.source = source;
         end.damageKnockback.hitboxSource = end.gameObject;
-
+        end.gameObject.layer = LayerMask.NameToLayer("Hitboxes");
 
         hitboxes.Add(end);
 
@@ -268,7 +268,7 @@ public class Hitbox : MonoBehaviour
         mid.source = source;
         mid.damageKnockback.source = source;
         mid.damageKnockback.hitboxSource = mid.gameObject;
-
+        mid.gameObject.layer = LayerMask.NameToLayer("Hitboxes");
         hitboxes.Add(mid);
 
         if (radius >= length / 3f)

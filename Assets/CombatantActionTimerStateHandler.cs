@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class CombatantActionTimerStateHandler : StateMachineBehaviour
 {
-    public float delay = -1;
+    public float delay = -2;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
@@ -13,7 +13,12 @@ public class CombatantActionTimerStateHandler : StateMachineBehaviour
             if (delay == -1)
             {
                 actor.clock = CombatantActor.CLOCK_DEFAULT;
-            } else
+            }
+            else if (delay == -2)
+            {
+                actor.clock = Random.Range(2, 5);
+            }
+            else
             {
                 actor.clock = delay;
             }
