@@ -205,7 +205,12 @@ public class NavigatingHumanoidActor : HumanoidActor
         // Update position based on animation movement using navigation surface height
         Vector3 position = animator.rootPosition;
         position.y = nav.nextPosition.y;
-        transform.position = position;
+        Vector3 dir = position - this.transform.position;
+        if (!Physics.SphereCast(this.transform.position + (Vector3.up * 0.75f), 0.25f, dir, out RaycastHit hit, dir.magnitude, LayerMask.GetMask("Terrain")))
+        {
+            transform.position = position;
+        }
+
     }
 
     public void RealignToTarget()

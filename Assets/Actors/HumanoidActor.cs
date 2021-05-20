@@ -10,6 +10,7 @@ public class HumanoidActor : Actor
 {
 
     protected CharacterController cc;
+    protected Rigidbody rigidbody;
 
     [HideInInspector]
     public Collider boundingCollider;
@@ -142,7 +143,7 @@ public class HumanoidActor : Actor
         //GetStance();
 
         cc = GetComponent<CharacterController>();
-
+        rigidbody = GetComponent<Rigidbody>();
         boundingCollider = GetComponent<Collider>();
 
         SetHeft(1f);
@@ -939,17 +940,6 @@ public class HumanoidActor : Actor
     {
         // remove all references to this
         return false;
-    }
-
-    public void HandleBlockIK()
-    {
-        /*
-        if (stance.GetBlockStyle() == StanceHandler.BlockStyle.TwoHand && !animator.IsInTransition(animator.GetLayerIndex("Base Movement")))
-        {
-            animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, tempValue1);
-            animator.SetIKPosition(AvatarIKGoal.LeftHand, positionReference.MainHand.transform.position + positionReference.MainHand.transform.forward * tempValue2);
-        }
-        */
     }
 
     public void SetNextAttackType(BladeWeapon.AttackType type, bool adjustPoise)

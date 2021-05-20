@@ -19,12 +19,13 @@ public class EquippableWeapon : Item
     [Header("Slot Information")]
     public Inventory.EquipSlot MainHandEquipSlot;
     public Inventory.EquipSlot OffHandEquipSlot;
-    [Header("Stance Information")]
-    public StanceHandler PrfStance;
+    [Header("Stance & Moveset Information")]
+    public StanceHandler stance;
+    public Moveset moveset;
     [Header("Stats")]
     public float AttackSpeed;
     public float weight;
-    
+
     public UnityEvent OnEquip = new UnityEvent();
     public UnityEvent OnUnequip = new UnityEvent();
 

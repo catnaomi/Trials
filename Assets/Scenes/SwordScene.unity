@@ -6302,6 +6302,28 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 334377652}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &335766013 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2876314853822692796, guid: c57728b619a42bc47b9d3e0a00922990,
+    type: 3}
+  m_PrefabInstance: {fileID: 6110069715879376081}
+  m_PrefabAsset: {fileID: 0}
+--- !u!54 &335766025
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 335766013}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &341934194
 GameObject:
   m_ObjectHideFlags: 0
@@ -9624,7 +9646,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 351d090e163d1b849929e69962ef7cae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 693636908}
+  player: {fileID: 7262600551037293709}
   image: {fileID: 529390380}
 --- !u!1 &530919668
 GameObject:
@@ -12611,27 +12633,11 @@ MonoBehaviour:
   chargeTime: 0
   centerTransform: {fileID: 0}
   stance:
-    rightHandStance: 0
-    leftHandStance: 0
-    twoHandStance: 0
+    stanceStyle: 0
+    rightGrip: 0
+    leftGrip: 0
+    twohandGrip: 0
     blockStyle: 0
-    moveset:
-      slashMain: {fileID: 0}
-      slashOff: {fileID: 0}
-      thrustMain: {fileID: 0}
-      thrustOff: {fileID: 0}
-      slashMainHeavy: {fileID: 0}
-      slashOffHeavy: {fileID: 0}
-      thrustMainHeavy: {fileID: 0}
-      thrustOffHeavy: {fileID: 0}
-      slashDash: {fileID: 0}
-      slashPlunge: {fileID: 0}
-      slashSneak: {fileID: 0}
-      thrustDash: {fileID: 0}
-      thrustPlunge: {fileID: 0}
-      thrustSneak: {fileID: 0}
-      skill1: {fileID: 0}
-      skill2: {fileID: 0}
   currentAttackInput: {fileID: 0}
   moveset:
     slashMain: {fileID: 0}
@@ -13033,27 +13039,11 @@ MonoBehaviour:
   chargeTime: 0
   centerTransform: {fileID: 1873066734}
   stance:
-    rightHandStance: 0
-    leftHandStance: 0
-    twoHandStance: 0
+    stanceStyle: 0
+    rightGrip: 0
+    leftGrip: 0
+    twohandGrip: 0
     blockStyle: 0
-    moveset:
-      slashMain: {fileID: 0}
-      slashOff: {fileID: 0}
-      thrustMain: {fileID: 0}
-      thrustOff: {fileID: 0}
-      slashMainHeavy: {fileID: 0}
-      slashOffHeavy: {fileID: 0}
-      thrustMainHeavy: {fileID: 0}
-      thrustOffHeavy: {fileID: 0}
-      slashDash: {fileID: 11400000, guid: 3dccf017742cc764ba6db956a5ae117d, type: 2}
-      slashPlunge: {fileID: 11400000, guid: 165d7bcb572233e4fbe4ac8959666b97, type: 2}
-      slashSneak: {fileID: 11400000, guid: 3eb243351fc290444ac2f394a3c200e2, type: 2}
-      thrustDash: {fileID: 11400000, guid: bdb92155421b16b4cbd5d6b250edbfbd, type: 2}
-      thrustPlunge: {fileID: 11400000, guid: d7e00934967b7164080a7595af91097d, type: 2}
-      thrustSneak: {fileID: 11400000, guid: 91e45d79f610406408b43497aebf4c2b, type: 2}
-      skill1: {fileID: 11400000, guid: 7cb559ef66c64bb489882417b2263ac7, type: 2}
-      skill2: {fileID: 11400000, guid: 1f63bf86d06129a41b8c3756b3dcc671, type: 2}
   currentAttackInput: {fileID: 0}
   moveset:
     slashMain: {fileID: 11400000, guid: dd58464c413cfee478c599729b1bc3f2, type: 2}
@@ -18780,8 +18770,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1132656376}
-  m_LocalRotation: {x: 0.610116, y: -0.00013773631, z: 0.00017255226, w: 0.792312}
-  m_LocalPosition: {x: 0.00007706473, y: 9.425268, z: 1.695535}
+  m_LocalRotation: {x: 0.61011606, y: -0.00013817562, z: 0.00017310261, w: 0.7923121}
+  m_LocalPosition: {x: 0.00007731054, y: 9.425266, z: 1.6955335}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1143833990}
@@ -20891,6 +20881,19 @@ MonoBehaviour:
   downTarget: {fileID: 345520453}
   leftTarget: {fileID: 345520453}
   rightTarget: {fileID: 345520453}
+  handleUI: 1
+  targetGraphic: {fileID: 9206070849078276016, guid: 98ce605f7de2af142b0fa5d7d8fa8cda,
+    type: 3}
+  upGraphic: {fileID: 4310504062080535192, guid: 4412bb3eb0cdb8b448d247dbeee8a389,
+    type: 3}
+  downGraphic: {fileID: 9154205800001027066, guid: 99414f85d49a44d4e8db8d90339a0235,
+    type: 3}
+  leftGraphic: {fileID: 3282611953497002008, guid: c0c947b310a6bc04ba7e42783cc33081,
+    type: 3}
+  rightGraphic: {fileID: 263446488122040254, guid: 05eb0176f339cce4fb617f5658456851,
+    type: 3}
+  uiOffset: {x: 0, y: 1, z: 0}
+  billboard: 1
 --- !u!114 &1257053860
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46635,27 +46638,11 @@ MonoBehaviour:
   chargeTime: 0
   centerTransform: {fileID: 0}
   stance:
-    rightHandStance: 0
-    leftHandStance: 0
-    twoHandStance: 0
+    stanceStyle: 0
+    rightGrip: 0
+    leftGrip: 0
+    twohandGrip: 0
     blockStyle: 0
-    moveset:
-      slashMain: {fileID: 0}
-      slashOff: {fileID: 0}
-      thrustMain: {fileID: 0}
-      thrustOff: {fileID: 0}
-      slashMainHeavy: {fileID: 0}
-      slashOffHeavy: {fileID: 0}
-      thrustMainHeavy: {fileID: 0}
-      thrustOffHeavy: {fileID: 0}
-      slashDash: {fileID: 0}
-      slashPlunge: {fileID: 0}
-      slashSneak: {fileID: 0}
-      thrustDash: {fileID: 0}
-      thrustPlunge: {fileID: 0}
-      thrustSneak: {fileID: 0}
-      skill1: {fileID: 0}
-      skill2: {fileID: 0}
   currentAttackInput: {fileID: 0}
   moveset:
     slashMain: {fileID: 0}
@@ -55163,6 +55150,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: xbot-combatant
       objectReference: {fileID: 0}
+    - target: {fileID: 2876314853822692796, guid: c57728b619a42bc47b9d3e0a00922990,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9168171087891374805, guid: c57728b619a42bc47b9d3e0a00922990,
+        type: 3}
+      propertyPath: m_UpdateMode
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c57728b619a42bc47b9d3e0a00922990, type: 3}
 --- !u!4 &6120022291218735697
@@ -57053,6 +57050,7 @@ GameObject:
   - component: {fileID: 7262600551037293708}
   - component: {fileID: 7262600551037293707}
   - component: {fileID: 7262600551037293713}
+  - component: {fileID: 7262600551037293715}
   m_Layer: 10
   m_Name: pre-kplayer1-norag
   m_TagString: Actor
@@ -57329,27 +57327,11 @@ MonoBehaviour:
   chargeTime: 0
   centerTransform: {fileID: 1873066734}
   stance:
-    rightHandStance: 0
-    leftHandStance: 0
-    twoHandStance: 0
+    stanceStyle: 0
+    rightGrip: 0
+    leftGrip: 0
+    twohandGrip: 0
     blockStyle: 0
-    moveset:
-      slashMain: {fileID: 0}
-      slashOff: {fileID: 0}
-      thrustMain: {fileID: 0}
-      thrustOff: {fileID: 0}
-      slashMainHeavy: {fileID: 0}
-      slashOffHeavy: {fileID: 0}
-      thrustMainHeavy: {fileID: 0}
-      thrustOffHeavy: {fileID: 0}
-      slashDash: {fileID: 11400000, guid: 3dccf017742cc764ba6db956a5ae117d, type: 2}
-      slashPlunge: {fileID: 11400000, guid: 165d7bcb572233e4fbe4ac8959666b97, type: 2}
-      slashSneak: {fileID: 11400000, guid: 3eb243351fc290444ac2f394a3c200e2, type: 2}
-      thrustDash: {fileID: 11400000, guid: bdb92155421b16b4cbd5d6b250edbfbd, type: 2}
-      thrustPlunge: {fileID: 11400000, guid: d7e00934967b7164080a7595af91097d, type: 2}
-      thrustSneak: {fileID: 11400000, guid: 91e45d79f610406408b43497aebf4c2b, type: 2}
-      skill1: {fileID: 11400000, guid: 7cb559ef66c64bb489882417b2263ac7, type: 2}
-      skill2: {fileID: 11400000, guid: 1f63bf86d06129a41b8c3756b3dcc671, type: 2}
   currentAttackInput: {fileID: 0}
   moveset:
     slashMain: {fileID: 11400000, guid: dd58464c413cfee478c599729b1bc3f2, type: 2}
@@ -57408,8 +57390,8 @@ MonoBehaviour:
   OffWeapon: {fileID: 0}
   startingMainSlot: -1
   startingOffSlot: -1
-  Slot0Weapon: {fileID: 11400000, guid: 83393d613dc23204bb4b827e671d3b6b, type: 2}
-  Slot1Weapon: {fileID: 11400000, guid: 83393d613dc23204bb4b827e671d3b6b, type: 2}
+  Slot0Weapon: {fileID: 11400000, guid: 8a703e24a27caf64180b5f9632a0423b, type: 2}
+  Slot1Weapon: {fileID: 0}
   Slot2Weapon: {fileID: 11400000, guid: e2125d81640ba49449339d95c9516c58, type: 2}
   Slot3Weapon: {fileID: 11400000, guid: a9f1ec4aadee4af4593c733a9f770813, type: 2}
   StartingContents:
@@ -57544,11 +57526,27 @@ CapsuleCollider:
   m_GameObject: {fileID: 7262600551037293706}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   m_Radius: 0.5
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!54 &7262600551037293715
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7262600551037293706}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 96
+  m_CollisionDetection: 0
 --- !u!4 &7265301093024547524
 Transform:
   m_ObjectHideFlags: 0
@@ -59927,27 +59925,11 @@ MonoBehaviour:
   chargeTime: 0
   centerTransform: {fileID: 0}
   stance:
-    rightHandStance: 0
-    leftHandStance: 0
-    twoHandStance: 0
+    stanceStyle: 0
+    rightGrip: 0
+    leftGrip: 0
+    twohandGrip: 0
     blockStyle: 0
-    moveset:
-      slashMain: {fileID: 0}
-      slashOff: {fileID: 0}
-      thrustMain: {fileID: 0}
-      thrustOff: {fileID: 0}
-      slashMainHeavy: {fileID: 0}
-      slashOffHeavy: {fileID: 0}
-      thrustMainHeavy: {fileID: 0}
-      thrustOffHeavy: {fileID: 0}
-      slashDash: {fileID: 0}
-      slashPlunge: {fileID: 0}
-      slashSneak: {fileID: 0}
-      thrustDash: {fileID: 0}
-      thrustPlunge: {fileID: 0}
-      thrustSneak: {fileID: 0}
-      skill1: {fileID: 0}
-      skill2: {fileID: 0}
   currentAttackInput: {fileID: 0}
   moveset:
     slashMain: {fileID: 0}
@@ -61630,27 +61612,11 @@ MonoBehaviour:
   chargeTime: 0
   centerTransform: {fileID: 0}
   stance:
-    rightHandStance: 0
-    leftHandStance: 0
-    twoHandStance: 0
+    stanceStyle: 0
+    rightGrip: 0
+    leftGrip: 0
+    twohandGrip: 0
     blockStyle: 0
-    moveset:
-      slashMain: {fileID: 0}
-      slashOff: {fileID: 0}
-      thrustMain: {fileID: 0}
-      thrustOff: {fileID: 0}
-      slashMainHeavy: {fileID: 0}
-      slashOffHeavy: {fileID: 0}
-      thrustMainHeavy: {fileID: 0}
-      thrustOffHeavy: {fileID: 0}
-      slashDash: {fileID: 0}
-      slashPlunge: {fileID: 0}
-      slashSneak: {fileID: 0}
-      thrustDash: {fileID: 0}
-      thrustPlunge: {fileID: 0}
-      thrustSneak: {fileID: 0}
-      skill1: {fileID: 0}
-      skill2: {fileID: 0}
   currentAttackInput: {fileID: 0}
   moveset:
     slashMain: {fileID: 0}

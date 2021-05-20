@@ -21,5 +21,7 @@ public class CreateBlendtreeAsset : MonoBehaviour
         BlendTree BTcopy = Instantiate<BlendTree>(BT);
 
         AssetDatabase.CreateAsset(BTcopy, AssetDatabase.GenerateUniqueAssetPath(path + "_" + BT.name + ".asset"));
+
+        Debug.Log("Copied blendtree in " + path);
     }
 }

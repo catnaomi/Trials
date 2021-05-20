@@ -31,9 +31,13 @@ public class BlockIKHandler : StateMachineBehaviour
     // OnStateIK is called right after Animator.OnAnimatorIK()
     override public void OnStateIK(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        if (animator.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
+        if (animator.TryGetComponent<PlayerActor>(out PlayerActor actor))
         {
-            actor.HandleBlockIK();
+            if (animator.GetFloat("Style-Block") == (int)StanceHandler.BlockStyle.TwoHand && !animator.IsInTransition(animator.GetLayerIndex("Base Movement")))
+            {
+                animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0.75f);
+                animator.SetIKPosition(AvatarIKGoal.LeftHand, actor.positionReference.MainHand.transform.position + actor.positionReference.MainHand.transform.forward * -0.25f);
+            }
         }
     }
 }

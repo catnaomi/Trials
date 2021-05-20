@@ -142,24 +142,24 @@ public class CraftableWeapon : BladeWeapon
 
     public void SetProperties()
     {
-        this.PrfStance = new StanceHandler();
+        this.stance = new StanceHandler();
 
         if (hilt != null)
         {
             this.EquippableMain = hilt.MainHanded;
             this.EquippableOff = hilt.OffHanded;
 
-            this.PrfStance.ApplyMoveset(hilt.PrfStance);
+            //this.stance.ApplyMoveset(hilt.PrfStance);
         }
 
         if (blade != null)
         {
-            this.PrfStance.ApplyMoveset(blade.PrfStance);
+            //this.stance.ApplyMoveset(blade.PrfStance);
         }
 
         if (adornment != null)
         {
-            this.PrfStance.ApplyMoveset(adornment.PrfStance);
+            //this.stance.ApplyMoveset(adornment.PrfStance);
         }
 
         if (GetTotalLength() > 2 || GetTotalWeight() > 3)

@@ -140,7 +140,50 @@ namespace CustomUtilities
         {
             Dictionary<AxisDirection, Transform> map = new Dictionary<AxisDirection, Transform>();
 
+            Dictionary<Transform, Dictionary<AxisDirection, float>> transformRankMap = new Dictionary<Transform, Dictionary<AxisDirection, float>>();
+            foreach (Transform testTransform in transforms)
+            {
+                Dictionary<AxisDirection, float> rank = new Dictionary<AxisDirection, float>();
+                foreach (AxisDirection axis in GetCardinals())
+                {
+                    Vector3 testDirection = testTransform.position - anchor;
+                    Vector3 axisDir = AxisDirectionToTransformDirection(basis, axis);
+                    float dot = Vector3.Dot(testDirection, axisDir);
+                    rank[axis] = dot;
+                }
+                transformRankMap[testTransform] = rank;
+            }
 
+            List<Transform> remainingTransform = new List<Transform>();
+            remainingTransform.AddRange(transforms);
+            Vector2 metric = new Vector2(1, 0);
+            bool deleteOnFind = remainingTransform.Count > 4;
+            foreach (AxisDirection axis in GetCardinals())
+            {
+                AxisDirection axis2 = GetRightHandDirection(axis);
+                float leading = Mathf.Infinity;
+                Transform lead = null;
+                foreach (Transform testTransform in remainingTransform)
+                {
+                    float val1 = transformRankMap[testTransform][axis];
+                    float val2 = transformRankMap[testTransform][axis2];
+                    Vector2 testVector = new Vector2(val1, val2);
+
+                    float dist = Vector2.Distance(testVector, metric);
+                    if (dist < leading)
+                    {
+                        leading = dist;
+                        lead = testTransform;
+                    }
+                }
+                if (deleteOnFind && lead != null)
+                {
+                    remainingTransform.Remove(lead);
+                }
+                map[axis] = lead;
+            }
+            return map;
+            /*
             foreach (AxisDirection axis in Enum.GetValues(typeof(AxisDirection)))
             {
                 Transform leadingTransform = null;
@@ -172,6 +215,7 @@ namespace CustomUtilities
             }
 
             return map;
+            */
         }
 
         /*
@@ -195,6 +239,32 @@ namespace CustomUtilities
             return gameObjectMap;
         }
         */
+
+        public static AxisDirection GetRightHandDirection(AxisDirection axis)
+        {
+            if (axis == AxisDirection.Up)
+            {
+                return AxisDirection.Right;
+            }
+            else if (axis == AxisDirection.Right)
+            {
+                return AxisDirection.Down;
+            }
+            else if (axis == AxisDirection.Down)
+            {
+                return AxisDirection.Left;
+            }
+            else if (axis == AxisDirection.Left)
+            {
+                return AxisDirection.Up;
+            }
+            return AxisDirection.Zero;
+        }
+
+        public static AxisDirection[] GetCardinals()
+        {
+            return new AxisDirection[] { AxisDirection.Up, AxisDirection.Down, AxisDirection.Left, AxisDirection.Right };
+        }
 
         /*
          * converts an axis direction to a relative direction based relative to a transform. 

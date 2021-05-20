@@ -454,16 +454,32 @@ public class Inventory : MonoBehaviour
         if (IsMainEquipped() && IsMainDrawn())
         {
             //stance = StanceHandler.MergeStances(stance, GetMainWeapon().PrfMainHandStance);
-            mainStance = GetMainWeapon().PrfStance;
+            mainStance = GetMainWeapon().stance;
+            //stance.Merge(mainStance, true);
+            stance.stanceStyle = mainStance.stanceStyle;
+            stance.rightGrip = mainStance.rightGrip;
+            stance.leftGrip = mainStance.rightGrip;
+            stance.twohandGrip = mainStance.twohandGrip;
+            stance.blockStyle = mainStance.blockStyle;
         }
 
         if (IsOffEquipped() && IsOffDrawn())
         {
             //stance = StanceHandler.MergeStances(stance, GetOffHand().PrfOffHandStance);
-            offStance = GetOffHand().PrfStance;
+            offStance = GetOffHand().stance;
+            stance.Merge(offStance, false);
+            stance.leftGrip = offStance.leftGrip;
+            if (offStance.blockStyle != StanceHandler.BlockStyle.Shield)
+            {
+                stance.blockStyle = StanceHandler.BlockStyle.Bracing; // cross block?
+            }
+            else
+            {
+                stance.blockStyle = StanceHandler.BlockStyle.Shield;
+            }
         }
-
-        stance.MergeStance(mainStance, offStance);
+        
+        
     }
 
     public float GetEquipWeight()

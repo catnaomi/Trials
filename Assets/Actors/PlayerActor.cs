@@ -77,7 +77,12 @@ public class PlayerActor : HumanoidActor
     public bool ledgeHanging;
     public bool ladderSnap;
     public bool ladderLockout;
-    
+
+    private void OnEnable()
+    {
+        player = this;
+        bool b = false;
+    }
     public override void ActorStart()
     {
         base.ActorStart();
@@ -96,7 +101,6 @@ public class PlayerActor : HumanoidActor
         this.OnInjure.AddListener(() => { FXController.SlowMo(0.5f, 3f); });
         this.OnDodge.AddListener(() => { FXController.SlowMo(0.1f, 0.5f); });
         //OnHit.AddListener(() => { FXController.Hitpause(1f); });
-        player = this;
 
         SetupInput();
     }
@@ -296,8 +300,9 @@ public class PlayerActor : HumanoidActor
             ladderLockout = false;
         }
         animator.SetBool("LadderLockout", ladderLockout);
-        
 
+        animator.SetLayerWeight(animator.GetLayerIndex("Right Arm Override"), inventory.IsMainDrawn() ? 1f : 0f);
+        animator.SetLayerWeight(animator.GetLayerIndex("Left Arm Override"), inventory.IsOffDrawn() ? 1f : 0f);
         //animator.SetFloat("StickVelocity", stickDirection.magnitude);
         //animator.SetFloat("ForwardVelocity", primaryVertical);
         //animator.SetFloat("StrafingVelocity", primaryHorizontal);
@@ -746,13 +751,13 @@ public class PlayerActor : HumanoidActor
 
         if (inventory.IsMainDrawn() && inventory.IsOffDrawn())
         {
-            this.animator.SetFloat("Style-Left", (int)stance.leftHandStance);
-            this.animator.SetFloat("Style-Right", (int)stance.rightHandStance);
+            this.animator.SetFloat("Style-Left", (int)stance.leftGrip);
+            this.animator.SetFloat("Style-Right", (int)stance.rightGrip);
         }
         else if (inventory.IsMainDrawn() && inventory.IsTwoHanding())
         {
-            this.animator.SetFloat("Style-Left", (int)stance.twoHandStance);
-            this.animator.SetFloat("Style-Right", (int)stance.twoHandStance);
+            this.animator.SetFloat("Style-Left", (int)stance.twohandGrip);
+            this.animator.SetFloat("Style-Right", (int)stance.twohandGrip);
         }
         else if (inventory.IsOffDrawn())
         {
@@ -763,9 +768,9 @@ public class PlayerActor : HumanoidActor
             this.animator.SetFloat("Style-Left", 0);
             this.animator.SetFloat("Style-Right", 0);
         }
-        
 
-        this.animator.SetFloat("BlockStyle", (int)stance.GetBlockStyle());
+        this.animator.SetFloat("Style-Stance", (int)stance.stanceStyle);
+        this.animator.SetFloat("Style-Block", (int)stance.blockStyle);
 
         //stance.ApplyHeavyAttack(this);
         //stance.ApplySpecialAttack(this);

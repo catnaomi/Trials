@@ -27,6 +27,17 @@ public class PlayerTargetManager : MonoBehaviour
     public Transform rightTarget;
 
     List<Ray> rays;
+
+
+    public bool handleUI = true;
+    public GameObject targetGraphic;
+    public GameObject upGraphic;
+    public GameObject downGraphic;
+    public GameObject leftGraphic;
+    public GameObject rightGraphic;
+    public Vector3 uiOffset;
+    public bool billboard = true;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -38,6 +49,15 @@ public class PlayerTargetManager : MonoBehaviour
 
         player.toggleTarget.AddListener(ToggleTarget);
         player.secondaryStickFlick.AddListener(SwitchTargets);
+
+        if (handleUI)
+        {
+            targetGraphic = GameObject.Instantiate(targetGraphic);
+            upGraphic = GameObject.Instantiate(upGraphic);
+            downGraphic = GameObject.Instantiate(downGraphic);
+            leftGraphic = GameObject.Instantiate(leftGraphic);
+            rightGraphic = GameObject.Instantiate(rightGraphic);
+        }
     }
 
     IEnumerator UpdateTargets()
@@ -185,6 +205,43 @@ public class PlayerTargetManager : MonoBehaviour
     {
         currentTarget = t;
         //player.SetCombatTarget(currentTarget);
+    }
+
+    private void OnGUI()
+    {
+        if (handleUI)
+        {
+            HandleTargetGraphic(targetGraphic, currentTarget);
+            HandleTargetGraphic(upGraphic, upTarget);
+            HandleTargetGraphic(downGraphic, downTarget);
+            HandleTargetGraphic(leftGraphic, leftTarget);
+            HandleTargetGraphic(rightGraphic, rightTarget);
+            
+        }
+    }
+
+    private bool HandleTargetGraphic(GameObject graphic, Transform target)
+    {
+        if (target == null || PlayerActor.player.GetCombatTarget() == null)
+        {
+            graphic.SetActive(false);
+            return false;
+        }
+        graphic.SetActive(true);
+        graphic.transform.position = target.position + uiOffset;
+        return true;
+    }
+
+    private bool HandleTargetGraphic(GameObject graphic, GameObject target)
+    {
+        if (target == null || PlayerActor.player.GetCombatTarget() == null)
+        {
+            graphic.SetActive(false);
+            return false;
+        }
+        graphic.SetActive(true);
+        graphic.transform.position = target.transform.position + uiOffset;
+        return true;
     }
 
     private void OnDrawGizmosSelected()
