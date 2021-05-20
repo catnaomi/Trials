@@ -5,15 +5,16 @@ using UnityEngine;
 public class Spawner : MonoBehaviour
 {
     public GameObject[] prefabs;
-    public bool spawnOnDebug;
     public int count;
+    public bool spawn;
     // Update is called once per frame
     void Update()
     {
-        if (spawnOnDebug && Input.GetButtonDown("Debug"))
+        if (spawn)
         {
             GameObject.Instantiate(prefabs[count % prefabs.Length], this.transform.position, Quaternion.identity);
             count++;
+            spawn = false;
         }
     }
 }

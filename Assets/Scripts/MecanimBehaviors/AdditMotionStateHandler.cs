@@ -55,6 +55,7 @@ public class AdditMotionStateHandler : StateMachineBehaviour
             }
             else
             {
+                //actor.transform.Translate(dirVector * mag * mult * Time.deltaTime);
                 cc.Move(dirVector * mag * mult * Time.deltaTime);
             }
             //cc.Move((cc.transform.forward - Vector3.up) * mag * Time.deltaTime);

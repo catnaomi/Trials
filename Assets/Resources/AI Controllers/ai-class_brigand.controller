@@ -1042,7 +1042,7 @@ AnimatorStateTransition:
   serializedVersion: 3
   m_TransitionDuration: 0.29
   m_TransitionOffset: 0
-  m_ExitTime: 0.35
+  m_ExitTime: 0.15
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -8159,7 +8159,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b2d2f65c1b6da443b9d901ff3fb52e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  delay: -1
+  delay: 0.5
 --- !u!114 &2758764947274679379
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -9106,6 +9106,7 @@ AnimatorState:
   - {fileID: -6413018152942549233}
   m_StateMachineBehaviours:
   - {fileID: 4836113076523642094}
+  - {fileID: 5153460280796382248}
   m_Position: {x: 50, y: 50, z: 0}
   m_IKOnFeet: 0
   m_WriteDefaultValues: 1
@@ -9114,7 +9115,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: -203655887218126122, guid: f0ed1a8db4b48d74c8651998b6f9afac,
+  m_Motion: {fileID: -8208755971862120221, guid: 80a83a415916d4b4bb5b89c27f5a1aa6,
     type: 3}
   m_Tag: ATTACKING
   m_SpeedParameter: AttackSpeed1
@@ -9476,6 +9477,22 @@ AnimatorStateTransition:
   m_InterruptionSource: 0
   m_OrderedInterruption: 1
   m_CanTransitionToSelf: 1
+--- !u!114 &5153460280796382248
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5a3b5271c4c2a344862475ddb9b6334, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  direction: 1
+  mult: 10
+  direct: 1
+  dodge: 0
 --- !u!114 &5158333282924530638
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -9726,7 +9743,7 @@ AnimatorStateTransition:
   serializedVersion: 3
   m_TransitionDuration: 0.29
   m_TransitionOffset: 0
-  m_ExitTime: 0.35
+  m_ExitTime: 0.15
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -10438,7 +10455,7 @@ AnimatorStateTransition:
   serializedVersion: 3
   m_TransitionDuration: 0.25
   m_TransitionOffset: 0
-  m_ExitTime: 0.25
+  m_ExitTime: 1
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 2
