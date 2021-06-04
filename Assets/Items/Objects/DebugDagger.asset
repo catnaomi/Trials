@@ -18,6 +18,7 @@ MonoBehaviour:
   MaxStackSize: 1
   invID: 0
   prefab: {fileID: 1804189005472518104, guid: 23cc13a9c7026f24e8b2c8b600b13dca, type: 3}
+  displayImage: {fileID: 21300000, guid: 85b2df164e8f66443998fd826e6fdd7b, type: 3}
   isEquipped: 1
   EquippableMain: 1
   EquippableOff: 1
@@ -26,20 +27,29 @@ MonoBehaviour:
   ParentRightAsOff: 0
   MainHandEquipSlot: 1
   OffHandEquipSlot: 2
-  PrfStance:
-    rightHandStance: 1
-    leftHandStance: 1
-    twoHandStance: 0
+  stance:
+    stanceStyle: 0
+    rightGrip: 0
+    leftGrip: 0
+    twohandGrip: 0
     blockStyle: 0
-    moveset:
-      mainStrong: {fileID: 0}
-      mainQuick: {fileID: 0}
-      offStrong: {fileID: 0}
-      offQuick: {fileID: 0}
-      twoStrong: {fileID: 0}
-      twoQuick: {fileID: 0}
-      dualStrong: {fileID: 0}
-      dualQuick: {fileID: 0}
+  moveset:
+    slashMain: {fileID: 0}
+    slashOff: {fileID: 0}
+    thrustMain: {fileID: 0}
+    thrustOff: {fileID: 0}
+    slashMainHeavy: {fileID: 0}
+    slashOffHeavy: {fileID: 0}
+    thrustMainHeavy: {fileID: 0}
+    thrustOffHeavy: {fileID: 0}
+    slashDash: {fileID: 0}
+    slashPlunge: {fileID: 0}
+    slashSneak: {fileID: 0}
+    thrustDash: {fileID: 0}
+    thrustPlunge: {fileID: 0}
+    thrustSneak: {fileID: 0}
+    skill1: {fileID: 0}
+    skill2: {fileID: 0}
   AttackSpeed: 1.25
   weight: 2
   OnEquip:
