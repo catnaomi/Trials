@@ -39,6 +39,7 @@ public class PlayerActor : HumanoidActor
     public Moveset moveset;
     PlayerInput inputs;
 
+    public bool isMenuOpen;
     bool startDodge;
 
     Vector3 stickDirection;
@@ -479,6 +480,7 @@ public class PlayerActor : HumanoidActor
 
     public void OnInputAttack(InputAttack atk)
     {
+        if (!CanPlayerInput()) return;
         currentAttackInput = atk;
         if (true)
         {
@@ -496,6 +498,7 @@ public class PlayerActor : HumanoidActor
 
     public void Jump()
     {
+        if (!CanPlayerInput()) return;
         if (!IsHanging())
         {
             animator.SetTrigger("Input-Jump");
@@ -508,6 +511,7 @@ public class PlayerActor : HumanoidActor
 
     public void Dodge()
     {
+        if (!CanPlayerInput()) return;
         if (!IsHanging())
         {
             animator.SetTrigger("Input-Dodge");
@@ -544,6 +548,7 @@ public class PlayerActor : HumanoidActor
 
     public void Block(bool block)
     {
+        if (!CanPlayerInput()) return;
         animator.SetBool("Blocking", block);
     }
     private void SetupInput()
@@ -670,6 +675,25 @@ public class PlayerActor : HumanoidActor
             Block(false);
         };
 
+        inputs.actions["Menu"].started += (context) =>
+        {
+            ToggleMenu();
+        };
+
+        inputs.actions["QuickSlot - 0"].performed += (context) =>
+        {
+            inventory.InputOnSlot(0);
+        };
+
+        inputs.actions["QuickSlot - 1"].performed += (context) =>
+        {
+            inventory.InputOnSlot(1);
+        };
+
+        inputs.actions["QuickSlot - 2"].performed += (context) =>
+        {
+            inventory.InputOnSlot(2);
+        };
         /*
         mainThrustPress.AddListener(() => {
             Debug.Log("Main Thrust Press");
@@ -697,6 +721,24 @@ public class PlayerActor : HumanoidActor
         });*/
     }
 
+    // checks to see if player input is accepted. used for inventory menu
+    public bool CanPlayerInput()
+    {
+        return !isMenuOpen;
+    }
+    public void ToggleMenu()
+    {
+        if (!isMenuOpen)
+        {
+            MenuController.menu.ShowMenu();
+            isMenuOpen = true;
+        }
+        else
+        {
+            MenuController.menu.HideMenu();
+            isMenuOpen = false;
+        }
+    }
     private void GetInput()
     {
         if (IsHanging())

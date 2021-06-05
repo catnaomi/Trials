@@ -136,7 +136,7 @@ public class HumanoidActor : Actor
             inventory = this.GetComponent<Inventory>();
         }
 
-        inventory.Init();
+        //inventory.Init();
 
         //inventory.OnChange.AddListener(GetStance);
 

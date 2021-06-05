@@ -60,7 +60,7 @@ public class InventoryItem : Selectable, ISelectHandler
         //float diff = (this.transform.position.y - ((RectTransform)this.transform).rect.height/2) - (viewport.position.y - viewport.rect.height / 2);
         float diffBot = (this.transform.position.y - ((RectTransform)this.transform).rect.height) - (viewport.position.y);
         float diffTop = (this.transform.position.y) - (viewport.position.y + ((RectTransform)viewport).rect.height);
-        Debug.Log("dist - bottom: " + (diffBot) + " top: " + diffTop);
+        //Debug.Log("dist - bottom: " + (diffBot) + " top: " + diffTop);
         if (diffBot < 0)
         {
             content.Translate(0, -diffBot, 0);
@@ -84,11 +84,5 @@ public class InventoryItem : Selectable, ISelectHandler
             desc_text.text = item.GetDescription();
             name_text.text = item.GetName();
         }
-    }
-
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(this.transform.parent.parent.parent.position, 200f);
     }
 }

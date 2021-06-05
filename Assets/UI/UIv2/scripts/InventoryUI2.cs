@@ -20,6 +20,7 @@ public class InventoryUI2 : MonoBehaviour
     public float itemHeight = 191;
     public int columns = 4;
 
+    bool initialized;
     // Start is called before the first frame update
     void Start()
     {
@@ -27,10 +28,23 @@ public class InventoryUI2 : MonoBehaviour
         if (source != null)
         {
             inventory = source.GetComponent<IInventory>();
-            Populate();
+            
         }
+        initialized = false;
     }
 
+    private void Update()
+    {
+        if (!initialized)
+        {
+            if (inventory != null)
+            {
+                inventory.GetChangeEvent().AddListener(Populate);
+                Populate();
+            }
+            initialized = true;
+        }
+    }
     public void Populate()
     {
         foreach(InventoryItem displayItem in items)
@@ -55,6 +69,9 @@ public class InventoryUI2 : MonoBehaviour
             items.Add(displayItem);
         }
         ((RectTransform)viewport.transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Ceil((float)contents.Count / (float)columns) * itemHeight);
-        EventSystem.current.SetSelectedGameObject(items[0].gameObject);
+        if (items.Count > 0)
+        {
+            EventSystem.current.SetSelectedGameObject(items[0].gameObject);
+        }
     }
 }
