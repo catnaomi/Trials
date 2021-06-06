@@ -18,28 +18,39 @@ MonoBehaviour:
   MaxStackSize: 1
   invID: 0
   prefab: {fileID: 6227314725866584499, guid: 3b9ceda05e36fe843a92d126dbe8d801, type: 3}
+  displayImage: {fileID: 21300000, guid: 75ade6ead379adc42a533f9e16a2e530, type: 3}
+  displayColor: {r: 1, g: 1, b: 1, a: 1}
   isEquipped: 1
   EquippableMain: 1
   EquippableOff: 0
-  TwoHandOnly: 0
+  TwoHandOnly: 1
   ParentLeftAsMain: 1
   ParentRightAsOff: 0
   MainHandEquipSlot: 5
   OffHandEquipSlot: 0
-  PrfStance:
-    rightHandStance: 1
-    leftHandStance: 1
-    twoHandStance: 4
-    blockStyle: 1
-    moveset:
-      mainStrong: {fileID: 0}
-      mainQuick: {fileID: 0}
-      offStrong: {fileID: 0}
-      offQuick: {fileID: 0}
-      twoStrong: {fileID: 11400000, guid: 9b24f26b5a396f2428423675f0c7fa0a, type: 2}
-      twoQuick: {fileID: 0}
-      dualStrong: {fileID: 0}
-      dualQuick: {fileID: 0}
+  stance:
+    stanceStyle: 5
+    rightGrip: 4
+    leftGrip: 4
+    twohandGrip: 4
+    blockStyle: 2
+  moveset:
+    slashMain: {fileID: 0}
+    slashOff: {fileID: 0}
+    thrustMain: {fileID: 0}
+    thrustOff: {fileID: 0}
+    slashMainHeavy: {fileID: 0}
+    slashOffHeavy: {fileID: 0}
+    thrustMainHeavy: {fileID: 0}
+    thrustOffHeavy: {fileID: 0}
+    slashDash: {fileID: 0}
+    slashPlunge: {fileID: 0}
+    slashSneak: {fileID: 0}
+    thrustDash: {fileID: 0}
+    thrustPlunge: {fileID: 0}
+    thrustSneak: {fileID: 0}
+    skill1: {fileID: 0}
+    skill2: {fileID: 0}
   AttackSpeed: 1
   weight: 0
   OnEquip:
@@ -52,8 +63,8 @@ MonoBehaviour:
   arrowPrefab: {fileID: 4805927410726168974, guid: 1be0e19a8c8967c4eb39716d4edc5885,
     type: 3}
   damageKnockback:
-    poiseDamage: 20
     staminaDamage: 5
+    poiseDamage: 20
     kbForce: {x: 0, y: 0, z: 20}
     kbRadial: 0
     damage:
@@ -72,8 +83,11 @@ MonoBehaviour:
     originPoint: {x: 0, y: 0, z: 0}
     breaksArmor: 0
     unblockable: 0
-    minStaggerType: 0
-    staggerType: 1
+    staggers:
+      onHitOnBalance: 0
+      onHitOffBalance: 0
+      onInjure: 0
+      onKill: 0
     hitClip: {fileID: 0}
   ikHandler: {fileID: 11400000, guid: 3e1da2a0b87efea48b403875a190a4af, type: 2}
   drawTime: 1

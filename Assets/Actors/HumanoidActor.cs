@@ -1204,7 +1204,7 @@ public class HumanoidActor : Actor
     public void HitboxActive(int active)
     {
         EquippableWeapon mainWeapon = inventory.GetMainWeapon();
-        EquippableWeapon offHandWeapon = inventory.GetOffHand();
+        EquippableWeapon offHandWeapon = inventory.GetOffWeapon();
         bool main = (mainWeapon != null && mainWeapon is HitboxHandler);
         bool off = (offHandWeapon != null && offHandWeapon is HitboxHandler);
         if (active == 0)
@@ -1286,7 +1286,7 @@ public class HumanoidActor : Actor
         {
             return;
         }
-        EquippableWeapon weapon = inventory.GetOffHand();
+        EquippableWeapon weapon = inventory.GetOffWeapon();
         GameObject weaponModel = weapon.model;
         GameObject mount = this.positionReference.OffHand;
 

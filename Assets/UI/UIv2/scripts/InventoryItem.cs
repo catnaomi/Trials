@@ -12,15 +12,19 @@ public class InventoryItem : Selectable, ISelectHandler
     public TMP_Text desc_text;
     public TMP_Text name_text;
 
-    public InventoryUI2 invUI;
     Image image;
     bool updateOnGUI;
     // Start is called before the first frame update
     void Start()
     {
         image = this.transform.GetChild(0).GetComponent<Image>();
+        
     }
 
+    void OnEnable()
+    {
+        this.GetComponent<Button>().onClick.AddListener(StartEquip);
+    }
     private void OnGUI()
     {
         if (updateOnGUI)
@@ -76,6 +80,11 @@ public class InventoryItem : Selectable, ISelectHandler
         {
             content.Translate(0, -diffTop, 0);
         }
+    }
+
+    public void StartEquip()
+    {
+        InventoryUI2.invUI.StartQuickSlotEquip(item);
     }
     public void UpdatePreview()
     {

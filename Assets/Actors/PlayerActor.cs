@@ -302,8 +302,10 @@ public class PlayerActor : HumanoidActor
         }
         animator.SetBool("LadderLockout", ladderLockout);
 
-        animator.SetLayerWeight(animator.GetLayerIndex("Right Arm Override"), inventory.IsMainDrawn() ? 1f : 0f);
-        animator.SetLayerWeight(animator.GetLayerIndex("Left Arm Override"), inventory.IsOffDrawn() ? 1f : 0f);
+        bool leftEquipped = inventory.IsOffDrawn() || (inventory.IsMainDrawn() && inventory.GetMainWeapon().ParentLeftAsMain);
+        bool rightEquipped = inventory.IsMainDrawn() || (inventory.IsOffDrawn() && inventory.GetOffWeapon().ParentRightAsOff);
+        animator.SetLayerWeight(animator.GetLayerIndex("Right Arm Override"), rightEquipped ? 1f : 0f);
+        animator.SetLayerWeight(animator.GetLayerIndex("Left Arm Override"), leftEquipped ? 1f : 0f);
         //animator.SetFloat("StickVelocity", stickDirection.magnitude);
         //animator.SetFloat("ForwardVelocity", primaryVertical);
         //animator.SetFloat("StrafingVelocity", primaryHorizontal);
@@ -551,6 +553,20 @@ public class PlayerActor : HumanoidActor
         if (!CanPlayerInput()) return;
         animator.SetBool("Blocking", block);
     }
+
+    public void Sheathe()
+    {
+        if (!CanPlayerInput()) return;
+        if (inventory.IsOffDrawn())
+        {
+            TriggerSheath(false, inventory.GetOffWeapon().OffHandEquipSlot, false);
+        }
+        else if (inventory.IsMainDrawn())
+        {
+            TriggerSheath(false, inventory.GetMainWeapon().MainHandEquipSlot, true);
+        }
+        InventoryUI2.invUI.FlareSlot(3);
+    }
     private void SetupInput()
     {
         inputs = GetComponent<PlayerInput>();
@@ -682,17 +698,34 @@ public class PlayerActor : HumanoidActor
 
         inputs.actions["QuickSlot - 0"].performed += (context) =>
         {
-            inventory.InputOnSlot(0);
+            if (CanPlayerInput() || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
+            {
+                inventory.InputOnSlot(0);
+                InventoryUI2.invUI.FlareSlot(0);
+            }
         };
 
         inputs.actions["QuickSlot - 1"].performed += (context) =>
         {
-            inventory.InputOnSlot(1);
+            if (CanPlayerInput() || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
+            {
+                inventory.InputOnSlot(1);
+                InventoryUI2.invUI.FlareSlot(1);
+            }
         };
 
         inputs.actions["QuickSlot - 2"].performed += (context) =>
         {
-            inventory.InputOnSlot(2);
+            if (CanPlayerInput() || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
+            {
+                inventory.InputOnSlot(2);
+                InventoryUI2.invUI.FlareSlot(2);
+            }
+        };
+
+        inputs.actions["Sheathe"].performed += (context) =>
+        {
+            Sheathe();
         };
         /*
         mainThrustPress.AddListener(() => {

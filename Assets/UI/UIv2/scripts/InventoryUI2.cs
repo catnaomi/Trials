@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class InventoryUI2 : MonoBehaviour
 {
+    public static InventoryUI2 invUI;
+
     public GameObject viewport;
     public GameObject itemTemplate;
     public Sprite imageGeneric;
@@ -19,8 +22,22 @@ public class InventoryUI2 : MonoBehaviour
     public float itemWidth = 191;
     public float itemHeight = 191;
     public int columns = 4;
-
     bool initialized;
+
+    public UnityEvent OnQuickSlotEquipStart;
+    public UnityEvent OnQuickSlotEquipEnd;
+    public bool awaitingQuickSlotEquipInput;
+
+    public QuickSelectItem quickSlot0;
+    public QuickSelectItem quickSlot1;
+    public QuickSelectItem quickSlot2;
+    public QuickSheatheIndicator sheathSlot;
+
+    [ReadOnly] public EquippableWeapon quickSlotItem;
+    void Awake()
+    {
+        invUI = this;
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -45,15 +62,20 @@ public class InventoryUI2 : MonoBehaviour
             initialized = true;
         }
     }
+
     public void Populate()
     {
-        foreach(InventoryItem displayItem in items)
+        List<Item> contents = inventory.GetContents();
+
+        if (contents.Count == items.Count) return;
+
+        foreach (InventoryItem displayItem in items)
         {
             GameObject.Destroy(displayItem);
         }
         items.Clear();
 
-        List<Item> contents = inventory.GetContents();
+        
         for (int i = 0; i < contents.Count; i++)
         {
             GameObject displayObj = GameObject.Instantiate(itemTemplate, viewport.transform);
@@ -72,6 +94,49 @@ public class InventoryUI2 : MonoBehaviour
         if (items.Count > 0)
         {
             EventSystem.current.SetSelectedGameObject(items[0].gameObject);
+        }
+    }
+
+    public void StartQuickSlotEquip(Item item)
+    {
+        if (item != null && item is EquippableWeapon weapon)
+        {
+            quickSlotItem = weapon;
+            OnQuickSlotEquipStart.Invoke();
+            awaitingQuickSlotEquipInput = true;
+        }
+    }
+
+    public void EndQuickSlotEquip()
+    {
+        OnQuickSlotEquipEnd.Invoke();
+        awaitingQuickSlotEquipInput = false;
+        foreach(InventoryItem item in items)
+        {
+            if (item.item == quickSlotItem)
+            {
+                EventSystem.current.SetSelectedGameObject(item.gameObject);
+                break;
+            }
+        }
+    }
+
+    public void FlareSlot(int slot)
+    {
+        switch (slot)
+        {
+            case 0:
+                quickSlot0.Flare();
+                break;
+            case 1:
+                quickSlot1.Flare();
+                break;
+            case 2:
+                quickSlot2.Flare();
+                break;
+            case 3:
+                sheathSlot.Flare();
+                break;
         }
     }
 }

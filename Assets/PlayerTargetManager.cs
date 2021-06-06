@@ -85,7 +85,9 @@ public class PlayerTargetManager : MonoBehaviour
                 bool playerInRange = playerDist < maxPlayerDistance;
                 bool camInRange = camDist < maxCamDistance;
 
-                bool invalid = (!playerInRange || playerTerrainBlocked) && (!camInRange || camTerrainBlocked);
+                Vector3 vpp = Camera.main.WorldToViewportPoint(target.transform.position);
+                bool onScreen = (Mathf.Abs(vpp.x) <= 1f) && (Mathf.Abs(vpp.y) <= 1f) && (vpp.z >= 0);
+                bool invalid = !onScreen || ((!playerInRange || playerTerrainBlocked) && (!camInRange || camTerrainBlocked));
 
 
                 if (!invalid)
@@ -105,6 +107,30 @@ public class PlayerTargetManager : MonoBehaviour
                 }
             }
 
+            if (targets.Count > 0)
+            {
+                targets.Sort((a,b) => {
+                    Vector3 aDist = Camera.main.WorldToViewportPoint(a.transform.position);
+                    Vector3 bDist = Camera.main.WorldToViewportPoint(b.transform.position);
+                    return Math.Sign(bDist.magnitude - aDist.magnitude);
+                    if (aDist.z < 0 && bDist.z < 0)
+                    {
+                        return 0;
+                    }
+                    else if (aDist.z < 0)
+                    {
+                        return -1;
+                    }
+                    else if (bDist.z < 0)
+                    {
+                        return 1;
+                    }
+                    else
+                    {
+                        
+                    }
+                });
+            }
             yield return new WaitForSecondsRealtime(2f);
         }
     }
@@ -192,7 +218,7 @@ public class PlayerTargetManager : MonoBehaviour
         {
             AxisUtilities.AxisDirection direction = AxisUtilities.DirectionToAxisDirection(player.look, "HORIZONTAL", "VERTICAL");
             //AxisUtilities.AxisDirection direction = AxisUtilities.InvertAxis(InputHandler.main.SecondaryFlickDirection, false, false, false);
-            Debug.Log("switch:" + direction + "--" + player.look);
+            //Debug.Log("switch:" + direction + "--" + player.look);
             if (directionToTarget.TryGetValue(direction, out Transform target) && target != null)
             {
                 SetTarget(target.gameObject);

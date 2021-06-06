@@ -18,36 +18,39 @@ MonoBehaviour:
   MaxStackSize: 1
   invID: 0
   prefab: {fileID: 6502720667461261439, guid: adccd86633c83de4191e8ae9ba17b285, type: 3}
+  displayImage: {fileID: 21300000, guid: ee48e658d81098345977e58035c87003, type: 3}
+  displayColor: {r: 1, g: 1, b: 1, a: 1}
   isEquipped: 1
   EquippableMain: 0
   EquippableOff: 1
-  OneHanded: 1
-  TwoHanded: 0
+  TwoHandOnly: 0
   ParentLeftAsMain: 0
   ParentRightAsOff: 0
   MainHandEquipSlot: 0
   OffHandEquipSlot: 5
-  PrfMainHandStance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
-  PrfOffHandStance:
-    animatorStance: 3
-    lightThrustStyle: 3
-    lightSlashStyle: 1
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
-  PrfTwoHandStance:
-    animatorStance: 0
-    lightThrustStyle: 0
-    lightSlashStyle: 0
-    heavyAttack: {fileID: 0}
-    specialAttack: {fileID: 0}
-    specialPriority: 0
+  stance:
+    stanceStyle: 0
+    rightGrip: 0
+    leftGrip: 8
+    twohandGrip: 0
+    blockStyle: 4
+  moveset:
+    slashMain: {fileID: 0}
+    slashOff: {fileID: 0}
+    thrustMain: {fileID: 0}
+    thrustOff: {fileID: 0}
+    slashMainHeavy: {fileID: 0}
+    slashOffHeavy: {fileID: 0}
+    thrustMainHeavy: {fileID: 0}
+    thrustOffHeavy: {fileID: 0}
+    slashDash: {fileID: 0}
+    slashPlunge: {fileID: 0}
+    slashSneak: {fileID: 0}
+    thrustDash: {fileID: 0}
+    thrustPlunge: {fileID: 0}
+    thrustSneak: {fileID: 0}
+    skill1: {fileID: 0}
+    skill2: {fileID: 0}
   AttackSpeed: 1
   weight: 0
   OnEquip:
@@ -72,9 +75,10 @@ MonoBehaviour:
   blockPoiseDamage: 100
   bashCost: 20
   bashDamage:
-    poiseDamage: 20
     staminaDamage: 20
+    poiseDamage: 20
     kbForce: {x: 0, y: 0, z: 10}
+    kbRadial: 0
     damage:
       potential: 5
       truedmg: 0
@@ -88,8 +92,12 @@ MonoBehaviour:
       air: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
     breaksArmor: 1
     unblockable: 0
-    minStaggerType: 0
-    staggerType: 5
+    staggers:
+      onHitOnBalance: 0
+      onHitOffBalance: 0
+      onInjure: 0
+      onKill: 0
     hitClip: {fileID: 8300000, guid: 8cf0a475e2a2ccc48bf5bb14d8c24c2e, type: 3}

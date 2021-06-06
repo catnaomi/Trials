@@ -201,6 +201,7 @@ public class Inventory : MonoBehaviour, IInventory
 
     public void EquipOffHandWeapon(EquippableWeapon weapon, bool draw)
     {
+
         if (!weapon.EquippableOff)
         {
             return;
@@ -417,7 +418,7 @@ public class Inventory : MonoBehaviour, IInventory
         return null;
     }
 
-    public EquippableWeapon GetOffHand()
+    public EquippableWeapon GetOffWeapon()
     {
         if (IsOffEquipped())
         {
@@ -471,7 +472,7 @@ public class Inventory : MonoBehaviour, IInventory
         if (IsOffEquipped() && IsOffDrawn())
         {
             //stance = StanceHandler.MergeStances(stance, GetOffHand().PrfOffHandStance);
-            offStance = GetOffHand().stance;
+            offStance = GetOffWeapon().stance;
             stance.Merge(offStance, false);
             stance.leftGrip = offStance.leftGrip;
             if (offStance.blockStyle != StanceHandler.BlockStyle.Shield)
@@ -497,7 +498,7 @@ public class Inventory : MonoBehaviour, IInventory
 
         if (IsOffEquipped())
         {
-            weight += GetOffHand().GetWeight();
+            weight += GetOffWeapon().GetWeight();
         }
 
         return weight;
@@ -570,6 +571,7 @@ public class Inventory : MonoBehaviour, IInventory
         {
             Slot3Weapon = weapon;
         }
+
         UnequipMainWeapon();
         UnequipOffHandWeapon();
     }
@@ -627,68 +629,101 @@ public class Inventory : MonoBehaviour, IInventory
 
     public void InputOnSlot(int slot)
     {
-        EquippableWeapon weapon = null;
-        if (slot == 0)
+        if (InventoryUI2.invUI.awaitingQuickSlotEquipInput)
         {
-            weapon = Slot0Weapon;
-        }
-        else if (slot == 1)
-        {
-            weapon = Slot1Weapon;
-        }
-        else if (slot == 2)
-        {
-            weapon = Slot2Weapon;
-        }
-        else if (slot == 3)
-        {
-            weapon = Slot3Weapon;
-        }
-
-        if (weapon != null)
-        {
-            bool isMain = weapon == MainWeapon;
-            bool isOff = weapon == OffWeapon;
-
-            if (isMain)
+            Item item = InventoryUI2.invUI.quickSlotItem;
+            if (item != null && item is EquippableWeapon weapon)
             {
-                if (!IsMainDrawn())
-                {
-                    actor.TriggerSheath(true, MainWeapon.MainHandEquipSlot, true);
-                }
+                EquipToSlot(weapon, slot);
+                OnChange.Invoke();
             }
-            else if (isOff)
+            InventoryUI2.invUI.EndQuickSlotEquip();
+        }
+        else
+        {
+            EquippableWeapon weapon = null;
+            if (slot == 0)
             {
-                if (!IsOffDrawn())
+                weapon = Slot0Weapon;
+            }
+            else if (slot == 1)
+            {
+                weapon = Slot1Weapon;
+            }
+            else if (slot == 2)
+            {
+                weapon = Slot2Weapon;
+            }
+            else if (slot == 3)
+            {
+                weapon = Slot3Weapon;
+            }
+
+            if (weapon != null)
+            {
+                bool isMain = weapon == MainWeapon;
+                bool isOff = weapon == OffWeapon;
+
+                if (isMain)
                 {
-                    actor.TriggerSheath(true, OffWeapon.OffHandEquipSlot, false);
-                }
-                else if (weapon.EquippableMain)
-                {
-                    if (IsMainEquipped())
+                    if (!IsMainDrawn())
                     {
-                        if (MainWeapon.EquippableOff)
-                        {
-                            EquippableWeapon mw = GetMainWeapon();
-                            EquipOffHandWeapon(mw);
-                        }
+                        actor.TriggerSheath(true, MainWeapon.MainHandEquipSlot, true);
                     }
-                    EquipMainWeapon(weapon);
                 }
-            }
-            else
-            {
-                if (IsMainEquipped() && weapon.EquippableOff && !MainWeapon.TwoHandOnly)
+                else if (isOff)
                 {
-                    EquipOffHandWeapon(weapon, IsMainDrawn());
+                    if (!IsOffDrawn())
+                    {
+                        actor.TriggerSheath(true, OffWeapon.OffHandEquipSlot, false);
+                    }
+                    else if (weapon.EquippableMain)
+                    {
+                        if (IsMainEquipped())
+                        {
+                            if (MainWeapon.EquippableOff)
+                            {
+                                EquippableWeapon mw = GetMainWeapon();
+                                EquipOffHandWeapon(mw);
+                            }
+                        }
+                        EquipMainWeapon(weapon);
+                    }
                 }
                 else
                 {
-                    if (weapon.TwoHandOnly)
+                    if ((IsMainEquipped() && weapon.EquippableOff && !MainWeapon.TwoHandOnly) || (weapon.EquippableOff && !weapon.EquippableMain && (!IsMainEquipped() || !MainWeapon.TwoHandOnly)))
                     {
-                        UnequipOffHandWeapon();
+                        EquipOffHandWeapon(weapon, IsMainDrawn());
                     }
-                    EquipMainWeapon(weapon);
+                    else if (weapon.EquippableMain)
+                    {
+                        if (weapon.TwoHandOnly)
+                        {
+                            UnequipOffHandWeapon();
+                        }
+                        EquipMainWeapon(weapon);
+                    }
+                    else if (weapon.EquippableOff && MainWeapon.TwoHandOnly)
+                    {
+                        if (Slot0Weapon != null && Slot0Weapon != weapon && Slot0Weapon.EquippableMain && !Slot0Weapon.TwoHandOnly)
+                        {
+                            EquipMainWeapon(Slot0Weapon, false);
+                        }
+                        else if (Slot1Weapon != null && Slot1Weapon != weapon && Slot1Weapon.EquippableMain && !Slot1Weapon.TwoHandOnly)
+                        {
+                            EquipMainWeapon(Slot1Weapon, false);
+                        }
+                        else if (Slot2Weapon != null && Slot2Weapon != weapon && Slot2Weapon.EquippableMain && !Slot2Weapon.TwoHandOnly)
+                        {
+                            EquipMainWeapon(Slot2Weapon, false);
+                        }
+                        else
+                        {
+                            UnequipMainWeapon();
+                        }
+                        EquipOffHandWeapon(weapon);
+                    }
                 }
             }
         }
@@ -712,7 +747,7 @@ public class Inventory : MonoBehaviour, IInventory
         }
         else if (!main && IsOffEquipped())
         {
-            return GetOffHand().GetBlockResistance();
+            return GetOffWeapon().GetBlockResistance();
         }
         else
         {
@@ -728,7 +763,7 @@ public class Inventory : MonoBehaviour, IInventory
         }
         else if (!main && IsOffEquipped())
         {
-            return GetOffHand().GetBlockPoiseDamage();
+            return GetOffWeapon().GetBlockPoiseDamage();
         }
         else
         {
