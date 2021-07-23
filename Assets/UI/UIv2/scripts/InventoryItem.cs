@@ -23,7 +23,7 @@ public class InventoryItem : Selectable, ISelectHandler
 
     void OnEnable()
     {
-        this.GetComponent<Button>().onClick.AddListener(StartEquip);
+        //this.GetComponent<Button>().onClick.AddListener(StartEquip);
     }
     private void OnGUI()
     {

@@ -24,6 +24,9 @@ public class InventoryUI2 : MonoBehaviour
     public int columns = 4;
     bool initialized;
 
+    [Header("Quickslot Info")]
+    public bool usingQuickslots = true;
+    [Space(5)]
     public UnityEvent OnQuickSlotEquipStart;
     public UnityEvent OnQuickSlotEquipEnd;
     public bool awaitingQuickSlotEquipInput;
@@ -34,6 +37,8 @@ public class InventoryUI2 : MonoBehaviour
     public QuickSheatheIndicator sheathSlot;
 
     [ReadOnly] public EquippableWeapon quickSlotItem;
+
+    public string filterType = "";
     void Awake()
     {
         invUI = this;
@@ -44,7 +49,7 @@ public class InventoryUI2 : MonoBehaviour
         items = new List<InventoryItem>();
         if (source != null)
         {
-            inventory = source.GetComponent<IInventory>();
+            //inventory = source.GetComponent<IInventory>();
             
         }
         initialized = false;
@@ -54,30 +59,41 @@ public class InventoryUI2 : MonoBehaviour
     {
         if (!initialized)
         {
+            if (source != null && inventory == null)
+            {
+                inventory = source.GetComponent<IInventory>();
+            }
             if (inventory != null)
             {
                 inventory.GetChangeEvent().AddListener(Populate);
                 Populate();
+                initialized = true;
             }
-            initialized = true;
+           
         }
     }
 
     public void Populate()
     {
+        Populate(false);
+    }
+
+    public void Populate(bool force)
+    {
         List<Item> contents = inventory.GetContents();
 
-        if (contents.Count == items.Count) return;
+        if (!force && contents.Count == items.Count) return;
 
         foreach (InventoryItem displayItem in items)
         {
-            GameObject.Destroy(displayItem);
+            GameObject.Destroy(displayItem.gameObject);
         }
         items.Clear();
 
-        
+        int count = 0;
         for (int i = 0; i < contents.Count; i++)
         {
+            if (filterType != "" && contents[i].GetItemType() != filterType) continue;
             GameObject displayObj = GameObject.Instantiate(itemTemplate, viewport.transform);
             displayObj.SetActive(true);
             InventoryItem displayItem = displayObj.GetComponent<InventoryItem>();
@@ -85,13 +101,19 @@ public class InventoryUI2 : MonoBehaviour
             int x = i % columns;
             int y = i / columns;
 
-            displayObj.transform.Translate(x * itemWidth, y * -itemHeight, 0);
+            //displayObj.transform.Translate(x * itemWidth, y * -itemHeight, 0);
 
+         
             displayItem.SetItem(contents[i]);
+            if (usingQuickslots)
+            {
+                displayItem.GetComponent<Button>().onClick.AddListener(displayItem.StartEquip);
+            }
             items.Add(displayItem);
+            count++;
         }
-        ((RectTransform)viewport.transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Ceil((float)contents.Count / (float)columns) * itemHeight);
-        if (items.Count > 0)
+        ((RectTransform)viewport.transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Ceil((float)count / (float)columns) * itemHeight);
+        if (items.Count > 0 && usingQuickslots)
         {
             EventSystem.current.SetSelectedGameObject(items[0].gameObject);
         }

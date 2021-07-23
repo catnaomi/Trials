@@ -30,4 +30,9 @@ public class Item : ScriptableObject
         return (HumanoidActor)holder;
     }
 
+    public virtual string GetItemType()
+    {
+        return this.GetType().ToString();
+    }
+
 }
