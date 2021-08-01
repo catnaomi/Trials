@@ -12,7 +12,17 @@ public class CraftableWeapon : BladeWeapon
     public Adornment adornment;
 
     #region stats
-
+    // base damage
+    // type/moveset TODO
+    // attack speed (from EquippableWeapon)
+    // length (below)
+    // weight (below)
+    // width (below)
+    // balance (below)
+    // slash damage (below)
+    // thrust damage (below)
+    // durability
+    // elements
     public override float GetLength()
     {
         return GetTotalLength();
@@ -42,11 +52,17 @@ public class CraftableWeapon : BladeWeapon
 
     public override float GetWidth()
     {
+        float b = 0f;
+        float h = 0f;
         if (blade != null)
         {
-            return blade.width;
+            b = blade.GetWidth();
         }
-        return 0f;
+        if (hilt != null)
+        {
+            h = hilt.GetWidth();
+        }
+        return Mathf.Max(b, h);
     }
 
     public override float GetWeight()
@@ -59,33 +75,14 @@ public class CraftableWeapon : BladeWeapon
         if (blade != null)
         {
             weight += blade.GetWeight();
-            /*
-            foreach (Inset inset in blade.insets)
-            {
-                if (inset != null)
-                {
-                    weight += inset.weight;
-                }
-            }
-            */
         }
         if (hilt != null)
         {
             weight += hilt.GetWeight();
-            /*
-            foreach (Inset inset in hilt.insets)
-            {
-                if (inset != null)
-                {
-                    weight += inset.weight;
-                }
-            }
-            */
         }
         if (adornment != null)
         {
             weight += adornment.GetWeight();
-
         }
         return weight;
     }
@@ -109,7 +106,7 @@ public class CraftableWeapon : BladeWeapon
     {
         if (blade != null)
         {
-            return blade.piercingModifier;
+            return blade.GetPiercingModifier();
         }
         return 0f;
     }
@@ -118,12 +115,30 @@ public class CraftableWeapon : BladeWeapon
     {
         if (blade != null)
         {
-            return blade.slashingModifier;
+            return blade.GetSlashingModifier();
         }
         return 0f;
     }
 
+    public override int GetDurability()
+    {
+        List<int> durabilities = new List<int>();
+        List<WeaponComponent> components = this.GetAllComponents();
+        foreach (WeaponComponent component in components)
+        {
+            if (component.durability != -999)
+            {
+                durabilities.Add(component.durability);
+            }
+        }
+        return Mathf.Min(durabilities.ToArray());
+    }
     public override float GetAttackSpeed(bool twoHand)
+    {
+        return AttackSpeedFormula(GetTotalWeight(), GetBalance(), twoHand);
+    }
+
+    public static float AttackSpeedFormula(float weight, float balance, bool twoHand)
     {
         float WEIGHT_1H_OFFSET = 3f;
         float WEIGHT_2H_OFFSET = 5f;
@@ -131,10 +146,11 @@ public class CraftableWeapon : BladeWeapon
 
         float BALANCE_MODIFIER = 0.2f;
 
-        float weightOffset = (twoHand ? WEIGHT_2H_OFFSET : WEIGHT_1H_OFFSET) - GetTotalWeight();
+        //float weightOffset = (twoHand ? WEIGHT_2H_OFFSET : WEIGHT_1H_OFFSET) - GetTotalWeight();
+        float weightOffset = (twoHand ? WEIGHT_2H_OFFSET : WEIGHT_1H_OFFSET) - weight;
         weightOffset *= WEIGHT_MOD;
 
-        float balanceOffset = -GetBalance() * BALANCE_MODIFIER;
+        float balanceOffset = -balance * BALANCE_MODIFIER;
 
         return 1f + weightOffset + balanceOffset;
     }
@@ -172,7 +188,7 @@ public class CraftableWeapon : BladeWeapon
             this.MainHandEquipSlot = Inventory.EquipSlot.rHip;
             this.OffHandEquipSlot = Inventory.EquipSlot.lHip;
         }
-        this.elementRatios = new Damage();
+        // this.elements = something or other;
         /*
         int leadSP = -9;
         foreach (WeaponComponent component in GetAllComponents())
@@ -199,12 +215,26 @@ public class CraftableWeapon : BladeWeapon
         if (hilt != null)
         {
             comps.Add(hilt);
-            comps.AddRange(hilt.insets);
+            //comps.AddRange(hilt.insets); // commented out to avoid null referenced components
+            foreach(Inset inset in hilt.insets)
+            {
+                if (inset != null)
+                {
+                    comps.Add(inset);
+                }
+            }
         }
         if (blade != null)
         {
             comps.Add(blade);
-            comps.AddRange(blade.insets);
+            //comps.AddRange(blade.insets); // commented out to avoid null referenced components
+            foreach (Inset inset in blade.insets)
+            {
+                if (inset != null)
+                {
+                    comps.Add(inset);
+                }
+            }
         }
         if (adornment != null)
         {
@@ -213,6 +243,98 @@ public class CraftableWeapon : BladeWeapon
         return comps;
     }
 
+
+
+    public void GetStatDifferencesHiltChange(Hilt proposedHilt, ref WeaponStatBlock statBlock)
+    {
+        float weight_nohilt = 0;
+        float width_nohilt = 0;
+        float length_nohilt = 0;
+        float bladeWeight = 0f;
+        if (blade != null)
+        {
+            bladeWeight = blade.GetWeight();
+            weight_nohilt += blade.GetWeight();
+            width_nohilt = Mathf.Max(blade.width, width_nohilt);
+            length_nohilt += blade.GetLength();
+        }
+        if (adornment != null)
+        {
+            weight_nohilt += adornment.GetWeight();
+        }
+        statBlock.stat_Weight.comparisonValue = weight_nohilt + proposedHilt.GetWeight();
+        statBlock.stat_Length.comparisonValue = length_nohilt + proposedHilt.GetLength();
+        statBlock.stat_Width.comparisonValue = Mathf.Max(width_nohilt, proposedHilt.GetWidth());
+
+        statBlock.stat_Balance.comparisonValue = bladeWeight - proposedHilt.GetWeight();
+        statBlock.stat_AttackSpeed.comparisonValue = AttackSpeedFormula(weight_nohilt + proposedHilt.GetWeight(), bladeWeight - proposedHilt.GetWeight(), false);
+        statBlock.stat_Durability.comparisonValue = Mathf.Max(proposedHilt.durability, this.GetDurability());
+        
+
+        statBlock.stat_Weight.compare = true;
+        statBlock.stat_Length.compare = true;
+        statBlock.stat_Width.compare = true;
+        statBlock.stat_Balance.compare = true;
+        statBlock.stat_AttackSpeed.compare = true;
+        statBlock.stat_Durability.compare = true;
+    }
+
+    public void GetStatDifferencesBladeChange(Blade proposedBlade, ref WeaponStatBlock statBlock)
+    {
+        float weight_noblade = 0;
+        float width_noblade = 0;
+        float length_noblade = 0;
+        float hiltWeight = 0f;
+        if (hilt != null)
+        {
+            hiltWeight = hilt.GetWeight();
+            weight_noblade += hilt.GetWeight();
+            width_noblade = Mathf.Max(hilt.width, width_noblade);
+            length_noblade += hilt.GetLength();
+        }
+        if (adornment != null)
+        {
+            weight_noblade += adornment.GetWeight();
+        }
+        statBlock.stat_Weight.comparisonValue = weight_noblade + proposedBlade.GetWeight();
+        statBlock.stat_Length.comparisonValue = length_noblade + proposedBlade.GetLength();
+        statBlock.stat_Width.comparisonValue = Mathf.Max(width_noblade, proposedBlade.GetWidth());
+
+        statBlock.stat_Balance.comparisonValue = proposedBlade.GetWeight() - hiltWeight;
+
+        statBlock.stat_AttackSpeed.comparisonValue = AttackSpeedFormula(weight_noblade + proposedBlade.GetWeight(), hiltWeight - proposedBlade.GetWeight(), false);
+
+        statBlock.stat_Durability.comparisonValue = Mathf.Max(proposedBlade.durability, this.GetDurability());
+
+        statBlock.stat_BaseDamage.comparisonValue = proposedBlade.GetBaseDamage();
+        statBlock.stat_PierceMod.comparisonValue = proposedBlade.GetPiercingModifier();
+        statBlock.stat_SlashMod.comparisonValue = proposedBlade.GetSlashingModifier();
+
+        statBlock.stat_Weight.compare = true;
+        statBlock.stat_Length.compare = true;
+        statBlock.stat_Width.compare = true;
+        statBlock.stat_Balance.compare = true;
+        statBlock.stat_AttackSpeed.compare = true;
+        statBlock.stat_Durability.compare = true;
+        statBlock.stat_BaseDamage.compare = true;
+        statBlock.stat_PierceMod.compare = true;
+        statBlock.stat_SlashMod.compare = true;
+    }
+
+    public void GetStatDifferencesAdornmentChange(Adornment proposedAdornment, ref WeaponStatBlock statBlock)
+    {
+        float weight_noadorn = 0;
+        if (hilt != null)
+        {
+            weight_noadorn += hilt.GetWeight();
+        }
+        if (blade != null)
+        {
+            weight_noadorn += blade.GetWeight();
+        }
+        statBlock.stat_Weight.comparisonValue = weight_noadorn + proposedAdornment.GetWeight();
+        statBlock.stat_Weight.compare = true;
+    }
     #region rendering
     public override GameObject GenerateModel()
     {

@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "BladeWeapon", menuName = "ScriptableObjects/CreateBladeWeapon", order = 1)]
 public class BladeWeapon : EquippableWeapon, HitboxHandler
 {
+    public float baseDamage;
     public float width = 1f;
     public float length = 1.5f;
     //public float weight = 1f;
@@ -17,7 +19,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
     TrailRenderer trailSlash;
     ParticleSystem trailSystem;
 
-    public Damage elementRatios;
+    public List<DamageType> elements;
 
 
     public override void EquipWeapon(Actor actor)
@@ -97,38 +99,38 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 default:
                 case AttackType.SlashingLight:
                     //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
-                    staminaCost = (10 + 1 * GetWeight() + 15 * Mathf.Abs(GetBalance())) * 1;
+                    staminaCost = this.GetStamCost() * 1;
                     sound = FXController.clipDictionary["sword_swing_light"];
                     break;
                 case AttackType.ThrustingLight:
                     //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
-                    staminaCost = (10 + 1 * GetWeight() + 15 * Mathf.Abs(GetBalance())) * 1;
+                    staminaCost = this.GetStamCost() * 1;
                     sound = FXController.clipDictionary["sword_swing_light"];
                     break;
                 case AttackType.SlashingMedium:
                     //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2;
-                    staminaCost = (5 + 1 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1.5f;
+                    staminaCost = this.GetStamCost() * 1.5f;
                     sound = FXController.clipDictionary["sword_swing_medium"];
                     break;
                 case AttackType.ThrustingMedium:
                     sound = FXController.clipDictionary["sword_swing_medium"];
                     //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2;
-                    staminaCost = (5 + 1 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1.5f;
+                    staminaCost = this.GetStamCost() * 1.5f;
                     break;
                 case AttackType.SlashingHeavy:
                     sound = FXController.clipDictionary["sword_swing_heavy"];
                     //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 3;
-                    staminaCost = (5 + 1 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2f;
+                    staminaCost = this.GetStamCost() * 2f;
                     break;
                 case AttackType.ThrustingHeavy:
                     sound = FXController.clipDictionary["sword_swing_heavy"];
                     //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 3;
-                    staminaCost = (5 + 1 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2f;
+                    staminaCost = this.GetStamCost() * 2f;
                     break;
                 case AttackType.Bash:
                     sound = FXController.clipDictionary["sword_swing_heavy"];
                     //poiseCost = (1 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
-                    staminaCost = (5 + 1 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
+                    staminaCost = this.GetStamCost() * 1;
                     break;
             }
 
@@ -149,6 +151,16 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         this.active = active;
     }
 
+    public float GetStamCost()
+    {
+        return (10 + 1 * GetWeight() + 15 * Mathf.Abs(GetBalance()));
+    }
+
+    public float GetStaminaDamage()
+    {
+        return (10f + 3f * GetWeight());
+    }
+
     public float GetPoiseFromAttack(AttackType type)
     {
         switch (type)
@@ -167,22 +179,6 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.ThrustingHeavy:
                 return 25f;
         }
-    }
-
-
-    // handle offhand attacks, should only happen if equipped to off hand as player
-    public bool HandleInput(out InputAction action)
-    {
-        action = null;
-        bool down = Input.GetButtonDown("Attack2");
-
-        if (down)
-        {
-            //action = ActionsLibrary.GetInputAction(OffhandAttack);
-            return true;
-        }
-
-        return false;
     }
 
     public GameObject GetHand()
@@ -212,7 +208,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         return length;
     }
 
-    public virtual float GetWeight()
+    public override float GetWeight()
     {
         return weight;
     }
@@ -242,19 +238,24 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         return 1f;
     }
 
-    public virtual Damage GetBaseDamage(bool slashing)
+    public virtual float GetBaseDamage()
     {
-        Damage baseDamage;
+        return baseDamage;
+    }
+    public virtual Damage GetModifiedDamage(bool slashing)
+    {
         if (slashing)
         {
-            baseDamage = new Damage(2f + 1f * GetWeight() + 5 * Mathf.Pow(GetSlashingModifier(), 2) + 3 * GetBalance(), DamageType.Slashing);
+            Damage damage = new Damage(this.baseDamage * this.GetSlashingModifier(), elements);
+            damage.types.Add(DamageType.Slashing);
+            return damage;
         }
-        else
+        else // piercing
         {
-            baseDamage = new Damage(2f + 1f * GetWeight() + 5 * Mathf.Pow(GetPiercingModifier(), 2) + 3 * GetBalance(), DamageType.Piercing);
+            Damage damage = new Damage(this.baseDamage * this.GetPiercingModifier(), elements);
+            damage.types.Add(DamageType.Slashing);
+            return damage;
         }
-        baseDamage.Add(elementRatios);
-        return baseDamage;
     }
     
     public virtual float GetBasePoiseDamage()
@@ -264,7 +265,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
 
     public override Damage GetBlockResistance()
     {
-        return new Damage().Add(elementRatios).SetRatio(DamageType.Slashing, 0.5f).SetRatio(DamageType.Piercing, 0.5f);
+        return new Damage();
     }
 
     private void SetTrails(bool thrust, bool slash)
@@ -424,8 +425,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.SlashingLight:
                 return new DamageKnockback()
                 {
-                    damage = GetBaseDamage(true).MultPotential(1),
-                    staminaDamage = (10f + 3f * GetWeight()) * 1f,
+                    damage = GetModifiedDamage(true).MultPotential(1),
+                    staminaDamage = GetStaminaDamage() * 1f,
                     poiseDamage = GetBasePoiseDamage() * 1f,//(10f + 6f * GetWeight()) * 1f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
@@ -438,8 +439,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.SlashingMedium:
                 return new DamageKnockback()
                 {
-                    damage = GetBaseDamage(true).MultPotential(2),
-                    staminaDamage = (10f + 3f * GetWeight()) * 2f,
+                    damage = GetModifiedDamage(true).MultPotential(2),
+                    staminaDamage = GetStaminaDamage() * 2f,
                     poiseDamage = GetBasePoiseDamage() * 2f,//(10f + 6f * GetWeight()) * 2f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
@@ -452,8 +453,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.SlashingHeavy:
                 return new DamageKnockback()
                 {
-                    damage = GetBaseDamage(true).MultPotential(3),
-                    staminaDamage = (10f + 3f * GetWeight()) * 3f,
+                    damage = GetModifiedDamage(true).MultPotential(3),
+                    staminaDamage = GetStaminaDamage() * 3f,
                     poiseDamage = GetBasePoiseDamage() * 3f,//(10f + 6f * GetWeight()) * 3f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
@@ -467,8 +468,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.ThrustingLight:
                 return new DamageKnockback()
                 {
-                    damage = GetBaseDamage(false).MultPotential(1),
-                    staminaDamage = (10f + 3f * GetWeight()) * 1f,
+                    damage = GetModifiedDamage(false).MultPotential(1),
+                    staminaDamage = GetStaminaDamage() * 1f,
                     poiseDamage = GetBasePoiseDamage() * 1f,//(10f + 6f * GetWeight()) * 1f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
@@ -481,8 +482,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.ThrustingMedium:
                 return new DamageKnockback()
                 {
-                    damage = GetBaseDamage(false).MultPotential(2),
-                    staminaDamage = (10f + 3f * GetWeight()) * 2f,
+                    damage = GetModifiedDamage(false).MultPotential(2),
+                    staminaDamage = GetStaminaDamage() * 2f,
                     poiseDamage = GetBasePoiseDamage() * 2f,//(10f + 6f * GetWeight()) * 2f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
@@ -495,8 +496,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.ThrustingHeavy:
                 return new DamageKnockback()
                 {
-                    damage = GetBaseDamage(false).MultPotential(3),
-                    staminaDamage = (10f + 3f * GetWeight()) * 3f,
+                    damage = GetModifiedDamage(false).MultPotential(3),
+                    staminaDamage = GetStaminaDamage() * 3f,
                     poiseDamage = GetBasePoiseDamage() * 3f,//(10f + 6f * GetWeight()) * 3f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
@@ -524,8 +525,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.SlashingCritical:
                 return new DamageKnockback()
                 {
-                    damage = GetBaseDamage(true).MultPotential(4),
-                    staminaDamage = (10f + 3f * GetWeight()) * 3f,
+                    damage = GetModifiedDamage(true).MultPotential(4),
+                    staminaDamage = GetStaminaDamage() * 3f,
                     poiseDamage = 999f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
@@ -540,8 +541,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.ThrustingCritical:
                 return new DamageKnockback()
                 {
-                    damage = GetBaseDamage(false).MultPotential(4),
-                    staminaDamage = (10f + 3f * GetWeight()) * 3f,
+                    damage = GetModifiedDamage(false).MultPotential(4),
+                    staminaDamage = GetStaminaDamage() * 3f,
                     poiseDamage = 999f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
@@ -642,6 +643,34 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
 
             wall = false;
         }
+    }
+
+    public virtual int GetDurability()
+    {
+        return -999;
+    }
+    public void GetStatDifferencesWeaponComparison(BladeWeapon proposedWeapon, ref WeaponStatBlock statBlock)
+    {
+        statBlock.stat_Weight.comparisonValue = proposedWeapon.GetWeight();
+        statBlock.stat_Length.comparisonValue = proposedWeapon.GetLength();
+        statBlock.stat_Width.comparisonValue = proposedWeapon.GetWidth();
+
+        statBlock.stat_Balance.comparisonValue = proposedWeapon.GetBalance();
+
+        statBlock.stat_AttackSpeed.comparisonValue = proposedWeapon.GetAttackSpeed(false);
+        if (proposedWeapon is CraftableWeapon craftWeapon)
+        {
+            statBlock.stat_Durability.comparisonValue = craftWeapon.GetDurability();
+            statBlock.stat_Durability.compare = true;
+        }
+
+
+
+        statBlock.stat_Weight.compare = true;
+        statBlock.stat_Length.compare = true;
+        statBlock.stat_Width.compare = true;
+        statBlock.stat_Balance.compare = true;
+        statBlock.stat_AttackSpeed.compare = true;
     }
 
     public bool CanOffhandEquip()

@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class WeaponComponent : Item
 {
     [Header("Component Stats")]
-    public int durability;
+    public int durability = -999; // -999 = no durability/unbreakable
     public float weight;
     [ReadOnly]
     public bool attached;
@@ -12,9 +13,12 @@ public class WeaponComponent : Item
     [Space(5)]
     public StanceHandler PrfStance;
     protected GameObject model;
-    public int ReduceDurability(int amt)
+    public virtual int ReduceDurability(int amt)
     {
-        durability -= amt;
+        if (durability != -999)
+        {
+            durability -= amt;
+        }
         return durability;
     }
 
@@ -35,5 +39,10 @@ public class WeaponComponent : Item
             model = GameObject.Instantiate(prefab);
         }
         return model;
+    }
+
+    public virtual List<WeaponComponent> GetComponents()
+    {
+        return new List<WeaponComponent>() { this };
     }
 }

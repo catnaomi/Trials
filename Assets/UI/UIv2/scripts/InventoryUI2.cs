@@ -14,9 +14,10 @@ public class InventoryUI2 : MonoBehaviour
     public Sprite imageGeneric;
     public GameObject source;
 
-    IInventory inventory;
+    [HideInInspector]
+    public IInventory inventory;
 
-    List<InventoryItem> items;
+    List<InventoryItemDisplay> items;
 
     [Header("UI Info")]
     public float itemWidth = 191;
@@ -46,7 +47,7 @@ public class InventoryUI2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        items = new List<InventoryItem>();
+        items = new List<InventoryItemDisplay>();
         if (source != null)
         {
             //inventory = source.GetComponent<IInventory>();
@@ -84,19 +85,22 @@ public class InventoryUI2 : MonoBehaviour
 
         if (!force && contents.Count == items.Count) return;
 
-        foreach (InventoryItem displayItem in items)
+        foreach (InventoryItemDisplay displayItem in items)
         {
             GameObject.Destroy(displayItem.gameObject);
         }
         items.Clear();
 
         int count = 0;
+        List<string> filterList = new List<string>();
+        filterList.AddRange(filterType.Split(','));
         for (int i = 0; i < contents.Count; i++)
         {
-            if (filterType != "" && contents[i].GetItemType() != filterType) continue;
+            
+            if (filterType != "" && !filterList.Contains(contents[i].GetItemType())) continue;
             GameObject displayObj = GameObject.Instantiate(itemTemplate, viewport.transform);
             displayObj.SetActive(true);
-            InventoryItem displayItem = displayObj.GetComponent<InventoryItem>();
+            InventoryItemDisplay displayItem = displayObj.GetComponent<InventoryItemDisplay>();
 
             int x = i % columns;
             int y = i / columns;
@@ -133,7 +137,7 @@ public class InventoryUI2 : MonoBehaviour
     {
         OnQuickSlotEquipEnd.Invoke();
         awaitingQuickSlotEquipInput = false;
-        foreach(InventoryItem item in items)
+        foreach(InventoryItemDisplay item in items)
         {
             if (item.item == quickSlotItem)
             {

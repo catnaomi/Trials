@@ -88,7 +88,7 @@ public class InspectorDebugActor : MonoBehaviour
         if (resetAttributes)
         {
             resetAttributes = false;
-            GetComponent<ActorAttributes>().Reset();
+            GetComponent<ActorAttributes>().ResetAttributes();
         }
 
         canMove = actor.CanMove();

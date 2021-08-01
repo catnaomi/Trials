@@ -152,7 +152,7 @@ public class HumanoidActor : Actor
 
         
 
-        attributes.Reset();
+        attributes.ResetAttributes();
 
         if (damageDisplay != null)
         {
@@ -500,7 +500,7 @@ public class HumanoidActor : Actor
         AdjustDefendingPosition(damageKnockback.source);
 
         //  implement resistances
-        float totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances).GetTotal();
+        float totalDamage = attributes.GetAdjustedDamage(damageKnockback.damage);
 
         bool offBalance = attributes.GetOffBalance();
 
@@ -845,20 +845,23 @@ public class HumanoidActor : Actor
     public bool Damage(DamageKnockback damageKnockback, int multiplier, bool blocking)
     {
         // account for resistances
-        float totalDamage;
+        float totalDamage = attributes.GetAdjustedDamage(damageKnockback.damage) * multiplier;
+        
         if (!blocking)
         {
-            totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances).GetTotal();
+            //totalDamage = attributes.GetAdjustedDamage(damageKnockback.damage);
         }
         else
         {
             //totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances, inventory.GetBlockResistance(stance.BlockWithMain())).GetTotal();
-            totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances, inventory.GetBlockResistance(true)).GetTotal();
+            //totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances, inventory.GetBlockResistance(true)).GetTotal();
+            //attributes.GetAdjustedDamage(damageKnockback.damage); // TODO: block resistance. again.
+            totalDamage *= 0.5f;
         }
 
         if (damageDisplay != null)
         {
-            damageDisplay.GetComponent<DamageDisplay>().AddDamage(totalDamage * multiplier, damageKnockback.damage.GetHighestType(DamageType.Slashing, DamageType.Piercing));
+            damageDisplay.GetComponent<DamageDisplay>().AddDamage(totalDamage, DamageType.TrueDamage);
         }
 
         if (totalDamage <= 0)
@@ -867,7 +870,7 @@ public class HumanoidActor : Actor
         }
 
         //attributes.ReducePoise(damageKnockback.poiseDamage);
-        attributes.ReduceAttribute(attributes.health, totalDamage * multiplier);
+        attributes.ReduceAttribute(attributes.health, totalDamage);
         
         
 

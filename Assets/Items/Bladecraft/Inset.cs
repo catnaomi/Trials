@@ -12,4 +12,11 @@ public class Inset : WeaponComponent
     {
         return String.Format("{0}:-Weight:{1}",itemName, weight);
     }
+
+    public static Inset CreateEmptyInset()
+    {
+        Inset i = ScriptableObject.CreateInstance<Inset>();
+        i.itemName = "_EmptyInset";
+        return i;
+    }
 }

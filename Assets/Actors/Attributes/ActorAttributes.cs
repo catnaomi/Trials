@@ -53,7 +53,13 @@ public class ActorAttributes : MonoBehaviour
     [Space(5)]
     public float attributeRecoveryDelay = 3f;
 
-    public Damage resistances;
+    [Header("Resistances & Weaknesses")]
+    public List<DamageType> resistances;
+    public float resistanceRatio;
+    [Space(5)]
+    public List<DamageType> weaknesses;
+    public float weaknessRatio;
+
 
     [Header("Statistics")]
     public float BlockReduction = 1f;
@@ -156,7 +162,7 @@ public class ActorAttributes : MonoBehaviour
         }
     }
 
-    public void Reset()
+    public void ResetAttributes()
     {
         effectClock = 0f;
 
@@ -292,11 +298,9 @@ public class ActorAttributes : MonoBehaviour
         return amount * mult;
     }
 
-    public int GetModifiedHealthDamage(int amount, DamageType type)
+    public float GetAdjustedDamage(Damage damage)
     {
-        int mod = 0;
-
-        return Mathf.Max(0, amount + mod);
+        return damage.GetTotalMinusResistances(this.resistances, this.weaknesses, this.resistanceRatio, this.weaknessRatio);
     }
 }
 
