@@ -208,11 +208,6 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         return length;
     }
 
-    public override float GetWeight()
-    {
-        return weight;
-    }
-
     public virtual float GetHiltLength()
     {
         return 0f;

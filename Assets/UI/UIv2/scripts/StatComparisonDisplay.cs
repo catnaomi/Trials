@@ -53,7 +53,7 @@ public class StatComparisonDisplay : MonoBehaviour
                 }
                 else if (comparisonType == ColorComparisonType.LowerPreferred)
                 {
-                    displayChange.color = negativeColor;
+                    displayChange.color = positiveColor;
                 }
             }
             else {
@@ -78,7 +78,8 @@ public class StatComparisonDisplay : MonoBehaviour
                     displayChange.color = neutralColor;
                 }
             }
-            displayChange.text += comparisonResult.ToString(stringFormat);           
+            displayChange.text += comparisonResult.ToString(stringFormat);
+            displayChange.text = "-> " + comparisonValue.ToString(stringFormat);
         }
         else
         {

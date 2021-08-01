@@ -116,6 +116,44 @@ public class InventoryUI2 : MonoBehaviour
             items.Add(displayItem);
             count++;
         }
+        for (int j = 1; j < items.Count; j++)
+        {
+            Button b = items[j].GetComponent<Button>();
+
+            Navigation nav = new Navigation();
+            nav.mode =  Navigation.Mode.Automatic;
+
+            if (j >= 3) // up
+            {
+                if (items[j-3] != null)
+                {
+                    nav.selectOnUp = items[j - 3];
+                }
+            }
+            if (j <= items.Count - 3) // down
+            {
+                if (j + 3 < items.Count && items[j + 3] != null)
+                {
+                    nav.selectOnDown = items[j + 3];
+                }
+            }
+            if (j % 3 != 0) // left
+            {
+                if (items[j - 1] != null)
+                {
+                    nav.selectOnLeft = items[j - 1];
+                }
+            }
+            if (j % 3 != 2) // right
+            {
+                if (j + 1 < items.Count && items[j+1] != null)
+                {
+                    nav.selectOnRight = items[j + 1];
+                }
+            }
+            b.navigation = nav;
+
+        }
         ((RectTransform)viewport.transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Ceil((float)count / (float)columns) * itemHeight);
         if (items.Count > 0 && usingQuickslots)
         {
