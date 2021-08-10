@@ -5,7 +5,7 @@ using UnityEngine;
 public class Interactable : MonoBehaviour
 {
     public Collider interactionNode;
-    PlayerActor player;
+    protected PlayerActor player;
     public bool canInteract;
     public GameObject interactIcon;
     // Start is called before the first frame update

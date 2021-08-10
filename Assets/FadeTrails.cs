@@ -28,7 +28,7 @@ public class FadeTrails : MonoBehaviour
     {
         if (fading)
         {
-            t.lifetimeMultiplier = Mathf.MoveTowards(t.lifetimeMultiplier, 0f, 0.025f); //(lifetime / (Time.deltaTime * duration))
+            t.lifetimeMultiplier = Mathf.MoveTowards(t.lifetimeMultiplier, 0f, 0.01f); //(lifetime / (Time.deltaTime * duration))
             if (t.lifetimeMultiplier <= 0f)
             {
                 fading = false;

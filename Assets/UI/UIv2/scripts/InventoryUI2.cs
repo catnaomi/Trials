@@ -40,9 +40,13 @@ public class InventoryUI2 : MonoBehaviour
     [ReadOnly] public EquippableWeapon quickSlotItem;
 
     public string filterType = "";
-    void Awake()
+    void OnEnable()
     {
         invUI = this;
+        if (items != null && items.Count > 0)
+        {
+            EventSystem.current.SetSelectedGameObject(items[0].gameObject);
+        }
     }
     // Start is called before the first frame update
     void Start()
@@ -173,6 +177,14 @@ public class InventoryUI2 : MonoBehaviour
         }
     }
 
+    public InventoryItemDisplay GetFirstItem()
+    {
+        if (items.Count > 0)
+        {
+            return items[0];
+        }
+        return null;
+    }
     public void StartQuickSlotEquip(Item item)
     {
         if (item != null && item is EquippableWeapon weapon)
@@ -211,7 +223,7 @@ public class InventoryUI2 : MonoBehaviour
                 quickSlot2.Flare();
                 break;
             case 3:
-                sheathSlot.Flare();
+    
                 break;
         }
     }

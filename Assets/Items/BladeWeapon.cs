@@ -270,29 +270,17 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
 
     private void SetTrails(bool thrust, bool slash)
     {
-        foreach (TrailRenderer trail in GetModel().GetComponentsInChildren<TrailRenderer>())
-        {
-            if (trail.gameObject.name == "trail_thrust")
-            {
-                trailThrust = trail;
-            }
-            else if (trail.gameObject.name == "trail_slash")
-            {
-                trailSlash = trail;
-            }
-        }
-
+        if (GetModel() == null) return;
         trailSystem = GetModel().GetComponentInChildren<ParticleSystem>();
 
-        if (trailThrust != null)
+        if (trailSystem == null)
         {
-            trailThrust.emitting = thrust;
-        }
-        if (trailSlash != null)
-        {
-            trailSlash.emitting = slash;
-        }
+            GameObject trailPrefab = Resources.Load<GameObject>("Prefabs/trail_particle");
+            GameObject trailObject = GameObject.Instantiate(trailPrefab, GetModel().transform);
+            trailObject.transform.position = GetHand().transform.position + GetModel().transform.up * GetLength();
 
+            trailSystem = trailObject.GetComponent<ParticleSystem>();
+        }
         if (trailSystem != null)
         {
             if (thrust || slash)
@@ -311,8 +299,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             {
                 var t = trailSystem.trails;
 
+ 
                 trailSystem.GetComponent<FadeTrails>().StartFade();
-                //trailSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
                 //t.lifetimeMultiplier = 0f;
                 //t.lifetime = 0f;
             }
@@ -677,4 +665,6 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
     {
         return EquippableOff;
     }
+
+ 
 }

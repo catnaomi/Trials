@@ -93,4 +93,9 @@ public class EquippableWeapon : Item
     {
         return weight;
     }
+
+    public virtual bool IsEquippable()
+    {
+        return true;
+    }
 }

@@ -199,7 +199,7 @@ public class PlayerTargetManager : MonoBehaviour
 
     void ToggleTarget()
     {
-        Debug.Log("target?");
+        //Debug.Log("target?");
         if (!lockedOn && targets.Count > 0)
         {
             lockedOn = true;

@@ -208,7 +208,15 @@ public class CraftableWeapon : BladeWeapon
         statChanges["SlashingModifier"] = 0f;
         statChanges["PiercingModfier"] = 0f;
 
-        this.elements.Clear();
+        if (this.elements == null)
+        {
+            this.elements = new List<DamageType>();
+        }
+        else
+        {
+            this.elements.Clear();
+        }
+        
         foreach (WeaponComponent component in GetAllComponents())
         {
             if (component is IBladeStatModifier bsm)
@@ -247,6 +255,10 @@ public class CraftableWeapon : BladeWeapon
             */
         }
 
+    public override bool IsEquippable()
+    {
+        return (hilt != null) && (blade != null);
+    }
     public List<WeaponComponent> GetAllComponents()
     {
         List<WeaponComponent> comps = new List<WeaponComponent>();

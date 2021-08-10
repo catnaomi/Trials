@@ -696,6 +696,11 @@ public class PlayerActor : HumanoidActor
             ToggleMenu();
         };
 
+        inputs.actions["Interact"].started += (context) =>
+        {
+            Interact();
+        };
+
         inputs.actions["QuickSlot - 0"].performed += (context) =>
         {
             if (CanPlayerInput() || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
@@ -1088,6 +1093,15 @@ public class PlayerActor : HumanoidActor
         return highlightedInteractable;
     }
 
+    private void Interact()
+    {
+        Interactable interactable = GetHighlightedInteractable();
+        if (interactable != null)
+        {
+            interactable.Interact(this);
+        }
+        
+    }
     private void OnAnimatorIK(int layerIndex)
     {
         if (IsAiming())

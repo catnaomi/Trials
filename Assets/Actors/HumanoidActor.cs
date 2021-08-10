@@ -377,7 +377,9 @@ public class HumanoidActor : Actor
     public bool GetGrounded()
     {
         // return cc.isGrounded;
-        return Physics.Raycast(transform.position, Vector3.down, 0.1f, LayerMask.GetMask("Terrain"));
+        Collider c = this.GetComponent<Collider>();
+        Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down;
+        return Physics.Raycast(bottom, Vector3.down, 0.2f, LayerMask.GetMask("Terrain"));
     }
 
     protected void OnAnimatorIK(int layerIndex)

@@ -2,6 +2,7 @@ using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
@@ -10,6 +11,7 @@ using UnityEngine.UI;
 public class CraftMenuController : MonoBehaviour
 {
     // TODO: blade comparisons, actually setting slots 
+
     public GameObject source;
     public CraftState state;
     [Header("UI References")]
@@ -24,6 +26,7 @@ public class CraftMenuController : MonoBehaviour
     public InventoryItemDisplay removeButton;
     public InventoryItemDisplay hollowHiltButton;
     public InventoryItemDisplay hollowBladeButton;
+    public InventoryItemDisplay newWeaponButton;
     [Space(5)]
     public WeaponStatBlock statBlock;
     [Space(5)]
@@ -34,6 +37,9 @@ public class CraftMenuController : MonoBehaviour
     public BladeWeapon currentWeapon;
     public WeaponComponent currentComponent;
     InventoryItemDisplay hovered;
+
+    public UnityEvent onExit;
+    bool exit;
     bool init;
     bool hide;
     public enum CraftState
@@ -55,7 +61,6 @@ public class CraftMenuController : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(previewToggle.gameObject);
         inventoryMenu.source = this.source;
         init = false;
-
     }
 
     private void Update()
@@ -200,6 +205,22 @@ public class CraftMenuController : MonoBehaviour
             hollowHiltButton.gameObject.SetActive(false);
             hollowBladeButton.gameObject.SetActive(false);
         }
+        if (state == CraftState.Assembly_Select)
+        {
+            newWeaponButton.gameObject.SetActive(true);
+        }
+        else
+        {
+            newWeaponButton.gameObject.SetActive(false);
+        }
+    }
+
+    public void SetupUIInputModule()
+    {
+        EventSystem.current.GetComponent<InputSystemUIInputModule>().cancel.action.performed += (context) =>
+        {
+            OnCancel();
+        };
     }
     // returns true if weapon is different than current
     public bool SetCurrentWeapon(BladeWeapon weapon)
@@ -215,6 +236,16 @@ public class CraftMenuController : MonoBehaviour
         }
         return false;
     }
+
+    public void CreateNewWeapon()
+    {
+        CraftableWeapon newCraft = (CraftableWeapon)ScriptableObject.CreateInstance("CraftableWeapon");
+        newCraft.itemName = "New Craftable Weapon";
+        newCraft.itemDesc = "hot off the presses!";
+        inventoryMenu.inventory.Add(newCraft);
+        SetCurrentWeapon(newCraft);
+        inventoryMenu.Populate(true);
+    }
     public void UpdateStats()
     {
         if (currentWeapon != null)
@@ -224,6 +255,10 @@ public class CraftMenuController : MonoBehaviour
                 craftable.SetProperties();
             }
             statBlock.SetWeapon(currentWeapon);
+        }
+        else
+        {
+            statBlock.Clear();
         }
     }
 
@@ -443,7 +478,6 @@ public class CraftMenuController : MonoBehaviour
     {
         if (currentComponent == null)
         {
-            Debug.Log("clear!!");
             statBlock.SetCompare(false);
             UpdateStats();
         }
@@ -561,6 +595,15 @@ public class CraftMenuController : MonoBehaviour
             }
 
         }
+        InventoryItemDisplay item = inventoryMenu.GetFirstItem();
+        if (item != null)
+        {
+            EventSystem.current.SetSelectedGameObject(item.gameObject);
+        }
+        else
+        {
+            EventSystem.current.SetSelectedGameObject(previewToggle.gameObject);
+        }
         Debug.Log("select main slot");
         currentComponent = null;
     }
@@ -648,6 +691,15 @@ public class CraftMenuController : MonoBehaviour
                 }
             }
         }
+        InventoryItemDisplay item = inventoryMenu.GetFirstItem();
+        if (item != null)
+        {
+            EventSystem.current.SetSelectedGameObject(item.gameObject);
+        }
+        else
+        {
+            EventSystem.current.SetSelectedGameObject(previewToggle.gameObject);
+        }
         Debug.Log("select inset slot #" + slot);
         currentComponent = null;
     }
@@ -675,5 +727,69 @@ public class CraftMenuController : MonoBehaviour
         hide = !hide;
         Debug.Log("hide? " + hide);
         hideable.SetActive(!hide);
+    }
+
+    public void OnCancel()
+    {
+        if (state == CraftState.Assembly_Hilt_Remove || state == CraftState.Assembly_Hilt_SelectSlot)
+        {
+            currentComponent = null;
+            state = CraftState.Assembly_Hilt;
+            InventoryItemDisplay firstItem = inventoryMenu.GetFirstItem();
+            if (firstItem != null)
+            {
+                EventSystem.current.SetSelectedGameObject(firstItem.gameObject);
+            }
+            else
+            {
+                EventSystem.current.SetSelectedGameObject(hiltToggle.gameObject);
+            }
+        }
+        else if(state == CraftState.Assembly_Blade_Remove || state == CraftState.Assembly_Blade_SelectSlot)
+        {
+            currentComponent = null;
+            state = CraftState.Assembly_Blade;
+            InventoryItemDisplay firstItem = inventoryMenu.GetFirstItem();
+            if (firstItem != null)
+            {
+                EventSystem.current.SetSelectedGameObject(firstItem.gameObject);
+            }
+            else
+            {
+                EventSystem.current.SetSelectedGameObject(bladeToggle.gameObject);
+            }
+        }
+        else if (state == CraftState.Assembly_Adornment_Remove || state == CraftState.Assembly_Adornment_SelectSlot)
+        {
+            currentComponent = null;
+            state = CraftState.Assembly_Adornment;
+            InventoryItemDisplay firstItem = inventoryMenu.GetFirstItem();
+            if (firstItem != null)
+            {
+                EventSystem.current.SetSelectedGameObject(firstItem.gameObject);
+            }
+            else
+            {
+                EventSystem.current.SetSelectedGameObject(adornmentToggle.gameObject);
+            }
+        }
+        else if (state == CraftState.Assembly_Blade || state == CraftState.Assembly_Hilt || state == CraftState.Assembly_Adornment)
+        {
+            state = CraftState.Assembly_Select;
+            currentComponent = null;
+            currentWeapon = null;
+            UpdateStats();
+        }
+        else if (state == CraftState.Assembly_Select && currentWeapon != null)
+        {
+            currentComponent = null;
+            currentWeapon = null;
+            UpdateStats();
+        }
+        else if (currentWeapon == null && !exit)
+        {
+            exit = true;
+            onExit.Invoke();
+        }
     }
 }

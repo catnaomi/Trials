@@ -146,19 +146,21 @@ public class Inventory : MonoBehaviour, IInventory
         }
     }
 
-    public void RemoveItem(Item item)
+    public bool RemoveItem(Item item)
     {
         if (item != null)
         {
             bool success = contents.Remove(item);
             item.holder = null;
             OnChange.Invoke();
+            return success;
         }
+        return false;
     }
 
     public void EquipMainWeapon(EquippableWeapon weapon, bool draw)
     {
-        if (!weapon.EquippableMain)
+        if (!weapon.EquippableMain || !weapon.IsEquippable())
         {
             return;
         }
@@ -202,7 +204,7 @@ public class Inventory : MonoBehaviour, IInventory
     public void EquipOffHandWeapon(EquippableWeapon weapon, bool draw)
     {
 
-        if (!weapon.EquippableOff)
+        if (!weapon.EquippableOff || !weapon.IsEquippable())
         {
             return;
         }
@@ -812,13 +814,13 @@ public class Inventory : MonoBehaviour, IInventory
 
     public bool Add(Item item)
     {
-        contents.Add(item);
+        AddItem(item);
         return true;
     }
 
     public bool Remove(Item item)
     {
-        return contents.Remove(item);
+        return RemoveItem(item);
     }
 
     public void Clear()

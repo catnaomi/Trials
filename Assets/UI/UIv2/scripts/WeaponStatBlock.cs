@@ -68,8 +68,21 @@ public class WeaponStatBlock : MonoBehaviour
 
         foreach (StatComparisonDisplay statComparisonDisplay in statComparisonDisplays)
         {
+            statComparisonDisplay.gameObject.SetActive(true);
             statComparisonDisplay.UpdateDisplay();
         }
+        stat_Elements.gameObject.SetActive(true);
         stat_Elements.GenerateElements();
+    }
+
+    public void Clear()
+    {
+        displayName.text = "";
+
+        foreach (StatComparisonDisplay statComparisonDisplay in statComparisonDisplays)
+        {
+            statComparisonDisplay.gameObject.SetActive(false);
+        }
+        stat_Elements.gameObject.SetActive(false);
     }
 }

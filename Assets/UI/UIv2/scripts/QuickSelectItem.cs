@@ -14,7 +14,7 @@ public class QuickSelectItem : MonoBehaviour
     public Color equippedColor = new Color(1f, 1f, 1f, 0.5f);
     public Color awaitInputColor = Color.magenta;
     bool awaitingInput;
-    bool equipped;
+    public bool equipped;
     public InventoryUI2 invUI;
 
     public float shadowAlpha = 0f;

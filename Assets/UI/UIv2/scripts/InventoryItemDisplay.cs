@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -95,7 +96,14 @@ public class InventoryItemDisplay : Selectable, ISelectHandler
 
     public void StartEquip()
     {
-        InventoryUI2.invUI.StartQuickSlotEquip(item);
+        try
+        {
+            InventoryUI2.invUI.StartQuickSlotEquip(item);
+        }
+        catch (Exception ex)
+        {
+            bool b = false;
+        }
     }
     public void UpdatePreview()
     {
