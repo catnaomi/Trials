@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 public class CraftMenuController : MonoBehaviour
@@ -18,6 +20,10 @@ public class CraftMenuController : MonoBehaviour
     [Space(5)]
     public InventoryUI2 inventoryMenu;
     public GameObject itemPreview;
+    public GameObject hideable;
+    public InventoryItemDisplay removeButton;
+    public InventoryItemDisplay hollowHiltButton;
+    public InventoryItemDisplay hollowBladeButton;
     [Space(5)]
     public WeaponStatBlock statBlock;
     [Space(5)]
@@ -25,19 +31,23 @@ public class CraftMenuController : MonoBehaviour
     public InventoryItemDisplay slotSelect_main;
     public InventoryItemDisplay[] slotSelect_insets;
     
-    BladeWeapon currentWeapon;
+    public BladeWeapon currentWeapon;
     public WeaponComponent currentComponent;
     InventoryItemDisplay hovered;
     bool init;
+    bool hide;
     public enum CraftState
     {
         Assembly_Select,
         Assembly_Hilt,
         Assembly_Hilt_SelectSlot,
+        Assembly_Hilt_Remove,
         Assembly_Blade,
         Assembly_Blade_SelectSlot,
+        Assembly_Blade_Remove,
         Assembly_Adornment,
-        Assembly_Adornment_SelectSlot
+        Assembly_Adornment_SelectSlot,
+        Assembly_Adornment_Remove,
     }
     // Start is called before the first frame update
     void Start()
@@ -45,8 +55,13 @@ public class CraftMenuController : MonoBehaviour
         EventSystem.current.SetSelectedGameObject(previewToggle.gameObject);
         inventoryMenu.source = this.source;
         init = false;
+
     }
 
+    private void Update()
+    {
+        if (Gamepad.current.rightStickButton.wasReleasedThisFrame) ToggleHide();
+    }
     public void SetCategory()
     {
         if (previewToggle.isOn)
@@ -62,7 +77,7 @@ public class CraftMenuController : MonoBehaviour
             {
                 state = CraftState.Assembly_Hilt;
                 currentComponent = null;
-                inventoryMenu.filterType = "Hilt";
+                inventoryMenu.filterType = "Hilt,Inset,ElementalGem";
                 inventoryMenu.Populate(true);
             }
         }
@@ -72,7 +87,7 @@ public class CraftMenuController : MonoBehaviour
             {
                 state = CraftState.Assembly_Blade;
                 currentComponent = null;
-                inventoryMenu.filterType = "Blade";
+                inventoryMenu.filterType = "Blade,Inset,ElementalGem";
                 inventoryMenu.Populate(true);
             }
         }
@@ -123,7 +138,10 @@ public class CraftMenuController : MonoBehaviour
 
         bool inSelectState = (state == CraftState.Assembly_Adornment_SelectSlot) ||
                                 (state == CraftState.Assembly_Blade_SelectSlot) ||
-                                (state == CraftState.Assembly_Hilt_SelectSlot);
+                                (state == CraftState.Assembly_Hilt_SelectSlot) ||
+                                (state == CraftState.Assembly_Adornment_Remove) ||
+                                (state == CraftState.Assembly_Blade_Remove) ||
+                                (state == CraftState.Assembly_Hilt_Remove);
         if (currentWeapon != null && inSelectState && currentComponent != null)
         {
             if (currentComponent is Hilt || currentComponent is Blade || currentComponent is Adornment)
@@ -157,6 +175,31 @@ public class CraftMenuController : MonoBehaviour
                 slotSelect_insets[i].showSelectHighlight = false;
             }
         }
+
+        if (currentWeapon != null && (state == CraftState.Assembly_Hilt || state == CraftState.Assembly_Hilt_SelectSlot || state == CraftState.Assembly_Hilt_Remove))
+        {
+            removeButton.gameObject.SetActive(true);
+            hollowHiltButton.gameObject.SetActive(true);
+            hollowBladeButton.gameObject.SetActive(false);
+        }
+        else if (currentWeapon != null && (state == CraftState.Assembly_Blade || state == CraftState.Assembly_Blade_SelectSlot || state == CraftState.Assembly_Blade_Remove))
+        {
+            removeButton.gameObject.SetActive(true);
+            hollowHiltButton.gameObject.SetActive(false);
+            hollowBladeButton.gameObject.SetActive(true);
+        }
+        else if (currentWeapon != null && (state == CraftState.Assembly_Adornment || state == CraftState.Assembly_Adornment_SelectSlot || state == CraftState.Assembly_Adornment_Remove))
+        {
+            removeButton.gameObject.SetActive(true);
+            hollowHiltButton.gameObject.SetActive(false);
+            hollowBladeButton.gameObject.SetActive(false);
+        }
+        else
+        {
+            removeButton.gameObject.SetActive(false);
+            hollowHiltButton.gameObject.SetActive(false);
+            hollowBladeButton.gameObject.SetActive(false);
+        }
     }
     // returns true if weapon is different than current
     public bool SetCurrentWeapon(BladeWeapon weapon)
@@ -176,15 +219,19 @@ public class CraftMenuController : MonoBehaviour
     {
         if (currentWeapon != null)
         {
+            if (currentWeapon is CraftableWeapon craftable)
+            {
+                craftable.SetProperties();
+            }
             statBlock.SetWeapon(currentWeapon);
         }
     }
 
     public void UpdateSlots()
     {
-        bool showSlotsState = (state == CraftState.Assembly_Adornment) || (state == CraftState.Assembly_Adornment_SelectSlot) ||
-                            (state == CraftState.Assembly_Blade) || (state == CraftState.Assembly_Blade_SelectSlot) ||
-                            (state == CraftState.Assembly_Hilt) || (state == CraftState.Assembly_Hilt_SelectSlot);
+        bool showSlotsState = (state == CraftState.Assembly_Adornment) || (state == CraftState.Assembly_Adornment_SelectSlot) || (state == CraftState.Assembly_Adornment_Remove) ||
+                            (state == CraftState.Assembly_Blade) || (state == CraftState.Assembly_Blade_SelectSlot) || (state == CraftState.Assembly_Blade_Remove) ||
+                            (state == CraftState.Assembly_Hilt) || (state == CraftState.Assembly_Hilt_SelectSlot) || (state == CraftState.Assembly_Hilt_Remove);
 
         if (showSlotsState && currentWeapon != null && currentWeapon is CraftableWeapon craftableWeapon)
         {
@@ -252,68 +299,94 @@ public class CraftMenuController : MonoBehaviour
                 UpdateStats();
                 UpdateSlots();
             }
-            
+
         }
-        else if (state == CraftState.Assembly_Hilt || state == CraftState.Assembly_Hilt_SelectSlot)
+        else if (currentWeapon != null && currentWeapon is CraftableWeapon craftableWeapon)
         {
-            if (itemDisplay.item is Hilt hilt)
+            if (state == CraftState.Assembly_Hilt || state == CraftState.Assembly_Hilt_SelectSlot || state == CraftState.Assembly_Hilt_Remove)
             {
-                currentComponent = hilt;
-                statBlock.SetCompare(false);
-                if (currentWeapon != null && currentWeapon is CraftableWeapon craftableWeapon)
+                if (itemDisplay.item is Hilt hilt)
                 {
+                    currentComponent = hilt;
+                    statBlock.SetCompare(false);
                     craftableWeapon.GetStatDifferencesHiltChange(hilt, ref statBlock);
-                }
 
-                UpdateStats();
-                UpdateSlots();
-
-                if (currentWeapon != null)
-                {
+                    UpdateStats();
+                    UpdateSlots();
                     EventSystem.current.SetSelectedGameObject(slotSelect_main.gameObject);
                 }
-            }
-            state = CraftState.Assembly_Hilt_SelectSlot;
-        }
-        else if (state == CraftState.Assembly_Blade || state == CraftState.Assembly_Blade_SelectSlot)
-        {
-            if (itemDisplay.item is Blade blade)
-            {
-                currentComponent = blade;
-                statBlock.SetCompare(false);
-                if (currentWeapon != null && currentWeapon is CraftableWeapon craftableWeapon)
+                else if (itemDisplay.item is Inset inset)
                 {
+                    currentComponent = inset;
+                    statBlock.SetCompare(false);
+                    if (inset is IBladeStatModifier bsm)
+                    {
+                        craftableWeapon.GetStatDifferencesBladeStatModifier(bsm, ref statBlock);
+                    }
+
+                    UpdateStats();
+                    UpdateSlots();
+
+                    if (craftableWeapon.hilt != null && craftableWeapon.hilt.slots > 0)
+                    {
+                        EventSystem.current.SetSelectedGameObject(slotSelect_insets[0].gameObject);
+                    }
+                }
+                state = CraftState.Assembly_Hilt_SelectSlot;
+            }
+            else if (state == CraftState.Assembly_Blade || state == CraftState.Assembly_Blade_SelectSlot || state == CraftState.Assembly_Blade_Remove)
+            {
+                if (itemDisplay.item is Blade blade)
+                {
+                    currentComponent = blade;
+                    statBlock.SetCompare(false);
+
                     craftableWeapon.GetStatDifferencesBladeChange(blade, ref statBlock);
-                }
 
-                UpdateStats();
-                UpdateSlots();
-                if (currentWeapon != null)
-                {
-                    EventSystem.current.SetSelectedGameObject(slotSelect_main.gameObject);
+                    UpdateStats();
+                    UpdateSlots();
+                    if (currentWeapon != null && currentWeapon is CraftableWeapon)
+                    {
+                        EventSystem.current.SetSelectedGameObject(slotSelect_main.gameObject);
+                    }
                 }
+                else if (itemDisplay.item is Inset inset)
+                {
+                    currentComponent = inset;
+                    statBlock.SetCompare(false);
+                    if (inset is IBladeStatModifier bsm)
+                    {
+                        craftableWeapon.GetStatDifferencesBladeStatModifier(bsm, ref statBlock);
+                    }
+
+                    UpdateStats();
+                    UpdateSlots();
+
+                    if (craftableWeapon.blade != null && craftableWeapon.blade.slots > 0)
+                    {
+                        EventSystem.current.SetSelectedGameObject(slotSelect_insets[0].gameObject);
+                    }
+                }
+                state = CraftState.Assembly_Blade_SelectSlot;
             }
-            state = CraftState.Assembly_Blade_SelectSlot;
-        }
-        else if (state == CraftState.Assembly_Adornment || state == CraftState.Assembly_Adornment_SelectSlot)
-        {
-            if (itemDisplay.item is Adornment adornment)
+            else if (state == CraftState.Assembly_Adornment || state == CraftState.Assembly_Adornment_SelectSlot || state == CraftState.Assembly_Adornment_Remove)
             {
-                currentComponent = adornment;
-                statBlock.SetCompare(false);
-                if (currentWeapon != null && currentWeapon is CraftableWeapon craftableWeapon)
+                if (itemDisplay.item is Adornment adornment)
                 {
-                    craftableWeapon.GetStatDifferencesAdornmentChange(adornment, ref statBlock);
-                }
+                    currentComponent = adornment;
+                    statBlock.SetCompare(false);
 
-                UpdateStats();
-                UpdateSlots();
-                if (currentWeapon != null)
-                {
-                    EventSystem.current.SetSelectedGameObject(slotSelect_main.gameObject);
+                        craftableWeapon.GetStatDifferencesAdornmentChange(adornment, ref statBlock);
+
+
+                    UpdateStats();
+                    UpdateSlots();
+
+                        EventSystem.current.SetSelectedGameObject(slotSelect_main.gameObject);
+
                 }
+                state = CraftState.Assembly_Adornment_SelectSlot;
             }
-            state = CraftState.Assembly_Adornment_SelectSlot;
         }
     }
 
@@ -366,6 +439,15 @@ public class CraftMenuController : MonoBehaviour
         }
     }
 
+    public void ClearCompareIfNoSelect()
+    {
+        if (currentComponent == null)
+        {
+            Debug.Log("clear!!");
+            statBlock.SetCompare(false);
+            UpdateStats();
+        }
+    }
     public void OnSelectSlotMain()
     {
         if (currentWeapon != null && currentWeapon is CraftableWeapon craftableWeapon)
@@ -379,7 +461,10 @@ public class CraftMenuController : MonoBehaviour
                     {
                         foreach (Inset inset in removedInsets)
                         {
-                            inventoryMenu.inventory.Add(inset);
+                            if (!(inset is HollowInset))
+                            {
+                                inventoryMenu.inventory.Add(inset);
+                            }
                         }
                     }
                     inventoryMenu.inventory.Add(craftableWeapon.hilt);
@@ -388,6 +473,7 @@ public class CraftMenuController : MonoBehaviour
                 craftableWeapon.hilt = hilt;
                 currentComponent = null;
                 inventoryMenu.Populate(true);
+                statBlock.SetCompare(false);
                 UpdateStats();
                 UpdateSlots();
                 GenerateModel();
@@ -401,7 +487,10 @@ public class CraftMenuController : MonoBehaviour
                     {
                         foreach (Inset inset in removedInsets)
                         {
-                            inventoryMenu.inventory.Add(inset);
+                            if (!(inset is HollowInset))
+                            {
+                                inventoryMenu.inventory.Add(inset);
+                            }
                         }
                     }
                     inventoryMenu.inventory.Add(craftableWeapon.blade);
@@ -411,6 +500,7 @@ public class CraftMenuController : MonoBehaviour
                 craftableWeapon.blade = blade;
                 currentComponent = null;
                 inventoryMenu.Populate(true);
+                statBlock.SetCompare(false);
                 UpdateStats();
                 UpdateSlots();
                 GenerateModel();
@@ -425,10 +515,51 @@ public class CraftMenuController : MonoBehaviour
                 craftableWeapon.adornment = adornment;
                 currentComponent = null;
                 inventoryMenu.Populate(true);
+                statBlock.SetCompare(false);
                 UpdateStats();
                 UpdateSlots();
                 GenerateModel();
             }
+            else if (state == CraftState.Assembly_Hilt_Remove)
+            {
+                if (craftableWeapon.hilt != null)
+                {
+                    inventoryMenu.inventory.Add(craftableWeapon.hilt);
+                }
+                craftableWeapon.hilt = null;
+                state = CraftState.Assembly_Hilt;
+                inventoryMenu.Populate(true);
+                statBlock.SetCompare(false);
+                UpdateStats();
+                UpdateSlots();
+                GenerateModel();
+            }
+            else if (state == CraftState.Assembly_Blade_Remove)
+            {
+                if (craftableWeapon.blade != null)
+                {
+                    inventoryMenu.inventory.Add(craftableWeapon.blade);
+                }
+                craftableWeapon.blade = null;
+                state = CraftState.Assembly_Blade;
+                inventoryMenu.Populate(true);
+                statBlock.SetCompare(false);
+                UpdateStats();
+                UpdateSlots();
+                GenerateModel();
+            }
+            else if (state == CraftState.Assembly_Adornment_Remove)
+            {
+                inventoryMenu.inventory.Add(craftableWeapon.adornment);
+                craftableWeapon.adornment = null;
+                state = CraftState.Assembly_Adornment;
+                inventoryMenu.Populate(true);
+                statBlock.SetCompare(false);
+                UpdateStats();
+                UpdateSlots();
+                GenerateModel();
+            }
+
         }
         Debug.Log("select main slot");
         currentComponent = null;
@@ -436,7 +567,113 @@ public class CraftMenuController : MonoBehaviour
 
     public void OnSelectSlotInset(int slot)
     {
+        if (currentWeapon != null && currentWeapon is CraftableWeapon craftableWeapon)
+        {
+            if (state == CraftState.Assembly_Hilt_SelectSlot && currentComponent is Inset inseth)
+            {
+                if (craftableWeapon.hilt != null)
+                {
+                    Inset prev;
+                    craftableWeapon.hilt.UnattachInset(slot, out prev);
+                    craftableWeapon.hilt.AttachInset(inseth, slot);
+                    inventoryMenu.inventory.Remove(inseth);
+                    if (prev != null && !(prev is HollowInset))
+                    {
+                        inventoryMenu.inventory.Add(prev);
+                    }
+                    inventoryMenu.inventory.Add(craftableWeapon.hilt);
+                    state = CraftState.Assembly_Hilt;
+                    inventoryMenu.Populate(true);
+                    statBlock.SetCompare(false);
+                    UpdateStats();
+                    UpdateSlots();
+                    GenerateModel();
+                }
+            }
+            else if (state == CraftState.Assembly_Blade_SelectSlot && currentComponent is Inset insetb)
+            {
+                if (craftableWeapon.blade != null)
+                {
+                    Inset prev;
+                    craftableWeapon.blade.UnattachInset(slot, out prev);
+                    craftableWeapon.blade.AttachInset(insetb, slot);
+                    inventoryMenu.inventory.Remove(insetb);
+                    if (prev != null && !(prev is HollowInset))
+                    {
+                        inventoryMenu.inventory.Add(prev);
+                    }
+                    inventoryMenu.inventory.Add(craftableWeapon.blade);
+                    state = CraftState.Assembly_Blade;
+                    inventoryMenu.Populate(true);
+                    statBlock.SetCompare(false);
+                    UpdateStats();
+                    UpdateSlots();
+                    GenerateModel();
+                }
+            }
+            else if (state == CraftState.Assembly_Hilt_Remove)
+            {
+                if (craftableWeapon.hilt != null)
+                {
+                    Inset prev;
+                    craftableWeapon.hilt.UnattachInset(slot, out prev);
+                    if (prev != null && !(prev is HollowInset))
+                    {
+                        inventoryMenu.inventory.Add(prev);
+                    }
+                    state = CraftState.Assembly_Hilt;
+                    inventoryMenu.Populate(true);
+                    statBlock.SetCompare(false);
+                    UpdateStats();
+                    UpdateSlots();
+                    GenerateModel();
+                }
+            }
+            else if (state == CraftState.Assembly_Blade_Remove)
+            {
+                if (craftableWeapon.blade != null)
+                {
+                    Inset prev;
+                    craftableWeapon.blade.UnattachInset(slot, out prev);
+                    if (prev != null && !(prev is HollowInset))
+                    {
+                        inventoryMenu.inventory.Add(prev);
+                    }
+                    state = CraftState.Assembly_Blade;
+                    inventoryMenu.Populate(true);
+                    statBlock.SetCompare(false);
+                    UpdateStats();
+                    UpdateSlots();
+                    GenerateModel();
+                }
+            }
+        }
         Debug.Log("select inset slot #" + slot);
         currentComponent = null;
+    }
+    
+    public void SetRemove()
+    {
+        if (state == CraftState.Assembly_Hilt || state == CraftState.Assembly_Hilt_SelectSlot)
+        {
+            state = CraftState.Assembly_Hilt_Remove;
+        }
+        else if (state == CraftState.Assembly_Blade || state == CraftState.Assembly_Blade_SelectSlot)
+        {
+            state = CraftState.Assembly_Blade_Remove;
+        }
+        else if (state == CraftState.Assembly_Adornment)
+        {
+            state = CraftState.Assembly_Adornment_Remove;
+        }
+        EventSystem.current.SetSelectedGameObject(slotSelect_main.gameObject);
+    }
+
+    public void ToggleHide()
+    {
+
+        hide = !hide;
+        Debug.Log("hide? " + hide);
+        hideable.SetActive(!hide);
     }
 }

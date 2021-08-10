@@ -263,6 +263,11 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         return new Damage();
     }
 
+    public virtual List<DamageType> GetElements()
+    {
+        return elements;
+    }
+
     private void SetTrails(bool thrust, bool slash)
     {
         foreach (TrailRenderer trail in GetModel().GetComponentsInChildren<TrailRenderer>())

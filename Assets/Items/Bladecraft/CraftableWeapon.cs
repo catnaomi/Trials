@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using CustomUtilities;
 
 [Serializable]
 [CreateAssetMenu(fileName = "Item", menuName = "ScriptableObjects/Crafting/New CraftableWeapon", order = 1)]
@@ -10,6 +11,8 @@ public class CraftableWeapon : BladeWeapon
     public Hilt hilt;
     public Blade blade;
     public Adornment adornment;
+
+    Dictionary<string, float> statChanges = new Dictionary<string, float>();
 
     #region stats
     // base damage
@@ -25,7 +28,7 @@ public class CraftableWeapon : BladeWeapon
     // elements
     public override float GetLength()
     {
-        return GetTotalLength();
+        return GetTotalLength() + GetStatChange("Length");
     }
     public float GetTotalLength()
     {
@@ -62,9 +65,17 @@ public class CraftableWeapon : BladeWeapon
         {
             h = hilt.GetWidth();
         }
-        return Mathf.Max(b, h);
+        return Mathf.Max(b, h) + GetStatChange("Width");
     }
 
+    public override float GetBaseDamage()
+    {
+        if (blade != null)
+        {
+            return blade.baseDamage + GetStatChange("BaseDamage");
+        }
+        return 0f + GetStatChange("BaseDamage");
+    }
     public override float GetWeight()
     {
         return GetTotalWeight();
@@ -99,25 +110,25 @@ public class CraftableWeapon : BladeWeapon
         {
             h = hilt.GetWeight();
         }
-        return b-h;
+        return (b-h) * GetStatChange("Balance"); ;
     }
 
     public override float GetPiercingModifier()
     {
         if (blade != null)
         {
-            return blade.GetPiercingModifier();
+            return blade.GetPiercingModifier() + GetStatChange("PiercingModifier");
         }
-        return 0f;
+        return 0f + GetStatChange("PiercingModifier");
     }
 
     public override float GetSlashingModifier()
     {
         if (blade != null)
         {
-            return blade.GetSlashingModifier();
+            return blade.GetSlashingModifier() + GetStatChange("SlashingModifier");
         }
-        return 0f;
+        return 0f + GetStatChange("SlashingModifier");
     }
 
     public override int GetDurability()
@@ -135,7 +146,7 @@ public class CraftableWeapon : BladeWeapon
     }
     public override float GetAttackSpeed(bool twoHand)
     {
-        return AttackSpeedFormula(GetTotalWeight(), GetBalance(), twoHand);
+        return AttackSpeedFormula(GetTotalWeight(), GetBalance(), twoHand) * GetStatChange("AttackSpeed");
     }
 
     public static float AttackSpeedFormula(float weight, float balance, bool twoHand)
@@ -188,26 +199,53 @@ public class CraftableWeapon : BladeWeapon
             this.MainHandEquipSlot = Inventory.EquipSlot.rHip;
             this.OffHandEquipSlot = Inventory.EquipSlot.lHip;
         }
-        // this.elements = something or other;
-        /*
-        int leadSP = -9;
+
+        statChanges["BaseDamage"] = 0f;
+        statChanges["AttackSpeed"] = 1f; // multiplicative
+        statChanges["Length"] = 0f;
+        statChanges["Width"] = 0f;
+        statChanges["Balance"] = 1f; // multiplicative
+        statChanges["SlashingModifier"] = 0f;
+        statChanges["PiercingModfier"] = 0f;
+
+        this.elements.Clear();
         foreach (WeaponComponent component in GetAllComponents())
         {
-            if (component != null)
+            if (component is IBladeStatModifier bsm)
             {
-                if (component.ratios != null)
+                foreach (KeyValuePair<string, float> pair in bsm.GetStatMods())
                 {
-                    elementRatios.Add(component.ratios);
+                    statChanges[pair.Key] += pair.Value;
                 }
-                if (component.PrfMainHandStance.specialAttack != null && component.PrfMainHandStance.specialPriority > leadSP)
+                foreach (DamageType type in bsm.GetAddedElements())
                 {
-                    this.PrfStance.specialAttack = component.PrfMainHandStance.specialAttack;
-                    leadSP = component.PrfMainHandStance.specialPriority;
+                    if (!this.elements.Contains(type))
+                    {
+                        this.elements.Add(type);
+                    }
                 }
-            } 
+            }
         }
-        */
-    }
+            // this.elements = something or other;
+            /*
+            int leadSP = -9;
+            foreach (WeaponComponent component in GetAllComponents())
+            {
+                if (component != null)
+                {
+                    if (component.ratios != null)
+                    {
+                        elementRatios.Add(component.ratios);
+                    }
+                    if (component.PrfMainHandStance.specialAttack != null && component.PrfMainHandStance.specialPriority > leadSP)
+                    {
+                        this.PrfStance.specialAttack = component.PrfMainHandStance.specialAttack;
+                        leadSP = component.PrfMainHandStance.specialPriority;
+                    }
+                } 
+            }
+            */
+        }
 
     public List<WeaponComponent> GetAllComponents()
     {
@@ -335,6 +373,33 @@ public class CraftableWeapon : BladeWeapon
         statBlock.stat_Weight.comparisonValue = weight_noadorn + proposedAdornment.GetWeight();
         statBlock.stat_Weight.compare = true;
     }
+
+    public void GetStatDifferencesBladeStatModifier(IBladeStatModifier bladeStatModifier, ref WeaponStatBlock statBlock)
+    {
+        statBlock.stat_Weight.comparisonValue = this.GetWeight() + bladeStatModifier.GetWeight();
+
+        Dictionary<string, float> statMod = bladeStatModifier.GetStatMods();
+
+        statBlock.stat_Length.comparisonValue = (statMod.TryGetValue("Length", out float len) ? len : 0f) + this.GetLength();
+        statBlock.stat_Width.comparisonValue = (statMod.TryGetValue("Width", out float wid) ? wid : 0f) + this.GetWidth();
+
+        statBlock.stat_Balance.comparisonValue = (statMod.TryGetValue("Balance", out float bal) ? this.GetBalance() * bal : this.GetBalance());
+
+        statBlock.stat_AttackSpeed.comparisonValue = (statMod.TryGetValue("AttackSpeed", out float atkspd) ? this.GetAttackSpeed(false) * atkspd : this.GetAttackSpeed(false));
+
+        statBlock.stat_BaseDamage.comparisonValue = (statMod.TryGetValue("BaseDamage", out float bd) ? bd : 0f) + this.GetBaseDamage();
+        statBlock.stat_PierceMod.comparisonValue = (statMod.TryGetValue("PiercingModifier", out float pm) ? pm : 0f) + this.GetPiercingModifier();
+        statBlock.stat_SlashMod.comparisonValue = (statMod.TryGetValue("SlashingModifier", out float sm) ? sm : 0f) + this.GetSlashingModifier();
+
+        statBlock.stat_Weight.compare = true;
+        statBlock.stat_Length.compare = true;
+        statBlock.stat_Width.compare = true;
+        statBlock.stat_Balance.compare = true;
+        statBlock.stat_AttackSpeed.compare = true;
+        statBlock.stat_BaseDamage.compare = true;
+        statBlock.stat_PierceMod.compare = true;
+        statBlock.stat_SlashMod.compare = true;
+    }
     #region rendering
     public override GameObject GenerateModel()
     {
@@ -371,7 +436,7 @@ public class CraftableWeapon : BladeWeapon
                 bladeModel.transform.SetParent(model.transform);
                 if (hiltModel != null)
                 {
-                    bladeModel.transform.position = hiltModel.transform.Find("_mount").position;
+                    bladeModel.transform.position = InterfaceUtilities.FindRecursively(hiltModel.transform,"mount").position;
                 }
             }
         }
@@ -394,6 +459,29 @@ public class CraftableWeapon : BladeWeapon
     }
     #endregion
 
+    public float GetStatChange(string stat)
+    {
+        if (statChanges == null)
+        {
+            statChanges = new Dictionary<string, float>();
+
+            statChanges["BaseDamage"] = 0f;
+            statChanges["AttackSpeed"] = 1f; // multiplicative
+            statChanges["Length"] = 0f;
+            statChanges["Width"] = 0f;
+            statChanges["Balance"] = 1f; // multiplicative
+            statChanges["SlashingModifier"] = 0f;
+            statChanges["PiercingModfier"] = 0f;
+        }
+        if (statChanges.TryGetValue(stat, out float val))
+        {
+            return val;
+        }
+        else
+        {
+            return 0f;
+        }
+    }
     public string ToString()
     {
         string bladeTxt = "none equipped";

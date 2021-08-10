@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CustomUtilities;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,12 +11,12 @@ public class InsetBearer : WeaponComponent
     [Header("Insets")]
     public List<Inset> insets;
     public int slots;
-
+    public bool UsePrefabInset = true;
     
     private void OnEnable()
     {
         //insets.Clear();
-        /*
+        
         for (int i = 0; i < slots; i++)
         {
             //Inset empty = null;//Inset.CreateEmptyInset();
@@ -27,14 +28,14 @@ public class InsetBearer : WeaponComponent
             else if (insets[i] == null)
             {
                 insets[i] = empty;
-            }
+            }*/
             
         }
         while (insets.Count > slots)
         {
             insets.RemoveAt(insets.Count - 1);
         }
-        */
+        
     }
     
 
@@ -155,18 +156,45 @@ public class InsetBearer : WeaponComponent
             model = GameObject.Instantiate(prefab);
             for (int i = 0; i < slots; i++)
             {
-                Transform insetSlot = model.transform.Find("inset_" + (i + 1));
-                if (insets[i] != null)
+                if (UsePrefabInset)
                 {
-                    GameObject newInset = insets[i].GenerateModel();
-                    if (newInset != null)
+                    Transform insetSlot = model.transform.Find("inset_" + (i + 1));
+                    if (insets[i] != null && insetSlot != null)
                     {
-                        newInset.transform.SetParent(insetSlot, false);
+                        GameObject newInset = insets[i].GenerateModel();
+                        if (newInset != null)
+                        {
+                            newInset.transform.SetParent(insetSlot, false);
+                        }
+                        Transform insetDefault = insetSlot.transform.Find("inset_" + (i + 1) + "_default");
+                        if (insetDefault != null)
+                        {
+                            insetDefault.gameObject.SetActive(false);
+                        }
                     }
-                    Transform insetDefault = insetSlot.transform.Find("inset_" + (i + 1) + "_default");
-                    if (insetDefault != null)
+                }
+                else
+                {
+                    Transform fill = InterfaceUtilities.FindRecursively(model.transform, "fill" + (i+1));
+                    Transform inlay = InterfaceUtilities.FindRecursively(model.transform, "inlay" + (i + 1));
+                    if (insets[i] == null)
                     {
-                        insetDefault.gameObject.SetActive(false);
+                        fill.gameObject.SetActive(true);
+                        inlay.gameObject.SetActive(false);
+                    }
+                    else if (insets[i] is HollowInset)
+                    {
+                        fill.gameObject.SetActive(false);
+                        inlay.gameObject.SetActive(false);
+                    }
+                    else if (insets[i])
+                    {
+                        fill.gameObject.SetActive(false);
+                        inlay.gameObject.SetActive(true);
+                        if (insets[i] is ElementalGem gem && gem.gemMaterial != null)
+                        {
+                            inlay.GetComponent<Renderer>().material = gem.gemMaterial;
+                        }
                     }
                 }
             }

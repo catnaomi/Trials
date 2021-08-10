@@ -68,5 +68,25 @@ namespace CustomUtilities
                 SetLayerRecursively(child.gameObject, layer);
             }
         }
+
+        public static Transform FindRecursively(Transform transform, string name)
+        {
+            if (transform.name.Contains(name))
+            {
+                return transform;
+            }
+            else
+            {
+                foreach (Transform child in transform)
+                {
+                    Transform find = FindRecursively(child, name);
+                    if (find != null)
+                    {
+                        return find;
+                    }
+                }
+                return null;
+            }
+        }
     }
 }

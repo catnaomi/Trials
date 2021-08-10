@@ -6,6 +6,7 @@ public enum DamageType
     TrueDamage,
     Slashing,
     Piercing,
+    Blunt,
     Earth,
     Light,
     Dark,

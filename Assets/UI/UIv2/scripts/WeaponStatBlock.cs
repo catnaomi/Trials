@@ -29,6 +29,8 @@ public class WeaponStatBlock : MonoBehaviour
     public StatComparisonDisplay stat_PierceMod;
     public StatComparisonDisplay stat_Durability;
     // elements
+    [Space(5)]
+    public StatElementsDisplay stat_Elements;
 
     StatComparisonDisplay[] statComparisonDisplays;
     public void Awake()
@@ -48,6 +50,7 @@ public class WeaponStatBlock : MonoBehaviour
         stat_PierceMod.statValue = weapon.GetPiercingModifier();
         stat_Durability.statValue = weapon.GetDurability();
 
+        stat_Elements.SetElements(weapon.GetElements().ToArray());
         UpdateDisplay();
     }
 
@@ -67,5 +70,6 @@ public class WeaponStatBlock : MonoBehaviour
         {
             statComparisonDisplay.UpdateDisplay();
         }
+        stat_Elements.GenerateElements();
     }
 }

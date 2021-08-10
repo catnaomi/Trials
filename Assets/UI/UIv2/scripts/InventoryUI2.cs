@@ -116,6 +116,18 @@ public class InventoryUI2 : MonoBehaviour
             items.Add(displayItem);
             count++;
         }
+        items.Sort((a, b) => 
+        {
+            if (a.item.GetItemType() != b.item.GetItemType())
+            {
+                return filterList.IndexOf(b.item.GetItemType()) - filterList.IndexOf(a.item.GetItemType());
+            }
+            else
+            {
+                return a.item.itemName.CompareTo(b.item.itemName);
+            }
+            
+        });
         for (int j = 1; j < items.Count; j++)
         {
             Button b = items[j].GetComponent<Button>();

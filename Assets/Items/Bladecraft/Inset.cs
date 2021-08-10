@@ -13,10 +13,10 @@ public class Inset : WeaponComponent
         return String.Format("{0}:-Weight:{1}",itemName, weight);
     }
 
-    public static Inset CreateEmptyInset()
+    public static Inset CreateHollowInset()
     {
-        Inset i = ScriptableObject.CreateInstance<Inset>();
-        i.itemName = "_EmptyInset";
+        Inset i = ScriptableObject.CreateInstance<HollowInset>();
+        i.itemName = "_HollowInset";
         return i;
     }
 }
