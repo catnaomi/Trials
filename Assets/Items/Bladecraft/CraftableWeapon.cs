@@ -234,6 +234,11 @@ public class CraftableWeapon : BladeWeapon
                 }
             }
         }
+
+        if (blade != null && hilt != null)
+        {
+            this.moveset = Moveset.GetMoveset(hilt.hiltDescriptor, blade.bladeDescriptor);
+        }
             // this.elements = something or other;
             /*
             int leadSP = -9;

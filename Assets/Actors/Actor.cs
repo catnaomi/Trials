@@ -147,7 +147,7 @@ public class Actor : MonoBehaviour
         return CombatTarget;
     }
 
-    public void SetCombatTarget(GameObject target)
+    public virtual void SetCombatTarget(GameObject target)
     {
         CombatTarget = target;
     }

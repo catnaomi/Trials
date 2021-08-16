@@ -9,10 +9,9 @@ public class EquippableWeapon : Item
     [Header("Equip Information")]
     public bool EquippableMain = true;
     public bool EquippableOff = true;
-    public bool TwoHandOnly = false;
-    //[Space(5)]
-    //public bool OneHanded = true;
-    //public bool TwoHanded = true;
+    [Space(5)]
+    public bool OneHanded = true;
+    public bool TwoHanded = true;
     [Space(5)]
     public bool ParentLeftAsMain = false;
     public bool ParentRightAsOff = false;
@@ -97,5 +96,15 @@ public class EquippableWeapon : Item
     public virtual bool IsEquippable()
     {
         return true;
+    }
+
+    public virtual Moveset GetMoveset()
+    {
+        return moveset;
+    }
+
+    public bool TwoHandOnly()
+    {
+        return TwoHanded && !OneHanded;
     }
 }

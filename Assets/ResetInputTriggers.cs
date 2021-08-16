@@ -10,6 +10,9 @@ public class ResetInputTriggers : StateMachineBehaviour
     public bool IncludingLadderLockout = false;
     public bool OnEntry = true;
     public bool OnExit = false;
+    public bool Lockout = false;
+    public bool MashPrev = false;
+    public int MashPreventionID;
 
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -22,10 +25,13 @@ public class ResetInputTriggers : StateMachineBehaviour
     }
 
     // OnStateUpdate is called on each Update frame between OnStateEnter and OnStateExit callbacks
-    //override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
-    //{
-    //    
-    //}
+    override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        if (Lockout || (MashPrev && animator.GetInteger("Input-AttackID") == MashPreventionID))
+        {
+            Reset(animator);
+        }
+    }
 
     // OnStateExit is called when a transition ends and the state machine finishes evaluating this state
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

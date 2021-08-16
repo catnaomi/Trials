@@ -71,7 +71,7 @@ namespace CustomUtilities
 
         public static Transform FindRecursively(Transform transform, string name)
         {
-            if (transform.name.Contains(name))
+            if (transform.name.ToLower().Contains(name.ToLower()))
             {
                 return transform;
             }

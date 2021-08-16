@@ -69,8 +69,12 @@ public class HumanoidActor : Actor
 
     bool isHitboxActive;
 
+    [Range(-1f,1f)]
     public float tempValue1;
+    [Range(-1f, 1f)]
     public float tempValue2;
+    [Range(-1f, 1f)]
+    public float tempValue3;
 
     public GameObject damageDisplay;
 
@@ -1303,6 +1307,24 @@ public class HumanoidActor : Actor
 
         weaponModel.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
         offWeaponAngle = angle;
+    }
+
+    public void ResetMainRotation()
+    {
+        RotateMainWeapon(0f);
+        if (!inventory.IsMainDrawn())
+        {
+            return;
+        }
+        EquippableWeapon weapon = inventory.GetMainWeapon();
+        GameObject weaponModel = weapon.model;
+        GameObject mount = this.positionReference.MainHand;
+
+        //Quaternion rotation = Quaternion.AngleAxis(angle, mount.transform.up);
+
+        //weaponModel.transform.rotation = rotation;
+
+        //weaponModel.transform.localRotation = Quaternion.identity;
     }
 
     public void SetHeft(float heft)

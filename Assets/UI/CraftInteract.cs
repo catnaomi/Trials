@@ -64,6 +64,8 @@ public class CraftInteract : Interactable
         loadingScene = true;
         player.inventory.UnequipMainWeapon();
         player.inventory.UnequipOffHandWeapon();
+
+        Moveset.LoadMovesetCombinations();
     }
 
     private void InitiateScene()

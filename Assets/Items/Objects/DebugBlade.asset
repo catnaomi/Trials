@@ -19,10 +19,12 @@ MonoBehaviour:
   invID: 0
   prefab: {fileID: 1804189005472518104, guid: 60d2f5c90e5bfa4418b1bc6dae6bdf42, type: 3}
   displayImage: {fileID: 21300000, guid: db06b6c4cc451d749a12788835a5bc2a, type: 3}
+  displayColor: {r: 1, g: 1, b: 1, a: 1}
   isEquipped: 0
   EquippableMain: 1
   EquippableOff: 1
-  TwoHandOnly: 0
+  OneHanded: 1
+  TwoHanded: 1
   ParentLeftAsMain: 0
   ParentRightAsOff: 0
   MainHandEquipSlot: 1
@@ -33,23 +35,7 @@ MonoBehaviour:
     leftGrip: 2
     twohandGrip: 6
     blockStyle: 2
-  moveset:
-    slashMain: {fileID: 0}
-    slashOff: {fileID: 0}
-    thrustMain: {fileID: 0}
-    thrustOff: {fileID: 0}
-    slashMainHeavy: {fileID: 0}
-    slashOffHeavy: {fileID: 0}
-    thrustMainHeavy: {fileID: 0}
-    thrustOffHeavy: {fileID: 0}
-    slashDash: {fileID: 0}
-    slashPlunge: {fileID: 0}
-    slashSneak: {fileID: 0}
-    thrustDash: {fileID: 0}
-    thrustPlunge: {fileID: 0}
-    thrustSneak: {fileID: 0}
-    skill1: {fileID: 0}
-    skill2: {fileID: 0}
+  moveset: {fileID: 11400000, guid: 99a9394933d4ef041aa009b474330a73, type: 2}
   AttackSpeed: 1
   weight: 3
   OnEquip:
@@ -59,16 +45,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   model: {fileID: 0}
+  baseDamage: 0
   width: 0.25
   length: 1.25
-  elementRatios:
-    potential: 0
-    truedmg: 0
-    slash: 0
-    pierce: 0
-    earth: 0
-    light: 0
-    dark: 0
-    fire: 0
-    water: 0
-    air: 0
+  elements: 

@@ -37,6 +37,13 @@ public class PlayerActor : HumanoidActor
     [ReadOnly]
     public InputAttack currentAttackInput;
     public Moveset moveset;
+    IKHandMatch ikHand;
+    float ikHandWeight;
+    float showRight;
+    float showLeft;
+    float show2h;
+    Transform offGrip;
+    Vector3 offGripLast;
     PlayerInput inputs;
 
     public bool isMenuOpen;
@@ -79,6 +86,10 @@ public class PlayerActor : HumanoidActor
     public bool ladderSnap;
     public bool ladderLockout;
 
+
+    [Space(20)]
+    [Range(0f, 1f)]
+    public float tempVal;
     private void OnEnable()
     {
         player = this;
@@ -103,6 +114,7 @@ public class PlayerActor : HumanoidActor
         this.OnDodge.AddListener(() => { FXController.SlowMo(0.1f, 0.5f); });
         //OnHit.AddListener(() => { FXController.Hitpause(1f); });
 
+        inventory.OnChange.AddListener(GetStance);
         SetupInput();
     }
 
@@ -132,13 +144,17 @@ public class PlayerActor : HumanoidActor
         bool weaponDrawn = inventory.IsWeaponDrawn();
         bool isGrounded = GetGrounded();
         bool isAiming = IsAiming();
-        bool lockedOn = this.GetCombatTarget() != null;//cameraController.lockedOn;
+        bool lockedOn = IsLockedOn();
 
         animator.SetBool("Cam-Locked", lockedOn);
         //animator.SetBool("Cam-Aiming", isAiming && Input.GetButton("Aim"));
 
         float slowMultiplier = 1f;
 
+        if (animator.GetBool("Input-AttackHeld"))
+        {
+            animator.SetFloat("Input-AttackHeldTime", animator.GetFloat("Input-AttackHeldTime") + Time.deltaTime);
+        }
         /*
          *  public float BaseMovementSpeed = 5f;
     public float ForwardMultiplier = 1f;
@@ -208,6 +224,7 @@ public class PlayerActor : HumanoidActor
         }
         lastPos = transform.position;
 
+        ApplyStance();
         if (isAiming)
         {
             alignMode = AlignMode.Camera;
@@ -302,10 +319,7 @@ public class PlayerActor : HumanoidActor
         }
         animator.SetBool("LadderLockout", ladderLockout);
 
-        bool leftEquipped = inventory.IsOffDrawn() || (inventory.IsMainDrawn() && inventory.GetMainWeapon().ParentLeftAsMain);
-        bool rightEquipped = inventory.IsMainDrawn() || (inventory.IsOffDrawn() && inventory.GetOffWeapon().ParentRightAsOff);
-        animator.SetLayerWeight(animator.GetLayerIndex("Right Arm Override"), rightEquipped ? 1f : 0f);
-        animator.SetLayerWeight(animator.GetLayerIndex("Left Arm Override"), leftEquipped ? 1f : 0f);
+
         //animator.SetFloat("StickVelocity", stickDirection.magnitude);
         //animator.SetFloat("ForwardVelocity", primaryVertical);
         //animator.SetFloat("StrafingVelocity", primaryHorizontal);
@@ -428,6 +442,10 @@ public class PlayerActor : HumanoidActor
     {
         base.LateUpdate();
 
+        if (offGrip != null)
+        {
+            offGripLast = offGrip.transform.position;
+        }
         /*
         if (IsAiming() && stance != null && stance.heavyAttack is HeavyAttackAim heavyAttackAim && heavyAttackAim.ikHandler != null)
         {
@@ -494,8 +512,16 @@ public class PlayerActor : HumanoidActor
             {
                 animator.SetTrigger("Input-Attack");
                 animator.SetInteger("Input-AttackID", atk.attackId);
+                animator.SetBool("Input-AttackHeld", true);
+                animator.SetFloat("Input-AttackHeldTime", 0f);
             }
         }
+    }
+
+    public void OnAttackRelease()
+    {
+        if (!CanPlayerInput()) return;
+        animator.SetBool("Input-AttackHeld", false);
     }
 
     public void Jump()
@@ -574,9 +600,10 @@ public class PlayerActor : HumanoidActor
         inputs.actions["Atk_ThrustMain"].performed += (context) =>
         {
             if (!context.performed) return;
+            if (this.moveset == null) return;
             if (context.interaction is TapInteraction)
             {
-                InputAttack atk = this.moveset.thrustMain;
+                InputAttack atk = (!IsTwoHanding()) ? this.moveset.thrust1h : this.moveset.thrust2h;
                 if (atk != null)
                 {
                     OnInputAttack(atk);
@@ -584,19 +611,25 @@ public class PlayerActor : HumanoidActor
             }
             else if (context.interaction is HoldInteraction)
             {
-                InputAttack atk = this.moveset.thrustMainHeavy;
+                InputAttack atk = (!IsTwoHanding()) ? this.moveset.thrustHeavy1h : this.moveset.thrustHeavy2h;
                 if (atk != null)
                 {
                     OnInputAttack(atk);
                 }
             }
+        };
+
+        inputs.actions["Atk_ThrustMain"].canceled += (context) =>
+        {
+            OnAttackRelease();
         };
 
         inputs.actions["Atk_SlashMain"].performed += (context) =>
         {
+            if (this.moveset == null) return;
             if (context.interaction is TapInteraction)
             {
-                InputAttack atk = this.moveset.slashMain;
+                InputAttack atk = (!IsTwoHanding()) ? this.moveset.slash1h : this.moveset.slash2h;
                 if (atk != null)
                 {
                     OnInputAttack(atk);
@@ -604,7 +637,7 @@ public class PlayerActor : HumanoidActor
             }
             else if (context.interaction is HoldInteraction)
             {
-                InputAttack atk = this.moveset.slashMainHeavy;
+                InputAttack atk = (!IsTwoHanding()) ? this.moveset.slashHeavy1h : this.moveset.slashHeavy2h;
                 if (atk != null)
                 {
                     OnInputAttack(atk);
@@ -612,6 +645,12 @@ public class PlayerActor : HumanoidActor
             }
         };
 
+        inputs.actions["Atk_SlashMain"].canceled += (context) =>
+        {
+            OnAttackRelease();
+        };
+
+        /*
         inputs.actions["Atk_ThrustOff"].performed += (context) =>
         {
             if (!context.performed) return;
@@ -652,6 +691,7 @@ public class PlayerActor : HumanoidActor
                 }
             }
         };
+        */
 
         inputs.actions["ChangeTarget"].performed += (context) =>
         {
@@ -801,6 +841,10 @@ public class PlayerActor : HumanoidActor
         }
     }
 
+    public bool IsTwoHanding()
+    {
+        return inventory.IsTwoHanding();
+    }
     public new void TriggerSheath(bool draw, Inventory.EquipSlot slot, bool targetMain)
     {
         base.TriggerSheath(draw, slot, targetMain);
@@ -814,21 +858,184 @@ public class PlayerActor : HumanoidActor
 
     public void GetStance()
     {
+
+        ResetMainRotation();
+        float HEAVY_WEIGHT_THRESHOLD = 5f;
+        float HEAVY_LENGTH_THRESHOLD = 3f;
+
+        bool twohand = IsTwoHanding();
+        bool mainDrawn = inventory.IsMainDrawn();
+        bool offDrawn = inventory.IsOffDrawn();
+        
+        bool mainHeavy = mainDrawn && inventory.GetMainWeapon() is BladeWeapon mb && ((mb.GetWeight() >= HEAVY_WEIGHT_THRESHOLD) || (mb.GetLength() > HEAVY_LENGTH_THRESHOLD));
+        bool offHeavy = offDrawn && inventory.GetOffWeapon() is BladeWeapon ob && ((ob.GetWeight() >= HEAVY_WEIGHT_THRESHOLD) || (ob.GetLength() > HEAVY_LENGTH_THRESHOLD));
+
+        /*
+        bool leftEquipped = inventory.IsOffDrawn() || (inventory.IsMainDrawn() && inventory.GetMainWeapon().ParentLeftAsMain);
+        bool rightEquipped = inventory.IsMainDrawn() || (inventory.IsOffDrawn() && inventory.GetOffWeapon().ParentRightAsOff);
+        animator.SetLayerWeight(animator.GetLayerIndex("Right Arm Override"), rightEquipped ? 1f : 0f);
+        animator.SetLayerWeight(animator.GetLayerIndex("Left Arm Override"), leftEquipped ? 1f : 0f);
+        */
+        // stance: 14, 1 or 12, maybe different when locked on?
+
+        
+
+        if (!mainDrawn && !offDrawn) // unarmed
+        {
+            // unarmed
+            stance.stanceStyle = StanceHandler.StanceStyle.None;
+            stance.leftGrip = StanceHandler.GripStyle.None;
+            stance.rightGrip = StanceHandler.GripStyle.None;
+            stance.twohandGrip = StanceHandler.GripStyle.None;
+
+            DefaultLayerWeights();
+        }
+        else if (mainDrawn && !offDrawn) // main hand only
+        {
+            if (!mainHeavy)
+            {
+                stance.twohandGrip = StanceHandler.GripStyle.Greatsword;
+                stance.rightGrip = StanceHandler.GripStyle.Unarmed;
+                stance.leftGrip = StanceHandler.GripStyle.None;
+                stance.stanceStyle = StanceHandler.StanceStyle.Casual_OffF;
+
+                DefaultLayerWeights();
+            }
+            else
+            {  
+                stance.twohandGrip = StanceHandler.GripStyle.TwoHandPoise;
+                stance.rightGrip = StanceHandler.GripStyle.Shoulder;
+                stance.leftGrip = StanceHandler.GripStyle.None;
+                stance.stanceStyle = StanceHandler.StanceStyle.Shoulder_OffF;//(twohand) ? StanceHandler.StanceStyle.Shield_OffF : StanceHandler.StanceStyle.Shoulder_OffF;
+
+
+                DefaultLayerWeights();
+                if (twohand)
+                {
+                    //RotateMainWeapon(tempValue1 * 90f);
+                    SetIKHands(IKHandMatch.Down, 0.1f);
+                }
+            }
+            
+        }
+        else if (!mainDrawn && offDrawn) // off hand only
+        {
+            // dunno yet
+            stance.stanceStyle = StanceHandler.StanceStyle.None;
+            stance.leftGrip = StanceHandler.GripStyle.None;
+            stance.rightGrip = StanceHandler.GripStyle.None;
+            stance.twohandGrip = StanceHandler.GripStyle.None;
+
+            DefaultLayerWeights();
+        }
+        else if (mainDrawn && offDrawn) // dual wield
+        {
+            if (inventory.GetOffWeapon() is OffHandShield)
+            {
+                stance.twohandGrip = StanceHandler.GripStyle.Greatsword;
+                stance.rightGrip = (!mainHeavy) ? StanceHandler.GripStyle.Unarmed : StanceHandler.GripStyle.Shoulder;
+                stance.leftGrip = StanceHandler.GripStyle.None;
+                stance.stanceStyle = (!mainHeavy) ? StanceHandler.StanceStyle.Casual_OffF : StanceHandler.StanceStyle.Shoulder_OffF;
+
+                DefaultLayerWeights();
+            }
+            else
+            {
+                // dunno yet, but account for shield
+                stance.stanceStyle = StanceHandler.StanceStyle.None;
+                stance.leftGrip = StanceHandler.GripStyle.None;
+                stance.rightGrip = StanceHandler.GripStyle.None;
+                stance.twohandGrip = StanceHandler.GripStyle.None;
+
+                DefaultLayerWeights();
+            }
+            
+        }
+
         if (inventory.IsMainEquipped())
         {
-            if (this.stance != null)
+            Transform grpO = InterfaceUtilities.FindRecursively(inventory.GetWeaponModel().transform, "GripOff");
+            if (grpO != null)
             {
-                //stance.RemoveHeavyAttack(this);
-                //stance.RemoveSpecialAttack(this);
+                offGrip = grpO;
             }
-            inventory.UpdateStance(stance);
-            ApplyStance();
+            else
+            {
+                offGrip = null;
+            }
         }
+           
+
+        ApplyStance();
+    }
+
+    /*
+    public void UpdateStance(StanceHandler stance)
+    {
+        StanceHandler mainStance = null;
+        StanceHandler offStance = null;
+
+        if (IsMainEquipped() && IsMainDrawn())
+        {
+            //stance = StanceHandler.MergeStances(stance, GetMainWeapon().PrfMainHandStance);
+            mainStance = GetMainWeapon().stance;
+            //stance.Merge(mainStance, true);
+            stance.stanceStyle = mainStance.stanceStyle;
+            stance.rightGrip = mainStance.rightGrip;
+            stance.leftGrip = mainStance.rightGrip;
+            stance.twohandGrip = mainStance.twohandGrip;
+            stance.blockStyle = mainStance.blockStyle;
+        }
+
+        if (IsOffEquipped() && IsOffDrawn())
+        {
+            //stance = StanceHandler.MergeStances(stance, GetOffHand().PrfOffHandStance);
+            offStance = GetOffWeapon().stance;
+            stance.Merge(offStance, false);
+            stance.leftGrip = offStance.leftGrip;
+            if (offStance.blockStyle != StanceHandler.BlockStyle.Shield)
+            {
+                stance.blockStyle = StanceHandler.BlockStyle.Bracing; // cross block?
+            }
+            else
+            {
+                stance.blockStyle = StanceHandler.BlockStyle.Shield;
+            }
+        }
+
+
+    }
+    */
+
+    private void DefaultLayerWeights()
+    {
+        bool twohand = IsTwoHanding();
+        showRight = (!twohand && stance.rightGrip != StanceHandler.GripStyle.None) ? 1f : 0f;
+        showLeft = (!twohand && stance.leftGrip != StanceHandler.GripStyle.None) ? 1f : 0f;
+        show2h = (twohand && stance.twohandGrip != StanceHandler.GripStyle.None) ? 1f : 0f;
+        SetIKHands(IKHandMatch.None, 0f);
+        RotateMainWeapon(0f);
+        RotateOffWeapon(0f);
     }
     public void ApplyStance()
     {
         //this.animator.runtimeAnimatorController = stance.GetController();
 
+
+
+        this.animator.SetFloat("Style-Left", (int)stance.leftGrip);
+        this.animator.SetFloat("Style-Right", (int)stance.rightGrip);
+        this.animator.SetFloat("Style-2H", (int)stance.twohandGrip);
+
+        bool twohand = IsTwoHanding();
+
+        float rw = animator.GetLayerWeight(animator.GetLayerIndex("Right Arm Override"));
+        float lw = animator.GetLayerWeight(animator.GetLayerIndex("Left Arm Override"));
+        float tw = animator.GetLayerWeight(animator.GetLayerIndex("Two Arm Override"));
+        animator.SetLayerWeight(animator.GetLayerIndex("Right Arm Override"), Mathf.MoveTowards(rw,  showRight, 7.5f * Time.deltaTime));
+        animator.SetLayerWeight(animator.GetLayerIndex("Left Arm Override"), Mathf.MoveTowards(lw, showLeft, 7.5f * Time.deltaTime));
+        animator.SetLayerWeight(animator.GetLayerIndex("Two Arm Override"), Mathf.MoveTowards(tw, show2h, 7.5f * Time.deltaTime));
+        /*
         if (inventory.IsMainDrawn() && inventory.IsOffDrawn())
         {
             this.animator.SetFloat("Style-Left", (int)stance.leftGrip);
@@ -848,6 +1055,7 @@ public class PlayerActor : HumanoidActor
             this.animator.SetFloat("Style-Left", 0);
             this.animator.SetFloat("Style-Right", 0);
         }
+        */
 
         this.animator.SetFloat("Style-Stance", (int)stance.stanceStyle);
         this.animator.SetFloat("Style-Block", (int)stance.blockStyle);
@@ -1123,12 +1331,70 @@ public class PlayerActor : HumanoidActor
 
             animator.SetIKPosition(AvatarIKGoal.RightHand, hangMountR.position);
         }
+        else if (ikHand == IKHandMatch.LeftToRight)
+        {
+            animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, ikHandWeight);
+            animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0.5f);
+            animator.SetIKPosition(AvatarIKGoal.RightHand, this.transform.forward + this.transform.up * 0.5f);
+            animator.SetIKPosition(AvatarIKGoal.LeftHand, positionReference.MainHand.transform.position);
+
+            animator.SetIKHintPosition(AvatarIKHint.LeftElbow, positionReference.MainHand.transform.position + this.transform.forward);
+            animator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, 0.9f);
+
+        }
+        else if (ikHand == IKHandMatch.RightToLeft)
+        {
+            animator.SetIKPositionWeight(AvatarIKGoal.RightHand, ikHandWeight);
+            animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0f);
+            animator.SetIKPosition(AvatarIKGoal.RightHand, positionReference.OffHand.transform.position);
+        }
+        else if (ikHand == IKHandMatch.Down)
+        {
+            animator.SetIKPositionWeight(AvatarIKGoal.RightHand, ikHandWeight);
+            animator.SetIKPosition(AvatarIKGoal.RightHand, this.transform.position + Vector3.down);
+
+            animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0.9f);
+            animator.SetIKPosition(AvatarIKGoal.LeftHand, positionReference.MainHand.transform.position + positionReference.MainHand.transform.forward * -0.25f);
+
+            //animator.SetIKHintPositionWeight(AvatarIKHint.RightElbow, 0.5f);
+            //animator.SetIKHintPositionWeight(AvatarIKHint.LeftElbow, tempVal);
+            //animator.SetIKHintPosition(AvatarIKHint.RightElbow, this.transform.position + Vector3.down);
+            //animator.SetIKHintPosition(AvatarIKHint.LeftElbow, this.transform.position + Vector3.down * 2f);
+
+            if (offGrip != null)
+            {
+                animator.SetIKPosition(AvatarIKGoal.LeftHand, offGrip.position + positionReference.MainHand.transform.up * -0.07f + positionReference.MainHand.transform.forward * -0.08f + positionReference.MainHand.transform.right * 0.05f);
+            }
+        }
         else
         {
             animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0f);
             animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0f);
         }
         
+    }
+
+    public void SetIKHands(IKHandMatch ik, float w)
+    {
+        ikHand = ik;
+        ikHandWeight = w;
+    }
+    public enum IKHandMatch
+    {
+        None,
+        LeftToRight,
+        RightToLeft,
+        Down
+    }
+
+    public bool IsLockedOn()
+    {
+        return this.GetCombatTarget() != null;
+    }
+    public override void SetCombatTarget(GameObject target)
+    {
+        base.SetCombatTarget(target);
+        GetStance();
     }
     private void OnDrawGizmos()
     {

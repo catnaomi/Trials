@@ -27,7 +27,8 @@ public class StanceHandler
         TwoHandSide_MainF,  //  10: 2hand sword 
         TwoHandSide_OffF,   //  11:2hand sword
         Shoulder_MainF,     //  12:
-        Shoulder_OffF,      //  13:
+        Shoulder_OffF,      //  13: 
+        Casual_OffF,        // 14
     }
 
     public enum GripStyle
@@ -46,6 +47,9 @@ public class StanceHandler
         TwoHandSide_Mirror, // 11
         Shoulder,           // 12
         Shoulder_Mirror,    // 13
+        Casual,             // 14
+        Casual_Mirror,      // 15
+        TwoHandPoise,       // 16
         // TODO: add heavy (over shoulder) variations, and polearm variations
     }
 

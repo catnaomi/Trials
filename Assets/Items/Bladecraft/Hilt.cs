@@ -11,6 +11,7 @@ public class Hilt : InsetBearer
     //public GameObject prefab; // inherit from Item
     // Material?
 
+    public string hiltDescriptor;
     [Space(5)]
     public bool MainHanded;
     public bool OffHanded;

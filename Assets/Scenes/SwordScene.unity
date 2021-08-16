@@ -8706,8 +8706,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1132656376}
-  m_LocalRotation: {x: 0.61011535, y: 0.000975101, z: -0.0012215801, w: 0.79231113}
-  m_LocalPosition: {x: -0.0005455735, y: 9.425267, z: 1.6955361}
+  m_LocalRotation: {x: 0.6101153, y: 0.0009773375, z: -0.0012243818, w: 0.7923112}
+  m_LocalPosition: {x: -0.00054682494, y: 9.425267, z: 1.6955345}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1143833990}
@@ -22547,6 +22547,7 @@ MonoBehaviour:
   shouldForceLeft: 0
   tempValue1: 0
   tempValue2: 0
+  tempValue3: 0
   damageDisplay: {fileID: 5717959513460033759, guid: 58c5ca3d04bf8bf4e8310dcb196880d3,
     type: 3}
   gravity: {x: 0, y: 0, z: 0}
@@ -22685,6 +22686,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   weaponChanged: 0
+  TwoHanding: 0
 --- !u!1 &4930196131519214906
 GameObject:
   m_ObjectHideFlags: 0
@@ -26808,8 +26810,9 @@ MonoBehaviour:
   isGrounded: 0
   shouldSneak: 0
   shouldForceLeft: 0
-  tempValue1: 0.75
-  tempValue2: -0.1
+  tempValue1: 0.075
+  tempValue2: 0.035
+  tempValue3: 0
   damageDisplay: {fileID: 0}
   gravity: {x: 0, y: 0, z: 0}
   humanoidState: 0
@@ -26852,23 +26855,7 @@ MonoBehaviour:
     twohandGrip: 0
     blockStyle: 0
   currentAttackInput: {fileID: 0}
-  moveset:
-    slashMain: {fileID: 11400000, guid: dd58464c413cfee478c599729b1bc3f2, type: 2}
-    slashOff: {fileID: 0}
-    thrustMain: {fileID: 11400000, guid: bc812d46be1d80f48a1e3e2d4439e46a, type: 2}
-    thrustOff: {fileID: 0}
-    slashMainHeavy: {fileID: 11400000, guid: 1f63bf86d06129a41b8c3756b3dcc671, type: 2}
-    slashOffHeavy: {fileID: 0}
-    thrustMainHeavy: {fileID: 11400000, guid: 7259afa655be39048bca293eeb5acf60, type: 2}
-    thrustOffHeavy: {fileID: 0}
-    slashDash: {fileID: 0}
-    slashPlunge: {fileID: 0}
-    slashSneak: {fileID: 0}
-    thrustDash: {fileID: 0}
-    thrustPlunge: {fileID: 0}
-    thrustSneak: {fileID: 0}
-    skill1: {fileID: 0}
-    skill2: {fileID: 0}
+  moveset: {fileID: 0}
   isMenuOpen: 0
   highlightedInteractable: {fileID: 0}
   move: {x: 0, y: 0}
@@ -26894,6 +26881,7 @@ MonoBehaviour:
   ledgeHanging: 0
   ladderSnap: 0
   ladderLockout: 0
+  tempVal: 0.075
 --- !u!114 &7262600551037293710
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26963,6 +26951,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   weaponChanged: 0
+  TwoHanding: 0
 --- !u!114 &7262600551037293711
 MonoBehaviour:
   m_ObjectHideFlags: 0
