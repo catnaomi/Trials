@@ -36,9 +36,9 @@ public class StatDisplay : MonoBehaviour
             return;
         }
 
-        healthDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.health.current * 5f);
-        healthSpentDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.smoothedHealth * 5f);
-        healthMaxDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.health.max * 5f);
+        healthDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.health.current * .5f);
+        healthSpentDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.smoothedHealth * .5f);
+        healthMaxDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.health.max * .5f);
         healthText.text = Mathf.Floor(actor.attributes.health.current).ToString();
 
         staminaDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.stamina.current * 5f);

@@ -209,6 +209,18 @@ public class InventoryUI2 : MonoBehaviour
         }
     }
 
+    public InventoryItemDisplay FindItemDisplay(Item targetItem)
+    {
+        foreach (InventoryItemDisplay item in items)
+        {
+            if (item.item == targetItem)
+            {
+                return item;
+            }
+        }
+        return null;
+    }
+
     public void FlareSlot(int slot)
     {
         switch (slot)

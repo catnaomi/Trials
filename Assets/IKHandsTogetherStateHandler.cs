@@ -35,7 +35,15 @@ public class IKHandsTogetherStateHandler : StateMachineBehaviour
     {
         if (animator.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
         {
-            animator.SetIKPosition(AvatarIKGoal.LeftHand, actor.positionReference.MainHand.transform.position);
+            if (animator.TryGetComponent<PlayerActor>(out PlayerActor player) && player.offGrip != null)
+            {
+                animator.SetIKPosition(AvatarIKGoal.LeftHand, player.offGrip.position);
+            }
+            else
+            {
+                animator.SetIKPosition(AvatarIKGoal.LeftHand, actor.positionReference.MainHand.transform.position);
+            }
+            
             animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, weight);
 
         }

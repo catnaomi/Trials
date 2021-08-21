@@ -43,13 +43,13 @@ public class HumanoidActor : Actor
 
     [HideInInspector] public bool isInvulnerable;
 
-    [HideInInspector] public UnityEvent OnSheathe;
-    [HideInInspector] public UnityEvent OnOffhandAttack;
-    [HideInInspector] public UnityEvent OnAttack;
-    [HideInInspector] public UnityEvent OnBlock;
-    [HideInInspector] public UnityEvent OnDodge;
-    [HideInInspector] public UnityEvent OnInjure;
-    [HideInInspector] public UnityEvent OnHitboxActive;
+    public UnityEvent OnSheathe;
+    public UnityEvent OnOffhandAttack;
+    public UnityEvent OnAttack;
+    public UnityEvent OnBlock;
+    public UnityEvent OnDodge;
+    public UnityEvent OnInjure;
+    public UnityEvent OnHitboxActive;
     //public StanceHandler stance;
 
     [ReadOnly] public IKHandler aimIKHandler;
@@ -164,6 +164,7 @@ public class HumanoidActor : Actor
             damageDisplay.GetComponent<DamageDisplay>().source = this.transform;
         }
 
+        /*
         OnSheathe = new UnityEvent();
         OnOffhandAttack = new UnityEvent();
         OnAttack = new UnityEvent();
@@ -171,6 +172,7 @@ public class HumanoidActor : Actor
         OnDodge = new UnityEvent();
         OnInjure = new UnityEvent();
         OnHitboxActive = new UnityEvent();
+        */
     }
 
     public override void ActorPreUpdate()
@@ -1306,12 +1308,18 @@ public class HumanoidActor : Actor
         //weaponModel.transform.rotation = rotation;
 
         weaponModel.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
+
+        if (weapon is BladeWeapon blade)
+        {
+            blade.GetHitboxes().root.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
+        }
         offWeaponAngle = angle;
     }
 
     public void ResetMainRotation()
     {
         RotateMainWeapon(0f);
+        /*
         if (!inventory.IsMainDrawn())
         {
             return;
@@ -1325,8 +1333,13 @@ public class HumanoidActor : Actor
         //weaponModel.transform.rotation = rotation;
 
         //weaponModel.transform.localRotation = Quaternion.identity;
+        */
     }
 
+    public void ResetOffRotation()
+    {
+        RotateOffWeapon(0f);
+    }
     public void SetHeft(float heft)
     {
         this.heft = heft;
@@ -1639,6 +1652,15 @@ public class HumanoidActor : Actor
         }
 
         return baseLayer && actionLayer;
+    }
+
+    public bool IsEmptyState()
+    {
+        string TAG = "EMPTY";
+        bool ALLOW_IN_TRANSITION = true;
+
+        return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
     }
 
     public bool IsBlockStaggered()

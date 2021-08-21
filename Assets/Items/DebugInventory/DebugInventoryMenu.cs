@@ -87,7 +87,7 @@ public class DebugInventoryMenu : MonoBehaviour
         Slot2Name.text = "-";
         Slot3Name.text = "-";
 
-        Color mainColor = (player.inventory.IsTwoHanding() ? twoHandColor : mainHandColor);
+        Color mainColor = (player.IsTwoHanding() ? twoHandColor : mainHandColor);
         
         if (player.inventory.Slot0Weapon != null)
         {

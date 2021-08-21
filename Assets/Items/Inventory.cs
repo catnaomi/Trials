@@ -319,7 +319,7 @@ public class Inventory : MonoBehaviour, IInventory
 
     
     public void UpdateTwoHand(bool set2h)
-    {
+    { 
         if (MainWeapon == null)
         {
             return;
@@ -341,15 +341,16 @@ public class Inventory : MonoBehaviour, IInventory
             {
                 UnequipOffHandWeapon();
             }
-            else
+            else if (IsOffDrawn() && TwoHanding)
             {
-                actor.TriggerSheath(!TwoHanding, GetOffWeapon().OffHandEquipSlot, false);
+                actor.TriggerSheath(false, GetOffWeapon().OffHandEquipSlot, false);
                 //SetDrawn(false, !TwoHanding);
             }
         }
         
         OnChange.Invoke();
         weaponChanged = true;
+        
     }
     
     public void PositionWeapon()
@@ -446,33 +447,6 @@ public class Inventory : MonoBehaviour, IInventory
         }
         return null;
     }
-
-    public float GetAttackSpeed()
-    {
-        if (IsMainEquipped())
-        {
-            return MainWeapon.GetAttackSpeed(IsTwoHanding());
-        }
-        return 1f;
-    }
-
-    public float GetOffAttackSpeed()
-    {
-        if (IsOffEquipped())
-        {
-            return OffWeapon.GetAttackSpeed(false);
-        }
-        return 1f;
-    }
-
-
-    public bool IsTwoHanding()
-    {
-        //return IsMainDrawn() && !IsOffDrawn();
-        return TwoHanding;
-    }
-
-    
 
     public float GetEquipWeight()
     {

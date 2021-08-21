@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class IKHandsThrustStateHandler : StateMachineBehaviour
 {
-    public float weight;
-    public float targetTime;
+    public float rWeight;
+    public float lWeight;
+    public float rTargetTime;
+    public float lTargetTime;
+    public bool ikRight = true;
+    public bool ikLeft = true;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     //override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     //{
@@ -33,14 +37,28 @@ public class IKHandsThrustStateHandler : StateMachineBehaviour
     // OnStateIK is called right after Animator.OnAnimatorIK()
     override public void OnStateIK(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        float cWeight = Mathf.Min(((stateInfo.normalizedTime - targetTime) / targetTime), 1f) * weight;
-        Debug.Log(cWeight);
+        float rcWeight = Mathf.Min(1f - ((rTargetTime - stateInfo.normalizedTime) / rTargetTime), 1f) * rWeight;
+        float lcWeight = Mathf.Min(1f - ((lTargetTime - stateInfo.normalizedTime) / lTargetTime), 1f) * lWeight;
+        //Debug.Log(cWeight);
         if (animator.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
         {
-            animator.SetIKRotation(AvatarIKGoal.RightHand, Quaternion.LookRotation(actor.transform.right));
-            animator.SetIKRotationWeight(AvatarIKGoal.RightHand, cWeight);
-            animator.SetIKPosition(AvatarIKGoal.LeftHand, actor.positionReference.MainHand.transform.position);
-            animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 0.75f);
+            if (ikLeft)
+            {
+                if (actor is PlayerActor player && player.offGrip != null)
+                {
+                    animator.SetIKPosition(AvatarIKGoal.LeftHand, player.offGrip.position);
+                    animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, lcWeight);
+                }
+                else
+                {
+                    animator.SetIKPosition(AvatarIKGoal.LeftHand, actor.positionReference.MainHand.transform.position);
+                    animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, lcWeight);
+                }
+            }
+            if (ikRight) {
+                animator.SetIKRotation(AvatarIKGoal.RightHand, Quaternion.LookRotation(actor.transform.right));
+                animator.SetIKRotationWeight(AvatarIKGoal.RightHand, rcWeight);    
+            }
 
         }
     }

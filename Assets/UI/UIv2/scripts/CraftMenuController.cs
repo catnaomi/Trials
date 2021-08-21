@@ -245,6 +245,11 @@ public class CraftMenuController : MonoBehaviour
         inventoryMenu.inventory.Add(newCraft);
         SetCurrentWeapon(newCraft);
         inventoryMenu.Populate(true);
+        InventoryItemDisplay itemDisplay = inventoryMenu.FindItemDisplay(newCraft);
+        if (itemDisplay != null)
+        {
+            EventSystem.current.SetSelectedGameObject(itemDisplay.gameObject);
+        }
     }
     public void UpdateStats()
     {

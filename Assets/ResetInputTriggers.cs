@@ -13,6 +13,7 @@ public class ResetInputTriggers : StateMachineBehaviour
     public bool Lockout = false;
     public bool MashPrev = false;
     public int MashPreventionID;
+    public bool ResetHeldTime = false;
 
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
@@ -84,6 +85,10 @@ public class ResetInputTriggers : StateMachineBehaviour
         if (IncludingLadderLockout)
         {
             animator.SetBool("LadderLockout", false);
+        }
+        if (ResetHeldTime)
+        {
+            animator.SetFloat("InputHeldTime", 0f);
         }
         animator.SetBool("Input-Player", false);
     }

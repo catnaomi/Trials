@@ -64,7 +64,7 @@ public class CraftInteract : Interactable
         loadingScene = true;
         player.inventory.UnequipMainWeapon();
         player.inventory.UnequipOffHandWeapon();
-
+        player.isMenuOpen = true;
         Moveset.LoadMovesetCombinations();
     }
 
@@ -74,7 +74,7 @@ public class CraftInteract : Interactable
         if (removeOnLoad != null) {
             GameObject.Destroy(removeOnLoad);
         }
-        player.isMenuOpen = true;
+        
         craftMenu = GameObject.Find("_CraftMenu").GetComponent<CraftMenuController>();
         craftMenu.inventoryMenu.inventory = player.inventory;
         craftMenu.inventoryMenu.Populate();
@@ -86,5 +86,6 @@ public class CraftInteract : Interactable
     {
         sceneLoad = SceneManager.UnloadSceneAsync("CraftScene2");
         unloadingScene = true;
+        player.isMenuOpen = false;
     }
 }

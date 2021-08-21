@@ -170,7 +170,7 @@ public class PlayerTargetManager : MonoBehaviour
             //cmtg.AddMember(currentTarget.transform, 1f, 2f);
             player.SetCombatTarget(currentTarget);
         }
-        else if (currentTarget == null)
+        else if (currentTarget == null && player.GetCombatTarget() != null)
         {
             player.SetCombatTarget(null);
             lockedOn = false;

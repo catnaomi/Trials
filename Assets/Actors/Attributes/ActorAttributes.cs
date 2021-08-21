@@ -309,6 +309,6 @@ public class ActorAttributes : MonoBehaviour
 public class AttributeValue
 {
     public float baseValue;
-    [ReadOnly] public float current;
-    [ReadOnly] public float max;
+    public float current;
+    public float max;
 }

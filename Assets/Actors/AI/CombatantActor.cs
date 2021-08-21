@@ -59,6 +59,36 @@ public class CombatantActor : NavigatingHumanoidActor
         float timeInState = animator.GetFloat("TimeInState");
         animator.SetFloat("TimeInState", timeInState + Time.deltaTime);
 
+        float ASCurve = animator.GetFloat("AttackSpeedCurve");
+        if (ASCurve == 0f)
+        {
+            this.animator.SetFloat("AttackSpeedMain", GetAttackSpeed());
+            this.animator.SetFloat("AttackSpeedOff", GetOffAttackSpeed());
+        }
+        else
+        {
+            this.animator.SetFloat("AttackSpeedMain", GetAttackSpeed() * ASCurve);
+            this.animator.SetFloat("AttackSpeedOff", GetOffAttackSpeed() * ASCurve);
+        }
+
+    }
+
+    public float GetAttackSpeed()
+    {
+        if (inventory.IsMainEquipped())
+        {
+            return inventory.GetMainWeapon().GetAttackSpeed(false);
+        }
+        return 1f;
+    }
+
+    public float GetOffAttackSpeed()
+    {
+        if (inventory.IsOffEquipped())
+        {
+            return inventory.GetOffWeapon().GetAttackSpeed(false);
+        }
+        return 1f;
     }
 
     public bool DetermineCombatTarget(out GameObject target)

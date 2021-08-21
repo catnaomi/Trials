@@ -7,31 +7,22 @@ using System.Collections.Generic;
 [CreateAssetMenu(fileName = "Item", menuName = "ScriptableObjects/Stances & Movesets/New Moveset", order = 1)]
 public class Moveset : ScriptableObject
 {
-    [Header("Light Attacks")]
-    public InputAttack slash1h;
-    public InputAttack thrust1h;
-    [Space(5)]
-    public InputAttack slash2h;
-    public InputAttack thrust2h;
-    [Header("Heavy Attacks")]
-    public InputAttack slashHeavy1h;
-    public InputAttack thrustHeavy1h;
-    [Space(5)]
-    public InputAttack slashHeavy2h;
-    public InputAttack thrustHeavy2h;
-    [Header("Offhand Attacks")]
-    public InputAttack offhandAttack;
-    public InputAttack offhandHeavy;
-    public InputAttack twohandAttack;
-    public InputAttack twohandHeavy;
+    [Header("Main Hand Attacks")]
+    public InputAttack quickMain;
+    public InputAttack heavyMain;
+    public InputAttack chargeMain;
+    [Header("Two Hand Attacks")]
+    public InputAttack quick2h;
+    public InputAttack heavy2h;
+    public InputAttack charge2h;
+    [Header("Off Hand Attacks")]
+    public InputAttack quickOff;
+    public InputAttack heavyOff;
+    public InputAttack chargeOff;
     [Header("Movement-Based Attacks")]
-    public InputAttack slashDash;
-    public InputAttack slashPlunge;
-    public InputAttack slashSneak;
-    [Space(5)]
-    public InputAttack thrustDash;
-    public InputAttack thrustPlunge;
-    public InputAttack thrustSneak;
+    public InputAttack dash;
+    public InputAttack plunge;
+    public InputAttack sneak;
 
     public static Dictionary<string, Moveset> movesetTable;
     public static bool movesetsLoaded = false;

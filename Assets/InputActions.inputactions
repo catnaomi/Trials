@@ -70,7 +70,7 @@
                     "interactions": "Hold"
                 },
                 {
-                    "name": "Atk_ThrustMain",
+                    "name": "Atk_Main",
                     "type": "Button",
                     "id": "887faeb1-6141-4425-87a5-2c978693b25a",
                     "expectedControlType": "Button",
@@ -78,7 +78,15 @@
                     "interactions": "Tap,Hold"
                 },
                 {
-                    "name": "Atk_SlashMain",
+                    "name": "Atk_ChargeMain",
+                    "type": "Button",
+                    "id": "926f1db6-a655-4bda-bb5e-a1c7bd667169",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "Atk_Off",
                     "type": "Button",
                     "id": "2e93d5bc-2ec5-45ac-bc0d-7800d9ed0796",
                     "expectedControlType": "Button",
@@ -86,20 +94,12 @@
                     "interactions": "Tap,Hold"
                 },
                 {
-                    "name": "Atk_ThrustOff",
+                    "name": "Atk_ChargeOff",
                     "type": "Button",
                     "id": "cd8fab46-c893-4dbb-950a-a83ca4795385",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Tap,Hold"
-                },
-                {
-                    "name": "Atk_SlashOff",
-                    "type": "Button",
-                    "id": "926f1db6-a655-4bda-bb5e-a1c7bd667169",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "Tap,Hold"
+                    "interactions": ""
                 },
                 {
                     "name": "Menu",
@@ -220,33 +220,22 @@
                 {
                     "name": "",
                     "id": "dae37d5a-8681-46bb-beec-e8c8cd1db31e",
-                    "path": "<Gamepad>/leftShoulder",
+                    "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "Atk_ThrustMain",
+                    "action": "Atk_Main",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
                     "id": "8ecb86f0-e55f-4144-bd21-7461a704df39",
-                    "path": "<Gamepad>/rightShoulder",
+                    "path": "<Gamepad>/leftShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "Atk_SlashMain",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "47d28809-af81-4418-8be3-3f55ef1417d1",
-                    "path": "<Gamepad>/rightTrigger",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Atk_SlashOff",
+                    "action": "Atk_Off",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -254,10 +243,10 @@
                     "name": "",
                     "id": "36255ce6-7319-434a-9c94-bc94fbbfb091",
                     "path": "<Gamepad>/leftTrigger",
-                    "interactions": "Press",
+                    "interactions": "",
                     "processors": "",
                     "groups": "Gamepad",
-                    "action": "Atk_ThrustOff",
+                    "action": "Atk_ChargeOff",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -346,6 +335,17 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "47d28809-af81-4418-8be3-3f55ef1417d1",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "Atk_ChargeMain",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
