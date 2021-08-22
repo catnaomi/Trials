@@ -442,7 +442,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 return new DamageKnockback()
                 {
                     damage = GetModifiedDamage(true).MultPotential(3),
-                    staminaDamage = GetStaminaDamage() * 3f,
+                    staminaDamage = GetStaminaDamage() * 10f,
                     poiseDamage = GetBasePoiseDamage() * 3f,//(10f + 6f * GetWeight()) * 3f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
@@ -485,7 +485,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 return new DamageKnockback()
                 {
                     damage = GetModifiedDamage(false).MultPotential(3),
-                    staminaDamage = GetStaminaDamage() * 3f,
+                    staminaDamage = GetStaminaDamage() * 10f,
                     poiseDamage = GetBasePoiseDamage() * 3f,//(10f + 6f * GetWeight()) * 3f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
