@@ -126,9 +126,4 @@ public class OffHandBow : EquippableWeapon, HitboxHandler
             canFire = true;
         }
     }
-
-    public override Damage GetBlockResistance()
-    {
-        return new Damage();//.SetRatio(DamageType.Slashing, 0.3f).SetRatio(DamageType.Piercing, 0.2f);
-    }
 }

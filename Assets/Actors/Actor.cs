@@ -27,10 +27,9 @@ public class Actor : MonoBehaviour
     public UnityEvent OnActionStart;
     [HideInInspector]
     public UnityEvent OnActionEnd;
-    [HideInInspector]
     public UnityEvent OnHurt;
-    [HideInInspector]
     public UnityEvent OnHit;
+    public float lastDamageTaken;
     private  int mercyId; //hitbox
 
     public Vector3 moveDirection;

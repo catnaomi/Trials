@@ -9,7 +9,6 @@ public class WeaponComponent : Item
     public float weight;
     [ReadOnly]
     public bool attached;
-    public Damage ratios;
     [Space(5)]
     public StanceHandler PrfStance;
     protected GameObject model;

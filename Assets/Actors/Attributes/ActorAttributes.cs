@@ -14,8 +14,11 @@ public class ActorAttributes : MonoBehaviour
     private float effectClock;
     // basic/vitality stats
 
-    
+
     [Header("Vitality")]
+    public AttributeValue hearts;
+    public float recoverableHearts;
+
 
     [ReadOnly] public float smoothedHealth;
     private float healthRecoveryClock;
@@ -34,32 +37,14 @@ public class ActorAttributes : MonoBehaviour
     [Header("AI Personality")]
     public AttributeValue audacity;
     public AttributeValue guile;
-    /*
-    [ReadOnly] public float smoothedPoise;
-    
-    private float poiseSmoothClock;
-    private float poiseLast;
-    public AttributeValue poiseRecoveryRate;
-    */
-
-    private float poiseRecoveryClock;
-    private float poiseLast;
-    private bool poiseIncreased;
-    public float poise;
-    public float weightPoise = 10f; // poise of character weight during attacks and movement
-    public float poiseRate = 100f;
-    public bool isOffBalance;
 
     [Space(5)]
     public float attributeRecoveryDelay = 3f;
 
     [Header("Resistances & Weaknesses")]
-    public List<DamageType> resistances;
-    public float resistanceRatio;
-    [Space(5)]
-    public List<DamageType> weaknesses;
-    public float weaknessRatio;
+    public List<DamageResistance> resistances;
 
+    
 
     [Header("Statistics")]
     public float BlockReduction = 1f;
@@ -119,35 +104,8 @@ public class ActorAttributes : MonoBehaviour
             this.RecoverAttribute(stamina, staminaRecoveryRate.current * Time.deltaTime);
         }
 
-        CheckOffBalance();
-
-
-        if (poiseIncreased)
-        {
-            poiseRecoveryClock = 0f;
-            poiseIncreased = false;
-        }
-        else if (poise > poiseLast || health.current < healthLast)
-        {
-            poiseRecoveryClock = 0f;
-        }
-        else
-        {
-            poiseRecoveryClock += Time.deltaTime;
-        }
-        if (poiseRecoveryClock > attributeRecoveryDelay)
-        {
-            //this.ReduceAttribute(poise, poiseLossRate * Time.deltaTime);
-
-            //float targetPoise = (this.TryGetComponent<HumanoidActor>(out HumanoidActor human) && (!human.CanMove() || human.moveDirection == Vector3.zero)) ? 0f : GetBasePoise();
-            float targetPoise = 100f;
-
-            this.poise = Mathf.MoveTowards(this.poise, targetPoise, poiseRate * Time.deltaTime);
-        }
-
         healthLast = health.current;
         staminaLast = stamina.current;
-        poiseLast = poise;
 
         effectClock += Time.deltaTime;
         if (effectClock > EFFECT_UPDATE_FREQUENCY)
@@ -171,8 +129,6 @@ public class ActorAttributes : MonoBehaviour
         smoothedStamina = stamina.current = stamina.max = stamina.baseValue;
         staminaRecoveryRate.current = staminaRecoveryRate.max = staminaRecoveryRate.baseValue;
 
-        poise = 100f;
-
         effects.Clear();
 
         // TODO: resistances
@@ -181,11 +137,6 @@ public class ActorAttributes : MonoBehaviour
     public bool HasAttributeRemaining(AttributeValue value)
     {
         return value.current > 0f;
-    }
-
-    public bool HasPoiseRemaining()
-    {
-        return poise > 0f;
     }
     public void RecoverAttribute(AttributeValue value, float amount)
     {
@@ -220,66 +171,15 @@ public class ActorAttributes : MonoBehaviour
         }
     }
 
-    public void IncreasePoiseByWeight(float poise)
-    {
-        float totalWeightPoise = poise + weightPoise + this.GetComponent<Inventory>().GetEquipWeight();
-
-        if (this.poise <= totalWeightPoise + 100f)
-        {
-            this.poise += totalWeightPoise;
-            if (this.poise >= totalWeightPoise + 100f)
-            {
-                this.poise = totalWeightPoise + 100f;
-            }
-        }
-        poiseIncreased = true;
-
-        CheckOffBalance();
-    }
-
-    public void SetPoise(float poise)
-    {
-        this.poise = poise;
-        poiseIncreased = true;
-
-        CheckOffBalance();
-    }
-
-    public void ReducePoise(float poise)
-    {
-        this.poise -= poise;
-
-        poiseIncreased = true;
-
-        CheckOffBalance();
-        if (this.poise < 0)
-        {
-            this.poise = 0;
-        }
-    }
-
     public bool HasHealthRemaining()
     {
         return health.current > 0;
     }
 
-    public void CheckOffBalance()
+    public bool HasHeartsRemaining()
     {
-        if (isOffBalance && poise >= 100f)
-        {
-            isOffBalance = false;
-        }
-
-        if (!isOffBalance && poise <= 0)
-        {
-            isOffBalance = true;
-        }
-    }
-
-    public bool GetOffBalance()
-    {
-        return isOffBalance;
-    }
+        return hearts.current > 0;
+    }    
 
     public void AddEffect(Effect effect)
     {
@@ -289,18 +189,6 @@ public class ActorAttributes : MonoBehaviour
     public void RemoveEffect(Effect effect)
     {
         effect.Remove(this);
-    }
-
-    public float GetModifiedPoiseDamage(float amount, DamageType type)
-    {
-        float mult = 1f;// Mathf.Clamp((0.2f) * -resistances.resist[(int)type], -0.8f, 0.8f) + 1f;
-
-        return amount * mult;
-    }
-
-    public float GetAdjustedDamage(Damage damage)
-    {
-        return damage.GetTotalMinusResistances(this.resistances, this.weaknesses, this.resistanceRatio, this.weaknessRatio);
     }
 }
 

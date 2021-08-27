@@ -703,6 +703,7 @@ public class Inventory : MonoBehaviour, IInventory
         return MainWeapon.model;
     }
     
+    /*
     public Damage GetBlockResistance(bool main)
     {
         if (main && IsMainEquipped())
@@ -718,6 +719,7 @@ public class Inventory : MonoBehaviour, IInventory
             return new Damage();
         }
     }
+    */
 
     public float GetBlockPoiseDamage(bool main)
     {

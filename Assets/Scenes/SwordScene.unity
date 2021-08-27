@@ -1131,7 +1131,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 88934918}
-  m_LocalRotation: {x: 0.0000000074505797, y: 0.000000016589182, z: -0.0000000040818118,
+  m_LocalRotation: {x: 0.0000000074505797, y: -0.000000016181728, z: 0.0000000039726724,
     w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -7961,8 +7961,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 944179744}
-  m_LocalRotation: {x: 0.12017319, y: -0.00049592415, z: 0.00006003185, w: 0.99275285}
-  m_LocalPosition: {x: 0.004066146, y: 2.5000048, z: -4.07}
+  m_LocalRotation: {x: 0.12017319, y: -0.0004959856, z: 0.00006003928, w: 0.99275285}
+  m_LocalPosition: {x: 0.004066937, y: 2.5000048, z: -4.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1895078454}
@@ -8179,8 +8179,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.12017321, y: -0.0004959072, z: 0.000060029797, w: 0.99275285}
-  m_LocalPosition: {x: 0.0040661474, y: 2.5000048, z: -4.07}
+  m_LocalRotation: {x: 0.12017321, y: -0.00049600215, z: 0.00006004129, w: 0.99275285}
+  m_LocalPosition: {x: 0.004066939, y: 2.5000048, z: -4.07}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5950004287654635161}
@@ -8707,8 +8707,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1132656376}
-  m_LocalRotation: {x: 0.60929585, y: 0.032338545, z: -0.040512823, w: 0.7912469}
-  m_LocalPosition: {x: -0.018069524, y: 9.425491, z: 1.6964478}
+  m_LocalRotation: {x: 0.6092962, y: 0.03233215, z: -0.04050482, w: 0.7912472}
+  m_LocalPosition: {x: -0.01806578, y: 9.425493, z: 1.6964481}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1143833990}
@@ -9845,7 +9845,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1253622711}
-  m_LocalRotation: {x: 0.00000002235174, y: 0.0000000342261, z: -0.000000008414644,
+  m_LocalRotation: {x: 0.00000002235174, y: -0.000000034400724, z: 0.000000008451024,
     w: 1}
   m_LocalPosition: {x: -9.313226e-10, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -10065,7 +10065,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1257053858}
   m_LocalRotation: {x: 0, y: -0.6167491, z: -0, w: 0.78715986}
-  m_LocalPosition: {x: -0.000000004656613, y: -0.4855584, z: 4.3103557}
+  m_LocalPosition: {x: 0.0000000055879354, y: -0.4855584, z: 4.3103557}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 944179746}
@@ -15659,7 +15659,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1836596668}
-  m_LocalRotation: {x: 0.0000000074505797, y: 0.000000016589182, z: -0.0000000040818118,
+  m_LocalRotation: {x: 0.0000000074505797, y: -0.000000016181728, z: 0.0000000039726724,
     w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -16475,7 +16475,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1895078452}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.0039264346, y: -0.93772006, z: -3.816485}
+  m_LocalPosition: {x: -0.0039269216, y: -0.93772006, z: -3.816485}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1253622713}
@@ -22438,20 +22438,21 @@ MonoBehaviour:
   applyOnDebug: 0
   damageKnockback:
     staminaDamage: 0
-    poiseDamage: 40
     kbForce: {x: 0, y: 0, z: 100}
     kbRadial: 0
-    damage:
-      potential: 0
-      types: 
+    healthDamage: 0
+    types: 
+    heartsDamage: 0
+    criticalMultiplier: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
     breaksArmor: 0
     unblockable: 0
     staggers:
-      onHitOnBalance: 0
-      onHitOffBalance: 0
+      onHit: 0
+      onArmorHit: 0
+      onCritical: 0
       onInjure: 0
       onKill: 0
     hitClip: {fileID: 0}
@@ -22511,6 +22512,7 @@ MonoBehaviour:
   OnHit:
     m_PersistentCalls:
       m_Calls: []
+  lastDamageTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
@@ -22590,6 +22592,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa4a007199216784f888d5ff544172ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hearts:
+    baseValue: 0
+    current: 0
+    max: 0
+  recoverableHearts: 0
   smoothedHealth: 0
   health:
     baseValue: 10000
@@ -22616,15 +22623,28 @@ MonoBehaviour:
     baseValue: 0
     current: 0
     max: 0
-  poise: 100
-  weightPoise: 25
-  poiseRate: 25
-  isOffBalance: 0
   attributeRecoveryDelay: 3
-  resistances: 00000000000000000000000000000000000000000000000000000000000000000000000000000000
-  resistanceRatio: 0
-  weaknesses: 
-  weaknessRatio: 0
+  resistances:
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
   BlockReduction: 1
   effects: []
 --- !u!143 &4930196131503610046
@@ -26154,7 +26174,7 @@ PrefabInstance:
     - target: {fileID: 2876314853822692796, guid: c57728b619a42bc47b9d3e0a00922990,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9168171087891374805, guid: c57728b619a42bc47b9d3e0a00922990,
         type: 3}
@@ -26621,20 +26641,21 @@ MonoBehaviour:
   applyOnDebug: 0
   damageKnockback:
     staminaDamage: 0
-    poiseDamage: 10
     kbForce: {x: 0, y: 100, z: 100}
     kbRadial: 0
-    damage:
-      potential: 0
-      types: 
+    healthDamage: 0
+    types: 
+    heartsDamage: 0
+    criticalMultiplier: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
     breaksArmor: 0
     unblockable: 0
     staggers:
-      onHitOnBalance: 0
-      onHitOffBalance: 0
+      onHit: 0
+      onArmorHit: 0
+      onCritical: 0
       onInjure: 0
       onKill: 0
     hitClip: {fileID: 0}
@@ -26791,6 +26812,7 @@ MonoBehaviour:
   OnHit:
     m_PersistentCalls:
       m_Calls: []
+  lastDamageTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
@@ -26983,6 +27005,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa4a007199216784f888d5ff544172ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hearts:
+    baseValue: 12
+    current: 12
+    max: 12
+  recoverableHearts: 0
   smoothedHealth: 0
   health:
     baseValue: 1000
@@ -27009,15 +27036,28 @@ MonoBehaviour:
     baseValue: 0
     current: 0
     max: 0
-  poise: 100
-  weightPoise: 25
-  poiseRate: 25
-  isOffBalance: 0
   attributeRecoveryDelay: 3
-  resistances: 00000000000000000000000000000000000000000000000000000000000000000000000000000000
-  resistanceRatio: 0
-  weaknesses: 
-  weaknessRatio: 0
+  resistances:
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
+  - type: 0
+    ratio: 0
   BlockReduction: 1
   effects: []
 --- !u!143 &7262600551037293712
@@ -27567,6 +27607,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 8049781472459515087, guid: ea2e4f0faf37e2346a637004f544dea4,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8049781472459515087, guid: ea2e4f0faf37e2346a637004f544dea4,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8049781472459515087, guid: ea2e4f0faf37e2346a637004f544dea4,
         type: 3}

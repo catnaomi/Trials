@@ -78,9 +78,9 @@ public class EquippableWeapon : Item
         model = null;
     }
 
-    public virtual Damage GetBlockResistance()
+    public virtual DamageResistance[] GetBlockResistance()
     {
-        return new Damage();
+        return null;
     }
 
     public virtual float GetBlockPoiseDamage()

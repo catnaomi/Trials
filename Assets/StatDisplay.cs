@@ -19,11 +19,7 @@ public class StatDisplay : MonoBehaviour
     public RectTransform staminaMaxDisplay;
     public Text staminaText;
 
-    public float poiseOffset;
-    public RectTransform poiseDisplay;
-    public RectTransform poiseSpentDisplay;
-    public RectTransform poiseMaxDisplay;
-    public Text poiseText;
+    public Text heartsText;
 
     private void Start()
     {
@@ -46,11 +42,6 @@ public class StatDisplay : MonoBehaviour
         staminaMaxDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.stamina.max * 5f);
         staminaText.text = Mathf.Floor(actor.attributes.stamina.current).ToString();
 
-        poiseDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.poise * 5f);
-        //poiseSpentDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.smoothedPoise * 5f);
-        //poiseMaxDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.poise.max * 5f);
-        poiseText.text = Mathf.Floor(actor.attributes.poise).ToString();
-        poiseDisplay.GetComponent<Image>().color = (actor.attributes.GetOffBalance()) ? Color.red : Color.blue;
-
+        heartsText.text = Mathf.Floor(actor.attributes.hearts.current).ToString();
     }
 }

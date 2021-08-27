@@ -508,12 +508,11 @@ public class HumanoidActor : Actor
         AdjustDefendingPosition(damageKnockback.source);
 
         //  implement resistances
-        float totalDamage = attributes.GetAdjustedDamage(damageKnockback.damage);
-
-        bool offBalance = attributes.GetOffBalance();
+        float totalDamage = DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.types, this.attributes.resistances);
+        float heartsDamage = Mathf.Max(Mathf.Floor(DamageKnockback.GetTotalMinusResistances(damageKnockback.heartsDamage, damageKnockback.types, this.attributes.resistances)), 1f);
 
         bool willInjure = attributes.HasHealthRemaining() && (totalDamage >= attributes.health.current);
-        bool willKill = !attributes.HasHealthRemaining();
+        bool willKill = !attributes.HasHealthRemaining() && (heartsDamage >= attributes.hearts.current);
 
         if (this.IsDodging() || isInvulnerable)
         {
@@ -532,13 +531,14 @@ public class HumanoidActor : Actor
             // blocking deals stamina damage
             attributes.ReduceAttribute(attributes.stamina, damageKnockback.staminaDamage);
             //attributes.ReducePoise(damageKnockback.poiseDamage);
-            Damage(damageKnockback, true);
+            //Damage(damageKnockback, true); don't take health damage through blocks
 
+            /*
             if (!attributes.HasAttributeRemaining(attributes.health))
             { // injure!
                 this.OnInjure.Invoke();
             }
-
+            */
             if (attributes.HasAttributeRemaining(attributes.stamina))
             {
                 ProcessStagger(DamageKnockback.StaggerType.BlockStagger, damageKnockback);
@@ -550,29 +550,28 @@ public class HumanoidActor : Actor
         }
         else // get hit
         {
-            //Die();
+            Damage(damageKnockback, this.IsCritVulnerable());
             if (willKill)
             {
                 ProcessStagger(damageKnockback.staggers.onKill, damageKnockback);
                 Die();
             }
-            else {
-                attributes.ReducePoise(damageKnockback.poiseDamage);
-                Damage(damageKnockback, true);
-                if (willInjure)
-                {
-                    ProcessStagger(damageKnockback.staggers.onInjure, damageKnockback);
-                }
-                else if (attributes.GetOffBalance())
-                {
-                    ProcessStagger(damageKnockback.staggers.onHitOffBalance, damageKnockback);
-                }
-                else
-                {
-                    ProcessStagger(damageKnockback.staggers.onHitOnBalance, damageKnockback);
-                }
-                
-            } 
+            else if (IsArmored() && !damageKnockback.breaksArmor)
+            {
+                ProcessStagger(damageKnockback.staggers.onArmorHit, damageKnockback);
+            }
+            else if (IsCritVulnerable())
+            {
+                ProcessStagger(damageKnockback.staggers.onCritical, damageKnockback);
+            }
+            else if (willInjure)
+            {
+                ProcessStagger(damageKnockback.staggers.onInjure, damageKnockback);
+            }
+            else
+            {
+                ProcessStagger(damageKnockback.staggers.onHit, damageKnockback);
+            }
         }
     }
 
@@ -619,7 +618,7 @@ public class HumanoidActor : Actor
         {
             if (damageKnockback.source != null && damageKnockback.source.TryGetComponent<HumanoidActor>(out HumanoidActor humanoid))
             {
-                humanoid.BlockRecoil(this.inventory.GetBlockPoiseDamage(true));
+                humanoid.BlockRecoil();
             }
         }
     }
@@ -630,247 +629,23 @@ public class HumanoidActor : Actor
         animator.SetTrigger("Impact");
     }
 
-    public void BlockRecoil(float poiseDamage)
+    public void BlockRecoil()
     {
-        attributes.ReducePoise(poiseDamage);
-        if (!IsArmored() && !IsAiming() && attributes.GetOffBalance())
+        if (!IsArmored() && !IsAiming())
         {
-            //animator.SetTrigger("AttackBlocked");
             AnimatorImpact(DamageKnockback.StaggerType.Recoil);
         }
     }
-    /*
-    public void Block(DamageKnockback damageKnockback)
-    {
-        Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
-        turnTowards = -(turnTowards.normalized);
 
-        slideAmount = damageKnockback.kbForce.magnitude / 20f;
-
-        transform.LookAt(transform.position + turnTowards);
-
-        //OnHurt.Invoke();
-        OnBlock.Invoke();
-        if (damageKnockback.source != null && damageKnockback.source.GetComponentInChildren<Actor>() != null)
-        {
-            damageKnockback.source.GetComponentInChildren<Actor>().OnHit.Invoke();
-        }
-
-        FXController.CreateFX(FXController.FX.FX_Block, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f);
-
-        AnimatorImpact(DamageKnockback.StaggerType.BlockStagger);
-
-        if (damageKnockback.source != null && damageKnockback.source.TryGetComponent<HumanoidActor>(out HumanoidActor humanoid))
-        {
-            //humanoid.BlockRecoil(this.inventory.GetBlockPoiseDamage(stance.BlockWithMain()));
-            // TODO: implement block resistance stat
-            humanoid.BlockRecoil(this.inventory.GetBlockPoiseDamage(true));
-            //humanoid.HeavyStagger(parryDamage);
-        }
-    }
-
-    
-    public void Knockback(DamageKnockback damageKnockback)
-    {
-        Vector3 force = damageKnockback.kbForce;// + Vector3.up * 2f;
-
-
-        OnHurt.Invoke();
-        if (damageKnockback.source != null && damageKnockback.source.GetComponentInChildren<Actor>() != null)
-        {
-            damageKnockback.source.GetComponentInChildren<Actor>().OnHit.Invoke();
-        }
-
-        FXController.CreateFX(FXController.FX.FX_Stagger, GetFXPosition(damageKnockback), Quaternion.LookRotation(-NumberUtilities.FlattenVector(force).normalized), 2f, damageKnockback.hitClip);
-
-        AnimatorImpact(DamageKnockback.StaggerType.Knockdown);
-        Ragdoll();
-
-        positionReference.Hips.AddForce(force, ForceMode.Impulse);
-
-        lastForce = damageKnockback.kbForce;
-    }
-
-    public bool LightStagger(DamageKnockback damageKnockback)
-    {
-        Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
-        turnTowards = -(turnTowards.normalized);
-        
-
-        OnHurt.Invoke();
-        if (damageKnockback.source != null && damageKnockback.source.GetComponentInChildren<Actor>() != null)
-        {
-            damageKnockback.source.GetComponentInChildren<Actor>().OnHit.Invoke();
-        }
-        FXController.CreateFX(FXController.FX.FX_Hit, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
-
-
-        transform.LookAt(transform.position + turnTowards);
-
-        AnimatorImpact(DamageKnockback.StaggerType.Stagger);
-
-        return true;
-    }
-
-    public bool HeavyStagger(DamageKnockback damageKnockback)
-    {
-        Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
-        turnTowards = -(turnTowards.normalized);
-        transform.LookAt(transform.position + turnTowards);
-
-        OnHurt.Invoke();
-
-        if (damageKnockback.source != null && damageKnockback.source.GetComponentInChildren<Actor>() != null)
-        {
-            damageKnockback.source.GetComponentInChildren<Actor>().OnHit.Invoke();
-        }
-        FXController.CreateFX(FXController.FX.FX_Hit, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
-
-        AxisUtilities.AxisDirection axis = AxisUtilities.AxisDirection.Backward;//AxisUtilities.DirectionToAxisDirection(damageKnockback.kbForce, this.transform, "HORIZONTAL", "SAGGITAL");
-
-
-        animator.SetInteger("AxisDirection", (int)axis);
-
-        AnimatorImpact(DamageKnockback.StaggerType.HeavyStagger);
-
-        return true;
-    }
-
-    public bool GuardBreak(DamageKnockback damageKnockback)
-    {
-        Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
-        turnTowards = -(turnTowards.normalized);
-        transform.LookAt(transform.position + turnTowards);
-
-        OnHurt.Invoke();
-        if (damageKnockback.source != null && damageKnockback.source.GetComponentInChildren<Actor>() != null)
-        {
-            damageKnockback.source.GetComponentInChildren<Actor>().OnHit.Invoke();
-        }
-        FXController.CreateFX(FXController.FX.FX_Block, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f);
-
-
-        AnimatorImpact(DamageKnockback.StaggerType.GuardBreak);
-
-        //attributes.ReduceAttribute(attributes.poise, 100f);
-        attributes.SetPoise(0f);
-
-        return true;
-    }
-
-    public void Parry(DamageKnockback damageKnockback)
-    {
-
-        FXController.CreateFX(FXController.FX.FX_Block, GetFXPosition(damageKnockback), Quaternion.LookRotation(-NumberUtilities.FlattenVector(damageKnockback.kbForce).normalized), 2f);
-
-        DamageKnockback parryDamage = new DamageKnockback(damageKnockback);
-        parryDamage.kbForce = -NumberUtilities.FlattenVector(damageKnockback.kbForce).normalized;
-        parryDamage.source = this.gameObject;
-
-        if (damageKnockback.source != null && damageKnockback.source.TryGetComponent<HumanoidActor>(out HumanoidActor humanoid))
-        {
-            humanoid.Stun(parryDamage);
-            humanoid.attributes.SetPoise(0f);
-            //humanoid.HeavyStagger(parryDamage);
-        }
-
-    }
-
-    public void Flinch(DamageKnockback damageKnockback)
-    {
-        Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
-        turnTowards = -(turnTowards.normalized);
-        transform.LookAt(transform.position + turnTowards);
-
-        OnHurt.Invoke();
-
-        if (damageKnockback.source != null && damageKnockback.source.GetComponentInChildren<Actor>() != null)
-        {
-            damageKnockback.source.GetComponentInChildren<Actor>().OnHit.Invoke();
-        }
-
-        FXController.CreateFX(FXController.FX.FX_Hit, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
-
-        AnimatorImpact(DamageKnockback.StaggerType.Flinch);
-    }
-
-    public void Stun(DamageKnockback damageKnockback)
-    {
-        Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
-        turnTowards = -(turnTowards.normalized);
-        transform.LookAt(transform.position + turnTowards);
-
-        OnHurt.Invoke();
-
-        if (damageKnockback.source != null && damageKnockback.source.GetComponentInChildren<Actor>() != null)
-        {
-            damageKnockback.source.GetComponentInChildren<Actor>().OnHit.Invoke();
-        }
-
-        FXController.CreateFX(FXController.FX.FX_Stagger, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
-
-        AnimatorImpact(DamageKnockback.StaggerType.Stun);
-    }
-
-    public void Recoil(DamageKnockback damageKnockback)
-    {
-        Vector3 turnTowards = new Vector3(damageKnockback.kbForce.x, 0, damageKnockback.kbForce.z);
-        turnTowards = -(turnTowards.normalized);
-        transform.LookAt(transform.position + turnTowards);
-
-        OnHurt.Invoke();
-
-        if (damageKnockback.source != null && damageKnockback.source.GetComponentInChildren<Actor>() != null)
-        {
-            damageKnockback.source.GetComponentInChildren<Actor>().OnHit.Invoke();
-        }
-
-        FXController.CreateFX(FXController.FX.FX_Stagger, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
-
-        AnimatorImpact(DamageKnockback.StaggerType.Recoil);
-    }
-
-    public void AnimatorImpact(DamageKnockback.StaggerType type)
-    {
-        if (false)//type == DamageKnockback.StaggerType.Knockdown)
-        {
-            animator.SetTrigger("ForceKnockdown");
-        }
-        animator.SetInteger("ImpactType", (int)type);
-        animator.SetTrigger("Impact");
-    }
-    */
-    public bool Damage(DamageKnockback damageKnockback)
-    {
-        return Damage(damageKnockback, 1, false);
-    }
-
-    public bool Damage(DamageKnockback damageKnockback, bool blocking)
-    {
-        return Damage(damageKnockback, 1, blocking);
-    }
-
-    public bool Damage(DamageKnockback damageKnockback, int multiplier, bool blocking)
+    public bool Damage(DamageKnockback damageKnockback, bool isCritical)
     {
         // account for resistances
-        float totalDamage = attributes.GetAdjustedDamage(damageKnockback.damage) * multiplier;
-        
-        if (!blocking)
-        {
-            //totalDamage = attributes.GetAdjustedDamage(damageKnockback.damage);
-        }
-        else
-        {
-            //totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances, inventory.GetBlockResistance(stance.BlockWithMain())).GetTotal();
-            //totalDamage = damageKnockback.damage.GetTotalMinusResistances(this.attributes.resistances, inventory.GetBlockResistance(true)).GetTotal();
-            //attributes.GetAdjustedDamage(damageKnockback.damage); // TODO: block resistance. again.
-            totalDamage *= 0.5f;
-        }
+        float critMult = (isCritical) ? damageKnockback.criticalMultiplier : 1f;
+        float totalDamage = DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage * critMult, damageKnockback.types, this.attributes.resistances);
+        float heartsDamage = Mathf.Max(Mathf.Floor(DamageKnockback.GetTotalMinusResistances(damageKnockback.heartsDamage * critMult, damageKnockback.types, this.attributes.resistances)), 1f);
 
-        if (damageDisplay != null)
-        {
-            damageDisplay.GetComponent<DamageDisplay>().AddDamage(totalDamage, DamageType.TrueDamage);
-        }
+        OnHurt.Invoke();
+
 
         if (totalDamage <= 0)
         {
@@ -878,7 +653,15 @@ public class HumanoidActor : Actor
         }
 
         //attributes.ReducePoise(damageKnockback.poiseDamage);
-        attributes.ReduceAttribute(attributes.health, totalDamage);
+        if (attributes.HasHealthRemaining())
+        {
+            attributes.ReduceAttribute(attributes.health, totalDamage);
+        }
+        else
+        {
+            attributes.ReduceAttribute(attributes.hearts, heartsDamage);
+        }
+        
         
         
 
@@ -956,10 +739,6 @@ public class HumanoidActor : Actor
     public void SetNextAttackType(BladeWeapon.AttackType type, bool adjustPoise)
     {
         nextAttackType = type;
-        if (adjustPoise)
-        {
-            attributes.IncreasePoiseByWeight(inventory.GetPoiseFromAttack(type));
-        }
     }
 
     private void OnDrawGizmosSelected()
@@ -1099,8 +878,8 @@ public class HumanoidActor : Actor
     {
         DamageKnockback dk = new DamageKnockback()
         {
-            damage = new Damage(fallDamage * mult, DamageType.TrueDamage),
-            poiseDamage = 999f,
+            healthDamage = 100f,//new Damage(fallDamage * mult, DamageType.TrueDamage),
+            heartsDamage = 1f,
             kbForce = Vector3.zero,
             unblockable = true,
             breaksArmor = true,
@@ -1781,6 +1560,23 @@ public class HumanoidActor : Actor
         }
         return false;
 
+    }
+
+    public bool IsCritVulnerable()
+    {
+        string[] STATES = new string[]
+        {
+            "CRITICAL",
+        };
+
+        foreach (string state in STATES)
+        {
+            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 

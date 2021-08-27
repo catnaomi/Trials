@@ -7,14 +7,16 @@ using System.Collections.Generic;
 public class DamageKnockback
 {
     public float staminaDamage;
-    public float poiseDamage;
 
     [Space(10)]
     public Vector3 kbForce;
 
     public bool kbRadial;
 
-    public Damage damage;
+    public float healthDamage;
+    public DamageType[] types;
+    public float heartsDamage;
+    public float criticalMultiplier;
 
     [ReadOnly]
     public GameObject hitboxSource;
@@ -31,22 +33,19 @@ public class DamageKnockback
     [Serializable]
     public struct StaggerData
     {
-        public StaggerType onHitOnBalance;
-        public StaggerType onHitOffBalance;
-
-        //public StaggerType onBlockOnBalance;
-        //public StaggerType onBlockOffBalance;
-
+        public StaggerType onHit;
+        public StaggerType onArmorHit;
+        public StaggerType onCritical;
         public StaggerType onInjure;
         public StaggerType onKill;
     }
     public enum StaggerType
     {
         None,           // 0
-        // on hit
+        // hitsuns
         Flinch,         // 1
-        LightStagger,   // 2
-        HeavyStagger,   // 3
+        Stagger,   // 2
+        Stumble,   // 3
         Knockdown,      // 4
         Stun,           // 5
         Crumple,        // 6
@@ -73,16 +72,16 @@ public class DamageKnockback
         this.staminaDamage = damageKnockback.staminaDamage;
         this.kbForce = damageKnockback.kbForce.normalized * damageKnockback.kbForce.magnitude;
         this.staggers = damageKnockback.staggers;
-        this.poiseDamage = damageKnockback.poiseDamage;
         this.hitClip = damageKnockback.hitClip;
         this.breaksArmor = damageKnockback.breaksArmor;
         this.kbRadial = damageKnockback.kbRadial;
-        this.damage = new Damage(damageKnockback.damage);
+        this.healthDamage = damageKnockback.healthDamage;
+        this.types = damageKnockback.types;
     }
 
     public DamageKnockback()
     {
-        this.damage = new Damage();
+        this.healthDamage = 0f;
     }
 
     public static Vector3 GetKnockbackRelativeToTransform(Vector3 vector, Transform transform)
@@ -92,9 +91,33 @@ public class DamageKnockback
 
     public static StaggerData StandardStaggerData = new StaggerData()
     {
-        onHitOnBalance = StaggerType.LightStagger,
-        onHitOffBalance = StaggerType.HeavyStagger,
-        onInjure = StaggerType.Knockdown,
+        onHit = StaggerType.Stagger,
+        onArmorHit = StaggerType.Flinch,
+        onCritical = StaggerType.Crumple,
+        onInjure = StaggerType.Stumble,
         onKill = StaggerType.Crumple
     };
+
+    public static float GetTotalMinusResistances(float damage, DamageType[] typeArray, List<DamageResistance> resists)
+    {
+        float total = damage;
+
+        List<DamageType> types = new List<DamageType>();
+        types.AddRange(typeArray);
+        foreach (DamageResistance resist in resists)
+        {
+            if (types.Contains(resist.type)) {
+                total *= resist.ratio;
+            }
+        }
+
+        return total;
+    }
+}
+
+[Serializable]
+public struct DamageResistance
+{
+    public DamageType type;
+    public float ratio; // percentage value reduciton
 }

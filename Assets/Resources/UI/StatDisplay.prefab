@@ -96,6 +96,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.615, g: 0.615, b: 0.615, a: 1}
   m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -169,6 +171,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.37746468, g: 0.85300004, b: 0.24543867, a: 1}
   m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -242,6 +246,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.85490197, g: 0.75337553, b: 0.2470588, a: 1}
   m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -307,10 +313,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   actor: {fileID: 0}
-  hpDisplayPrefab: {fileID: 7407373292143374208, guid: 9cfd503b0524abc4094a79a19f2d8d12,
-    type: 3}
-  hpOffset: 60
+  healthOffset: 0
+  healthDisplay: {fileID: 0}
+  healthSpentDisplay: {fileID: 0}
+  healthMaxDisplay: {fileID: 0}
+  healthText: {fileID: 0}
   staminaOffset: 0
   staminaDisplay: {fileID: 1392937730083030607}
-  spentDisplay: {fileID: 1392937731027658209}
-  maxDisplay: {fileID: 1392937730053318396}
+  staminaSpentDisplay: {fileID: 0}
+  staminaMaxDisplay: {fileID: 0}
+  staminaText: {fileID: 0}
+  poiseOffset: 0
+  poiseDisplay: {fileID: 0}
+  poiseSpentDisplay: {fileID: 0}
+  poiseMaxDisplay: {fileID: 0}
+  poiseText: {fileID: 0}

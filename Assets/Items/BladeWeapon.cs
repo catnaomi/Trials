@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public class BladeWeapon : EquippableWeapon, HitboxHandler
 {
     public float baseDamage;
+    public float heartsDamage;
     public float width = 1f;
     public float length = 1.5f;
     //public float weight = 1f;
@@ -147,7 +148,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
 
         }
         SetTrails(AttackIsThrusting(nextAttackType) && active, AttackIsSlashing(nextAttackType) && active);
-        SetTrailColor(dk.damage.GetHighestType(DamageType.Slashing, DamageType.Piercing));
+        //SetTrailColor(dk.healthDamage.GetHighestType(DamageType.Slashing, DamageType.Piercing));
         this.active = active;
     }
 
@@ -237,20 +238,38 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
     {
         return baseDamage;
     }
-    public virtual Damage GetModifiedDamage(bool slashing)
+    public virtual float GetModifiedDamage(bool slashing)
     {
         if (slashing)
         {
-            Damage damage = new Damage(this.baseDamage * this.GetSlashingModifier(), elements);
-            damage.types.Add(DamageType.Slashing);
-            return damage;
+            return this.baseDamage * this.GetSlashingModifier();
         }
         else // piercing
         {
-            Damage damage = new Damage(this.baseDamage * this.GetPiercingModifier(), elements);
-            damage.types.Add(DamageType.Slashing);
-            return damage;
+            return this.baseDamage * this.GetPiercingModifier();
         }
+    }
+
+    public virtual float GetModifiedHeartsDamage(bool slashing)
+    {
+        if (slashing)
+        {
+            return this.heartsDamage * this.GetSlashingModifier();
+        }
+        else // piercing
+        {
+            return this.heartsDamage * this.GetPiercingModifier();
+        }
+    }
+    public DamageType[] GetModifiedDamageTypes(bool slashing)
+    {
+        DamageType[] types = new DamageType[this.elements.Count + 1];
+        for (int i = 0; i < this.elements.Count; i++)
+        {
+            types[i] = this.elements[i];
+        }
+        types[this.elements.Count] = (slashing) ? DamageType.Slashing : DamageType.Piercing;
+        return types;
     }
     
     public virtual float GetBasePoiseDamage()
@@ -258,9 +277,9 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         return 25f + 5f * GetWeight();
     }
 
-    public override Damage GetBlockResistance()
+    public override DamageResistance[] GetBlockResistance()
     {
-        return new Damage();
+        return null;
     }
 
     public virtual List<DamageType> GetElements()
@@ -413,9 +432,9 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.SlashingLight:
                 return new DamageKnockback()
                 {
-                    damage = GetModifiedDamage(true).MultPotential(1),
+                    healthDamage = GetModifiedDamage(true) * 1f,
+                    heartsDamage = GetModifiedHeartsDamage(true) * 1f,
                     staminaDamage = GetStaminaDamage() * 1f,
-                    poiseDamage = GetBasePoiseDamage() * 1f,//(10f + 6f * GetWeight()) * 1f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             lightKB,
@@ -423,13 +442,14 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
                     source = GetHumanoidHolder().gameObject,
+                    types = GetModifiedDamageTypes(true),
                 };           
             case AttackType.SlashingMedium:
                 return new DamageKnockback()
                 {
-                    damage = GetModifiedDamage(true).MultPotential(2),
+                    healthDamage = GetModifiedDamage(true) * 2f,
+                    heartsDamage = GetModifiedHeartsDamage(true) * 2f,
                     staminaDamage = GetStaminaDamage() * 2f,
-                    poiseDamage = GetBasePoiseDamage() * 2f,//(10f + 6f * GetWeight()) * 2f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             heavyKB,
@@ -437,13 +457,14 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
                     source = GetHumanoidHolder().gameObject,
+                    types = GetModifiedDamageTypes(true),
                 };
             case AttackType.SlashingHeavy:
                 return new DamageKnockback()
                 {
-                    damage = GetModifiedDamage(true).MultPotential(3),
-                    staminaDamage = GetStaminaDamage() * 3f,
-                    poiseDamage = GetBasePoiseDamage() * 3f,//(10f + 6f * GetWeight()) * 3f,
+                    healthDamage = GetModifiedDamage(true) * 3f,
+                    heartsDamage = GetModifiedHeartsDamage(true) * 3f,
+                    staminaDamage = GetStaminaDamage() * 10f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             heavyKB,
@@ -452,13 +473,14 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                     staggers = DamageKnockback.StandardStaggerData,
                     breaksArmor = true,
                     source = GetHumanoidHolder().gameObject,
+                    types = GetModifiedDamageTypes(true),
                 };
             case AttackType.ThrustingLight:
                 return new DamageKnockback()
                 {
-                    damage = GetModifiedDamage(false).MultPotential(1),
+                    healthDamage = GetModifiedDamage(false) * 1f,
+                    heartsDamage = GetModifiedHeartsDamage(false) * 1f,
                     staminaDamage = GetStaminaDamage() * 1f,
-                    poiseDamage = GetBasePoiseDamage() * 1f,//(10f + 6f * GetWeight()) * 1f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             lightKB,
@@ -466,13 +488,14 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
                     source = GetHumanoidHolder().gameObject,
+                    types = GetModifiedDamageTypes(false),
                 };
             case AttackType.ThrustingMedium:
                 return new DamageKnockback()
                 {
-                    damage = GetModifiedDamage(false).MultPotential(2),
+                    healthDamage = GetModifiedDamage(false) * 2f,
+                    heartsDamage = GetModifiedHeartsDamage(false) * 2f,
                     staminaDamage = GetStaminaDamage() * 2f,
-                    poiseDamage = GetBasePoiseDamage() * 2f,//(10f + 6f * GetWeight()) * 2f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             heavyKB,
@@ -480,13 +503,14 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
                     source = GetHumanoidHolder().gameObject,
+                    types = GetModifiedDamageTypes(false),
                 };
             case AttackType.ThrustingHeavy:
                 return new DamageKnockback()
                 {
-                    damage = GetModifiedDamage(false).MultPotential(3),
-                    staminaDamage = GetStaminaDamage() * 3f,
-                    poiseDamage = GetBasePoiseDamage() * 3f,//(10f + 6f * GetWeight()) * 3f,
+                    healthDamage = GetModifiedDamage(false) * 3f,
+                    heartsDamage = GetModifiedHeartsDamage(false) * 3f,
+                    staminaDamage = GetStaminaDamage() * 10f,
                     kbForce = DamageKnockback.GetKnockbackRelativeToTransform
                         (
                             heavyKB,
@@ -494,52 +518,6 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
                     breaksArmor = true,
-                    source = GetHumanoidHolder().gameObject,
-                };
-            case AttackType.Bash:
-                return new DamageKnockback()
-                {
-                    damage = new Damage(1f, DamageType.Earth),
-                    staminaDamage = (10f + 3f * GetWeight()) * 1f,
-                    poiseDamage = (10f + 6f * GetWeight()) * 3f,
-                    kbForce = DamageKnockback.GetKnockbackRelativeToTransform
-                        (
-                            heavyKB,
-                            actor.transform
-                        ),
-                    staggers = DamageKnockback.StandardStaggerData,
-                    source = GetHumanoidHolder().gameObject,
-                };
-            case AttackType.SlashingCritical:
-                return new DamageKnockback()
-                {
-                    damage = GetModifiedDamage(true).MultPotential(4),
-                    staminaDamage = GetStaminaDamage() * 3f,
-                    poiseDamage = 999f,
-                    kbForce = DamageKnockback.GetKnockbackRelativeToTransform
-                        (
-                            heavyKB,
-                            actor.transform
-                        ),
-                    staggers = DamageKnockback.StandardStaggerData,
-                    breaksArmor = true,
-                    unblockable = true,
-                    source = GetHumanoidHolder().gameObject,
-                };
-            case AttackType.ThrustingCritical:
-                return new DamageKnockback()
-                {
-                    damage = GetModifiedDamage(false).MultPotential(4),
-                    staminaDamage = GetStaminaDamage() * 3f,
-                    poiseDamage = 999f,
-                    kbForce = DamageKnockback.GetKnockbackRelativeToTransform
-                        (
-                            heavyKB,
-                            actor.transform
-                        ),
-                    staggers = DamageKnockback.StandardStaggerData,
-                    breaksArmor = true,
-                    unblockable = true,
                     source = GetHumanoidHolder().gameObject,
                 };
             default:

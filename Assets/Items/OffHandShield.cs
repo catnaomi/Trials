@@ -7,7 +7,7 @@ public class OffHandShield : EquippableWeapon, HitboxHandler
     [Range(0.01f, 1f)]
     public float reductionStrength;
 
-    public Damage BlockResistance;
+    //public Damage BlockResistance;
     public float blockPoiseDamage;
 
     public float bashCost;
@@ -72,13 +72,10 @@ public class OffHandShield : EquippableWeapon, HitboxHandler
         //humanoidActor.attributes.RemoveEffect(effect);
     }
 
+    /*
     public override Damage GetBlockResistance()
     {
         return BlockResistance;
     }
-
-    public override float GetBlockPoiseDamage()
-    {
-        return blockPoiseDamage;
-    }
+    */
 }
