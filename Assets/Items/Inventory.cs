@@ -20,6 +20,7 @@ public class Inventory : MonoBehaviour, IInventory
     private bool OffIsDrawn;
 
     public bool equipOnStart = true;
+    public bool initialized = false;
     [Header("Inspector-set Weapons")]
     [Tooltip("Up Slot. Equips to Mainhand.")]
     public EquippableWeapon Slot0Weapon; // starts equipped. up
@@ -101,27 +102,7 @@ public class Inventory : MonoBehaviour, IInventory
             AddItem(sweapon);
         }
 
-        if (equipOnStart)
-        {
-            if (mweapon != null && oweapon != null)
-            {
-                EquipMainWeapon(mweapon, false);
-                EquipOffHandWeapon(oweapon, false);
-            }
-            else if (mweapon != null)
-            {
-                EquipMainWeapon(mweapon, true);
-            }
-            else if (oweapon != null)
-            {
-                EquipOffHandWeapon(oweapon, true);
-            }
-        }
         
-
-
-        //GenerateModels();
-        PositionWeapon();
         /*
         if (EquippedIsMainEquipped())
         {
@@ -137,6 +118,34 @@ public class Inventory : MonoBehaviour, IInventory
         }*/
     }
 
+    void Update()
+    {
+        if (!initialized)
+        {
+            if (equipOnStart)
+            {
+                EquippableWeapon mweapon = Slot0Weapon;
+                EquippableWeapon oweapon = Slot1Weapon;
+                if (mweapon != null && oweapon != null)
+                {
+                    EquipMainWeapon(mweapon, false);
+                    EquipOffHandWeapon(oweapon, false);
+                }
+                else if (mweapon != null)
+                {
+                    EquipMainWeapon(mweapon, true);
+                }
+                else if (oweapon != null)
+                {
+                    EquipOffHandWeapon(oweapon, true);
+                }
+            }
+
+            PositionWeapon();
+
+            initialized = true;
+        }
+    }
     public void AddItem(Item item)
     {
         if (item != null)

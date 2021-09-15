@@ -76,8 +76,6 @@ public class HumanoidActor : Actor
     [Range(-1f, 1f)]
     public float tempValue3;
 
-    public GameObject damageDisplay;
-
     public Vector3 gravity;
     [Serializable]
     public struct PositionReference
@@ -95,6 +93,8 @@ public class HumanoidActor : Actor
         public GameObject lHip;
         public GameObject lBack;
         public GameObject cBack;
+        [Space(5)]
+        public float eyeHeight;
     }
 
     [Header("Humanoid Settings")]
@@ -127,13 +127,13 @@ public class HumanoidActor : Actor
 
     private void Awake()
     {
-        
+        LocateSlotsByName();
     }
     public override void ActorStart()
     {
         base.ActorStart();
 
-        LocateSlotsByName();
+        
 
         if (inventory == null)
         {
@@ -157,12 +157,6 @@ public class HumanoidActor : Actor
         
 
         attributes.ResetAttributes();
-
-        if (damageDisplay != null)
-        {
-            damageDisplay = Instantiate(damageDisplay);
-            damageDisplay.GetComponent<DamageDisplay>().source = this.transform;
-        }
 
         /*
         OnSheathe = new UnityEvent();
@@ -447,6 +441,11 @@ public class HumanoidActor : Actor
         humanoidState = HumanoidState.Actionable;
     }
 
+    public virtual bool ShouldHelpless()
+    {
+        return false;
+    }
+
     public void TryRevive()
     {
         reviveClock += Time.deltaTime;
@@ -479,11 +478,15 @@ public class HumanoidActor : Actor
     public void Die()
     {
         this.gameObject.tag = "Corpse";
+        //animator.SetBool("Helpless", true);
+        animator.SetBool("Dead", true);
         humanoidState = HumanoidState.Dead;
+        StartCleanUp();
     }
 
     public bool Vulnerable()
     {
+        return !IsProne();
         switch (humanoidState)
         {
             case HumanoidState.Ragdolled:
@@ -512,7 +515,7 @@ public class HumanoidActor : Actor
         float heartsDamage = Mathf.Max(Mathf.Floor(DamageKnockback.GetTotalMinusResistances(damageKnockback.heartsDamage, damageKnockback.types, this.attributes.resistances)), 1f);
 
         bool willInjure = attributes.HasHealthRemaining() && (totalDamage >= attributes.health.current);
-        bool willKill = !attributes.HasHealthRemaining() && (heartsDamage >= attributes.hearts.current);
+        bool willKill = (!attributes.HasHealthRemaining() && (heartsDamage >= attributes.hearts.current)) || IsHelpless();
 
         if (this.IsDodging() || isInvulnerable)
         {
@@ -553,8 +556,16 @@ public class HumanoidActor : Actor
             Damage(damageKnockback, this.IsCritVulnerable());
             if (willKill)
             {
-                ProcessStagger(damageKnockback.staggers.onKill, damageKnockback);
+                if (!animator.GetBool("Helpless"))
+                {
+                    ProcessStagger(damageKnockback.staggers.onKill, damageKnockback);
+                }
                 Die();
+            }
+            else if (ShouldHelpless())
+            {
+                animator.SetBool("Helpless", true);
+                ProcessStagger(damageKnockback.staggers.onHelpless, damageKnockback);
             }
             else if (IsArmored() && !damageKnockback.breaksArmor)
             {
@@ -571,6 +582,10 @@ public class HumanoidActor : Actor
             else
             {
                 ProcessStagger(damageKnockback.staggers.onHit, damageKnockback);
+            }
+            if (ShouldHelpless())
+            {
+                animator.SetBool("Helpless", true);
             }
         }
     }
@@ -641,9 +656,10 @@ public class HumanoidActor : Actor
     {
         // account for resistances
         float critMult = (isCritical) ? damageKnockback.criticalMultiplier : 1f;
-        float totalDamage = DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage * critMult, damageKnockback.types, this.attributes.resistances);
+        float totalDamage = (!isCritical) ? DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.types, this.attributes.resistances) : this.attributes.health.max;
         float heartsDamage = Mathf.Max(Mathf.Floor(DamageKnockback.GetTotalMinusResistances(damageKnockback.heartsDamage * critMult, damageKnockback.types, this.attributes.resistances)), 1f);
 
+        lastDamageTaken = totalDamage;
         OnHurt.Invoke();
 
 
@@ -659,6 +675,7 @@ public class HumanoidActor : Actor
         }
         else
         {
+            Debug.Log("taking hearts damage   " + heartsDamage);
             attributes.ReduceAttribute(attributes.hearts, heartsDamage);
         }
         
@@ -743,58 +760,8 @@ public class HumanoidActor : Actor
 
     private void OnDrawGizmosSelected()
     {
-        try
-        {
-            string staminaText = "stamina: [";
-
-            for (int i = 0; i < attributes.stamina.max; i += 10)
-            {
-                char c;
-                if (i < attributes.stamina.current)
-                {
-                    c = '=';
-                }
-                else if (i < attributes.smoothedStamina)
-                {
-                    c = '+';
-                }
-                else
-                {
-                    c = '–';
-                }
-                staminaText += c;
-            }
-            staminaText += "] " + (int)attributes.stamina.current;
-
-            InterfaceUtilities.GizmosDrawText(transform.position + Vector3.up * 2f, new Color(0, 0.5f, 0), staminaText);
-
-            string stunText = "stun: [";
-
-            for (float f = 0; f < stunAmount; f += 0.1f)
-            {
-                stunText += "|";
-            }
-
-            stunText += "] " + (int)(stunAmount * 100f);
-
-            if (stunAmount > 0)
-            {
-                InterfaceUtilities.GizmosDrawText(transform.position + Vector3.up * 2.1f, new Color(0.5f, 0.5f, 0.5f), stunText);
-            }
-
-            string hpText = "hp : [";
-            for (int h = 1; h <= attributes.health.current; h++)
-            {
-                hpText += "|";
-            }
-            hpText += "] " + attributes.health.current;
-
-            InterfaceUtilities.GizmosDrawText(transform.position + Vector3.up * 2.2f, new Color(0.5f, 0, 0), hpText);
-        }
-        catch (Exception ex)
-        {
-
-        }
+        Gizmos.color = Color.blue;
+        Gizmos.DrawCube(this.transform.position + this.transform.up * this.positionReference.eyeHeight, new Vector3(1, 0.025f, 1));
     }
 
     protected AxisUtilities.AxisDirection GetDodgeDirection()
@@ -819,11 +786,6 @@ public class HumanoidActor : Actor
 
         // if not found?
         return AxisUtilities.AxisDirection.Zero;
-    }
-
-    public bool IsHelpless()
-    {
-        return humanoidState == HumanoidState.Helpless;
     }
 
     public void Slay()
@@ -1436,6 +1398,15 @@ public class HumanoidActor : Actor
     public bool IsEmptyState()
     {
         string TAG = "EMPTY";
+        bool ALLOW_IN_TRANSITION = true;
+
+        return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
+    }
+
+    public bool IsHelpless()
+    {
+        string TAG = "HELPLESS";
         bool ALLOW_IN_TRANSITION = true;
 
         return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&

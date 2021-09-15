@@ -91,10 +91,10 @@ public class PlayerActor : HumanoidActor
     [Space(20)]
     [Range(0f, 1f)]
     public float tempVal;
-    private void OnEnable()
+    protected override void ActorAwake()
     {
+        base.ActorAwake();
         player = this;
-        bool b = false;
     }
     public override void ActorStart()
     {
@@ -509,7 +509,7 @@ public class PlayerActor : HumanoidActor
         {
             TriggerSheath(true, Inventory.EquipSlot.lHip, true);
         }
-        else if (this.attributes.stamina.current >= 0f)
+        else if (this.attributes.stamina.current > 0f)
         {
             animator.SetTrigger("Input-Attack");
             animator.SetInteger("Input-AttackID", atk.attackId);
@@ -598,13 +598,13 @@ public class PlayerActor : HumanoidActor
     {
         inputs = GetComponent<PlayerInput>();
 
-        inputs.actions["Atk_Main"].performed += (context) =>
+        inputs.actions["Atk_Slash"].performed += (context) =>
         {
             if (!context.performed) return;
             if (this.moveset == null) return;
             if (context.interaction is TapInteraction)
             {
-                InputAttack atk = this.moveset.quickMain;
+                InputAttack atk = (!this.IsTwoHanding()) ? this.moveset.quickSlash1h : this.moveset.quickSlash2h;
                 if (atk != null)
                 {
                     OnInputAttack(atk);
@@ -612,7 +612,7 @@ public class PlayerActor : HumanoidActor
             }
             else if (context.interaction is HoldInteraction)
             {
-                InputAttack atk = this.moveset.heavyMain;
+                InputAttack atk = (!this.IsTwoHanding()) ? this.moveset.strongSlash1h : this.moveset.strongSlash2h;
                 if (atk != null)
                 {
                     OnInputAttack(atk);
@@ -620,42 +620,33 @@ public class PlayerActor : HumanoidActor
             }
         };
 
-        inputs.actions["Atk_Main"].canceled += (context) =>
-        {
-            OnAttackRelease();
-        };
-
-        inputs.actions["Atk_ChargeMain"].performed += (context) =>
-        {
-            if (this.moveset == null) return;
-            InputAttack atk = this.moveset.chargeMain;
-            if (atk != null)
-            {
-                OnInputAttack(atk);
-            }
-        };
-
-        inputs.actions["Atk_ChargeMain"].canceled += (context) =>
+        inputs.actions["Atk_Slash"].canceled += (context) =>
         {
             OnAttackRelease();
         };
 
         inputs.actions["Atk_Off"].performed += (context) =>
         {
+            if (this.moveset == null) return;
+            InputAttack atk = (this.inventory.IsOffEquipped()) ? this.moveset.offAttack : this.moveset.specialAttack;
+            if (atk != null)
+            {
+                OnInputAttack(atk);
+            }
+        };
+        
+        inputs.actions["Atk_Off"].canceled += (context) =>
+        {
+            OnAttackRelease();
+        };
+        
+        inputs.actions["Atk_Thrust"].performed += (context) =>
+        {
             if (!context.performed) return;
             if (this.moveset == null) return;
             if (context.interaction is TapInteraction)
             {
-                InputAttack atk = null;
-                if (this.inventory.IsOffDrawn())
-                {
-                    atk = this.moveset.quickOff;
-                    
-                }
-                else if (this.inventory.IsMainDrawn() && (this.IsTwoHanding() || this.inventory.GetMainWeapon().TwoHanded))
-                {
-                    atk = this.moveset.quick2h;
-                }
+                InputAttack atk = (!this.IsTwoHanding()) ? this.moveset.quickThrust1h : this.moveset.quickThrust2h;
                 if (atk != null)
                 {
                     OnInputAttack(atk);
@@ -663,16 +654,7 @@ public class PlayerActor : HumanoidActor
             }
             else if (context.interaction is HoldInteraction)
             {
-                InputAttack atk = null;
-                if (this.inventory.IsOffDrawn())
-                {
-                    atk = this.moveset.heavyOff;
-
-                }
-                else if (this.inventory.IsMainDrawn() && (this.IsTwoHanding() || this.inventory.GetMainWeapon().TwoHanded))
-                {
-                    atk = this.moveset.heavy2h;
-                }
+                InputAttack atk = (!this.IsTwoHanding()) ? this.moveset.strongThrust1h : this.moveset.strongThrust2h;
                 if (atk != null)
                 {
                     OnInputAttack(atk);
@@ -680,11 +662,12 @@ public class PlayerActor : HumanoidActor
             }
         };
 
-        inputs.actions["Atk_Off"].canceled += (context) =>
+        inputs.actions["Atk_Thrust"].canceled += (context) =>
         {
             OnAttackRelease();
         };
 
+        /*
         inputs.actions["Atk_ChargeOff"].performed += (context) =>
         {
             if (this.moveset == null) return;
@@ -1510,6 +1493,8 @@ public class PlayerActor : HumanoidActor
     }
     private void OnDrawGizmos()
     {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawCube(this.transform.position + this.transform.up * this.positionReference.eyeHeight, new Vector3(1, 0.025f, 1));
         try
         {
             //Gizmos.DrawLine(positionReference.Head.transform.position, positionReference.Head.transform.position + GetLaunchVector(positionReference.Head.transform.position) * 100f);

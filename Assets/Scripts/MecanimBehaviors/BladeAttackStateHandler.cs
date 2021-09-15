@@ -20,7 +20,7 @@ public class BladeAttackStateHandler : StateMachineBehaviour
             }
             else if (actor is PlayerActor player)
             {
-                player.AnimSetTwoHand(isTwoHanded);
+                //player.AnimSetTwoHand(isTwoHanded);
             }
         }
     }

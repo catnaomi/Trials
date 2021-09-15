@@ -18,10 +18,10 @@ public class ActorAttributes : MonoBehaviour
     [Header("Vitality")]
     public AttributeValue hearts;
     public float recoverableHearts;
-
+    private float heartsLast;
 
     [ReadOnly] public float smoothedHealth;
-    private float healthRecoveryClock;
+    public float healthRecoveryClock;
     private float healthSmoothClock;
     private float healthLast;
     public AttributeValue health;
@@ -39,7 +39,8 @@ public class ActorAttributes : MonoBehaviour
     public AttributeValue guile;
 
     [Space(5)]
-    public float attributeRecoveryDelay = 3f;
+    public float staminaRecoveryDelay = 3f;
+    public float healthRecoveryDelay = 10f;
 
     [Header("Resistances & Weaknesses")]
     public List<DamageResistance> resistances;
@@ -62,7 +63,7 @@ public class ActorAttributes : MonoBehaviour
         smoothedStamina = NumberUtilities.TimeDelayedSmoothDelta(smoothedStamina, stamina.current, staminaSmoothClock + SMOOTHING_DELAY, stamina.max / SMOOTHING_MAX_DELTA, Time.time);
         //smoothedPoise = NumberUtilities.TimeDelayedSmoothDelta(smoothedPoise, poise.current, poiseSmoothClock + SMOOTHING_DELAY, poise.max / SMOOTHING_MAX_DELTA, Time.time);
 
-        if (health.current < healthLast)
+        if (health.current < healthLast || hearts.current < heartsLast)
         {
             healthRecoveryClock = 0f;
         }
@@ -78,7 +79,7 @@ public class ActorAttributes : MonoBehaviour
         {
             smoothedHealth = health.current;
         }
-        if (healthRecoveryClock > attributeRecoveryDelay)
+        if (healthRecoveryClock > healthRecoveryDelay)
         {
             this.RecoverAttribute(health, healthRecoveryRate.current * Time.deltaTime);
         }
@@ -99,14 +100,14 @@ public class ActorAttributes : MonoBehaviour
         {
             smoothedStamina = stamina.current;
         }
-        if (staminaRecoveryClock > attributeRecoveryDelay)
+        if (staminaRecoveryClock > staminaRecoveryDelay)
         {
             this.RecoverAttribute(stamina, staminaRecoveryRate.current * Time.deltaTime);
         }
 
         healthLast = health.current;
         staminaLast = stamina.current;
-
+        heartsLast = hearts.current;
         effectClock += Time.deltaTime;
         if (effectClock > EFFECT_UPDATE_FREQUENCY)
         {

@@ -38,6 +38,7 @@ public class DamageKnockback
         public StaggerType onCritical;
         public StaggerType onInjure;
         public StaggerType onKill;
+        public StaggerType onHelpless;
     }
     public enum StaggerType
     {
@@ -46,6 +47,7 @@ public class DamageKnockback
         Flinch,         // 1
         Stagger,   // 2
         Stumble,   // 3
+        // knockouts
         Knockdown,      // 4
         Stun,           // 5
         Crumple,        // 6
@@ -53,8 +55,8 @@ public class DamageKnockback
         // on block
         BlockStagger,   // 7
         GuardBreak,     // 8
-
         Recoil,          // 9 shorter stun
+
         FallDamage,       // 10
     }
 
@@ -76,6 +78,7 @@ public class DamageKnockback
         this.breaksArmor = damageKnockback.breaksArmor;
         this.kbRadial = damageKnockback.kbRadial;
         this.healthDamage = damageKnockback.healthDamage;
+        this.heartsDamage = damageKnockback.heartsDamage;
         this.types = damageKnockback.types;
     }
 
@@ -93,15 +96,18 @@ public class DamageKnockback
     {
         onHit = StaggerType.Stagger,
         onArmorHit = StaggerType.Flinch,
-        onCritical = StaggerType.Crumple,
+        onCritical = StaggerType.Stumble,
         onInjure = StaggerType.Stumble,
-        onKill = StaggerType.Crumple
+        onKill = StaggerType.Crumple,
+        onHelpless = StaggerType.Crumple,
     };
 
     public static float GetTotalMinusResistances(float damage, DamageType[] typeArray, List<DamageResistance> resists)
     {
+
         float total = damage;
 
+        if (typeArray == null || typeArray.Length <= 0) return total;
         List<DamageType> types = new List<DamageType>();
         types.AddRange(typeArray);
         foreach (DamageResistance resist in resists)

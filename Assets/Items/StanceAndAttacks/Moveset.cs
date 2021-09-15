@@ -8,17 +8,18 @@ using System.Collections.Generic;
 public class Moveset : ScriptableObject
 {
     [Header("Main Hand Attacks")]
-    public InputAttack quickMain;
-    public InputAttack heavyMain;
-    public InputAttack chargeMain;
+    public InputAttack quickSlash1h;
+    public InputAttack strongSlash1h;
+    public InputAttack quickThrust1h;
+    public InputAttack strongThrust1h;
     [Header("Two Hand Attacks")]
-    public InputAttack quick2h;
-    public InputAttack heavy2h;
-    public InputAttack charge2h;
+    public InputAttack quickSlash2h;
+    public InputAttack strongSlash2h;
+    public InputAttack quickThrust2h;
+    public InputAttack strongThrust2h;
     [Header("Off Hand Attacks")]
-    public InputAttack quickOff;
-    public InputAttack heavyOff;
-    public InputAttack chargeOff;
+    public InputAttack offAttack;
+    public InputAttack specialAttack;
     [Header("Movement-Based Attacks")]
     public InputAttack dash;
     public InputAttack plunge;

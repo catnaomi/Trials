@@ -7,23 +7,27 @@ public class StatDisplay : MonoBehaviour
 {
     public Actor actor;
 
-    public float healthOffset;
-    public RectTransform healthDisplay;
-    public RectTransform healthSpentDisplay;
-    public RectTransform healthMaxDisplay;
-    public Text healthText;
-
-    public float staminaOffset;
-    public RectTransform staminaDisplay;
-    public RectTransform staminaSpentDisplay;
-    public RectTransform staminaMaxDisplay;
-    public Text staminaText;
-
-    public Text heartsText;
+    public AttributeDisplay healthBar;
+    public AttributeDisplay staminaBar;
+    public AttributeDisplay hearts;
+    public SimpleDamageDisplay damage;
 
     private void Start()
     {
-        actor = PlayerActor.player;
+        if (actor == null) actor = PlayerActor.player;
+        healthBar.SetAttribute(actor.attributes.health);
+        staminaBar.SetAttribute(actor.attributes.stamina);
+        hearts.SetAttribute(actor.attributes.hearts);
+        damage.SetActor(actor);
+    }
+
+    public void SetActor(Actor actor)
+    {
+        this.actor = actor;
+        healthBar.SetAttribute(actor.attributes.health);
+        staminaBar.SetAttribute(actor.attributes.stamina);
+        hearts.SetAttribute(actor.attributes.hearts);
+        damage.SetActor(actor);
     }
     private void OnGUI()
     {
@@ -32,16 +36,13 @@ public class StatDisplay : MonoBehaviour
             return;
         }
 
-        healthDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.health.current * .5f);
-        healthSpentDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.smoothedHealth * .5f);
-        healthMaxDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.health.max * .5f);
-        healthText.text = Mathf.Floor(actor.attributes.health.current).ToString();
 
-        staminaDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.stamina.current * 5f);
-        staminaSpentDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.smoothedStamina * 5f);
-        staminaMaxDisplay.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, actor.attributes.stamina.max * 5f);
-        staminaText.text = Mathf.Floor(actor.attributes.stamina.current).ToString();
+        healthBar.SetSmoothValue(actor.attributes.smoothedHealth);
+        healthBar.UpdateGUI();
 
-        heartsText.text = Mathf.Floor(actor.attributes.hearts.current).ToString();
+        staminaBar.SetSmoothValue(actor.attributes.smoothedStamina);
+        staminaBar.UpdateGUI();
+
+        hearts.UpdateGUI();
     }
 }

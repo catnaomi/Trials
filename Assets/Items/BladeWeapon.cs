@@ -470,7 +470,15 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             heavyKB,
                             actor.transform
                         ),
-                    staggers = DamageKnockback.StandardStaggerData,
+                    staggers =  new DamageKnockback.StaggerData()
+                    {
+                        onHit = DamageKnockback.StaggerType.Stumble,
+                        onArmorHit = DamageKnockback.StaggerType.Stagger,
+                        onCritical = DamageKnockback.StaggerType.Knockdown,
+                        onInjure = DamageKnockback.StaggerType.Knockdown,
+                        onKill = DamageKnockback.StaggerType.Knockdown,
+                        onHelpless = DamageKnockback.StaggerType.Knockdown,
+                    },
                     breaksArmor = true,
                     source = GetHumanoidHolder().gameObject,
                     types = GetModifiedDamageTypes(true),
@@ -516,9 +524,18 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             heavyKB,
                             actor.transform
                         ),
-                    staggers = DamageKnockback.StandardStaggerData,
+                    staggers = new DamageKnockback.StaggerData()
+                    {
+                        onHit = DamageKnockback.StaggerType.Stumble,
+                        onArmorHit = DamageKnockback.StaggerType.Stagger,
+                        onCritical = DamageKnockback.StaggerType.Knockdown,
+                        onInjure = DamageKnockback.StaggerType.Knockdown,
+                        onKill = DamageKnockback.StaggerType.Knockdown,
+                        onHelpless = DamageKnockback.StaggerType.Knockdown,
+                    },
                     breaksArmor = true,
                     source = GetHumanoidHolder().gameObject,
+                    types = GetModifiedDamageTypes(false),
                 };
             default:
                 return new DamageKnockback();

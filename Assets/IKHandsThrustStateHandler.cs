@@ -8,8 +8,11 @@ public class IKHandsThrustStateHandler : StateMachineBehaviour
     public float lWeight;
     public float rTargetTime;
     public float lTargetTime;
+    public float ufWeight;
+    public float ufTargetTime;
     public bool ikRight = true;
     public bool ikLeft = true;
+    public bool ikUpForward = false;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     //override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     //{
@@ -39,6 +42,7 @@ public class IKHandsThrustStateHandler : StateMachineBehaviour
     {
         float rcWeight = Mathf.Min(1f - ((rTargetTime - stateInfo.normalizedTime) / rTargetTime), 1f) * rWeight;
         float lcWeight = Mathf.Min(1f - ((lTargetTime - stateInfo.normalizedTime) / lTargetTime), 1f) * lWeight;
+        float ufcWeight = (stateInfo.normalizedTime >= ufTargetTime) ? 1f : 0f;// Mathf.Min(1f - ((ufTargetTime - stateInfo.normalizedTime) / ufTargetTime), 1f) * ufWeight;
         //Debug.Log(cWeight);
         if (animator.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
         {
@@ -58,6 +62,11 @@ public class IKHandsThrustStateHandler : StateMachineBehaviour
             if (ikRight) {
                 animator.SetIKRotation(AvatarIKGoal.RightHand, Quaternion.LookRotation(actor.transform.right));
                 animator.SetIKRotationWeight(AvatarIKGoal.RightHand, rcWeight);    
+            }
+            if (ikUpForward)
+            {
+                animator.SetIKPosition(AvatarIKGoal.RightHand, actor.transform.position + actor.transform.forward + Vector3.up * actor.positionReference.eyeHeight);
+                animator.SetIKPositionWeight(AvatarIKGoal.RightHand, ufcWeight);
             }
 
         }

@@ -97,7 +97,7 @@ public class NavigatingHumanoidActor : HumanoidActor
 
     public bool IsClearLineToTarget()
     {
-        if (true)
+        if (CombatTarget != null)
         {
             if (Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, CombatTarget.transform.position - this.transform.position, out RaycastHit hit, Vector3.Distance(CombatTarget.transform.position, this.transform.position), ~LayerMask.GetMask("Limbs","Hitboxes")))
             {
@@ -118,7 +118,7 @@ public class NavigatingHumanoidActor : HumanoidActor
             //return;
         }
 
-        if (shouldNavigate)
+        if (shouldNavigate && CombatTarget != null)
         {
             nav.enabled = true;
             obstacle.enabled = false;
@@ -189,7 +189,7 @@ public class NavigatingHumanoidActor : HumanoidActor
         }
 
         Quaternion targetRot;
-        if (ShouldFaceTarget() || IsBlocking())
+        if (CombatTarget != null && (ShouldFaceTarget() || IsBlocking()))
         {
             targetRot = Quaternion.LookRotation(NumberUtilities.FlattenVector(CombatTarget.transform.position - this.transform.position));
         }

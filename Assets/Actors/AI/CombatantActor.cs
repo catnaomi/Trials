@@ -46,6 +46,10 @@ public class CombatantActor : NavigatingHumanoidActor
                 }
             }
         }
+        else if (CombatTarget.tag == "Corpse")
+        {
+            CombatTarget = null;
+        }
 
         float dist = GetDistanceToTarget();
         animator.SetFloat("DistanceToTarget", dist);
@@ -71,8 +75,21 @@ public class CombatantActor : NavigatingHumanoidActor
             this.animator.SetFloat("AttackSpeedOff", GetOffAttackSpeed() * ASCurve);
         }
 
+        if (CombatTarget != null && CombatTarget.TryGetComponent<HumanoidActor>(out HumanoidActor targetActor))
+        {
+            animator.SetBool("Target-Critical", targetActor.IsCritVulnerable());
+        }
+        else
+        {
+            animator.SetBool("Target-Critical", false);
+        }
+
     }
 
+    public override bool ShouldHelpless()
+    {
+        return (this.attributes.health.current <= 0) && (this.attributes.hearts.current <= 3);
+    }
     public float GetAttackSpeed()
     {
         if (inventory.IsMainEquipped())
@@ -94,7 +111,7 @@ public class CombatantActor : NavigatingHumanoidActor
     public bool DetermineCombatTarget(out GameObject target)
     {
         target = PlayerActor.player.gameObject;
-        return true;
+        return PlayerActor.player.gameObject.tag != "Corpse";
     }
 
     public void BeingAttacked()

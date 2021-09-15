@@ -183,7 +183,7 @@ public class PlayerTargetManager : MonoBehaviour
         List<Transform> otherTransforms = new List<Transform>();
         foreach (GameObject target in targets)
         {
-            if (target != currentTarget)
+            if (target != currentTarget && target != null)
             {
                 otherTransforms.Add(target.transform);
             }

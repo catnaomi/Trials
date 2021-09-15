@@ -29,6 +29,7 @@ public class Actor : MonoBehaviour
     public UnityEvent OnActionEnd;
     public UnityEvent OnHurt;
     public UnityEvent OnHit;
+    public UnityEvent OnDie;
     public float lastDamageTaken;
     private  int mercyId; //hitbox
 
@@ -38,14 +39,12 @@ public class Actor : MonoBehaviour
 
     public GameObject CombatTarget;
     public GameObject FollowTarget;
-    private void Awake()
+    void OnEnable()
     {
-        OnHurt = new UnityEvent();
-        OnHit = new UnityEvent();
-        OnActionCommand = new UnityEvent();
-        OnActionStart = new UnityEvent();
-        OnActionEnd = new UnityEvent();
 
+        animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
+        attributes = GetComponent<ActorAttributes>();
         ActorAwake();
     }
 
@@ -56,10 +55,7 @@ public class Actor : MonoBehaviour
     public void Start()
     {
         //CurrentAction = ActionsLibrary.GetInputAction(0);
-
-        animator = GetComponent<Animator>();
-        audioSource = GetComponent<AudioSource>();
-        attributes = GetComponent<ActorAttributes>();
+        
         ActorStart();
     }
 
@@ -182,5 +178,22 @@ public class Actor : MonoBehaviour
     public void SetAdditionalMovement(Vector3 move)
     {
         moveAdditional = move;
+    }
+
+    public void StartCleanUp()
+    {
+        StartCoroutine(CorpseClean());
+    }
+
+
+    IEnumerator CorpseClean()
+    {
+        int iterations = 5;
+        for (int i = 0; i < iterations; i++)
+        {
+            yield return new WaitForSecondsRealtime(1f);
+        }
+        GameObject.Destroy(this.gameObject);
+
     }
 }
