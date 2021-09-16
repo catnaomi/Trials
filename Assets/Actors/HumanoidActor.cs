@@ -481,6 +481,7 @@ public class HumanoidActor : Actor
         //animator.SetBool("Helpless", true);
         animator.SetBool("Dead", true);
         humanoidState = HumanoidState.Dead;
+        OnDie.Invoke();
         StartCleanUp();
     }
 

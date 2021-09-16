@@ -56,11 +56,9 @@ public class StanceHandler
     public enum BlockStyle
     {
         None,         // 0
-        OneHand,      // 1
-        Bracing,      // 2
-        TwoHand,      // 3
-        Shield,       // 4
-        //Bow_Dagger,   // 5
+        Bracing,      // 1
+        Shield,       // 2
+        Light_2H,     // 3
     }
 
     public enum HeavyStyle

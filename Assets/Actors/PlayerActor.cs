@@ -939,6 +939,7 @@ public class PlayerActor : HumanoidActor
                 stance.leftGrip = StanceHandler.GripStyle.None;
                 stance.stanceStyle = StanceHandler.StanceStyle.Casual_OffF;
 
+                stance.blockStyle = StanceHandler.BlockStyle.Light_2H;
                 DefaultLayerWeights();
             }
             else
