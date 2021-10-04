@@ -15,6 +15,13 @@ public class Item : ScriptableObject
     public Sprite displayImage;
     public Color displayColor = Color.white;
 
+    public enum ItemType
+    {
+        Misc,
+        Weapons,
+        Components,
+        Consumables
+    }
     public virtual string GetName()
     {
         return itemName;

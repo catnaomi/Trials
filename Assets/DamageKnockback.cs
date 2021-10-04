@@ -17,7 +17,7 @@ public class DamageKnockback
     public DamageType[] types;
     public float heartsDamage;
     public float criticalMultiplier;
-
+    public bool forceCritical;
     [ReadOnly]
     public GameObject hitboxSource;
     [ReadOnly]
@@ -80,6 +80,8 @@ public class DamageKnockback
         this.healthDamage = damageKnockback.healthDamage;
         this.heartsDamage = damageKnockback.heartsDamage;
         this.types = damageKnockback.types;
+        this.criticalMultiplier = damageKnockback.criticalMultiplier;
+        this.forceCritical = damageKnockback.forceCritical;
     }
 
     public DamageKnockback()

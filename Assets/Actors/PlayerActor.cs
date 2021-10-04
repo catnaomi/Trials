@@ -48,12 +48,15 @@ public class PlayerActor : HumanoidActor
 
     public bool isMenuOpen;
     bool startDodge;
-
+    
     Vector3 stickDirection;
     //Vector3 moveDirection;
 
     Vector3 airDirection;
     Vector3 lastPos;
+
+    public float ParryWindow = 0.5f;
+    float parryTime;
 
     List<Interactable> interactables;
     public Interactable highlightedInteractable;
@@ -112,8 +115,9 @@ public class PlayerActor : HumanoidActor
         interactables = new List<Interactable>();
 
         this.OnInjure.AddListener(() => { FXController.SlowMo(0.5f, 3f); });
-        this.OnDodge.AddListener(() => { FXController.SlowMo(0.1f, 0.5f); });
+        //this.OnDodge.AddListener(() => { FXController.SlowMo(0.1f, 0.5f); });
         this.OnHitboxActive.AddListener(CheckForStamina);
+        this.OnParry.AddListener(ParrySuccess);
         //OnHit.AddListener(() => { FXController.Hitpause(1f); });
 
         inventory.OnChange.AddListener(GetStance);
@@ -321,6 +325,10 @@ public class PlayerActor : HumanoidActor
         }
         animator.SetBool("LadderLockout", ladderLockout);
 
+        if (parryTime > 0f)
+        {
+            parryTime -= Time.deltaTime;
+        }
 
         //animator.SetFloat("StickVelocity", stickDirection.magnitude);
         //animator.SetFloat("ForwardVelocity", primaryVertical);
@@ -475,31 +483,6 @@ public class PlayerActor : HumanoidActor
         look = value.Get<Vector2>();
     }
 
-    /*
-    public void OnAtk_ThrustMain(InputValue value)
-    {
-        Debug.Log("Main Thrust Press");
-
-    }
-
-    public void OnAtk_SlashMain(InputValue value)
-    {
-        Debug.Log("Main Slash Press");
-
-    }
-
-    public void OnAtk_ThrustOff(InputValue value)
-    {
-        Debug.Log("Off Thrust Press");
-
-    }
-
-    public void OnAtk_SlashOff(InputValue value)
-    {
-        Debug.Log("Off Slash Press");
-
-    }*/
-
     public void OnInputAttack(InputAttack atk)
     {
         if (!CanPlayerInput()) return;
@@ -515,14 +498,28 @@ public class PlayerActor : HumanoidActor
             animator.SetInteger("Input-AttackID", atk.attackId);
             animator.SetBool("Input-AttackHeld", true);
             animator.SetFloat("Input-AttackHeldTime", 0f);
+
+            animator.SetBool("Input-AttackBlockOkay", atk.IsBlockOkay());
+            animator.SetBool("Input-AttackFallingOkay", atk.IsFallingOkay());
+            animator.SetBool("Input-AttackSprintOkay", atk.IsSprintOkay());
+            animator.SetBool("Input-AttackParryOkay", atk.IsParryOkay());
         }
 
     }
 
-    public void OnAttackRelease()
+    public void OnAttackRelease(bool slash)
     {
         //if (!CanPlayerInput()) return;
         animator.SetBool("Input-AttackHeld", false);
+
+        if (slash)
+        {
+            animator.SetBool("Input-SlashHeld", false);
+        }
+        else
+        {
+            animator.SetBool("Input-ThrustHeld", false);
+        }
     }
 
     public void Jump()
@@ -552,6 +549,19 @@ public class PlayerActor : HumanoidActor
             else if (this.GetCombatTarget() != null)
             {
                 dodgeDir = move;
+                Vector2[] directions = { Vector2.up, Vector2.down, Vector2.left, Vector2.right,
+                    (Vector2.up + Vector2.left).normalized, (Vector2.up + Vector2.right).normalized,
+                     (Vector2.down + Vector2.left).normalized, (Vector2.down + Vector2.right).normalized };
+                float lead = Mathf.Infinity;
+                foreach (Vector2 v in directions)
+                {
+                    float dot = Mathf.Abs(1f - Vector2.Dot(move, v));
+                    if (dot < lead)
+                    {
+                        dodgeDir = v;
+                        lead = dot;
+                    }
+                }
             }
             else
             {
@@ -600,11 +610,21 @@ public class PlayerActor : HumanoidActor
 
         inputs.actions["Atk_Slash"].performed += (context) =>
         {
+            Debug.Log("slashpress");
             if (!context.performed) return;
             if (this.moveset == null) return;
+            animator.SetBool("Input-SlashHeld", true);
+            animator.SetBool("Input-SlashDown", true);
             if (context.interaction is TapInteraction)
             {
-                InputAttack atk = (!this.IsTwoHanding()) ? this.moveset.quickSlash1h : this.moveset.quickSlash2h;
+                InputAttack atk = null;
+                if (IsParrySuccessful())
+                {
+                    atk = this.moveset.disarm;
+                }
+                else {
+                    atk = (inputs.actions["Block"].ReadValue<float>() <= 0f) ? this.moveset.quickSlash1h : this.moveset.quickSlash2h;
+                }
                 if (atk != null)
                 {
                     OnInputAttack(atk);
@@ -612,7 +632,7 @@ public class PlayerActor : HumanoidActor
             }
             else if (context.interaction is HoldInteraction)
             {
-                InputAttack atk = (!this.IsTwoHanding()) ? this.moveset.strongSlash1h : this.moveset.strongSlash2h;
+                InputAttack atk = (inputs.actions["Block"].ReadValue<float>() <= 0f) ? this.moveset.strongSlash1h : this.moveset.strongSlash2h;
                 if (atk != null)
                 {
                     OnInputAttack(atk);
@@ -622,7 +642,7 @@ public class PlayerActor : HumanoidActor
 
         inputs.actions["Atk_Slash"].canceled += (context) =>
         {
-            OnAttackRelease();
+            OnAttackRelease(true);
         };
 
         inputs.actions["Atk_Off"].performed += (context) =>
@@ -637,16 +657,26 @@ public class PlayerActor : HumanoidActor
         
         inputs.actions["Atk_Off"].canceled += (context) =>
         {
-            OnAttackRelease();
+            OnAttackRelease(true);
         };
         
         inputs.actions["Atk_Thrust"].performed += (context) =>
         {
             if (!context.performed) return;
             if (this.moveset == null) return;
+            animator.SetBool("Input-ThrustHeld", true);
+            animator.SetBool("Input-ThrustDown", true);
             if (context.interaction is TapInteraction)
             {
-                InputAttack atk = (!this.IsTwoHanding()) ? this.moveset.quickThrust1h : this.moveset.quickThrust2h;
+                InputAttack atk = null; 
+                if (IsParrySuccessful())
+                {
+                    atk = this.moveset.riposte;
+                }
+                else
+                {
+                    atk = (inputs.actions["Block"].ReadValue<float>() <= 0f) ? this.moveset.quickThrust1h : this.moveset.quickThrust2h;
+                }
                 if (atk != null)
                 {
                     OnInputAttack(atk);
@@ -654,7 +684,7 @@ public class PlayerActor : HumanoidActor
             }
             else if (context.interaction is HoldInteraction)
             {
-                InputAttack atk = (!this.IsTwoHanding()) ? this.moveset.strongThrust1h : this.moveset.strongThrust2h;
+                InputAttack atk = (inputs.actions["Block"].ReadValue<float>() <= 0f) ? this.moveset.strongThrust1h : this.moveset.strongThrust2h;
                 if (atk != null)
                 {
                     OnInputAttack(atk);
@@ -664,77 +694,8 @@ public class PlayerActor : HumanoidActor
 
         inputs.actions["Atk_Thrust"].canceled += (context) =>
         {
-            OnAttackRelease();
+            OnAttackRelease(false);
         };
-
-        /*
-        inputs.actions["Atk_ChargeOff"].performed += (context) =>
-        {
-            if (this.moveset == null) return;
-            InputAttack atk = null;
-            if (this.inventory.IsOffDrawn())
-            {
-                atk = this.moveset.chargeOff;
-
-            }
-            else if (this.inventory.IsMainDrawn() && (this.IsTwoHanding() || this.inventory.GetMainWeapon().TwoHanded))
-            {
-                atk = this.moveset.charge2h;
-            }
-            if (atk != null)
-            {
-                OnInputAttack(atk);
-            }
-        };
-
-        inputs.actions["Atk_ChargeOff"].canceled += (context) =>
-        {
-            Debug.Log("off charge release");
-            OnAttackRelease();
-        };
-
-        /*
-        inputs.actions["Atk_ThrustOff"].performed += (context) =>
-        {
-            if (!context.performed) return;
-            if (context.interaction is TapInteraction)
-            {
-                InputAttack atk = this.moveset.thrustOff;
-                if (atk != null)
-                {
-                    OnInputAttack(atk);
-                }
-            }
-            else if (context.interaction is HoldInteraction)
-            {
-                InputAttack atk = this.moveset.thrustOffHeavy;
-                if (atk != null)
-                {
-                    OnInputAttack(atk);
-                }
-            }
-        };
-
-        inputs.actions["Atk_SlashOff"].performed += (context) =>
-        {
-            if (context.interaction is TapInteraction)
-            {
-                InputAttack atk = this.moveset.slashOff;
-                if (atk != null)
-                {
-                    OnInputAttack(atk);
-                }
-            }
-            else if (context.interaction is HoldInteraction)
-            {
-                InputAttack atk = this.moveset.slashOffHeavy;
-                if (atk != null)
-                {
-                    OnInputAttack(atk);
-                }
-            }
-        };
-        */
 
         inputs.actions["ChangeTarget"].performed += (context) =>
         {
@@ -760,8 +721,15 @@ public class PlayerActor : HumanoidActor
 
         inputs.actions["Dodge"].performed += (context) =>
         {
-            dodge = true;
-            Dodge();
+            if (!IsBlocking())
+            {
+                dodge = true;
+                Dodge();
+            }
+            else
+            {
+                StartParry();
+            }
         };
 
         inputs.actions["Block"].started += (context) =>
@@ -1141,7 +1109,11 @@ public class PlayerActor : HumanoidActor
 
     public bool IsTwoHanding()
     {
-        return inventory.TwoHanding;
+        if (inventory.IsMainEquipped())
+        {
+            return inventory.GetMainWeapon().TwoHandOnly();
+        }
+        return false;
     }
 
     public void AnimSetTwoHand(bool set2h)
@@ -1491,6 +1463,42 @@ public class PlayerActor : HumanoidActor
     {
         base.SetCombatTarget(target);
         GetStance();
+    }
+
+    public void ParrySuccess()
+    {
+        animator.SetBool("Parry-Success", true);
+        AudioSource audio = this.GetComponent<AudioSource>();
+        audio.clip = FXController.clipDictionary["parry_success"];
+        audio.Play();
+        FXController.SlowMo(0.1f, 5f);
+    }
+
+    public bool IsParrySuccessful()
+    {
+        return animator.GetBool("Parry-Success");
+    }
+
+    void StartParry()
+    {
+        animator.SetBool("Input-Parry", true);
+    }
+    public void Parry()
+    {
+        parryTime = ParryWindow;
+        AudioSource audio = this.GetComponent<AudioSource>();
+        audio.clip = FXController.clipDictionary["parry_start"];
+        audio.Play();
+    }
+
+    public void EndSlowMo()
+    {
+        FXController.CancelSlowMo();
+    }
+
+    public override bool IsParrying()
+    {
+        return base.IsParrying() && parryTime > 0f;
     }
     private void OnDrawGizmos()
     {

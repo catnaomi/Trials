@@ -69,6 +69,9 @@ public class ResetInputTriggers : StateMachineBehaviour
         animator.ResetTrigger("Input-AttackUp");
         animator.ResetTrigger("Input-AttackDown");
 
+        animator.ResetTrigger("Input-Parry");
+        animator.SetBool("Parry-Success", false);
+
         if (IncludingDodge)
         {
             animator.ResetTrigger("Input-DodgeDown");
@@ -91,5 +94,10 @@ public class ResetInputTriggers : StateMachineBehaviour
             animator.SetFloat("InputHeldTime", 0f);
         }
         animator.SetBool("Input-Player", false);
+
+        animator.SetBool("Input-AttackBlockOkay", false);
+        animator.SetBool("Input-AttackFallingOkay", false);
+        animator.SetBool("Input-AttackSprintOkay", false);
+        animator.SetBool("Input-AttackParryOkay", false);
     }
 }

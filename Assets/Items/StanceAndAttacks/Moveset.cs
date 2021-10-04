@@ -24,6 +24,9 @@ public class Moveset : ScriptableObject
     public InputAttack dash;
     public InputAttack plunge;
     public InputAttack sneak;
+    [Header("Parry Attacks")]
+    public InputAttack riposte;
+    public InputAttack disarm;
 
     public static Dictionary<string, Moveset> movesetTable;
     public static bool movesetsLoaded = false;

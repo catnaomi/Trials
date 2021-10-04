@@ -50,6 +50,7 @@ public class HumanoidActor : Actor
     public UnityEvent OnDodge;
     public UnityEvent OnInjure;
     public UnityEvent OnHitboxActive;
+    public UnityEvent OnParry;
     //public StanceHandler stance;
 
     [ReadOnly] public IKHandler aimIKHandler;
@@ -228,6 +229,7 @@ public class HumanoidActor : Actor
         //animator.SetBool("Grounded", GetGrounded());
         //animator.SetBool("BlendMovement", animator.GetCurrentAnimatorStateInfo(0).IsTag("BLEND_MOVE"));
 
+        animator.SetBool("InImpactState", IsInImpactState());
         animator.SetBool("Armed", inventory.IsWeaponDrawn());
 
         inventory.UpdateWeapon();
@@ -528,7 +530,7 @@ public class HumanoidActor : Actor
         {
             // take no damage / stamina damage, and stagger human opponents
             // todo: Reimplement parrying
-            //Parry(damageKnockback);
+            ParryAtk(damageKnockback);
         }
         else if (this.IsBlocking() && !damageKnockback.unblockable) // is actor blocking. cannot die through block.
         {
@@ -572,7 +574,7 @@ public class HumanoidActor : Actor
             {
                 ProcessStagger(damageKnockback.staggers.onArmorHit, damageKnockback);
             }
-            else if (IsCritVulnerable())
+            else if (IsCritVulnerable() || damageKnockback.forceCritical)
             {
                 ProcessStagger(damageKnockback.staggers.onCritical, damageKnockback);
             }
@@ -683,6 +685,16 @@ public class HumanoidActor : Actor
         
         
 
+        return true;
+    }
+
+    public bool ParryAtk(DamageKnockback damageKnockback)
+    {
+        OnParry.Invoke();
+        if (damageKnockback.source != null && damageKnockback.source.TryGetComponent<HumanoidActor>(out HumanoidActor humanoid))
+        {
+            humanoid.BlockRecoil();
+        }
         return true;
     }
 
@@ -1508,30 +1520,13 @@ public class HumanoidActor : Actor
         return false;
     }
 
-    public bool IsParrying()
+    public virtual bool IsParrying()
     {
-        /*string MOVABLE_TAG = "MOVABLE";
+        string TAG = "PARRY";
         bool ALLOW_IN_TRANSITION = true;
 
-        return animator.GetCurrentAnimatorStateInfo(0).IsTag(MOVABLE_TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(0));*/
-
-
-        string[] MOVEABLE_STATES = new string[]
-        {
-            "PARRY",
-            "PARRY_MOVABLE",
-        };
-
-        foreach (string state in MOVEABLE_STATES)
-        {
-            if (animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(state))
-            {
-                return true;
-            }
-        }
-        return false;
-
+        return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
+                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
     }
 
     public bool IsCritVulnerable()
@@ -1551,7 +1546,12 @@ public class HumanoidActor : Actor
         return false;
     }
 
+    public bool IsInImpactState()
+    {
+        string TAG = "EMPTY";
 
+        return !(animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Impacts")).IsTag(TAG));
+    }
     public bool IsHitboxActive()
     {
         return isHitboxActive;

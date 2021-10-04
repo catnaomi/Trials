@@ -18,7 +18,7 @@ public class InputAttack : InputAction
     public bool isBlockOK; // can attack be initiated from block
     public bool isSprintOK; // can attack be initiated from sprint
     public bool isFallingOK; // can attack be initiated while falling
-    public bool isTwoHanded;
+    public bool isParryOK; // is attack a riposte or disarm?
     public int GetAttackID()
     {
         return attackId;
@@ -37,5 +37,10 @@ public class InputAttack : InputAction
     public bool IsFallingOkay()
     {
         return isFallingOK;
+    }
+
+    public bool IsParryOkay()
+    {
+        return isParryOK;
     }
 }

@@ -58,6 +58,9 @@ public class FXController : MonoBehaviour
 
             { "bow_draw",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bow_draw") },
             { "bow_fire", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bow_fire") },
+
+            { "parry_start", Resources.Load<AudioClip>("Sounds/Effects/sword-parry01") },
+            { "parry_success", Resources.Load<AudioClip>("Sounds/Effects/sword-parry02") },
         };
 
         fixedDeltaTime = Time.fixedDeltaTime;
@@ -119,9 +122,16 @@ public class FXController : MonoBehaviour
     {
         slowMotionLength = duration;
         slowMotionAmount = amount;
-        Debug.Log(string.Format("Attempting to slow time by {1} for {0} second(s)", hitpauseLength, slowMotionAmount));
+        Debug.Log(string.Format("Attempting to slow time by {1} for {0} second(s)", slowMotionLength, slowMotionAmount));
         var coroutine = main.SlowMoCoroutine();
         main.StartCoroutine(coroutine);
+    }
+
+    public static void CancelSlowMo()
+    {
+        Debug.Log("cancelling slow motion");
+        main.StopCoroutine("SlowMoCoroutine");
+        SlowMoEnd();
     }
 
     IEnumerator SlowMoCoroutine()

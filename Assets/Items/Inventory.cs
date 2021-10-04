@@ -641,7 +641,7 @@ public class Inventory : MonoBehaviour, IInventory
                     }
                     else
                     {
-                        UpdateTwoHand(!TwoHanding);
+                        //UpdateTwoHand(!TwoHanding);
                     }
                 }
                 else if (isOff)

@@ -110,6 +110,8 @@ public class PlayerTargetManager : MonoBehaviour
             if (targets.Count > 0)
             {
                 targets.Sort((a,b) => {
+                    return (int)Mathf.Sign(Vector3.Distance(player.transform.position, b.transform.position) - Vector3.Distance(player.transform.position, a.transform.position));
+                    /*
                     Vector3 aDist = Camera.main.WorldToViewportPoint(a.transform.position);
                     Vector3 bDist = Camera.main.WorldToViewportPoint(b.transform.position);
                     return Math.Sign(bDist.magnitude - aDist.magnitude);
@@ -128,7 +130,7 @@ public class PlayerTargetManager : MonoBehaviour
                     else
                     {
                         
-                    }
+                    }*/
                 });
             }
             yield return new WaitForSecondsRealtime(2f);
