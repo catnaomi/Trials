@@ -27,7 +27,7 @@ public class DamageKnockback
 
     public bool breaksArmor;
     public bool unblockable;
-
+    public bool disarm;
     public StaggerData staggers;
     
     [Serializable]
@@ -82,6 +82,7 @@ public class DamageKnockback
         this.types = damageKnockback.types;
         this.criticalMultiplier = damageKnockback.criticalMultiplier;
         this.forceCritical = damageKnockback.forceCritical;
+        this.disarm = damageKnockback.disarm;
     }
 
     public DamageKnockback()

@@ -48,6 +48,13 @@ public class Interactable : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (player != null)
+        {
+            player.RemoveInteractable(this);
+        }
+    }
     public void SetIconVisiblity(bool visible)
     {
         if (interactIcon != null)

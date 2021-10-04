@@ -37,9 +37,11 @@ public class InventoryUI2 : MonoBehaviour
     public QuickSelectItem quickSlot2;
     public QuickSheatheIndicator sheathSlot;
 
+    public GameObject selectPopup;
+    Item selectedItem;
     [ReadOnly] public EquippableWeapon quickSlotItem;
 
-    public string filterType = "";
+    public Item.ItemType[] filterType;
     void OnEnable()
     {
         invUI = this;
@@ -96,12 +98,14 @@ public class InventoryUI2 : MonoBehaviour
         items.Clear();
 
         int count = 0;
-        List<string> filterList = new List<string>();
-        filterList.AddRange(filterType.Split(','));
+        List<Item.ItemType> filterList =  new List<Item.ItemType>();
+        filterList.AddRange(filterType);
+        //sfilterList.AddRange(filterType.Split(','));
+
         for (int i = 0; i < contents.Count; i++)
         {
             
-            if (filterType != "" && !filterList.Contains(contents[i].GetItemType())) continue;
+            if (filterList.Count > 0 && !filterList.Contains(contents[i].GetItemType())) continue;
             GameObject displayObj = GameObject.Instantiate(itemTemplate, viewport.transform);
             displayObj.SetActive(true);
             InventoryItemDisplay displayItem = displayObj.GetComponent<InventoryItemDisplay>();
@@ -113,10 +117,15 @@ public class InventoryUI2 : MonoBehaviour
 
          
             displayItem.SetItem(contents[i]);
+            
+            
             if (usingQuickslots)
             {
-                displayItem.GetComponent<Button>().onClick.AddListener(displayItem.StartEquip);
+                //displayItem.GetComponent<Button>().onClick.AddListener(displayItem.StartEquip);
+                displayItem.GetComponent<Button>().onClick.AddListener(() => { ItemSelect(displayItem); });
             }
+            
+            
             items.Add(displayItem);
             count++;
         }
@@ -209,6 +218,27 @@ public class InventoryUI2 : MonoBehaviour
         }
     }
 
+    public void ItemSelect(InventoryItemDisplay inventoryItemDisplay)
+    {
+        selectedItem = inventoryItemDisplay.item;
+        selectPopup.SetActive(true);
+        EventSystem.current.SetSelectedGameObject(selectPopup.GetComponentInChildren<Button>().gameObject);
+    }
+
+    public void SelectEquip()
+    {
+        selectPopup.SetActive(false);
+        StartQuickSlotEquip(selectedItem);
+    }
+
+    public void SelectDrop()
+    {
+        selectPopup.SetActive(false);
+        inventory.Remove(selectedItem);
+        LooseItem li = LooseItem.CreateLooseItem(selectedItem);
+        li.gameObject.transform.position = source.transform.position + Vector3.up + source.transform.forward * 2f;
+        EventSystem.current.SetSelectedGameObject(items[0].gameObject);
+    }
     public InventoryItemDisplay FindItemDisplay(Item targetItem)
     {
         foreach (InventoryItemDisplay item in items)

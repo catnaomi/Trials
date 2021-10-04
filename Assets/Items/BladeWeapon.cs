@@ -355,6 +355,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         Bash,               // 7
         SlashingCritical,
         ThrustingCritical,
+        Disarming,
     }
 
     public static bool AttackIsSlashing(AttackType type)
@@ -560,6 +561,26 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                     types = GetModifiedDamageTypes(false),
                     criticalMultiplier = 1.7f,
                     forceCritical = true,
+                };
+            case AttackType.Disarming:
+                return new DamageKnockback()
+                {
+                    healthDamage = 0f,
+                    heartsDamage = 0f,
+                    staminaDamage = 0f,
+                    kbForce = heavyKB.magnitude * Vector3.up * 10f,
+                    staggers = new DamageKnockback.StaggerData()
+                    {
+                        onHit = DamageKnockback.StaggerType.Stumble,
+                        onArmorHit = DamageKnockback.StaggerType.Stumble,
+                        onCritical = DamageKnockback.StaggerType.Stumble,
+                        onInjure = DamageKnockback.StaggerType.Stumble,
+                        onKill = DamageKnockback.StaggerType.Stumble,
+                        onHelpless = DamageKnockback.StaggerType.Stumble,
+                    },
+                    breaksArmor = true,
+                    source = GetHumanoidHolder().gameObject,
+                    disarm = true
                 };
             default:
                 return new DamageKnockback();

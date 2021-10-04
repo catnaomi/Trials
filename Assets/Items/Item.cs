@@ -19,8 +19,11 @@ public class Item : ScriptableObject
     {
         Misc,
         Weapons,
-        Components,
-        Consumables
+        Consumables,
+        Blades,
+        Hilts,
+        Insets,
+        Accessories,
     }
     public virtual string GetName()
     {
@@ -37,9 +40,9 @@ public class Item : ScriptableObject
         return (HumanoidActor)holder;
     }
 
-    public virtual string GetItemType()
+    public virtual ItemType GetItemType()
     {
-        return this.GetType().ToString();
+        return ItemType.Misc;
     }
 
 }

@@ -30,4 +30,9 @@ public class Hilt : InsetBearer
         }
         return String.Format("{0}:\n-Weight:{1}\n-Length:{2}\n-Insets (slots: {3}):{4}", itemName, weight, length, slots, insetTxt);
     }
+
+    public override ItemType GetItemType()
+    {
+        return ItemType.Hilts;
+    }
 }

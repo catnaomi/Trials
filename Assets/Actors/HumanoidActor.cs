@@ -590,6 +590,11 @@ public class HumanoidActor : Actor
             {
                 animator.SetBool("Helpless", true);
             }
+
+            if (damageKnockback.disarm)
+            {
+                Disarm(damageKnockback);
+            }
         }
     }
 
@@ -641,6 +646,18 @@ public class HumanoidActor : Actor
         }
     }
 
+    public void Disarm(DamageKnockback damageKnockback)
+    {
+        if (this.inventory.IsMainDrawn())
+        {
+            EquippableWeapon weapon = inventory.GetMainWeapon();
+            inventory.UnequipMainWeapon();
+            inventory.RemoveItem(weapon);
+            LooseItem li = LooseItem.CreateLooseItem(weapon);
+            li.gameObject.transform.position = this.transform.position + Vector3.up;
+            li.GetComponent<Rigidbody>().AddForce(this.transform.up * 2.5f, ForceMode.Impulse);
+        }
+    }
     public void AnimatorImpact(DamageKnockback.StaggerType type)
     {
         animator.SetInteger("ImpactType", (int)type);

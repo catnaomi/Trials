@@ -45,4 +45,9 @@ public class Blade : InsetBearer
     {
         return piercingModifier;
     }
+
+    public override ItemType GetItemType()
+    {
+        return ItemType.Blades;
+    }
 }

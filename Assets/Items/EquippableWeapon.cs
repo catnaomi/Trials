@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.Events;
 
-public class EquippableWeapon : Item
+public class EquippableWeapon : Item, IGeneratesModel
 {   
     [ReadOnly] public bool isEquipped;
 
@@ -78,6 +78,11 @@ public class EquippableWeapon : Item
         model = null;
     }
 
+    public virtual GameObject GetModel()
+    {
+        return model;
+    }
+
     public virtual DamageResistance[] GetBlockResistance()
     {
         return null;
@@ -106,5 +111,10 @@ public class EquippableWeapon : Item
     public bool TwoHandOnly()
     {
         return TwoHanded && !OneHanded;
+    }
+
+    public override ItemType GetItemType()
+    {
+        return ItemType.Weapons;
     }
 }

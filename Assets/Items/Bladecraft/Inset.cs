@@ -19,4 +19,9 @@ public class Inset : WeaponComponent
         i.itemName = "_HollowInset";
         return i;
     }
+
+    public override ItemType GetItemType()
+    {
+        return ItemType.Insets;
+    }
 }

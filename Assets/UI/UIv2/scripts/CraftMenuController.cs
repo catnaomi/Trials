@@ -73,7 +73,7 @@ public class CraftMenuController : MonoBehaviour
         {
             state = CraftState.Assembly_Select;
             currentComponent = null;
-            inventoryMenu.filterType = "BladeWeapon,CraftableWeapon";
+            inventoryMenu.filterType = new Item.ItemType[] { Item.ItemType.Weapons };// "BladeWeapon,CraftableWeapon";
             inventoryMenu.Populate(true);
         }
         else if (hiltToggle.isOn)
@@ -82,7 +82,7 @@ public class CraftMenuController : MonoBehaviour
             {
                 state = CraftState.Assembly_Hilt;
                 currentComponent = null;
-                inventoryMenu.filterType = "Hilt,Inset,ElementalGem";
+                inventoryMenu.filterType = new Item.ItemType[] { Item.ItemType.Hilts, Item.ItemType.Insets }; //"Hilt,Inset,ElementalGem";
                 inventoryMenu.Populate(true);
             }
         }
@@ -92,7 +92,7 @@ public class CraftMenuController : MonoBehaviour
             {
                 state = CraftState.Assembly_Blade;
                 currentComponent = null;
-                inventoryMenu.filterType = "Blade,Inset,ElementalGem";
+                inventoryMenu.filterType = new Item.ItemType[] { Item.ItemType.Blades, Item.ItemType.Insets }; //"Blade,Inset,ElementalGem";
                 inventoryMenu.Populate(true);
             }
         }
@@ -102,7 +102,7 @@ public class CraftMenuController : MonoBehaviour
             {
                 state = CraftState.Assembly_Adornment;
                 currentComponent = null;
-                inventoryMenu.filterType = "Adornment";
+                inventoryMenu.filterType = new Item.ItemType[] { Item.ItemType.Accessories }; //"Adornment";
                 inventoryMenu.Populate(true);
             }
         }

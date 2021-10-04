@@ -1342,6 +1342,7 @@ public class PlayerActor : HumanoidActor
 
         foreach (Interactable interactable in interactables)
         {
+            if (interactable == null) continue;
             float dist = Vector3.Distance(this.transform.position, interactable.transform.position);
             if (dist < leadDist)
             {

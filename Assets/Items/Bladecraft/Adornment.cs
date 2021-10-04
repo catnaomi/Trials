@@ -14,4 +14,9 @@ public class Adornment : WeaponComponent
     {
         return String.Format("{0}:-Weight:{1}", itemName, weight);
     }
+
+    public override ItemType GetItemType()
+    {
+        return ItemType.Accessories;
+    }
 }
