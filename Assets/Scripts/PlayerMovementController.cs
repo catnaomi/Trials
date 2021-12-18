@@ -1,4 +1,5 @@
 using Animancer;
+using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,17 +16,27 @@ public class PlayerMovementController : MonoBehaviour
     [SerializeField]
     private Vector2 look;
 
-    public CameraState camState = CameraState.Free;
-    [Header("Movement Settings")]
+    [Header("Camera")]
+    public CameraState camState = CameraState.None;
+    CameraState prevCamState;
+    [SerializeField]
+    public VirtualCameras vcam;
+
+    [Header("Movement")]
     public float walkSpeedMax = 5f;
     public AnimationCurve walkSpeedCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     public float sprintSpeed = 10f;
     public float sprintTurnSpeed = 90f;
+    public float walkAccel = 25f;
+    public float walkTurnSpeed = 1080f;
+    public float hardLandAccel = 2.5f;
+    public float softLandAccel = 2.5f;
     public float skidAngle = 160f;
     public float gravity = 9.81f;
     public float terminalVel = 70f;
     public float fallBufferTime = 0.25f;
     public float hardLandingTime = 2f;
+    public float softLandingTime = 1f;
     public float rollSpeed = 5f;
     public float jumpVel = 10f;
     public float yVel;
@@ -34,43 +45,64 @@ public class PlayerMovementController : MonoBehaviour
     public float airTime = 0f;
     float lastAirTime;
     float landTime = 0f;
+    float speed;
     bool dashed;
     bool jump;
+   
+    float walkAccelReal;
     public bool sprinting;
     public bool shouldDodge;
+    [Header("Climbing Settings")]
+    bool ledgeSnap;
+    bool ledgeHanging;
+    public ClimbDetector currentClimb;
+    public Collider hangCollider;
     [Header("Animancer")]
     public AnimancerComponent animancer;
 
     public MixerTransition2DAsset moveAnim;
+    public AnimationClip idleAnim;
     public ClipTransition dashAnim;
     public ClipTransition sprintAnim;
     public ClipTransition skidAnim;
     public ClipTransition fallAnim;
-    public ClipTransition landAnim;
+    public AnimationClip landSoftAnim;
+    public AnimationClip landHardAnim;
     public ClipTransition rollAnim;
     public ClipTransition standJumpAnim;
     public ClipTransition runJumpAnim;
-
+    [Space(5)]
+    public MixerTransition2D ledgeHang;
+    public ClipTransition ledgeClimb;
     PlayerMovementController movementController;
     AnimState state;
 
     public float angle1;
     struct AnimState
     {
-        public DirectionalMixerState move;
+        public MixerState move;
         public AnimancerState dash;
         public AnimancerState sprint;
         public AnimancerState skid;
         public AnimancerState fall;
         public AnimancerState roll;
         public AnimancerState jump;
+        public DirectionalMixerState climb;
+    }
+    [Serializable]
+    public struct VirtualCameras
+    {
+        public CinemachineVirtualCameraBase free;
+        public CinemachineVirtualCameraBase target;
+        public CinemachineVirtualCameraBase aim;
+        public CinemachineVirtualCameraBase climb;
     }
     // Start is called before the first frame update
     void Start()
     {
         cc = this.GetComponent<CharacterController>();
         movementController = this.GetComponent<PlayerMovementController>();
-        state.move = (DirectionalMixerState)animancer.States.GetOrCreate(moveAnim);
+        state.move = (MixerState)animancer.States.GetOrCreate(moveAnim);
         animancer.Play(state.move);
 
         this.GetComponent<PlayerInput>().actions["Sprint"].started += (context) =>
@@ -84,10 +116,11 @@ public class PlayerMovementController : MonoBehaviour
         };
 
         skidAnim.Events.OnEnd += () => { state.sprint = animancer.Play(sprintAnim); };
-        landAnim.Events.OnEnd += () => { animancer.Play(state.move, 1f); };
+        //landAnim.Events.OnEnd += () => { animancer.Play(state.move, 1f); };
         rollAnim.Events.OnEnd += () => { animancer.Play(state.move); };
         standJumpAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
         runJumpAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
+        walkAccelReal = walkAccel;
     }
 
 
@@ -103,7 +136,6 @@ public class PlayerMovementController : MonoBehaviour
         Vector3 stickDirection = Vector3.zero;
         Vector3 lookDirection = this.transform.forward;
         Vector3 moveDirection = Vector3.zero;
-        float speed = 0f;
 
         if (camState == CameraState.Free)
         {
@@ -113,10 +145,10 @@ public class PlayerMovementController : MonoBehaviour
 
         if (animancer.States.Current == state.move)
         {
-            speed = walkSpeedCurve.Evaluate(move.magnitude) * walkSpeedMax;
+            speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * walkSpeedMax, walkAccelReal * Time.deltaTime);
             if (stickDirection.sqrMagnitude > 0)
             {
-                lookDirection = stickDirection.normalized;
+                lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * walkTurnSpeed * Time.deltaTime, 1f);
             }
             moveDirection = stickDirection;
             if (!GetGrounded() && lastAirTime > fallBufferTime)
@@ -211,18 +243,49 @@ public class PlayerMovementController : MonoBehaviour
         }
         else if (animancer.States.Current == state.fall)
         {
+            //speed = 0f;
             airTime += Time.deltaTime;
             if (GetGrounded() && yVel <= 0)
             {
                 if (lastAirTime >= hardLandingTime)
                 {
-                    animancer.Play(landAnim);
+
+                    AnimancerState land = state.move.ChildStates[0];
+                    land.Clip = landHardAnim;
+                    walkAccelReal = hardLandAccel;
+                    land.Events.OnEnd += () =>
+                    {
+                        land.Clip = idleAnim;
+                        walkAccelReal = walkAccel;
+                    };
+                    speed = 0f;
+                    animancer.Play(state.move, 0.25f);
+                    sprinting = false;
+                }
+                else if (lastAirTime >= softLandingTime)
+                {
+                    AnimancerState land = state.move.ChildStates[0];
+                    land.Clip = landSoftAnim;
+                    walkAccelReal = softLandAccel;
+                    land.Events.OnEnd += () =>
+                    {
+                        land.Clip = idleAnim;
+                        walkAccelReal = walkAccel;
+                    };
+                    speed = 0f;
+                    animancer.Play(state.move, 0.25f);
                 }
                 else
                 {
-                    animancer.Play(state.move);
+                    animancer.Play(state.move, 0.25f);
                 }
                 
+            }
+            if (ledgeSnap)
+            {
+                state.climb = (DirectionalMixerState)animancer.Play(ledgeHang);
+                SnapToLedge();
+                StartCoroutine(DelayedSnapToLedge());
             }
 
         }
@@ -235,8 +298,17 @@ public class PlayerMovementController : MonoBehaviour
         else if (animancer.States.Current == state.jump)
         {
             jump = false;
+            //speed = 0f;
             //speed = sprintSpeed;
             moveDirection = this.transform.forward;
+        }
+        if (animancer.States.Current == state.climb)
+        {
+
+            if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
+            {
+                state.climb.ParameterX = move.x;
+            }
         }
 
 
@@ -272,35 +344,146 @@ public class PlayerMovementController : MonoBehaviour
 
         this.transform.rotation = Quaternion.LookRotation(lookDirection);
         Vector3 downwardsVelocity = this.transform.up * yVel;
-        state.move.Parameter = movementController.GetMovementVector();
+        if (state.move is CartesianMixerState cartesian)
+        {
+            cartesian.Parameter = movementController.GetMovementVector();
+        }
+        else if (state.move is DirectionalMixerState directional)
+        {
+            directional.Parameter = movementController.GetMovementVector();
+        }
         Vector3 finalMov = (moveDirection * speed + downwardsVelocity);
 
-        if (!GetGrounded() || yVel > 0 || animancer.States.Current == state.jump)
+        if (cc.enabled)
         {
-            /*
-            if (Physics.SphereCast(this.transform.position, cc.radius, Vector3.down, out RaycastHit sphereHit, 1f, LayerMask.GetMask("Terrain")))
+            if (!GetGrounded() || yVel > 0 || animancer.States.Current == state.jump)
             {
-                Vector3 dir = -(this.transform.position - sphereHit.point);
-                dir.Scale(new Vector3(1f, 0f, 1f));
-                cc.Move(dir.normalized * 10f);
-                Debug.Log("slide");
-            }*/
-            cc.Move((xzVel + downwardsVelocity) * Time.deltaTime);
-            Debug.Log("fall!!!");
-        }
-        else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain")) && yVel <= 0)
-        {
-            Vector3 temp = Vector3.Cross(hit.normal, finalMov);
-            cc.Move((Vector3.Cross(temp, hit.normal) + gravity * Vector3.down) * Time.deltaTime);
-        }
-        else
-        {
-            cc.Move(finalMov * Time.deltaTime);
+                /*
+                if (Physics.SphereCast(this.transform.position, cc.radius, Vector3.down, out RaycastHit sphereHit, 1f, LayerMask.GetMask("Terrain")))
+                {
+                    Vector3 dir = -(this.transform.position - sphereHit.point);
+                    dir.Scale(new Vector3(1f, 0f, 1f));
+                    cc.Move(dir.normalized * 10f);
+                    Debug.Log("slide");
+                }*/
+                cc.Move((xzVel + downwardsVelocity) * Time.deltaTime);
+                Debug.Log("fall!!!");
+            }
+            else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain")) && yVel <= 0)
+            {
+                Vector3 temp = Vector3.Cross(hit.normal, finalMov);
+                cc.Move((Vector3.Cross(temp, hit.normal) + gravity * Vector3.down) * Time.deltaTime);
+            }
+            else
+            {
+                cc.Move(finalMov * Time.deltaTime);
+            }
         }
         if (animancer.States.Current == state.move || animancer.States.Current == state.sprint || animancer.States.Current == state.dash)
         {
             xzVel = finalMov;
             xzVel.Scale(new Vector3(1f, 0f, 1f));
+        }
+
+        HandleCinemachine();
+    }
+
+
+    private void LateUpdate()
+    {
+
+    }
+    public void SetLedge(Ledge ledge)
+    {
+        ledgeSnap = true;
+        currentClimb = ledge;
+    }
+
+    public void UnsnapLedge(ClimbDetector ledge)
+    {
+        ledgeSnap = false;
+    }
+
+    public void SnapToCurrentLedge()
+    {
+        SnapToLedge();
+        //StartCoroutine(DelayedSnapToLedge());
+    }
+
+    void SnapToLedge()
+    {
+        if (ledgeSnap == true && currentClimb != null)
+        {
+            if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
+            {
+                this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
+                int sign = 0;
+                if (Mathf.Abs(move.x) > 0.1f) sign = (int)Mathf.Sign(move.x);
+                this.transform.position = ledge.GetSnapPointDot(cc.radius * 2f, this.transform.position, this, -sign);
+                this.GetComponent<Collider>().enabled = false;
+                ledgeHanging = true;
+                return;
+            }
+            else
+            {
+
+
+                this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
+
+                //Vector3 offset = currentClimb.collider.transform.position - this.hangCollider.bounds.center;
+                Vector3 offset = currentClimb.collider.transform.position - this.transform.position;
+
+                Vector3 verticalOffset = Vector3.up * offset.y;
+
+                Vector3 horizontalOffset = Vector3.Project(offset, currentClimb.collider.transform.forward);
+
+                this.GetComponent<Collider>().enabled = false;
+
+                transform.position = this.transform.position + (verticalOffset + horizontalOffset);
+
+                Debug.Log("movement! horiz" + horizontalOffset.magnitude);
+
+                ledgeHanging = true;
+            }
+
+        }
+    }
+
+    void HandleCinemachine()
+    {
+        if (animancer.States.Current == state.climb)
+        {
+            camState = CameraState.Climb;
+        }
+        else
+        {
+            camState = CameraState.Free;
+        }
+        if (camState == CameraState.Free)
+        {
+            if (prevCamState != CameraState.Free)
+            {
+                vcam.free.gameObject.SetActive(true);
+                vcam.climb.gameObject.SetActive(false);
+            }
+        }
+        else if (camState == CameraState.Climb)
+        {
+            if (prevCamState != CameraState.Climb)
+            {
+                vcam.free.gameObject.SetActive(false);
+                vcam.climb.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    IEnumerator DelayedSnapToLedge()
+    {
+        while (ledgeSnap == true)
+        {
+            //yield return new WaitForEndOfFrame();
+            SnapToLedge();
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
@@ -349,16 +532,19 @@ public class PlayerMovementController : MonoBehaviour
     {
         if (camState == CameraState.Free)
         {
-            return new Vector2(0f, move.magnitude);
+            return new Vector2(0f, speed / walkSpeedMax);
+            //return new Vector2(0f, move.magnitude);
         }
         return Vector2.zero;
     }
 
     public enum CameraState
     {
+        None,
         Free,
         Lock,
-        Aim
+        Aim,
+        Climb
     }
 
     public bool GetGrounded()
