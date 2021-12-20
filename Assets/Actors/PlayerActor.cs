@@ -274,10 +274,10 @@ public class PlayerActor : HumanoidActor
         {
             if (currentClimb != null && currentClimb is Ladder ladder)
             {
-                descendClamp = (ladder.canDescend) ? -1 : 0;
-                ascendClamp = (ladder.canAscend) ? 1 : 0;
+                //descendClamp = (ladder.canDescend) ? -1 : 0;
+                //ascendClamp = (ladder.canAscend) ? 1 : 0;
 
-                dismountLadder = ladder.SetCurrentHeight(this.transform.position);
+                //dismountLadder = ladder.SetCurrentHeight(this.transform.position);
             }
         }
 

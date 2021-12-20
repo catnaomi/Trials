@@ -15,7 +15,7 @@ public class PlayerMovementController : MonoBehaviour
     Vector2 moveSmoothed;
     [SerializeField]
     private Vector2 look;
-
+    float defaultRadius;
     [Header("Camera")]
     public CameraState camState = CameraState.None;
     CameraState prevCamState;
@@ -53,10 +53,24 @@ public class PlayerMovementController : MonoBehaviour
     public bool sprinting;
     public bool shouldDodge;
     [Header("Climbing Settings")]
+    public ClimbDetector currentClimb;
     bool ledgeSnap;
     bool ledgeHanging;
-    public ClimbDetector currentClimb;
+    
+    bool allowClimb = true;
     public Collider hangCollider;
+    public float climbSpeed = 1f; 
+    [Header("Swim Settings")]
+    public bool inWater;
+    public Collider swimCollider;
+    public float waterVerticalSpeed;
+    public float swimSpeed;
+    public float swimAccel;
+    public float wadingHeight;
+    float waterHeight;
+    public float wadingSpeed = 3f;
+    public bool wading;
+    public float wadingPercent;
     [Header("Animancer")]
     public AnimancerComponent animancer;
 
@@ -74,9 +88,19 @@ public class PlayerMovementController : MonoBehaviour
     [Space(5)]
     public MixerTransition2D ledgeHang;
     public ClipTransition ledgeClimb;
+    public ClipTransition ladderClimb;
+    public ClipTransition ladderClimbUp;
+    [Space(5)]
+    public LinearMixerTransition swimAnim;
+    public AnimationClip swimEnd;
+    public ClipTransition swimStart;
+
     PlayerMovementController movementController;
     AnimState state;
 
+
+    private System.Action _OnLandEnd;
+    private System.Action _OnFinishClimb;
     public float angle1;
     struct AnimState
     {
@@ -87,7 +111,8 @@ public class PlayerMovementController : MonoBehaviour
         public AnimancerState fall;
         public AnimancerState roll;
         public AnimancerState jump;
-        public DirectionalMixerState climb;
+        public AnimancerState climb;
+        public AnimancerState swim;
     }
     [Serializable]
     public struct VirtualCameras
@@ -101,6 +126,7 @@ public class PlayerMovementController : MonoBehaviour
     void Start()
     {
         cc = this.GetComponent<CharacterController>();
+        defaultRadius = cc.radius;
         movementController = this.GetComponent<PlayerMovementController>();
         state.move = (MixerState)animancer.States.GetOrCreate(moveAnim);
         animancer.Play(state.move);
@@ -120,7 +146,29 @@ public class PlayerMovementController : MonoBehaviour
         rollAnim.Events.OnEnd += () => { animancer.Play(state.move); };
         standJumpAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
         runJumpAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
+        swimStart.Events.OnEnd += () => {
+            state.swim = animancer.Play(swimAnim);
+        };
         walkAccelReal = walkAccel;
+
+        _OnLandEnd = () =>
+        {
+            state.move.ChildStates[0].Clip = idleAnim;
+            walkAccelReal = walkAccel;
+        };
+
+        _OnFinishClimb = () =>
+        {
+            cc.enabled = true;
+            airTime = 0f;
+            yVel = 0f;
+            xzVel = Vector3.zero;
+            animancer.Play(state.move, 0.25f);
+        };
+
+        ledgeClimb.Events.OnEnd = _OnFinishClimb;
+
+        ladderClimbUp.Events.OnEnd = _OnFinishClimb;
     }
 
 
@@ -136,7 +184,7 @@ public class PlayerMovementController : MonoBehaviour
         Vector3 stickDirection = Vector3.zero;
         Vector3 lookDirection = this.transform.forward;
         Vector3 moveDirection = Vector3.zero;
-
+        float grav = gravity;
         if (camState == CameraState.Free)
         {
 
@@ -145,7 +193,8 @@ public class PlayerMovementController : MonoBehaviour
 
         if (animancer.States.Current == state.move)
         {
-            speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * walkSpeedMax, walkAccelReal * Time.deltaTime);
+            float speedMax = (!wading) ? walkSpeedMax : Mathf.Lerp(walkSpeedMax, wadingSpeed, wadingPercent);
+            speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * speedMax, walkAccelReal * Time.deltaTime);
             if (stickDirection.sqrMagnitude > 0)
             {
                 lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * walkTurnSpeed * Time.deltaTime, 1f);
@@ -177,8 +226,10 @@ public class PlayerMovementController : MonoBehaviour
                 jump = false;
                 state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
             }
-
-            
+            if (CheckWater())
+            {
+                state.swim = animancer.Play(swimStart, 0.25f);
+            }
         }
         else if (animancer.States.Current == state.dash)
         {
@@ -240,6 +291,10 @@ public class PlayerMovementController : MonoBehaviour
             {
                 state.fall = animancer.Play(fallAnim);
             }
+            if (CheckWater())
+            {
+                state.swim = animancer.Play(swimAnim);
+            }
         }
         else if (animancer.States.Current == state.fall)
         {
@@ -253,11 +308,7 @@ public class PlayerMovementController : MonoBehaviour
                     AnimancerState land = state.move.ChildStates[0];
                     land.Clip = landHardAnim;
                     walkAccelReal = hardLandAccel;
-                    land.Events.OnEnd += () =>
-                    {
-                        land.Clip = idleAnim;
-                        walkAccelReal = walkAccel;
-                    };
+                    land.Events.OnEnd = _OnLandEnd;
                     speed = 0f;
                     animancer.Play(state.move, 0.25f);
                     sprinting = false;
@@ -267,11 +318,7 @@ public class PlayerMovementController : MonoBehaviour
                     AnimancerState land = state.move.ChildStates[0];
                     land.Clip = landSoftAnim;
                     walkAccelReal = softLandAccel;
-                    land.Events.OnEnd += () =>
-                    {
-                        land.Clip = idleAnim;
-                        walkAccelReal = walkAccel;
-                    };
+                    land.Events.OnEnd = _OnLandEnd;
                     speed = 0f;
                     animancer.Play(state.move, 0.25f);
                 }
@@ -283,11 +330,22 @@ public class PlayerMovementController : MonoBehaviour
             }
             if (ledgeSnap)
             {
-                state.climb = (DirectionalMixerState)animancer.Play(ledgeHang);
+                if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
+                {
+                    state.climb = (DirectionalMixerState)animancer.Play(ledgeHang);
+                    
+                }
+                else if (currentClimb.TryGetComponent<Ladder>(out Ladder ladder))
+                {
+                    state.climb = animancer.Play(ladderClimb);
+                }
                 SnapToLedge();
                 StartCoroutine(DelayedSnapToLedge());
             }
-
+            if (CheckWater())
+            {
+                state.swim = animancer.Play(swimAnim);
+            }
         }
         else if (animancer.States.Current == state.roll)
         {
@@ -302,17 +360,50 @@ public class PlayerMovementController : MonoBehaviour
             //speed = sprintSpeed;
             moveDirection = this.transform.forward;
         }
-        if (animancer.States.Current == state.climb)
+        else if (animancer.States.Current == state.climb)
         {
-
             if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
             {
-                state.climb.ParameterX = move.x;
+                ((DirectionalMixerState)state.climb).ParameterX = move.x;
+            }
+            else if (currentClimb.TryGetComponent<Ladder>(out Ladder ladder))
+            {
+                state.climb.Speed = move.y * climbSpeed;
+                if (ladder.snapPoint <= -0.9 && move.y > 0)
+                {
+                    SnapToLedge();
+                    this.transform.position = ladder.endpoint.transform.position;
+                    this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
+                    ledgeSnap = false;
+                    animancer.Play(ladderClimbUp);
+                    StartCoroutine("ClimbLockout");
+
+                }
             }
         }
+        else if (animancer.States.Current == state.swim)
+        {
+            if (CheckWater())
+            {
+                speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * swimSpeed, swimAccel * Time.deltaTime);
+                if (stickDirection.sqrMagnitude > 0)
+                {
+                    lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * walkTurnSpeed * Time.deltaTime, 1f);
+                }
+                moveDirection = stickDirection;
+            }
+            else
+            {
+                AnimancerState land = state.move.ChildStates[0];
+                land.Clip = swimEnd;
+                walkAccelReal = hardLandAccel;
+                land.Events.OnEnd = _OnLandEnd;
+                speed = 0f;
+                animancer.Play(state.move, 0.25f);
+            }
+            
 
-
-
+        }
 
         if (GetGrounded())
         {
@@ -322,7 +413,7 @@ public class PlayerMovementController : MonoBehaviour
             }
             else
             {
-                yVel -= gravity * Time.deltaTime;
+                yVel -= grav * Time.deltaTime;
             }
             airTime = 0f;
             landTime += Time.deltaTime;
@@ -333,7 +424,7 @@ public class PlayerMovementController : MonoBehaviour
         }
         else
         {
-            yVel -= gravity * Time.deltaTime;
+            yVel -= grav * Time.deltaTime;
             if (yVel < -terminalVel)
             {
                 yVel = -terminalVel;
@@ -352,11 +443,15 @@ public class PlayerMovementController : MonoBehaviour
         {
             directional.Parameter = movementController.GetMovementVector();
         }
+        if (state.swim is LinearMixerState linearSwim)
+        {
+            linearSwim.Parameter = speed / swimSpeed;
+        }
         Vector3 finalMov = (moveDirection * speed + downwardsVelocity);
 
         if (cc.enabled)
         {
-            if (!GetGrounded() || yVel > 0 || animancer.States.Current == state.jump)
+            if (animancer.States.Current != state.swim && (!GetGrounded() || yVel > 0 || animancer.States.Current == state.jump))
             {
                 /*
                 if (Physics.SphereCast(this.transform.position, cc.radius, Vector3.down, out RaycastHit sphereHit, 1f, LayerMask.GetMask("Terrain")))
@@ -369,7 +464,7 @@ public class PlayerMovementController : MonoBehaviour
                 cc.Move((xzVel + downwardsVelocity) * Time.deltaTime);
                 Debug.Log("fall!!!");
             }
-            else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain")) && yVel <= 0)
+            else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain")) && yVel <= 0 && animancer.States.Current != state.swim)
             {
                 Vector3 temp = Vector3.Cross(hit.normal, finalMov);
                 cc.Move((Vector3.Cross(temp, hit.normal) + gravity * Vector3.down) * Time.deltaTime);
@@ -393,12 +488,25 @@ public class PlayerMovementController : MonoBehaviour
     {
 
     }
+
+    #region CLIMBING
     public void SetLedge(Ledge ledge)
     {
-        ledgeSnap = true;
-        currentClimb = ledge;
+        if (allowClimb)
+        {
+            ledgeSnap = true;
+            currentClimb = ledge;
+        }
     }
 
+    public void SetLadder(Ladder ladder)
+    {
+        if (allowClimb)
+        {
+            ledgeSnap = true;
+            currentClimb = ladder;
+        }
+    }
     public void UnsnapLedge(ClimbDetector ledge)
     {
         ledgeSnap = false;
@@ -422,8 +530,19 @@ public class PlayerMovementController : MonoBehaviour
                 this.transform.position = ledge.GetSnapPointDot(cc.radius * 2f, this.transform.position, this, -sign);
                 this.GetComponent<Collider>().enabled = false;
                 ledgeHanging = true;
-                return;
             }
+            else if (currentClimb.TryGetComponent<Ladder>(out Ladder ladder))
+            {
+                //descendClamp = (ladder.canDescend) ? -1 : 0;
+                //ascendClamp = (ladder.canAscend) ? 1 : 0;
+                this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
+                int sign = 0;
+                if (Mathf.Abs(move.y) > 0.1f) sign = (int)Mathf.Sign(move.y);
+                this.transform.position = ladder.GetSnapPointDot(cc.height/2f, this.transform.position, this, -sign);
+                this.GetComponent<Collider>().enabled = false;
+                ledgeHanging = true;
+            }
+            /*
             else
             {
 
@@ -445,10 +564,28 @@ public class PlayerMovementController : MonoBehaviour
 
                 ledgeHanging = true;
             }
-
+            */
+        }
+    }
+    IEnumerator DelayedSnapToLedge()
+    {
+        while (ledgeSnap == true)
+        {
+            //yield return new WaitForEndOfFrame();
+            SnapToLedge();
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
+    IEnumerator ClimbLockout()
+    {
+        allowClimb = false;
+        yield return new WaitForSeconds(1f);
+        allowClimb = true;
+    }
+    #endregion
+
+    #region CAMERA
     void HandleCinemachine()
     {
         if (animancer.States.Current == state.climb)
@@ -476,25 +613,51 @@ public class PlayerMovementController : MonoBehaviour
             }
         }
     }
-
-    IEnumerator DelayedSnapToLedge()
+    public enum CameraState
     {
-        while (ledgeSnap == true)
-        {
-            //yield return new WaitForEndOfFrame();
-            SnapToLedge();
-            yield return new WaitForSeconds(0.1f);
-        }
+        None,
+        Free,
+        Lock,
+        Aim,
+        Climb
     }
 
+    #endregion
+
+    #region INPUT
     public void OnDodge(InputValue value)
     {
-        shouldDodge = true;
+        if (animancer.States.Current == state.climb)
+        {
+            ledgeSnap = false;
+            state.fall = animancer.Play(fallAnim, 1f);
+            cc.enabled = true;
+            airTime = 0f;
+            cc.Move(Vector3.down * 0.5f);
+            yVel = 0f;
+            xzVel = Vector3.zero;
+            StartCoroutine("ClimbLockout");
+        }
+        else
+        {
+            shouldDodge = true;
+        }
+        
     }
 
     public void OnJump(InputValue value)
     {
-        jump = true;
+        if (animancer.States.Current == state.climb)
+        {
+            ledgeSnap = false;
+            animancer.Play(ledgeClimb);
+            StartCoroutine("ClimbLockout");
+        }
+        else
+        {
+            jump = true;
+        }
+        
     }
 
     public void ApplyJump()
@@ -528,6 +691,9 @@ public class PlayerMovementController : MonoBehaviour
         Debug.Log("dash-end");
         animancer.Play(state.sprint);
     }
+
+
+
     public Vector2 GetMovementVector()
     {
         if (camState == CameraState.Free)
@@ -538,14 +704,41 @@ public class PlayerMovementController : MonoBehaviour
         return Vector2.zero;
     }
 
-    public enum CameraState
+    #endregion
+
+    #region SWIMMING
+
+    bool CheckWater()
     {
-        None,
-        Free,
-        Lock,
-        Aim,
-        Climb
+        wading = false;
+        inWater = Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit waterHit, cc.height + 0.1f, LayerMask.GetMask("Water"), QueryTriggerInteraction.Collide);
+        if (inWater)
+        {
+            swimCollider = waterHit.collider;
+            waterHeight = swimCollider.bounds.center.y + swimCollider.bounds.extents.y;
+            if (Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit wadingHit, 10f, LayerMask.GetMask("Terrain")))
+            {
+                wading = (waterHeight - wadingHit.point.y) <= wadingHeight;
+                if (wading)
+                {
+                    wadingPercent = Mathf.Clamp((waterHeight - wadingHit.point.y)/wadingHeight,0f,1f);
+                    
+                }
+                else
+                {
+                    wadingPercent = 0f;
+                }
+                Physics.IgnoreCollision(this.GetComponent<Collider>(), swimCollider, wading);
+            }
+            if (!wading)
+            {
+                return true;
+            }
+            
+        }
+        return false;
     }
+    #endregion
 
     public bool GetGrounded()
     {
