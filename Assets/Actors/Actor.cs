@@ -19,14 +19,6 @@ public class Actor : MonoBehaviour
     [HideInInspector]
     public AudioSource audioSource;
 
-    public InputAction CurrentAction;   
-
-    [HideInInspector]
-    public UnityEvent OnActionCommand;
-    [HideInInspector]
-    public UnityEvent OnActionStart;
-    [HideInInspector]
-    public UnityEvent OnActionEnd;
     public UnityEvent OnHurt;
     public UnityEvent OnHit;
     public UnityEvent OnDie;
@@ -117,25 +109,6 @@ public class Actor : MonoBehaviour
         // do nothing by default
     }
 
-    public virtual void TakeAction(InputAction action)
-    {
-        CurrentAction = action;
-        //animator.SetInteger("ActionType", action.animId);
-        animator.SetBool("HasNewAction", true);
-        //animator.SetTrigger("TakeAction");
-        OnActionCommand.Invoke();
-    }
-
-    public void ClearAction()
-    {
-        CurrentAction = null;
-        animator.SetBool("HasNewAction", false);
-    }
-
-    public InputAction GetLastAction()
-    {
-        return CurrentAction;
-    }
 
     public GameObject GetCombatTarget()
     {

@@ -1,0 +1,94 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3790137987329400828
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3790137987329400827}
+  - component: {fileID: 3790137987329400826}
+  - component: {fileID: 3790137987329400829}
+  m_Layer: 0
+  m_Name: Player Lock Target Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3790137987329400827
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3790137987329400828}
+  m_LocalRotation: {x: 0, y: -0.6167491, z: -0, w: 0.78715986}
+  m_LocalPosition: {x: 0.00000015972182, y: -0.4855585, z: 4.3103557}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3790137987329400826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3790137987329400828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5eb80d8e62d9d145bb50fb783c0f731, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PositionMode: 0
+  m_RotationMode: 0
+  m_UpdateMethod: 1
+  m_Targets:
+  - target: {fileID: 0}
+    weight: 1
+    radius: 2
+  - target: {fileID: 0}
+    weight: 1
+    radius: 2
+--- !u!114 &3790137987329400829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3790137987329400828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 441fbf0800067aa48a65fe74b2363262, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  cam: {fileID: 0}
+  maxPlayerDistance: 5
+  maxCamDistance: 25
+  targets: []
+  index: 7
+  lockedOn: 0
+  currentTarget: {fileID: 0}
+  upTarget: {fileID: 0}
+  downTarget: {fileID: 0}
+  leftTarget: {fileID: 0}
+  rightTarget: {fileID: 0}
+  handleUI: 1
+  targetGraphic: {fileID: 9206070849078276016, guid: 98ce605f7de2af142b0fa5d7d8fa8cda,
+    type: 3}
+  upGraphic: {fileID: 4310504062080535192, guid: 4412bb3eb0cdb8b448d247dbeee8a389,
+    type: 3}
+  downGraphic: {fileID: 9154205800001027066, guid: 99414f85d49a44d4e8db8d90339a0235,
+    type: 3}
+  leftGraphic: {fileID: 3282611953497002008, guid: c0c947b310a6bc04ba7e42783cc33081,
+    type: 3}
+  rightGraphic: {fileID: 263446488122040254, guid: 05eb0176f339cce4fb617f5658456851,
+    type: 3}
+  uiOffset: {x: 0, y: 1, z: 0}
+  billboard: 1

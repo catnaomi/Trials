@@ -78,29 +78,10 @@ public class HumanoidActor : Actor
     public float tempValue3;
 
     public Vector3 gravity;
-    [Serializable]
-    public struct PositionReference
-    {
-        [Header("Body & Joint Positions")]
-        public Transform Hips;
-        public Transform Spine;
-        public Transform Head;
-        [Header("Weapon Positions")]
-        public GameObject MainHand;
-        public GameObject OffHand;
-        [Space(5)]
-        public GameObject rHip;
-        public GameObject rBack;
-        public GameObject lHip;
-        public GameObject lBack;
-        public GameObject cBack;
-        [Space(5)]
-        public float eyeHeight;
-    }
 
     [Header("Humanoid Settings")]
     public HumanoidState humanoidState;
-    public PositionReference positionReference;
+    public HumanoidPositionReference positionReference;
     public Inventory inventory;
     public bool canRevive = true;
 
@@ -128,7 +109,7 @@ public class HumanoidActor : Actor
 
     private void Awake()
     {
-        LocateSlotsByName();
+        positionReference.LocateSlotsByName();
     }
     public override void ActorStart()
     {
@@ -238,112 +219,7 @@ public class HumanoidActor : Actor
         
     }
 
-    void LocateSlotsByName()
-    {
-        string HAND_R_NAME = "_equipHandR";
-        string HAND_L_NAME = "_equipHandL";
-
-
-        Dictionary<Inventory.EquipSlot, string> SLOT_NAMES = new Dictionary<Inventory.EquipSlot, string> {
-            {Inventory.EquipSlot.rHip, "_equipSheathR" },
-            {Inventory.EquipSlot.lHip, "_equipSheathL" },
-            {Inventory.EquipSlot.rBack, "_equipBackR" },
-            {Inventory.EquipSlot.lBack, "_equipBackL" },
-            {Inventory.EquipSlot.cBack, "_equipBackC" }
-        };
-
-        Transform current;
-        if (positionReference.MainHand == null)
-        {
-            current = LocateSlotsRecursive(this.transform, HAND_R_NAME);
-            if (current != null)
-            {
-                positionReference.MainHand = current.gameObject;
-            }            
-        }
-        if (positionReference.OffHand == null)
-        {
-            current = LocateSlotsRecursive(this.transform, HAND_L_NAME);
-            if (current != null)
-            {
-                positionReference.OffHand = current.gameObject;
-            }
-        }
-
-        foreach (Inventory.EquipSlot slot in SLOT_NAMES.Keys)
-        {
-            if (this.GetPositionRefSlot(slot) == null)
-            {
-                current = LocateSlotsRecursive(this.transform, SLOT_NAMES[slot]);
-                if (current != null)
-                {
-                    this.SetPositionRefSlot(slot, current.gameObject);
-                }
-            }
-        }
-    }
-
-    Transform LocateSlotsRecursive(Transform t, string n)
-    {
-        Transform s = t.Find(n);
-        if (s == null)
-        {
-            foreach(Transform c in t)
-            {
-                Transform found = LocateSlotsRecursive(c, n);
-                if (found != null)
-                {
-                    return found;
-                }
-            }
-            return null;
-        }
-        else
-        {
-            return s;
-        }
-    }
-
-    public GameObject GetPositionRefSlot(Inventory.EquipSlot slot)
-    {
-        switch (slot)
-        {
-            case Inventory.EquipSlot.rHip:
-                return positionReference.rHip;
-            case Inventory.EquipSlot.lHip:
-                return positionReference.lHip;
-            case Inventory.EquipSlot.rBack:
-                return positionReference.rBack;
-            case Inventory.EquipSlot.lBack:
-                return positionReference.lBack;
-            case Inventory.EquipSlot.cBack:
-                return positionReference.cBack;
-            default:
-                return null;
-        }
-    }
-
-    public void SetPositionRefSlot(Inventory.EquipSlot slot, GameObject newSlot)
-    {
-        switch (slot)
-        {
-            case Inventory.EquipSlot.rHip:
-                positionReference.rHip = newSlot;
-                break;
-            case Inventory.EquipSlot.lHip:
-                positionReference.lHip = newSlot;
-                break;
-            case Inventory.EquipSlot.rBack:
-                positionReference.rBack = newSlot;
-                break;
-            case Inventory.EquipSlot.lBack:
-                positionReference.lBack = newSlot;
-                break;
-            case Inventory.EquipSlot.cBack:
-                positionReference.cBack = newSlot;
-                break;
-        }
-    }
+    
     
     protected void LateUpdate()
     {
@@ -404,11 +280,6 @@ public class HumanoidActor : Actor
         }
     }
 
-    public override void TakeAction(InputAction action)
-    {
-        // lmao this no longer does anything
-        return;
-    }
     public void TryGetup()
     {
         if (attributes.HasHealthRemaining() || this is PlayerActor)

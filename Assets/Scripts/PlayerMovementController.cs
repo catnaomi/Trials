@@ -4,18 +4,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(CharacterController))]
-public class PlayerMovementController : MonoBehaviour
+[RequireComponent(typeof(CharacterController), typeof(HumanoidPositionReference))]
+public class PlayerMovementController : Actor
 {
     CharacterController cc;
 
     public Vector2 move;
     Vector2 moveSmoothed;
-    [SerializeField]
-    private Vector2 look;
+    public Vector2 look;
     float defaultRadius;
+    [HideInInspector]public HumanoidPositionReference positionReference;
     [Header("Camera")]
     public CameraState camState = CameraState.None;
     CameraState prevCamState;
@@ -29,6 +30,7 @@ public class PlayerMovementController : MonoBehaviour
     public float sprintTurnSpeed = 90f;
     public float walkAccel = 25f;
     public float walkTurnSpeed = 1080f;
+    [Space(5)]
     public float hardLandAccel = 2.5f;
     public float softLandAccel = 2.5f;
     public float skidAngle = 160f;
@@ -37,8 +39,10 @@ public class PlayerMovementController : MonoBehaviour
     public float fallBufferTime = 0.25f;
     public float hardLandingTime = 2f;
     public float softLandingTime = 1f;
+    [Space(5)]
     public float rollSpeed = 5f;
     public float jumpVel = 10f;
+    [Space(5)]
     public float yVel;
     public bool isGrounded;
     public Vector3 xzVel;
@@ -48,6 +52,9 @@ public class PlayerMovementController : MonoBehaviour
     float speed;
     bool dashed;
     bool jump;
+    Vector3 targetDirection;
+    [Space(5)]
+    public float strafeSpeed = 2.5f;
    
     float walkAccelReal;
     public bool sprinting;
@@ -101,7 +108,9 @@ public class PlayerMovementController : MonoBehaviour
 
     private System.Action _OnLandEnd;
     private System.Action _OnFinishClimb;
-    public float angle1;
+    [Header("Targeting")]
+    public UnityEvent toggleTarget;
+    public UnityEvent changeTarget;
     struct AnimState
     {
         public MixerState move;
@@ -121,6 +130,12 @@ public class PlayerMovementController : MonoBehaviour
         public CinemachineVirtualCameraBase target;
         public CinemachineVirtualCameraBase aim;
         public CinemachineVirtualCameraBase climb;
+    }
+
+    private void Awake()
+    {
+        positionReference = this.GetComponent<HumanoidPositionReference>();
+        positionReference.LocateSlotsByName();
     }
     // Start is called before the first frame update
     void Start()
@@ -143,7 +158,7 @@ public class PlayerMovementController : MonoBehaviour
 
         skidAnim.Events.OnEnd += () => { state.sprint = animancer.Play(sprintAnim); };
         //landAnim.Events.OnEnd += () => { animancer.Play(state.move, 1f); };
-        rollAnim.Events.OnEnd += () => { animancer.Play(state.move); };
+        rollAnim.Events.OnEnd += () => { animancer.Play(state.move, 0.5f); };
         standJumpAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
         runJumpAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
         swimStart.Events.OnEnd += () => {
@@ -185,21 +200,48 @@ public class PlayerMovementController : MonoBehaviour
         Vector3 lookDirection = this.transform.forward;
         Vector3 moveDirection = Vector3.zero;
         float grav = gravity;
-        if (camState == CameraState.Free)
-        {
 
-            stickDirection = camForward * move.y + camRight * move.x;
-        }
+        stickDirection = camForward * move.y + camRight * move.x;
 
         if (animancer.States.Current == state.move)
         {
-            float speedMax = (!wading) ? walkSpeedMax : Mathf.Lerp(walkSpeedMax, wadingSpeed, wadingPercent);
-            speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * speedMax, walkAccelReal * Time.deltaTime);
-            if (stickDirection.sqrMagnitude > 0)
+            float speedMax = 0f;
+            if (wading)
             {
-                lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * walkTurnSpeed * Time.deltaTime, 1f);
+                speedMax = Mathf.Lerp(walkSpeedMax, wadingSpeed, wadingPercent);
             }
-            moveDirection = stickDirection;
+            else if (camState == CameraState.Lock)
+            {
+                speedMax = strafeSpeed;
+            }
+            else
+            {
+                speedMax = walkSpeedMax;
+            }
+            speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * speedMax, walkAccelReal * Time.deltaTime);
+            if (camState == CameraState.Free)
+            {
+                if (stickDirection.sqrMagnitude > 0)
+                {
+                    lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * walkTurnSpeed * Time.deltaTime, 1f);
+                }
+                moveDirection = stickDirection;
+            }
+            else if (camState == CameraState.Lock)
+            {
+                if (GetCombatTarget() != null)
+                {
+                    targetDirection = this.transform.position - GetCombatTarget().transform.position;
+                    targetDirection.Scale(new Vector3(-1f, 0f, -1f));
+                    lookDirection = Vector3.RotateTowards(lookDirection, targetDirection, Mathf.Deg2Rad * walkTurnSpeed * Time.deltaTime, 1f);
+
+                }
+                else
+                {
+                    lookDirection = this.transform.forward;
+                }
+                moveDirection = stickDirection;
+            }
             if (!GetGrounded() && lastAirTime > fallBufferTime)
             {
                 state.fall = animancer.Play(fallAnim);
@@ -208,6 +250,7 @@ public class PlayerMovementController : MonoBehaviour
             {
                 if (!dashed)
                 {
+                    lookDirection = stickDirection.normalized;
                     state.dash = animancer.Play(dashAnim);
                 }
                 else
@@ -219,6 +262,7 @@ public class PlayerMovementController : MonoBehaviour
             if (shouldDodge)
             {
                 shouldDodge = false;
+                lookDirection = stickDirection.normalized;
                 state.roll = animancer.Play(rollAnim);
             }
             if (jump)
@@ -260,7 +304,6 @@ public class PlayerMovementController : MonoBehaviour
         else if (animancer.States.Current == state.sprint)
         {
             speed = sprintSpeed;
-            angle1 = Vector3.Angle(lookDirection, stickDirection);
             if (shouldDodge)
             {
                 state.roll = animancer.Play(rollAnim);
@@ -592,6 +635,10 @@ public class PlayerMovementController : MonoBehaviour
         {
             camState = CameraState.Climb;
         }
+        else if (GetCombatTarget() != null)
+        {
+            camState = CameraState.Lock;
+        }
         else
         {
             camState = CameraState.Free;
@@ -602,6 +649,16 @@ public class PlayerMovementController : MonoBehaviour
             {
                 vcam.free.gameObject.SetActive(true);
                 vcam.climb.gameObject.SetActive(false);
+                vcam.target.gameObject.SetActive(false);
+            }
+        }
+        else if (camState == CameraState.Lock)
+        {
+            if (prevCamState != CameraState.Lock)
+            {
+                vcam.free.gameObject.SetActive(false);
+                vcam.target.gameObject.SetActive(true);
+                vcam.climb.gameObject.SetActive(false);
             }
         }
         else if (camState == CameraState.Climb)
@@ -609,7 +666,8 @@ public class PlayerMovementController : MonoBehaviour
             if (prevCamState != CameraState.Climb)
             {
                 vcam.free.gameObject.SetActive(false);
-                vcam.climb.gameObject.SetActive(true);
+                vcam.climb.gameObject.SetActive(false);
+                vcam.target.gameObject.SetActive(true);
             }
         }
     }
@@ -692,7 +750,15 @@ public class PlayerMovementController : MonoBehaviour
         animancer.Play(state.sprint);
     }
 
+    public void OnTarget(InputValue value)
+    {
+        toggleTarget.Invoke();
+    }
 
+    public void OnChangeTarget(InputValue value)
+    {
+        if (value.Get<Vector2>().magnitude > 0.9f) changeTarget.Invoke();
+    }
 
     public Vector2 GetMovementVector()
     {
@@ -700,6 +766,10 @@ public class PlayerMovementController : MonoBehaviour
         {
             return new Vector2(0f, speed / walkSpeedMax);
             //return new Vector2(0f, move.magnitude);
+        }
+        else if (camState == CameraState.Lock)
+        {
+            return move;
         }
         return Vector2.zero;
     }

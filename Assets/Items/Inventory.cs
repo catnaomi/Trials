@@ -378,7 +378,7 @@ public class Inventory : MonoBehaviour, IInventory
             }
             else
             {
-                parent = actor.GetPositionRefSlot(MainWeapon.MainHandEquipSlot);
+                parent = actor.positionReference.GetPositionRefSlot(MainWeapon.MainHandEquipSlot);
             }
             MainWeapon.model.transform.position = parent.transform.position;
             MainWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.up, parent.transform.forward);
@@ -398,7 +398,7 @@ public class Inventory : MonoBehaviour, IInventory
             }
             else
             {
-                parent = actor.GetPositionRefSlot(OffWeapon.OffHandEquipSlot);
+                parent = actor.positionReference.GetPositionRefSlot(OffWeapon.OffHandEquipSlot);
             }
             OffWeapon.model.transform.position = parent.transform.position;
             OffWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.up, parent.transform.forward);

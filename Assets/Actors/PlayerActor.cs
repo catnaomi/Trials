@@ -69,7 +69,7 @@ public class PlayerActor : HumanoidActor
     //public bool sprint;
     [Space(5)]
     public UnityEvent toggleTarget;
-    public UnityEvent secondaryStickFlick;
+    public UnityEvent changeTarget;
     [Space(10)]
     public bool stanceMain;
     public bool stanceOff;
@@ -701,7 +701,7 @@ public class PlayerActor : HumanoidActor
         {
             if (context.interaction is PressInteraction)
             {
-                secondaryStickFlick.Invoke();
+                changeTarget.Invoke();
             }
         };
 

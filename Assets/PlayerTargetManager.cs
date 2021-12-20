@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class PlayerTargetManager : MonoBehaviour
 {
-    public PlayerActor player;
+    public PlayerMovementController player;
     public Camera cam;
     public float maxPlayerDistance = 20f;
     public float maxCamDistance = 20f;
@@ -37,6 +37,7 @@ public class PlayerTargetManager : MonoBehaviour
     public GameObject rightGraphic;
     public Vector3 uiOffset;
     public bool billboard = true;
+    public float targetDelay;
 
     // Start is called before the first frame update
     void Start()
@@ -48,7 +49,7 @@ public class PlayerTargetManager : MonoBehaviour
         lockedOn = false;
 
         player.toggleTarget.AddListener(ToggleTarget);
-        player.secondaryStickFlick.AddListener(SwitchTargets);
+        player.changeTarget.AddListener(SwitchTargets);
 
         if (handleUI)
         {
@@ -73,10 +74,10 @@ public class PlayerTargetManager : MonoBehaviour
             rays = new List<Ray>();
             foreach (GameObject target in allLockTargets)
             {
-                float playerDist = Vector3.Distance(target.transform.position, player.centerTransform.position);
+                float playerDist = Vector3.Distance(target.transform.position, player.positionReference.Spine.position);
                 float camDist = Vector3.Distance(target.transform.position, cam.transform.position);
 
-                Ray pRay = new Ray(player.centerTransform.position, (target.transform.position - player.centerTransform.position));
+                Ray pRay = new Ray(player.positionReference.Spine.position, (target.transform.position - player.positionReference.Spine.position));
                 Ray cRay = new Ray(cam.transform.position, (target.transform.position - cam.transform.position));
 
                 bool playerTerrainBlocked = Physics.Raycast(pRay, playerDist, LayerMask.GetMask("Terrain"));
@@ -133,7 +134,7 @@ public class PlayerTargetManager : MonoBehaviour
                     }*/
                 });
             }
-            yield return new WaitForSecondsRealtime(2f);
+            yield return new WaitForSecondsRealtime(targetDelay);
         }
     }
 
@@ -250,7 +251,7 @@ public class PlayerTargetManager : MonoBehaviour
 
     private bool HandleTargetGraphic(GameObject graphic, Transform target)
     {
-        if (target == null || PlayerActor.player.GetCombatTarget() == null)
+        if (target == null || player.GetCombatTarget() == null)
         {
             graphic.SetActive(false);
             return false;
@@ -262,7 +263,7 @@ public class PlayerTargetManager : MonoBehaviour
 
     private bool HandleTargetGraphic(GameObject graphic, GameObject target)
     {
-        if (target == null || PlayerActor.player.GetCombatTarget() == null)
+        if (target == null || player.GetCombatTarget() == null)
         {
             graphic.SetActive(false);
             return false;
