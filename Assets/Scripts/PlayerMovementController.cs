@@ -17,6 +17,9 @@ public class PlayerMovementController : Actor
     public Vector2 look;
     float defaultRadius;
     [HideInInspector]public HumanoidPositionReference positionReference;
+
+    [Header("Inventory")]
+    public HumanoidInventory inventory;
     [Header("Camera")]
     public CameraState camState = CameraState.None;
     CameraState prevCamState;
@@ -34,6 +37,8 @@ public class PlayerMovementController : Actor
     public float hardLandAccel = 2.5f;
     public float softLandAccel = 2.5f;
     public float skidAngle = 160f;
+    public float skidDecel = 10f;
+    Vector3 lastSprintForward;
     public float gravity = 9.81f;
     public float terminalVel = 70f;
     public float fallBufferTime = 0.25f;
@@ -65,6 +70,7 @@ public class PlayerMovementController : Actor
     bool ledgeHanging;
     
     bool allowClimb = true;
+    bool allowLadderFinish = true;
     public Collider hangCollider;
     public float climbSpeed = 1f; 
     [Header("Swim Settings")]
@@ -95,6 +101,7 @@ public class PlayerMovementController : Actor
     [Space(5)]
     public MixerTransition2D ledgeHang;
     public ClipTransition ledgeClimb;
+    public ClipTransition ledgeStart;
     public ClipTransition ladderClimb;
     public ClipTransition ladderClimbUp;
     [Space(5)]
@@ -184,6 +191,8 @@ public class PlayerMovementController : Actor
         ledgeClimb.Events.OnEnd = _OnFinishClimb;
 
         ladderClimbUp.Events.OnEnd = _OnFinishClimb;
+
+        ledgeStart.Events.OnEnd += () => { state.climb = (DirectionalMixerState)animancer.Play(ledgeHang); };
     }
 
 
@@ -257,7 +266,7 @@ public class PlayerMovementController : Actor
                 {
                     state.sprint = animancer.Play(sprintAnim, 1f);
                 }
-                
+
             }
             if (shouldDodge)
             {
@@ -273,6 +282,7 @@ public class PlayerMovementController : Actor
             if (CheckWater())
             {
                 state.swim = animancer.Play(swimStart, 0.25f);
+                this.gameObject.SendMessage("SplashBig");
             }
         }
         else if (animancer.States.Current == state.dash)
@@ -280,9 +290,15 @@ public class PlayerMovementController : Actor
             dashed = true;
             speed = sprintSpeed;
             moveDirection = this.transform.forward;
+            lastSprintForward = moveDirection;
             if (shouldDodge)
             {
                 state.roll = animancer.Play(rollAnim);
+            }
+            else if (jump)
+            {
+                jump = false;
+                state.jump = animancer.Play(runJumpAnim);
             }
             else if (state.dash.NormalizedTime >= 0.8f)
             {
@@ -315,9 +331,10 @@ public class PlayerMovementController : Actor
             }
             else if (move.magnitude > 0.75f && Vector3.Angle(lookDirection, stickDirection) >= skidAngle)
             {
+                
                 state.skid = animancer.Play(skidAnim);
                 lookDirection = -stickDirection;
-                
+                lastSprintForward = -stickDirection;
 
             }
             else if (move.magnitude <= 0f || !sprinting)
@@ -337,7 +354,14 @@ public class PlayerMovementController : Actor
             if (CheckWater())
             {
                 state.swim = animancer.Play(swimAnim);
+                this.gameObject.SendMessage("SplashBig");
             }
+            
+        }
+        else if (animancer.States.Current == state.skid)
+        {
+            speed = Mathf.MoveTowards(speed, 0f, skidDecel * Time.deltaTime);
+            moveDirection = lastSprintForward;
         }
         else if (animancer.States.Current == state.fall)
         {
@@ -367,16 +391,17 @@ public class PlayerMovementController : Actor
                 }
                 else
                 {
-                    animancer.Play(state.move, 0.25f);
+                    this.gameObject.SendMessage("Thud");
+                    animancer.Play(state.move, 0.1f);
                 }
-                
+
             }
             if (ledgeSnap)
             {
                 if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
                 {
-                    state.climb = (DirectionalMixerState)animancer.Play(ledgeHang);
-                    
+                    animancer.Play(ledgeStart);
+
                 }
                 else if (currentClimb.TryGetComponent<Ladder>(out Ladder ladder))
                 {
@@ -388,6 +413,7 @@ public class PlayerMovementController : Actor
             if (CheckWater())
             {
                 state.swim = animancer.Play(swimAnim);
+                this.gameObject.SendMessage("SplashBig");
             }
         }
         else if (animancer.States.Current == state.roll)
@@ -412,7 +438,7 @@ public class PlayerMovementController : Actor
             else if (currentClimb.TryGetComponent<Ladder>(out Ladder ladder))
             {
                 state.climb.Speed = move.y * climbSpeed;
-                if (ladder.snapPoint <= -0.9 && move.y > 0)
+                if (ladder.snapPoint <= -0.9 && move.y > 0 && allowLadderFinish)
                 {
                     SnapToLedge();
                     this.transform.position = ladder.endpoint.transform.position;
@@ -444,7 +470,7 @@ public class PlayerMovementController : Actor
                 speed = 0f;
                 animancer.Play(state.move, 0.25f);
             }
-            
+
 
         }
 
@@ -548,6 +574,8 @@ public class PlayerMovementController : Actor
         {
             ledgeSnap = true;
             currentClimb = ladder;
+            allowLadderFinish = false;
+            StartCoroutine(LadderFinishLockout());
         }
     }
     public void UnsnapLedge(ClimbDetector ledge)
@@ -626,6 +654,13 @@ public class PlayerMovementController : Actor
         yield return new WaitForSeconds(1f);
         allowClimb = true;
     }
+
+    IEnumerator LadderFinishLockout()
+    {
+        allowLadderFinish = false;
+        yield return new WaitForSeconds(1f);
+        allowLadderFinish = true;
+    }
     #endregion
 
     #region CAMERA
@@ -666,8 +701,8 @@ public class PlayerMovementController : Actor
             if (prevCamState != CameraState.Climb)
             {
                 vcam.free.gameObject.SetActive(false);
-                vcam.climb.gameObject.SetActive(false);
-                vcam.target.gameObject.SetActive(true);
+                vcam.climb.gameObject.SetActive(true);
+                vcam.target.gameObject.SetActive(false);
             }
         }
     }
@@ -711,7 +746,7 @@ public class PlayerMovementController : Actor
             animancer.Play(ledgeClimb);
             StartCoroutine("ClimbLockout");
         }
-        else
+        else if (GetGrounded())
         {
             jump = true;
         }
