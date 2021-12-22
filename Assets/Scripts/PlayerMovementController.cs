@@ -60,7 +60,10 @@ public class PlayerMovementController : Actor
     float speed;
     bool dashed;
     bool jump;
+    bool blocking;
     Vector3 targetDirection;
+    Vector3 headPoint;
+    public float headPointSpeed = 25f;
     [Space(5)]
     public float strafeSpeed = 2.5f;
     [Space(5)]
@@ -98,6 +101,7 @@ public class PlayerMovementController : Actor
     ClipTransition plungeEnd;
     float cancelTime;
     int attackIndex = 0;
+    public float blockSpeed = 2.5f;
     float attackResetTimer = 0f;
     [Header("Animancer")]
     public AnimancerComponent animancer;
@@ -105,6 +109,7 @@ public class PlayerMovementController : Actor
     public AnimationClip idleAnim;
     public ClipTransition dashAnim;
     public ClipTransition sprintAnim;
+    ClipTransition currentSprintAnim;
     public ClipTransition skidAnim;
     public ClipTransition fallAnim;
     public AnimationClip landSoftAnim;
@@ -112,6 +117,7 @@ public class PlayerMovementController : Actor
     public ClipTransition rollAnim;
     public ClipTransition standJumpAnim;
     public ClipTransition runJumpAnim;
+    public ClipTransition backflipAnim;
     [Space(5)]
     public MixerTransition2D ledgeHang;
     public ClipTransition ledgeClimb;
@@ -125,6 +131,9 @@ public class PlayerMovementController : Actor
     [Space(5)]
     public AvatarMask upperBodyMask;
 
+    MixerTransition2D blockMove;
+    ClipTransition blockAnimStart;
+    ClipTransition blockAnim;
     PlayerMovementController movementController;
     AnimState state;
 
@@ -149,6 +158,7 @@ public class PlayerMovementController : Actor
         public AnimancerState climb;
         public AnimancerState swim;
         public AnimancerState attack;
+        public AnimancerState block;
     }
 
     enum AnimLayer
@@ -190,11 +200,24 @@ public class PlayerMovementController : Actor
             SprintEnd();
         };
 
+        this.GetComponent<PlayerInput>().actions["Block"].started += (context) =>
+        {
+            BlockStart();
+        };
+
+        this.GetComponent<PlayerInput>().actions["Block"].canceled += (context) =>
+        {
+            BlockEnd();
+        };
+
+        currentSprintAnim = sprintAnim;
+
         skidAnim.Events.OnEnd += () => { state.sprint = animancer.Play(sprintAnim); };
         //landAnim.Events.OnEnd += () => { animancer.Play(state.move, 1f); };
         rollAnim.Events.OnEnd += () => { animancer.Play(state.move, 0.5f); };
         standJumpAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
         runJumpAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
+        backflipAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
         swimStart.Events.OnEnd += () => {
             state.swim = animancer.Play(swimAnim);
         };
@@ -313,7 +336,7 @@ public class PlayerMovementController : Actor
                 }
                 else
                 {
-                    state.sprint = animancer.Play(sprintAnim, 1f);
+                    state.sprint = animancer.Play(currentSprintAnim, 1f);
                 }
 
             }
@@ -333,6 +356,16 @@ public class PlayerMovementController : Actor
                 state.swim = animancer.Play(swimStart, 0.25f);
                 this.gameObject.SendMessage("SplashBig");
             }
+            if (blocking && inventory.IsMainDrawn())
+            {
+                ((MixerState)state.block).ChildStates[0].Clip = blockAnimStart.Clip;
+                animancer.Play(state.block, 0.25f);
+                animancer.Layers[1].Play(blockAnimStart, 0f);
+                blockAnimStart.Events.OnEnd = () => {
+                    animancer.Layers[1].Play(blockAnim);
+                    ((MixerState)state.block).ChildStates[0].Clip = blockAnim.Clip;
+                };
+            }
             if (attack && !animancer.Layers[1].IsAnyStatePlaying())
             {
                 if (inventory.IsMainDrawn())
@@ -341,6 +374,10 @@ public class PlayerMovementController : Actor
                     {
                         MainSlash();
 
+                    }
+                    else if (thrust)
+                    {
+                        MainThrust();
                     }
                 }
                 attack = false;
@@ -354,7 +391,97 @@ public class PlayerMovementController : Actor
             {
                 attackResetTimer -= Time.deltaTime;
             }
-            
+            animancer.Layers[0].ApplyAnimatorIK = true;
+        }
+        else if (animancer.States.Current == state.block)
+        {
+            bool stopBlock = false;
+            speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * blockSpeed, walkAccelReal * Time.deltaTime);
+            if (camState == CameraState.Free)
+            {
+                lookDirection = this.transform.forward;
+                moveDirection = stickDirection;
+            }
+            else if (camState == CameraState.Lock)
+            {
+                if (GetCombatTarget() != null)
+                {
+                    targetDirection = this.transform.position - GetCombatTarget().transform.position;
+                    targetDirection.Scale(new Vector3(-1f, 0f, -1f));
+                    lookDirection = Vector3.RotateTowards(lookDirection, targetDirection, Mathf.Deg2Rad * walkTurnSpeed * Time.deltaTime, 1f);
+
+                }
+                else
+                {
+                    lookDirection = this.transform.forward;
+                }
+                moveDirection = stickDirection;
+            }
+            if (!GetGrounded() && lastAirTime > fallBufferTime)
+            {
+                state.fall = animancer.Play(fallAnim);
+                stopBlock = true;
+            }
+            /*
+            if (jump)
+            {
+                jump = false;
+                state.jump = animancer.Play(backflipAnim);
+                moveDirection = this.transform.forward;
+                speed = -blockSpeed;
+                stopBlock = true;
+            }
+            */
+            if (attack)
+            {
+                if (slash)
+                {
+                    BlockSlash();
+                    attackDecelReal = attackDecel;
+                }
+                else if (thrust)
+                {
+                    BlockThrust();
+                    attackDecelReal = attackDecel;
+                }
+                attack = false;
+                slash = false;
+                thrust = false;
+                stopBlock = true;
+            }
+            if (CheckWater())
+            {
+                state.swim = animancer.Play(swimStart, 0.25f);
+                this.gameObject.SendMessage("SplashBig");
+                stopBlock = true;
+            }
+            if (shouldDodge)
+            {
+                shouldDodge = false;
+                if (stickDirection.magnitude > 0)
+                {
+                    lookDirection = stickDirection.normalized;
+                }
+                else
+                {
+                    lookDirection = transform.forward;
+                }
+                state.roll = animancer.Play(rollAnim);
+                stopBlock = true;
+            }
+            if (!blocking)
+            {
+                stopBlock = true;
+                animancer.Play(state.move, 0.25f);
+            }
+            if (stopBlock)
+            {
+                if (animancer.Layers[1].IsPlayingClip(blockAnim.Clip) || animancer.Layers[1].IsPlayingClip(blockAnimStart.Clip))
+                {
+                    animancer.Layers[1].Stop();
+                }
+            }
+            animancer.Layers[0].ApplyAnimatorIK = true;
         }
         else if (animancer.States.Current == state.dash)
         {
@@ -375,7 +502,7 @@ public class PlayerMovementController : Actor
             {
                 if (sprinting)
                 {
-                    state.sprint = animancer.Play(sprintAnim);
+                    state.sprint = animancer.Play(currentSprintAnim);
                 }
                 else
                 {
@@ -386,7 +513,7 @@ public class PlayerMovementController : Actor
             {
                 state.fall = animancer.Play(fallAnim);
             }
-
+            animancer.Layers[0].ApplyAnimatorIK = false;
         }
         else if (animancer.States.Current == state.sprint)
         {
@@ -435,16 +562,21 @@ public class PlayerMovementController : Actor
                     {
                         DashSlash();
                     }
+                    else if (thrust)
+                    {
+                        DashThrust();
+                    }
                 }
                 attack = false;
                 slash = false;
             }
-
+            animancer.Layers[0].ApplyAnimatorIK = false;
         }
         else if (animancer.States.Current == state.skid)
         {
             speed = Mathf.MoveTowards(speed, 0f, skidDecel * Time.deltaTime);
             moveDirection = lastSprintForward;
+            animancer.Layers[0].ApplyAnimatorIK = false;
         }
         else if (animancer.States.Current == state.fall)
         {
@@ -475,7 +607,7 @@ public class PlayerMovementController : Actor
                 else
                 {
                     this.gameObject.SendMessage("Thud");
-                    animancer.Play(state.move, 0.1f);
+                    animancer.Play(state.move, 0.25f);
                 }
 
             }
@@ -506,9 +638,14 @@ public class PlayerMovementController : Actor
                     {
                         PlungeSlash();
                     }
+                    else if (thrust)
+                    {
+                        PlungeThrust();
+                    }
                 }
                 attack = false;
                 slash = false;
+                thrust = false;
             }
         }
         else if (animancer.States.Current == state.roll)
@@ -525,10 +662,16 @@ public class PlayerMovementController : Actor
                         rollAnim.Events.OnEnd = () => { RollSlash(); };
                         
                     }
+                    else if (thrust)
+                    {
+                        rollAnim.Events.OnEnd = () => { RollThrust(); };
+                    }
                 }
                 attack = false;
                 slash = false;
+                thrust = false;
             }
+            animancer.Layers[0].ApplyAnimatorIK = false;
         }
         else if (animancer.States.Current == state.jump)
         {
@@ -536,6 +679,7 @@ public class PlayerMovementController : Actor
             //speed = 0f;
             //speed = sprintSpeed;
             moveDirection = this.transform.forward;
+            animancer.Layers[0].ApplyAnimatorIK = true;
         }
         else if (animancer.States.Current == state.climb)
         {
@@ -557,6 +701,7 @@ public class PlayerMovementController : Actor
 
                 }
             }
+            animancer.Layers[0].ApplyAnimatorIK = false;
         }
         else if (animancer.States.Current == state.swim)
         {
@@ -579,14 +724,14 @@ public class PlayerMovementController : Actor
                 animancer.Play(state.move, 0.25f);
             }
 
-
+            animancer.Layers[0].ApplyAnimatorIK = (speed < 0.1f);
         }
         else if (animancer.States.Current == state.attack)
         {
             speed = Mathf.MoveTowards(speed, 0f, attackDecelReal * Time.deltaTime);
             moveDirection = this.transform.forward;
 
-            if (cancelTime > 0 && animancer.States.Current.NormalizedTime >= cancelTime)
+            if (cancelTime > 0 && animancer.States.Current.NormalizedTime >= cancelTime && !plunge)
             {
                 if (attack && slash)
                 {
@@ -595,6 +740,13 @@ public class PlayerMovementController : Actor
                     cancelTime = -1f;
                     CancelSlash();
                     
+                }
+                else if (attack && thrust)
+                {
+                    attack = false;
+                    thrust = false;
+                    cancelTime = -1f;
+                    CancelThrust();
                 }
                 attackResetTimer = 0.5f;
             }
@@ -614,6 +766,7 @@ public class PlayerMovementController : Actor
                 state.swim = animancer.Play(swimAnim);
                 this.gameObject.SendMessage("SplashBig");
             }
+            animancer.Layers[0].ApplyAnimatorIK = false;
         }
 
         if (GetGrounded())
@@ -658,6 +811,11 @@ public class PlayerMovementController : Actor
         {
             linearSwim.Parameter = speed / swimSpeed;
         }
+        if (blocking && state.block is DirectionalMixerState blockDirectional)
+        {
+            blockDirectional.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
+            blockDirectional.ParameterY = Vector3.Dot(moveDirection, this.transform.forward) * (speed / walkSpeedMax);
+        }
         Vector3 finalMov = (moveDirection * speed + downwardsVelocity);
 
         if (cc.enabled)
@@ -689,7 +847,7 @@ public class PlayerMovementController : Actor
             xzVel = finalMov;
             xzVel.Scale(new Vector3(1f, 0f, 1f));
         }
-
+        GetHeadPoint();
         HandleCinemachine();
     }
 
@@ -713,7 +871,7 @@ public class PlayerMovementController : Actor
             StartCoroutine(LadderFinishLockout());
         }
     }
-    public void UnsnapLedge(ClimbDetector ledge)
+    public void UnsnapLedge()
     {
         ledgeSnap = false;
     }
@@ -903,6 +1061,16 @@ public class PlayerMovementController : Actor
         look = value.Get<Vector2>();
     }
 
+    void BlockStart()
+    {
+        blocking = true;
+
+    }
+
+    void BlockEnd()
+    {
+        blocking = false;
+    }
     void SprintStart()
     {
         sprinting = true;
@@ -934,6 +1102,12 @@ public class PlayerMovementController : Actor
     {
         attack = true;
         slash = true;
+    }
+
+    public void OnAtk_Thrust(InputValue value)
+    {
+        attack = true;
+        thrust = true;
     }
     public Vector2 GetMovementVector()
     {
@@ -1024,6 +1198,7 @@ public class PlayerMovementController : Actor
     {
         MixerTransition2DAsset movementAnim = moveAnim;
         Debug.Log("updating player anims from moveset");
+
         if (inventory.IsMainDrawn())
         {
             Debug.Log("main is drawn");
@@ -1040,6 +1215,32 @@ public class PlayerMovementController : Actor
         }
         state.move = (MixerState)animancer.States.GetOrCreate(movementAnim);
         if (moving) animancer.Play(state.move);
+
+
+        MixerTransition2DAsset blockingMoveAnim = moveAnim;
+        if (inventory.IsOffDrawn() && inventory.GetOffWeapon().moveset.overridesBlock)
+        {
+            blockingMoveAnim = inventory.GetOffWeapon().moveset.blockMove;
+            blockAnim = inventory.GetOffWeapon().moveset.blockAnim;
+            blockAnimStart = inventory.GetOffWeapon().moveset.blockAnimStart;
+        }
+        else if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.overridesBlock)
+        {
+            blockingMoveAnim = inventory.GetMainWeapon().moveset.blockMove;
+            blockAnim = inventory.GetMainWeapon().moveset.blockAnim;
+            blockAnimStart = inventory.GetMainWeapon().moveset.blockAnimStart;
+        }
+
+        state.block = (MixerState)animancer.States.GetOrCreate(blockingMoveAnim);
+
+
+        ClipTransition sprintingAnim = sprintAnim;
+        if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.overridesSprint)
+        {
+            sprintingAnim = inventory.GetMainWeapon().moveset.sprintAnim;
+        }
+
+        currentSprintAnim = sprintingAnim;
     }
 
 
@@ -1095,6 +1296,7 @@ public class PlayerMovementController : Actor
             blade.GetHitboxes().root.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
         }
         mainWeaponAngle = angle;
+        Debug.Log("rotating");
     }
 
     // rotates the off hand weapon model around the upwards axis of the off hand mount
@@ -1158,9 +1360,42 @@ public class PlayerMovementController : Actor
         attackDecelReal = attackDecel;
     }
 
+    public void MainThrust()
+    {
+        if (GetMoveset().quickThrust1h is ComboAttack combo && combo.HasNext(attackIndex))
+        {
+            state.attack = animancer.Play(combo.GetClip(attackIndex));
+            cancelTime = combo.GetExitTime(attackIndex);
+            attackIndex++;
+            attackResetTimer = 0.5f;
+        }
+        else
+        {
+            state.attack = animancer.Play(GetMoveset().quickThrust1h.GetClip());
+            cancelTime = -1f;
+        }
+
+
+        state.attack.Events.OnEnd = _AttackEnd;
+        attackDecelReal = attackDecel;
+    }
+
     public void CancelSlash()
     {
         if (GetMoveset().quickSlash1h is ComboAttack combo)
+        {
+            state.attack = animancer.Play(combo.GetClip(attackIndex));
+            cancelTime = combo.GetExitTime(attackIndex);
+            attackResetTimer = 0.5f;
+            attackIndex++;
+        }
+        else cancelTime = -1f;
+        state.attack.Events.OnEnd = _AttackEnd;
+    }
+
+    public void CancelThrust()
+    {
+        if (GetMoveset().quickThrust1h is ComboAttack combo)
         {
             state.attack = animancer.Play(combo.GetClip(attackIndex));
             cancelTime = combo.GetExitTime(attackIndex);
@@ -1176,8 +1411,79 @@ public class PlayerMovementController : Actor
         attackDecelReal = dashAttackDecel;
         state.attack.Events.OnEnd = _MoveOnEnd;
         dashed = false;
+        attackIndex = 0;
     }
 
+    public void DashThrust()
+    {
+        state.attack = animancer.Play(GetMoveset().dashThrust.GetClip());
+        attackDecelReal = dashAttackDecel;
+        state.attack.Events.OnEnd = _MoveOnEnd;
+        dashed = false;
+        attackIndex = 0;
+    }
+    
+
+    public void BlockSlash()
+    {
+        System.Action _BlockAttackEnd = () => {
+            if (blocking)
+            {
+                animancer.Layers[1].Play(blockAnim, 0.25f);
+                animancer.Play(state.block, 0.25f);
+            }
+            else
+            {
+                _MoveOnEnd();
+            }
+        };
+        if (inventory.IsOffDrawn() && inventory.GetOffWeapon().moveset.stanceSlash != null)
+        {
+            state.attack = animancer.Play(inventory.GetOffWeapon().moveset.stanceSlash.GetClip());
+            state.attack.Events.OnEnd = _BlockAttackEnd;
+            attackIndex = 0;
+        }
+        else if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.stanceSlash != null)
+        {
+            state.attack = animancer.Play(inventory.GetMainWeapon().moveset.stanceSlash.GetClip());
+            state.attack.Events.OnEnd = _BlockAttackEnd;
+            attackIndex = 0;
+        }
+        else
+        {
+            MainSlash();
+        }
+    }
+    public void BlockThrust()
+    {
+        System.Action _BlockAttackEnd = () => {
+            if (blocking)
+            {
+                animancer.Layers[1].Play(blockAnim, 0.25f);
+                animancer.Play(state.block, 0.25f);
+            }
+            else
+            {
+                _MoveOnEnd();
+            }
+        };
+        if (inventory.IsOffDrawn() && inventory.GetOffWeapon().moveset.stanceThrust != null)
+        {
+            state.attack = animancer.Play(inventory.GetOffWeapon().moveset.stanceThrust.GetClip());
+            state.attack.Events.OnEnd = _BlockAttackEnd;
+            attackIndex = 0;
+        }
+        else if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.stanceThrust != null)
+        {
+            state.attack = animancer.Play(inventory.GetMainWeapon().moveset.stanceThrust.GetClip());
+            state.attack.Events.OnEnd = _BlockAttackEnd;
+            attackIndex = 0;
+        }
+        else
+        {
+            MainThrust();
+        }
+    }
     public void RollSlash()
     {
         state.attack = animancer.Play(GetMoveset().rollSlash.GetClip());
@@ -1185,6 +1491,17 @@ public class PlayerMovementController : Actor
         state.attack.Events.OnEnd = _MoveOnEnd;
         rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
         dashed = false;
+        attackIndex = 0;
+    }
+
+    public void RollThrust()
+    {
+        state.attack = animancer.Play(GetMoveset().rollThrust.GetClip());
+        attackDecelReal = dashAttackDecel;
+        state.attack.Events.OnEnd = _MoveOnEnd;
+        rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
+        dashed = false;
+        attackIndex = 0;
     }
 
     public void PlungeSlash()
@@ -1199,6 +1516,57 @@ public class PlayerMovementController : Actor
             plungeEnd.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
         }
         plunge = true;
+        attackIndex = 0;
+    }
+
+    public void PlungeThrust()
+    {
+        if (GetMoveset().plungeThrust is PhaseAttack phase)
+        {
+            ClipTransition clip = GetMoveset().plungeThrust.GetClip();
+            state.attack.Events.OnEnd = () => { state.attack = animancer.Play(phase.GetLoopPhaseClip(), 0.1f); };
+            state.attack = animancer.Play(GetMoveset().plungeThrust.GetClip());
+            attackDecelReal = 0f;
+            plungeEnd = phase.GetEndPhaseClip();
+            plungeEnd.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
+        }
+        plunge = true;
+        attackIndex = 0;
+    }
+    #endregion
+
+    #region IK
+
+    void GetHeadPoint()
+    {
+        float dist = 10f;
+        Vector3 point = Vector3.zero;
+        if (this.GetCombatTarget() != null)
+        {
+            point = this.GetCombatTarget().transform.position;
+        }
+        else if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, dist, LayerMask.GetMask("Terrain")))
+        {
+            point = hit.point;
+        }
+        else
+        {
+            point = Camera.main.transform.position + Camera.main.transform.forward * 10f;
+        }
+        if (headPoint == Vector3.zero)
+        {
+            headPoint = point;
+        }
+        else
+        {
+            headPoint = Vector3.MoveTowards(headPoint, point, headPointSpeed * Time.deltaTime);
+        }
+    }
+
+    private void OnAnimatorIK(int layerIndex)
+    {
+        animancer.Animator.SetLookAtPosition(headPoint);
+        animancer.Animator.SetLookAtWeight(1f, 0.1f, 1f, 0f, 0.7f);
     }
     #endregion
     public bool GetGrounded()

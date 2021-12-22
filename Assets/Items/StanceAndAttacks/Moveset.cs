@@ -29,6 +29,12 @@ public class Moveset : ScriptableObject
     public ClipTransition draw;
     public ClipTransition sheathe;
     public MixerTransition2DAsset moveAnim;
+    public bool overridesBlock;
+    public MixerTransition2DAsset blockMove;
+    public ClipTransition blockAnim;
+    public ClipTransition blockAnimStart;
+    public bool overridesSprint;
+    public ClipTransition sprintAnim;
 
     public static Dictionary<string, Moveset> movesetTable;
     public static bool movesetsLoaded = false;
