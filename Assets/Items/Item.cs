@@ -35,11 +35,34 @@ public class Item : ScriptableObject
         return itemDesc;
     }
 
-    protected HumanoidActor GetHumanoidHolder()
+    protected Actor GetHeldActor()
     {
-        return (HumanoidActor)holder;
+        return (Actor)holder;
     }
 
+    protected IInventory GetInventory()
+    {
+        // TODO: make this cleaner
+
+        if (holder is PlayerMovementController player)
+        {
+            return player.GetComponent<PlayerInventory>();
+        }
+        else if (holder.TryGetComponent<IInventory>(out IInventory inventory))
+        {
+            return inventory;
+        }
+        return null;
+    }
+
+    protected HumanoidPositionReference GetPositionReference()
+    {
+        if (holder.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference))
+        {
+            return positionReference;
+        }
+        return null;
+    }
     public virtual ItemType GetItemType()
     {
         return ItemType.Misc;

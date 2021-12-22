@@ -607,7 +607,7 @@ public class PlayerActor : HumanoidActor
     private void SetupInput()
     {
         inputs = GetComponent<PlayerInput>();
-
+        /*
         inputs.actions["Atk_Slash"].performed += (context) =>
         {
             Debug.Log("slashpress");

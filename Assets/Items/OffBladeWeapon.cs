@@ -14,12 +14,12 @@ public class OffBladeWeapon : BladeWeapon, OffHandWeapon
 
     public new GameObject GetHand()
     {
-        return GetHumanoidHolder().positionReference.OffHand;
+        return GetPositionReference().OffHand;
     }
 
     public new GameObject GetModel()
     {
-        return GetHumanoidHolder().inventory.GetOffhandModel();
+        return ((IHumanoidInventory)GetInventory()).GetOffhandModel();
     }
 
 }

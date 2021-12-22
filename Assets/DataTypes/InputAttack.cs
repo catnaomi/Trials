@@ -1,24 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Animancer;
 
 [CreateAssetMenu(fileName = "atk0000_name", menuName = "ScriptableObjects/Attacks/Basic Attack", order = 1)]
 public class InputAttack : InputAction
 {
-    /*
-     * 0 is deliberately blank
-     * 001-399   standard attacks
-     * 001-099   1h right
-     * 101-199   1h left
-     * 201-299   2h
-     * 301-399   2x
-     * 
-     * 
-     */
     public int attackId;
     public bool isBlockOK; // can attack be initiated from block
     public bool isSprintOK; // can attack be initiated from sprint
     public bool isFallingOK; // can attack be initiated while falling
     public bool isParryOK; // is attack a riposte or disarm?
+    [SerializeField] protected ClipTransition anim;
     public int GetAttackID()
     {
         return attackId;
@@ -42,5 +34,9 @@ public class InputAttack : InputAction
     public bool IsParryOkay()
     {
         return isParryOK;
+    }
+    public virtual ClipTransition GetClip()
+    {
+        return anim;
     }
 }

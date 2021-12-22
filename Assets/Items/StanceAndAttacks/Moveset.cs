@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using Animancer;
 
 [Serializable]
 [CreateAssetMenu(fileName = "Item", menuName = "ScriptableObjects/Stances & Movesets/New Moveset", order = 1)]
@@ -12,21 +13,22 @@ public class Moveset : ScriptableObject
     public InputAttack strongSlash1h;
     public InputAttack quickThrust1h;
     public InputAttack strongThrust1h;
-    [Header("Two Hand Attacks")]
-    public InputAttack quickSlash2h;
-    public InputAttack strongSlash2h;
-    public InputAttack quickThrust2h;
-    public InputAttack strongThrust2h;
-    [Header("Off Hand Attacks")]
-    public InputAttack offAttack;
-    public InputAttack specialAttack;
+    [Header("Stance Attacks")]
+    public InputAttack stanceSlash;
+    public InputAttack stanceThrust;
+    [Header("Combo Attacks")]
+    public InputAttack comboSlash1h;
     [Header("Movement-Based Attacks")]
-    public InputAttack dash;
-    public InputAttack plunge;
-    public InputAttack sneak;
-    [Header("Parry Attacks")]
-    public InputAttack riposte;
-    public InputAttack disarm;
+    public InputAttack dashSlash;
+    public InputAttack dashThrust;
+    public InputAttack plungeSlash;
+    public InputAttack plungeThrust;
+    public InputAttack rollSlash;
+    public InputAttack rollThrust;
+    [Header("Animancer")]
+    public ClipTransition draw;
+    public ClipTransition sheathe;
+    public MixerTransition2DAsset moveAnim;
 
     public static Dictionary<string, Moveset> movesetTable;
     public static bool movesetsLoaded = false;

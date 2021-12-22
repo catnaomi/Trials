@@ -11,7 +11,7 @@ using UnityEngine.InputSystem;
 public class PlayerMovementController : Actor
 {
     CharacterController cc;
-
+    public bool instatemove;
     public Vector2 move;
     Vector2 moveSmoothed;
     public Vector2 look;
@@ -19,7 +19,10 @@ public class PlayerMovementController : Actor
     [HideInInspector]public HumanoidPositionReference positionReference;
 
     [Header("Inventory")]
-    public HumanoidInventory inventory;
+    public PlayerInventory inventory;
+    bool equipToMain;
+    float mainWeaponAngle;
+    float offWeaponAngle;
     [Header("Camera")]
     public CameraState camState = CameraState.None;
     CameraState prevCamState;
@@ -60,7 +63,10 @@ public class PlayerMovementController : Actor
     Vector3 targetDirection;
     [Space(5)]
     public float strafeSpeed = 2.5f;
-   
+    [Space(5)]
+    public float attackDecel = 25f;
+    public float dashAttackDecel = 10f;
+    float attackDecelReal;
     float walkAccelReal;
     public bool sprinting;
     public bool shouldDodge;
@@ -84,9 +90,17 @@ public class PlayerMovementController : Actor
     public float wadingSpeed = 3f;
     public bool wading;
     public float wadingPercent;
+    [Header("Combat")]
+    public bool attack;
+    bool slash;
+    bool thrust;
+    bool plunge;
+    ClipTransition plungeEnd;
+    float cancelTime;
+    int attackIndex = 0;
+    float attackResetTimer = 0f;
     [Header("Animancer")]
     public AnimancerComponent animancer;
-
     public MixerTransition2DAsset moveAnim;
     public AnimationClip idleAnim;
     public ClipTransition dashAnim;
@@ -108,6 +122,8 @@ public class PlayerMovementController : Actor
     public LinearMixerTransition swimAnim;
     public AnimationClip swimEnd;
     public ClipTransition swimStart;
+    [Space(5)]
+    public AvatarMask upperBodyMask;
 
     PlayerMovementController movementController;
     AnimState state;
@@ -115,6 +131,9 @@ public class PlayerMovementController : Actor
 
     private System.Action _OnLandEnd;
     private System.Action _OnFinishClimb;
+    private System.Action _MoveOnEnd;
+    private System.Action _AttackEnd;
+    private System.Action _StopUpperLayer;
     [Header("Targeting")]
     public UnityEvent toggleTarget;
     public UnityEvent changeTarget;
@@ -129,6 +148,13 @@ public class PlayerMovementController : Actor
         public AnimancerState jump;
         public AnimancerState climb;
         public AnimancerState swim;
+        public AnimancerState attack;
+    }
+
+    enum AnimLayer
+    {
+       Base = 0,
+       UpperBody = 1,
     }
     [Serializable]
     public struct VirtualCameras
@@ -151,6 +177,7 @@ public class PlayerMovementController : Actor
         defaultRadius = cc.radius;
         movementController = this.GetComponent<PlayerMovementController>();
         state.move = (MixerState)animancer.States.GetOrCreate(moveAnim);
+        state.attack = animancer.States.GetOrCreate(rollAnim);
         animancer.Play(state.move);
 
         this.GetComponent<PlayerInput>().actions["Sprint"].started += (context) =>
@@ -188,17 +215,39 @@ public class PlayerMovementController : Actor
             animancer.Play(state.move, 0.25f);
         };
 
+        _MoveOnEnd = () =>
+        {
+            animancer.Play(state.move, 0.1f);
+        };
+
+        _AttackEnd = () =>
+        {
+            animancer.Play(state.move, 0.5f);
+            attack = false;
+            slash = false;
+            thrust = false;
+        };
+
+        _StopUpperLayer = () =>
+        {
+            animancer.Layers[1].Stop();
+        };
+
         ledgeClimb.Events.OnEnd = _OnFinishClimb;
 
         ladderClimbUp.Events.OnEnd = _OnFinishClimb;
 
         ledgeStart.Events.OnEnd += () => { state.climb = (DirectionalMixerState)animancer.Play(ledgeHang); };
+
+        animancer.Layers[(int)AnimLayer.UpperBody].SetMask(upperBodyMask);
+        //animancer.Layers[(int)AnimLayer.UpperBody].IsAdditive = true;
     }
 
 
     // Update is called once per frame
     void Update()
     {
+        instatemove = (animancer.States.Current == state.move);
         isGrounded = GetGrounded();
         moveSmoothed = Vector2.MoveTowards(moveSmoothed, move, Time.deltaTime);
         Vector3 camForward = Camera.main.transform.forward;
@@ -284,6 +333,28 @@ public class PlayerMovementController : Actor
                 state.swim = animancer.Play(swimStart, 0.25f);
                 this.gameObject.SendMessage("SplashBig");
             }
+            if (attack && !animancer.Layers[1].IsAnyStatePlaying())
+            {
+                if (inventory.IsMainDrawn())
+                {
+                    if (slash)
+                    {
+                        MainSlash();
+
+                    }
+                }
+                attack = false;
+                slash = false;
+            }
+            if (attackResetTimer <= 0f)
+            {
+                attackIndex = 0;
+            }
+            else
+            {
+                attackResetTimer -= Time.deltaTime;
+            }
+            
         }
         else if (animancer.States.Current == state.dash)
         {
@@ -356,7 +427,19 @@ public class PlayerMovementController : Actor
                 state.swim = animancer.Play(swimAnim);
                 this.gameObject.SendMessage("SplashBig");
             }
-            
+            if (attack && !animancer.Layers[1].IsAnyStatePlaying())
+            {
+                if (inventory.IsMainDrawn())
+                {
+                    if (slash)
+                    {
+                        DashSlash();
+                    }
+                }
+                attack = false;
+                slash = false;
+            }
+
         }
         else if (animancer.States.Current == state.skid)
         {
@@ -415,12 +498,37 @@ public class PlayerMovementController : Actor
                 state.swim = animancer.Play(swimAnim);
                 this.gameObject.SendMessage("SplashBig");
             }
+            if (attack && !animancer.Layers[1].IsAnyStatePlaying())
+            {
+                if (inventory.IsMainDrawn())
+                {
+                    if (slash)
+                    {
+                        PlungeSlash();
+                    }
+                }
+                attack = false;
+                slash = false;
+            }
         }
         else if (animancer.States.Current == state.roll)
         {
             shouldDodge = false;
             speed = rollSpeed;
             moveDirection = this.transform.forward;
+            if (attack && !animancer.Layers[1].IsAnyStatePlaying())
+            {
+                if (inventory.IsMainDrawn())
+                {
+                    if (slash)
+                    {
+                        rollAnim.Events.OnEnd = () => { RollSlash(); };
+                        
+                    }
+                }
+                attack = false;
+                slash = false;
+            }
         }
         else if (animancer.States.Current == state.jump)
         {
@@ -472,6 +580,40 @@ public class PlayerMovementController : Actor
             }
 
 
+        }
+        else if (animancer.States.Current == state.attack)
+        {
+            speed = Mathf.MoveTowards(speed, 0f, attackDecelReal * Time.deltaTime);
+            moveDirection = this.transform.forward;
+
+            if (cancelTime > 0 && animancer.States.Current.NormalizedTime >= cancelTime)
+            {
+                if (attack && slash)
+                {
+                    attack = false;
+                    slash = false;
+                    cancelTime = -1f;
+                    CancelSlash();
+                    
+                }
+                attackResetTimer = 0.5f;
+            }
+            else
+            {
+                attackResetTimer = 0f;
+            }
+            if (plunge && GetGrounded())
+            {
+                state.attack = animancer.Play(plungeEnd);
+                plunge = false;
+                xzVel = Vector3.zero;
+                speed = 0f;
+            }
+            if (CheckWater())
+            {
+                state.swim = animancer.Play(swimAnim);
+                this.gameObject.SendMessage("SplashBig");
+            }
         }
 
         if (GetGrounded())
@@ -531,7 +673,6 @@ public class PlayerMovementController : Actor
                     Debug.Log("slide");
                 }*/
                 cc.Move((xzVel + downwardsVelocity) * Time.deltaTime);
-                Debug.Log("fall!!!");
             }
             else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain")) && yVel <= 0 && animancer.States.Current != state.swim)
             {
@@ -550,12 +691,6 @@ public class PlayerMovementController : Actor
         }
 
         HandleCinemachine();
-    }
-
-
-    private void LateUpdate()
-    {
-
     }
 
     #region CLIMBING
@@ -795,6 +930,11 @@ public class PlayerMovementController : Actor
         if (value.Get<Vector2>().magnitude > 0.9f) changeTarget.Invoke();
     }
 
+    public void OnAtk_Slash(InputValue value)
+    {
+        attack = true;
+        slash = true;
+    }
     public Vector2 GetMovementVector()
     {
         if (camState == CameraState.Free)
@@ -807,6 +947,18 @@ public class PlayerMovementController : Actor
             return move;
         }
         return Vector2.zero;
+    }
+
+    public void OnSheathe(InputValue value)
+    {
+        if (!inventory.IsMainDrawn())
+        {
+            TriggerSheath(true, Inventory.EquipSlot.lHip, true);
+        }
+        else
+        {
+            TriggerSheath(false, Inventory.EquipSlot.lHip, true);
+        }
     }
 
     #endregion
@@ -845,6 +997,210 @@ public class PlayerMovementController : Actor
     }
     #endregion
 
+    #region INVENTORY & ITEMS
+
+    public Moveset GetMoveset()
+    {
+        if (inventory.IsMainDrawn())
+        {
+            return inventory.GetMainWeapon().moveset;
+        }
+        return null;
+    }
+
+    public Moveset GetMovesetOff()
+    {
+        if (inventory.IsOffDrawn())
+        {
+            return inventory.GetOffWeapon().moveset;
+        }
+        else if (inventory.IsMainDrawn())
+        {
+            return inventory.GetMainWeapon().moveset;
+        }
+        return null;
+    }
+    public void UpdateFromMoveset()
+    {
+        MixerTransition2DAsset movementAnim = moveAnim;
+        Debug.Log("updating player anims from moveset");
+        if (inventory.IsMainDrawn())
+        {
+            Debug.Log("main is drawn");
+            Moveset moveset = inventory.GetMainWeapon().moveset;
+            if (moveset.moveAnim != null)
+            {
+                movementAnim = moveset.moveAnim;
+            }
+        }
+        bool moving = false;
+        if (animancer.States.Current == state.move)
+        {
+            moving = true;
+        }
+        state.move = (MixerState)animancer.States.GetOrCreate(movementAnim);
+        if (moving) animancer.Play(state.move);
+    }
+
+
+
+    public void TriggerSheath(bool draw, Inventory.EquipSlot slot, bool targetMain)
+    {
+        if (targetMain && inventory.IsMainEquipped())
+        {
+            AnimancerState drawState = animancer.Layers[(int)AnimLayer.UpperBody].Play((draw) ? inventory.GetMainWeapon().moveset.draw : inventory.GetMainWeapon().moveset.sheathe);
+            drawState.Events.OnEnd = _StopUpperLayer;
+        }
+        else if (!targetMain && inventory.IsOffEquipped())
+        {
+            AnimancerState drawState = animancer.Layers[(int)AnimLayer.UpperBody].Play((draw) ? inventory.GetOffWeapon().moveset.draw : inventory.GetOffWeapon().moveset.sheathe);
+            drawState.Events.OnEnd = _StopUpperLayer;
+        }
+        equipToMain = targetMain;
+    }
+
+    public void AnimDrawWeapon(int slot)
+    {
+        inventory.SetDrawn(equipToMain, true);
+        UpdateFromMoveset();
+    }
+
+    public void AnimSheathWeapon(int slot)
+    {
+        inventory.SetDrawn(equipToMain, false);
+        UpdateFromMoveset();
+    }
+
+
+    public void RotateMainWeapon(float angle)
+    {
+        if (!inventory.IsMainDrawn())
+        {
+            return;
+        }
+        EquippableWeapon weapon = inventory.GetMainWeapon();
+        GameObject weaponModel = weapon.model;
+        GameObject mount = this.positionReference.MainHand;
+
+        float angleDiff = mainWeaponAngle - angle;
+
+        //Quaternion rotation = Quaternion.AngleAxis(angle, mount.transform.up);
+
+        //weaponModel.transform.rotation = rotation;
+
+        weaponModel.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
+
+        if (weapon is BladeWeapon blade)
+        {
+            blade.GetHitboxes().root.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
+        }
+        mainWeaponAngle = angle;
+    }
+
+    // rotates the off hand weapon model around the upwards axis of the off hand mount
+    public void RotateOffWeapon(float angle)
+    {
+        if (!inventory.IsOffDrawn())
+        {
+            return;
+        }
+        EquippableWeapon weapon = inventory.GetOffWeapon();
+        GameObject weaponModel = weapon.model;
+        GameObject mount = this.positionReference.OffHand;
+
+        float angleDiff = offWeaponAngle - angle;
+
+        //Quaternion rotation = Quaternion.AngleAxis(angle, mount.transform.up);
+
+        //weaponModel.transform.rotation = rotation;
+
+        weaponModel.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
+
+        if (weapon is BladeWeapon blade)
+        {
+            blade.GetHitboxes().root.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
+        }
+        offWeaponAngle = angle;
+    }
+
+    public void ResetMainRotation()
+    {
+        RotateMainWeapon(0f);
+    }
+
+    public void ResetOffRotation()
+    {
+        RotateOffWeapon(0f);
+    }
+    #endregion
+
+    #region COMBAT
+
+    // attacks
+
+    public void MainSlash()
+    {
+        if (GetMoveset().quickSlash1h is ComboAttack combo)
+        {
+            state.attack = animancer.Play(combo.GetClip(attackIndex));
+            cancelTime = combo.GetExitTime(attackIndex);
+            attackIndex++;
+            attackResetTimer = 0.5f;
+        }
+        else
+        {
+            state.attack = animancer.Play(GetMoveset().quickSlash1h.GetClip());
+            cancelTime = -1f;
+        }
+        
+        
+        state.attack.Events.OnEnd = _AttackEnd;
+        attackDecelReal = attackDecel;
+    }
+
+    public void CancelSlash()
+    {
+        if (GetMoveset().quickSlash1h is ComboAttack combo)
+        {
+            state.attack = animancer.Play(combo.GetClip(attackIndex));
+            cancelTime = combo.GetExitTime(attackIndex);
+            attackResetTimer = 0.5f;
+            attackIndex++;
+        }
+        else cancelTime = -1f;
+        state.attack.Events.OnEnd = _AttackEnd;
+    }
+    public void DashSlash()
+    {
+        state.attack = animancer.Play(GetMoveset().dashSlash.GetClip());
+        attackDecelReal = dashAttackDecel;
+        state.attack.Events.OnEnd = _MoveOnEnd;
+        dashed = false;
+    }
+
+    public void RollSlash()
+    {
+        state.attack = animancer.Play(GetMoveset().rollSlash.GetClip());
+        attackDecelReal = dashAttackDecel;
+        state.attack.Events.OnEnd = _MoveOnEnd;
+        rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
+        dashed = false;
+    }
+
+    public void PlungeSlash()
+    { 
+        if (GetMoveset().plungeSlash is PhaseAttack phase)
+        {
+            ClipTransition clip = GetMoveset().plungeSlash.GetClip();
+            state.attack.Events.OnEnd = () => { state.attack = animancer.Play(phase.GetLoopPhaseClip(), 0.1f); };
+            state.attack = animancer.Play(GetMoveset().plungeSlash.GetClip());
+            attackDecelReal = 0f;
+            plungeEnd = phase.GetEndPhaseClip();
+            plungeEnd.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
+        }
+        plunge = true;
+    }
+    #endregion
     public bool GetGrounded()
     {
         // return cc.isGrounded;

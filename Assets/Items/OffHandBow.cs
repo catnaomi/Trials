@@ -46,7 +46,7 @@ public class OffHandBow : EquippableWeapon, HitboxHandler
     {
         base.EquipWeapon(actor);
 
-        GetHumanoidHolder().aimIKHandler = ikHandler;
+        //GetHeldActor().aimIKHandler = ikHandler;
 
         //((HumanoidActor)actor).drawTime = drawTime;
         //((HumanoidActor)actor).OnOffhandAttack.AddListener(Fire);
@@ -105,18 +105,18 @@ public class OffHandBow : EquippableWeapon, HitboxHandler
 
     public void HitboxActive(bool active)
     {
-        if (active && canFire && GetHumanoidHolder().IsAiming())
+        if (active && canFire/* && GetHeldActor().IsAiming()*/)
         {
             Debug.Log("bow fire!!!");
-            if (GetHumanoidHolder() is PlayerActor)
+            if (GetHeldActor() is PlayerActor)
             {
-                fireStrength = Mathf.Clamp(GetHumanoidHolder().animator.GetFloat("Input-HeavyHeldTime"), 0f, 1f);
+                fireStrength = Mathf.Clamp(GetHeldActor().animator.GetFloat("Input-HeavyHeldTime"), 0f, 1f);
             }
             else
             {
                 fireStrength = 1f;
             }
-            GetHumanoidHolder().attributes.ReduceAttribute(GetHumanoidHolder().attributes.stamina, 10f);
+            GetHeldActor().attributes.ReduceAttribute(GetHeldActor().attributes.stamina, 10f);
             Fire();
             canFire = false;
         }

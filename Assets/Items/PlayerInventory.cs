@@ -7,11 +7,11 @@ using CustomUtilities;
 
 // TODO: FIX THIS
 
-public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
+public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
 {
     public static int invID;
 
-    HumanoidActor actor;
+    PlayerMovementController player;
     [ReadOnly] public EquippableWeapon MainWeapon;
     private bool MainIsDrawn;
     //private bool TwoHanding;
@@ -51,7 +51,7 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
 
     void Awake()
     {
-        this.actor = GetComponent<HumanoidActor>();
+        this.player = GetComponent<PlayerMovementController>();
         contents = new List<Item>();
         foreach (Item item in StartingContents)
         {
@@ -151,7 +151,7 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
         if (item != null)
         {
             contents.Add(item);
-            item.holder = actor;
+            item.holder = player;
             OnChange.Invoke();
         }
     }
@@ -194,17 +194,15 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
         PositionWeapon();
 
         weapon.isEquipped = true;
-        weapon.EquipWeapon(actor);
+        weapon.EquipWeapon(this.player);
 
         UpdateTwoHand(weapon.TwoHandOnly());
 
-        if (weapon.moveset != null && actor is PlayerActor player)
-        {
-            player.moveset = weapon.moveset;
-        }
+        //player.moveset = weapon.moveset;
+
         if (draw)
         {
-            actor.TriggerSheath(true, MainWeapon.MainHandEquipSlot, true);
+            this.player.TriggerSheath(true, MainWeapon.MainHandEquipSlot, true);
         }
 
         OnChange.Invoke();
@@ -244,13 +242,13 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
         PositionWeapon();
 
         weapon.isEquipped = true;
-        weapon.EquipWeapon(actor);
+        weapon.EquipWeapon(player);
 
         UpdateTwoHand(false);
 
         if (draw)
         {
-            actor.TriggerSheath(true, OffWeapon.OffHandEquipSlot, false);
+            player.TriggerSheath(true, OffWeapon.OffHandEquipSlot, false);
         }
 
         OnChange.Invoke();
@@ -268,7 +266,7 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
         {
             return;
         }
-        MainWeapon.UnequipWeapon(actor);
+        MainWeapon.UnequipWeapon(player);
         MainWeapon.isEquipped = false;
         MainWeapon.DestroyModel();
         //MainWeapon.isMain = false;
@@ -276,7 +274,7 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
         //MainWeapon.isDrawn = false;
         //MainWeapon.is2h = false;
         MainWeapon = null;
-        actor.ResetMainRotation();
+        player.ResetMainRotation();
         PositionWeapon();
 
         OnChange.Invoke();
@@ -290,7 +288,7 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
         {
             return;
         }
-        OffWeapon.UnequipWeapon(actor);
+        OffWeapon.UnequipWeapon(player);
         OffWeapon.isEquipped = false;
         OffWeapon.DestroyModel();
         //OffWeapon.isMain = false;
@@ -298,7 +296,7 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
         //OffWeapon.isDrawn = false;
         //OffWeapon.is2h = false;
         OffWeapon = null;
-        actor.RotateOffWeapon(0f);
+        player.RotateOffWeapon(0f);
         PositionWeapon();
 
         OnChange.Invoke();
@@ -352,7 +350,7 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
             }
             else if (IsOffDrawn() && TwoHanding)
             {
-                actor.TriggerSheath(false, GetOffWeapon().OffHandEquipSlot, false);
+                player.TriggerSheath(false, GetOffWeapon().OffHandEquipSlot, false);
                 //SetDrawn(false, !TwoHanding);
             }
         }
@@ -370,15 +368,15 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
             GameObject parent;
             if (IsMainDrawn() && !MainWeapon.ParentLeftAsMain)
             {
-                parent = actor.positionReference.MainHand;
+                parent = player.positionReference.MainHand;
             }
             else if (IsMainDrawn() && MainWeapon.ParentLeftAsMain)
             {
-                parent = actor.positionReference.OffHand;
+                parent = player.positionReference.OffHand;
             }
             else
             {
-                parent = actor.positionReference.GetPositionRefSlot(MainWeapon.MainHandEquipSlot);
+                parent = player.positionReference.GetPositionRefSlot(MainWeapon.MainHandEquipSlot);
             }
             MainWeapon.model.transform.position = parent.transform.position;
             MainWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.up, parent.transform.forward);
@@ -390,15 +388,15 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
             GameObject parent;
             if (IsOffDrawn() && OffWeapon.ParentRightAsOff)
             {
-                parent = actor.positionReference.MainHand;
+                parent = player.positionReference.MainHand;
             }
             else if (IsOffDrawn() && !OffWeapon.ParentRightAsOff)
             {
-                parent = actor.positionReference.OffHand;
+                parent = player.positionReference.OffHand;
             }
             else
             {
-                parent = actor.positionReference.GetPositionRefSlot(OffWeapon.OffHandEquipSlot);
+                parent = player.positionReference.GetPositionRefSlot(OffWeapon.OffHandEquipSlot);
             }
             OffWeapon.model.transform.position = parent.transform.position;
             OffWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.up, parent.transform.forward);
@@ -420,11 +418,11 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
     {
         if (IsMainEquipped())
         {
-            MainWeapon.UpdateWeapon(actor);
+            MainWeapon.UpdateWeapon(player);
         }
         if (IsOffEquipped())
         {
-            OffWeapon.UpdateWeapon(actor);
+            OffWeapon.UpdateWeapon(player);
         }
     }
 // during fixed update
@@ -432,11 +430,11 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
     {
         if (IsMainEquipped())
         {
-            MainWeapon.FixedUpdateWeapon(actor);
+            MainWeapon.FixedUpdateWeapon(player);
         }
         if (IsOffEquipped())
         {
-            OffWeapon.FixedUpdateWeapon(actor);
+            OffWeapon.FixedUpdateWeapon(player);
         }
     }
     public EquippableWeapon GetMainWeapon()
@@ -637,7 +635,7 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
                 {
                     if (!IsMainDrawn())
                     {
-                        actor.TriggerSheath(true, MainWeapon.MainHandEquipSlot, true);
+                        player.TriggerSheath(true, MainWeapon.MainHandEquipSlot, true);
                     }
                     else
                     {
@@ -648,7 +646,7 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
                 {
                     if (!IsOffDrawn())
                     {
-                        actor.TriggerSheath(true, OffWeapon.OffHandEquipSlot, false);
+                        player.TriggerSheath(true, OffWeapon.OffHandEquipSlot, false);
                     }
                     else if (weapon.EquippableMain)
                     {

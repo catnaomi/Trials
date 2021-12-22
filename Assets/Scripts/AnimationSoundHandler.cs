@@ -30,7 +30,6 @@ public class AnimationSoundHandler : MonoBehaviour
     #region Footsteps
     public void StepL(int heavy)
     {
-        Debug.Log("heavy" + heavy);
         AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
         if (!source.isPlaying) source.PlayOneShot(default_stepL);
 

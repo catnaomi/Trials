@@ -178,18 +178,18 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             case AttackType.SlashingHeavy:
                 return 25f;
             case AttackType.ThrustingHeavy:
-                return 25f;
+                return 25f; 
         }
     }
 
     public GameObject GetHand()
     {
-        switch (GetHumanoidHolder().inventory.GetItemHand(this))
+        switch (((IHumanoidInventory)GetInventory()).GetItemHand(this))
         {
             case -1:
-                return GetHumanoidHolder().positionReference.OffHand;
+                return GetPositionReference().OffHand;
             default:
-                return GetHumanoidHolder().positionReference.MainHand;
+                return GetPositionReference().MainHand;
 
         }
     }
@@ -442,7 +442,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             actor.transform
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
-                    source = GetHumanoidHolder().gameObject,
+                    source = GetHeldActor().gameObject,
                     types = GetModifiedDamageTypes(true),
                     criticalMultiplier = 1.2f,
                 };           
@@ -458,7 +458,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             actor.transform
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
-                    source = GetHumanoidHolder().gameObject,
+                    source = GetHeldActor().gameObject,
                     types = GetModifiedDamageTypes(true),
                     criticalMultiplier = 1.2f,
                 };
@@ -483,7 +483,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                         onHelpless = DamageKnockback.StaggerType.Knockdown,
                     },
                     breaksArmor = true,
-                    source = GetHumanoidHolder().gameObject,
+                    source = GetHeldActor().gameObject,
                     types = GetModifiedDamageTypes(true),
                     criticalMultiplier = 1.2f,
                 };
@@ -499,7 +499,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             actor.transform
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
-                    source = GetHumanoidHolder().gameObject,
+                    source = GetHeldActor().gameObject,
                     types = GetModifiedDamageTypes(false),
                     criticalMultiplier = 1.7f,
                 };
@@ -515,7 +515,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                             actor.transform
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
-                    source = GetHumanoidHolder().gameObject,
+                    source = GetHeldActor().gameObject,
                     types = GetModifiedDamageTypes(false),
                     criticalMultiplier = 1.7f,
                 };
@@ -540,7 +540,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                         onHelpless = DamageKnockback.StaggerType.Knockdown,
                     },
                     breaksArmor = true,
-                    source = GetHumanoidHolder().gameObject,
+                    source = GetHeldActor().gameObject,
                     types = GetModifiedDamageTypes(false),
                     criticalMultiplier = 1.7f,
                 };
@@ -557,7 +557,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                         ),
                     staggers = DamageKnockback.StandardStaggerData,
                     breaksArmor = true,
-                    source = GetHumanoidHolder().gameObject,
+                    source = GetHeldActor().gameObject,
                     types = GetModifiedDamageTypes(false),
                     criticalMultiplier = 1.7f,
                     forceCritical = true,
@@ -579,7 +579,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                         onHelpless = DamageKnockback.StaggerType.Stumble,
                     },
                     breaksArmor = true,
-                    source = GetHumanoidHolder().gameObject,
+                    source = GetHeldActor().gameObject,
                     disarm = true
                 };
             default:
