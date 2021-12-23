@@ -3,7 +3,7 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 
-[CreateAssetMenu(fileName = "BladeWeapon", menuName = "ScriptableObjects/CreateBladeWeapon", order = 1)]
+[CreateAssetMenu(fileName = "BladeWeapon", menuName = "ScriptableObjects/Weapons/Create Blade Weapon", order = 1)]
 public class BladeWeapon : EquippableWeapon, HitboxHandler
 {
     public float baseDamage;

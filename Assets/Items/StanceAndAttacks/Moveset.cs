@@ -16,8 +16,9 @@ public class Moveset : ScriptableObject
     [Header("Stance Attacks")]
     public InputAttack stanceSlash;
     public InputAttack stanceThrust;
-    [Header("Combo Attacks")]
-    public InputAttack comboSlash1h;
+    [Header("Aim Attack")]
+    public AimAttack aimAttack;
+
     [Header("Movement-Based Attacks")]
     public InputAttack dashSlash;
     public InputAttack dashThrust;

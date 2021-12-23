@@ -10,7 +10,7 @@ public class IKHandler : ScriptableObject
 
     }
 
-    public virtual void OnUpdate(HumanoidActor actor)
+    public virtual void OnUpdate(Actor actor)
     {
 
     }

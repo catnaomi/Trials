@@ -9,6 +9,7 @@ public class EquippableWeapon : Item, IGeneratesModel
     [Header("Equip Information")]
     public bool EquippableMain = true;
     public bool EquippableOff = true;
+    public bool EquippableRanged = false;
     [Space(5)]
     public bool OneHanded = true;
     public bool TwoHanded = true;
@@ -18,6 +19,7 @@ public class EquippableWeapon : Item, IGeneratesModel
     [Header("Slot Information")]
     public Inventory.EquipSlot MainHandEquipSlot;
     public Inventory.EquipSlot OffHandEquipSlot;
+    public Inventory.EquipSlot RangedEquipSlot;
     [Header("Stance & Moveset Information")]
     public StanceHandler stance;
     public Moveset moveset;

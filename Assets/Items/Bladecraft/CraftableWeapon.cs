@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using CustomUtilities;
 
 [Serializable]
-[CreateAssetMenu(fileName = "Item", menuName = "ScriptableObjects/Crafting/New CraftableWeapon", order = 1)]
+[CreateAssetMenu(fileName = "Item", menuName = "ScriptableObjects/Crafting/New Craftable Weapon", order = 1)]
 public class CraftableWeapon : BladeWeapon
 {
     public Hilt hilt;

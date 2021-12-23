@@ -7,8 +7,13 @@ public class BowIKHandler : IKHandler
 
     public override void OnIK(Animator animator)
     {
-        HumanoidActor actor = animator.GetComponent<HumanoidActor>();
+        Debug.Log("bowikonik");
+        if (animator.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference))
+        {
+            animator.SetLookAtWeight(1f, 0f, 0.5f);
 
+            animator.SetLookAtPosition(positionReference.Spine.transform.position + positionReference.transform.forward * 100f);
+        }
         /*
         Vector3 aimDir = actor.GetLaunchVector(actor.positionReference.Spine.transform.position);
 
@@ -16,17 +21,27 @@ public class BowIKHandler : IKHandler
 
         Vector3 adjAimDir = Quaternion.AngleAxis(90f, Vector3.up) * aimDir;
         */
-        animator.SetLookAtWeight(1f, 0f, 0.5f);
-
-        animator.SetLookAtPosition(actor.positionReference.Spine.transform.position + actor.transform.forward * 100f);
+        
     }
 
-    public override void OnUpdate(HumanoidActor actor)
+    public override void OnUpdate(Actor aactor)
     {
-        Vector3 aimDir = actor.GetLaunchVector(actor.positionReference.Spine.transform.position);
+        Debug.Log("bowikupdate");
+        if (aactor is HumanoidActor actor)
+        {
+            Vector3 aimDir = actor.GetLaunchVector(actor.positionReference.Spine.transform.position);
 
-        Quaternion aimRot = Quaternion.LookRotation(aimDir, Vector3.up) * Quaternion.AngleAxis(90f, Vector3.up);
+            Quaternion aimRot = Quaternion.LookRotation(aimDir, Vector3.up) * Quaternion.AngleAxis(90f, Vector3.up);
 
-        actor.positionReference.Spine.rotation = aimRot;
+            actor.positionReference.Spine.rotation = aimRot;
+        }
+        else if (aactor is PlayerMovementController player)
+        {
+            Vector3 aimDir = player.GetLaunchVector(player.positionReference.Spine.transform.position);
+
+            Quaternion aimRot = Quaternion.LookRotation(aimDir, Vector3.up) * Quaternion.AngleAxis(90f, Vector3.up);
+
+            player.positionReference.Spine.rotation = aimRot;
+        }
     }
 }

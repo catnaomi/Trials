@@ -48,7 +48,7 @@ public class OffHandShield : EquippableWeapon, HitboxHandler
     public override void EquipWeapon(Actor actor)
     {
         base.EquipWeapon(actor);
-
+        return;
         HumanoidActor humanoidActor = (HumanoidActor)actor;
         //humanoidActor.blockType = ActionsLibrary.BlockType.Shield;
 

@@ -49,6 +49,10 @@ public class Inventory : MonoBehaviour, IInventory, IHumanoidInventory
         cBack  // 5
     }
 
+    public const int MainType = 0;
+    public const int OffType = 1;
+    public const int RangedType = -1;
+
     void Awake()
     {
         this.actor = GetComponent<HumanoidActor>();

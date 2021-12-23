@@ -9,36 +9,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7690a8c48c333f6418d1729d9eaa3864, type: 3}
-  m_Name: DebugShield
+  m_Script: {fileID: 11500000, guid: f79f0958e32df0241858a7c1d664535c, type: 3}
+  m_Name: DebugBow2
   m_EditorClassIdentifier: 
-  itemName: Debug Shield
-  itemDesc: is a shield of debuggin'
+  itemName: DebugBow
+  itemDesc: a debugging bow for a more sophisticated age.
   holder: {fileID: 0}
   MaxStackSize: 1
   invID: 0
-  prefab: {fileID: 6502720667461261439, guid: adccd86633c83de4191e8ae9ba17b285, type: 3}
-  displayImage: {fileID: 21300000, guid: ee48e658d81098345977e58035c87003, type: 3}
+  prefab: {fileID: 6227314725866584499, guid: 3b9ceda05e36fe843a92d126dbe8d801, type: 3}
+  displayImage: {fileID: 21300000, guid: 75ade6ead379adc42a533f9e16a2e530, type: 3}
   displayColor: {r: 1, g: 1, b: 1, a: 1}
-  isEquipped: 1
+  isEquipped: 0
   EquippableMain: 0
-  EquippableOff: 1
-  EquippableRanged: 0
-  OneHanded: 1
-  TwoHanded: 1
-  ParentLeftAsMain: 0
-  ParentRightAsOff: 0
+  EquippableOff: 0
+  EquippableRanged: 1
+  OneHanded: 0
+  TwoHanded: 0
+  ParentLeftAsMain: 1
+  ParentRightAsOff: 1
   MainHandEquipSlot: 0
-  OffHandEquipSlot: 5
-  RangedEquipSlot: 0
+  OffHandEquipSlot: 0
+  RangedEquipSlot: 4
   stance:
     stanceStyle: 0
     rightGrip: 0
-    leftGrip: 8
+    leftGrip: 0
     twohandGrip: 0
-    blockStyle: 4
-  moveset: {fileID: 11400000, guid: c1c2358107bd704408d4f58944d2817a, type: 2}
-  AttackSpeed: 1
+    blockStyle: 0
+  moveset: {fileID: 11400000, guid: bc549c059af4b0045b4e4f50b648e75d, type: 2}
+  AttackSpeed: 0
   weight: 0
   OnEquip:
     m_PersistentCalls:
@@ -47,12 +47,11 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   model: {fileID: 0}
-  reductionStrength: 0.1
-  blockPoiseDamage: 100
-  bashCost: 20
-  bashDamage:
-    staminaDamage: 20
-    kbForce: {x: 0, y: 0, z: 10}
+  arrowPrefab: {fileID: 4805927410726168974, guid: 1be0e19a8c8967c4eb39716d4edc5885,
+    type: 3}
+  damageKnockback:
+    staminaDamage: 0
+    kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     healthDamage: 0
     types: 
@@ -62,7 +61,7 @@ MonoBehaviour:
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
-    breaksArmor: 1
+    breaksArmor: 0
     unblockable: 0
     disarm: 0
     staggers:
@@ -72,4 +71,6 @@ MonoBehaviour:
       onInjure: 0
       onKill: 0
       onHelpless: 0
-    hitClip: {fileID: 8300000, guid: 8cf0a475e2a2ccc48bf5bb14d8c24c2e, type: 3}
+    hitClip: {fileID: 0}
+  ikHandler: {fileID: 11400000, guid: 3e1da2a0b87efea48b403875a190a4af, type: 2}
+  drawTime: 1

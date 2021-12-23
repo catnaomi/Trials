@@ -19,6 +19,9 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
     [ReadOnly] public EquippableWeapon OffWeapon;
     private bool OffIsDrawn;
 
+    [ReadOnly] public EquippableWeapon RangedWeapon;
+    private bool RangedIsDrawn;
+
     public bool equipOnStart = true;
     public bool initialized = false;
     [Header("Inspector-set Weapons")]
@@ -26,7 +29,7 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
     public EquippableWeapon Slot0Weapon; // starts equipped. up
     [Tooltip("Left Slot. Equips to Offhand.")]
     public EquippableWeapon Slot1Weapon; // left
-    [Tooltip("Right Slot.")]
+    [Tooltip("Right Slot. Equips to Ranged.")]
     public EquippableWeapon Slot2Weapon; // right
     [ReadOnly] public EquippableWeapon Slot3Weapon; // down (disabled)
 
@@ -71,6 +74,7 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
 
         EquippableWeapon mweapon = null;
         EquippableWeapon oweapon = null;
+        EquippableWeapon rweapon = null;
 
         if (Slot0Weapon != null)
         {
@@ -90,9 +94,9 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
 
         if (Slot2Weapon != null)
         {
-            var sweapon = Instantiate(Slot2Weapon);
-            Slot2Weapon = sweapon;
-            AddItem(sweapon);
+            rweapon = Instantiate(Slot2Weapon);
+            Slot2Weapon = rweapon;
+            AddItem(rweapon);
         }
 
         if (Slot3Weapon != null)
@@ -126,6 +130,7 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
             {
                 EquippableWeapon mweapon = Slot0Weapon;
                 EquippableWeapon oweapon = Slot1Weapon;
+                EquippableWeapon rweapon = Slot2Weapon;
                 if (mweapon != null && oweapon != null)
                 {
                     EquipMainWeapon(mweapon, false);
@@ -138,6 +143,10 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
                 else if (oweapon != null)
                 {
                     EquipOffHandWeapon(oweapon, true);
+                }
+                if (rweapon != null)
+                {
+                    EquipRangedWeapon(rweapon);
                 }
             }
 
@@ -260,6 +269,33 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
         EquipOffHandWeapon(weapon, true);
     }
 
+    public void EquipRangedWeapon(EquippableWeapon weapon)
+    {
+        if (!weapon.EquippableRanged || !weapon.IsEquippable())
+        {
+            return;
+        }
+        if (IsRangedEquipped())
+        {
+            if (weapon == RangedWeapon)
+            {
+                return;
+            }
+            UnequipRangedWeapon();
+        }
+        RangedWeapon = weapon;
+        //slot.slot = slot.weapon.MainHandEquipSlot;
+
+        GenerateRangedModel();
+        PositionWeapon();
+
+        weapon.isEquipped = true;
+        weapon.EquipWeapon(this.player);
+
+        OnChange.Invoke();
+        weaponChanged = true;
+    }
+
     public void UnequipMainWeapon()
     {
         if (!IsMainEquipped())
@@ -303,6 +339,23 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
         weaponChanged = true;
     }
 
+    public void UnequipRangedWeapon()
+    {
+        RangedWeapon.UnequipWeapon(player);
+        RangedWeapon.isEquipped = false;
+        RangedWeapon.DestroyModel();
+        //MainWeapon.isMain = false;
+        //MainWeapon.isOff = false;
+        //MainWeapon.isDrawn = false;
+        //MainWeapon.is2h = false;
+        RangedWeapon = null;
+
+        PositionWeapon();
+
+        OnChange.Invoke();
+        weaponChanged = true;
+
+    }
     public void GenerateMainModel()
     {
         if (IsMainEquipped())
@@ -318,10 +371,19 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
             OffWeapon.GenerateModel();
         }
     }
+
+    public void GenerateRangedModel()
+    {
+        if (IsRangedEquipped())
+        {
+            RangedWeapon.GenerateModel();
+        }
+    }
     public void GenerateModels()
     {
         GenerateMainModel();
         GenerateOffModel();
+        GenerateRangedModel();
     }
 
     
@@ -402,6 +464,26 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
             OffWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.up, parent.transform.forward);
             OffWeapon.model.transform.SetParent(parent.transform, true);
         }
+        // ranged
+        if (IsRangedEquipped())
+        {
+            GameObject parent;
+            if (IsRangedDrawn() && !RangedWeapon.ParentLeftAsMain)
+            {
+                parent = player.positionReference.MainHand;
+            }
+            else if (IsRangedDrawn() && RangedWeapon.ParentLeftAsMain)
+            {
+                parent = player.positionReference.OffHand;
+            }
+            else
+            {
+                parent = player.positionReference.GetPositionRefSlot(RangedWeapon.RangedEquipSlot);
+            }
+            RangedWeapon.model.transform.position = parent.transform.position;
+            RangedWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.up, parent.transform.forward);
+            RangedWeapon.model.transform.SetParent(parent.transform, true);
+        }
     }
 
     public bool IsMainDrawn()
@@ -413,7 +495,12 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
     {
         return IsOffEquipped() && OffIsDrawn;
     }
-    
+
+    public bool IsRangedDrawn()
+    {
+        return IsRangedEquipped() && RangedIsDrawn;
+    }
+
     public void UpdateWeapon()
     {
         if (IsMainEquipped())
@@ -455,6 +542,15 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
         return null;
     }
 
+    public EquippableWeapon GetRangedWeapon()
+    {
+        if (IsRangedEquipped())
+        {
+            return RangedWeapon;
+        }
+        return null;
+    }
+
     public float GetEquipWeight()
     {
         float weight = 0f;
@@ -466,6 +562,11 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
         if (IsOffEquipped())
         {
             weight += GetOffWeapon().GetWeight();
+        }
+
+        if (IsRangedEquipped())
+        {
+            weight += GetRangedWeapon().GetWeight();
         }
 
         return weight;
@@ -480,24 +581,37 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
         return 0f;
     }
 
-    public void SetDrawn(bool main, bool drawn)
+
+    public void SetDrawn(int type, bool drawn)
     {
-        if (main)
+        switch (type)
         {
-            if (IsMainEquipped())
-            {
-                MainIsDrawn = drawn;
-            }
-        }
-        else
-        {
-            if (IsOffEquipped())
-            {
-                OffIsDrawn = drawn;
-            }
+            case Inventory.MainType: // main
+                if (IsMainEquipped())
+                {
+                    MainIsDrawn = drawn;
+                }
+                break;
+            case Inventory.OffType: // off
+                if (IsOffEquipped())
+                {
+                    OffIsDrawn = drawn;
+                }
+                break;
+            case Inventory.RangedType: // ranged
+                if (IsRangedEquipped())
+                {
+                    RangedIsDrawn = drawn;
+                }
+                break;
         }
         PositionWeapon();
         weaponChanged = true;
+    }
+
+    public void SetDrawn(bool main, bool drawn)
+    {
+        SetDrawn((main) ? 0 : 1, drawn);
     }
 
     public void EquipToSlot(EquippableWeapon weapon, int slot)
@@ -541,6 +655,7 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
 
         UnequipMainWeapon();
         UnequipOffHandWeapon();
+        UnequipRangedWeapon();
     }
 
     public int FindWeaponSlot(EquippableWeapon weapon)
@@ -593,6 +708,20 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
         }
         return true;
     }
+
+    public bool IsRangedEquipped()
+    {
+        if (RangedWeapon == null)
+        {
+            return false;
+        }
+        if (RangedWeapon.itemName == "")
+        {
+            return false;
+        }
+        return true;
+    }
+
 
     public void InputOnSlot(int slot)
     {
@@ -710,6 +839,10 @@ public class PlayerInventory : MonoBehaviour, IInventory, IHumanoidInventory
         return MainWeapon.model;
     }
     
+    public GameObject GetRangedModel()
+    {
+        return RangedWeapon.model;
+    }
     /*
     public Damage GetBlockResistance(bool main)
     {
