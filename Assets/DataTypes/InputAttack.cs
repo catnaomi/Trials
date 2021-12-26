@@ -11,6 +11,8 @@ public class InputAttack : InputAction
     public bool isFallingOK; // can attack be initiated while falling
     public bool isParryOK; // is attack a riposte or disarm?
     [SerializeField] protected ClipTransition anim;
+    [Header("Attack Data")]
+    public DamageKnockback attackData;
     public int GetAttackID()
     {
         return attackId;

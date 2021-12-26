@@ -106,7 +106,11 @@ public class PlayerMovementController : Actor
     public float blockSpeed = 2.5f;
     float attackResetTimer = 0f;
     float aimTimer;
+    bool isHitboxActive;
     public float aimCancelTime = 2f;
+    public float aimTime;
+    public float aimStartTime = 0.25f;
+    [ReadOnly, SerializeField] private DamageKnockback currentAttackData;
     [Header("Animancer")]
     public AnimancerComponent animancer;
     public MixerTransition2DAsset moveAnim;
@@ -116,8 +120,8 @@ public class PlayerMovementController : Actor
     ClipTransition currentSprintAnim;
     public ClipTransition skidAnim;
     public ClipTransition fallAnim;
-    public AnimationClip landSoftAnim;
-    public AnimationClip landHardAnim;
+    public ClipTransition landSoftAnim;
+    public ClipTransition landHardAnim;
     public ClipTransition rollAnim;
     public ClipTransition standJumpAnim;
     public ClipTransition runJumpAnim;
@@ -130,7 +134,7 @@ public class PlayerMovementController : Actor
     public ClipTransition ladderClimbUp;
     [Space(5)]
     public LinearMixerTransition swimAnim;
-    public AnimationClip swimEnd;
+    public ClipTransition swimEnd;
     public ClipTransition swimStart;
     [Space(5)]
     public float horizontalAimSpeed = 90f;
@@ -139,13 +143,15 @@ public class PlayerMovementController : Actor
     MixerTransition2DAsset aimAnim;
     [Space(5)]
     public AvatarMask upperBodyMask;
-
+    [Header("Damage Anims")]
+    public DamageAnims damageAnim;
     MixerTransition2D blockMove;
     ClipTransition blockAnimStart;
     ClipTransition blockAnim;
     PlayerMovementController movementController;
     AnimState state;
 
+    public UnityEvent OnHitboxActive;
 
     private System.Action _OnLandEnd;
     private System.Action _OnFinishClimb;
@@ -243,6 +249,7 @@ public class PlayerMovementController : Actor
         };
         walkAccelReal = walkAccel;
 
+
         _OnLandEnd = () =>
         {
             state.move.ChildStates[0].Clip = idleAnim;
@@ -282,6 +289,14 @@ public class PlayerMovementController : Actor
 
         ledgeStart.Events.OnEnd += () => { state.climb = (DirectionalMixerState)animancer.Play(ledgeHang); };
 
+        System.Action _MoveAndReset = () =>
+        {
+            animancer.Play(state.move, 0.1f);
+            walkAccelReal = walkAccel;
+        };
+        landHardAnim.Events.OnEnd = _MoveAndReset;
+        landSoftAnim.Events.OnEnd = _MoveAndReset;
+        swimEnd.Events.OnEnd = _MoveAndReset;
         animancer.Layers[(int)AnimLayer.UpperBody].SetMask(upperBodyMask);
         //animancer.Layers[(int)AnimLayer.UpperBody].IsAdditive = true;
         UpdateFromMoveset();
@@ -402,6 +417,10 @@ public class PlayerMovementController : Actor
             }
             if (attack && !animancer.Layers[1].IsAnyStatePlaying())
             {
+                if (!inventory.IsMainDrawn())
+                {
+                    inventory.SetDrawn(true, true);
+                }
                 if (inventory.IsMainDrawn())
                 {
                     if (slash)
@@ -414,10 +433,10 @@ public class PlayerMovementController : Actor
                         MainThrust();
                     }
                 }
-                else if (inventory.IsMainEquipped() && !animancer.Layers[1].IsAnyStatePlaying())
-                {
-                    TriggerSheath(true, inventory.GetMainWeapon().MainHandEquipSlot, true);
-                }
+                //else if (inventory.IsMainEquipped() && !animancer.Layers[1].IsAnyStatePlaying())
+                //{
+                //    TriggerSheath(true, inventory.GetMainWeapon().MainHandEquipSlot, true);
+                //}
                 attack = false;
                 slash = false;
                 thrust = false;
@@ -606,6 +625,10 @@ public class PlayerMovementController : Actor
             }
             if (attack && !animancer.Layers[1].IsAnyStatePlaying())
             {
+                if (!inventory.IsMainDrawn())
+                {
+                    inventory.SetDrawn(true, true);
+                }
                 if (inventory.IsMainDrawn())
                 {
                     if (slash)
@@ -637,20 +660,25 @@ public class PlayerMovementController : Actor
                 if (lastAirTime >= hardLandingTime)
                 {
 
-                    AnimancerState land = state.move.ChildStates[0];
+                    /*AnimancerState land = state.move.ChildStates[0];
                     land.Clip = landHardAnim;
-                    walkAccelReal = hardLandAccel;
+                    
                     land.Events.OnEnd = _OnLandEnd;
                     speed = 0f;
-                    animancer.Play(state.move, 0.25f);
+                    animancer.Play(state.move, 0.25f);*/
+
+                    AnimancerState land = animancer.Play(landHardAnim);
+                    walkAccelReal = hardLandAccel;
+                    speed = 0f;
                     sprinting = false;
                 }
                 else if (lastAirTime >= softLandingTime)
                 {
-                    AnimancerState land = state.move.ChildStates[0];
-                    land.Clip = landSoftAnim;
+                    AnimancerState land = animancer.Play(landSoftAnim);
+                    //AnimancerState land = state.move.ChildStates[0];
+                    //land.Clip = landSoftAnim;
                     walkAccelReal = softLandAccel;
-                    land.Events.OnEnd = _OnLandEnd;
+                    //land.Events.OnEnd = _OnLandEnd;
                     speed = 0f;
                     animancer.Play(state.move, 0.25f);
                 }
@@ -682,6 +710,10 @@ public class PlayerMovementController : Actor
             }
             if (attack && !animancer.Layers[1].IsAnyStatePlaying())
             {
+                if (!inventory.IsMainDrawn())
+                {
+                    inventory.SetDrawn(true, true);
+                }
                 if (inventory.IsMainDrawn())
                 {
                     if (slash)
@@ -705,6 +737,10 @@ public class PlayerMovementController : Actor
             moveDirection = this.transform.forward;
             if (attack && !animancer.Layers[1].IsAnyStatePlaying())
             {
+                if (!inventory.IsMainDrawn())
+                {
+                    inventory.SetDrawn(true, true);
+                }
                 if (inventory.IsMainDrawn())
                 {
                     if (slash)
@@ -766,12 +802,11 @@ public class PlayerMovementController : Actor
             }
             else
             {
-                AnimancerState land = state.move.ChildStates[0];
-                land.Clip = swimEnd;
+                //AnimancerState land = state.move.ChildStates[0];
+                AnimancerState land = animancer.Play(swimEnd);
                 walkAccelReal = hardLandAccel;
-                land.Events.OnEnd = _OnLandEnd;
                 speed = 0f;
-                animancer.Play(state.move, 0.25f);
+                sprinting = false;
             }
 
             animancer.Layers[0].ApplyAnimatorIK = (speed < 0.1f);
@@ -863,18 +898,7 @@ public class PlayerMovementController : Actor
                     inventory.SetDrawn(Inventory.OffType, false);
                     TriggerSheath(true, inventory.GetRangedWeapon().RangedEquipSlot, Inventory.RangedType);
                 }
-                else if (!anyPlaying)
-                {
-                    animancer.Layers[1].Play(rwep.moveset.aimAttack.GetIdleClip());
-                }
-                else if (atk && !aimAttack)
-                {
-                    ClipTransition clip = rwep.moveset.aimAttack.GetStartClip();
-                    clip.Events.OnEnd = () => { animancer.Layers[1].Play(rwep.moveset.aimAttack.GetHoldClip()); };
-                    animancer.Layers[1].Play(clip);
-                    aimAttack = true;
-                }
-                else if (!atk && aimAttack)
+                else if (!aiming && aimAttack)//(!atk && aimAttack)
                 {
                     ClipTransition clip = rwep.moveset.aimAttack.GetFireClip();
                     clip.Events.OnEnd = () => { animancer.Layers[1].Play(rwep.moveset.aimAttack.GetIdleClip()); };
@@ -883,6 +907,20 @@ public class PlayerMovementController : Actor
                     attack = false;
                     slash = false;
                     thrust = false;
+                }
+                else
+                {
+                    if (aiming && !aimAttack && inventory.IsRangedDrawn())
+                    {
+                        ClipTransition clip = rwep.moveset.aimAttack.GetStartClip();
+                        clip.Events.OnEnd = () => { animancer.Layers[1].Play(rwep.moveset.aimAttack.GetHoldClip()); };
+                        animancer.Layers[1].Play(clip);
+                        aimAttack = true;
+                    }
+                    else if (!anyPlaying)
+                    {
+                        animancer.Layers[1].Play(rwep.moveset.aimAttack.GetIdleClip());
+                    }
                 }
             }
             if (!aiming)
@@ -990,6 +1028,10 @@ public class PlayerMovementController : Actor
         {
             animancer.Layers[1].ApplyAnimatorIK = false;
         }
+        if (GetGrounded() && !IsFalling() && !IsClimbing())
+        {
+            UnsnapLedge();   
+        }
         HandleCinemachine();
     }
 
@@ -1024,6 +1066,10 @@ public class PlayerMovementController : Actor
     public void UnsnapLedge()
     {
         ledgeSnap = false;
+        if (currentClimb != null)
+        {
+            currentClimb.inUse = false;
+        }
     }
 
     public void SnapToCurrentLedge()
@@ -1213,6 +1259,7 @@ public class PlayerMovementController : Actor
         bool t = this.GetComponent<PlayerInput>().actions["Atk_Thrust"].IsPressed();
         return s || t;
     }
+
     void BlockStart()
     {
         blocking = true;
@@ -1277,7 +1324,7 @@ public class PlayerMovementController : Actor
 
     public void OnSheathe(InputValue value)
     {
-        if (inventory.IsMainEquipped())
+        if (inventory.IsMainEquipped() && !animancer.Layers[1].IsAnyStatePlaying())
         {
             if (!inventory.IsMainDrawn())
             {
@@ -1714,6 +1761,78 @@ public class PlayerMovementController : Actor
     {
         state.aim = animancer.Play(aimAnim);
         aimForwardVector = this.transform.forward;
+        aimTime = 0f;
+    }
+
+    /*
+    * triggered by animation:
+    * 0 = deactivate hitboxes
+    * 1 = main weapon
+    * 2 = off weapon, if applicable
+    * 3 = both, if applicable
+    * 4 = ranged weapon
+    */
+    public void HitboxActive(int active)
+    {
+        EquippableWeapon mainWeapon = inventory.GetMainWeapon();
+        EquippableWeapon offHandWeapon = inventory.GetOffWeapon();
+        EquippableWeapon rangedWeapon = inventory.GetRangedWeapon();
+        bool main = (mainWeapon != null && mainWeapon is HitboxHandler);
+        bool off = (offHandWeapon != null && offHandWeapon is HitboxHandler);
+        bool ranged = (rangedWeapon != null && rangedWeapon is HitboxHandler);
+        if (active == 0)
+        {
+            if (main)
+            {
+                ((HitboxHandler)mainWeapon).HitboxActive(false);
+            }
+            if (off)
+            {
+                ((HitboxHandler)offHandWeapon).HitboxActive(false);
+            }
+            isHitboxActive = false;
+        }
+        else if (active == 1)
+        {
+            if (main)
+            {
+                ((HitboxHandler)mainWeapon).HitboxActive(true);
+            }
+            isHitboxActive = true;
+            OnHitboxActive.Invoke();
+        }
+        else if (active == 2)
+        {
+            if (off)
+            {
+                ((HitboxHandler)offHandWeapon).HitboxActive(true);
+            }
+            isHitboxActive = true;
+            OnHitboxActive.Invoke();
+        }
+        else if (active == 3)
+        {
+            if (main)
+            {
+                ((HitboxHandler)mainWeapon).HitboxActive(true);
+            }
+            if (off)
+            {
+                ((HitboxHandler)offHandWeapon).HitboxActive(true);
+            }
+            isHitboxActive = true;
+            OnHitboxActive.Invoke();
+        }
+        else if (active == 4)
+        {
+            if (ranged)
+            {
+                 ((HitboxHandler)rangedWeapon).HitboxActive(true);
+            }
+            isHitboxActive = true;
+            OnHitboxActive.Invoke();
+        }
+
     }
     #endregion
 
@@ -1796,6 +1915,16 @@ public class PlayerMovementController : Actor
     public bool IsAiming()
     {
         return animancer.States.Current == state.aim;
+    }
+
+    public bool IsFalling()
+    {
+        return animancer.States.Current == state.fall;
+    }
+
+    public bool IsClimbing()
+    {
+        return animancer.States.Current == state.climb;
     }
     #endregion
     public bool GetGrounded()

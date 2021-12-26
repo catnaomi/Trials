@@ -6,18 +6,23 @@ using System.Collections.Generic;
 [Serializable]
 public class DamageKnockback
 {
+    public float damage;
     public float staminaDamage;
-
-    [Space(10)]
-    public Vector3 kbForce;
-
-    public bool kbRadial;
-
-    public float healthDamage;
     public DamageType[] types;
-    public float heartsDamage;
+    [Space(5)]
     public float criticalMultiplier;
     public bool forceCritical;
+    [Space(5)]
+    public bool breaksArmor;
+    public bool unblockable;
+    public bool disarm;
+    public StaggerData staggers;
+    [Space(10)]
+    public Vector3 kbForce;
+    public bool kbRadial;
+    [Space(5)]
+
+    
     [ReadOnly]
     public GameObject hitboxSource;
     [ReadOnly]
@@ -25,10 +30,7 @@ public class DamageKnockback
 
     public Vector3 originPoint;
 
-    public bool breaksArmor;
-    public bool unblockable;
-    public bool disarm;
-    public StaggerData staggers;
+    
     
     [Serializable]
     public struct StaggerData
@@ -36,9 +38,7 @@ public class DamageKnockback
         public StaggerType onHit;
         public StaggerType onArmorHit;
         public StaggerType onCritical;
-        public StaggerType onInjure;
         public StaggerType onKill;
-        public StaggerType onHelpless;
     }
     public enum StaggerType
     {
@@ -78,7 +78,6 @@ public class DamageKnockback
         this.breaksArmor = damageKnockback.breaksArmor;
         this.kbRadial = damageKnockback.kbRadial;
         this.healthDamage = damageKnockback.healthDamage;
-        this.heartsDamage = damageKnockback.heartsDamage;
         this.types = damageKnockback.types;
         this.criticalMultiplier = damageKnockback.criticalMultiplier;
         this.forceCritical = damageKnockback.forceCritical;
@@ -100,9 +99,7 @@ public class DamageKnockback
         onHit = StaggerType.Stagger,
         onArmorHit = StaggerType.Flinch,
         onCritical = StaggerType.Stumble,
-        onInjure = StaggerType.Stumble,
         onKill = StaggerType.Crumple,
-        onHelpless = StaggerType.Crumple,
     };
 
     public static float GetTotalMinusResistances(float damage, DamageType[] typeArray, List<DamageResistance> resists)

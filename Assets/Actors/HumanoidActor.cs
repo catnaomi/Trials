@@ -386,10 +386,8 @@ public class HumanoidActor : Actor
 
         //  implement resistances
         float totalDamage = DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.types, this.attributes.resistances);
-        float heartsDamage = Mathf.Max(Mathf.Floor(DamageKnockback.GetTotalMinusResistances(damageKnockback.heartsDamage, damageKnockback.types, this.attributes.resistances)), 1f);
 
-        bool willInjure = attributes.HasHealthRemaining() && (totalDamage >= attributes.health.current);
-        bool willKill = (!attributes.HasHealthRemaining() && (heartsDamage >= attributes.hearts.current)) || IsHelpless();
+        bool willKill = attributes.HasHealthRemaining() && (totalDamage >= attributes.health.current);
 
         if (this.IsDodging() || isInvulnerable)
         {
@@ -436,11 +434,6 @@ public class HumanoidActor : Actor
                 }
                 Die();
             }
-            else if (ShouldHelpless())
-            {
-                animator.SetBool("Helpless", true);
-                ProcessStagger(damageKnockback.staggers.onHelpless, damageKnockback);
-            }
             else if (IsArmored() && !damageKnockback.breaksArmor)
             {
                 ProcessStagger(damageKnockback.staggers.onArmorHit, damageKnockback);
@@ -448,10 +441,6 @@ public class HumanoidActor : Actor
             else if (IsCritVulnerable() || damageKnockback.forceCritical)
             {
                 ProcessStagger(damageKnockback.staggers.onCritical, damageKnockback);
-            }
-            else if (willInjure)
-            {
-                ProcessStagger(damageKnockback.staggers.onInjure, damageKnockback);
             }
             else
             {
@@ -548,7 +537,6 @@ public class HumanoidActor : Actor
         // account for resistances
         float critMult = (isCritical) ? damageKnockback.criticalMultiplier : 1f;
         float totalDamage = (!isCritical) ? DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.types, this.attributes.resistances) : this.attributes.health.max;
-        float heartsDamage = Mathf.Max(Mathf.Floor(DamageKnockback.GetTotalMinusResistances(damageKnockback.heartsDamage * critMult, damageKnockback.types, this.attributes.resistances)), 1f);
 
         lastDamageTaken = totalDamage;
         OnHurt.Invoke();
@@ -564,12 +552,6 @@ public class HumanoidActor : Actor
         {
             attributes.ReduceAttribute(attributes.health, totalDamage);
         }
-        else
-        {
-            Debug.Log("taking hearts damage   " + heartsDamage);
-            attributes.ReduceAttribute(attributes.hearts, heartsDamage);
-        }
-        
         
         
 
@@ -742,7 +724,6 @@ public class HumanoidActor : Actor
         DamageKnockback dk = new DamageKnockback()
         {
             healthDamage = 100f,//new Damage(fallDamage * mult, DamageType.TrueDamage),
-            heartsDamage = 1f,
             kbForce = Vector3.zero,
             unblockable = true,
             breaksArmor = true,
@@ -853,6 +834,7 @@ public class HumanoidActor : Actor
      * 1 = main weapon
      * 2 = off weapon, if applicable
      * 3 = both, if applicable
+     * 4 = ranged weapon
      */
     public void HitboxActive(int active)
     {

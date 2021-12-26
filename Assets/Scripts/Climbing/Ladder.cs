@@ -42,14 +42,7 @@ public class Ladder : ClimbDetector
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.transform.root.TryGetComponent<PlayerMovementController>(out PlayerMovementController playermov))
-        {
-            if (playermov.currentClimb == this)
-            {
-                playermov.UnsnapLedge();
-            }
-            inUse = false;
-        }
+
     }
     private void OnDrawGizmosSelected()
     {
