@@ -22,6 +22,13 @@ public class AnimationSoundHandler : MonoBehaviour
     public AudioClip swim;
     public AudioClip splashSmall;
     public AudioClip splashBig;
+    [Header("Combat")]
+    public AudioSource combatWhiffSource;
+    public AudioSource combatHitSource;
+    public AudioClip slashLight;
+    public AudioClip thrustLight;
+    public AudioClip slashHeavy;
+    public AudioClip thrustHeavy;
     // Start is called before the first frame update
     void Start()
     {
@@ -102,6 +109,34 @@ public class AnimationSoundHandler : MonoBehaviour
         waterSource.PlayOneShot(splashSmall);
     }
     #endregion
+
+    #region Combat
+
+    public void SlashLight()
+    {
+        combatWhiffSource.Stop();
+        combatWhiffSource.PlayOneShot(slashLight);
+    }
+
+    public void SlashHeavy()
+    {
+        combatWhiffSource.Stop();
+        combatWhiffSource.PlayOneShot(slashHeavy);
+    }
+
+    public void ThrustLight()
+    {
+        combatWhiffSource.Stop();
+        combatWhiffSource.PlayOneShot(thrustLight);
+    }
+
+    public void ThrustHeavy()
+    {
+        combatWhiffSource.Stop();
+        combatWhiffSource.PlayOneShot(thrustHeavy);
+    }
+    #endregion
+
 #if (UNITY_EDITOR)
     public void PopulateWithDefaults()
     {
@@ -119,7 +154,11 @@ public class AnimationSoundHandler : MonoBehaviour
         swim = Resources.Load<AudioClip>("Sounds/Water/swim1");
         splashBig = Resources.Load<AudioClip>("Sounds/Water/splash1");
         splashSmall = Resources.Load<AudioClip>("Sounds/Water/splash2");
-
+        // combat
+        slashLight = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_light");
+        slashHeavy = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy");
+        thrustLight = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_light");
+        thrustHeavy = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy");
     }
 #endif
 }

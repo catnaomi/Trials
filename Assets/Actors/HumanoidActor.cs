@@ -385,7 +385,7 @@ public class HumanoidActor : Actor
         AdjustDefendingPosition(damageKnockback.source);
 
         //  implement resistances
-        float totalDamage = DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.types, this.attributes.resistances);
+        float totalDamage = DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.GetTypes(), this.attributes.resistances);
 
         bool willKill = attributes.HasHealthRemaining() && (totalDamage >= attributes.health.current);
 
@@ -536,7 +536,7 @@ public class HumanoidActor : Actor
     {
         // account for resistances
         float critMult = (isCritical) ? damageKnockback.criticalMultiplier : 1f;
-        float totalDamage = (!isCritical) ? DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.types, this.attributes.resistances) : this.attributes.health.max;
+        float totalDamage = (!isCritical) ? DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.GetTypes(), this.attributes.resistances) : this.attributes.health.max;
 
         lastDamageTaken = totalDamage;
         OnHurt.Invoke();

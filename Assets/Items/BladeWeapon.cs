@@ -84,8 +84,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         {
             GenerateHitboxes();
         }
-        AttackType nextAttackType = ((HumanoidActor)holder).nextAttackType;
-        DamageKnockback dk = this.GetDamageFromAttack(nextAttackType, holder);
+        DamageKnockback dk = this.GetDamageFromAttack(holder);
         hitboxes.SetDamage(dk);
         hitboxes.SetActive(active);
         if (active)
@@ -93,52 +92,16 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             wall = false;
             //holder.attributes.ReduceAttribute(holder.attributes.stamina, this.GetPoiseCost(((HumanoidActor)holder).nextAttackType));
 
-            AudioClip sound;
-            float staminaCost = 0f;
-            switch (nextAttackType)
+            float staminaCost = this.GetStamCost() * 1;
+            if (dk.isSlash)
             {
-                default:
-                case AttackType.SlashingLight:
-                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
-                    staminaCost = this.GetStamCost() * 1;
-                    sound = FXController.clipDictionary["sword_swing_light"];
-                    break;
-                case AttackType.ThrustingLight:
-                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
-                    staminaCost = this.GetStamCost() * 1;
-                    sound = FXController.clipDictionary["sword_swing_light"];
-                    break;
-                case AttackType.SlashingMedium:
-                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2;
-                    staminaCost = this.GetStamCost() * 1.5f;
-                    sound = FXController.clipDictionary["sword_swing_medium"];
-                    break;
-                case AttackType.ThrustingMedium:
-                    sound = FXController.clipDictionary["sword_swing_medium"];
-                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 2;
-                    staminaCost = this.GetStamCost() * 1.5f;
-                    break;
-                case AttackType.SlashingHeavy:
-                    sound = FXController.clipDictionary["sword_swing_heavy"];
-                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 3;
-                    staminaCost = this.GetStamCost() * 2f;
-                    break;
-                case AttackType.ThrustingHeavy:
-                    sound = FXController.clipDictionary["sword_swing_heavy"];
-                    //poiseCost = (10 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 3;
-                    staminaCost = this.GetStamCost() * 2f;
-                    break;
-                case AttackType.Bash:
-                    sound = FXController.clipDictionary["sword_swing_heavy"];
-                    //poiseCost = (1 + 3 * GetWeight() + 20 * Mathf.Abs(GetBalance())) * 1;
-                    staminaCost = this.GetStamCost() * 1;
-                    break;
+                holder.gameObject.SendMessage("SlashLight");
             }
-
-            holder.attributes.ReduceAttribute(holder.attributes.stamina, staminaCost);
-            //holder.attributes.ReduceAttributeToMin(holder.attributes.poise, poiseCost, 20f);
-            holder.PlayAudioClip(sound);
-
+            else if (dk.isThrust)
+            {
+                holder.gameObject.SendMessage("ThrustLight");
+            }
+            
             /*
              * FXController.CreateFX(sound,
                 ((HumanoidActor)holder).positionReference.MainHand.transform.position + (((HumanoidActor)holder).positionReference.MainHand.transform.forward * length),
@@ -147,7 +110,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 */
 
         }
-        SetTrails(AttackIsThrusting(nextAttackType) && active, AttackIsSlashing(nextAttackType) && active);
+        //SetTrails(AttackIsThrusting(nextAttackType) && active, AttackIsSlashing(nextAttackType) && active);
         //SetTrailColor(dk.healthDamage.GetHighestType(DamageType.Slashing, DamageType.Piercing));
         this.active = active;
     }
@@ -383,6 +346,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         }
         return false;
     }
+    /*
     public virtual DamageKnockback GetDamageFromAttack(AttackType attackType, Actor actor)
     {
 
@@ -423,7 +387,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
          *  Mediums: 3 (1 heart)
          *  Heavies: 6 (2 hearts)
          *    
-         */
+         *
 
         Vector3 heavyKB = new Vector3(0, 20f, 50f + 25f * GetWeight());
         Vector3 lightKB = new Vector3(0, 0, 20f);
@@ -586,6 +550,21 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 return new DamageKnockback();
         }
     }
+*/
+
+    public virtual DamageKnockback GetDamageFromAttack(Actor actor)
+    {
+        if (actor is IAttacker attacker)
+        {
+            DamageKnockback damage = attacker.GetCurrentDamage();
+            damage.healthDamage = 100 * (damage.healthDamage / 100f) * (this.GetBaseDamage() / 100f);
+            damage.AddTypes(this.elements.ToArray());
+            return damage;
+        }
+        return new DamageKnockback();
+    }
+
+
     public float GetHeft()
     {
         return 1f / weight; 
@@ -655,18 +634,18 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             length))
             */
 
-        if (active)
+        if (active && holder.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference))
         {
-            Vector3 contactPoint = contactBox.hitTerrain.ClosestPointOnBounds(((HumanoidActor)holder).positionReference.MainHand.transform.position + (((HumanoidActor)holder).positionReference.MainHand.transform.forward * (length / 2f)));
+            Vector3 contactPoint = contactBox.hitTerrain.ClosestPointOnBounds((positionReference.MainHand.transform.position + positionReference.MainHand.transform.forward * (length / 2f)));
 
             FXController.CreateFX(FXController.FX.FX_Sparks,
                     contactPoint,
                     Quaternion.identity,
                     1f);
 
-            if (wall)
+            if (wall && holder is PlayerMovementController player)
             {
-                ((HumanoidActor)holder).HitWall();
+                player.HitWall();
             }
 
             wall = false;

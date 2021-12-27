@@ -7,7 +7,7 @@ public class ComboAttack : InputAttack
 {
     [SerializeField] private ClipTransition[] sequence;
     [SerializeField] private float[] exitTimes;
-
+    public DamageKnockback[] damages;
     public override ClipTransition GetClip()
     {
         return sequence[0];
@@ -15,6 +15,7 @@ public class ComboAttack : InputAttack
 
     public ClipTransition GetClip(int i)
     {
+        if (i < 0 || i >= sequence.Length) { return sequence[0]; }
         return sequence[i];
     }
 
@@ -39,4 +40,14 @@ public class ComboAttack : InputAttack
         return -1f;
     }
 
+    public DamageKnockback GetDamage(int index)
+    {
+        if (index <= 0) return damages[0];
+        return damages[index-1];
+    }
+
+    public override DamageKnockback GetDamage()
+    {
+        return GetDamage(0);
+    }
 }

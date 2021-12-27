@@ -8,7 +8,7 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController), typeof(HumanoidPositionReference))]
-public class PlayerMovementController : Actor
+public class PlayerMovementController : Actor, IAttacker, IDamageable
 {
     CharacterController cc;
     public bool instatemove;
@@ -110,7 +110,7 @@ public class PlayerMovementController : Actor
     public float aimCancelTime = 2f;
     public float aimTime;
     public float aimStartTime = 0.25f;
-    [ReadOnly, SerializeField] private DamageKnockback currentAttackData;
+    [ReadOnly, SerializeField] private DamageKnockback currentDamage;
     [Header("Animancer")]
     public AnimancerComponent animancer;
     public MixerTransition2DAsset moveAnim;
@@ -175,6 +175,7 @@ public class PlayerMovementController : Actor
         public AnimancerState attack;
         public AnimancerState block;
         public AnimancerState aim;
+        public AnimancerState hurt;
     }
 
     enum AnimLayer
@@ -607,7 +608,6 @@ public class PlayerMovementController : Actor
             else if (move.magnitude <= 0f || !sprinting)
             {
                 animancer.Play(state.move, 0.5f);
-                Debug.Log("sprint release");
             }
             else
             {
@@ -1400,11 +1400,9 @@ public class PlayerMovementController : Actor
     public void UpdateFromMoveset()
     {
         MixerTransition2DAsset movementAnim = moveAnim;
-        Debug.Log("updating player anims from moveset");
 
         if (inventory.IsMainDrawn())
         {
-            Debug.Log("main is drawn");
             Moveset moveset = inventory.GetMainWeapon().moveset;
             if (moveset.moveAnim != null)
             {
@@ -1447,7 +1445,6 @@ public class PlayerMovementController : Actor
 
         if (inventory.IsRangedEquipped())
         {
-            Debug.Log("ranged is equipped");
             aimAnim = inventory.GetRangedWeapon().moveset.aimAttack.GetMovement();
         }
         else
@@ -1562,7 +1559,7 @@ public class PlayerMovementController : Actor
     #region COMBAT
 
     // attacks
-
+    #region attacks
     public void MainSlash()
     {
         if (GetMoveset().quickSlash1h is ComboAttack combo)
@@ -1571,16 +1568,19 @@ public class PlayerMovementController : Actor
             cancelTime = combo.GetExitTime(attackIndex);
             attackIndex++;
             attackResetTimer = 0.5f;
+            SetCurrentDamage(combo.GetDamage(attackIndex));
         }
         else
         {
             state.attack = animancer.Play(GetMoveset().quickSlash1h.GetClip());
             cancelTime = -1f;
+            SetCurrentDamage(GetMoveset().quickSlash1h.GetDamage());
         }
         
         
         state.attack.Events.OnEnd = _AttackEnd;
         attackDecelReal = attackDecel;
+        SetCurrentDamage(GetMoveset().quickSlash1h.GetDamage());
     }
 
     public void MainThrust()
@@ -1591,16 +1591,19 @@ public class PlayerMovementController : Actor
             cancelTime = combo.GetExitTime(attackIndex);
             attackIndex++;
             attackResetTimer = 0.5f;
+            SetCurrentDamage(combo.GetDamage(attackIndex));
         }
         else
         {
             state.attack = animancer.Play(GetMoveset().quickThrust1h.GetClip());
             cancelTime = -1f;
+            SetCurrentDamage(GetMoveset().quickThrust1h.GetDamage());
         }
 
 
         state.attack.Events.OnEnd = _AttackEnd;
         attackDecelReal = attackDecel;
+        
     }
 
     public void CancelSlash()
@@ -1611,9 +1614,15 @@ public class PlayerMovementController : Actor
             cancelTime = combo.GetExitTime(attackIndex);
             attackResetTimer = 0.5f;
             attackIndex++;
+            SetCurrentDamage(combo.GetDamage(attackIndex));
         }
-        else cancelTime = -1f;
+        else
+        {
+            cancelTime = -1f;
+            SetCurrentDamage(GetMoveset().quickSlash1h.GetDamage());
+        }
         state.attack.Events.OnEnd = _AttackEnd;
+        
     }
 
     public void CancelThrust()
@@ -1624,8 +1633,13 @@ public class PlayerMovementController : Actor
             cancelTime = combo.GetExitTime(attackIndex);
             attackResetTimer = 0.5f;
             attackIndex++;
+            SetCurrentDamage(combo.GetDamage(attackIndex));
         }
-        else cancelTime = -1f;
+        else
+        {
+            cancelTime = -1f;
+            SetCurrentDamage(GetMoveset().quickThrust1h.GetDamage());
+        }
         state.attack.Events.OnEnd = _AttackEnd;
     }
     public void DashSlash()
@@ -1635,6 +1649,7 @@ public class PlayerMovementController : Actor
         state.attack.Events.OnEnd = _MoveOnEnd;
         dashed = false;
         attackIndex = 0;
+        SetCurrentDamage(GetMoveset().dashSlash.GetDamage());
     }
 
     public void DashThrust()
@@ -1644,6 +1659,7 @@ public class PlayerMovementController : Actor
         state.attack.Events.OnEnd = _MoveOnEnd;
         dashed = false;
         attackIndex = 0;
+        SetCurrentDamage(GetMoveset().dashThrust.GetDamage());
     }
     
 
@@ -1665,12 +1681,14 @@ public class PlayerMovementController : Actor
             state.attack = animancer.Play(inventory.GetOffWeapon().moveset.stanceSlash.GetClip());
             state.attack.Events.OnEnd = _BlockAttackEnd;
             attackIndex = 0;
+            SetCurrentDamage(inventory.GetOffWeapon().moveset.stanceSlash.GetDamage());
         }
         else if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.stanceSlash != null)
         {
             state.attack = animancer.Play(inventory.GetMainWeapon().moveset.stanceSlash.GetClip());
             state.attack.Events.OnEnd = _BlockAttackEnd;
             attackIndex = 0;
+            SetCurrentDamage(inventory.GetMainWeapon().moveset.stanceSlash.GetDamage());
         }
         else
         {
@@ -1695,12 +1713,14 @@ public class PlayerMovementController : Actor
             state.attack = animancer.Play(inventory.GetOffWeapon().moveset.stanceThrust.GetClip());
             state.attack.Events.OnEnd = _BlockAttackEnd;
             attackIndex = 0;
+            SetCurrentDamage(inventory.GetOffWeapon().moveset.stanceThrust.GetDamage());
         }
         else if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.stanceThrust != null)
         {
             state.attack = animancer.Play(inventory.GetMainWeapon().moveset.stanceThrust.GetClip());
             state.attack.Events.OnEnd = _BlockAttackEnd;
             attackIndex = 0;
+            SetCurrentDamage(inventory.GetMainWeapon().moveset.stanceThrust.GetDamage());
         }
         else
         {
@@ -1715,6 +1735,7 @@ public class PlayerMovementController : Actor
         rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
         dashed = false;
         attackIndex = 0;
+        SetCurrentDamage(GetMoveset().rollSlash.GetDamage());
     }
 
     public void RollThrust()
@@ -1725,6 +1746,7 @@ public class PlayerMovementController : Actor
         rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
         dashed = false;
         attackIndex = 0;
+        SetCurrentDamage(GetMoveset().rollThrust.GetDamage());
     }
 
     public void PlungeSlash()
@@ -1740,6 +1762,7 @@ public class PlayerMovementController : Actor
         }
         plunge = true;
         attackIndex = 0;
+        SetCurrentDamage(GetMoveset().plungeSlash.GetDamage());
     }
 
     public void PlungeThrust()
@@ -1755,6 +1778,7 @@ public class PlayerMovementController : Actor
         }
         plunge = true;
         attackIndex = 0;
+        SetCurrentDamage(GetMoveset().plungeThrust.GetDamage());
     }
 
     public void Aim()
@@ -1763,7 +1787,7 @@ public class PlayerMovementController : Actor
         aimForwardVector = this.transform.forward;
         aimTime = 0f;
     }
-
+    #endregion
     /*
     * triggered by animation:
     * 0 = deactivate hitboxes
@@ -1833,6 +1857,53 @@ public class PlayerMovementController : Actor
             OnHitboxActive.Invoke();
         }
 
+    }
+
+    public void Shockwave(int active)
+    {
+        if (currentDamage == null) return;
+
+        float SHOCKWAVE_RADIUS = 2f;
+
+        bool main = (inventory.IsMainDrawn());
+        bool off = (inventory.IsOffDrawn());
+
+        Vector3 origin = this.transform.position;
+        if (active == 1 && main)
+        {
+            origin = inventory.GetMainWeapon().GetModel().transform.position;
+        }
+        else if (active == 2 && off)
+        {
+            origin = inventory.GetOffWeapon().GetModel().transform.position;
+        }
+
+        Collider[] colliders = Physics.OverlapSphere(this.transform.position, SHOCKWAVE_RADIUS, LayerMask.GetMask("Actors"));
+        foreach (Collider collider in colliders)
+        {
+            if (collider.TryGetComponent<IDamageable>(out IDamageable damageable))
+            {
+                damageable.TakeDamage(currentDamage);
+            }
+        }
+    }
+    public void SetCurrentDamage(DamageKnockback damageKnockback)
+    {
+        currentDamage = new DamageKnockback(damageKnockback);
+        currentDamage.source = this.gameObject;
+    }
+
+    public DamageKnockback GetCurrentDamage()
+    {
+        return currentDamage;
+    }
+    
+    public void Recoil()
+    {
+        HitboxActive(0);
+        AnimancerState state = animancer.Play(damageAnim.recoil);
+        state.Events.OnEnd = _MoveOnEnd;
+        this.state.hurt = state;
     }
     #endregion
 
@@ -1927,6 +1998,7 @@ public class PlayerMovementController : Actor
         return animancer.States.Current == state.climb;
     }
     #endregion
+
     public bool GetGrounded()
     {
         // return cc.isGrounded;
@@ -1934,5 +2006,15 @@ public class PlayerMovementController : Actor
         Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down;
         Debug.DrawLine(bottom, bottom + Vector3.down * 0.2f, Color.red);
         return Physics.Raycast(bottom, Vector3.down, 0.2f, LayerMask.GetMask("Terrain")) || cc.isGrounded;
+    }
+
+    public void TakeDamage(DamageKnockback damage)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void HitWall()
+    {
+        Debug.Log("wall hit");
     }
 }

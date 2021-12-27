@@ -12,5 +12,7 @@ public enum DamageType
     Dark,
     Fire,
     Water,
-    Air
+    Air,
+
+    Standard_SlashPierce // converts to slashing or piercing on evaluation
 }

@@ -27,6 +27,30 @@ MonoBehaviour:
     _Clip: {fileID: 0}
     _Speed: 1
     _NormalizedStartTime: 0
+  attackData:
+    healthDamage: 25
+    staminaDamage: 25
+    types: 0a000000
+    criticalMultiplier: 1.25
+    forceCritical: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 0
+    isSlash: 1
+    stunTime: 1
+    staggers:
+      onHit: 2
+      onArmorHit: 1
+      onCritical: 3
+      onKill: 6
+    kbForce: {x: 0, y: 1, z: 0}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitClip: {fileID: 0}
+  staminaCost: 0
   sequence:
   - _FadeDuration: 0.25
     _Events:
@@ -43,11 +67,11 @@ MonoBehaviour:
     _Events:
       _NormalizedTimes:
       - 0.42426312
-      - 0.7465619
+      - 0.9
       _Callbacks: []
       _Names:
       - OnCancel
-    _Clip: {fileID: 7400000, guid: 45000f1d60c27754f8d3ca9e052abbae, type: 2}
+    _Clip: {fileID: 7400000, guid: 2bd2de54bf34ff04491e187eccb3cf6a, type: 2}
     _Speed: 1
     _NormalizedStartTime: 0
   - _FadeDuration: 0.25
@@ -61,4 +85,71 @@ MonoBehaviour:
     _NormalizedStartTime: 0
   exitTimes:
   - 0.291439
-  - 0.4242631
+  - 0.8
+  damages:
+  - healthDamage: 25
+    staminaDamage: 25
+    types: 0a000000
+    criticalMultiplier: 1
+    forceCritical: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 0
+    isSlash: 1
+    stunTime: 0
+    staggers:
+      onHit: 3
+      onArmorHit: 1
+      onCritical: 3
+      onKill: 7
+    kbForce: {x: 0, y: 0, z: 0}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}
+  - healthDamage: 25
+    staminaDamage: 25
+    types: 0a000000
+    criticalMultiplier: 1
+    forceCritical: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 0
+    isSlash: 1
+    stunTime: 0
+    staggers:
+      onHit: 2
+      onArmorHit: 1
+      onCritical: 2
+      onKill: 7
+    kbForce: {x: 0, y: 0, z: 0}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}
+  - healthDamage: 50
+    staminaDamage: 250
+    types: 0a000000
+    criticalMultiplier: 1
+    forceCritical: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 0
+    isSlash: 1
+    stunTime: 0
+    staggers:
+      onHit: 3
+      onArmorHit: 1
+      onCritical: 3
+      onKill: 5
+    kbForce: {x: 0, y: 0, z: 0}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}

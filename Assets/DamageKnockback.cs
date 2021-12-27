@@ -6,9 +6,9 @@ using System.Collections.Generic;
 [Serializable]
 public class DamageKnockback
 {
-    public float damage;
+    public float healthDamage;
     public float staminaDamage;
-    public DamageType[] types;
+    [SerializeField]private DamageType[] types;
     [Space(5)]
     public float criticalMultiplier;
     public bool forceCritical;
@@ -16,6 +16,10 @@ public class DamageKnockback
     public bool breaksArmor;
     public bool unblockable;
     public bool disarm;
+    public bool isThrust;
+    public bool isSlash;
+    public bool bouncesOffBlock;
+    public float stunTime;
     public StaggerData staggers;
     [Space(10)]
     public Vector3 kbForce;
@@ -45,7 +49,8 @@ public class DamageKnockback
         None,           // 0
         // hitsuns
         Flinch,         // 1
-        Stagger,   // 2
+        StaggerSmall,   // 2
+        StaggerLarge,
         Stumble,   // 3
         // knockouts
         Knockdown,      // 4
@@ -82,6 +87,10 @@ public class DamageKnockback
         this.criticalMultiplier = damageKnockback.criticalMultiplier;
         this.forceCritical = damageKnockback.forceCritical;
         this.disarm = damageKnockback.disarm;
+        this.stunTime = damageKnockback.stunTime;
+        this.isSlash = damageKnockback.isSlash;
+        this.isThrust = damageKnockback.isThrust;
+        this.bouncesOffBlock = damageKnockback.bouncesOffBlock;
     }
 
     public DamageKnockback()
@@ -89,14 +98,31 @@ public class DamageKnockback
         this.healthDamage = 0f;
     }
 
+    public static DamageKnockback GetDefaultDamage()
+    {
+        DamageKnockback damage = new DamageKnockback();
+        damage.healthDamage = 25f;
+        damage.staminaDamage = 25f;
+        damage.kbForce = Vector3.up;
+        damage.staggers = StandardStaggerData;
+
+        damage.types = new DamageType[1] { DamageType.Standard_SlashPierce };
+        damage.criticalMultiplier = 1.25f;
+        damage.forceCritical = false;
+
+        damage.stunTime = 1f;
+
+        return damage;
+    }
+
     public static Vector3 GetKnockbackRelativeToTransform(Vector3 vector, Transform transform)
     {
         return transform.forward * vector.z + transform.right * vector.x + transform.up * vector.y;
     }
 
-    public static StaggerData StandardStaggerData = new StaggerData()
+    public static readonly StaggerData StandardStaggerData = new StaggerData()
     {
-        onHit = StaggerType.Stagger,
+        onHit = StaggerType.StaggerSmall,
         onArmorHit = StaggerType.Flinch,
         onCritical = StaggerType.Stumble,
         onKill = StaggerType.Crumple,
@@ -118,6 +144,44 @@ public class DamageKnockback
         }
 
         return total;
+    }
+
+    public void AddTypes(DamageType[] newtypes)
+    {
+        List<DamageType> dtypes = new List<DamageType>();
+        dtypes.AddRange(this.types);
+        foreach (DamageType type in newtypes)
+        {
+            if (dtypes.Contains(type))
+            {
+                dtypes.Add(type);
+            }
+        }
+        types = dtypes.ToArray();
+    }
+
+    public DamageType[] GetTypes()
+    {
+        List<DamageType> dtypes = new List<DamageType>();
+        foreach (DamageType type in this.types)
+        {
+            if (type == DamageType.Standard_SlashPierce)
+            {
+                if (isSlash)
+                {
+                    dtypes.Add(DamageType.Slashing);
+                }
+                else if (isThrust)
+                {
+                    dtypes.Add(DamageType.Piercing);
+                }
+            }
+            else
+            {
+                dtypes.Add(type);
+            }
+        }
+        return dtypes.ToArray();
     }
 }
 

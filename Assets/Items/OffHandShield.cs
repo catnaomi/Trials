@@ -48,16 +48,19 @@ public class OffHandShield : EquippableWeapon, HitboxHandler
     public override void EquipWeapon(Actor actor)
     {
         base.EquipWeapon(actor);
-        return;
-        HumanoidActor humanoidActor = (HumanoidActor)actor;
-        //humanoidActor.blockType = ActionsLibrary.BlockType.Shield;
 
-        hitbox = Hitbox.CreateHitbox(
-            ((HumanoidActor)holder).positionReference.OffHand.transform.position,
+        if (actor.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference) && actor.TryGetComponent<PlayerInventory>(out PlayerInventory inventory))
+        {
+            hitbox = Hitbox.CreateHitbox(
+            positionReference.OffHand.transform.position,
             0.5f,
-            ((HumanoidActor)holder).inventory.GetOffhandModel().transform,
+            inventory.GetOffhandModel().transform,
             bashDamage,
             actor.gameObject);
+        }
+        //humanoidActor.blockType = ActionsLibrary.BlockType.Shield;
+
+        
 
         //humanoidActor.attributes.AddEffect(effect);
     }

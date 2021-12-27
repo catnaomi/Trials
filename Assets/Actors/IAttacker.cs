@@ -5,5 +5,5 @@ using UnityEngine;
 public interface IAttacker
 {
 
-    public DamageKnockback GetCurrentAttack();
+    public DamageKnockback GetCurrentDamage();
 }

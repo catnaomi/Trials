@@ -12,7 +12,8 @@ public class InputAttack : InputAction
     public bool isParryOK; // is attack a riposte or disarm?
     [SerializeField] protected ClipTransition anim;
     [Header("Attack Data")]
-    public DamageKnockback attackData;
+    public DamageKnockback attackData = DamageKnockback.GetDefaultDamage();
+    public float staminaCost;
     public int GetAttackID()
     {
         return attackId;
@@ -40,5 +41,14 @@ public class InputAttack : InputAction
     public virtual ClipTransition GetClip()
     {
         return anim;
+    }
+
+    public virtual DamageKnockback GetDamage()
+    {
+        return attackData;
+    }
+    public void GetDefaultAttack()
+    {
+        attackData = DamageKnockback.GetDefaultDamage();
     }
 }
