@@ -8,6 +8,9 @@ public class HumanoidPositionReference : MonoBehaviour
     public Transform Hips;
     public Transform Spine;
     public Transform Head;
+    [Space(5)]
+    public Transform FootL;
+    public Transform FootR;
     [Header("Weapon Positions")]
     public GameObject MainHand;
     public GameObject OffHand;
@@ -41,6 +44,8 @@ public class HumanoidPositionReference : MonoBehaviour
         string SPINE_NAME = "Spine";
         string HEAD_NAME = "Head";
 
+        string FOOT_R_NAME = "RightFoot";
+        string FOOT_L_NAME = "LeftFoot";
         Dictionary<Inventory.EquipSlot, string> SLOT_NAMES = new Dictionary<Inventory.EquipSlot, string> {
             {Inventory.EquipSlot.rHip, "_equipSheathR" },
             {Inventory.EquipSlot.lHip, "_equipSheathL" },
@@ -94,6 +99,23 @@ public class HumanoidPositionReference : MonoBehaviour
                 this.OffHand = current.gameObject;
             }
         }
+        if (this.FootR == null)
+        {
+            current = LocateSlotsRecursive(this.transform, FOOT_R_NAME);
+            if (current != null)
+            {
+                this.FootR = current;
+            }
+        }
+        if (this.FootL == null)
+        {
+            current = LocateSlotsRecursive(this.transform, FOOT_L_NAME);
+            if (current != null)
+            {
+                this.FootL = current;
+            }
+        }
+
 
         foreach (Inventory.EquipSlot slot in SLOT_NAMES.Keys)
         {

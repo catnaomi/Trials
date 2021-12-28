@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class AnimationSoundHandler : MonoBehaviour
+public class AnimationFXHandler : MonoBehaviour
 {
     [Header("Footsteps")]
     public AudioSource footSourceLight;
@@ -17,6 +17,9 @@ public class AnimationSoundHandler : MonoBehaviour
     public AudioClip default_slide;
     public AudioClip default_roll;
     public AudioClip tap;
+    [Space(10)]
+    public Transform footL;
+    public Transform footR;
     [Header("Swim")]
     public AudioSource waterSource;
     public AudioClip swim;
