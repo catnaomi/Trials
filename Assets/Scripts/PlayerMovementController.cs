@@ -207,7 +207,7 @@ public class PlayerMovementController : Actor, IAttacker, IDamageable
         state.attack = animancer.States.GetOrCreate(rollAnim);
         animancer.Play(state.move);
 
-        this.GetComponent<PlayerInput>().actions["Sprint"].started += (context) =>
+        this.GetComponent<PlayerInput>().actions["Sprint"].performed += (context) =>
         {
             SprintStart();
         };

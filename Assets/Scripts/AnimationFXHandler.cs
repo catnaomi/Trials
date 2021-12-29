@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 #if (UNITY_EDITOR)
 using UnityEditor;
 #endif
@@ -32,6 +33,9 @@ public class AnimationFXHandler : MonoBehaviour
     public AudioClip thrustLight;
     public AudioClip slashHeavy;
     public AudioClip thrustHeavy;
+    [Header("Events")]
+    public UnityEvent OnDust;
+    public UnityEvent OnDashDust;
     // Start is called before the first frame update
     void Start()
     {
@@ -42,7 +46,7 @@ public class AnimationFXHandler : MonoBehaviour
     {
         AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
         if (!source.isPlaying) source.PlayOneShot(default_stepL);
-
+        if (heavy > 0) OnDust.Invoke();
     }
 
     public void StepL()
@@ -53,6 +57,7 @@ public class AnimationFXHandler : MonoBehaviour
     {
         AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
         if (!source.isPlaying) source.PlayOneShot(default_stepR);
+        if (heavy > 0) OnDust.Invoke();
     }
 
     public void StepR()
@@ -76,18 +81,26 @@ public class AnimationFXHandler : MonoBehaviour
     {
         footSourceHeavy.Stop();
         footSourceHeavy.PlayOneShot(dash);
+        OnDashDust.Invoke();
     }
 
     public void Slide()
     {
         footSourceHeavy.Stop();
         footSourceHeavy.PlayOneShot(default_slide);
+        OnDashDust.Invoke();
     }
 
     public void Roll()
     {
         footSourceHeavy.Stop();
         footSourceHeavy.PlayOneShot(default_roll);
+        
+    }
+
+    public void Dust()
+    {
+        OnDust.Invoke();
     }
 
     #endregion
