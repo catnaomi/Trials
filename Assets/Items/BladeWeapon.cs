@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using CustomUtilities;
 
 [CreateAssetMenu(fileName = "BladeWeapon", menuName = "ScriptableObjects/Weapons/Create Blade Weapon", order = 1)]
 public class BladeWeapon : EquippableWeapon, HitboxHandler
@@ -19,6 +20,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
     TrailRenderer trailThrust;
     TrailRenderer trailSlash;
     ParticleSystem trailSystem;
+    MeshSwordSlash slashMesh;
+
 
     public List<DamageType> elements;
 
@@ -35,12 +38,20 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         hitboxes.OnHitTerrain.RemoveAllListeners();
         hitboxes.OnHitTerrain.AddListener(TerrainContact);
         hitboxes.OnHitWall.AddListener(WallContact);
+
+
+        slashMesh = FXController.CreateSwordSlash().GetComponent<MeshSwordSlash>();
+        slashMesh.topPoint = InterfaceUtilities.FindRecursively(GetModel().transform, "_top");
+        slashMesh.bottomPoint = InterfaceUtilities.FindRecursively(GetModel().transform, "_bottom");
+        slashMesh.pseudoParent = actor.transform;
+        //slashMesh.transform.rotation = Quaternion.identity;
     }
 
     public override void UnequipWeapon(Actor actor)
     {
         base.UnequipWeapon(actor);
 
+        GameObject.Destroy(slashMesh);
         DestroyHitboxes();
     }
 
@@ -89,13 +100,16 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         hitboxes.SetActive(active);
         if (active)
         {
+            slashMesh.transform.position = holder.transform.position;
             wall = false;
             //holder.attributes.ReduceAttribute(holder.attributes.stamina, this.GetPoiseCost(((HumanoidActor)holder).nextAttackType));
-
+            slashMesh.SetTopPoint(InterfaceUtilities.FindRecursively(GetModel().transform, "_top"));
+            slashMesh.SetBottomPoint(InterfaceUtilities.FindRecursively(GetModel().transform, "_bottom"));
             float staminaCost = this.GetStamCost() * 1;
             if (dk.isSlash)
             {
                 holder.gameObject.SendMessage("SlashLight");
+                slashMesh.BeginSlash();
             }
             else if (dk.isThrust)
             {
@@ -109,6 +123,10 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 1f);
                 */
 
+        }
+        else
+        {
+            slashMesh.EndSlash();
         }
         //SetTrails(AttackIsThrusting(nextAttackType) && active, AttackIsSlashing(nextAttackType) && active);
         //SetTrailColor(dk.healthDamage.GetHighestType(DamageType.Slashing, DamageType.Piercing));
