@@ -112,7 +112,7 @@ public class PlayerMovementController : Actor, IAttacker, IDamageable
     public float aimStartTime = 0.25f;
     [ReadOnly, SerializeField] private DamageKnockback currentDamage;
     [Header("Animancer")]
-    public AnimancerComponent animancer;
+    AnimancerComponent animancer;
     public MixerTransition2DAsset moveAnim;
     public AnimationClip idleAnim;
     public ClipTransition dashAnim;
@@ -203,6 +203,7 @@ public class PlayerMovementController : Actor, IAttacker, IDamageable
         cc = this.GetComponent<CharacterController>();
         defaultRadius = cc.radius;
         movementController = this.GetComponent<PlayerMovementController>();
+        animancer = this.GetComponent<AnimancerComponent>();
         state.move = (MixerState)animancer.States.GetOrCreate(moveAnim);
         state.attack = animancer.States.GetOrCreate(rollAnim);
         animancer.Play(state.move);
@@ -1415,7 +1416,7 @@ public class PlayerMovementController : Actor, IAttacker, IDamageable
             moving = true;
         }
         state.move = (MixerState)animancer.States.GetOrCreate(movementAnim);
-        if (moving) animancer.Play(state.move);
+        if (moving) animancer.Play(state.move, 0.25f);
 
 
         MixerTransition2DAsset blockingMoveAnim = moveAnim;

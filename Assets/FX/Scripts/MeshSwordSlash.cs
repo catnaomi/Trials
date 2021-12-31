@@ -105,10 +105,10 @@ public class MeshSwordSlash : MonoBehaviour
     }
     private void UpdateTrail()
     {
-        
+        this.transform.position = pseudoParent.position;
         if (slashing)
         {
-            this.transform.position = pseudoParent.position;
+            
             topPoints.Add(topPoint.position);
             bottomPoints.Add(bottomPoint.position);
             topCurve.Update(topPoints);
