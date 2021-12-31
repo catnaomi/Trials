@@ -65,6 +65,7 @@ public class PlayerMovementController : Actor, IAttacker, IDamageable
     bool aimAttack;
     Vector3 targetDirection;
     Vector3 headPoint;
+    Vector3 smoothedHeadPoint;
     public float headPointSpeed = 25f;
     [Space(5)]
     public float strafeSpeed = 2.5f;
@@ -1975,7 +1976,28 @@ public class PlayerMovementController : Actor, IAttacker, IDamageable
         }
         else
         {
-            animancer.Animator.SetLookAtPosition(headPoint);
+            Vector3 point = Vector3.zero;
+            if (this.GetCombatTarget() != null || IsAiming())
+            {
+                point = headPoint;
+            }
+            else
+            {
+                float headY = this.transform.position.y + positionReference.eyeHeight;
+                Vector3 headDir = headPoint - this.transform.position;
+                headDir.Scale(new Vector3(1f, 0f, 1f));
+                if (Vector3.Angle(headDir.normalized, this.transform.forward) < 45f)
+                {
+                    point = new Vector3(headPoint.x, headY, headPoint.z);
+                    animancer.Animator.SetLookAtPosition(point);
+                }
+                else
+                {
+                    point = this.transform.position + this.transform.forward * headDir.magnitude + this.transform.up * positionReference.eyeHeight;
+                }
+            }
+            smoothedHeadPoint = Vector3.MoveTowards(smoothedHeadPoint, point, headPointSpeed * Time.deltaTime);
+            animancer.Animator.SetLookAtPosition(smoothedHeadPoint);
             animancer.Animator.SetLookAtWeight(1f, 0.1f, 1f, 0f, 0.7f);
         }
         

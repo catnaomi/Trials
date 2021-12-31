@@ -16,8 +16,14 @@ public class MeshSwordSlash : MonoBehaviour
     List<Vector3> emptyPoints = new List<Vector3> { Vector3.zero, Vector3.zero, Vector3.zero, Vector3.zero };
     Vector3[] controlPoints;
     public int resolution = 2;
+    public float fadeoutTime = 1f;
+    public float lineFadeTime = 0.5f;
+    float fadeoutTimer = 1f;
+    float lineTimer = 0.5f;
+    public Color color = Color.white;
     [Header("Mesh Settings")] 
     public Material material;
+    MaterialPropertyBlock block;
     MeshFilter meshFilter;
     MeshRenderer renderer;
     List<Vector3> vertices;
@@ -43,6 +49,9 @@ public class MeshSwordSlash : MonoBehaviour
         mesh = new Mesh();
         meshFilter.mesh = mesh;
         renderer.sharedMaterial = material;
+        block = new MaterialPropertyBlock();
+        block.SetColor("_Color", color);
+        renderer.SetPropertyBlock(block);
         vertices = new List<Vector3>(MAX_QUADS * 4);
         triangles = new List<int>(MAX_QUADS * 6);
         uvs = new List<Vector2>(MAX_QUADS * 4);
@@ -94,6 +103,40 @@ public class MeshSwordSlash : MonoBehaviour
         //UpdateTrail();
         //topCurve.DrawSpline(Color.white);
         //bottomCurve.DrawSpline(Color.black);
+        if (slashing)
+        {
+            fadeoutTimer = fadeoutTime;
+            lineTimer = lineFadeTime;
+        }
+        else
+        {
+            if (fadeoutTimer > 0)
+            {
+                fadeoutTimer -= Time.deltaTime;
+            }
+            else
+            {
+                fadeoutTimer = 0f;
+            }
+            if (lineTimer > 0)
+            {
+                lineTimer -= Time.deltaTime;
+            }
+            else
+            {
+                lineTimer = 0f;
+            }
+
+            float alpha = fadeoutTimer / fadeoutTime;
+            block.SetColor("_BaseColor", new Color(color.r, color.g, color.b, alpha));
+            renderer.SetPropertyBlock(block);
+            lineRenderer.startColor = new Color(lineRenderer.startColor.r, lineRenderer.startColor.g, lineRenderer.startColor.b, alpha);
+            lineRenderer.endColor = new Color(lineRenderer.endColor.r, lineRenderer.endColor.g, lineRenderer.endColor.b, alpha);
+        }
+        if (slashing || fadeoutTimer > 0 || lineTimer > 0)
+        {
+            this.transform.position = pseudoParent.position;
+        }
     }
     IEnumerator UpdateAtFPS()
     {
@@ -108,7 +151,6 @@ public class MeshSwordSlash : MonoBehaviour
         
         if (slashing)
         {
-            this.transform.position = pseudoParent.position;
             topPoints.Add(topPoint.position);
             bottomPoints.Add(bottomPoint.position);
             topCurve.Update(topPoints);
@@ -157,7 +199,7 @@ public class MeshSwordSlash : MonoBehaviour
                         triangles.Add(i2);
                     }
 
-                    lineRenderer.SetPosition(i, topCurvePoints[i].position - this.transform.position);
+                    lineRenderer.SetPosition(topCurvePoints.Length - 1 - i, topCurvePoints[i].position - this.transform.position);
                 }
                 mesh.Clear();
                 mesh.SetVertices(vertices);
@@ -208,6 +250,18 @@ public class MeshSwordSlash : MonoBehaviour
             }
             */
 
+        }
+        else
+        {
+            //if (fadeoutTimer <= 0)
+            //{
+            int count = Mathf.FloorToInt(topCurve.GetPoints().Length * (lineTimer / lineFadeTime));
+            if (count < 0)
+            {
+                count = 0;
+            }
+            lineRenderer.positionCount = count;
+            //}
         }
     }
 }
