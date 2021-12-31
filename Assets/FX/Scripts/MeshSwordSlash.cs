@@ -76,7 +76,7 @@ public class MeshSwordSlash : MonoBehaviour
         lineVertices.Clear();
         topPoints.Clear();
         bottomPoints.Clear();
-        
+        mesh.Clear();
     }
 
     public void EndSlash()
@@ -107,6 +107,8 @@ public class MeshSwordSlash : MonoBehaviour
         {
             fadeoutTimer = fadeoutTime;
             lineTimer = lineFadeTime;
+            block.SetColor("_BaseColor", color);
+            renderer.SetPropertyBlock(block);
         }
         else
         {

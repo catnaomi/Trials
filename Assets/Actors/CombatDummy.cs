@@ -124,6 +124,7 @@ public class CombatDummy : Actor, IDamageable
                     state.Time = 0f;
                     state.ParameterX = xdot;
                     state.ParameterY = ydot;
+                    state.Events.OnEnd = () => { animancer.Layers[1].Stop(); };
                 }
             }
             else if (stagger == DamageKnockback.StaggerType.StaggerLarge)

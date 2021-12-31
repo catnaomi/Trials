@@ -11,6 +11,7 @@ public class FXController : MonoBehaviour
     public GameObject fx_stagger;
     public GameObject fx_sparks;
     public GameObject fx_slash;
+    public GameObject fx_thrust;
     private static float fixedDeltaTime;
     private static float hitpauseLength;
 
@@ -95,6 +96,11 @@ public class FXController : MonoBehaviour
         return newFX;
     }
 
+    public static GameObject CreateSwordThrust()
+    {
+        GameObject newFX = GameObject.Instantiate(main.fx_thrust);
+        return newFX;
+    }
     public static void Hitpause(float duration)
     {
         hitpauseLength = duration;
