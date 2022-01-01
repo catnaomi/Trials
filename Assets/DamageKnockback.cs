@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 [Serializable]
 public class DamageKnockback
@@ -34,6 +35,7 @@ public class DamageKnockback
 
     public Vector3 originPoint;
 
+    public UnityEvent OnHit;
     
     
     [Serializable]
@@ -91,6 +93,7 @@ public class DamageKnockback
         this.isSlash = damageKnockback.isSlash;
         this.isThrust = damageKnockback.isThrust;
         this.bouncesOffBlock = damageKnockback.bouncesOffBlock;
+        this.OnHit = damageKnockback.OnHit;
     }
 
     public DamageKnockback()

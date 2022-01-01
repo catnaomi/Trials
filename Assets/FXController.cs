@@ -12,6 +12,8 @@ public class FXController : MonoBehaviour
     public GameObject fx_sparks;
     public GameObject fx_slash;
     public GameObject fx_thrust;
+    [Space(5)]
+    public GameObject fx_bleedSword;
     private static float fixedDeltaTime;
     private static float hitpauseLength;
 
@@ -30,6 +32,7 @@ public class FXController : MonoBehaviour
         FX_Hit,
         FX_Stagger,
         FX_Sparks,
+        FX_BleedSword,
     }
     public static Dictionary<FX, GameObject> fxDictionary;
     public static Dictionary<string, AudioClip> clipDictionary;
@@ -40,7 +43,8 @@ public class FXController : MonoBehaviour
             { FX.FX_Block,  this.fx_block },
             { FX.FX_Hit, this.fx_hit },
             { FX.FX_Stagger, this.fx_stagger },
-            { FX.FX_Sparks, this.fx_sparks }
+            { FX.FX_Sparks, this.fx_sparks },
+            { FX.FX_BleedSword, this.fx_bleedSword },
         };
 
         clipDictionary = new Dictionary<string, AudioClip>()
@@ -51,6 +55,8 @@ public class FXController : MonoBehaviour
 
             { "sword_hit_light",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_hit_light") },
             { "sword_hit_heavy", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_hit_heavy") },
+
+            { "sword_bleed",  Resources.Load<AudioClip>("Sounds/Effects/sound_bleed1") },
 
             { "shield_bash",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bash") },
             { "shield_bash_hit", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bash_hit") },

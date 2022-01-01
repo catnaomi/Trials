@@ -101,10 +101,20 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             GenerateHitboxes();
         }
         DamageKnockback dk = this.GetDamageFromAttack(holder);
-        hitboxes.SetDamage(dk);
-        hitboxes.SetActive(active);
+        dk.OnHit.RemoveAllListeners();
+        dk.OnHit.AddListener(() =>
+        {
+            //slashFX.SetContactPoint(GetHand().transform.position + GetHand().transform.forward * GetLength());
+            if (dk.isSlash)
+            {
+                holder.StartCoroutine(BleedSlash());
+            }
+            
+        });
+        
         if (active)
         {
+
             slashFX.transform.position = holder.transform.position;
             thrustFX.transform.position = holder.transform.position;
             wall = false;
@@ -138,11 +148,19 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             slashFX.EndSlash();
             thrustFX.EndThrust();
         }
+        hitboxes.SetDamage(dk);
+        hitboxes.SetActive(active);
         //SetTrails(AttackIsThrusting(nextAttackType) && active, AttackIsSlashing(nextAttackType) && active);
         //SetTrailColor(dk.healthDamage.GetHighestType(DamageType.Slashing, DamageType.Piercing));
         this.active = active;
     }
 
+    IEnumerator BleedSlash()
+    {
+        yield return new WaitForEndOfFrame();
+        slashFX.SetContactPoint(holder.lastContactPoint);
+        slashFX.Bleed();
+    }
     public float GetStamCost()
     {
         return (10 + 1 * GetWeight() + 15 * Mathf.Abs(GetBalance()));

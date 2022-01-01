@@ -27,6 +27,7 @@ public class Actor : MonoBehaviour
 
     public Vector3 moveDirection;
     public Vector3 moveAdditional;
+    public Vector3 lastContactPoint;
     // targets
 
     public GameObject CombatTarget;

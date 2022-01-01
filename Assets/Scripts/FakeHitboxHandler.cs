@@ -24,4 +24,14 @@ public class FakeHitboxHandler : MonoBehaviour
         }
 
     }
+
+    public void StepR(int i)
+    {
+
+    }
+
+    public void StepL(int i)
+    {
+
+    }
 }

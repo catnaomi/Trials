@@ -150,6 +150,15 @@ public class CombatDummy : Actor, IDamageable
                 hurt = state;
                 this.transform.rotation = Quaternion.LookRotation(-(this.transform.position - damage.source.transform.position), Vector3.up);
             }
+
+            Vector3 contactPosition = this.GetComponent<Collider>().ClosestPointOnBounds(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
+
+            if (damage.source.TryGetComponent<Actor>(out Actor actor))
+            {
+                actor.lastContactPoint = contactPosition;
+            }
+            damage.OnHit.Invoke();
+            //FXController.CreateFX(FXController.FX.FX_BleedSword, contactPosition, Quaternion.identity, 1f);
         }
     }
     public void AdjustDefendingPosition(GameObject attacker)
