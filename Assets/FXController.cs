@@ -49,9 +49,9 @@ public class FXController : MonoBehaviour
 
         clipDictionary = new Dictionary<string, AudioClip>()
         {
-            { "sword_swing_light",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_light") },
-            { "sword_swing_medium", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_medium") },
-            { "sword_swing_heavy", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy") },
+            { "sword_swing_light",  Resources.Load<AudioClip>("Sounds/Effects/sword_swing1") },
+            { "sword_swing_medium", Resources.Load<AudioClip>("Sounds/Effects/sword_swing1") },
+            { "sword_swing_heavy", Resources.Load<AudioClip>("Sounds/Effects/sword_swing1") },
 
             { "sword_hit_light",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_hit_light") },
             { "sword_hit_heavy", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_hit_heavy") },

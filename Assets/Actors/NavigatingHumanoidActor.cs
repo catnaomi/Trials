@@ -2,8 +2,10 @@
 using System.Collections;
 using UnityEngine.AI;
 using CustomUtilities;
+using Animancer;
 
-public class NavigatingHumanoidActor : HumanoidActor
+[RequireComponent(typeof(CharacterController), typeof(HumanoidPositionReference))]
+public class NavigatingHumanoidActor : Actor
 {
     [HideInInspector]
     public NavMeshAgent nav;
@@ -19,13 +21,18 @@ public class NavigatingHumanoidActor : HumanoidActor
 
     Vector3 additMove;
 
+    protected PlayerInventory inventory;
+    [Header("Animancer")]
+    protected AnimancerComponent animancer;
+    public MixerTransition2DAsset moveAnim;
+
     public override void ActorStart()
     {
         base.ActorStart();
 
         nav = GetComponent<NavMeshAgent>();
         obstacle = GetComponent<NavMeshObstacle>();
-
+        animancer = GetComponent<AnimancerComponent>();
         nav.updatePosition = false;
 
         nav.updateRotation = false;
@@ -112,11 +119,6 @@ public class NavigatingHumanoidActor : HumanoidActor
     public override void ActorPostUpdate()
     {
         base.ActorPostUpdate();
-
-        if (humanoidState != HumanoidState.Actionable || !CanMove())
-        {
-            //return;
-        }
 
         if (shouldNavigate && CombatTarget != null)
         {
@@ -228,12 +230,17 @@ public class NavigatingHumanoidActor : HumanoidActor
         return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
                 (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
     }
-    public override bool IsBlocking()
+    public bool IsBlocking()
     {
         string TAG = "BLOCKING";
         bool ALLOW_IN_TRANSITION = true;
 
         return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
                 (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
+    }
+
+    public bool CanMove()
+    {
+        return true;
     }
 }

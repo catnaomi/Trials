@@ -109,6 +109,11 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             {
                 holder.StartCoroutine(BleedSlash());
             }
+            else if (dk.isThrust)
+            {
+                thrustFX.SetContactPoint(holder.lastContactPoint);
+                thrustFX.Bleed();
+            }
             
         });
         

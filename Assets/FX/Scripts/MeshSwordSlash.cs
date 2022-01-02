@@ -332,6 +332,7 @@ public class MeshSwordSlash : MonoBehaviour
         particles.Play();
         bloodTimer = bloodFadeDelay + bloodFadeTime;
         bleeding = true;
+        this.GetComponent<AudioSource>().Play();
     }
 
     public void StopBleeding()

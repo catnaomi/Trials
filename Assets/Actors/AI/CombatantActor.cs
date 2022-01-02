@@ -27,11 +27,6 @@ public class CombatantActor : NavigatingHumanoidActor
             clock -= Time.deltaTime;
         }
 
-        this.OnInjure.AddListener(() => 
-        {
-            StartHelpless();
-        });
-
         if (CombatTarget == null)
         {
             if (DetermineCombatTarget(out GameObject target))
@@ -86,10 +81,6 @@ public class CombatantActor : NavigatingHumanoidActor
 
     }
 
-    public override bool ShouldHelpless()
-    {
-        return (this.attributes.health.current <= 0) && (this.attributes.hearts.current <= 3);
-    }
     public float GetAttackSpeed()
     {
         if (inventory.IsMainEquipped())
