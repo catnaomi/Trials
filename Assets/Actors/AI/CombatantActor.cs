@@ -83,18 +83,18 @@ public class CombatantActor : NavigatingHumanoidActor
 
     public float GetAttackSpeed()
     {
-        if (inventory.IsMainEquipped())
+        if (inventory is PlayerInventory combatInventory && combatInventory.IsMainEquipped())
         {
-            return inventory.GetMainWeapon().GetAttackSpeed(false);
+            return combatInventory.GetMainWeapon().GetAttackSpeed(false);
         }
         return 1f;
     }
 
     public float GetOffAttackSpeed()
     {
-        if (inventory.IsOffEquipped())
+        if (inventory is PlayerInventory combatInventory && combatInventory.IsOffEquipped())
         {
-            return inventory.GetOffWeapon().GetAttackSpeed(false);
+            return combatInventory.GetOffWeapon().GetAttackSpeed(false);
         }
         return 1f;
     }

@@ -30,11 +30,6 @@ public class IntelligentActor : NavigatingHumanoidActor
     {
         base.ActorPreUpdate();
 
-        if (humanoidState != HumanoidState.Actionable)
-        {
-            return;
-        }
-
         updateClock += Time.deltaTime;
         foreach (AIModule module in modules)
         {

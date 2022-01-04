@@ -4,48 +4,102 @@ using UnityEngine.AI;
 using CustomUtilities;
 using Animancer;
 
-[RequireComponent(typeof(CharacterController), typeof(HumanoidPositionReference))]
-public class NavigatingHumanoidActor : Actor
+[RequireComponent(typeof(HumanoidPositionReference)), RequireComponent(typeof(NavMeshAgent))]
+public class NavigatingHumanoidActor : Actor, INavigates
 {
     [HideInInspector]
     public NavMeshAgent nav;
-    [HideInInspector]
-    public NavMeshObstacle obstacle;
     public float angleSpeed = 180f;
+
+    Rigidbody rigidbody;
+
+    HumanoidPositionReference positionReference;
     [Header("Navigation Settings")]
 
     public float bufferRange = 2f;
-
-    bool shouldNavigate;
-    protected float currentDistance;
-
+    public float closeRange = 1f; // close range should be <= buffer range
+    public bool shouldNavigate;
+    public float currentDistance;
+    public float updateSpeed = 0.25f;
+    public float neg = -1;
     Vector3 additMove;
-
-    protected PlayerInventory inventory;
+    public float angle;
+    public Vector3 destination;
+    bool followingTarget;
+    bool obstacleTransitioning;
+    bool ignoreRoot;
+    bool shouldFall;
+    bool offMeshInProgress;
+    public float jumpAdjustSpeed = 3f;
+    protected IInventory inventory;
     [Header("Animancer")]
     protected AnimancerComponent animancer;
+    public LinearMixerTransitionAsset idleAnim;
     public MixerTransition2DAsset moveAnim;
+    public ClipTransition jumpHorizontal;
+    public ClipTransition jumpDown;
+    public ClipTransition fallAnim;
+    public ClipTransition landAnim;
+    protected NavAnimState navstate;
+    protected struct NavAnimState {
+        public LinearMixerState idle;
+        public DirectionalMixerState move;
+        public AnimancerState fall;
+    }
 
+    void OnEnable()
+    {
+        StartCoroutine("UpdateDestination");
+    }
+
+    System.Action _FinishJump;
+    System.Action _FinishDrop;
     public override void ActorStart()
     {
         base.ActorStart();
 
         nav = GetComponent<NavMeshAgent>();
-        obstacle = GetComponent<NavMeshObstacle>();
         animancer = GetComponent<AnimancerComponent>();
         nav.updatePosition = false;
 
         nav.updateRotation = false;
 
         nav.angularSpeed = angleSpeed;
+        nav.autoTraverseOffMeshLink = false;
 
-        obstacle.enabled = false;
+        positionReference = GetComponent<HumanoidPositionReference>();
+        navstate.move = (DirectionalMixerState)animancer.States.GetOrCreate(moveAnim);
+        navstate.idle = (LinearMixerState)animancer.Play(idleAnim);
+
+        rigidbody = this.GetComponent<Rigidbody>();
+        if (CombatTarget != null) SetDestination(CombatTarget);
+
+        _FinishJump = () =>
+        {
+            nav.CompleteOffMeshLink();
+            animancer.Play(navstate.move, 0.1f);
+            ignoreRoot = false;
+            offMeshInProgress = false;
+        };
+
+        _FinishDrop = () =>
+        {
+            Vector3 pos = animancer.Animator.rootPosition;
+            navstate.fall = animancer.Play(fallAnim);
+            this.transform.position = pos;
+            nav.nextPosition = pos;
+            rigidbody.velocity = Vector3.down;
+        };
+
+        landAnim.Events.OnEnd = () =>
+        {
+            animancer.Play(navstate.idle);
+        };
     }
 
     public void StartNavigationToTarget(GameObject target)
     {
-        CombatTarget = target;
-        shouldNavigate = true;
+        SetDestination(target);
     }
 
     public void ResumeNavigation()
@@ -56,90 +110,173 @@ public class NavigatingHumanoidActor : Actor
     {
         shouldNavigate = false;
     }
-
-    /*
-    public void SetAdditionalMovement(Vector3 move)
-    {
-        Debug.Log("additmovenav");
-        bool relative = false;
-        if (relative)
-        {
-            additMove = transform.forward * move.z + transform.up * move.y + transform.right * move.x;
-        }
-        else
-        {
-            additMove = move;
-        }
-    }
-    */
-
-    public float GetDistanceToTarget()
-    {
-        if (CombatTarget != null)
-        {
-            if (shouldNavigate && nav.hasPath)
-            {
-                return nav.remainingDistance;
-            }
-            else
-            {
-                Vector3 targetAnimPos = CombatTarget.transform.position;
-                /*
-                if (CombatTarget.TryGetComponent<Animator>(out Animator targetAnim))
-                {
-                    targetAnimPos = targetAnim.bodyPosition;
-                }*/
-                Vector3 thisPos = this.transform.position;//animator.bodyPosition;
-                thisPos.y = 0;
-                targetAnimPos.y = 0;
-                return Vector3.Distance(thisPos, targetAnimPos);
-            }
-
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    public bool IsClearLineToTarget()
-    {
-        if (CombatTarget != null)
-        {
-            if (Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, CombatTarget.transform.position - this.transform.position, out RaycastHit hit, Vector3.Distance(CombatTarget.transform.position, this.transform.position), ~LayerMask.GetMask("Limbs","Hitboxes")))
-            {
-                if (hit.transform.root == CombatTarget.transform.root)
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+   
     public override void ActorPostUpdate()
     {
         base.ActorPostUpdate();
 
-        if (shouldNavigate && CombatTarget != null)
+        Vector3 moveDirection = Vector3.zero;
+        Vector3 lookDirection = this.transform.forward;
+        currentDistance = GetDistanceToTarget();
+        bool inBufferRange = currentDistance <= bufferRange;
+        bool inCloseRange = currentDistance <= closeRange;
+        if (followingTarget)
         {
-            nav.enabled = true;
-            obstacle.enabled = false;
-            //nav.isStopped = false;
-            nav.SetDestination(CombatTarget.transform.position);
-            UpdateWithNav();
+            if (GetCombatTarget() == null)
+            {
+                followingTarget = false;
+            }
+            else
+            {
+                destination = CombatTarget.transform.position;
+            }
+        }
+        if (animancer.States.Current == navstate.idle)
+        {
+            ignoreRoot = false;
+            nav.isStopped = true;
+            if (shouldNavigate)
+            {
+                lookDirection = (destination - this.transform.position).normalized;
+                lookDirection.Scale(new Vector3(1f, 0f, 1f));
+                Debug.DrawLine(this.transform.position + this.transform.up, this.transform.position + this.transform.up + lookDirection);
+                if (!inBufferRange)
+                {
+                    animancer.Play(navstate.move, 0.25f);
+                }
+            }
+            angle = Mathf.MoveTowards(angle, Vector3.SignedAngle(this.transform.forward, lookDirection, Vector3.up), nav.angularSpeed * Time.deltaTime);
+            navstate.idle.Parameter = angle;
+            
+        }
+        else if (animancer.States.Current == navstate.move)
+        {
+            nav.isStopped = false;
+            float xmov = 0;
+            float ymov = 0;
+            if (shouldNavigate && !inCloseRange)
+            {
+                moveDirection = nav.desiredVelocity.normalized;
+                xmov = Vector3.Dot(moveDirection, this.transform.right);
+                ymov = Vector3.Dot(moveDirection, this.transform.forward);
+
+                navstate.move.ParameterX = xmov;
+                navstate.move.ParameterY = ymov;
+
+                Quaternion targetRot = Quaternion.LookRotation(NumberUtilities.FlattenVector(nav.desiredVelocity));
+                this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, targetRot, nav.angularSpeed * Time.deltaTime);
+                if (nav.isOnOffMeshLink && !offMeshInProgress)
+                {
+                    offMeshInProgress = true;
+                    if (nav.currentOffMeshLinkData.linkType == OffMeshLinkType.LinkTypeJumpAcross)
+                    {
+                        Jump();
+                    }
+                    else if (nav.currentOffMeshLinkData.linkType == OffMeshLinkType.LinkTypeDropDown)
+                    {
+                        Drop();
+                    }
+                }
+            }
+            else
+            {
+                animancer.Play(navstate.idle, 0.25f);
+            }
+            
+        }
+
+        if (animancer.States.Current == navstate.fall)
+        {
+            ignoreRoot = true;
+            if (rigidbody.isKinematic)
+            {
+                rigidbody.isKinematic = false;
+            }
+
+            if (GetGrounded())
+            {
+                if (offMeshInProgress)
+                {
+                    nav.CompleteOffMeshLink();
+                    offMeshInProgress = false;
+                }
+                animancer.Play(landAnim);
+                rigidbody.isKinematic = true;
+                ignoreRoot = false;
+            }
         }
         else
         {
-            //nav.isStopped = true;
-            nav.enabled = false;
+            Vector3 worldDeltaPosition = nav.nextPosition - transform.position;
+            if (worldDeltaPosition.magnitude > nav.radius) nav.nextPosition = transform.position + 0.9f * worldDeltaPosition;
+        }
+        
+    }
 
-            obstacle.enabled = true;
+    public void Jump()
+    {
+        OffMeshLinkData data = nav.currentOffMeshLinkData;
+        StartCoroutine(JumpRoutine(data));
+    }
 
-            UpdateWithoutNav();
+    IEnumerator JumpRoutine(OffMeshLinkData data)
+    {
+        ignoreRoot = true;
+        Vector3 dir;
+        while (Vector3.Distance(this.transform.position, data.startPos) > 0.1f)
+        {
+            dir = (data.endPos - this.transform.position).normalized;
+            dir.Scale(new Vector3(1f, 0f, 1f));
+            this.transform.position = Vector3.MoveTowards(this.transform.position, data.startPos, jumpAdjustSpeed * Time.fixedDeltaTime);
+            this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, dir, 360f * Mathf.Deg2Rad * Time.fixedDeltaTime, 10f));
+            yield return new WaitForFixedUpdate();
         }
 
-        
+        ignoreRoot = false;
+        dir = (data.endPos - this.transform.position).normalized;
+        dir.Scale(new Vector3(1f, 0f, 1f));
+        this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+        jumpHorizontal.Events.OnEnd = _FinishJump;
+        animancer.Play(jumpHorizontal);
+        yield return new WaitWhile(() => animancer.States.Current != navstate.idle);
+        Vector3 pos = animancer.Animator.rootPosition;
+        this.transform.position = pos;
+        nav.nextPosition = pos;
+    }
 
+    public void Drop()
+    {
+        OffMeshLinkData data = nav.currentOffMeshLinkData;
+        StartCoroutine(DropRoutine(data));
+    }
+
+    IEnumerator DropRoutine(OffMeshLinkData data)
+    {
+        ignoreRoot = true;
+        Vector3 dir;
+        while (Vector3.Distance(this.transform.position, data.startPos) > 0.1f)
+        {
+            dir = (data.endPos - this.transform.position).normalized;
+            dir.Scale(new Vector3(1f, 0f, 1f));
+            this.transform.position = Vector3.MoveTowards(this.transform.position, data.startPos, jumpAdjustSpeed * Time.fixedDeltaTime);
+            this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, dir, 360f * Mathf.Deg2Rad * Time.fixedDeltaTime, 10f));
+            yield return new WaitForFixedUpdate();
+        }
+        ignoreRoot = false;
+        dir = (data.endPos - this.transform.position).normalized;
+        dir.Scale(new Vector3(1f, 0f, 1f));
+        this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+        jumpDown.Events.OnEnd = _FinishDrop;
+        animancer.Play(jumpDown);
+
+    }
+
+    public bool GetGrounded()
+    {
+        Collider c = this.GetComponent<Collider>();
+        Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down;
+        Debug.DrawLine(bottom, bottom + Vector3.down * 0.2f, Color.red);
+        return Physics.Raycast(bottom, Vector3.down, 0.2f, LayerMask.GetMask("Terrain"));
     }
 
     private void UpdateWithNav()
@@ -205,22 +342,81 @@ public class NavigatingHumanoidActor : Actor
     void OnAnimatorMove()
     {
         // Update position based on animation movement using navigation surface height
-        Vector3 position = animator.rootPosition;
+        Vector3 position = animancer.Animator.rootPosition;
+        if (!ignoreRoot) transform.rotation = animancer.Animator.rootRotation;
         position.y = nav.nextPosition.y;
         Vector3 dir = position - this.transform.position;
-        if (!Physics.SphereCast(this.transform.position + (Vector3.up * 0.75f), 0.25f, dir, out RaycastHit hit, dir.magnitude, LayerMask.GetMask("Terrain")))
+        if (!ignoreRoot && (animancer.States.Current == navstate.move || !Physics.SphereCast(this.transform.position + (Vector3.up * positionReference.eyeHeight), 0.25f, dir, out RaycastHit hit, dir.magnitude, LayerMask.GetMask("Terrain"))))
         {
             transform.position = position;
         }
+        
 
     }
 
+    
+    IEnumerator UpdateDestination()
+    {
+        while (this.enabled)
+        {
+            yield return new WaitForSecondsRealtime(updateSpeed);
+            if (nav.enabled) nav.SetDestination(destination);
+        }
+    }
+    public void SetDestination(Vector3 position)
+    {
+        destination = position;
+        followingTarget = false;
+    }
+
+    public void SetDestination(GameObject target)
+    {
+        SetCombatTarget(target);
+        destination = target.transform.position;
+        followingTarget = true;
+    }
     public void RealignToTarget()
     {
         if (CombatTarget != null)
         {
             this.transform.rotation = Quaternion.LookRotation(NumberUtilities.FlattenVector(CombatTarget.transform.position - this.transform.position));
         }
+    }
+
+    public float GetDistanceToTarget()
+    {
+        if (nav.enabled) {
+            return nav.remainingDistance;
+        }
+        if (destination == Vector3.zero)
+        {
+            return 0f;
+        }
+        else
+        {
+            return Vector3.Distance(this.transform.position, destination);
+        }
+    }
+
+    public bool IsClearLineToTarget()
+    {
+        if (CombatTarget != null)
+        {
+            if (Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, CombatTarget.transform.position - this.transform.position, out RaycastHit hit, Vector3.Distance(CombatTarget.transform.position, this.transform.position), ~LayerMask.GetMask("Limbs", "Hitboxes")))
+            {
+                if (hit.transform.root == CombatTarget.transform.root)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(this.transform.position + this.transform.up, this.transform.position + this.transform.forward + this.transform.up);
     }
     public bool ShouldFaceTarget()
     {
@@ -242,5 +438,10 @@ public class NavigatingHumanoidActor : Actor
     public bool CanMove()
     {
         return true;
+    }
+
+    public Vector3 GetDestination()
+    {
+        return destination;
     }
 }

@@ -14,6 +14,7 @@ public class BladeAttackStateHandler : StateMachineBehaviour
         if (animator.gameObject.TryGetComponent<HumanoidActor>(out HumanoidActor actor))
         {
             actor.SetNextAttackType(attackType, true);
+            /*
             if (actor is NavigatingHumanoidActor navActor)
             {
                 navActor.RealignToTarget();
@@ -22,6 +23,7 @@ public class BladeAttackStateHandler : StateMachineBehaviour
             {
                 //player.AnimSetTwoHand(isTwoHanded);
             }
+            */
         }
     }
 }
