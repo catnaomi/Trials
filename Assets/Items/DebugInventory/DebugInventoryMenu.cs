@@ -73,13 +73,13 @@ public class DebugInventoryMenu : MonoBehaviour
 
         if (player.inventory.IsMainEquipped())
         {
-            mainName.text = player.inventory.MainWeapon.itemName;
-            mainDesc.text = player.inventory.MainWeapon.itemDesc;
+            mainName.text = player.inventory.GetMainWeapon().itemName;
+            mainDesc.text = player.inventory.GetMainWeapon().itemDesc;
         }
         if (player.inventory.IsOffEquipped())
         {
-            offName.text = player.inventory.OffWeapon.itemName;
-            offDesc.text = player.inventory.OffWeapon.itemDesc;
+            offName.text = player.inventory.GetOffWeapon().itemName;
+            offDesc.text = player.inventory.GetOffWeapon().itemDesc;
         }
 
         Slot0Name.text = "-";
@@ -89,6 +89,7 @@ public class DebugInventoryMenu : MonoBehaviour
 
         Color mainColor = (player.IsTwoHanding() ? twoHandColor : mainHandColor);
         
+        /*
         if (player.inventory.Slot0Weapon != null)
         {
             Slot0Name.text = player.inventory.Slot0Weapon.itemName;
@@ -169,6 +170,7 @@ public class DebugInventoryMenu : MonoBehaviour
         {
             Slot3Panel.color = unequippedColor;
         }
+        */
     }
 
     private void Update()
@@ -190,13 +192,13 @@ public class DebugInventoryMenu : MonoBehaviour
         }
         slots.Clear();
         
-        for (int i = 0; i < player.inventory.contents.Count; i++)
+        for (int i = 0; i < player.inventory.GetContents().Count; i++)
         {
-            bool nameonly = !(player.inventory.contents[i] is EquippableWeapon);
+            bool nameonly = !(player.inventory.GetContents()[i] is EquippableWeapon);
             GameObject slot = Instantiate((!nameonly ? prefab : prefabNameOnly), viewport.position + Vector3.right * (75f) + Vector3.up * (-125f * (i+1)), Quaternion.identity, viewport);
             DebugItemSlot controller = slot.GetComponent<DebugItemSlot>();
-            controller.item = player.inventory.contents[i];
-            controller.inventory = player.inventory;
+            controller.item = player.inventory.GetContents()[i];
+            //controller.inventory = player.inventory;
             controller.nameonly = nameonly;
         }
     }

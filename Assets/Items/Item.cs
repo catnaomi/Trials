@@ -44,7 +44,7 @@ public class Item : ScriptableObject
     {
         // TODO: make this cleaner
 
-        if (holder is PlayerMovementController player)
+        if (holder is PlayerActor player)
         {
             return player.GetComponent<PlayerInventory>();
         }

@@ -32,7 +32,7 @@ public class Ledge : ClimbDetector
             player.SetLedge(this);
             inUse = true;
         }
-        else if (other.transform.root.TryGetComponent<PlayerMovementController>(out PlayerMovementController playermov))
+        else if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor playermov))
         {
             playermov.SetLedge(this);
             inUse = true;
@@ -55,7 +55,7 @@ public class Ledge : ClimbDetector
         return snap.transform.position + snap.transform.right * -snapPoint * (GetLength() - climberWidth) * 0.5f;
     }
 
-    public Vector3 GetSnapPointDot(float climberWidth, Vector3 climberPosition, PlayerMovementController player, int dir)
+    public Vector3 GetSnapPointDot(float climberWidth, Vector3 climberPosition, PlayerActor player, int dir)
     {
         //if (linkedLeft) left.snapPoint = -0.9f;
         //if (linkedRight) right.snapPoint = 0.9f;

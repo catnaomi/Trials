@@ -427,7 +427,7 @@ public class ForgeUI : MonoBehaviour
     public void UpdateFromInventory()
     {
         componentInventory.Clear();
-        foreach (Item item in targetInventory.contents)
+        foreach (Item item in targetInventory.GetContents())
         {
             if (item is WeaponComponent comp)
             {
@@ -441,9 +441,9 @@ public class ForgeUI : MonoBehaviour
         {
             foreach (WeaponComponent comp in weapon.GetAllComponents())
             {
-                targetInventory.RemoveItem(comp);
+                targetInventory.Remove(comp);
             }
-            targetInventory.AddItem(weapon);
+            targetInventory.Add(weapon);
 
             weapon = Instantiate(emptyWeapon);
 

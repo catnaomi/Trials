@@ -35,7 +35,7 @@ public class BowIKHandler : IKHandler
 
             actor.positionReference.Spine.rotation = aimRot;
         }
-        else if (aactor is PlayerMovementController player)
+        else if (aactor is PlayerActor player)
         {
             Vector3 aimDir = player.GetLaunchVector(player.positionReference.Spine.transform.position);
 

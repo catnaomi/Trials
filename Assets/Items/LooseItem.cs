@@ -76,7 +76,7 @@ using UnityEngine;
 
         public override void Interact(PlayerActor player)
         {
-            player.inventory.AddItem(item);
+            player.inventory.Add(item);
             GameObject.Destroy(this.gameObject);
         }
 

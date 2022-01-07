@@ -64,7 +64,7 @@ public class CraftInteract : Interactable
         loadingScene = true;
         player.inventory.UnequipMainWeapon();
         player.inventory.UnequipOffHandWeapon();
-        player.isMenuOpen = true;
+        GameStateController.game.isMenuOpen = true;
         Moveset.LoadMovesetCombinations();
     }
 
@@ -86,6 +86,6 @@ public class CraftInteract : Interactable
     {
         sceneLoad = SceneManager.UnloadSceneAsync("CraftScene2");
         unloadingScene = true;
-        player.isMenuOpen = false;
+        GameStateController.game.isMenuOpen = false;
     }
 }

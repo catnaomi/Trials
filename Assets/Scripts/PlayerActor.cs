@@ -8,7 +8,7 @@ using UnityEngine.Events;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController), typeof(HumanoidPositionReference))]
-public class PlayerMovementController : Actor, IAttacker, IDamageable
+public class PlayerActor : Actor, IAttacker, IDamageable
 {
     CharacterController cc;
     public bool instatemove;
@@ -28,7 +28,9 @@ public class PlayerMovementController : Actor, IAttacker, IDamageable
     CameraState prevCamState;
     [SerializeField]
     public VirtualCameras vcam;
-
+    [Header("Interaction & Dialogue")]
+    List<Interactable> interactables;
+    public Interactable highlightedInteractable;
     [Header("Movement")]
     public float walkSpeedMax = 5f;
     public AnimationCurve walkSpeedCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
@@ -149,9 +151,10 @@ public class PlayerMovementController : Actor, IAttacker, IDamageable
     MixerTransition2D blockMove;
     ClipTransition blockAnimStart;
     ClipTransition blockAnim;
-    PlayerMovementController movementController;
+    PlayerActor movementController;
     AnimState state;
 
+    public static PlayerActor player;
     public UnityEvent OnHitboxActive;
 
     private System.Action _OnLandEnd;
@@ -197,13 +200,14 @@ public class PlayerMovementController : Actor, IAttacker, IDamageable
     {
         positionReference = this.GetComponent<HumanoidPositionReference>();
         positionReference.LocateSlotsByName();
+        player = this;
     }
     // Start is called before the first frame update
     void Start()
     {
         cc = this.GetComponent<CharacterController>();
         defaultRadius = cc.radius;
-        movementController = this.GetComponent<PlayerMovementController>();
+        movementController = this.GetComponent<PlayerActor>();
         animancer = this.GetComponent<AnimancerComponent>();
         state.move = (MixerState)animancer.States.GetOrCreate(moveAnim);
         state.attack = animancer.States.GetOrCreate(rollAnim);
@@ -2020,8 +2024,68 @@ public class PlayerMovementController : Actor, IAttacker, IDamageable
     {
         return animancer.States.Current == state.climb;
     }
+
+    public bool IsTwoHanding()
+    {
+        return inventory.IsMainDrawn() && inventory.GetMainWeapon().TwoHandOnly();
+    }
     #endregion
 
+    #region INTERACTION
+    public void AddInteractable(Interactable interactable)
+    {
+        if (!interactables.Contains(interactable))
+        {
+            interactables.Add(interactable);
+            GetHighlightedInteractable();
+        }
+    }
+
+    public void RemoveInteractable(Interactable interactable)
+    {
+        interactables.Remove(interactable);
+        GetHighlightedInteractable();
+    }
+
+    public void ClearInteractables()
+    {
+        interactables.Clear();
+        GetHighlightedInteractable();
+    }
+
+    public Interactable GetHighlightedInteractable()
+    {
+        highlightedInteractable = null;
+        float leadDist = Mathf.Infinity;
+
+        foreach (Interactable interactable in interactables)
+        {
+            if (interactable == null) continue;
+            float dist = Vector3.Distance(this.transform.position, interactable.transform.position);
+            if (dist < leadDist)
+            {
+                leadDist = dist;
+                highlightedInteractable = interactable;
+            }
+            interactable.SetIconVisiblity(false);
+        }
+        if (highlightedInteractable != null)
+        {
+            highlightedInteractable.SetIconVisiblity(true);
+        }
+        return highlightedInteractable;
+    }
+
+    private void Interact()
+    {
+        Interactable interactable = GetHighlightedInteractable();
+        if (interactable != null)
+        {
+            interactable.Interact(this);
+        }
+
+    }
+    #endregion
     public bool GetGrounded()
     {
         // return cc.isGrounded;

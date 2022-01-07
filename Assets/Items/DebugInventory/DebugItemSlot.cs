@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class DebugItemSlot : MonoBehaviour
 {
     [ReadOnly] public Item item;
-    [HideInInspector] public Inventory inventory;
+    [HideInInspector] public PlayerInventory inventory;
     public Text itemName;
     public bool nameonly;
     public Button Slot0Equip;

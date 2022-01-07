@@ -31,7 +31,7 @@ public class QuickSelectItem : MonoBehaviour
     public void UpdateSlots()
     {
         //Debug.Log("Updating Quickslot UI: " + slot);
-        Inventory inventory = PlayerActor.player.GetComponent<Inventory>();
+        PlayerInventory inventory = PlayerActor.player.GetComponent<PlayerInventory>();
         switch (slot)
         {
             case 0:

@@ -55,7 +55,7 @@ public class RangedBow : EquippableWeapon, HitboxHandler
 
     public void Fire()
     {
-        if (GetHeldActor() is PlayerMovementController player)
+        if (GetHeldActor() is PlayerActor player)
         {
 
         }

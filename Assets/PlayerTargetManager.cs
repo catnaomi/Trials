@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class PlayerTargetManager : MonoBehaviour
 {
-    public PlayerMovementController player;
+    public PlayerActor player;
     public Camera cam;
     public float maxPlayerDistance = 20f;
     public float maxCamDistance = 20f;

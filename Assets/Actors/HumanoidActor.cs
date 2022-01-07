@@ -82,7 +82,7 @@ public class HumanoidActor : Actor
     [Header("Humanoid Settings")]
     public HumanoidState humanoidState;
     public HumanoidPositionReference positionReference;
-    public Inventory inventory;
+    public HumanoidNPCInventory inventory;
     public bool canRevive = true;
 
     public BladeWeapon.AttackType nextAttackType;
@@ -119,7 +119,7 @@ public class HumanoidActor : Actor
 
         if (inventory == null)
         {
-            inventory = this.GetComponent<Inventory>();
+            inventory = this.GetComponent<HumanoidNPCInventory>();
         }
 
         //inventory.Init();
@@ -512,7 +512,7 @@ public class HumanoidActor : Actor
         {
             EquippableWeapon weapon = inventory.GetMainWeapon();
             inventory.UnequipMainWeapon();
-            inventory.RemoveItem(weapon);
+            inventory.Remove(weapon);
             LooseItem li = LooseItem.CreateLooseItem(weapon);
             li.gameObject.transform.position = this.transform.position + Vector3.up;
             li.GetComponent<Rigidbody>().AddForce(this.transform.up * 2.5f, ForceMode.Impulse);
@@ -986,11 +986,6 @@ public class HumanoidActor : Actor
     public override bool IsAlive()
     {
         return humanoidState != HumanoidState.Dead;
-    }
-
-    public bool IsWeaponEquipped()
-    {
-        return inventory.MainWeapon != null;
     }
 
     public void BecomeInvulnerable(float duration)

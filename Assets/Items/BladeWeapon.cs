@@ -694,7 +694,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                     Quaternion.identity,
                     1f);
 
-            if (wall && holder is PlayerMovementController player)
+            if (wall && holder is PlayerActor player)
             {
                 player.HitWall();
             }

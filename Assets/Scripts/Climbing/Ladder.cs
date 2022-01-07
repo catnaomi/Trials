@@ -33,7 +33,7 @@ public class Ladder : ClimbDetector
             player.SetLadder(this);
             inUse = true;
         }
-        else if (other.transform.root.TryGetComponent<PlayerMovementController>(out PlayerMovementController playermov))
+        else if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor playermov))
         {
             playermov.SetLadder(this);
             inUse = true;
@@ -60,7 +60,7 @@ public class Ladder : ClimbDetector
         return snap.transform.position + (snap.transform.up * -snapPoint * (GetHeight() - climberHeight) * 0.5f);
     }
 
-    public Vector3 GetSnapPointDot(float climberHeight, Vector3 climberPosition, PlayerMovementController player, int dir)
+    public Vector3 GetSnapPointDot(float climberHeight, Vector3 climberPosition, PlayerActor player, int dir)
     {
         //if (linkedLeft) left.snapPoint = -0.9f;
         //if (linkedRight) right.snapPoint = 0.9f;
