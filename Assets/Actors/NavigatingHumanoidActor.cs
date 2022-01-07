@@ -30,16 +30,25 @@ public class NavigatingHumanoidActor : Actor, INavigates
     bool ignoreRoot;
     bool shouldFall;
     bool offMeshInProgress;
+    public float airTime = 0f;
+    float lastAirTime;
+    float landTime = 0f;
+    Vector3 yVel = Vector3.zero;
+    Vector3 xzVel = Vector3.zero;
+    Vector3 lastPosition;
+    Vector3 animatorVelocity;
     public float jumpAdjustSpeed = 3f;
     protected IInventory inventory;
     [Header("Animancer")]
     protected AnimancerComponent animancer;
+    public NavAnims navAnims;
     public LinearMixerTransitionAsset idleAnim;
     public MixerTransition2DAsset moveAnim;
-    public ClipTransition jumpHorizontal;
-    public ClipTransition jumpDown;
-    public ClipTransition fallAnim;
-    public ClipTransition landAnim;
+    protected ClipTransition jumpHorizontal;
+    protected ClipTransition jumpDown;
+    protected ClipTransition fallAnim;
+    protected ClipTransition landAnim;
+
     protected NavAnimState navstate;
     protected struct NavAnimState {
         public LinearMixerState idle;
@@ -50,6 +59,10 @@ public class NavigatingHumanoidActor : Actor, INavigates
     void OnEnable()
     {
         StartCoroutine("UpdateDestination");
+        jumpHorizontal = navAnims.jumpHorizontal;
+        jumpDown = navAnims.jumpDown;
+        fallAnim = navAnims.fallAnim;
+        landAnim = navAnims.landAnim;
     }
 
     System.Action _FinishJump;
@@ -60,6 +73,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
 
         nav = GetComponent<NavMeshAgent>();
         animancer = GetComponent<AnimancerComponent>();
+
         nav.updatePosition = false;
 
         nav.updateRotation = false;
@@ -88,7 +102,6 @@ public class NavigatingHumanoidActor : Actor, INavigates
             navstate.fall = animancer.Play(fallAnim);
             this.transform.position = pos;
             nav.nextPosition = pos;
-            rigidbody.velocity = Vector3.down;
         };
 
         landAnim.Events.OnEnd = () =>
@@ -188,10 +201,6 @@ public class NavigatingHumanoidActor : Actor, INavigates
         if (animancer.States.Current == navstate.fall)
         {
             ignoreRoot = true;
-            if (rigidbody.isKinematic)
-            {
-                rigidbody.isKinematic = false;
-            }
 
             if (GetGrounded())
             {
@@ -201,7 +210,6 @@ public class NavigatingHumanoidActor : Actor, INavigates
                     offMeshInProgress = false;
                 }
                 animancer.Play(landAnim);
-                rigidbody.isKinematic = true;
                 ignoreRoot = false;
             }
         }
@@ -210,7 +218,15 @@ public class NavigatingHumanoidActor : Actor, INavigates
             Vector3 worldDeltaPosition = nav.nextPosition - transform.position;
             if (worldDeltaPosition.magnitude > nav.radius) nav.nextPosition = transform.position + 0.9f * worldDeltaPosition;
         }
-        
+
+        if (GetGrounded())
+        {
+            if (lastPosition != Vector3.zero)
+            {
+                xzVel = (this.transform.position - lastPosition);
+            }
+            lastPosition = this.transform.position;
+        }
     }
 
     public void Jump()
@@ -271,12 +287,67 @@ public class NavigatingHumanoidActor : Actor, INavigates
 
     }
 
-    public bool GetGrounded()
+    void FixedUpdate()
+    {
+        Vector3 velocity = Vector3.zero;
+        if (GetGrounded(out RaycastHit hitCheck1))
+        {
+            if (yVel.y <= 0)
+            {
+                yVel.y = 0f;
+            }
+            else
+            {
+                yVel.y += Physics.gravity.y * Time.fixedDeltaTime;
+            }
+            airTime = 0f;
+            landTime += Time.fixedDeltaTime;
+            if (landTime > 1f)
+            {
+                landTime = 1f;
+            }
+            Vector3 groundY = new Vector3(this.transform.position.x, hitCheck1.point.y, this.transform.position.z);
+            this.transform.position = Vector3.MoveTowards(this.transform.position, groundY, 0.2f * Time.fixedDeltaTime);
+        }
+        else
+        {
+            yVel.y += Physics.gravity.y * Time.fixedDeltaTime;
+            if (yVel.y < -70f)
+            {
+                yVel.y = -70;
+            }
+            airTime += Time.fixedDeltaTime;
+            lastAirTime = airTime;
+            if (animancer.States.Current == navstate.fall) velocity += xzVel;
+        }
+        velocity += yVel * Time.fixedDeltaTime;
+        this.GetComponent<CharacterController>().Move((velocity));
+    }
+    public bool GetGrounded(out RaycastHit hitInfo)
     {
         Collider c = this.GetComponent<Collider>();
-        Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down;
-        Debug.DrawLine(bottom, bottom + Vector3.down * 0.2f, Color.red);
-        return Physics.Raycast(bottom, Vector3.down, 0.2f, LayerMask.GetMask("Terrain"));
+        Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down * 0.9f;
+        
+        bool hit = Physics.Raycast(bottom, Vector3.down, out hitInfo, 0.2f, LayerMask.GetMask("Terrain"));
+        Debug.DrawLine(bottom, bottom + Vector3.down * 0.2f, hit ? Color.green : Color.red);
+        return hit;
+    }
+
+    public bool GetGrounded()
+    {
+        return GetGrounded(out RaycastHit unused);
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        CharacterController cc = this.GetComponent<CharacterController>();
+        if (!GetGrounded() && cc.isGrounded && animancer.States.Current == navstate.fall)
+        {
+            Debug.DrawLine(this.transform.position, hit.point, Color.blue);
+            Vector3 dir = this.transform.position - hit.point;
+            dir.y = 0;
+            this.transform.Translate(dir);
+        }
     }
 
     private void UpdateWithNav()
@@ -342,7 +413,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     void OnAnimatorMove()
     {
         // Update position based on animation movement using navigation surface height
-        Vector3 position = animancer.Animator.rootPosition;
+        Vector3 position = animancer.Animator.rootPosition + yVel;
         if (!ignoreRoot) transform.rotation = animancer.Animator.rootRotation;
         position.y = nav.nextPosition.y;
         Vector3 dir = position - this.transform.position;
@@ -350,11 +421,10 @@ public class NavigatingHumanoidActor : Actor, INavigates
         {
             transform.position = position;
         }
-        
+        animatorVelocity = animancer.Animator.velocity;
 
     }
 
-    
     IEnumerator UpdateDestination()
     {
         while (this.enabled)
