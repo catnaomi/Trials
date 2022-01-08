@@ -45,7 +45,7 @@ public class AnimationFXHandler : MonoBehaviour
     public void StepL(int heavy)
     {
         AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
-        if (!source.isPlaying) source.PlayOneShot(default_stepL);
+        if (!footSourceHeavy.isPlaying && !footSourceLight.isPlaying) source.PlayOneShot(default_stepL);
         if (heavy > 0) OnDust.Invoke();
     }
 
@@ -56,7 +56,7 @@ public class AnimationFXHandler : MonoBehaviour
     public void StepR(int heavy)
     {
         AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
-        if (!source.isPlaying) source.PlayOneShot(default_stepR);
+        if (!footSourceHeavy.isPlaying && !footSourceLight.isPlaying) source.PlayOneShot(default_stepR);
         if (heavy > 0) OnDust.Invoke();
     }
 

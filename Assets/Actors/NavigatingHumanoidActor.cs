@@ -38,7 +38,6 @@ public class NavigatingHumanoidActor : Actor, INavigates
     Vector3 lastPosition;
     Vector3 animatorVelocity;
     public float jumpAdjustSpeed = 3f;
-    protected IInventory inventory;
     [Header("Animancer")]
     protected AnimancerComponent animancer;
     public NavAnims navAnims;
@@ -58,7 +57,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
 
     void OnEnable()
     {
-        StartCoroutine("UpdateDestination");
+        
         jumpHorizontal = navAnims.jumpHorizontal;
         jumpDown = navAnims.jumpDown;
         fallAnim = navAnims.fallAnim;
@@ -108,6 +107,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
         {
             animancer.Play(navstate.idle);
         };
+        StartCoroutine("UpdateDestination");
     }
 
     public void StartNavigationToTarget(GameObject target)
@@ -482,7 +482,6 @@ public class NavigatingHumanoidActor : Actor, INavigates
         }
         return false;
     }
-
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

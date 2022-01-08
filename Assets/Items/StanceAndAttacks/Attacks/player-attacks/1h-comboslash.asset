@@ -38,6 +38,9 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 1
+    bouncesOffBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
     stunTime: 1
     staggers:
       onHit: 2
@@ -49,6 +52,9 @@ MonoBehaviour:
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
     hitClip: {fileID: 0}
   staminaCost: 0
   sequence:
@@ -72,7 +78,7 @@ MonoBehaviour:
       _Names:
       - OnCancel
     _Clip: {fileID: 7400000, guid: 2bd2de54bf34ff04491e187eccb3cf6a, type: 2}
-    _Speed: 1
+    _Speed: 1.25
     _NormalizedStartTime: 0
   - _FadeDuration: 0.25
     _Events:
@@ -97,6 +103,9 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 1
+    bouncesOffBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
     stunTime: 0
     staggers:
       onHit: 3
@@ -108,6 +117,9 @@ MonoBehaviour:
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
     hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}
   - healthDamage: 25
     staminaDamage: 25
@@ -119,6 +131,9 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 1
+    bouncesOffBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
     stunTime: 0
     staggers:
       onHit: 2
@@ -130,6 +145,9 @@ MonoBehaviour:
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
     hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}
   - healthDamage: 50
     staminaDamage: 250
@@ -141,6 +159,9 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 1
+    bouncesOffBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
     stunTime: 0
     staggers:
       onHit: 3
@@ -152,4 +173,7 @@ MonoBehaviour:
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
     hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}

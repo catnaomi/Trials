@@ -34,6 +34,7 @@ public class Moveset : ScriptableObject
     public MixerTransition2DAsset blockMove;
     public ClipTransition blockAnim;
     public ClipTransition blockAnimStart;
+    public ClipTransition blockStagger;
     public bool overridesSprint;
     public ClipTransition sprintAnim;
 

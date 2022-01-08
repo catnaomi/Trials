@@ -22,6 +22,7 @@ public class Actor : MonoBehaviour
     public UnityEvent OnHurt;
     public UnityEvent OnHit;
     public UnityEvent OnDie;
+    public UnityEvent OnAttack;
     public float lastDamageTaken;
     private  int mercyId; //hitbox
 
@@ -110,7 +111,10 @@ public class Actor : MonoBehaviour
         // do nothing by default
     }
 
-
+    public virtual bool IsBlocking()
+    {
+        return false;
+    }
     public GameObject GetCombatTarget()
     {
         return CombatTarget;

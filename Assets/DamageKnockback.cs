@@ -20,6 +20,8 @@ public class DamageKnockback
     public bool isThrust;
     public bool isSlash;
     public bool bouncesOffBlock;
+    public bool breaksBlock;
+    public bool canDamageSelf;
     public float stunTime;
     public StaggerData staggers;
     [Space(10)]
@@ -94,6 +96,8 @@ public class DamageKnockback
         this.isThrust = damageKnockback.isThrust;
         this.bouncesOffBlock = damageKnockback.bouncesOffBlock;
         this.OnHit = damageKnockback.OnHit;
+        this.breaksBlock = damageKnockback.breaksBlock;
+        this.canDamageSelf = damageKnockback.canDamageSelf;
     }
 
     public DamageKnockback()

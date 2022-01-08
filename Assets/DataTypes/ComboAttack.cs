@@ -42,7 +42,7 @@ public class ComboAttack : InputAttack
 
     public DamageKnockback GetDamage(int index)
     {
-        if (index <= 0) return damages[0];
+        if (index <= 0 || index >= damages.Length) return damages[0];
         return damages[index-1];
     }
 

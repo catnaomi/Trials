@@ -148,9 +148,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public AvatarMask upperBodyMask;
     [Header("Damage Anims")]
     public DamageAnims damageAnim;
+    HumanoidDamageHandler damageHandler;
     MixerTransition2D blockMove;
     ClipTransition blockAnimStart;
     ClipTransition blockAnim;
+    ClipTransition blockStagger;
     PlayerActor movementController;
     AnimState state;
 
@@ -212,6 +214,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         state.move = (MixerState)animancer.States.GetOrCreate(moveAnim);
         state.attack = animancer.States.GetOrCreate(rollAnim);
         animancer.Play(state.move);
+
+        
 
         this.GetComponent<PlayerInput>().actions["Sprint"].performed += (context) =>
         {
@@ -276,6 +280,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             animancer.Play(state.move, 0.1f);
         };
+
+        damageHandler = new HumanoidDamageHandler(this, damageAnim, animancer);
+        damageHandler.SetEndAction(_MoveOnEnd);
+        damageHandler.SetBlockEndAction(() => { animancer.Play(state.block, 0.5f); });
 
         _AttackEnd = () =>
         {
@@ -410,13 +418,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             if (blocking && inventory.IsMainDrawn())
             {
-                ((MixerState)state.block).ChildStates[0].Clip = blockAnimStart.Clip;
+                //((MixerState)state.block).ChildStates[0].Clip = blockAnimStart.Clip;
                 animancer.Play(state.block, 0.25f);
+                /*
                 animancer.Layers[1].Play(blockAnimStart, 0f);
                 blockAnimStart.Events.OnEnd = () => {
                     animancer.Layers[1].Play(blockAnim);
                     ((MixerState)state.block).ChildStates[0].Clip = blockAnim.Clip;
                 };
+                */
             }
             if (aiming)
             {
@@ -1023,7 +1033,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (animancer.States.Current == state.move || animancer.States.Current == state.sprint || animancer.States.Current == state.dash)
         {
             xzVel = finalMov;
-            xzVel.Scale(new Vector3(1f, 0f, 1f));
+            xzVel.y = 0;
         }
         if (IsAiming() && inventory.IsRangedDrawn())
         {
@@ -1430,16 +1440,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             blockingMoveAnim = inventory.GetOffWeapon().moveset.blockMove;
             blockAnim = inventory.GetOffWeapon().moveset.blockAnim;
             blockAnimStart = inventory.GetOffWeapon().moveset.blockAnimStart;
+            blockStagger = inventory.GetOffWeapon().moveset.blockStagger;
         }
         else if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.overridesBlock)
         {
             blockingMoveAnim = inventory.GetMainWeapon().moveset.blockMove;
             blockAnim = inventory.GetMainWeapon().moveset.blockAnim;
             blockAnimStart = inventory.GetMainWeapon().moveset.blockAnimStart;
+            blockStagger = inventory.GetMainWeapon().moveset.blockStagger;
         }
 
         state.block = (MixerState)animancer.States.GetOrCreate(blockingMoveAnim);
-
+        damageHandler.SetBlockClip(blockStagger);
 
         ClipTransition sprintingAnim = sprintAnim;
         if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.overridesSprint)
@@ -1868,7 +1880,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void Shockwave(int active)
     {
         if (currentDamage == null) return;
-
+        currentDamage.source = this.gameObject;
         float SHOCKWAVE_RADIUS = 2f;
 
         bool main = (inventory.IsMainDrawn());
@@ -1887,7 +1899,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Collider[] colliders = Physics.OverlapSphere(this.transform.position, SHOCKWAVE_RADIUS, LayerMask.GetMask("Actors"));
         foreach (Collider collider in colliders)
         {
-            if (collider.TryGetComponent<IDamageable>(out IDamageable damageable))
+            if (collider.TryGetComponent<IDamageable>(out IDamageable damageable) && (collider.transform.root != this.transform.root || currentDamage.canDamageSelf))
             {
                 damageable.TakeDamage(currentDamage);
             }
@@ -1903,13 +1915,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         return currentDamage;
     }
-    
+
+
+    public override void ProcessDamageKnockback(DamageKnockback damageKnockback)
+    {
+        HitboxActive(0);
+        TakeDamage(damageKnockback);
+    }
     public void Recoil()
     {
         HitboxActive(0);
-        AnimancerState state = animancer.Play(damageAnim.recoil);
-        state.Events.OnEnd = _MoveOnEnd;
-        this.state.hurt = state;
+        damageHandler.Recoil();
+    }
+
+    public void TakeDamage(DamageKnockback damage)
+    {
+        damageHandler.TakeDamage(damage);
     }
     #endregion
 
@@ -2029,6 +2050,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         return inventory.IsMainDrawn() && inventory.GetMainWeapon().TwoHandOnly();
     }
+
+    public override bool IsBlocking()
+    {
+        return animancer.States.Current == state.block || animancer.States.Current == damageHandler.block;
+    }
     #endregion
 
     #region INTERACTION
@@ -2093,11 +2119,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down;
         Debug.DrawLine(bottom, bottom + Vector3.down * 0.2f, Color.red);
         return Physics.Raycast(bottom, Vector3.down, 0.2f, LayerMask.GetMask("Terrain")) || cc.isGrounded;
-    }
-
-    public void TakeDamage(DamageKnockback damage)
-    {
-        throw new NotImplementedException();
     }
 
     public void HitWall()

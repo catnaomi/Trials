@@ -9,7 +9,6 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
     Actor actor;
     HumanoidPositionReference positionReference;
 
-    [SerializeField, ReadOnly] private List<Item> contents;
     [SerializeField, ReadOnly] private List<Item> drops;
     [SerializeField, ReadOnly] private EquippableWeapon MainWeapon;
     [SerializeField, ReadOnly] private bool MainIsDrawn;
@@ -19,7 +18,6 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
     [SerializeField, ReadOnly] private bool RangedIsDrawn;
 
     [Header("Starting Inventory Contents")]
-    public List<Item> StartingContents;
     public List<Item> DroppedContents;
 
     [Space(10)]
@@ -31,8 +29,6 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
     [Space(5)]
     public EquippableWeapon equipToRanged;
     public bool shouldEquipRanged = false;
-
-    public UnityEvent OnChange;
 
     bool weaponChanged;
     void Awake()
@@ -173,6 +169,8 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
         //slot.slot = slot.weapon.MainHandEquipSlot;
 
         MainIsDrawn = false;
+        GenerateMainModel();
+        PositionWeapon();
 
         weapon.isEquipped = true;
         weapon.EquipWeapon(actor);
