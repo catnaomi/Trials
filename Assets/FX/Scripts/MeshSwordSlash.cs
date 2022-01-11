@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using JPBotelho;
 using static JPBotelho.CatmullRom;
+using UnityEngine.Events;
+using Cinemachine;
 
 public class MeshSwordSlash : MonoBehaviour
 {
@@ -45,8 +47,10 @@ public class MeshSwordSlash : MonoBehaviour
     float bloodTimer;
     bool bleeding;
     List<Vector3> lineVertices;
-    
 
+    public CinemachineImpulseSource impulse;
+    public float impulseMag = 0.2f;
+    public UnityEvent OnBleed;
 
     [ReadOnly] public bool slashing = false;
     int slashFrames = 0;
@@ -73,6 +77,7 @@ public class MeshSwordSlash : MonoBehaviour
         bottomPoints = new List<Vector3>();
         topCurve = new CatmullRom(emptyPoints, resolution, false);
         bottomCurve = new CatmullRom(emptyPoints, resolution, false);
+
     }
 
     public void BeginSlash()
@@ -333,6 +338,8 @@ public class MeshSwordSlash : MonoBehaviour
         bloodTimer = bloodFadeDelay + bloodFadeTime;
         bleeding = true;
         this.GetComponent<AudioSource>().Play();
+        OnBleed.Invoke();
+        Shake();
     }
 
     public void StopBleeding()
@@ -340,6 +347,11 @@ public class MeshSwordSlash : MonoBehaviour
         bloodlineRenderer.GetComponentInChildren<ParticleSystem>().Stop();
         bloodlineRenderer.gameObject.SetActive(false);
         bleeding = false;
+    }
+
+    public void Shake()
+    {
+        impulse.GenerateImpulseWithVelocity(contactDir.normalized * impulseMag);
     }
 
     public void SetContactPoint(Vector3 position)

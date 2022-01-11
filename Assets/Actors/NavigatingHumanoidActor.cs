@@ -447,9 +447,9 @@ public class NavigatingHumanoidActor : Actor, INavigates
     }
     public void RealignToTarget()
     {
-        if (CombatTarget != null)
+        if (destination != Vector3.zero)
         {
-            this.transform.rotation = Quaternion.LookRotation(NumberUtilities.FlattenVector(CombatTarget.transform.position - this.transform.position));
+            this.transform.LookAt(destination, Vector3.up);
         }
     }
 

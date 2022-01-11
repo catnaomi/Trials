@@ -1,6 +1,8 @@
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class LineSwordThrust : MonoBehaviour
 {
@@ -24,6 +26,10 @@ public class LineSwordThrust : MonoBehaviour
     bool thrusting;
     bool bleeding;
     Vector3 contactPoint;
+
+    public CinemachineImpulseSource impulse;
+    public float impulseMag = 0.1f;
+    public UnityEvent OnBleed;
     // Start is called before the first frame update
     void Start()
     {
@@ -142,7 +148,15 @@ public class LineSwordThrust : MonoBehaviour
         bloodTimer = bloodFadeDelay + bloodFadeTime;
         bleeding = true;
         this.GetComponent<AudioSource>().Play();
+        OnBleed.Invoke();
+        Shake();
     }
+
+    public void Shake()
+    {
+        impulse.GenerateImpulseWithForce(impulseMag);
+    }
+
 
     public void StopBleeding()
     {

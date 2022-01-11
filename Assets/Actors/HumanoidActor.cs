@@ -438,7 +438,7 @@ public class HumanoidActor : Actor
             {
                 ProcessStagger(damageKnockback.staggers.onArmorHit, damageKnockback);
             }
-            else if (IsCritVulnerable() || damageKnockback.forceCritical)
+            else if (IsCritVulnerable())
             {
                 ProcessStagger(damageKnockback.staggers.onCritical, damageKnockback);
             }
@@ -535,7 +535,7 @@ public class HumanoidActor : Actor
     public bool Damage(DamageKnockback damageKnockback, bool isCritical)
     {
         // account for resistances
-        float critMult = (isCritical) ? damageKnockback.criticalMultiplier : 1f;
+        float critMult = (isCritical) ? damageKnockback.critData.criticalMultiplier : 1f;
         float totalDamage = (!isCritical) ? DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.GetTypes(), this.attributes.resistances) : this.attributes.health.max;
 
         lastDamageTaken = totalDamage;

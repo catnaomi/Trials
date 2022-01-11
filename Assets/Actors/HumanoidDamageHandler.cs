@@ -24,6 +24,7 @@ public class HumanoidDamageHandler : IDamageable
         AnimancerState state = animancer.Play(damageAnims.recoil);
         state.Events.OnEnd = _OnEnd;
         hurt = state;
+        actor.OnHurt.Invoke();
     }
 
     public HumanoidDamageHandler(Actor actor, DamageAnims anims, AnimancerComponent animancer)
@@ -82,10 +83,12 @@ public class HumanoidDamageHandler : IDamageable
             }
             else
             {
+                animancer.Layers[1].Stop();
                 ClipTransition clip = damageAnims.guardBreak;
                 AnimancerState state = animancer.Play(clip);
                 state.Events.OnEnd = _OnEnd;
                 hurt = state;
+                actor.OnHurt.Invoke();
             }
             actor.transform.rotation = Quaternion.LookRotation(-(actor.transform.position - damage.source.transform.position), Vector3.up);
         }
@@ -152,6 +155,7 @@ public class HumanoidDamageHandler : IDamageable
             }
            
             damage.OnHit.Invoke();
+            actor.OnHurt.Invoke();
         }
     }
     public void AdjustDefendingPosition(GameObject attacker)

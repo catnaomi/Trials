@@ -323,6 +323,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 UpdateFromMoveset();
             }
         });
+
+        OnHurt.AddListener(() => { HitboxActive(0); });
     }
 
 
@@ -1204,7 +1206,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Aim,
         Climb
     }
-
     #endregion
 
     #region INPUT

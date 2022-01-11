@@ -18,8 +18,15 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
     public float MeleeAttackRange = 1.5f;
     public bool InMeleeRange;
     [Space(5)]
+    public InputAttack SecondaryAttack;
+    public float SecondaryAttackRange = 2f;
+    public bool InSecondaryRange;
+    [Space(5)]
     public InputAttack GapCloserAttack;
-    public float GapCloserRange = 5f;
+    public ClipTransition GapCloserAnim;
+    public float GapCloserMaxRange = 5f;
+    public float GapCloserMinRange = 3f;
+    public float GapCloserRotationSpeed = 45f;
     public bool InGapRange;
     [Space(5)]
     public InputAttack PowerAttack;
@@ -34,7 +41,8 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
     HumanoidDamageHandler damageHandler;
     [Space(10)]
     public float clock;
-    public static float CLOCK_DEFAULT = 2f;
+    public float ActionDelayMinimum = 2f;
+    public float ActionDelayMaximum = 5f;
     
     public float LowHealthThreshold = 50f;
     public bool isLowHealth;
@@ -66,6 +74,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         Sheath.Events.OnEnd = _MoveOnEnd;
         damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
         damageHandler.SetEndAction(_MoveOnEnd);
+        OnHurt.AddListener(() => { HitboxActive(0); });
     }
 
     void Awake()
@@ -104,13 +113,14 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
 
         if (shouldAct)
         {
-            clock = CLOCK_DEFAULT * Random.value;
+            clock = Random.Range(ActionDelayMinimum, ActionDelayMaximum);
             float navdist = GetDistanceToTarget();
             float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
             InSightRange = realdist <= SightRange;
             InMeleeRange = navdist <= MeleeAttackRange && nav.hasPath;
-            InGapRange = navdist <= GapCloserRange && nav.hasPath;
+            InSecondaryRange = navdist <= SecondaryAttackRange && nav.hasPath;
+            InGapRange = navdist <= GapCloserMaxRange && navdist >= GapCloserMinRange && nav.hasPath;
             InPowerRange = navdist <= PowerAttackRange && nav.hasPath;
 
             if (InSightRange)
@@ -131,10 +141,48 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
                 }
                 
             }
-            if (InMeleeRange && CanAct())
+            if (CanAct())
             {
-                StartMeleeAttack();
+                if (InPowerRange && Random.value < 0.2f)
+                {
+                    RealignToTarget();
+                    StartPowerAttack();
+                }
+                else if (InSecondaryRange && InMeleeRange)
+                {
+                    RealignToTarget();
+                    if (Random.value > 0.5f)
+                    {
+                        StartMeleeAttack();
+                    }
+                    else
+                    {
+                        StartSecondaryAttack();
+                    }
+                }
+                else if (InMeleeRange)
+                {
+                    RealignToTarget();
+                    StartMeleeAttack();
+                }
+                else if (InSecondaryRange)
+                {
+                    RealignToTarget();
+                    StartSecondaryAttack();
+                }
+                else if (InGapRange)
+                {
+                    RealignToTarget();
+                    StartGapCloser();
+                }
+                
             }
+        }
+
+        if (animancer.States.Current == cstate.approach)
+        {
+            Vector3 dir = (destination - this.transform.position).normalized;
+            this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, dir, GapCloserRotationSpeed * Mathf.Deg2Rad * Time.deltaTime, 0f));
         }
     }
 
@@ -145,6 +193,32 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         SetCurrentDamage(MeleeAttack.GetDamage());
     }
 
+    public void StartSecondaryAttack()
+    {
+        cstate.attack = animancer.Play(SecondaryAttack.GetClip());
+        cstate.attack.Events.OnEnd = _MoveOnEnd;
+        SetCurrentDamage(SecondaryAttack.GetDamage());
+    }
+
+    public void StartPowerAttack()
+    {
+        cstate.attack = animancer.Play(PowerAttack.GetClip());
+        cstate.attack.Events.OnEnd = _MoveOnEnd;
+        SetCurrentDamage(PowerAttack.GetDamage());
+    }
+
+    public void StartGapCloser()
+    {
+        cstate.approach = animancer.Play(GapCloserAnim);
+        ClipTransition atkClip = GapCloserAttack.GetClip();
+        atkClip.Events.OnEnd = _MoveOnEnd;
+        cstate.approach.Events.OnEnd = () =>
+        {
+            cstate.attack = animancer.Play(atkClip);
+        };
+        
+        SetCurrentDamage(GapCloserAttack.GetDamage());
+    }
     /*
    * triggered by animation:
    * 0 = deactivate hitboxes
@@ -245,7 +319,6 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
     {
         return currentDamage;
     }
-
 
     public bool DetermineCombatTarget(out GameObject target)
     {
