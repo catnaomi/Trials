@@ -1333,7 +1333,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else if (camState == CameraState.Lock)
         {
-            return move;
+            return Vector2.ClampMagnitude(move,0.5f);
         }
         return Vector2.zero;
     }
