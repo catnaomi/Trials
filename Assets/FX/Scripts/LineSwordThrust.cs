@@ -25,10 +25,17 @@ public class LineSwordThrust : MonoBehaviour
     float bloodTimer;
     bool thrusting;
     bool bleeding;
+    bool nextIsCrit;
     Vector3 contactPoint;
 
+    [Header("Other FX")]
     public CinemachineImpulseSource impulse;
+    [Range(0f, 1f)]
+    public float hitVolume = 0.5f;
+    [Range(0f, 1f)]
+    public float critVolume = 1f;
     public float impulseMag = 0.1f;
+    public float impulseCritMag = 0.2f;
     public UnityEvent OnBleed;
     // Start is called before the first frame update
     void Start()
@@ -141,20 +148,26 @@ public class LineSwordThrust : MonoBehaviour
 
     public void Bleed()
     {
+        bool isCrit = IsNextCrit();
         bloodParticles[currentIndex].transform.position = contactPoint;
         bloodParticles[currentIndex].transform.rotation = Quaternion.LookRotation(pseudoParent.transform.forward);
         bloodParticles[currentIndex].gameObject.SetActive(true);
         bloodParticles[currentIndex].Play();
         bloodTimer = bloodFadeDelay + bloodFadeTime;
         bleeding = true;
-        this.GetComponent<AudioSource>().Play();
+        if (isCrit) Debug.Log("Crit!!!");
+        AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Blood) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Blood);
+        float volume = (isCrit) ? critVolume : hitVolume;
+        this.GetComponent<AudioSource>().Stop();
+        this.GetComponent<AudioSource>().PlayOneShot(clip, volume);
+        float force = (isCrit) ? impulseCritMag : impulseMag;
+        Shake(force);
         OnBleed.Invoke();
-        Shake();
     }
 
-    public void Shake()
+    public void Shake(float force)
     {
-        impulse.GenerateImpulseWithForce(impulseMag);
+        impulse.GenerateImpulseWithForce(force);
     }
 
 
@@ -167,4 +180,16 @@ public class LineSwordThrust : MonoBehaviour
     {
         contactPoint = position;
     }
-}
+
+    public void SetNextCrit(bool crit)
+    {
+        nextIsCrit = crit;
+    }
+
+    public bool IsNextCrit()
+    {
+        bool crit = nextIsCrit;
+        nextIsCrit = false;
+        return crit;
+    }
+} 

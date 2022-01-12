@@ -29,30 +29,45 @@ MonoBehaviour:
       - OnCancel
     _Clip: {fileID: -7911894043268297317, guid: 7c7da79be4202bb46a2154a2e93215f5,
       type: 3}
-    _Speed: 1
+    _Speed: 1.25
     _NormalizedStartTime: 0.1
   attackData:
     healthDamage: 25
     staminaDamage: 25
     types: 0a000000
-    criticalMultiplier: 1.25
-    forceCritical: 0
+    critData:
+      criticalMultiplier: 1.25
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
     breaksArmor: 0
     unblockable: 0
     disarm: 0
     isThrust: 1
     isSlash: 0
     bouncesOffBlock: 1
+    breaksBlock: 0
+    canDamageSelf: 0
     stunTime: 1
     staggers:
       onHit: 3
       onArmorHit: 1
-      onCritical: 3
+      onCritical: 7
       onKill: 6
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
     hitClip: {fileID: 0}
   staminaCost: 0

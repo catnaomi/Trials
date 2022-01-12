@@ -13,6 +13,7 @@ public class CombatDummy : Actor, IDamageable
     public ClipTransition block;
 
     public DamageAnims damageAnims;
+    HumanoidDamageHandler damageHandler;
     public float damageTaken;
     public float lastDamage;
     public float lastStaminaDamage;
@@ -38,6 +39,9 @@ public class CombatDummy : Actor, IDamageable
         animancer.Play((!blockanim)? idleState : blockState);
         animancer.Layers[1].IsAdditive = true;
         animancer.Layers[1].Weight = 0.5f;
+
+        damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
+        damageHandler.SetEndAction(_OnEnd);
     }
 
     public void Update()
@@ -61,6 +65,8 @@ public class CombatDummy : Actor, IDamageable
     }
     public void TakeDamage(DamageKnockback damage)
     {
+        damageHandler.TakeDamage(damage);
+        /*
         lastDamage = damage.healthDamage;
         damageTaken += lastDamage;
         lastStaminaDamage = damage.staminaDamage;
@@ -70,7 +76,7 @@ public class CombatDummy : Actor, IDamageable
         if (isBlocking && hitFromBehind)
         {
             stamina -= lastStaminaDamage;
-            if (stamina > 0)
+            if (!damage.breaksBlock)
             {
                 if (animancer.States.Current != hurt)
                 {
@@ -160,6 +166,7 @@ public class CombatDummy : Actor, IDamageable
             damage.OnHit.Invoke();
             //FXController.CreateFX(FXController.FX.FX_BleedSword, contactPosition, Quaternion.identity, 1f);
         }
+        */
     }
     public void AdjustDefendingPosition(GameObject attacker)
     {
@@ -179,6 +186,11 @@ public class CombatDummy : Actor, IDamageable
 
     public void Recoil()
     {
-        throw new System.NotImplementedException();
+        damageHandler.Recoil();
+    }
+
+    public override bool IsBlocking ()
+    {
+        return isBlocking && animancer.States.Current != damageHandler.hurt;
     }
 }

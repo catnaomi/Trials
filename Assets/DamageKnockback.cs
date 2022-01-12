@@ -35,8 +35,11 @@ public class DamageKnockback
     public GameObject source;
 
     public Vector3 originPoint;
+    public FXController.FXMaterial hitMaterial;
 
     public UnityEvent OnHit;
+    public UnityEvent OnCrit;
+    public UnityEvent OnBlock;
     
     
     [Serializable]
@@ -102,9 +105,17 @@ public class DamageKnockback
         this.isSlash = damageKnockback.isSlash;
         this.isThrust = damageKnockback.isThrust;
         this.bouncesOffBlock = damageKnockback.bouncesOffBlock;
-        this.OnHit = damageKnockback.OnHit;
+        
         this.breaksBlock = damageKnockback.breaksBlock;
         this.canDamageSelf = damageKnockback.canDamageSelf;
+
+        this.critData = damageKnockback.critData;
+
+        this.hitMaterial = damageKnockback.hitMaterial;
+
+        this.OnHit = damageKnockback.OnHit;
+        this.OnCrit = damageKnockback.OnCrit;
+        this.OnBlock = damageKnockback.OnBlock;
     }
 
     public DamageKnockback()

@@ -12,6 +12,7 @@ public class FXController : MonoBehaviour
     public GameObject fx_sparks;
     public GameObject fx_slash;
     public GameObject fx_thrust;
+    public GameObject fx_dizzy;
     [Space(5)]
     public GameObject fx_bleedSword;
     private static float fixedDeltaTime;
@@ -33,6 +34,16 @@ public class FXController : MonoBehaviour
         FX_Stagger,
         FX_Sparks,
         FX_BleedSword,
+    }
+
+    public enum FXMaterial
+    {
+        Blood,
+        Metal,
+        Wood,
+        Stone,
+        Dirt,
+        Glass
     }
     public static Dictionary<FX, GameObject> fxDictionary;
     public static Dictionary<string, AudioClip> clipDictionary;
@@ -56,7 +67,8 @@ public class FXController : MonoBehaviour
             { "sword_hit_light",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_hit_light") },
             { "sword_hit_heavy", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_hit_heavy") },
 
-            { "sword_bleed",  Resources.Load<AudioClip>("Sounds/Effects/sound_bleed1") },
+            
+
 
             { "shield_bash",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bash") },
             { "shield_bash_hit", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bash_hit") },
@@ -68,6 +80,20 @@ public class FXController : MonoBehaviour
 
             { "parry_start", Resources.Load<AudioClip>("Sounds/Effects/sword-parry01") },
             { "parry_success", Resources.Load<AudioClip>("Sounds/Effects/sword-parry02") },
+
+            // material on hits
+            // blood, metal, wood, stone, dirt, glass
+
+            { "sword_blood",  Resources.Load<AudioClip>("Sounds/Effects/sword-bleed1") },
+            { "sword_blood_crit",  Resources.Load<AudioClip>("Sounds/Effects/sword-bleed2") },
+
+            { "sword_metal",  Resources.Load<AudioClip>("Sounds/Effects/metal-hit2") },
+            { "sword_metal_crit",  Resources.Load<AudioClip>("Sounds/Effects/stone-break1") },
+
+            { "sword_wood",  Resources.Load<AudioClip>("Sounds/Effects/metal-hit1") },
+            { "sword_wood_crit",  Resources.Load<AudioClip>("Sounds/Effects/wood-break1") },
+
+            { "sword_bleed",  Resources.Load<AudioClip>("Sounds/Effects/sword-bleed1") },
         };
 
         fixedDeltaTime = Time.fixedDeltaTime;
@@ -105,6 +131,12 @@ public class FXController : MonoBehaviour
     public static GameObject CreateSwordThrust()
     {
         GameObject newFX = GameObject.Instantiate(main.fx_thrust);
+        return newFX;
+    }
+
+    public static GameObject CreateDizzy()
+    {
+        GameObject newFX = GameObject.Instantiate(main.fx_dizzy);
         return newFX;
     }
     public static void Hitpause(float duration)
@@ -171,6 +203,30 @@ public class FXController : MonoBehaviour
     {
         Time.timeScale = 1f;
         Time.fixedDeltaTime = fixedDeltaTime * Time.timeScale;
+    }
+
+    public static AudioClip GetSwordHitSoundFromFXMaterial(FXMaterial material)
+    {
+        switch (material)
+        {
+            default:
+            case FXMaterial.Blood:
+                return clipDictionary["sword_blood"];
+            case FXMaterial.Metal:
+                return clipDictionary["sword_metal"];
+            case FXMaterial.Wood:
+                return clipDictionary["sword_wood"];
+        }
+    }
+
+    public static AudioClip GetSwordCriticalSoundFromFXMaterial(FXMaterial material)
+    {
+        switch (material)
+        {
+            default:
+            case FXMaterial.Blood:
+                return clipDictionary["sword_blood_crit"];
+        }
     }
 
     public static Color GetColorForDamageType(DamageType type)

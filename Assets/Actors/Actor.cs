@@ -23,6 +23,7 @@ public class Actor : MonoBehaviour
     public UnityEvent OnHit;
     public UnityEvent OnDie;
     public UnityEvent OnAttack;
+    public UnityEvent OnCritVulnerable;
     public float lastDamageTaken;
     private  int mercyId; //hitbox
 

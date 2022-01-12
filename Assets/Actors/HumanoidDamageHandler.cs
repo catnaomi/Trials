@@ -12,9 +12,13 @@ public class HumanoidDamageHandler : IDamageable
     public float lastDamage;
     public float damageTaken;
 
+    public float critTime = -1f;
+    bool inCritCoroutine;
+
     public AnimancerState hurt;
     public AnimancerState block;
 
+    public Hitbox lastHitbox;
     ClipTransition blockStagger;
 
     System.Action _OnEnd;
@@ -33,6 +37,10 @@ public class HumanoidDamageHandler : IDamageable
         this.damageAnims = anims;
         this.animancer = animancer;
         blockStagger = damageAnims.blockStagger;
+
+
+        DizzyHumanoid dizzy = FXController.CreateDizzy().GetComponent<DizzyHumanoid>();
+        dizzy.SetActor(actor, this);
     }
 
     public void SetEndAction(System.Action action)
@@ -49,16 +57,17 @@ public class HumanoidDamageHandler : IDamageable
     {
         blockStagger = clip;
     }
+
     public void TakeDamage(DamageKnockback damage)
     {
         lastDamage = damage.healthDamage;
         damageTaken += lastDamage;
 
-
+        lastHitbox = damage.hitboxSource.GetComponent<Hitbox>();
 
         bool hitFromBehind = !(Vector3.Dot(-actor.transform.forward, (damage.source.transform.position - actor.transform.position).normalized) <= 0f);
         Debug.Log(actor.name + "from behind?" + hitFromBehind);
-        if (actor.IsBlocking() && !hitFromBehind)
+        if (actor.IsBlocking() && !hitFromBehind && !damage.unblockable)
         {
             if (!damage.breaksBlock)
             {
@@ -89,13 +98,17 @@ public class HumanoidDamageHandler : IDamageable
                 state.Events.OnEnd = _OnEnd;
                 hurt = state;
                 actor.OnHurt.Invoke();
+                StartCritVulnerability(clip.MaximumDuration / clip.Speed);
             }
             actor.transform.rotation = Quaternion.LookRotation(-(actor.transform.position - damage.source.transform.position), Vector3.up);
+            damage.OnBlock.Invoke();
         }
         else
         {
             AdjustDefendingPosition(damage.source);
-            DamageKnockback.StaggerType stagger = damage.staggers.onHit;
+            bool isCrit = IsCritVulnerable();
+            DamageKnockback.StaggerType stagger = (!isCrit) ? damage.staggers.onHit : damage.staggers.onCritical;
+            float maxTime = 0f;
             if (stagger == DamageKnockback.StaggerType.StaggerSmall)
             {
                 Vector3 dir = (damage.source.transform.position - actor.transform.position).normalized;
@@ -110,6 +123,7 @@ public class HumanoidDamageHandler : IDamageable
                     state.ParameterY = ydot;
                     state.Events.OnEnd = _OnEnd;
                     hurt = state;
+                    maxTime = state.RemainingDuration / state.Speed;
                 }
                 else
                 {
@@ -118,6 +132,7 @@ public class HumanoidDamageHandler : IDamageable
                     state.ParameterX = xdot;
                     state.ParameterY = ydot;
                     state.Events.OnEnd = () => { animancer.Layers[1].Stop(); };
+                    maxTime = state.RemainingDuration / state.Speed;
                 }
             }
             else if (stagger == DamageKnockback.StaggerType.StaggerLarge)
@@ -132,6 +147,7 @@ public class HumanoidDamageHandler : IDamageable
                 state.ParameterY = ydot;
                 state.Events.OnEnd = _OnEnd;
                 hurt = state;
+                maxTime = state.RemainingDuration / state.Speed;
             }
             else if (stagger != DamageKnockback.StaggerType.None)
             {
@@ -142,6 +158,7 @@ public class HumanoidDamageHandler : IDamageable
                 state.Events.OnEnd = _OnEnd;
                 hurt = state;
                 actor.transform.rotation = Quaternion.LookRotation(-(actor.transform.position - damage.source.transform.position), Vector3.up);
+                maxTime = clip.MaximumDuration / clip.Speed;
             }
 
             if (damage.hitboxSource != null)
@@ -152,6 +169,19 @@ public class HumanoidDamageHandler : IDamageable
                 {
                     sourceActor.lastContactPoint = contactPosition;
                 }
+            }
+
+            if (isCrit)
+            {
+                if (!damage.critData.doesNotConsumeCritState)
+                {
+                    StopCritVulnerability();
+                }
+                else
+                {
+                    StartCritVulnerability(maxTime);
+                }
+                damage.OnCrit.Invoke();
             }
            
             damage.OnHit.Invoke();
@@ -172,5 +202,41 @@ public class HumanoidDamageHandler : IDamageable
         Vector3 moveVector = Vector3.MoveTowards(actor.transform.position, targetPosition, MAX_ADJUST) - actor.transform.position;
 
         actor.GetComponent<CharacterController>().Move(moveVector);
+    }
+
+    public void StartCritVulnerability(float time)
+    {
+        critTime = time;
+        if (!inCritCoroutine)
+        {
+            actor.StartCoroutine(CriticalTimeOut());
+        }
+        actor.OnCritVulnerable.Invoke();
+    }
+
+    public void StopCritVulnerability()
+    {
+        critTime = -1f;
+    }
+
+    IEnumerator CriticalTimeOut()
+    {
+        inCritCoroutine = true;
+        while (critTime > 0)
+        {
+            yield return new WaitForEndOfFrame();
+            critTime -= Time.deltaTime;
+        }
+        inCritCoroutine = false;
+    }
+
+    public bool IsCritVulnerable()
+    {
+        return animancer.States.Current == hurt && critTime > 0f;
+    }
+
+    public HumanoidDamageHandler GetDamageHandler()
+    {
+        return this;
     }
 }

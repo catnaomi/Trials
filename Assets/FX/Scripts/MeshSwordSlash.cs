@@ -46,10 +46,19 @@ public class MeshSwordSlash : MonoBehaviour
     int contactIndex;
     float bloodTimer;
     bool bleeding;
+    bool nextIsCrit;
     List<Vector3> lineVertices;
-
+    [Header("Other FX")]
     public CinemachineImpulseSource impulse;
+    [Range(0f,1f)]
+    public float hitVolume = 0.5f;
+    [Range(0f, 1f)]
+    public float critVolume = 1f;
     public float impulseMag = 0.2f;
+    public float impulseCritMag = 0.4f;
+    [Header("Colors")]
+    public Material linemat_block;
+    public Material linemat_blood;
     public UnityEvent OnBleed;
 
     [ReadOnly] public bool slashing = false;
@@ -330,6 +339,8 @@ public class MeshSwordSlash : MonoBehaviour
     Vector3[] bloodlinePoints = { 0.75f * Vector3.forward, 0.5f * Vector3.forward, 0.25f * Vector3.forward, Vector3.zero, -0.25f * Vector3.forward, -0.5f * Vector3.forward, -0.75f * Vector3.forward };
     public void Bleed()
     {
+        bool isCrit = IsNextCrit();
+        bloodlineRenderer.sharedMaterial = linemat_blood;
         bloodlineRenderer.gameObject.SetActive(true);
         ParticleSystem particles = bloodlineRenderer.GetComponentInChildren<ParticleSystem>();
         bloodlineRenderer.transform.position = contactPoint;
@@ -337,9 +348,13 @@ public class MeshSwordSlash : MonoBehaviour
         particles.Play();
         bloodTimer = bloodFadeDelay + bloodFadeTime;
         bleeding = true;
-        this.GetComponent<AudioSource>().Play();
+        AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Blood) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Blood);
+        float volume = (isCrit) ? critVolume : hitVolume;
+        this.GetComponent<AudioSource>().Stop();
+        this.GetComponent<AudioSource>().PlayOneShot(clip, volume);
+        float force = (isCrit) ? impulseCritMag : impulseMag;
+        Shake(force);
         OnBleed.Invoke();
-        Shake();
     }
 
     public void StopBleeding()
@@ -349,9 +364,9 @@ public class MeshSwordSlash : MonoBehaviour
         bleeding = false;
     }
 
-    public void Shake()
+    public void Shake(float force)
     {
-        impulse.GenerateImpulseWithVelocity(contactDir.normalized * impulseMag);
+        impulse.GenerateImpulseWithVelocity(contactDir.normalized * force);
     }
 
     public void SetContactPoint(Vector3 position)
@@ -402,5 +417,17 @@ public class MeshSwordSlash : MonoBehaviour
         }
         contactPoint = leadingPoint;
         */
+    }
+
+    public void SetNextCrit(bool crit)
+    {
+        nextIsCrit = crit;
+    }
+
+    public bool IsNextCrit()
+    {
+        bool crit = nextIsCrit;
+        nextIsCrit = false;
+        return crit;
     }
 }

@@ -116,7 +116,18 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
             }
             
         });
-        
+        dk.OnCrit.AddListener(() =>
+        {
+            if (dk.isThrust)
+            {
+                thrustFX.SetNextCrit(true);
+            }
+            else if (dk.isSlash)
+            {
+                slashFX.SetNextCrit(true);
+            }
+        });
+
         if (active)
         {
 
@@ -166,6 +177,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         slashFX.SetContactPoint(holder.lastContactPoint);
         slashFX.Bleed();
     }
+
     public float GetStamCost()
     {
         return (10 + 1 * GetWeight() + 15 * Mathf.Abs(GetBalance()));
