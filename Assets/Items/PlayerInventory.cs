@@ -140,6 +140,12 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
             initialized = true;
         }
+        UpdateWeapon();
+    }
+
+    void FixedUpdate()
+    {
+        FixedUpdateWeapon();
     }
     public void AddItem(Item item)
     {
@@ -414,6 +420,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         if (IsMainEquipped())
         {
             GameObject parent;
+            bool mIdentity = false;
             if (IsMainDrawn() && !MainWeapon.ParentLeftAsMain)
             {
                 parent = player.positionReference.MainHand;
@@ -425,15 +432,21 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             else
             {
                 parent = player.positionReference.GetPositionRefSlot(MainWeapon.MainHandEquipSlot);
+                if (MainWeapon.MainHandEquipSlot == EquipSlot.cBack)
+                {
+                    mIdentity = true;
+                }
             }
             MainWeapon.model.transform.position = parent.transform.position;
             MainWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.up, parent.transform.forward);
+            if (mIdentity) MainWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.forward, -parent.transform.up);
             MainWeapon.model.transform.SetParent(parent.transform, true);
         }
         // off
         if (IsOffEquipped())
         {
             GameObject parent;
+            bool oIdentity = false;
             if (IsOffDrawn() && OffWeapon.ParentRightAsOff)
             {
                 parent = player.positionReference.MainHand;
@@ -445,15 +458,21 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             else
             {
                 parent = player.positionReference.GetPositionRefSlot(OffWeapon.OffHandEquipSlot);
+                if (OffWeapon.OffHandEquipSlot == EquipSlot.cBack)
+                {
+                    oIdentity = true;
+                }
             }
             OffWeapon.model.transform.position = parent.transform.position;
             OffWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.up, parent.transform.forward);
+            if (oIdentity) OffWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.forward, -parent.transform.up);
             OffWeapon.model.transform.SetParent(parent.transform, true);
         }
         // ranged
         if (IsRangedEquipped())
         {
             GameObject parent;
+            bool rIdentity = false;
             if (IsRangedDrawn() && !RangedWeapon.ParentLeftAsMain)
             {
                 parent = player.positionReference.MainHand;
@@ -465,9 +484,15 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             else
             {
                 parent = player.positionReference.GetPositionRefSlot(RangedWeapon.RangedEquipSlot);
+                if (RangedWeapon.RangedEquipSlot == EquipSlot.cBack)
+                {
+                    rIdentity = true;
+                }
+
             }
             RangedWeapon.model.transform.position = parent.transform.position;
             RangedWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.up, parent.transform.forward);
+            if (rIdentity) RangedWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.forward, -parent.transform.up);
             RangedWeapon.model.transform.SetParent(parent.transform, true);
         }
     }
@@ -497,6 +522,10 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         {
             OffWeapon.UpdateWeapon(player);
         }
+        if (IsRangedEquipped())
+        {
+            RangedWeapon.UpdateWeapon(player);
+        }
     }
 // during fixed update
     public void FixedUpdateWeapon()
@@ -508,6 +537,10 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         if (IsOffEquipped())
         {
             OffWeapon.FixedUpdateWeapon(player);
+        }
+        if (IsRangedEquipped())
+        {
+            RangedWeapon.FixedUpdateWeapon(player);
         }
     }
     public EquippableWeapon GetMainWeapon()

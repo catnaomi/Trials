@@ -33,9 +33,15 @@ public class AnimationFXHandler : MonoBehaviour
     public AudioClip thrustLight;
     public AudioClip slashHeavy;
     public AudioClip thrustHeavy;
+    [Space(10)]
+    public AudioClip bowPull;
+    public AudioClip bowFire;
     [Header("Events")]
     public UnityEvent OnDust;
     public UnityEvent OnDashDust;
+    [Header("Anim Events")]
+    public UnityEvent OnArrowDraw;
+    public UnityEvent OnArrowNock;
     // Start is called before the first frame update
     void Start()
     {
@@ -151,6 +157,23 @@ public class AnimationFXHandler : MonoBehaviour
         combatWhiffSource.Stop();
         combatWhiffSource.PlayOneShot(thrustHeavy);
     }
+
+    public void ArrowDraw()
+    {
+        OnArrowDraw.Invoke();
+    }
+
+    public void ArrowNock()
+    {
+        combatWhiffSource.PlayOneShot(bowPull);
+        OnArrowNock.Invoke();
+    }
+
+    public void ArrowFire()
+    {
+        combatWhiffSource.Stop();
+        combatHitSource.PlayOneShot(bowFire);
+    }
     #endregion
 
 #if (UNITY_EDITOR)
@@ -175,6 +198,9 @@ public class AnimationFXHandler : MonoBehaviour
         slashHeavy = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy");
         thrustLight = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_light");
         thrustHeavy = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy");
+
+        bowPull = Resources.Load<AudioClip>("Sounds/Effects/bow-draw1");
+        bowFire = Resources.Load<AudioClip>("Sounds/Effects/bow-fire");
     }
 #endif
 }

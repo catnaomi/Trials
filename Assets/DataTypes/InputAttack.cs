@@ -14,6 +14,7 @@ public class InputAttack : InputAction
     [Header("Attack Data")]
     public DamageKnockback attackData = DamageKnockback.GetDefaultDamage();
     public float staminaCost;
+    public float exitTime = -1f;
     public int GetAttackID()
     {
         return attackId;
@@ -50,5 +51,9 @@ public class InputAttack : InputAction
     public void GetDefaultAttack()
     {
         attackData = DamageKnockback.GetDefaultDamage();
+    }
+    public float GetExitTime()
+    {
+        return exitTime;
     }
 }

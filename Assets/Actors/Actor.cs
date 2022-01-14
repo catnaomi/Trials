@@ -164,6 +164,11 @@ public class Actor : MonoBehaviour
         StartCoroutine(CorpseClean());
     }
 
+    public virtual bool ShouldCalcFireStrength()
+    {
+        return false;
+    }
+
 
     IEnumerator CorpseClean()
     {

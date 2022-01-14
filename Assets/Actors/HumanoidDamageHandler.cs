@@ -13,6 +13,7 @@ public class HumanoidDamageHandler : IDamageable
     public float damageTaken;
 
     public float critTime = -1f;
+    float totalCritTime;
     bool inCritCoroutine;
 
     public AnimancerState hurt;
@@ -38,6 +39,7 @@ public class HumanoidDamageHandler : IDamageable
         this.animancer = animancer;
         blockStagger = damageAnims.blockStagger;
 
+        totalCritTime = 0f;
 
         DizzyHumanoid dizzy = FXController.CreateDizzy().GetComponent<DizzyHumanoid>();
         dizzy.SetActor(actor, this);
@@ -179,7 +181,7 @@ public class HumanoidDamageHandler : IDamageable
                 }
                 else
                 {
-                    StartCritVulnerability(maxTime);
+                    StartCritVulnerability(Mathf.Min(maxTime, damage.critData.criticalExtensionTime));
                 }
                 damage.OnCrit.Invoke();
             }
@@ -190,14 +192,14 @@ public class HumanoidDamageHandler : IDamageable
     }
     public void AdjustDefendingPosition(GameObject attacker)
     {
-        if (attacker == null || !attacker.TryGetComponent<Actor>(out Actor actor))
+        if (attacker == null || !attacker.TryGetComponent<Actor>(out Actor attackerActor))
         {
             return;
         }
 
         float MAX_ADJUST = 0.25f;
 
-        Vector3 targetPosition = attacker.transform.position + (attacker.transform.forward * 0.2f);
+        Vector3 targetPosition = attacker.transform.position + (attacker.transform.forward * 0.5f);
 
         Vector3 moveVector = Vector3.MoveTowards(actor.transform.position, targetPosition, MAX_ADJUST) - actor.transform.position;
 
@@ -206,7 +208,9 @@ public class HumanoidDamageHandler : IDamageable
 
     public void StartCritVulnerability(float time)
     {
+        if (totalCritTime >= DamageKnockback.MAX_CRITVULN_TIME) return;
         critTime = time;
+        totalCritTime += time;
         if (!inCritCoroutine)
         {
             actor.StartCoroutine(CriticalTimeOut());
@@ -217,6 +221,7 @@ public class HumanoidDamageHandler : IDamageable
     public void StopCritVulnerability()
     {
         critTime = -1f;
+        totalCritTime = 0f;
     }
 
     IEnumerator CriticalTimeOut()
@@ -232,7 +237,9 @@ public class HumanoidDamageHandler : IDamageable
 
     public bool IsCritVulnerable()
     {
-        return animancer.States.Current == hurt && critTime > 0f;
+        bool isCritVuln = animancer.States.Current == hurt && critTime > 0f;
+        if (!isCritVuln) totalCritTime = 0f;
+        return isCritVuln;
     }
 
     public HumanoidDamageHandler GetDamageHandler()

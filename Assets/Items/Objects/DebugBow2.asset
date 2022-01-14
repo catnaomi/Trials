@@ -30,7 +30,7 @@ MonoBehaviour:
   ParentRightAsOff: 1
   MainHandEquipSlot: 0
   OffHandEquipSlot: 0
-  RangedEquipSlot: 4
+  RangedEquipSlot: 5
   stance:
     stanceStyle: 0
     rightGrip: 0
@@ -47,30 +47,54 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   model: {fileID: 0}
+  fireMode: 3
   arrowPrefab: {fileID: 4805927410726168974, guid: 1be0e19a8c8967c4eb39716d4edc5885,
     type: 3}
+  deadArrowPrefab: {fileID: 2667612872126298195, guid: c280cbff6c2afba4f8b6e43aa2ea9bc6,
+    type: 3}
   damageKnockback:
+    healthDamage: 25
     staminaDamage: 0
-    kbForce: {x: 0, y: 0, z: 0}
-    kbRadial: 0
-    healthDamage: 0
     types: 
-    heartsDamage: 0
-    criticalMultiplier: 0
-    forceCritical: 0
-    hitboxSource: {fileID: 0}
-    source: {fileID: 0}
-    originPoint: {x: 0, y: 0, z: 0}
+    critData:
+      criticalMultiplier: 0
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0
     breaksArmor: 0
     unblockable: 0
     disarm: 0
+    isThrust: 0
+    isSlash: 0
+    bouncesOffBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    stunTime: 0
     staggers:
-      onHit: 0
-      onArmorHit: 0
-      onCritical: 0
-      onInjure: 0
-      onKill: 0
-      onHelpless: 0
+      onHit: 2
+      onArmorHit: 1
+      onCritical: 7
+      onKill: 7
+    kbForce: {x: 0, y: 0, z: 0}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
     hitClip: {fileID: 0}
   ikHandler: {fileID: 11400000, guid: 3e1da2a0b87efea48b403875a190a4af, type: 2}
+  fireStrengthMult: 100
+  fireStrengthMin: 25
   drawTime: 1
+  arrowCount: 4
+  arrowLength: 1

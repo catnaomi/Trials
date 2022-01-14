@@ -68,6 +68,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     Vector3 targetDirection;
     Vector3 headPoint;
     Vector3 smoothedHeadPoint;
+    bool aimAtkLockout;
     public float headPointSpeed = 25f;
     [Space(5)]
     public float strafeSpeed = 2.5f;
@@ -110,6 +111,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     float attackResetTimer = 0f;
     float aimTimer;
     bool isHitboxActive;
+    bool isSheathing;
+    string test1;
     public float aimCancelTime = 2f;
     public float aimTime;
     public float aimStartTime = 0.25f;
@@ -155,6 +158,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     ClipTransition blockStagger;
     PlayerActor movementController;
     AnimState state;
+    AimState astate;
 
     public static PlayerActor player;
     public UnityEvent OnHitboxActive;
@@ -181,7 +185,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState attack;
         public AnimancerState block;
         public AnimancerState aim;
-        public AnimancerState hurt;
+    }
+
+    struct AimState
+    {
+        public AnimancerState idle;
+        public AnimancerState sheathe;
+        public AnimancerState start;
+        public AnimancerState hold;
+        public AnimancerState fire;
     }
 
     enum AnimLayer
@@ -295,7 +307,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         _StopUpperLayer = () =>
         {
-            animancer.Layers[1].Stop();
+            animancer.Layers[(int)AnimLayer.UpperBody].Stop();
         };
 
         ledgeClimb.Events.OnEnd = _OnFinishClimb;
@@ -346,6 +358,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         stickDirection = camForward * move.y + camRight * move.x;
         GetHeadPoint();
 
+        #region Animancer State Checks
         if (animancer.States.Current == state.move)
         {
             float speedMax = 0f;
@@ -407,6 +420,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 shouldDodge = false;
                 lookDirection = stickDirection.normalized;
                 state.roll = animancer.Play(rollAnim);
+                animancer.Layers[(int)AnimLayer.UpperBody].Stop();
             }
             if (jump)
             {
@@ -423,9 +437,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 //((MixerState)state.block).ChildStates[0].Clip = blockAnimStart.Clip;
                 animancer.Play(state.block, 0.25f);
                 /*
-                animancer.Layers[1].Play(blockAnimStart, 0f);
+                animancer.Layers[(int)AnimLayer.UpperBody].Play(blockAnimStart, 0f);
                 blockAnimStart.Events.OnEnd = () => {
-                    animancer.Layers[1].Play(blockAnim);
+                    animancer.Layers[(int)AnimLayer.UpperBody].Play(blockAnim);
                     ((MixerState)state.block).ChildStates[0].Clip = blockAnim.Clip;
                 };
                 */
@@ -434,7 +448,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 Aim();
             }
-            if (attack && !animancer.Layers[1].IsAnyStatePlaying())
+            if (attack && !animancer.Layers[(int)AnimLayer.UpperBody].IsAnyStatePlaying())
             {
                 if (!inventory.IsMainDrawn())
                 {
@@ -452,7 +466,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         MainThrust();
                     }
                 }
-                //else if (inventory.IsMainEquipped() && !animancer.Layers[1].IsAnyStatePlaying())
+                //else if (inventory.IsMainEquipped() && !animancer.Layers[(int)AnimLayer.UpperBody].IsAnyStatePlaying())
                 //{
                 //    TriggerSheath(true, inventory.GetMainWeapon().MainHandEquipSlot, true);
                 //}
@@ -460,7 +474,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 slash = false;
                 thrust = false;
             }
-            else if (!animancer.Layers[1].IsAnyStatePlaying())
+            else if (!animancer.Layers[(int)AnimLayer.UpperBody].IsAnyStatePlaying())
             {
                 if (inventory.IsMainEquipped() && inventory.IsMainDrawn() && inventory.IsOffEquipped() && !inventory.IsOffDrawn())
                 {
@@ -564,9 +578,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             if (stopBlock)
             {
-                if (animancer.Layers[1].IsPlayingClip(blockAnim.Clip) || animancer.Layers[1].IsPlayingClip(blockAnimStart.Clip))
+                if (animancer.Layers[(int)AnimLayer.UpperBody].IsPlayingClip(blockAnim.Clip) || animancer.Layers[(int)AnimLayer.UpperBody].IsPlayingClip(blockAnimStart.Clip))
                 {
-                    animancer.Layers[1].Stop();
+                    animancer.Layers[(int)AnimLayer.UpperBody].Stop();
                 }
             }
             animancer.Layers[0].ApplyAnimatorIK = true;
@@ -641,7 +655,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 state.swim = animancer.Play(swimAnim);
                 this.gameObject.SendMessage("SplashBig");
             }
-            if (attack && !animancer.Layers[1].IsAnyStatePlaying())
+            if (attack && !animancer.Layers[(int)AnimLayer.UpperBody].IsAnyStatePlaying())
             {
                 if (!inventory.IsMainDrawn())
                 {
@@ -726,7 +740,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 state.swim = animancer.Play(swimAnim);
                 this.gameObject.SendMessage("SplashBig");
             }
-            if (attack && !animancer.Layers[1].IsAnyStatePlaying())
+            if (attack && !animancer.Layers[(int)AnimLayer.UpperBody].IsAnyStatePlaying())
             {
                 if (!inventory.IsMainDrawn())
                 {
@@ -751,9 +765,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else if (animancer.States.Current == state.roll)
         {
             shouldDodge = false;
+            HitboxActive(0);
             speed = rollSpeed;
             moveDirection = this.transform.forward;
-            if (attack && !animancer.Layers[1].IsAnyStatePlaying())
+            if (attack && !animancer.Layers[(int)AnimLayer.UpperBody].IsAnyStatePlaying())
             {
                 if (!inventory.IsMainDrawn())
                 {
@@ -879,6 +894,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             aimForwardVector = Quaternion.AngleAxis(look.x * horizontalAimSpeed * Time.deltaTime, Vector3.up) * aimForwardVector;
 
             bool turn = false;
+            /*
             if (move.magnitude > 0f)
             {
                 lookDirection = aimForwardVector;
@@ -887,7 +903,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 turn = true;
                 lookDirection = this.transform.forward;
-            }
+            }*/
+            lookDirection = Camera.main.transform.forward;
+            lookDirection.y = 0;
             if (state.aim is DirectionalMixerState aimDir)
             {
                 aimDir.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
@@ -906,40 +924,118 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             if (inventory.IsRangedEquipped())
             {
-                EquippableWeapon rwep = inventory.GetRangedWeapon();
-                bool anyPlaying = animancer.Layers[1].IsAnyStatePlaying();
-                bool atk = IsAttackHeld();
-                if (!inventory.IsRangedDrawn() && !anyPlaying)
+                RangedWeapon rwep = (RangedWeapon)inventory.GetRangedWeapon();
+                bool anyPlaying = animancer.Layers[(int)AnimLayer.UpperBody].IsAnyStatePlaying();
+                bool atk = false;
+                bool begin = false;
+                switch (rwep.GetFireMode())
+                {
+                    default:
+                    case RangedWeapon.FireMode.TriggerRelease:
+                        atk = !aiming;
+                        begin = aiming;
+                        break;
+                    case RangedWeapon.FireMode.TriggerAndAttackRelease:
+                        atk = !IsAttackHeld();
+                        begin = IsAttackHeld();
+                        break;
+                    case RangedWeapon.FireMode.TriggerAndAttackPress:
+                        atk = IsAttackHeld();
+                        begin = aiming;
+                        break;
+                }
+                
+                if (!anyPlaying)
+                {
+                    astate.idle = animancer.Layers[(int)AnimLayer.UpperBody].Play(rwep.moveset.aimAttack.GetIdleClip());
+                }
+                else if (animancer.Layers[(int)AnimLayer.UpperBody].CurrentState == astate.idle)
+                {
+                    if (!inventory.IsRangedDrawn())
+                    {
+                        inventory.SetDrawn(Inventory.MainType, false);
+                        inventory.SetDrawn(Inventory.OffType, false);
+                        astate.sheathe = TriggerSheath(true, inventory.GetRangedWeapon().RangedEquipSlot, Inventory.RangedType);// animancer.Layers[(int)AnimLayer.UpperBody].Play(rwep.moveset.aimAttack.GetIdleClip())
+                    }
+                    else if (begin)
+                    {
+                        ClipTransition clip = rwep.moveset.aimAttack.GetStartClip();
+                        
+                        astate.start = animancer.Layers[(int)AnimLayer.UpperBody].Play(clip);
+                        astate.start.Events.OnEnd = () => { astate.hold = animancer.Layers[(int)AnimLayer.UpperBody].Play(rwep.moveset.aimAttack.GetHoldClip()); };
+                        aimAttack = true;
+                    }
+                }
+                else if (animancer.Layers[(int)AnimLayer.UpperBody].CurrentState == astate.start || animancer.Layers[(int)AnimLayer.UpperBody].CurrentState == astate.hold)
+                {
+                    if (atk && rwep.CanFire())
+                    {
+                        ClipTransition clip = rwep.moveset.aimAttack.GetFireClip();
+
+                        astate.fire = animancer.Layers[(int)AnimLayer.UpperBody].Play(clip);
+                        astate.fire.Events.OnEnd = _StopUpperLayer;
+                        attack = false;
+                        slash = false;
+                        thrust = false;
+                    }
+                }
+                /*
+                if (aiming && !inventory.IsRangedDrawn() && !isSheathing)
                 {
                     Debug.Log("ranged is equipped");
                     inventory.SetDrawn(Inventory.MainType, false);
                     inventory.SetDrawn(Inventory.OffType, false);
                     TriggerSheath(true, inventory.GetRangedWeapon().RangedEquipSlot, Inventory.RangedType);
+                    test1 = "draw";
                 }
-                else if (!aiming && aimAttack)//(!atk && aimAttack)
+                else if (atk && aimAttack && inventory.IsRangedDrawn() && !aimAtkLockout)//(!atk && aimAttack)
                 {
                     ClipTransition clip = rwep.moveset.aimAttack.GetFireClip();
-                    clip.Events.OnEnd = () => { animancer.Layers[1].Play(rwep.moveset.aimAttack.GetIdleClip()); };
-                    animancer.Layers[1].Play(clip);
-                    aimAttack = false;
+                    clip.Events.OnEnd = () => {
+                        animancer.Layers[(int)AnimLayer.UpperBody].Play(rwep.moveset.aimAttack.GetIdleClip());
+                        
+                    };
+                    animancer.Layers[(int)AnimLayer.UpperBody].Play(clip);
                     attack = false;
                     slash = false;
                     thrust = false;
+                    aimAttack = false;
+                    SetAimAtkLockout(true);
+                    test1 = "fire";
                 }
                 else
                 {
-                    if (aiming && !aimAttack && inventory.IsRangedDrawn())
+                    if (aim && !aimAttack && inventory.IsRangedDrawn())
                     {
                         ClipTransition clip = rwep.moveset.aimAttack.GetStartClip();
-                        clip.Events.OnEnd = () => { animancer.Layers[1].Play(rwep.moveset.aimAttack.GetHoldClip()); };
-                        animancer.Layers[1].Play(clip);
+                        clip.Events.OnEnd = () => { animancer.Layers[(int)AnimLayer.UpperBody].Play(rwep.moveset.aimAttack.GetHoldClip()); };
+                        animancer.Layers[(int)AnimLayer.UpperBody].Play(clip);
                         aimAttack = true;
+                        test1 = "aiming";
                     }
                     else if (!anyPlaying)
                     {
-                        animancer.Layers[1].Play(rwep.moveset.aimAttack.GetIdleClip());
+                        animancer.Layers[(int)AnimLayer.UpperBody].Play(rwep.moveset.aimAttack.GetIdleClip());
+                        aimAttack = false;
+                        test1 = "idle";
                     }
                 }
+                */
+            }
+            if (shouldDodge)
+            {
+                shouldDodge = false;
+                if (stickDirection.magnitude > 0)
+                {
+                    lookDirection = stickDirection.normalized;
+                }
+                else
+                {
+                    lookDirection = transform.forward;
+                }
+                animancer.Layers[(int)AnimLayer.UpperBody].Stop();
+                inventory.SetDrawn(Inventory.RangedType, false);
+                state.roll = animancer.Play(rollAnim);
             }
             if (!aiming)
             {
@@ -959,6 +1055,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             animancer.Layers[0].ApplyAnimatorIK = true;
         }
+
+        #endregion
+
+
+
         if (GetGrounded())
         {
             if (yVel <= 0)
@@ -1040,11 +1141,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (IsAiming() && inventory.IsRangedDrawn())
         {
             inventory.GetRangedWeapon().moveset.aimAttack.OnUpdate(this);
-            animancer.Layers[1].ApplyAnimatorIK = true;
+            animancer.Layers[(int)AnimLayer.UpperBody].ApplyAnimatorIK = true;
         }
         else
         {
-            animancer.Layers[1].ApplyAnimatorIK = false;
+            animancer.Layers[(int)AnimLayer.UpperBody].ApplyAnimatorIK = false;
         }
         if (GetGrounded() && !IsFalling() && !IsClimbing())
         {
@@ -1181,7 +1282,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             camState = CameraState.Lock;
         }
-        else if (IsAiming())
+        else if (IsAiming() || aiming)
         {
             camState = CameraState.Aim;
         }
@@ -1314,7 +1415,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (value.Get<Vector2>().magnitude > 0.9f) changeTarget.Invoke();
     }
 
-    public void OnAtk_Slash(InputValue value)
+    public void OnAtk_Slash()
     {
         attack = true;
         slash = true;
@@ -1341,7 +1442,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void OnSheathe(InputValue value)
     {
-        if (inventory.IsMainEquipped() && !animancer.Layers[1].IsAnyStatePlaying())
+        if (inventory.IsMainEquipped() && !animancer.Layers[(int)AnimLayer.UpperBody].IsAnyStatePlaying())
         {
             if (!inventory.IsMainDrawn())
             {
@@ -1474,24 +1575,31 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
 
 
-    public void TriggerSheath(bool draw, Inventory.EquipSlot slot, int targetSlot)
+    public AnimancerState TriggerSheath(bool draw, Inventory.EquipSlot slot, int targetSlot)
     {
+        isSheathing = true;
         if ((targetSlot == Inventory.MainType) && inventory.IsMainEquipped())
         {
             AnimancerState drawState = animancer.Layers[(int)AnimLayer.UpperBody].Play((draw) ? inventory.GetMainWeapon().moveset.draw : inventory.GetMainWeapon().moveset.sheathe);
             drawState.Events.OnEnd = _StopUpperLayer;
+            equipToType = targetSlot;
+            return drawState;
         }
         else if ((targetSlot == Inventory.OffType) && inventory.IsOffEquipped())
         {
             AnimancerState drawState = animancer.Layers[(int)AnimLayer.UpperBody].Play((draw) ? inventory.GetOffWeapon().moveset.draw : inventory.GetOffWeapon().moveset.sheathe);
             drawState.Events.OnEnd = _StopUpperLayer;
+            equipToType = targetSlot;
+            return drawState;
         }
         else if ((targetSlot == Inventory.RangedType) && inventory.IsRangedEquipped())
         {
             AnimancerState drawState = animancer.Layers[(int)AnimLayer.UpperBody].Play((draw) ? inventory.GetRangedWeapon().moveset.draw : inventory.GetRangedWeapon().moveset.sheathe);
             drawState.Events.OnEnd = _StopUpperLayer;
+            equipToType = targetSlot;
+            return drawState;
         }
-        equipToType = targetSlot;
+        return null;
     }
 
     public void TriggerSheath(bool draw, Inventory.EquipSlot slot, bool targetMain)
@@ -1501,16 +1609,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void AnimDrawWeapon(int slot)
     {
+        isSheathing = false;
         inventory.SetDrawn(equipToType, true);
         UpdateFromMoveset();
     }
 
     public void AnimSheathWeapon(int slot)
     {
+        isSheathing = false;
         inventory.SetDrawn(equipToType, false);
         UpdateFromMoveset();
     }
 
+    public void SetAimAtkLockout(bool lockout)
+    {
+        aimAtkLockout = lockout;
+    }
 
     public void RotateMainWeapon(float angle)
     {
@@ -1592,7 +1706,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else
         {
             state.attack = animancer.Play(GetMoveset().quickSlash1h.GetClip());
-            cancelTime = -1f;
+            cancelTime = GetMoveset().quickSlash1h.GetExitTime();
             SetCurrentDamage(GetMoveset().quickSlash1h.GetDamage());
         }
         
@@ -1615,7 +1729,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else
         {
             state.attack = animancer.Play(GetMoveset().quickThrust1h.GetClip());
-            cancelTime = -1f;
+            cancelTime = GetMoveset().quickThrust1h.GetExitTime();
             SetCurrentDamage(GetMoveset().quickThrust1h.GetDamage());
         }
 
@@ -1637,7 +1751,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else
         {
-            cancelTime = -1f;
+            state.attack = animancer.Play(GetMoveset().quickSlash1h.GetClip());
+            cancelTime = GetMoveset().quickSlash1h.GetExitTime();
             SetCurrentDamage(GetMoveset().quickSlash1h.GetDamage());
         }
         state.attack.Events.OnEnd = _AttackEnd;
@@ -1656,7 +1771,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else
         {
-            cancelTime = -1f;
+            state.attack = animancer.Play(GetMoveset().quickThrust1h.GetClip());
+            cancelTime = GetMoveset().quickThrust1h.GetExitTime();
             SetCurrentDamage(GetMoveset().quickThrust1h.GetDamage());
         }
         state.attack.Events.OnEnd = _AttackEnd;
@@ -1687,7 +1803,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         System.Action _BlockAttackEnd = () => {
             if (blocking)
             {
-                animancer.Layers[1].Play(blockAnim, 0.25f);
+                animancer.Layers[(int)AnimLayer.UpperBody].Play(blockAnim, 0.25f);
                 animancer.Play(state.block, 0.25f);
             }
             else
@@ -1719,7 +1835,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         System.Action _BlockAttackEnd = () => {
             if (blocking)
             {
-                animancer.Layers[1].Play(blockAnim, 0.25f);
+                animancer.Layers[(int)AnimLayer.UpperBody].Play(blockAnim, 0.25f);
                 animancer.Play(state.block, 0.25f);
             }
             else
@@ -1806,6 +1922,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         aimForwardVector = this.transform.forward;
         aimTime = 0f;
     }
+
+
     #endregion
     /*
     * triggered by animation:
@@ -1833,7 +1951,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 ((HitboxHandler)offHandWeapon).HitboxActive(false);
             }
+            if (ranged)
+            {
+                ((HitboxHandler)rangedWeapon).HitboxActive(false);
+            }
             isHitboxActive = false;
+            //SetAimAtkLockout(false);
         }
         else if (active == 1)
         {
@@ -1994,6 +2117,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+
+    public override bool ShouldCalcFireStrength()
+    {
+        return true;
+    }
     private void OnAnimatorIK(int layerIndex)
     {
         if (IsAiming() && inventory.IsRangedDrawn())

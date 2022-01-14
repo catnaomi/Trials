@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
 
 public class ArrowController : Projectile
 {
@@ -10,7 +11,6 @@ public class ArrowController : Projectile
     public Hitbox hitbox;
     public DamageKnockback damageKnockback;
     public GameObject origin;
-
     bool launched;
     bool inFlight;
     bool shouldStick;
@@ -36,7 +36,6 @@ public class ArrowController : Projectile
     {
 
         //hitbox = Hitbox.CreateHitbox(tip.position, 0.25f, tip.transform, this.damageKnockback, origin);
-        
     }
     private void Update()
     {
@@ -62,7 +61,7 @@ public class ArrowController : Projectile
     private void EndFlight()
     {
         inFlight = false;
-        hitbox.gameObject.SetActive(false);
+        //hitbox.SetActive(false);
     }
 
     private void OnArrowHit()
@@ -71,58 +70,47 @@ public class ArrowController : Projectile
 
         if (hitbox.didHitTerrain)
         {
-
+            Debug.Log("hit terrain?");
             tip.isKinematic = true;
             feather.isKinematic = true;
 
-            Vector3 stickPos = hitbox.hitTerrain.ClosestPointOnBounds(tip.transform.position);
+            
 
-            GameObject empty = new GameObject();
-            empty.name = "Arrow [" + 0 + "] Stick Mount";
-            Destroy(empty, ARROW_DURATION);
-            empty.transform.SetParent(hitbox.hitTerrain.transform, false);
-            empty.transform.localScale = new Vector3(1f / hitbox.hitTerrain.transform.localScale.x, 1f / hitbox.hitTerrain.transform.localScale.y, 1f / hitbox.hitTerrain.transform.localScale.z);
-            tip.transform.SetParent(empty.transform, true);
-            tip.position = stickPos;
+            Stick(hitbox.hitTerrain);
+            hitbox.SetActive(false);
+            FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
         }
         else if (hitbox.victims.Count > 0)
         {
+            FXController.CreateFX(FXController.FX.FX_BleedPoint, feather.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
             Destroy(tip.gameObject);
-        }
-
-        return;
-        Actor victim;// = hitboxController.lastHitActor;
-
-        if (inFlight)
-        {
-            inFlight = false;
-            Rigidbody lead = null;
-            float leadDistance = Mathf.Infinity;
-            foreach (Rigidbody rigidbody in victim.GetComponentsInChildren<Rigidbody>())
-            {
-                Vector3 pos = rigidbody.transform.GetComponent<Collider>().ClosestPoint(tip.position);
-                float dist = Vector3.Distance(pos, tip.transform.position);
-                if (dist < leadDistance)
-                {
-                    leadDistance = dist;
-                    lead = rigidbody;
-                }
-            }
-            if (lead != null) {
-                shouldStick = true;
-                //stickTarget = lead;
-                stickPos = lead.transform.GetComponent<Collider>().bounds.center;
-                tip.position = stickPos; //tip.position + tip.transform.forward * 4f;
-                /*tip.position = lead.position;//.transform.GetComponent<Collider>().ClosestPoint(tip.position);//tip.transform.position + tip.transform.forward * 0.5f;
-                tip.transform.SetParent(lead.transform, true);*/
-                tip.isKinematic = true;
-                feather.isKinematic = true;
-                
-                EndFlight();
-            }
         }
     }
 
+
+    public void Stick(Collider hitCollider)
+    {
+        Vector3 stickPos = hitCollider.ClosestPoint(tip.transform.position);
+
+        /*ParentConstraint parentConstraint = this.GetComponent<ParentConstraint>();
+
+        parentConstraint.constraintActive = false;
+        parentConstraint.locked = false;
+
+        while (parentConstraint.sourceCount > 0)
+        {
+            parentConstraint.RemoveSource(0);
+        }
+        parentConstraint.AddSource(new ConstraintSource() { sourceTransform = hitCollider.transform, weight = 1f });*/
+
+        GameObject empty = new GameObject("Arrow Stick Mount");
+        Destroy(empty, ARROW_DURATION);
+        empty.transform.SetParent(hitbox.hitTerrain.transform, false);
+        empty.transform.localScale = new Vector3(1f / hitbox.hitTerrain.transform.localScale.x, 1f / hitbox.hitTerrain.transform.localScale.y, 1f / hitbox.hitTerrain.transform.localScale.z);
+        tip.transform.SetParent(empty.transform, true);
+        tip.position = stickPos;
+        this.GetComponentInChildren<TrailRenderer>().emitting = false;
+    }
     /*
     private void DisabledUpdate()
     {
@@ -221,26 +209,78 @@ public class ArrowController : Projectile
         GameObject arrowObj = GameObject.Instantiate(arrowPrefab, position, angle);
         ArrowController arrowController = arrowObj.GetComponent<ArrowController>();
 
-        arrowController.damageKnockback = damageKnockback;
-        arrowController.origin = source.gameObject;
-
-        arrowController.tip.position = position;
-
-        arrowController.initPos = position;
-
-        arrowController.tip.AddForce(force, ForceMode.VelocityChange);
 
         arrowController.hitbox = Hitbox.CreateHitbox(arrowController.tip.position, 0.1f, arrowController.tip.transform, damageKnockback, source.gameObject);
 
+
+        arrowController.Launch(position, angle, force, source, damageKnockback);
         //arrowController.hitbox.SetActive(true);
 
         //hitboxController.OnHit.AddListener(OnArrowHit);
 
-        Destroy(arrowObj, ARROW_DURATION);
 
         return arrowController;
     }
 
+    public static new ArrowController Spawn(GameObject arrowPrefab, Transform source)
+    {
+
+        GameObject arrowObj = GameObject.Instantiate(arrowPrefab);
+        ArrowController arrowController = arrowObj.GetComponent<ArrowController>();
+
+
+        arrowController.hitbox = Hitbox.CreateHitbox(arrowController.tip.position, 0.25f, arrowController.tip.transform, new DamageKnockback(), source.gameObject);
+
+
+        arrowController.gameObject.SetActive(false);
+        return arrowController;
+    }
+
+    public override void Launch(Vector3 position, Quaternion angle, Vector3 force, Transform source, DamageKnockback damageKnockback)
+    {
+        this.hitbox.SetActive(false);
+        this.transform.position = position;
+        this.transform.rotation = angle;
+        this.GetComponentInChildren<TrailRenderer>().Clear();
+        if (gameObject.activeInHierarchy)
+        {
+            tip.velocity = Vector3.zero;
+            tip.angularVelocity = Vector3.zero;
+            tip.Sleep();
+            feather.velocity = Vector3.zero;
+            feather.angularVelocity = Vector3.zero;
+            feather.Sleep();
+        }
+        this.damageKnockback = damageKnockback;
+        this.origin = source.gameObject;
+
+        this.tip.position = position;
+
+        this.initPos = position;
+        this.gameObject.SetActive(true);
+
+        this.tip.AddForce(force, ForceMode.VelocityChange);
+
+        this.hitbox.SetDamage(damageKnockback);
+
+        launched = false;
+        
+
+        //StopCoroutine("DisableAfterDelay");
+        //StartCoroutine("DisableAfterDelay");
+        Destroy(this.gameObject, ARROW_DURATION);
+    }
+
+    IEnumerator DisableAfterDelay()
+    {
+        yield return new WaitForSeconds(ARROW_DURATION);
+        tip.velocity = Vector3.zero;
+        tip.angularVelocity = Vector3.zero;
+        feather.velocity = Vector3.zero;
+        feather.angularVelocity = Vector3.zero;
+        this.GetComponentInChildren<TrailRenderer>().Clear();
+        this.gameObject.SetActive(false);
+    }
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.magenta;

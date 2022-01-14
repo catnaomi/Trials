@@ -41,7 +41,7 @@ public class DamageKnockback
     public UnityEvent OnCrit;
     public UnityEvent OnBlock;
     
-    
+    public static float MAX_CRITVULN_TIME = 3f;
     [Serializable]
     public struct StaggerData
     {
@@ -58,6 +58,7 @@ public class DamageKnockback
         public bool alwaysCritical;
         public bool causesCritState;
         public bool doesNotConsumeCritState;
+        public float criticalExtensionTime;
     }
     public enum StaggerType
     {
@@ -155,10 +156,11 @@ public class DamageKnockback
 
     public static readonly CriticalData StandardCritData = new CriticalData()
     {
-        criticalMultiplier = 1.25f,
+        criticalMultiplier = 1f,
         alwaysCritical = false,
         causesCritState = false,
         doesNotConsumeCritState = false,
+        criticalExtensionTime = 0.25f,
     };
 
     public static float GetTotalMinusResistances(float damage, DamageType[] typeArray, List<DamageResistance> resists)

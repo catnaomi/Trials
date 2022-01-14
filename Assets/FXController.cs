@@ -15,6 +15,7 @@ public class FXController : MonoBehaviour
     public GameObject fx_dizzy;
     [Space(5)]
     public GameObject fx_bleedSword;
+    public GameObject fx_bleedPoint;
     private static float fixedDeltaTime;
     private static float hitpauseLength;
 
@@ -34,6 +35,7 @@ public class FXController : MonoBehaviour
         FX_Stagger,
         FX_Sparks,
         FX_BleedSword,
+        FX_BleedPoint,
     }
 
     public enum FXMaterial
@@ -56,6 +58,7 @@ public class FXController : MonoBehaviour
             { FX.FX_Stagger, this.fx_stagger },
             { FX.FX_Sparks, this.fx_sparks },
             { FX.FX_BleedSword, this.fx_bleedSword },
+            { FX.FX_BleedPoint, this.fx_bleedPoint },
         };
 
         clipDictionary = new Dictionary<string, AudioClip>()
@@ -67,16 +70,15 @@ public class FXController : MonoBehaviour
             { "sword_hit_light",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_hit_light") },
             { "sword_hit_heavy", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_hit_heavy") },
 
-            
-
 
             { "shield_bash",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bash") },
             { "shield_bash_hit", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bash_hit") },
 
             { "metal_clash", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_clash") },
 
-            { "bow_draw",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bow_draw") },
-            { "bow_fire", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bow_fire") },
+            { "bow_draw",  Resources.Load<AudioClip>("Sounds/Effects/bow-draw1") },
+            { "bow_fire", Resources.Load<AudioClip>("Sounds/Effects/bow-fire") },
+            { "bow_hit", Resources.Load<AudioClip>("Sounds/Effects/bow-hit1") },
 
             { "parry_start", Resources.Load<AudioClip>("Sounds/Effects/sword-parry01") },
             { "parry_success", Resources.Load<AudioClip>("Sounds/Effects/sword-parry02") },
@@ -113,6 +115,7 @@ public class FXController : MonoBehaviour
         if (audioClipOverwrite != null)
         {
             AudioSource audioSource = newFX.GetComponentInChildren<AudioSource>();
+
             //audioSource.playOnAwake = true;
             //audioSource.Stop();
             audioSource.clip = audioClipOverwrite;

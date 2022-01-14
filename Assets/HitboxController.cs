@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using CustomUtilities;
 
+[System.Obsolete]
 public class HitboxController : MonoBehaviour
 {
     public static int NextID = 0;

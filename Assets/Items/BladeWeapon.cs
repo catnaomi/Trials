@@ -17,8 +17,6 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
     //[HideInInspector] WeaponController weaponController;
     [HideInInspector] HitboxGroup hitboxes;
 
-    TrailRenderer trailThrust;
-    TrailRenderer trailSlash;
     ParticleSystem trailSystem;
     MeshSwordSlash slashFX;
     LineSwordThrust thrustFX;
@@ -356,18 +354,7 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
     {
         Color c = FXController.GetColorForDamageType(type);
         Color c2 = FXController.GetSecondColorForDamageType(type);
-        if (trailThrust != null)
-        {
-            trailThrust.startColor = c2;
-            trailThrust.endColor = new Color(c.r, c.g, c.b, 0f);
-            //trailThrust.material.SetColor("_EmissionColor", c2);
-        }
-        if (trailSlash != null)
-        {
-            trailSlash.startColor = c2;
-            trailSlash.endColor = new Color(c.r, c.g, c.b, 0f);
-            //trailSlash.material.SetColor("_EmissionColor", c2);
-        }
+        
     }
     public enum AttackType
     {
