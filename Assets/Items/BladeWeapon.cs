@@ -98,36 +98,37 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         {
             GenerateHitboxes();
         }
-        DamageKnockback dk = this.GetDamageFromAttack(holder);
-        dk.OnHit.RemoveAllListeners();
-        dk.OnHit.AddListener(() =>
-        {
-            //slashFX.SetContactPoint(GetHand().transform.position + GetHand().transform.forward * GetLength());
-            if (dk.isSlash)
-            {
-                holder.StartCoroutine(BleedSlash());
-            }
-            else if (dk.isThrust)
-            {
-                thrustFX.SetContactPoint(holder.lastContactPoint);
-                thrustFX.Bleed();
-            }
-            
-        });
-        dk.OnCrit.AddListener(() =>
-        {
-            if (dk.isThrust)
-            {
-                thrustFX.SetNextCrit(true);
-            }
-            else if (dk.isSlash)
-            {
-                slashFX.SetNextCrit(true);
-            }
-        });
+        
 
         if (active)
         {
+            DamageKnockback dk = this.GetDamageFromAttack(holder);
+            dk.OnHit.RemoveAllListeners();
+            dk.OnHit.AddListener(() =>
+            {
+                //slashFX.SetContactPoint(GetHand().transform.position + GetHand().transform.forward * GetLength());
+                if (dk.isSlash)
+                {
+                    holder.StartCoroutine(BleedSlash());
+                }
+                else if (dk.isThrust)
+                {
+                    thrustFX.SetContactPoint(holder.lastContactPoint);
+                    thrustFX.Bleed();
+                }
+
+            });
+            dk.OnCrit.AddListener(() =>
+            {
+                if (dk.isThrust)
+                {
+                    thrustFX.SetNextCrit(true);
+                }
+                else if (dk.isSlash)
+                {
+                    slashFX.SetNextCrit(true);
+                }
+            });
 
             slashFX.transform.position = holder.transform.position;
             thrustFX.transform.position = holder.transform.position;
@@ -148,21 +149,21 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                 holder.gameObject.SendMessage("ThrustLight");
                 thrustFX.BeginThrust();
             }
-            
+
             /*
              * FXController.CreateFX(sound,
                 ((HumanoidActor)holder).positionReference.MainHand.transform.position + (((HumanoidActor)holder).positionReference.MainHand.transform.forward * length),
                 Quaternion.identity,
                 1f);
                 */
-
+            hitboxes.SetDamage(dk);
         }
         else
         {
             slashFX.EndSlash();
             thrustFX.EndThrust();
         }
-        hitboxes.SetDamage(dk);
+        
         hitboxes.SetActive(active);
         //SetTrails(AttackIsThrusting(nextAttackType) && active, AttackIsSlashing(nextAttackType) && active);
         //SetTrailColor(dk.healthDamage.GetHighestType(DamageType.Slashing, DamageType.Piercing));
@@ -607,6 +608,10 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         if (actor is IAttacker attacker)
         {
             DamageKnockback damage = attacker.GetCurrentDamage();
+            if (damage == null || attacker == null)
+            {
+                bool b = false;
+            }
             damage.healthDamage = 100 * (damage.healthDamage / 100f) * (this.GetBaseDamage() / 100f);
             damage.AddTypes(this.elements.ToArray());
             return damage;

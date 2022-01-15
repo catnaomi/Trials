@@ -24,6 +24,7 @@ public class Actor : MonoBehaviour
     public UnityEvent OnDie;
     public UnityEvent OnAttack;
     public UnityEvent OnCritVulnerable;
+    public UnityEvent OnDodge;
     public float lastDamageTaken;
     private  int mercyId; //hitbox
 
@@ -145,6 +146,24 @@ public class Actor : MonoBehaviour
         return attributes.health.current == 0;
     }
 
+    public virtual bool IsAttacking()
+    {
+        return false;
+    }
+
+    public virtual bool IsFalse()
+    {
+        return attributes.health.current == 0;
+    }
+    public virtual bool IsArmored()
+    {
+        return false;
+    }
+    public virtual bool IsDodging()
+    {
+        return false;
+    }
+
     public void PlayAudioClip(AudioClip audioClip)
     {
         if (audioSource != null)
@@ -169,7 +188,10 @@ public class Actor : MonoBehaviour
         return false;
     }
 
-
+    public virtual Vector3 GetLaunchVector(Vector3 origin)
+    {
+        return this.transform.forward;
+    }
     IEnumerator CorpseClean()
     {
         int iterations = 5;

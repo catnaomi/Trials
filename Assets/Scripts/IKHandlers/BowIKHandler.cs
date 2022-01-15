@@ -7,7 +7,6 @@ public class BowIKHandler : IKHandler
 
     public override void OnIK(Animator animator)
     {
-        Debug.Log("bowikonik");
         if (animator.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference))
         {
             animator.SetLookAtWeight(1f, 0f, 0.5f);
@@ -26,7 +25,6 @@ public class BowIKHandler : IKHandler
 
     public override void OnUpdate(Actor aactor)
     {
-        Debug.Log("bowikupdate");
         if (aactor is HumanoidActor actor)
         {
             Vector3 aimDir = actor.GetLaunchVector(actor.positionReference.Spine.transform.position);

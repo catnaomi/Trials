@@ -23,6 +23,13 @@ public class HumanoidPositionReference : MonoBehaviour
     [Space(5)]
     public float eyeHeight;
 
+    public enum AnimLayer
+    {
+        Base = 0,
+        UpperBody = 1,
+        Flinch = 2,
+    }
+
     // Use this for initialization
     void Start()
     {

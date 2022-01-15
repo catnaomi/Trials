@@ -130,7 +130,7 @@ public class RangedBow : RangedWeapon, HitboxHandler
     {
         if (!GetHeldActor().TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference)) return;
         deadArrow.SetActive(false);
-        Vector3 launchVector = GetLaunchVector(positionReference.MainHand.transform.position) + Vector3.up * 0.0f;
+        Vector3 launchVector = GetHeldActor().GetLaunchVector(positionReference.MainHand.transform.position) + Vector3.up * 0.0f;
 
         if (holder.GetCombatTarget() != null)
         {
@@ -160,7 +160,7 @@ public class RangedBow : RangedWeapon, HitboxHandler
             arrow = arrows[index] = ArrowController.Spawn(arrowPrefab, holder.transform);
         }*/
 
-        Vector3 origin = positionReference.MainHand.transform.position;//holder.transform.position + launchVector + holder.transform.up * 1f;
+        Vector3 origin = positionReference.MainHand.transform.position + positionReference.MainHand.transform.parent.up * arrowLength;//holder.transform.position + launchVector + holder.transform.up * 1f;//(parent.position - positionReference.OffHand.transform.position).normalized;
         ArrowController arrow = ArrowController.Launch(arrowPrefab, origin, Quaternion.LookRotation(launchVector), launchVector * launchStrength, holder.transform, this.damageKnockback);
         arrow.Launch(origin, Quaternion.LookRotation(launchVector), launchVector * launchStrength, holder.transform, this.damageKnockback);
 

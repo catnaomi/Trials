@@ -18,9 +18,9 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
     public float MeleeAttackRange = 1.5f;
     public bool InMeleeRange;
     [Space(5)]
-    public InputAttack SecondaryAttack;
-    public float SecondaryAttackRange = 2f;
-    public bool InSecondaryRange;
+    public InputAttack QuickAttack;
+    public float QuickAttackRange = 2f;
+    public bool InQuickRange;
     [Space(5)]
     public InputAttack GapCloserAttack;
     public ClipTransition GapCloserAnim;
@@ -37,6 +37,9 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
     public ClipTransition Draw;
     public ClipTransition Sheath;
     [Space(5)]
+    public float dodgeChance = 0.6f;
+    public float powerAttackChance = 0.2f;
+    [Space(5)]
     public DamageAnims damageAnims;
     HumanoidDamageHandler damageHandler;
     [Space(10)]
@@ -49,7 +52,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
     bool isHitboxActive;
     DamageKnockback currentDamage;
     public UnityEvent OnHitboxActive;
-
+    bool tryCounterAttack;
     protected CombatState cstate;
     protected struct CombatState
     {
@@ -57,6 +60,15 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         public AnimancerState approach;
         public AnimancerState dodge;
         public AnimancerState sheathe;
+    }
+
+    Attacks lastAttack;
+    enum Attacks
+    {
+        Melee,
+        Quick,
+        GapCloser,
+        Power
     }
     System.Action _MoveOnEnd;
     public override void ActorStart()
@@ -72,9 +84,34 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
 
         Draw.Events.OnEnd = _MoveOnEnd;
         Sheath.Events.OnEnd = _MoveOnEnd;
+        Dodge.Events.OnEnd = _MoveOnEnd;
         damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
-        damageHandler.SetEndAction(_MoveOnEnd);
-        OnHurt.AddListener(() => { HitboxActive(0); });
+        //damageHandler.SetEndAction(_MoveOnEnd);
+        
+        damageHandler.SetEndAction(() =>
+        {
+            bool dodge = TryDodge();
+            if (!dodge)
+            {
+                if (Random.value < powerAttackChance)
+                {
+                    StartPowerAttack();
+                }
+                else
+                {
+                    _MoveOnEnd();
+                }
+                
+            }
+        });
+        OnHurt.AddListener(() => {
+            HitboxActive(0);
+        });
+        OnDodge.AddListener(() => {
+            Debug.Log("dodge success!");
+            tryCounterAttack = true;
+            clock = 0f;
+        });
     }
 
     void Awake()
@@ -90,7 +127,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         {
             clock -= Time.deltaTime;
         }
-        bool shouldAct = clock <= 0f;
+        bool shouldAct = (clock <= 0f) || tryCounterAttack;
 
         if (CombatTarget == null)
         {
@@ -111,7 +148,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
             CombatTarget = null;
         }
 
-        if (shouldAct)
+        if (shouldAct && CanAct())
         {
             clock = Random.Range(ActionDelayMinimum, ActionDelayMaximum);
             float navdist = GetDistanceToTarget();
@@ -119,10 +156,16 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
 
             InSightRange = realdist <= SightRange;
             InMeleeRange = navdist <= MeleeAttackRange && nav.hasPath;
-            InSecondaryRange = navdist <= SecondaryAttackRange && nav.hasPath;
+            InQuickRange = navdist <= QuickAttackRange && nav.hasPath;
             InGapRange = navdist <= GapCloserMaxRange && navdist >= GapCloserMinRange && nav.hasPath;
             InPowerRange = navdist <= PowerAttackRange && nav.hasPath;
 
+            bool counterattack = false;
+            if (tryCounterAttack)
+            {
+                counterattack = true;
+                tryCounterAttack = false;
+            }
             if (InSightRange)
             {
                 SetDestination(CombatTarget);
@@ -143,12 +186,16 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
             }
             if (CanAct())
             {
-                if (InPowerRange && Random.value < 0.2f)
+                if (InMeleeRange && counterattack)
+                {
+                    StartQuickAttack();
+                }
+                else if (InPowerRange && Random.value < powerAttackChance)
                 {
                     RealignToTarget();
                     StartPowerAttack();
                 }
-                else if (InSecondaryRange && InMeleeRange)
+                else if (InQuickRange && InMeleeRange)
                 {
                     RealignToTarget();
                     if (Random.value > 0.5f)
@@ -157,7 +204,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
                     }
                     else
                     {
-                        StartSecondaryAttack();
+                        StartQuickAttack();
                     }
                 }
                 else if (InMeleeRange)
@@ -165,10 +212,10 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
                     RealignToTarget();
                     StartMeleeAttack();
                 }
-                else if (InSecondaryRange)
+                else if (InQuickRange)
                 {
                     RealignToTarget();
-                    StartSecondaryAttack();
+                    StartQuickAttack();
                 }
                 else if (InGapRange)
                 {
@@ -188,27 +235,34 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
 
     public void StartMeleeAttack()
     {
+        lastAttack = Attacks.Melee;
         cstate.attack = animancer.Play(MeleeAttack.GetClip());
         cstate.attack.Events.OnEnd = _MoveOnEnd;
         SetCurrentDamage(MeleeAttack.GetDamage());
+        OnAttack.Invoke();
     }
 
-    public void StartSecondaryAttack()
+    public void StartQuickAttack()
     {
-        cstate.attack = animancer.Play(SecondaryAttack.GetClip());
+        lastAttack = Attacks.Quick;
+        cstate.attack = animancer.Play(QuickAttack.GetClip());
         cstate.attack.Events.OnEnd = _MoveOnEnd;
-        SetCurrentDamage(SecondaryAttack.GetDamage());
+        SetCurrentDamage(QuickAttack.GetDamage());
+        OnAttack.Invoke();
     }
 
     public void StartPowerAttack()
     {
+        lastAttack = Attacks.Power;
         cstate.attack = animancer.Play(PowerAttack.GetClip());
         cstate.attack.Events.OnEnd = _MoveOnEnd;
         SetCurrentDamage(PowerAttack.GetDamage());
+        OnAttack.Invoke();
     }
 
     public void StartGapCloser()
     {
+        lastAttack = Attacks.GapCloser;
         cstate.approach = animancer.Play(GapCloserAnim);
         ClipTransition atkClip = GapCloserAttack.GetClip();
         atkClip.Events.OnEnd = _MoveOnEnd;
@@ -218,6 +272,37 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         };
         
         SetCurrentDamage(GapCloserAttack.GetDamage());
+        StartCoroutine("GapCloserCoroutine");
+        OnAttack.Invoke();
+    }
+
+    public bool TryDodge()
+    {
+        HitboxActive(0);
+        if (Random.value >= dodgeChance)
+        {
+            RealignToTarget();
+            cstate.dodge = animancer.Play(Dodge);
+            return true;
+        }
+        return false;
+    }
+
+
+    IEnumerator GapCloserCoroutine()
+    {
+        do
+        {
+            yield return new WaitForEndOfFrame();
+            if (GetDistanceToTarget() < GapCloserMinRange)
+            {
+                ClipTransition atkClip = GapCloserAttack.GetClip();
+                atkClip.Events.OnEnd = _MoveOnEnd;
+                cstate.attack = animancer.Play(atkClip);
+                break;
+            }
+
+        } while (animancer.States.Current == cstate.approach);
     }
     /*
    * triggered by animation:
@@ -326,6 +411,21 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         return PlayerActor.player.gameObject.tag != "Corpse";
     }
 
+    public override bool IsDodging()
+    {
+        return animancer.States.Current == cstate.dodge;
+    }
+
+    public override bool IsArmored()
+    {
+        return animancer.States.Current == cstate.approach || (IsAttacking() && (lastAttack == Attacks.GapCloser || lastAttack == Attacks.Power));
+    }
+
+    public override bool IsAttacking()
+    {
+        return animancer.States.Current == cstate.attack;
+    }
+
     public override void ProcessDamageKnockback(DamageKnockback damageKnockback)
     {
         damageHandler.TakeDamage(damageKnockback);
@@ -333,9 +433,9 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
 
     public void BeingAttacked()
     {
-        if (CombatTarget != null && currentDistance < bufferRange)
+        if (CombatTarget != null && currentDistance < bufferRange && CanAct())
         {
-            animator.SetTrigger("GettingAttacked");
+            TryDodge();
         }
     }
 

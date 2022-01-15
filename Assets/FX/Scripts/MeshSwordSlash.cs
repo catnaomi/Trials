@@ -169,7 +169,7 @@ public class MeshSwordSlash : MonoBehaviour
             lineRenderer.startColor = new Color(lineRenderer.startColor.r, lineRenderer.startColor.g, lineRenderer.startColor.b, alpha);
             lineRenderer.endColor = new Color(lineRenderer.endColor.r, lineRenderer.endColor.g, lineRenderer.endColor.b, alpha);
         }
-        if (slashing || fadeoutTimer > 0 || lineTimer > 0)
+        if (slashing)// || fadeoutTimer > 0 || lineTimer > 0)
         {
             this.transform.position = pseudoParent.position;
         }

@@ -15,6 +15,7 @@ public class DamageAnims : ScriptableObject
     public ClipTransition blockStagger;
     public ClipTransition guardBreak;
     public ClipTransition recoil;
+    public AvatarMask flinchMask;
 
 
     public ClipTransition GetClipFromStaggerType(DamageKnockback.StaggerType type)

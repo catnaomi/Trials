@@ -43,6 +43,9 @@ public class HumanoidDamageHandler : IDamageable
 
         DizzyHumanoid dizzy = FXController.CreateDizzy().GetComponent<DizzyHumanoid>();
         dizzy.SetActor(actor, this);
+        animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].SetMask(damageAnims.flinchMask);
+        animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].IsAdditive = true;
+        animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].SetWeight(1f);
     }
 
     public void SetEndAction(System.Action action)
@@ -69,14 +72,18 @@ public class HumanoidDamageHandler : IDamageable
 
         bool hitFromBehind = !(Vector3.Dot(-actor.transform.forward, (damage.source.transform.position - actor.transform.position).normalized) <= 0f);
         Debug.Log(actor.name + "from behind?" + hitFromBehind);
-        if (actor.IsBlocking() && !hitFromBehind && !damage.unblockable)
+        if (actor.IsDodging())
+        {
+            actor.OnDodge.Invoke();
+        }
+        else if (actor.IsBlocking() && !hitFromBehind && !damage.unblockable)
         {
             if (!damage.breaksBlock)
             {
                 if (animancer.States.Current != block)
                 {
                     ClipTransition clip = blockStagger;
-                    animancer.Layers[1].Stop();
+                    animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop();
                     block = animancer.Play(clip);
                     block.Events.OnEnd = _OnBlockEnd;
                     
@@ -84,8 +91,8 @@ public class HumanoidDamageHandler : IDamageable
                 else
                 {
                     ClipTransition clip = blockStagger;
-                    AnimancerState state = animancer.Layers[1].Play(clip);
-                    state.Events.OnEnd = () => { animancer.Layers[1].Stop(); };
+                    AnimancerState state = animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Play(clip);
+                    state.Events.OnEnd = () => { animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop(); };
                 }
                 if (damage.bouncesOffBlock && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
                 {
@@ -94,7 +101,7 @@ public class HumanoidDamageHandler : IDamageable
             }
             else
             {
-                animancer.Layers[1].Stop();
+                animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop();
                 ClipTransition clip = damageAnims.guardBreak;
                 AnimancerState state = animancer.Play(clip);
                 state.Events.OnEnd = _OnEnd;
@@ -107,11 +114,19 @@ public class HumanoidDamageHandler : IDamageable
         }
         else
         {
-            AdjustDefendingPosition(damage.source);
             bool isCrit = IsCritVulnerable();
+            
             DamageKnockback.StaggerType stagger = (!isCrit) ? damage.staggers.onHit : damage.staggers.onCritical;
             float maxTime = 0f;
-            if (stagger == DamageKnockback.StaggerType.StaggerSmall)
+            bool isFlinch = (stagger == DamageKnockback.StaggerType.Flinch || actor.IsArmored());
+            if (isFlinch)
+            {
+                AnimancerState state = animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Play(damageAnims.flinch);
+                state.Time = 0f;
+                state.Events.OnEnd = () => { animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop(); };
+                maxTime = state.RemainingDuration / state.Speed;
+            }
+            else if (stagger == DamageKnockback.StaggerType.StaggerSmall)
             {
                 Vector3 dir = (damage.source.transform.position - actor.transform.position).normalized;
                 float xdot = Vector3.Dot(actor.transform.right, dir);
@@ -129,11 +144,9 @@ public class HumanoidDamageHandler : IDamageable
                 }
                 else
                 {
-                    DirectionalMixerState state = (DirectionalMixerState)animancer.Layers[1].Play(damageAnims.staggerSmall);
+                    AnimancerState state = animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Play(damageAnims.flinch);
                     state.Time = 0f;
-                    state.ParameterX = xdot;
-                    state.ParameterY = ydot;
-                    state.Events.OnEnd = () => { animancer.Layers[1].Stop(); };
+                    state.Events.OnEnd = () => { animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop(); };
                     maxTime = state.RemainingDuration / state.Speed;
                 }
             }
@@ -186,6 +199,10 @@ public class HumanoidDamageHandler : IDamageable
                 damage.OnCrit.Invoke();
             }
            
+            if (!isFlinch)
+            {
+                AdjustDefendingPosition(damage.source);
+            }
             damage.OnHit.Invoke();
             actor.OnHurt.Invoke();
         }
@@ -197,7 +214,7 @@ public class HumanoidDamageHandler : IDamageable
             return;
         }
 
-        float MAX_ADJUST = 0.25f;
+        float MAX_ADJUST = 0.1f;
 
         Vector3 targetPosition = attacker.transform.position + (attacker.transform.forward * 0.5f);
 
