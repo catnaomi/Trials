@@ -7,55 +7,51 @@ public class StatDisplayHP : MonoBehaviour
 {
     public int healthyHealth;
     public int damagedHealth;
-
-    Sprite[] healthySprites;
-    Sprite[] damagedSprites;
-    Sprite[] allSprites;
-
-    public Image healthyImage;
-    public Image damagedImage;
+    public int maxHealth;
+    int lastHealth;
+    public Animator[] hearts;
+    [SerializeField,ReadOnly]private int[] heartValues;
+    int heartCount;
     // Start is called before the first frame update
-    void Awake()
+    void Start()
     {
-        allSprites = Resources.LoadAll<Sprite>("UI/temp_sheet_health");
-
-        healthySprites = new Sprite[]
-        {
-            null,
-            allSprites[0],
-            allSprites[1],
-            allSprites[2]
-        };
-
-        damagedSprites = new Sprite[]
-        {
-            null,
-            allSprites[3],
-            allSprites[4],
-            allSprites[5]
-        };
+        heartValues = new int[hearts.Length];
+        UpdateHearts();
     }
 
+    public void UpdateHearts()
+    {
+        int hp = healthyHealth;
+        heartCount = (int)Mathf.CeilToInt(Mathf.Max(maxHealth / 3f, 1));
+        for (int i = 0; i < hearts.Length; i++)
+        {
+            if (i >= heartCount)
+            {
+                hearts[i].gameObject.SetActive(false);
+            }
+            else
+            {
+                hearts[i].gameObject.SetActive(true);
+                if (hp > 3)
+                {
+                    heartValues[i] = 3;
+                    hp -= 3;
+                }
+                else
+                {
+                    heartValues[i] = hp;
+                    hp = 0;
+                }
+                hearts[i].SetInteger("value", heartValues[i]);
+            }
+        }
+    }
     private void OnGUI()
     {
-        if (healthyHealth > 0)
+        if (healthyHealth != lastHealth)
         {
-            healthyImage.sprite = healthySprites[healthyHealth];
-            healthyImage.color = Color.white;
-        }
-        else
-        {
-            healthyImage.color = Color.clear;
-        }
-
-        if (damagedHealth > 0)
-        {
-            damagedImage.sprite = damagedSprites[damagedHealth];
-            damagedImage.color = Color.white;
-        }
-        else
-        {
-            damagedImage.color = Color.clear;
+            lastHealth = healthyHealth;
+            UpdateHearts();
         }
     }
 }
