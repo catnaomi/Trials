@@ -7,7 +7,7 @@ using System.Collections.Generic;
 public class ActorAttributes : MonoBehaviour
 {
     private readonly float SMOOTHING_DELAY = 1.5f;
-    private readonly float SMOOTHING_MAX_DELTA = 25f;
+    private readonly float SMOOTHING_MAX_DELTA = 10f;
 
     private readonly float EFFECT_UPDATE_FREQUENCY = 1f; // how often to update effects, in seconds.
 
@@ -16,36 +16,17 @@ public class ActorAttributes : MonoBehaviour
 
 
     [Header("Vitality")]
-    public AttributeValue hearts;
-    public float recoverableHearts;
-    private float heartsLast;
-
     [ReadOnly] public float smoothedHealth;
     public float healthRecoveryClock;
     private float healthSmoothClock;
     private float healthLast;
     public AttributeValue health;
     public AttributeValue healthRecoveryRate;
-
-    [ReadOnly] public float smoothedStamina;
-    private float staminaRecoveryClock;
-    private float staminaSmoothClock;
-    private float staminaLast;
-    public AttributeValue stamina;
-    public AttributeValue staminaRecoveryRate;
-
-    [Header("AI Personality")]
-    public AttributeValue audacity;
-    public AttributeValue guile;
-
-    [Space(5)]
-    public float staminaRecoveryDelay = 3f;
-    public float healthRecoveryDelay = 10f;
-
+    public bool usesHearts = false;
+    public bool spareable = false;
+    
     [Header("Resistances & Weaknesses")]
     public List<DamageResistance> resistances;
-
-    
 
     [Header("Statistics")]
     public float BlockReduction = 1f;
@@ -60,10 +41,8 @@ public class ActorAttributes : MonoBehaviour
     void Update()
     {
         smoothedHealth = NumberUtilities.TimeDelayedSmoothDelta(smoothedHealth, health.current, healthSmoothClock + SMOOTHING_DELAY, health.max / SMOOTHING_MAX_DELTA, Time.time);
-        smoothedStamina = NumberUtilities.TimeDelayedSmoothDelta(smoothedStamina, stamina.current, staminaSmoothClock + SMOOTHING_DELAY, stamina.max / SMOOTHING_MAX_DELTA, Time.time);
-        //smoothedPoise = NumberUtilities.TimeDelayedSmoothDelta(smoothedPoise, poise.current, poiseSmoothClock + SMOOTHING_DELAY, poise.max / SMOOTHING_MAX_DELTA, Time.time);
 
-        if (health.current < healthLast || hearts.current < heartsLast)
+        if (health.current < healthLast)
         {
             healthRecoveryClock = 0f;
         }
@@ -79,35 +58,8 @@ public class ActorAttributes : MonoBehaviour
         {
             smoothedHealth = health.current;
         }
-        if (healthRecoveryClock > healthRecoveryDelay)
-        {
-            this.RecoverAttribute(health, healthRecoveryRate.current * Time.deltaTime);
-        }
-
-        if (stamina.current < staminaLast)
-        {
-            staminaRecoveryClock = 0f;
-        }
-        else
-        {
-            staminaRecoveryClock += Time.deltaTime;
-        }
-        if (smoothedStamina == stamina.current)
-        {
-            staminaSmoothClock = Time.time;
-        }
-        else if (smoothedStamina < stamina.current)
-        {
-            smoothedStamina = stamina.current;
-        }
-        if (staminaRecoveryClock > staminaRecoveryDelay)
-        {
-            this.RecoverAttribute(stamina, staminaRecoveryRate.current * Time.deltaTime);
-        }
 
         healthLast = health.current;
-        staminaLast = stamina.current;
-        heartsLast = hearts.current;
         effectClock += Time.deltaTime;
         if (effectClock > EFFECT_UPDATE_FREQUENCY)
         {
@@ -127,8 +79,6 @@ public class ActorAttributes : MonoBehaviour
 
         smoothedHealth = health.current = health.max = health.baseValue;
         healthRecoveryRate.current = healthRecoveryRate.max = healthRecoveryRate.baseValue;
-        smoothedStamina = stamina.current = stamina.max = stamina.baseValue;
-        staminaRecoveryRate.current = staminaRecoveryRate.max = staminaRecoveryRate.baseValue;
 
         effects.Clear();
 
@@ -172,15 +122,19 @@ public class ActorAttributes : MonoBehaviour
         }
     }
 
+    public void ReduceHealth(float damage)
+    {
+        ReduceAttribute(health, damage);
+        if (usesHearts)
+        {
+            health.current = Mathf.Ceil(health.current / 10f) * 10f;
+        }
+    }
+
     public bool HasHealthRemaining()
     {
         return health.current > 0;
     }
-
-    public bool HasHeartsRemaining()
-    {
-        return hearts.current > 0;
-    }    
 
     public void AddEffect(Effect effect)
     {

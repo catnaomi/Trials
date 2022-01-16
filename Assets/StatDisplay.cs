@@ -16,8 +16,8 @@ public class StatDisplay : MonoBehaviour
     {
         if (actor == null) actor = PlayerActor.player;
         healthBar.SetAttribute(actor.attributes.health);
-        staminaBar.SetAttribute(actor.attributes.stamina);
-        hearts.SetAttribute(actor.attributes.hearts);
+        //staminaBar.SetAttribute(actor.attributes.stamina);
+        //hearts.SetAttribute(actor.attributes.hearts);
         damage.SetActor(actor);
     }
 
@@ -25,8 +25,8 @@ public class StatDisplay : MonoBehaviour
     {
         this.actor = actor;
         healthBar.SetAttribute(actor.attributes.health);
-        staminaBar.SetAttribute(actor.attributes.stamina);
-        hearts.SetAttribute(actor.attributes.hearts);
+        //staminaBar.SetAttribute(actor.attributes.stamina);
+        //hearts.SetAttribute(actor.attributes.hearts);
         damage.SetActor(actor);
     }
     private void OnGUI()
@@ -40,7 +40,7 @@ public class StatDisplay : MonoBehaviour
         healthBar.SetSmoothValue(actor.attributes.smoothedHealth);
         healthBar.UpdateGUI();
 
-        staminaBar.SetSmoothValue(actor.attributes.smoothedStamina);
+        //staminaBar.SetSmoothValue(actor.attributes.smoothedStamina);
         staminaBar.UpdateGUI();
 
         hearts.UpdateGUI();

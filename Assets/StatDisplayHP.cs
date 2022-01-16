@@ -12,11 +12,21 @@ public class StatDisplayHP : MonoBehaviour
     public Animator[] hearts;
     [SerializeField,ReadOnly]private int[] heartValues;
     int heartCount;
+    public Actor actor;
     // Start is called before the first frame update
     void Start()
     {
         heartValues = new int[hearts.Length];
-        UpdateHearts();
+        if (actor == null && PlayerActor.player != null)
+        {
+            actor = PlayerActor.player;
+            actor.OnHurt.AddListener(UpdateHeartsFromActor);
+            actor.OnHurt.AddListener(Pain);
+            UpdateHeartsFromActor();
+        } else
+        {
+            UpdateHearts();
+        }
     }
 
     public void UpdateHearts()
@@ -48,10 +58,28 @@ public class StatDisplayHP : MonoBehaviour
     }
     private void OnGUI()
     {
-        if (healthyHealth != lastHealth)
+        if (actor == null && healthyHealth != lastHealth)
         {
             lastHealth = healthyHealth;
             UpdateHearts();
+        }
+    }
+
+    public void UpdateHeartsFromActor()
+    {
+        if (actor != null)
+        {
+            healthyHealth = Mathf.CeilToInt(actor.attributes.health.current / 10f);
+            maxHealth = Mathf.CeilToInt(actor.attributes.health.max / 10f);
+        }
+        UpdateHearts();
+    }
+
+    public void Pain()
+    {
+        foreach (Animator heart in hearts)
+        {
+            heart.SetTrigger("hurt");
         }
     }
 }
