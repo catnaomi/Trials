@@ -26,6 +26,7 @@ public class EquippableWeapon : Item, IGeneratesModel
     [Header("Stats")]
     public float AttackSpeed;
     public float weight;
+    public float BlockReduction = 0f;
 
     public UnityEvent OnEquip = new UnityEvent();
     public UnityEvent OnUnequip = new UnityEvent();

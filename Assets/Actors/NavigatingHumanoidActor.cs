@@ -55,20 +55,15 @@ public class NavigatingHumanoidActor : Actor, INavigates
         public AnimancerState fall;
     }
 
-    void OnEnable()
-    {
-        
-        jumpHorizontal = navAnims.jumpHorizontal;
-        jumpDown = navAnims.jumpDown;
-        fallAnim = navAnims.fallAnim;
-        landAnim = navAnims.landAnim;
-    }
-
     System.Action _FinishJump;
     System.Action _FinishDrop;
     public override void ActorStart()
     {
         base.ActorStart();
+        jumpHorizontal = navAnims.jumpHorizontal;
+        jumpDown = navAnims.jumpDown;
+        fallAnim = navAnims.fallAnim;
+        landAnim = navAnims.landAnim;
 
         nav = GetComponent<NavMeshAgent>();
         animancer = GetComponent<AnimancerComponent>();

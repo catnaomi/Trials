@@ -187,7 +187,7 @@ public class HumanoidActor : Actor
                 animator.SetBool("Sprinting", false);
             }
             */
-            attributes.ReduceAttribute(attributes.stamina, 10f * Time.deltaTime);
+            //attributes.ReduceAttribute(attributes.stamina, 10f * Time.deltaTime);
             //attributes.ReduceAttributeToMin(attributes.poise, 50f * Time.deltaTime, 50f);
         }
 
@@ -296,7 +296,7 @@ public class HumanoidActor : Actor
     {
         animator.SetTrigger("GetUp");
 
-        attributes.RecoverAttribute(attributes.stamina, 50f);
+        //attributes.RecoverAttribute(attributes.stamina, 50f);
 
         humanoidState = HumanoidState.Actionable;
     }
@@ -395,7 +395,7 @@ public class HumanoidActor : Actor
             // slowdown effect on player dodge!
             OnDodge.Invoke();
         }
-        else if (this.IsParrying() && attributes.HasAttributeRemaining(attributes.stamina) && !damageKnockback.unblockable) // is actor parrying with stamina remaining
+        else if (this.IsParrying()/* && attributes.HasAttributeRemaining(attributes.stamina)*/ && !damageKnockback.unblockable) // is actor parrying with stamina remaining
         {
             // take no damage / stamina damage, and stagger human opponents
             // todo: Reimplement parrying
@@ -404,7 +404,7 @@ public class HumanoidActor : Actor
         else if (this.IsBlocking() && !damageKnockback.unblockable) // is actor blocking. cannot die through block.
         {
             // blocking deals stamina damage
-            attributes.ReduceAttribute(attributes.stamina, damageKnockback.staminaDamage);
+            //attributes.ReduceAttribute(attributes.stamina, damageKnockback.staminaDamage);
             //attributes.ReducePoise(damageKnockback.poiseDamage);
             //Damage(damageKnockback, true); don't take health damage through blocks
 
@@ -414,6 +414,7 @@ public class HumanoidActor : Actor
                 this.OnInjure.Invoke();
             }
             */
+            /*
             if (attributes.HasAttributeRemaining(attributes.stamina))
             {
                 ProcessStagger(DamageKnockback.StaggerType.BlockStagger, damageKnockback);
@@ -422,6 +423,7 @@ public class HumanoidActor : Actor
             {
                 ProcessStagger(DamageKnockback.StaggerType.GuardBreak, damageKnockback);
             }
+            */
         }
         else // get hit
         {
@@ -600,12 +602,12 @@ public class HumanoidActor : Actor
     }
     public virtual void DeductStaminaFromDodge()
     {
-        attributes.ReduceAttribute(attributes.stamina, 10f);
+        //attributes.ReduceAttribute(attributes.stamina, 10f);
         //staminaClock = 0f;
     }
     public virtual void DeductStaminaFromAttack()
     {
-        attributes.ReduceAttribute(attributes.stamina, 10f);
+        //attributes.ReduceAttribute(attributes.stamina, 10f);
         //staminaClock = 0f;
     }
 

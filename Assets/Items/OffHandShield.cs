@@ -41,7 +41,7 @@ public class OffHandShield : EquippableWeapon, HitboxHandler
         {
             holder.PlayAudioClip(FXController.clipDictionary["shield_bash"]);
 
-            holder.attributes.ReduceAttribute(holder.attributes.stamina, bashCost);
+            //holder.attributes.ReduceAttribute(holder.attributes.stamina, bashCost);
         }
     }
 

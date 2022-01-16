@@ -49,6 +49,7 @@ public class DamageKnockback
         public StaggerType onArmorHit;
         public StaggerType onCritical;
         public StaggerType onKill;
+        public StaggerType onInjure;
     }
 
     [Serializable]
@@ -152,6 +153,7 @@ public class DamageKnockback
         onArmorHit = StaggerType.Flinch,
         onCritical = StaggerType.Stumble,
         onKill = StaggerType.Crumple,
+        onInjure = StaggerType.Crumple,
     };
 
     public static readonly CriticalData StandardCritData = new CriticalData()

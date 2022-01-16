@@ -115,11 +115,40 @@ public class HumanoidDamageHandler : IDamageable
         else
         {
             bool isCrit = IsCritVulnerable();
+            float damageAmount = damage.healthDamage * (isCrit ? damage.critData.criticalMultiplier : 1f);
+            DamageKnockback.StaggerType stagger;
             
-            DamageKnockback.StaggerType stagger = (!isCrit) ? damage.staggers.onHit : damage.staggers.onCritical;
+            // = (!isCrit) ? damage.staggers.onHit : damage.staggers.onCritical;
             float maxTime = 0f;
-            bool isFlinch = (stagger == DamageKnockback.StaggerType.Flinch || actor.IsArmored());
-            if (isFlinch)
+            //bool isFlinch = (stagger == DamageKnockback.StaggerType.Flinch || actor.IsArmored());
+
+            bool isArmored = actor.IsArmored() && !damage.breaksArmor;
+            bool willInjure = actor.attributes.spareable && actor.attributes.HasHealthRemaining() && damageAmount >= actor.attributes.health.current;
+            bool willKill = (!willInjure) && damageAmount >= actor.attributes.health.current;
+
+            if (willKill)
+            {
+                stagger = damage.staggers.onKill;
+            }
+            else if (willInjure)
+            {
+                stagger = damage.staggers.onInjure;
+            }
+            else if (isCrit)
+            {
+                stagger = damage.staggers.onCritical;
+            }
+            else if (isArmored)
+            {
+                stagger = damage.staggers.onArmorHit;
+            }
+            else
+            {
+                stagger = damage.staggers.onHit;
+            }
+
+            bool isFlinch = (stagger == DamageKnockback.StaggerType.Flinch);
+            if (stagger == DamageKnockback.StaggerType.Flinch)
             {
                 AnimancerState state = animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Play(damageAnims.flinch);
                 state.Time = 0f;
@@ -144,6 +173,7 @@ public class HumanoidDamageHandler : IDamageable
                 }
                 else
                 {
+                    isFlinch = true;
                     AnimancerState state = animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Play(damageAnims.flinch);
                     state.Time = 0f;
                     state.Events.OnEnd = () => { animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop(); };
@@ -198,10 +228,14 @@ public class HumanoidDamageHandler : IDamageable
                 }
                 damage.OnCrit.Invoke();
             }
+
+            actor.attributes.ReduceHealth(damageAmount);
+
            
             if (!isFlinch)
             {
                 AdjustDefendingPosition(damage.source);
+                animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop();
             }
             damage.OnHit.Invoke();
             actor.OnHurt.Invoke();

@@ -194,7 +194,6 @@ public class RangedBow : RangedWeapon, HitboxHandler
         if (active && canFire/* && GetHeldActor().IsAiming()*/)
         {
             Debug.Log("bow fire!!!");
-            GetHeldActor().attributes.ReduceAttribute(GetHeldActor().attributes.stamina, 10f);
             Fire();
             canFire = false;
         }

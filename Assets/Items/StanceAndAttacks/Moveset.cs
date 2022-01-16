@@ -8,18 +8,18 @@ using Animancer;
 [CreateAssetMenu(fileName = "Item", menuName = "ScriptableObjects/Stances & Movesets/New Moveset", order = 1)]
 public class Moveset : ScriptableObject
 {
-    [Header("Main Hand Attacks")]
+    [Header("Main Hand Attacks")] // exclusively determined by main hand
     public InputAttack quickSlash1h;
     public InputAttack strongSlash1h;
     public InputAttack quickThrust1h;
     public InputAttack strongThrust1h;
-    [Header("Stance Attacks")]
+    [Header("Stance Attacks")] // used by off hand if available, otherwise main hand
     public InputAttack stanceSlash;
     public InputAttack stanceThrust;
-    [Header("Aim Attack")]
+    [Header("Aim Attack")] // determined by ranged weapons only. ranged slot > off slot > main slot
     public AimAttack aimAttack;
 
-    [Header("Movement-Based Attacks")]
+    [Header("Movement-Based Attacks")] // used by off hand if available, otherwise main hand
     public InputAttack dashSlash;
     public InputAttack dashThrust;
     public InputAttack plungeSlash;
@@ -29,14 +29,14 @@ public class Moveset : ScriptableObject
     [Header("Animancer")]
     public ClipTransition draw;
     public ClipTransition sheathe;
-    public MixerTransition2DAsset moveAnim;
+    public MixerTransition2DAsset moveAnim; // main weapon only
     public bool overridesBlock;
-    public MixerTransition2DAsset blockMove;
+    public MixerTransition2DAsset blockMove; // off weapon > main weapon
     public ClipTransition blockAnim;
     public ClipTransition blockAnimStart;
     public ClipTransition blockStagger;
     public bool overridesSprint;
-    public ClipTransition sprintAnim;
+    public ClipTransition sprintAnim; // main weapon only
 
     public static Dictionary<string, Moveset> movesetTable;
     public static bool movesetsLoaded = false;
