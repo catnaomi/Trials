@@ -40,6 +40,7 @@ MonoBehaviour:
   moveset: {fileID: 11400000, guid: bc549c059af4b0045b4e4f50b648e75d, type: 2}
   AttackSpeed: 0
   weight: 0
+  blockResistances: []
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -53,7 +54,7 @@ MonoBehaviour:
   deadArrowPrefab: {fileID: 2667612872126298195, guid: c280cbff6c2afba4f8b6e43aa2ea9bc6,
     type: 3}
   damageKnockback:
-    healthDamage: 25
+    healthDamage: 10
     staminaDamage: 0
     types: 
     critData:
@@ -76,6 +77,7 @@ MonoBehaviour:
       onArmorHit: 1
       onCritical: 7
       onKill: 7
+      onInjure: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     hitboxSource: {fileID: 0}

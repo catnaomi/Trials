@@ -144,6 +144,7 @@ public class HumanoidDamageHandler : IDamageable
                 state.Events.OnEnd = _OnEnd;
                 hurt = state;
                 actor.OnHurt.Invoke();
+                damage.OnCrit.Invoke();
                 StartCritVulnerability(clip.MaximumDuration / clip.Speed);
             }
             actor.transform.rotation = Quaternion.LookRotation(-(actor.transform.position - damage.source.transform.position), Vector3.up);

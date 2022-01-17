@@ -9,6 +9,7 @@ public class RadialHealthTargetIndicator : MonoBehaviour
     public Image health;
     public Image damaged;
     public Image background;
+    public Image nonactor;
     public float hp;
     public float damageHP;
     public float hpRadialSpeed = 1f;
@@ -75,6 +76,7 @@ public class RadialHealthTargetIndicator : MonoBehaviour
         health.enabled = showHP;
         background.enabled = showing;
         damaged.enabled = showHP;
+        nonactor.enabled = !showHP;
         health.fillAmount = (!changed) ? Mathf.MoveTowards(health.fillAmount, hp, hpRadialSpeed * Time.deltaTime) : hp;
         damaged.fillAmount = damageHP;
 

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Interactions;
 
 [RequireComponent(typeof(CharacterController), typeof(HumanoidPositionReference))]
 public class PlayerActor : Actor, IAttacker, IDamageable
@@ -226,37 +227,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         state.attack = animancer.States.GetOrCreate(rollAnim);
         animancer.Play(state.move);
 
-        
-
-        this.GetComponent<PlayerInput>().actions["Sprint"].performed += (context) =>
-        {
-            SprintStart();
-        };
-
-        this.GetComponent<PlayerInput>().actions["Sprint"].canceled += (context) =>
-        {
-            SprintEnd();
-        };
-
-        this.GetComponent<PlayerInput>().actions["Block"].started += (context) =>
-        {
-            BlockStart();
-        };
-
-        this.GetComponent<PlayerInput>().actions["Block"].canceled += (context) =>
-        {
-            BlockEnd();
-        };
-
-        this.GetComponent<PlayerInput>().actions["Aim"].started += (context) =>
-        {
-            AimStart();
-        };
-
-        this.GetComponent<PlayerInput>().actions["Aim"].canceled += (context) =>
-        {
-            AimEnd();
-        };
+        SetupInputListeners();
 
         currentSprintAnim = sprintAnim;
 
@@ -437,10 +408,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 //((MixerState)state.block).ChildStates[0].Clip = blockAnimStart.Clip;
 
-                int itemSlot = inventory.GetItemSlot(blockWeapon);
+                int itemSlot = inventory.GetItemEquipType(blockWeapon);
                 if ((itemSlot == Inventory.MainType && !inventory.IsMainDrawn()) || (itemSlot == Inventory.OffType && !inventory.IsOffDrawn()))
                 {
-                    inventory.SetDrawn(inventory.GetItemSlot(blockWeapon), true);
+                    inventory.SetDrawn(inventory.GetItemEquipType(blockWeapon), true);
                 }
                 animancer.Play(state.block, 0.25f);
                 /*
@@ -481,13 +452,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 slash = false;
                 thrust = false;
             }
-            else if (!animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].IsAnyStatePlaying())
+            else if (!animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].IsAnyStatePlaying() && !blocking)
             {
                 if (inventory.IsMainEquipped() && inventory.IsMainDrawn() && inventory.IsOffEquipped() && !inventory.IsOffDrawn())
                 {
                     TriggerSheath(true, inventory.GetOffWeapon().OffHandEquipSlot, false);
                 }
-                else if (inventory.IsMainEquipped() && !inventory.IsMainDrawn() && inventory.IsOffEquipped() && inventory.IsOffDrawn())
+                else if ((!inventory.IsMainEquipped() || !inventory.IsMainDrawn()) && inventory.IsOffEquipped() && inventory.IsOffDrawn())
                 {
                     TriggerSheath(false, inventory.GetOffWeapon().OffHandEquipSlot, false);
                 }
@@ -1048,6 +1019,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 if (aimTimer <= 0f)
                 {
+                    animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].Stop();
                     if (inventory.IsRangedEquipped())
                     {
                         TriggerSheath(false, inventory.GetRangedWeapon().RangedEquipSlot, Inventory.RangedType);
@@ -1317,6 +1289,77 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     #endregion
 
     #region INPUT
+
+    void SetupInputListeners()
+    {
+        PlayerInput inputs = this.GetComponent<PlayerInput>();
+        inputs.actions["Sprint"].performed += (context) =>
+        {
+            SprintStart();
+        };
+
+        inputs.actions["Sprint"].canceled += (context) =>
+        {
+            SprintEnd();
+        };
+
+        inputs.actions["Block"].started += (context) =>
+        {
+            BlockStart();
+        };
+
+        inputs.actions["Block"].canceled += (context) =>
+        {
+            BlockEnd();
+        };
+
+        inputs.actions["Aim"].started += (context) =>
+        {
+            AimStart();
+        };
+
+        inputs.actions["Aim"].canceled += (context) =>
+        {
+            AimEnd();
+        };
+
+        inputs.actions["QuickSlot - 0"].performed += (context) =>
+        {
+            if (context.interaction is HoldInteraction)
+            {
+                OnQuickSlotHold(0);
+            }
+            else
+            {
+                OnQuickSlot(0);
+            }
+        };
+
+        inputs.actions["QuickSlot - 1"].performed += (context) =>
+        {
+            if (context.interaction is HoldInteraction)
+            {
+                OnQuickSlotHold(1);
+            }
+            else
+            {
+                OnQuickSlot(1);
+            }
+        };
+
+        inputs.actions["QuickSlot - 2"].performed += (context) =>
+        {
+            if (context.interaction is HoldInteraction)
+            {
+                OnQuickSlotHold(2);
+            }
+            else
+            {
+                OnQuickSlot(2);
+            }
+        };
+    }
+
     public void OnDodge(InputValue value)
     {
         if (!CanPlayerInput()) return;
@@ -1497,30 +1540,21 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
-    public void OnQuickSlot0()
+    public void OnQuickSlot(int slot)
     {
-        if (CanPlayerInput() || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
+        if ((IsMoving() && CanPlayerInput()) || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
         {
-            inventory.InputOnSlot(0);
-            InventoryUI2.invUI.FlareSlot(0);
+            inventory.InputOnSlot(slot);
+            InventoryUI2.invUI.FlareSlot(slot);
         }
     }
 
-    public void OnQuickSlot1()
+    public void OnQuickSlotHold(int slot)
     {
-        if (CanPlayerInput() || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
+        if (IsMoving() && CanPlayerInput())
         {
-            inventory.InputOnSlot(1);
-            InventoryUI2.invUI.FlareSlot(1);
-        }
-    }
-
-    public void OnQuickSlot2()
-    {
-        if (CanPlayerInput() || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
-        {
-            inventory.InputOnSlot(2);
-            InventoryUI2.invUI.FlareSlot(2);
+            inventory.UnequipOnSlot(slot);
+            InventoryUI2.invUI.FlareSlot(slot);
         }
     }
     #endregion
@@ -2279,6 +2313,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     #region State Checks
 
+    public bool IsMoving()
+    {
+        return animancer.States.Current == state.move;
+    }
     public bool IsAiming()
     {
         return animancer.States.Current == state.aim;

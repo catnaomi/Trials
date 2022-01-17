@@ -203,7 +203,8 @@ public class RangedBow : RangedWeapon, HitboxHandler
             canFire = true;
         }
         nocked = false;
-        deadArrow.SetActive(false);
+        if (deadArrow != null) deadArrow.SetActive(false);
+
     }
 
     void DespawnArrows()

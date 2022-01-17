@@ -229,6 +229,10 @@ public class FXController : MonoBehaviour
             default:
             case FXMaterial.Blood:
                 return clipDictionary["sword_blood_crit"];
+            case FXMaterial.Wood:
+                return clipDictionary["sword_wood_crit"];
+            case FXMaterial.Metal:
+                return clipDictionary["sword_metal_crit"];
         }
     }
 
