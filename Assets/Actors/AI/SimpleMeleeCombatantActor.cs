@@ -107,7 +107,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         OnHurt.AddListener(() => {
             HitboxActive(0);
         });
-        OnDodge.AddListener(() => {
+        OnDodgeSuccess.AddListener(() => {
             Debug.Log("dodge success!");
             tryCounterAttack = true;
             clock = 0f;

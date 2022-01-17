@@ -15,7 +15,7 @@ public class InventoryUI2 : MonoBehaviour
     public GameObject source;
 
     [HideInInspector]
-    public IInventory inventory;
+    public PlayerInventory inventory;
 
     List<InventoryItemDisplay> items;
 
@@ -56,7 +56,7 @@ public class InventoryUI2 : MonoBehaviour
         items = new List<InventoryItemDisplay>();
         if (source != null)
         {
-            //inventory = source.GetComponent<IInventory>();
+            inventory = source.GetComponent<PlayerInventory>();
             
         }
         initialized = false;
@@ -68,7 +68,7 @@ public class InventoryUI2 : MonoBehaviour
         {
             if (source != null && inventory == null)
             {
-                inventory = source.GetComponent<IInventory>();
+                inventory = source.GetComponent<PlayerInventory>();
             }
             if (inventory != null)
             {

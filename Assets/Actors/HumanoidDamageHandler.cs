@@ -109,7 +109,7 @@ public class HumanoidDamageHandler : IDamageable
 
         if (actor.IsDodging())
         {
-            actor.OnDodge.Invoke();
+            actor.OnDodgeSuccess.Invoke();
         }
         else if (blockSuccess && !willKill && !willInjure)
         {

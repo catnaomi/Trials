@@ -28,7 +28,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     CameraState prevCamState;
     [SerializeField]
     public VirtualCameras vcam;
+
     [Header("Interaction & Dialogue")]
+    public bool isMenuOpen;
     List<Interactable> interactables;
     public Interactable highlightedInteractable;
     [Header("Movement")]
@@ -219,6 +221,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         defaultRadius = cc.radius;
         movementController = this.GetComponent<PlayerActor>();
         animancer = this.GetComponent<AnimancerComponent>();
+        interactables = new List<Interactable>();
         state.move = (MixerState)animancer.States.GetOrCreate(moveAnim);
         state.attack = animancer.States.GetOrCreate(rollAnim);
         animancer.Play(state.move);
@@ -1316,6 +1319,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     #region INPUT
     public void OnDodge(InputValue value)
     {
+        if (!CanPlayerInput()) return;
         if (animancer.States.Current == state.climb)
         {
             ledgeSnap = false;
@@ -1336,6 +1340,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void OnJump(InputValue value)
     {
+        if (!CanPlayerInput()) return;
         if (animancer.States.Current == state.climb)
         {
             ledgeSnap = false;
@@ -1366,6 +1371,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     void AimStart()
     {
+        if (!CanPlayerInput()) return;
         aiming = true;
         aimTimer = aimCancelTime;
     }
@@ -1377,6 +1383,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public bool IsAttackHeld()
     {
+        if (!CanPlayerInput()) return false;
         bool s = this.GetComponent<PlayerInput>().actions["Atk_Slash"].IsPressed();
         bool t = this.GetComponent<PlayerInput>().actions["Atk_Thrust"].IsPressed();
         return s || t;
@@ -1384,6 +1391,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     void BlockStart()
     {
+        if (!CanPlayerInput()) return;
         blocking = true;
 
     }
@@ -1394,6 +1402,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     void SprintStart()
     {
+        if (!CanPlayerInput()) return;
         sprinting = true;
         dashed = false;
     }
@@ -1421,12 +1430,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void OnAtk_Slash()
     {
+        if (!CanPlayerInput()) return;
         attack = true;
         slash = true;
     }
 
     public void OnAtk_Thrust(InputValue value)
     {
+        if (!CanPlayerInput()) return;
         attack = true;
         thrust = true;
     }
@@ -1446,6 +1457,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void OnSheathe(InputValue value)
     {
+        if (!CanPlayerInput()) return;
         if (inventory.IsMainEquipped() && !animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].IsAnyStatePlaying())
         {
             if (!inventory.IsMainDrawn())
@@ -1460,6 +1472,58 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         
     }
 
+    #region MENUS
+
+    public void OnMenu(InputValue value)
+    {
+        ToggleMenu();
+    }
+    // checks to see if player input is accepted. used for inventory menu
+    public bool CanPlayerInput()
+    {
+        return !isMenuOpen;
+    }
+    public void ToggleMenu()
+    {
+        if (!isMenuOpen)
+        {
+            MenuController.menu.ShowMenu();
+            isMenuOpen = true;
+        }
+        else
+        {
+            MenuController.menu.HideMenu();
+            isMenuOpen = false;
+        }
+    }
+
+    public void OnQuickSlot0()
+    {
+        if (CanPlayerInput() || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
+        {
+            inventory.InputOnSlot(0);
+            InventoryUI2.invUI.FlareSlot(0);
+        }
+    }
+
+    public void OnQuickSlot1()
+    {
+        if (CanPlayerInput() || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
+        {
+            inventory.InputOnSlot(1);
+            InventoryUI2.invUI.FlareSlot(1);
+        }
+    }
+
+    public void OnQuickSlot2()
+    {
+        if (CanPlayerInput() || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
+        {
+            inventory.InputOnSlot(2);
+            InventoryUI2.invUI.FlareSlot(2);
+        }
+    }
+    #endregion
     #endregion
 
     #region SWIMMING
@@ -2300,6 +2364,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     }
     #endregion
+
+
     public bool GetGrounded()
     {
         // return cc.isGrounded;

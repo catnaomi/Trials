@@ -22,10 +22,11 @@ public class QuickSelectItem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        UpdateSlots();
+        
         PlayerActor.player.GetComponent<Inventory>().OnChange.AddListener(UpdateSlots);
 
         shadow = this.GetComponentInChildren<Shadow>();
+        UpdateSlots();
     }
 
     public void UpdateSlots()

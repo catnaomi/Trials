@@ -69,7 +69,6 @@ public class OffHandShield : EquippableWeapon, HitboxHandler
     {
         base.UnequipWeapon(actor);
 
-        HumanoidActor humanoidActor = (HumanoidActor)actor;
         //humanoidActor.blockType = ActionsLibrary.GetDefaultBlockType();
 
         //humanoidActor.attributes.RemoveEffect(effect);

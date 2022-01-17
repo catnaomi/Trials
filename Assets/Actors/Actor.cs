@@ -24,7 +24,7 @@ public class Actor : MonoBehaviour
     public UnityEvent OnDie;
     public UnityEvent OnAttack;
     public UnityEvent OnCritVulnerable;
-    public UnityEvent OnDodge;
+    public UnityEvent OnDodgeSuccess;
     public UnityEvent OnBlock;
     [HideInInspector]public UnityEvent OnHealthLoss;
     [HideInInspector]public UnityEvent OnHealthGain;
