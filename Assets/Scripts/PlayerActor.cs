@@ -119,6 +119,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float aimCancelTime = 2f;
     public float aimTime;
     public float aimStartTime = 0.25f;
+    [Range(-1f,1f)]
+    public float thrustIKValue;
+    public float thrustIKWeight;
+    public float thrustIKAdjustSpeed;
+    public float thrustInitialHeight;
+    public float thrustIKHeightRange;
     [ReadOnly, SerializeField] private DamageKnockback currentDamage;
     [Header("Animancer")]
     AnimancerComponent animancer;
@@ -862,7 +868,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 state.swim = animancer.Play(swimAnim);
                 this.gameObject.SendMessage("SplashBig");
             }
-            animancer.Layers[0].ApplyAnimatorIK = false;
+            animancer.Layers[0].ApplyAnimatorIK = true;
         }
         else if (animancer.States.Current == state.aim)
         {
@@ -2255,7 +2261,41 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     private void OnAnimatorIK(int layerIndex)
     {
-        if (IsAiming() && inventory.IsRangedDrawn())
+        Vector3 initialThrustPos = this.transform.position + this.transform.up * thrustInitialHeight;
+
+        float y = 0f;
+        float h = 0f;
+        if (GetCombatTarget() != null)
+        {
+            
+            y = (GetCombatTarget().transform.position - initialThrustPos).y;
+            Vector3 diff = (GetCombatTarget().transform.position - initialThrustPos);
+            diff.y = 0;
+            float xz = diff.magnitude;
+
+            h = (2 * y) / xz;
+            h = Mathf.Clamp(h, -thrustIKHeightRange, thrustIKHeightRange);
+        }
+        //Vector3 ikThrustVector = initialThrustPos + this.transform.forward * 2f + (thrustIKValue * this.transform.up * thrustIKHeightRange);
+        Vector3 ikThrustVector = initialThrustPos + this.transform.forward * 2f + (h * this.transform.up);
+        Debug.DrawLine(initialThrustPos, ikThrustVector, Color.red);
+        if (IsAttacking())
+        {
+            
+            if (currentDamage != null && currentDamage.isThrust && animancer.States.Current == state.attack)
+            {
+
+                animancer.Animator.SetIKPosition(AvatarIKGoal.RightHand, ikThrustVector);
+                animancer.Animator.SetIKPositionWeight(AvatarIKGoal.RightHand, thrustIKWeight);
+            }
+            else
+            {
+                animancer.Animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0f);
+            }
+            float weightTarget = (isHitboxActive) ? 1f : 0f;
+            thrustIKWeight = Mathf.MoveTowards(thrustIKWeight, weightTarget, thrustIKAdjustSpeed * Time.deltaTime);
+        }
+        else if (IsAiming() && inventory.IsRangedDrawn())
         {
             inventory.GetRangedWeapon().moveset.aimAttack.OnIK(animancer.Animator);
         }

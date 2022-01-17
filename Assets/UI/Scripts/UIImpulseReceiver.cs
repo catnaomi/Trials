@@ -37,7 +37,7 @@ public class UIImpulseReceiver : MonoBehaviour
         if (moving)
         {
             this.transform.localPosition += controller.delta * multiplier;
-            this.transform.localPosition = Vector3.MoveTowards(this.transform.localPosition, initialPosition, moveSpeed * Time.deltaTime);
+            
             if (onlyOnActorHurt)
             {
                 if (clock < 0f)
@@ -50,6 +50,7 @@ public class UIImpulseReceiver : MonoBehaviour
                 }
             }
         }
+        this.transform.localPosition = Vector3.MoveTowards(this.transform.localPosition, initialPosition, moveSpeed * Time.deltaTime);
     }
 
     public void StartMoving()
