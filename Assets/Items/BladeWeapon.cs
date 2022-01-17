@@ -104,6 +104,8 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         {
             DamageKnockback dk = this.GetDamageFromAttack(holder);
             dk.OnHit.RemoveAllListeners();
+            dk.OnCrit.RemoveAllListeners();
+            dk.OnBlock.RemoveAllListeners();
             dk.OnHit.AddListener(() =>
             {
                 //slashFX.SetContactPoint(GetHand().transform.position + GetHand().transform.forward * GetLength());
@@ -117,6 +119,17 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
                     thrustFX.Bleed();
                 }
 
+            });
+            dk.OnBlock.AddListener(() =>
+            {
+                if (dk.isSlash)
+                {
+                    holder.StartCoroutine(BlockSlash());
+                }
+                else if (dk.isThrust)
+                {
+                    holder.StartCoroutine(BlockThrust());
+                }
             });
             dk.OnCrit.AddListener(() =>
             {
@@ -175,6 +188,20 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
         yield return new WaitForEndOfFrame();
         slashFX.SetContactPoint(holder.lastContactPoint);
         slashFX.Bleed();
+    }
+
+    IEnumerator BlockSlash()
+    {
+        yield return new WaitForEndOfFrame();
+        slashFX.SetContactPoint(holder.lastContactPoint);
+        slashFX.Block(holder.lastBlockPoint);
+    }
+
+    IEnumerator BlockThrust()
+    {
+        yield return new WaitForEndOfFrame();
+        thrustFX.SetContactPoint(holder.lastContactPoint);
+        thrustFX.Block(holder.lastBlockPoint);
     }
 
     public float GetStamCost()
@@ -300,11 +327,6 @@ public class BladeWeapon : EquippableWeapon, HitboxHandler
     public virtual float GetBasePoiseDamage()
     {
         return 25f + 5f * GetWeight();
-    }
-
-    public override DamageResistance[] GetBlockResistance()
-    {
-        return null;
     }
 
     public virtual List<DamageType> GetElements()

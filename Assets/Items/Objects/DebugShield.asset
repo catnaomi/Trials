@@ -40,6 +40,13 @@ MonoBehaviour:
   moveset: {fileID: 11400000, guid: c1c2358107bd704408d4f58944d2817a, type: 2}
   AttackSpeed: 1
   weight: 0
+  blockResistances:
+  - type: 4
+    ratio: 1
+    flat: 30
+  - type: 0
+    ratio: 0
+    flat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -51,25 +58,43 @@ MonoBehaviour:
   blockPoiseDamage: 100
   bashCost: 20
   bashDamage:
-    staminaDamage: 20
-    kbForce: {x: 0, y: 0, z: 10}
-    kbRadial: 0
     healthDamage: 0
+    staminaDamage: 20
     types: 
-    heartsDamage: 0
-    criticalMultiplier: 0
-    forceCritical: 0
-    hitboxSource: {fileID: 0}
-    source: {fileID: 0}
-    originPoint: {x: 0, y: 0, z: 0}
+    critData:
+      criticalMultiplier: 0
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0
     breaksArmor: 1
     unblockable: 0
     disarm: 0
+    isThrust: 0
+    isSlash: 0
+    bouncesOffBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    stunTime: 0
     staggers:
       onHit: 0
       onArmorHit: 0
       onCritical: 0
-      onInjure: 0
       onKill: 0
-      onHelpless: 0
+      onInjure: 0
+    kbForce: {x: 0, y: 0, z: 10}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
     hitClip: {fileID: 8300000, guid: 8cf0a475e2a2ccc48bf5bb14d8c24c2e, type: 3}

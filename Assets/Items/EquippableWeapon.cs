@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.Events;
+using CustomUtilities;
 
 public class EquippableWeapon : Item, IGeneratesModel
 {   
@@ -26,7 +27,7 @@ public class EquippableWeapon : Item, IGeneratesModel
     [Header("Stats")]
     public float AttackSpeed;
     public float weight;
-    public float BlockReduction = 0f;
+    public DamageResistance[] blockResistances;
 
     public UnityEvent OnEquip = new UnityEvent();
     public UnityEvent OnUnequip = new UnityEvent();
@@ -88,7 +89,7 @@ public class EquippableWeapon : Item, IGeneratesModel
 
     public virtual DamageResistance[] GetBlockResistance()
     {
-        return null;
+        return blockResistances;
     }
 
     public virtual float GetBlockPoiseDamage()
@@ -99,6 +100,19 @@ public class EquippableWeapon : Item, IGeneratesModel
     public virtual float GetWeight()
     {
         return weight;
+    }
+
+    public virtual Bounds GetBlockBounds()
+    {
+        if (model != null)
+        {
+            Transform blockTransform = InterfaceUtilities.FindRecursively(model.transform, "_blockCollider");
+            if (blockTransform != null && blockTransform.TryGetComponent<Collider>(out Collider collider))
+            {
+                return collider.bounds;
+            }
+        }
+        return new Bounds();
     }
 
     public virtual bool IsEquippable()

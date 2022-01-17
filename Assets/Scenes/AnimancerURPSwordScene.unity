@@ -10579,7 +10579,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.778058, y: 1}
+    m_SensorSize: {x: 1.7776366, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -12443,10 +12443,23 @@ MonoBehaviour:
   OnDodge:
     m_PersistentCalls:
       m_Calls: []
+  OnBlock:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthLoss:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthGain:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChange:
+    m_PersistentCalls:
+      m_Calls: []
   lastDamageTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
+  lastBlockPoint: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   instatemove: 0
@@ -12847,7 +12860,7 @@ MonoBehaviour:
   equipOnStart: 1
   initialized: 0
   Slot0Weapon: {fileID: 11400000, guid: 83393d613dc23204bb4b827e671d3b6b, type: 2}
-  Slot1Weapon: {fileID: 11400000, guid: 35a85d4c060656d4784f67a3782b0e87, type: 2}
+  Slot1Weapon: {fileID: 0}
   Slot2Weapon: {fileID: 11400000, guid: d8b347b3b6ca1a240a5daa6e8658205c, type: 2}
   Slot3Weapon: {fileID: 0}
   weaponChanged: 0
@@ -12921,8 +12934,16 @@ MonoBehaviour:
     max: 0
   usesHearts: 1
   spareable: 0
+  OnHealthLoss:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthGain:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChange:
+    m_PersistentCalls:
+      m_Calls: []
   resistances: []
-  BlockReduction: 1
   effects: []
 --- !u!114 &169090237
 MonoBehaviour:
@@ -15141,10 +15162,23 @@ MonoBehaviour:
   OnDodge:
     m_PersistentCalls:
       m_Calls: []
+  OnBlock:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthLoss:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthGain:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChange:
+    m_PersistentCalls:
+      m_Calls: []
   lastDamageTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
+  lastBlockPoint: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   instatemove: 0
@@ -15546,8 +15580,16 @@ MonoBehaviour:
     max: 0
   usesHearts: 0
   spareable: 0
+  OnHealthLoss:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthGain:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChange:
+    m_PersistentCalls:
+      m_Calls: []
   resistances: []
-  BlockReduction: 1
   effects: []
 --- !u!114 &233718269
 MonoBehaviour:
@@ -16017,7 +16059,7 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 4402fd921b1304f419b97a2d7a7647bd,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -16.55
+      value: -18.406
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 4402fd921b1304f419b97a2d7a7647bd,
         type: 3}
@@ -16032,7 +16074,7 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 4402fd921b1304f419b97a2d7a7647bd,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.045581643
+      value: -0.33606273
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 4402fd921b1304f419b97a2d7a7647bd,
         type: 3}
@@ -16042,7 +16084,7 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 4402fd921b1304f419b97a2d7a7647bd,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.9989606
+      value: 0.94183964
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 4402fd921b1304f419b97a2d7a7647bd,
         type: 3}
@@ -16057,7 +16099,7 @@ PrefabInstance:
     - target: {fileID: -4216859302048453862, guid: 4402fd921b1304f419b97a2d7a7647bd,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 185.225
+      value: 219.274
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 4402fd921b1304f419b97a2d7a7647bd,
         type: 3}
@@ -16533,10 +16575,23 @@ MonoBehaviour:
   OnDodge:
     m_PersistentCalls:
       m_Calls: []
+  OnBlock:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthLoss:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthGain:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChange:
+    m_PersistentCalls:
+      m_Calls: []
   lastDamageTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
+  lastBlockPoint: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   isBlocking: 0
@@ -16588,8 +16643,16 @@ MonoBehaviour:
     max: 0
   usesHearts: 0
   spareable: 0
+  OnHealthLoss:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthGain:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChange:
+    m_PersistentCalls:
+      m_Calls: []
   resistances: []
-  BlockReduction: 1
   effects: []
 --- !u!136 &344795949
 CapsuleCollider:
@@ -16785,7 +16848,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.778058, y: 1}
+    m_SensorSize: {x: 1.7776366, y: 1}
   m_Transitions:
     m_BlendHint: 2
     m_InheritPosition: 1
@@ -17845,10 +17908,23 @@ MonoBehaviour:
   OnDodge:
     m_PersistentCalls:
       m_Calls: []
+  OnBlock:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthLoss:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthGain:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChange:
+    m_PersistentCalls:
+      m_Calls: []
   lastDamageTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
+  lastBlockPoint: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 1792680361}
   FollowTarget: {fileID: 0}
   nav: {fileID: 0}
@@ -17890,8 +17966,16 @@ MonoBehaviour:
     max: 0
   usesHearts: 0
   spareable: 0
+  OnHealthLoss:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthGain:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChange:
+    m_PersistentCalls:
+      m_Calls: []
   resistances: []
-  BlockReduction: 1
   effects: []
 --- !u!114 &446297715
 MonoBehaviour:
@@ -23807,10 +23891,23 @@ MonoBehaviour:
   OnDodge:
     m_PersistentCalls:
       m_Calls: []
+  OnBlock:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthLoss:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthGain:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChange:
+    m_PersistentCalls:
+      m_Calls: []
   lastDamageTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
+  lastBlockPoint: {x: 0, y: 0, z: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   nav: {fileID: 0}
@@ -23979,8 +24076,16 @@ MonoBehaviour:
     max: 0
   usesHearts: 0
   spareable: 0
+  OnHealthLoss:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthGain:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHealthChange:
+    m_PersistentCalls:
+      m_Calls: []
   resistances: []
-  BlockReduction: 1
   effects: []
 --- !u!143 &546529698
 CharacterController:
@@ -28684,7 +28789,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.778058, y: 1}
+    m_SensorSize: {x: 1.7776366, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -28757,7 +28862,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.778058, y: 1}
+    m_SensorSize: {x: 1.7776366, y: 1}
   m_Transitions:
     m_BlendHint: 1
     m_InheritPosition: 1
@@ -28773,8 +28878,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1132656376}
-  m_LocalRotation: {x: 0.699299, y: -0.04831962, z: 0.047483545, w: 0.71161187}
-  m_LocalPosition: {x: -8.116408, y: 27.371477, z: 5.0830774}
+  m_LocalRotation: {x: 0.69886404, y: -0.054447934, z: 0.05350584, w: 0.7111692}
+  m_LocalPosition: {x: -8.113433, y: 27.371475, z: 5.0835104}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -29298,7 +29403,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.778058, y: 1}
+    m_SensorSize: {x: 1.7776366, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
@@ -45478,7 +45583,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.778058, y: 1}
+    m_SensorSize: {x: 1.7776366, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -45494,7 +45599,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1883763762}
-  m_LocalRotation: {x: 0.21918678, y: -0.120069124, z: 0.022630828, w: 0.9680023}
+  m_LocalRotation: {x: 0.21918678, y: -0.12006915, z: 0.022630833, w: 0.9680023}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

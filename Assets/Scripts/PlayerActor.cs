@@ -429,9 +429,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 state.swim = animancer.Play(swimStart, 0.25f);
                 this.gameObject.SendMessage("SplashBig");
             }
-            if (blocking && inventory.IsMainDrawn())
+            EquippableWeapon blockWeapon = inventory.GetBlockWeapon();
+            if (blocking && blockWeapon != null)
             {
                 //((MixerState)state.block).ChildStates[0].Clip = blockAnimStart.Clip;
+
+                int itemSlot = inventory.GetItemSlot(blockWeapon);
+                if ((itemSlot == Inventory.MainType && !inventory.IsMainDrawn()) || (itemSlot == Inventory.OffType && !inventory.IsOffDrawn()))
+                {
+                    inventory.SetDrawn(inventory.GetItemSlot(blockWeapon), true);
+                }
                 animancer.Play(state.block, 0.25f);
                 /*
                 animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].Play(blockAnimStart, 0f);
@@ -1534,14 +1541,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
 
         MixerTransition2DAsset blockingMoveAnim = moveAnim;
-        if (inventory.IsOffDrawn() && inventory.GetOffWeapon().moveset.overridesBlock)
+        if (inventory.IsOffEquipped() && inventory.GetOffWeapon().moveset.overridesBlock)
         {
             blockingMoveAnim = inventory.GetOffWeapon().moveset.blockMove;
             blockAnim = inventory.GetOffWeapon().moveset.blockAnim;
             blockAnimStart = inventory.GetOffWeapon().moveset.blockAnimStart;
             blockStagger = inventory.GetOffWeapon().moveset.blockStagger;
         }
-        else if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.overridesBlock)
+        else if (inventory.IsMainEquipped() && inventory.GetMainWeapon().moveset.overridesBlock)
         {
             blockingMoveAnim = inventory.GetMainWeapon().moveset.blockMove;
             blockAnim = inventory.GetMainWeapon().moveset.blockAnim;
@@ -2058,6 +2065,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return currentDamage;
     }
 
+    public override List<DamageResistance> GetBlockResistance()
+    {
+        List<DamageResistance> dr = new List<DamageResistance>();
+        dr.AddRange(inventory.GetBlockResistance());
+        return dr;
+    }
 
     public override void ProcessDamageKnockback(DamageKnockback damageKnockback)
     {
@@ -2173,6 +2186,28 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             smoothedHeadPoint = Vector3.MoveTowards(smoothedHeadPoint, point, headPointSpeed * Time.deltaTime);
             animancer.Animator.SetLookAtPosition(smoothedHeadPoint);
             animancer.Animator.SetLookAtWeight(1f, 0.1f, 1f, 0f, 0.7f);
+        }
+        
+    }
+
+    public override void SetLastBlockpoint(Vector3 point)
+    {
+        EquippableWeapon weapon = inventory.GetBlockWeapon();
+        if (weapon == null || weapon.GetModel() == null)
+        {
+            base.SetLastBlockpoint(point);
+        }
+        else
+        {
+            Bounds bounds = weapon.GetBlockBounds();
+            if (bounds.extents.magnitude <= 0)
+            {
+                base.SetLastBlockpoint(point);
+            }
+            else
+            {
+                lastBlockPoint = bounds.ClosestPoint(point);
+            }
         }
         
     }

@@ -20,7 +20,7 @@ public class EffectBlockReduction : Effect
         {
             return false;
         }
-        attributes.BlockReduction *= percent;
+        //attributes.BlockReduction *= percent;
         return true;
     }
 
@@ -30,7 +30,7 @@ public class EffectBlockReduction : Effect
         {
             return false;
         }
-        attributes.BlockReduction /= percent;
+        //attributes.BlockReduction /= percent;
         return true;
     }
 

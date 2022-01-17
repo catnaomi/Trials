@@ -1,5 +1,6 @@
 ﻿using Animancer;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -71,13 +72,49 @@ public class HumanoidDamageHandler : IDamageable
         lastHitbox = damage.hitboxSource.GetComponent<Hitbox>();
 
         bool hitFromBehind = !(Vector3.Dot(-actor.transform.forward, (damage.source.transform.position - actor.transform.position).normalized) <= 0f);
-        Debug.Log(actor.name + "from behind?" + hitFromBehind);
+
+        List <DamageResistance> dr = new List<DamageResistance>();
+
+        if (actor.GetResistances() != null)
+        {
+            dr.AddRange(actor.GetResistances());
+        }
+        bool blockSuccess = (actor.IsBlocking() && !hitFromBehind && !damage.unblockable);
+        if (blockSuccess && actor.GetBlockResistance() != null)
+        {
+            dr.AddRange(actor.GetBlockResistance());
+        }
+        bool isCrit = IsCritVulnerable();
+        float damageAmount = damage.healthDamage * (isCrit ? damage.critData.criticalMultiplier : 1f);
+        Debug.Log("damage before resistances = " + damageAmount);
+        damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.GetTypes(), dr);
+        Debug.Log("damage after resistances = " + damageAmount);
+
+        bool isArmored = actor.IsArmored() && !damage.breaksArmor;
+        bool willInjure = actor.attributes.spareable && actor.attributes.HasHealthRemaining() && damageAmount >= actor.attributes.health.current;
+        bool willKill = (!willInjure) && damageAmount >= actor.attributes.health.current;
+
+        actor.attributes.ReduceHealth(damageAmount);
+
+        if (damage.hitboxSource != null)
+        {
+            Vector3 contactPosition = actor.GetComponent<Collider>().ClosestPoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
+
+            if (damage.source.TryGetComponent<Actor>(out Actor sourceActor))
+            {
+                sourceActor.lastContactPoint = contactPosition;
+                sourceActor.SetLastBlockpoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
+            }
+        }
+
         if (actor.IsDodging())
         {
             actor.OnDodge.Invoke();
         }
-        else if (actor.IsBlocking() && !hitFromBehind && !damage.unblockable)
+        else if (blockSuccess && !willKill && !willInjure)
         {
+            
+
             if (!damage.breaksBlock)
             {
                 if (animancer.States.Current != block)
@@ -111,20 +148,18 @@ public class HumanoidDamageHandler : IDamageable
             }
             actor.transform.rotation = Quaternion.LookRotation(-(actor.transform.position - damage.source.transform.position), Vector3.up);
             damage.OnBlock.Invoke();
+            actor.OnBlock.Invoke();
         }
         else
         {
-            bool isCrit = IsCritVulnerable();
-            float damageAmount = damage.healthDamage * (isCrit ? damage.critData.criticalMultiplier : 1f);
+            
             DamageKnockback.StaggerType stagger;
             
             // = (!isCrit) ? damage.staggers.onHit : damage.staggers.onCritical;
             float maxTime = 0f;
             //bool isFlinch = (stagger == DamageKnockback.StaggerType.Flinch || actor.IsArmored());
 
-            bool isArmored = actor.IsArmored() && !damage.breaksArmor;
-            bool willInjure = actor.attributes.spareable && actor.attributes.HasHealthRemaining() && damageAmount >= actor.attributes.health.current;
-            bool willKill = (!willInjure) && damageAmount >= actor.attributes.health.current;
+            
 
             if (willKill)
             {
@@ -206,15 +241,7 @@ public class HumanoidDamageHandler : IDamageable
                 maxTime = clip.MaximumDuration / clip.Speed;
             }
 
-            if (damage.hitboxSource != null)
-            {
-                Vector3 contactPosition = actor.GetComponent<Collider>().ClosestPointOnBounds(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
-
-                if (damage.source.TryGetComponent<Actor>(out Actor sourceActor))
-                {
-                    sourceActor.lastContactPoint = contactPosition;
-                }
-            }
+            
 
             if (isCrit)
             {
@@ -229,7 +256,7 @@ public class HumanoidDamageHandler : IDamageable
                 damage.OnCrit.Invoke();
             }
 
-            actor.attributes.ReduceHealth(damageAmount);
+            
 
            
             if (!isFlinch)
@@ -240,6 +267,7 @@ public class HumanoidDamageHandler : IDamageable
             damage.OnHit.Invoke();
             actor.OnHurt.Invoke();
         }
+        
     }
     public void AdjustDefendingPosition(GameObject attacker)
     {

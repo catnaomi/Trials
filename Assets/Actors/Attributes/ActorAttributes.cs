@@ -3,6 +3,7 @@ using System.Collections;
 using CustomUtilities;
 using System;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 public class ActorAttributes : MonoBehaviour
 {
@@ -24,12 +25,12 @@ public class ActorAttributes : MonoBehaviour
     public AttributeValue healthRecoveryRate;
     public bool usesHearts = false;
     public bool spareable = false;
-    
+
+    public UnityEvent OnHealthLoss;
+    public UnityEvent OnHealthGain;
+    public UnityEvent OnHealthChange;
     [Header("Resistances & Weaknesses")]
     public List<DamageResistance> resistances;
-
-    [Header("Statistics")]
-    public float BlockReduction = 1f;
 
     public List<Effect> effects;
 
@@ -124,13 +125,32 @@ public class ActorAttributes : MonoBehaviour
 
     public void ReduceHealth(float damage)
     {
-        ReduceAttribute(health, damage);
-        if (usesHearts)
+        if (damage > 0)
         {
-            health.current = Mathf.Ceil(health.current / 10f) * 10f;
+            ReduceAttribute(health, damage);
+            if (usesHearts)
+            {
+                health.current = Mathf.Ceil(health.current / 10f) * 10f;
+            }
+            OnHealthChange.Invoke();
+            OnHealthLoss.Invoke();
         }
+        
     }
 
+    public void RecoverHealth(float recovery)
+    {
+        if (recovery > 0)
+        {
+            RecoverAttributeToMax(health, recovery, health.max);
+            if (usesHearts)
+            {
+                health.current = Mathf.Ceil(health.current / 10f) * 10f;
+            }
+            OnHealthGain.Invoke();
+            OnHealthChange.Invoke();
+        }
+    }
     public bool HasHealthRemaining()
     {
         return health.current > 0;

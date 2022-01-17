@@ -169,19 +169,38 @@ public class DamageKnockback
     {
 
         float total = damage;
-
+        float ratio = 1f;
+        float flat = 0f;
         if (typeArray == null || typeArray.Length <= 0) return total;
         List<DamageType> types = new List<DamageType>();
         types.AddRange(typeArray);
         foreach (DamageResistance resist in resists)
         {
-            if (types.Contains(resist.type)) {
-                total *= resist.ratio;
+            //if (types.Contains(resist.type)) {
+            if (DamageResistContains(resist.type, types))
+            {
+                ratio *= resist.ratio;
+                flat += resist.flat;
             }
         }
-
+        total *= ratio;
+        total -= flat;
         return total;
     }
+
+    public static bool DamageResistContains(DamageType defendedType, List<DamageType> attackTypes)
+    {
+        switch (defendedType)
+        {
+            case DamageType.All:
+                return true;
+            case DamageType.Earth:
+                return attackTypes.Contains(defendedType) || attackTypes.Contains(DamageType.Slashing) || attackTypes.Contains(DamageType.Piercing) || attackTypes.Contains(DamageType.Blunt);
+            default:
+                return attackTypes.Contains(defendedType);
+        }
+    }
+
 
     public void AddTypes(DamageType[] newtypes)
     {
@@ -189,7 +208,7 @@ public class DamageKnockback
         dtypes.AddRange(this.types);
         foreach (DamageType type in newtypes)
         {
-            if (dtypes.Contains(type))
+            if (!dtypes.Contains(type))
             {
                 dtypes.Add(type);
             }
@@ -220,6 +239,8 @@ public class DamageKnockback
         }
         return dtypes.ToArray();
     }
+
+
 }
 
 [Serializable]
@@ -227,4 +248,5 @@ public struct DamageResistance
 {
     public DamageType type;
     public float ratio; // percentage value reduciton
+    public float flat; // flat value reduction
 }

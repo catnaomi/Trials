@@ -7,12 +7,13 @@ public enum DamageType
     Slashing,
     Piercing,
     Blunt,
-    Earth,
+    Earth, // also contributes to slash/pierce/blunt damage reduction
     Light,
     Dark,
     Fire,
     Water,
     Air,
 
-    Standard_SlashPierce // converts to slashing or piercing on evaluation
+    Standard_SlashPierce, // converts to slashing or piercing on evaluation
+    All, // used for global dr
 }

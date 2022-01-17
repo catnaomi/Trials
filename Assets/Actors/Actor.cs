@@ -25,12 +25,18 @@ public class Actor : MonoBehaviour
     public UnityEvent OnAttack;
     public UnityEvent OnCritVulnerable;
     public UnityEvent OnDodge;
+    public UnityEvent OnBlock;
+    [HideInInspector]public UnityEvent OnHealthLoss;
+    [HideInInspector]public UnityEvent OnHealthGain;
+    [HideInInspector]public UnityEvent OnHealthChange;
+
     public float lastDamageTaken;
     private  int mercyId; //hitbox
 
     public Vector3 moveDirection;
     public Vector3 moveAdditional;
     public Vector3 lastContactPoint;
+    public Vector3 lastBlockPoint;
     // targets
 
     public GameObject CombatTarget;
@@ -41,6 +47,9 @@ public class Actor : MonoBehaviour
         animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
         attributes = GetComponent<ActorAttributes>();
+        OnHealthLoss = attributes.OnHealthLoss;
+        OnHealthGain = attributes.OnHealthGain;
+        OnHealthChange = attributes.OnHealthChange;
         ActorAwake();
     }
 
@@ -117,6 +126,11 @@ public class Actor : MonoBehaviour
     {
         return false;
     }
+
+    public virtual void SetLastBlockpoint(Vector3 point)
+    {
+        lastBlockPoint = point;
+    }
     public GameObject GetCombatTarget()
     {
         return CombatTarget;
@@ -188,6 +202,15 @@ public class Actor : MonoBehaviour
         return false;
     }
 
+    public virtual List<DamageResistance> GetResistances()
+    {
+        return attributes.resistances;
+    }
+
+    public virtual List<DamageResistance> GetBlockResistance()
+    {
+        return null;
+    }
     public virtual Vector3 GetLaunchVector(Vector3 origin)
     {
         return this.transform.forward;

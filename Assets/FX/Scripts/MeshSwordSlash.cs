@@ -56,6 +56,7 @@ public class MeshSwordSlash : MonoBehaviour
     public float critVolume = 1f;
     public float impulseMag = 0.2f;
     public float impulseCritMag = 0.4f;
+    public float impulseBlockMult = 0.5f;
     [Header("Colors")]
     public Material linemat_block;
     public Material linemat_blood;
@@ -363,12 +364,21 @@ public class MeshSwordSlash : MonoBehaviour
         bloodlineRenderer.gameObject.SetActive(false);
         bleeding = false;
     }
-
+    
     public void Shake(float force)
     {
         impulse.GenerateImpulseWithVelocity(contactDir.normalized * force);
     }
 
+    public void Block(Vector3 point)
+    {
+        bool isCrit = IsNextCrit();
+        AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
+        FXController.CreateFX(FXController.FX.FX_Sparks, point, Quaternion.LookRotation(-contactDir), 1f, clip);
+
+        float force = (isCrit) ? impulseCritMag : impulseMag;
+        Shake(force * impulseBlockMult);
+    }
     public void SetContactPoint(Vector3 position)
     {
         contactPoint = position;

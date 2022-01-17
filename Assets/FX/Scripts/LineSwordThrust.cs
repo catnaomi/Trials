@@ -36,6 +36,7 @@ public class LineSwordThrust : MonoBehaviour
     public float critVolume = 1f;
     public float impulseMag = 0.1f;
     public float impulseCritMag = 0.2f;
+    public float impulseBlockMult = 0.5f;
     public UnityEvent OnBleed;
     // Start is called before the first frame update
     void Start()
@@ -163,6 +164,16 @@ public class LineSwordThrust : MonoBehaviour
         float force = (isCrit) ? impulseCritMag : impulseMag;
         Shake(force);
         OnBleed.Invoke();
+    }
+
+    public void Block(Vector3 point)
+    {
+        bool isCrit = IsNextCrit();
+        AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
+        FXController.CreateFX(FXController.FX.FX_Sparks, point, Quaternion.identity, 1f, clip);
+
+        float force = (isCrit) ? impulseCritMag : impulseMag;
+        Shake(force * impulseBlockMult);
     }
 
     public void Shake(float force)

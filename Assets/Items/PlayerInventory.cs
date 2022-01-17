@@ -22,6 +22,8 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     [ReadOnly] public EquippableWeapon RangedWeapon;
     private bool RangedIsDrawn;
 
+    EquippableWeapon BlockingWeapon;
+
     public bool equipOnStart = true;
     public bool initialized = false;
     [Header("Inspector-set Weapons")]
@@ -862,23 +864,33 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     {
         return RangedWeapon.model;
     }
-    /*
-    public Damage GetBlockResistance(bool main)
+    
+    public EquippableWeapon GetBlockWeapon()
     {
-        if (main && IsMainEquipped())
+        if (IsOffEquipped() && GetOffWeapon().GetMoveset().overridesBlock)
         {
-            return GetMainWeapon().GetBlockResistance();
+            return GetOffWeapon();
         }
-        else if (!main && IsOffEquipped())
+        else if (IsMainEquipped() && GetMainWeapon().GetMoveset().overridesBlock)
         {
-            return GetOffWeapon().GetBlockResistance();
+            return GetMainWeapon();
         }
         else
         {
-            return new Damage();
+            return null;
         }
     }
-    */
+    public DamageResistance[] GetBlockResistance()
+    {
+        if (GetBlockWeapon() != null)
+        {
+            return GetBlockWeapon().blockResistances;
+        }
+        else
+        {
+            return new DamageResistance[0];
+        }
+    }
 
     public float GetBlockPoiseDamage(bool main)
     {
@@ -915,6 +927,26 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
     }
 
+    public int GetItemSlot(EquippableWeapon weapon)
+    {
+        if (weapon == this.MainWeapon)
+        {
+            return Inventory.MainType;
+        }
+        else if (weapon == this.OffWeapon)
+        {
+            return Inventory.OffType;
+        }
+        else if (weapon == this.RangedWeapon)
+        {
+            return Inventory.RangedType;
+        }
+        else
+        {
+            return -1; // not equipped
+        }
+    }
+
     public bool CheckWeaponChanged()
     {
         if (weaponChanged)
@@ -923,16 +955,6 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             return true;
         }
         return false;
-    }
-
-    public List<Item> GetContents()
-    {
-        return contents;
-    }
-
-    public bool Contains(Item item)
-    {
-        return contents.Contains(item);
     }
 
     public bool Add(Item item)
@@ -945,15 +967,4 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     {
         return RemoveItem(item);
     }
-
-    public void Clear()
-    {
-        contents.Clear();
-    }
-
-    public UnityEvent GetChangeEvent()
-    {
-        return OnChange;
-    }
-
 }

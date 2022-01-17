@@ -20,8 +20,9 @@ public class StatDisplayHP : MonoBehaviour
         if (actor == null && PlayerActor.player != null)
         {
             actor = PlayerActor.player;
-            actor.OnHurt.AddListener(UpdateHeartsFromActor);
-            actor.OnHurt.AddListener(Pain);
+            actor.OnHealthChange.AddListener(UpdateHeartsFromActor);
+            actor.OnHealthLoss.AddListener(Pain);
+            
             UpdateHeartsFromActor();
         } else
         {
