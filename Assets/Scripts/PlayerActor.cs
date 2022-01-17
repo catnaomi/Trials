@@ -220,6 +220,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         positionReference = this.GetComponent<HumanoidPositionReference>();
         positionReference.LocateSlotsByName();
         player = this;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
     }
     // Start is called before the first frame update
     void Start()
@@ -1277,10 +1280,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         if (camState != prevCamState)
         {
-            vcam.free.gameObject.SetActive(camState == CameraState.Free);
-            vcam.climb.gameObject.SetActive(camState == CameraState.Climb);
-            vcam.target.gameObject.SetActive(camState == CameraState.Lock);
-            vcam.aim.gameObject.SetActive(camState == CameraState.Aim);
+            if (vcam.free != null) vcam.free.gameObject.SetActive(camState == CameraState.Free);
+            if (vcam.climb != null) vcam.climb.gameObject.SetActive(camState == CameraState.Climb);
+            if (vcam.target != null) vcam.target.gameObject.SetActive(camState == CameraState.Lock);
+            if (vcam.aim != null) vcam.aim.gameObject.SetActive(camState == CameraState.Aim);
         }
         prevCamState = camState;
     }
