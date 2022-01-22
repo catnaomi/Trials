@@ -24,6 +24,12 @@ public class UIImpulseReceiver : MonoBehaviour
         {
             actor = PlayerActor.player;
         }
+        if (actor == null)
+        {
+            Debug.Log("Disabling UI Impuse Receiver: No Actors.");
+            this.enabled = false;
+            return;
+        }
         if (onlyOnActorHurt)
         {
             moving = false;
