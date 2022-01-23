@@ -194,6 +194,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState attack;
         public AnimancerState block;
         public AnimancerState aim;
+        public AnimancerState dialogue;
     }
 
     struct AimState
@@ -213,6 +214,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public CinemachineVirtualCameraBase target;
         public CinemachineVirtualCameraBase aim;
         public CinemachineVirtualCameraBase climb;
+        public CinemachineVirtualCameraBase dialogue;
     }
 
     private void Awake()
@@ -1043,7 +1045,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             animancer.Layers[0].ApplyAnimatorIK = true;
         }
-
+        else if (animancer.States.Current == state.dialogue)
+        {
+            animancer.Layers[0].ApplyAnimatorIK = true;
+        }
         #endregion
 
 
@@ -1268,7 +1273,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else if (GetCombatTarget() != null)
         {
-            camState = CameraState.Lock;
+            camState = (!IsInDialogue()) ? CameraState.Lock : CameraState.Dialogue;
         }
         else if (IsAiming() || aiming)
         {
@@ -1280,10 +1285,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         if (camState != prevCamState)
         {
-            if (vcam.free != null) vcam.free.gameObject.SetActive(camState == CameraState.Free);
-            if (vcam.climb != null) vcam.climb.gameObject.SetActive(camState == CameraState.Climb);
-            if (vcam.target != null) vcam.target.gameObject.SetActive(camState == CameraState.Lock);
-            if (vcam.aim != null) vcam.aim.gameObject.SetActive(camState == CameraState.Aim);
+            if (vcam.free != null) vcam.free.m_Priority = (camState == CameraState.Free) ? 10 : 1;//gameObject.SetActive(camState == CameraState.Free);
+            if (vcam.climb != null) vcam.climb.m_Priority = (camState == CameraState.Climb) ? 10 : 1;//.gameObject.SetActive(camState == CameraState.Climb);
+            if (vcam.target != null) vcam.target.m_Priority = (camState == CameraState.Lock) ? 10 : 1;//.gameObject.SetActive(camState == CameraState.Lock);
+            if (vcam.aim != null) vcam.aim.m_Priority = (camState == CameraState.Aim) ? 10 : 1;//.SetActive(camState == CameraState.Aim);
+            if (vcam.dialogue != null) vcam.dialogue.m_Priority = (camState == CameraState.Dialogue) ? 10 : 1;//.gameObject.SetActive(camState == CameraState.D);
         }
         prevCamState = camState;
     }
@@ -1293,7 +1299,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Free,
         Lock,
         Aim,
-        Climb
+        Climb,
+        Dialogue,
     }
     #endregion
 
@@ -1540,12 +1547,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (!isMenuOpen)
         {
             MenuController.menu.ShowMenu();
-            isMenuOpen = true;
+            //isMenuOpen = true;
         }
         else
         {
             MenuController.menu.HideMenu();
-            isMenuOpen = false;
+            //isMenuOpen = false;
         }
     }
 
@@ -2051,6 +2058,34 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+    public void SheatheAll()
+    {
+        StartCoroutine("SheatheAllRoutine");
+    }
+
+    IEnumerator SheatheAllRoutine()
+    {
+        while (inventory.IsMainDrawn() || inventory.IsOffDrawn() || inventory.IsRangedDrawn())
+        {
+            if (animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].IsAnyStatePlaying())
+            {
+                yield return new WaitWhile(() => { return !animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].IsAnyStatePlaying(); });
+            }
+            if (inventory.IsRangedDrawn())
+            {
+                TriggerSheath(false, inventory.GetRangedWeapon().RangedEquipSlot, Inventory.RangedType);
+            }
+            else if (inventory.IsMainDrawn())
+            {
+                TriggerSheath(false, inventory.GetMainWeapon().MainHandEquipSlot, Inventory.MainType);
+            }
+            else if (inventory.IsOffDrawn())
+            {
+                TriggerSheath(false, inventory.GetOffWeapon().OffHandEquipSlot, Inventory.OffType);
+            }
+            yield return new WaitForEndOfFrame();
+        }
+    }
     #endregion
     /*
     * triggered by animation:
@@ -2388,6 +2423,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         return animancer.States.Current == state.block || animancer.States.Current == damageHandler.block;
     }
+   
+    public bool IsInDialogue()
+    {
+        return animancer.States.Current == state.dialogue;
+    }
+    public bool ShouldShowTargetIcon()
+    {
+        return this.GetCombatTarget() != null && !IsInDialogue();
+    }
     #endregion
 
     #region INTERACTION
@@ -2435,14 +2479,25 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return highlightedInteractable;
     }
 
-    private void Interact()
+    private void OnInteract()
     {
+        if (!CanPlayerInput()) return;
         Interactable interactable = GetHighlightedInteractable();
         if (interactable != null)
         {
             interactable.Interact(this);
         }
 
+    }
+
+    public void StartDialogue()
+    {
+        state.dialogue = animancer.Play(idleAnim);
+    }
+
+    public void StopDialogue()
+    {
+        animancer.Play(state.move);
     }
     #endregion
 

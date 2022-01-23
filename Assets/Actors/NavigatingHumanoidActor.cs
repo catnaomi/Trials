@@ -25,7 +25,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     Vector3 additMove;
     public float angle;
     public Vector3 destination;
-    bool followingTarget;
+    [HideInInspector]public bool followingTarget;
     bool obstacleTransitioning;
     bool ignoreRoot;
     bool shouldFall;
@@ -143,17 +143,26 @@ public class NavigatingHumanoidActor : Actor, INavigates
         {
             ignoreRoot = false;
             nav.isStopped = true;
-            if (shouldNavigate)
+            if (destination != Vector3.zero)
             {
                 lookDirection = (destination - this.transform.position).normalized;
-                lookDirection.Scale(new Vector3(1f, 0f, 1f));
+                lookDirection.y = 0f;
+                angle = Mathf.MoveTowards(angle, Vector3.SignedAngle(this.transform.forward, lookDirection, Vector3.up), nav.angularSpeed * Time.deltaTime);
+            }
+            else
+            {
+                angle = 0f;
+            }
+            if (shouldNavigate)
+            {
+                
                 Debug.DrawLine(this.transform.position + this.transform.up, this.transform.position + this.transform.up + lookDirection);
                 if (!inBufferRange)
                 {
                     animancer.Play(navstate.move, 0.25f);
                 }
             }
-            angle = Mathf.MoveTowards(angle, Vector3.SignedAngle(this.transform.forward, lookDirection, Vector3.up), nav.angularSpeed * Time.deltaTime);
+            
             navstate.idle.Parameter = angle;
             
         }

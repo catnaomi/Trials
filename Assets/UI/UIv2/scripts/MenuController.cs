@@ -9,6 +9,9 @@ public class MenuController : MonoBehaviour
     public GameObject[] categories;
     public int current = 0;
     public bool showing = false;
+
+    public const int Inventory = 0;
+    public const int Dialogue = 1;
     private void OnEnable()
     {
         menu = this;
@@ -26,6 +29,7 @@ public class MenuController : MonoBehaviour
             categories[i].SetActive(i == current);
         }
         showing = true;
+        SetPlayerMenuOpen(true);
     }
 
     public void HideMenu()
@@ -35,6 +39,17 @@ public class MenuController : MonoBehaviour
             categories[i].SetActive(false);
         }
         showing = false;
+        SetPlayerMenuOpen(false);
     }
 
+    public void OpenMenu(int index)
+    {
+        current = index;
+        ShowMenu();
+    }
+    public void SetPlayerMenuOpen(bool open)
+    {
+        if (PlayerActor.player == null) return;
+        PlayerActor.player.isMenuOpen = open;
+    }
 }

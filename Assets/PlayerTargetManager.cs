@@ -158,8 +158,22 @@ public class PlayerTargetManager : MonoBehaviour
             }
         }
 
-
-        if (currentTarget != null && player.GetCombatTarget() != currentTarget)
+        if (player.IsInDialogue())
+        {
+            if (currentTarget != player.GetCombatTarget())
+            {
+                currentTarget = player.GetCombatTarget();
+                if (cmtg.m_Targets.Length > 1)
+                {
+                    cmtg.m_Targets[1].target = currentTarget.transform;
+                }
+                else
+                {
+                    cmtg.AddMember(currentTarget.transform, 1f, 2f);
+                }
+            }
+        }
+        else if (currentTarget != null && player.GetCombatTarget() != currentTarget)
         {
             if (cmtg.m_Targets.Length > 1)
             {

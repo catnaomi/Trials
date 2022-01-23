@@ -140,6 +140,7 @@ public class Actor : MonoBehaviour
     {
         CombatTarget = target;
     }
+
     public GameObject GetFollowTarget()
     {
         return FollowTarget;

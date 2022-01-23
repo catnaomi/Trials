@@ -42,7 +42,7 @@ public class RadialHealthTargetIndicator : MonoBehaviour
             target = targetingActor.GetCombatTarget();
             changed = true;
         }
-        if (target != null)
+        if (target != null && (targetingActor is not PlayerActor player || player.ShouldShowTargetIcon()))
         {
             showing = true;
             

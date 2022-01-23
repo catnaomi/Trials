@@ -33,7 +33,7 @@ public class Interactable : MonoBehaviour
         if (player != null && canInteract)
         {
             player.AddInteractable(this);
-            Debug.Log("Player enter!");
+            //Debug.Log("Player enter!");
         }
     }
 
@@ -44,7 +44,7 @@ public class Interactable : MonoBehaviour
         {
             player.RemoveInteractable(this);
             this.SetIconVisiblity(false);
-            Debug.Log("Player exit!");
+            //Debug.Log("Player exit!");
         }
     }
 
