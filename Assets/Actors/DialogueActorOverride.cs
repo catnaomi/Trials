@@ -8,6 +8,7 @@ public class DialogueActorOverride : Interactable
 {
     public Actor actor;
     public GameObject lookAtTarget;
+    public Transform dialogueMount;
     DialogueRunner dialogue;
     bool talking;
     Vector3 lastDestination;
@@ -31,7 +32,7 @@ public class DialogueActorOverride : Interactable
         
         dialogue = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
         dialogue.onDialogueComplete.AddListener(StopDialogue);
-        dialogue.GetComponent<LineActorPositioningHandler>().SetSpeaker(this.gameObject);
+        dialogue.GetComponent<LineActorPositioningHandler>().SetSpeaker(this.gameObject, dialogueMount);
         talking = true;
         if (actor is NavigatingHumanoidActor navactor)
         {

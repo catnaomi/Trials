@@ -2497,6 +2497,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void StopDialogue()
     {
+        this.SetCombatTarget(null);
         animancer.Play(state.move);
     }
     #endregion
