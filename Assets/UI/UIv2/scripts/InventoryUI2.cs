@@ -15,7 +15,7 @@ public class InventoryUI2 : MonoBehaviour
     public GameObject source;
 
     [HideInInspector]
-    public PlayerInventory inventory;
+    public IInventory inventory;
 
     List<InventoryItemDisplay> items;
 
@@ -56,7 +56,7 @@ public class InventoryUI2 : MonoBehaviour
         items = new List<InventoryItemDisplay>();
         if (source != null)
         {
-            inventory = source.GetComponent<PlayerInventory>();
+            inventory = source.GetComponent<IInventory>();
             
         }
         initialized = false;
@@ -68,7 +68,7 @@ public class InventoryUI2 : MonoBehaviour
         {
             if (source != null && inventory == null)
             {
-                inventory = source.GetComponent<PlayerInventory>();
+                inventory = source.GetComponent<IInventory>();
             }
             if (inventory != null)
             {
@@ -122,7 +122,7 @@ public class InventoryUI2 : MonoBehaviour
             if (usingQuickslots)
             {
                 //displayItem.GetComponent<Button>().onClick.AddListener(displayItem.StartEquip);
-                displayItem.GetComponent<Button>().onClick.AddListener(() => { ItemSelect(displayItem); });
+                displayItem.onClick.AddListener(() => { ItemSelect(displayItem); });
             }
             
             
@@ -143,7 +143,7 @@ public class InventoryUI2 : MonoBehaviour
         });
         for (int j = 1; j < items.Count; j++)
         {
-            Button b = items[j].GetComponent<Button>();
+            Selectable b = items[j];
 
             Navigation nav = new Navigation();
             nav.mode =  Navigation.Mode.Automatic;
@@ -238,6 +238,13 @@ public class InventoryUI2 : MonoBehaviour
         LooseItem li = LooseItem.CreateLooseItem(selectedItem);
         li.gameObject.transform.position = source.transform.position + Vector3.up + source.transform.forward * 2f;
         EventSystem.current.SetSelectedGameObject(items[0].gameObject);
+    }
+
+    public void SelectCancel()
+    {
+        selectPopup.SetActive(false);
+        EventSystem.current.SetSelectedGameObject(FindItemDisplay(selectedItem).gameObject);
+        Debug.Log("inv cancel!!!!");
     }
     public InventoryItemDisplay FindItemDisplay(Item targetItem)
     {

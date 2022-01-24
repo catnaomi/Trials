@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: DebugDagger
   itemDesc: is dagger i guess
   holder: {fileID: 0}
-  MaxStackSize: 1
+  MaxStackSize: 104
   invID: 0
   prefab: {fileID: 1804189005472518104, guid: 23cc13a9c7026f24e8b2c8b600b13dca, type: 3}
   displayImage: {fileID: 21300000, guid: 85b2df164e8f66443998fd826e6fdd7b, type: 3}
@@ -23,12 +23,14 @@ MonoBehaviour:
   isEquipped: 1
   EquippableMain: 1
   EquippableOff: 0
+  EquippableRanged: 0
   OneHanded: 1
   TwoHanded: 1
   ParentLeftAsMain: 0
   ParentRightAsOff: 0
   MainHandEquipSlot: 1
   OffHandEquipSlot: 2
+  RangedEquipSlot: 0
   stance:
     stanceStyle: 3
     rightGrip: 2
@@ -38,6 +40,7 @@ MonoBehaviour:
   moveset: {fileID: 11400000, guid: d586729a6d4be9d4f9eb0498954a9f99, type: 2}
   AttackSpeed: 1.25
   weight: 2
+  blockResistances: []
   OnEquip:
     m_PersistentCalls:
       m_Calls: []

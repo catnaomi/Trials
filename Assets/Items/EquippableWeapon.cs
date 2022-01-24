@@ -27,6 +27,9 @@ public class EquippableWeapon : Item, IGeneratesModel
     [Header("Stats")]
     public float AttackSpeed;
     public float weight;
+    [Header("Ammunition")]
+    public bool usesAmmunition;
+    public Item ammunitionReference;
     public DamageResistance[] blockResistances;
 
     public UnityEvent OnEquip = new UnityEvent();
@@ -125,6 +128,21 @@ public class EquippableWeapon : Item, IGeneratesModel
         return moveset;
     }
 
+    public int GetAmmunitionRemaining()
+    {
+        if (!usesAmmunition)
+        {
+            return -1;
+        }
+        else if (holder == null)
+        {
+            return -1;
+        }
+        else
+        {
+            return holder.GetComponent<Inventory>().GetAmountOf(ammunitionReference);
+        }
+    }
     public bool TwoHandOnly()
     {
         return TwoHanded && !OneHanded;

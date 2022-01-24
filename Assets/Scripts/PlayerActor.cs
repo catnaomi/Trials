@@ -222,8 +222,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         positionReference = this.GetComponent<HumanoidPositionReference>();
         positionReference.LocateSlotsByName();
         player = this;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        //Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.visible = false;
 
     }
     // Start is called before the first frame update

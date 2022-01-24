@@ -109,8 +109,11 @@ public class RangedBow : RangedWeapon, HitboxHandler
 
     public void Draw()
     {
+        if (GetAmmunitionRemaining() > 0)
+        {
+            deadArrow.SetActive(true);
+        }
         
-        deadArrow.SetActive(true);
         //if (!holder.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference)) return;
         //Transform parent = positionReference.MainHand.transform;
         //Vector3 dir = (parent.position - positionReference.OffHand.transform.position).normalized;
@@ -130,6 +133,16 @@ public class RangedBow : RangedWeapon, HitboxHandler
     {
         if (!GetHeldActor().TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference)) return;
         deadArrow.SetActive(false);
+        GetHeldActor().SendMessage("ArrowFire");
+        if (GetAmmunitionRemaining() <= 0)
+        {
+            return;
+        }
+        else
+        {
+            holder.GetComponent<Inventory>().RemoveOne(ammunitionReference);
+        }
+        
         Vector3 launchVector = GetHeldActor().GetLaunchVector(positionReference.MainHand.transform.position) + Vector3.up * 0.0f;
 
         if (holder.GetCombatTarget() != null)
@@ -172,7 +185,7 @@ public class RangedBow : RangedWeapon, HitboxHandler
                 Physics.IgnoreCollision(actorCollider, arrowCollider);
             }
         }
-        GetHeldActor().SendMessage("ArrowFire");
+        
     }
 
     public bool CanOffhandEquip()

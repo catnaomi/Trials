@@ -13,14 +13,17 @@ public class InventoryItemDisplay : Selectable, ISelectHandler
     public Sprite generic;
     public TMP_Text desc_text;
     public TMP_Text name_text;
+    public TMP_Text number;
     public bool scroll = true;
     public Image image;
     public Image selectHighlight;
     public bool showSelectHighlight = false;
+    int count;
     bool updateOnGUI;
     bool highlighted;
-
+    bool clicked;
     public UnityEvent onHover;
+    public UnityEvent onClick;
     // Start is called before the first frame update
     void Start()
     {
@@ -40,9 +43,19 @@ public class InventoryItemDisplay : Selectable, ISelectHandler
             {
                 image.sprite = item.displayImage;
                 image.color = item.displayColor;
+                if (item.MaxStackSize > 1)
+                {
+                    number.gameObject.SetActive(true);
+                    number.text = item.Quantity.ToString();
+                }
+                else
+                {
+                    number.gameObject.SetActive(false);
+                }
             }
             else
             {
+                number.gameObject.SetActive(false);
                 image.color = Color.clear;
             }
             
@@ -55,6 +68,11 @@ public class InventoryItemDisplay : Selectable, ISelectHandler
         {
             //UpdatePreview();
         }
+        if (!clicked && IsPressed())
+        {
+            onClick.Invoke();
+        }
+        clicked = IsPressed();
     }
     public void SetItem(Item item)
     {

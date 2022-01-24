@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,6 +9,7 @@ public class QuickSelectItem : MonoBehaviour
     public Image itemImage;
     public Image frameImage;
     public Item item;
+    public TMP_Text number;
     public int slot; // 0 = up, 1 = left, 2 = right, 3 = down
 
     public Color defaultColor = new Color(1f, 1f, 1f, 0f);
@@ -71,6 +73,15 @@ public class QuickSelectItem : MonoBehaviour
             shadowAlpha -= Time.deltaTime;
             shadow.effectColor = new Color(c.r, c.g, c.b, shadowAlpha);
         }
+        if (item is EquippableWeapon weapon && weapon.usesAmmunition)
+        {
+            number.gameObject.SetActive(true);
+            number.text = weapon.GetAmmunitionRemaining().ToString();
+        }
+        else
+        {
+            number.gameObject.SetActive(false);
+        }
     }
     public void ClearItem()
     {
@@ -85,6 +96,7 @@ public class QuickSelectItem : MonoBehaviour
             itemImage.enabled = true;
             itemImage.sprite = item.displayImage;
             itemImage.color = item.displayColor;
+            number.gameObject.SetActive(false);
         }
         else
         {

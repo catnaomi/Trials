@@ -9,7 +9,8 @@ public class Item : ScriptableObject
     public string itemName;
     public string itemDesc;
     [HideInInspector] public Actor holder;
-    public int MaxStackSize = 1;
+    public int MaxStackSize = 0;
+    public int Quantity = 1;
     public int invID;
     public GameObject prefab;
     public Sprite displayImage;
@@ -68,4 +69,8 @@ public class Item : ScriptableObject
         return ItemType.Misc;
     }
 
+    public bool ItemEqual(Item item)
+    {
+        return item.itemName == this.itemName && item.invID == this.invID;
+    }
 }

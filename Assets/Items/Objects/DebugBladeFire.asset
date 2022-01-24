@@ -16,43 +16,31 @@ MonoBehaviour:
   itemDesc: a weapon of choice for hot developers
   holder: {fileID: 0}
   MaxStackSize: 1
-  invID: 0
+  invID: 102
   prefab: {fileID: 1804189005472518104, guid: f251dc646a8b5dc4ea23a4ea09af7651, type: 3}
   displayImage: {fileID: 21300000, guid: db06b6c4cc451d749a12788835a5bc2a, type: 3}
   displayColor: {r: 1, g: 0, b: 0, a: 1}
   isEquipped: 0
   EquippableMain: 1
   EquippableOff: 1
-  TwoHandOnly: 0
+  EquippableRanged: 0
+  OneHanded: 1
+  TwoHanded: 1
   ParentLeftAsMain: 0
   ParentRightAsOff: 0
   MainHandEquipSlot: 1
   OffHandEquipSlot: 2
+  RangedEquipSlot: 0
   stance:
     stanceStyle: 0
     rightGrip: 0
     leftGrip: 0
     twohandGrip: 0
     blockStyle: 0
-  moveset:
-    slashMain: {fileID: 0}
-    slashOff: {fileID: 0}
-    thrustMain: {fileID: 0}
-    thrustOff: {fileID: 0}
-    slashMainHeavy: {fileID: 0}
-    slashOffHeavy: {fileID: 0}
-    thrustMainHeavy: {fileID: 0}
-    thrustOffHeavy: {fileID: 0}
-    slashDash: {fileID: 0}
-    slashPlunge: {fileID: 0}
-    slashSneak: {fileID: 0}
-    thrustDash: {fileID: 0}
-    thrustPlunge: {fileID: 0}
-    thrustSneak: {fileID: 0}
-    skill1: {fileID: 0}
-    skill2: {fileID: 0}
+  moveset: {fileID: 0}
   AttackSpeed: 1
   weight: 3
+  blockResistances: []
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -61,6 +49,7 @@ MonoBehaviour:
       m_Calls: []
   model: {fileID: 0}
   baseDamage: 0
+  heartsDamage: 0
   width: 0.25
   length: 1.25
   elements: 07000000
