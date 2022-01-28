@@ -33,13 +33,10 @@ public class NavigatingHumanoidActor : Actor, INavigates
     public float airTime = 0f;
     float lastAirTime;
     float landTime = 0f;
-    Vector3 yVel = Vector3.zero;
-    Vector3 xzVel = Vector3.zero;
     Vector3 lastPosition;
     Vector3 animatorVelocity;
     public float jumpAdjustSpeed = 3f;
     [Header("Animancer")]
-    protected AnimancerComponent animancer;
     public NavAnims navAnims;
     public LinearMixerTransitionAsset idleAnim;
     public MixerTransition2DAsset moveAnim;
@@ -296,13 +293,13 @@ public class NavigatingHumanoidActor : Actor, INavigates
         Vector3 velocity = Vector3.zero;
         if (GetGrounded(out RaycastHit hitCheck1))
         {
-            if (yVel.y <= 0)
+            if (yVel <= 0)
             {
-                yVel.y = 0f;
+                yVel = 0f;
             }
             else
             {
-                yVel.y += Physics.gravity.y * Time.fixedDeltaTime;
+                yVel += Physics.gravity.y * Time.fixedDeltaTime;
             }
             airTime = 0f;
             landTime += Time.fixedDeltaTime;
@@ -315,16 +312,16 @@ public class NavigatingHumanoidActor : Actor, INavigates
         }
         else
         {
-            yVel.y += Physics.gravity.y * Time.fixedDeltaTime;
-            if (yVel.y < -70f)
+            yVel += Physics.gravity.y * Time.fixedDeltaTime;
+            if (yVel < -70f)
             {
-                yVel.y = -70;
+                yVel = -70;
             }
             airTime += Time.fixedDeltaTime;
             lastAirTime = airTime;
             if (animancer.States.Current == navstate.fall) velocity += xzVel;
         }
-        velocity += yVel * Time.fixedDeltaTime;
+        velocity += yVel * Vector3.up * Time.fixedDeltaTime;
         this.GetComponent<CharacterController>().Move((velocity));
     }
     public bool GetGrounded(out RaycastHit hitInfo)
@@ -414,10 +411,14 @@ public class NavigatingHumanoidActor : Actor, INavigates
         this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, targetRot, nav.angularSpeed * Time.deltaTime);
     }
 
+    public override void SetToIdle()
+    {
+        animancer.Play(navstate.idle);
+    }
     void OnAnimatorMove()
     {
         // Update position based on animation movement using navigation surface height
-        Vector3 position = animancer.Animator.rootPosition + yVel;
+        Vector3 position = animancer.Animator.rootPosition + yVel * Vector3.up;
         if (!ignoreRoot) transform.rotation = animancer.Animator.rootRotation;
         position.y = nav.nextPosition.y;
         Vector3 dir = position - this.transform.position;

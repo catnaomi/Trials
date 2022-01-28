@@ -157,6 +157,15 @@
                     "processors": "",
                     "interactions": "Tap",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "UsePower",
+                    "type": "Button",
+                    "id": "7d8ec08b-c279-4ffa-a37b-eeb76faa599f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "MultiTap,Tap",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -586,6 +595,17 @@
                     "processors": "",
                     "groups": "Keyboard",
                     "action": "Look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2bd3ef87-7a19-44fb-8c70-296a37c0cd6f",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "UsePower",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

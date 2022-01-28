@@ -56,9 +56,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float rollSpeed = 5f;
     public float jumpVel = 10f;
     [Space(5)]
-    public float yVel;
     public bool isGrounded;
-    public Vector3 xzVel;
     public float airTime = 0f;
     float lastAirTime;
     float landTime = 0f;
@@ -79,7 +77,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float attackDecel = 25f;
     public float dashAttackDecel = 10f;
     float attackDecelReal;
-    float walkAccelReal;
+    public float walkAccelReal;
     public bool sprinting;
     public bool shouldDodge;
     [Header("Climbing Settings")]
@@ -127,7 +125,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float thrustIKHeightRange;
     [ReadOnly, SerializeField] private DamageKnockback currentDamage;
     [Header("Animancer")]
-    AnimancerComponent animancer;
     public MixerTransition2DAsset moveAnim;
     public AnimationClip idleAnim;
     public ClipTransition dashAnim;
@@ -227,8 +224,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     }
     // Start is called before the first frame update
-    void Start()
+    public override void ActorStart()
     {
+        base.ActorStart();
         cc = this.GetComponent<CharacterController>();
         defaultRadius = cc.radius;
         movementController = this.GetComponent<PlayerActor>();
@@ -323,7 +321,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
 
     // Update is called once per frame
-    void Update()
+    public override void ActorPostUpdate()
     {
         instatemove = (animancer.States.Current == state.move);
         isGrounded = GetGrounded();
@@ -340,6 +338,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         stickDirection = camForward * move.y + camRight * move.x;
         GetHeadPoint();
 
+        if (!animancer.Layers[0].IsAnyStatePlaying())
+        {
+            animancer.Play(state.move);
+        }
+        if (isHitboxActive && animancer.States.Current != state.attack && animancer.States.Current != state.aim)
+        {
+            HitboxActive(0);
+        }
         #region Animancer State Checks
         if (animancer.States.Current == state.move)
         {
@@ -809,6 +815,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
                 }
             }
+            yVel = 0f;
             animancer.Layers[0].ApplyAnimatorIK = false;
         }
         else if (animancer.States.Current == state.swim)
@@ -1182,6 +1189,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             currentClimb.inUse = false;
         }
+        cc.enabled = true;
     }
 
     public void SnapToCurrentLedge()
@@ -2014,8 +2022,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (GetMoveset().plungeSlash is PhaseAttack phase)
         {
             ClipTransition clip = GetMoveset().plungeSlash.GetClip();
+            state.attack = animancer.Play(clip);
             state.attack.Events.OnEnd = () => { state.attack = animancer.Play(phase.GetLoopPhaseClip(), 0.1f); };
-            state.attack = animancer.Play(GetMoveset().plungeSlash.GetClip());
+ 
             attackDecelReal = 0f;
             plungeEnd = phase.GetEndPhaseClip();
             plungeEnd.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
@@ -2031,8 +2040,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (GetMoveset().plungeThrust is PhaseAttack phase)
         {
             ClipTransition clip = GetMoveset().plungeThrust.GetClip();
+            state.attack = animancer.Play(clip);
             state.attack.Events.OnEnd = () => { state.attack = animancer.Play(phase.GetLoopPhaseClip(), 0.1f); };
-            state.attack = animancer.Play(GetMoveset().plungeThrust.GetClip());
+            
             attackDecelReal = 0f;
             plungeEnd = phase.GetEndPhaseClip();
             plungeEnd.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
@@ -2432,6 +2442,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         return this.GetCombatTarget() != null && !IsInDialogue();
     }
+
+    public override void SetToIdle()
+    {
+        animancer.Play(state.move);
+    }
     #endregion
 
     #region INTERACTION
@@ -2501,7 +2516,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         animancer.Play(state.move);
     }
     #endregion
-
 
     public bool GetGrounded()
     {

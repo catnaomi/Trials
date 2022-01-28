@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.Events;
 using System.Collections.Generic;
+using Animancer;
 
 [RequireComponent(typeof(ActorAttributes))]
 public class Actor : MonoBehaviour
@@ -15,6 +16,8 @@ public class Actor : MonoBehaviour
 
     [HideInInspector]
     public Animator animator;
+    [HideInInspector]
+    public AnimancerComponent animancer;
 
     [HideInInspector]
     public AudioSource audioSource;
@@ -37,10 +40,16 @@ public class Actor : MonoBehaviour
     public Vector3 moveAdditional;
     public Vector3 lastContactPoint;
     public Vector3 lastBlockPoint;
+
+    public Vector3 xzVel;
+    public float yVel;
     // targets
 
     public GameObject CombatTarget;
     public GameObject FollowTarget;
+    [Header("Time Travel Data")]
+    public List<TimeTravelData> timeTravelStates;
+    public bool isRewinding;
     void OnEnable()
     {
 
@@ -60,17 +69,20 @@ public class Actor : MonoBehaviour
     public void Start()
     {
         //CurrentAction = ActionsLibrary.GetInputAction(0);
-        
+
         ActorStart();
+
     }
 
     public virtual void ActorStart()
     {
+        animancer = this.GetComponent<AnimancerComponent>();
         // run after base class Start()
     }
 
     public void Update()
     {
+        if (isRewinding) return;
         ActorPreUpdate();
 
         ActorPostUpdate();
@@ -78,6 +90,10 @@ public class Actor : MonoBehaviour
 
     public virtual void ActorPreUpdate()
     {
+        if (!isRewinding && animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].Weight > 1f)
+        {
+            animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].Weight = 0f;
+        }
         // run before base class 
     }
 
@@ -225,5 +241,43 @@ public class Actor : MonoBehaviour
         }
         GameObject.Destroy(this.gameObject);
 
+    }
+
+    public virtual void SetToIdle()
+    {
+        // do nothing
+    }
+    public void MoveOverTime(Vector3 targetPosition, Quaternion targetRotation, float timeToReach)
+    {
+        StartCoroutine(MoveOverTimeRoutine(targetPosition, targetRotation, timeToReach));
+    }
+
+    IEnumerator MoveOverTimeRoutine(Vector3 targetPosition, Quaternion targetRotation, float timeToReach)
+    {
+        if (timeToReach > 0f)
+        {
+            bool usingCC = this.TryGetComponent<CharacterController>(out CharacterController cc) && cc.enabled;
+            Vector3 startPosition = this.transform.position;
+            Quaternion startRotation = this.transform.rotation;
+            float t = 0f;
+            float timeElapsed = 0f;
+            while (timeElapsed < timeToReach)
+            {
+                yield return new WaitForEndOfFrame();
+                timeElapsed += Time.deltaTime;
+                t = Mathf.Clamp01(timeElapsed / timeToReach);
+                Vector3 currentPosition = Vector3.Lerp(startPosition, targetPosition, t);
+                Quaternion currentRotation = Quaternion.Lerp(startRotation, targetRotation, t);
+                if (usingCC)
+                {
+                    cc.Move(currentPosition - this.transform.position);
+                }
+                else
+                {
+                    this.transform.position = currentPosition;
+                }
+                this.transform.rotation = currentRotation;
+            }
+        }
     }
 }

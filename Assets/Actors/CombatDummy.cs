@@ -19,7 +19,6 @@ public class CombatDummy : Actor, IDamageable
     public float lastStaminaDamage;
     public float stamina = 100f;
 
-    AnimancerComponent animancer;
     HumanoidPositionReference positionReference;
     AnimancerState hurt;
     AnimancerState idleState;

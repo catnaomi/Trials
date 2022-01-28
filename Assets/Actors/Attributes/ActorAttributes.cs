@@ -123,6 +123,18 @@ public class ActorAttributes : MonoBehaviour
         }
     }
 
+    public void SetHealth(float amount)
+    {
+        float diff = amount - health.current;
+        if (diff >= 0)
+        {
+            RecoverHealth(diff);
+        }
+        else
+        {
+            ReduceHealth(diff);
+        }
+    }
     public void ReduceHealth(float damage)
     {
         if (damage > 0)

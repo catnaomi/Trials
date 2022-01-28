@@ -69,7 +69,7 @@ public class HumanoidDamageHandler : IDamageable
         lastDamage = damage.healthDamage;
         damageTaken += lastDamage;
 
-        lastHitbox = damage.hitboxSource.GetComponent<Hitbox>();
+        //lastHitbox = damage.hitboxSource.GetComponent<Hitbox>();
 
         bool hitFromBehind = !(Vector3.Dot(-actor.transform.forward, (damage.source.transform.position - actor.transform.position).normalized) <= 0f);
 

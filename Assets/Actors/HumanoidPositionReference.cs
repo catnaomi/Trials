@@ -28,6 +28,7 @@ public class HumanoidPositionReference : MonoBehaviour
         Base = 0,
         UpperBody = 1,
         Flinch = 2,
+        TimeEffects = 3,
     }
 
     // Use this for initialization
