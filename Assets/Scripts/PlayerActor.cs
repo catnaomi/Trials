@@ -2420,6 +2420,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return animancer.States.Current == state.climb;
     }
 
+    public override bool IsHitboxActive()
+    {
+        return isHitboxActive;
+    }
     public bool IsTwoHanding()
     {
         return inventory.IsMainDrawn() && inventory.GetMainWeapon().TwoHandOnly();

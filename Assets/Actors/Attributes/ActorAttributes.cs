@@ -186,4 +186,15 @@ public class AttributeValue
     public float baseValue;
     public float current;
     public float max;
+
+    public AttributeValue()
+    {
+
+    }
+    public AttributeValue(float baseValue, float current, float max)
+    {
+        this.baseValue = baseValue;
+        this.current = current;
+        this.max = max;
+    }
 }

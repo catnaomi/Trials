@@ -17,6 +17,10 @@ public class HumanoidDamageHandler : IDamageable
     float totalCritTime;
     bool inCritCoroutine;
 
+    public float unfreezeDamageDelay = 0.25f;
+    public Queue<DamageKnockback> timeStopDamages;
+    bool inFrozenRoutine;
+
     public AnimancerState hurt;
     public AnimancerState block;
 
@@ -47,6 +51,8 @@ public class HumanoidDamageHandler : IDamageable
         animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].SetMask(damageAnims.flinchMask);
         animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].IsAdditive = true;
         animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].SetWeight(1f);
+
+        timeStopDamages = new Queue<DamageKnockback>();
     }
 
     public void SetEndAction(System.Action action)
@@ -66,6 +72,15 @@ public class HumanoidDamageHandler : IDamageable
 
     public void TakeDamage(DamageKnockback damage)
     {
+        if (actor.IsTimeStopped())
+        {
+            if (!inFrozenRoutine)
+            {
+                actor.StartCoroutine(FrozenRoutine());
+            }
+            timeStopDamages.Enqueue(damage);
+            return;
+        }
         lastDamage = damage.healthDamage;
         damageTaken += lastDamage;
 
@@ -315,6 +330,17 @@ public class HumanoidDamageHandler : IDamageable
         inCritCoroutine = false;
     }
 
+    IEnumerator FrozenRoutine()
+    {
+        inFrozenRoutine = true;
+        yield return new WaitWhile(actor.IsTimeStopped);
+        while (timeStopDamages.Count > 0)
+        {
+            TakeDamage(timeStopDamages.Dequeue());
+            yield return new WaitForSeconds(unfreezeDamageDelay);
+        }
+        inFrozenRoutine = false;
+    }
     public bool IsCritVulnerable()
     {
         bool isCritVuln = animancer.States.Current == hurt && critTime > 0f;

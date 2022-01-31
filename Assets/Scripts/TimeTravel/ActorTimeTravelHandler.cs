@@ -17,6 +17,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     Actor actor;
     float lastHealth;
     TimeTravelData lastData;
+    bool isFrozen;
     void Start()
     {
         actor = this.GetComponent<Actor>();
@@ -61,9 +62,9 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         }
     }
 
-    public virtual void SaveTimeState()
+    public virtual TimeTravelData SaveTimeState()
     {
-        if (isRewinding) return;
+        if (isRewinding || isFrozen) return null;
         ActorTimeTravelData data = new ActorTimeTravelData()
         {
             time = Time.time,
@@ -76,39 +77,51 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         if (animancer != null && animancer.States.Current != null)
         {
             data.animancerState = animancer.States.Current;
+            data.animancerSpeed = data.animancerState.EffectiveSpeed;
             data.animancerNormalizedTime = animancer.States.Current.NormalizedTime;
             if (data.animancerState is MixerState mixerState)
             {
                 data.isMixer = true;
             }
             data.animationClip = CustomUtilities.AnimancerUtilities.GetCurrentClip(animancer);
-
+            data.animancerEndEvent = data.animancerState.Events.OnEnd;
         }
         timeTravelStates.Add(data);
         if (timeTravelStates.Count > TimeTravelController.time.maxSteps)
         {
             timeTravelStates.RemoveRange(0, timeTravelStates.Count - TimeTravelController.time.maxSteps);
         }
+        return data;
     }
 
     public void LoadTimeState(TimeTravelData data)
     {
+        LoadTimeState(data, 0f);
+    }
+
+    public void LoadTimeState(TimeTravelData data, float speed)
+    {
 
 
-        actor.MoveOverTime(data.position, data.rotation, TimeTravelController.time.rewindStepDuration);
+        actor.MoveOverTime(data.position, data.rotation, isRewinding ? TimeTravelController.time.rewindStepDuration : 0f);
         if (data is ActorTimeTravelData actorData)
         {
             if (actorData.animationClip != null)
             {
                 AnimancerState mainState = animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].Play(actorData.animationClip, TimeTravelController.time.rewindStepDuration);
                 mainState.NormalizedTime = actorData.animancerNormalizedTime;
-                mainState.Speed = 0f;
+                mainState.Speed = actorData.animancerSpeed * speed;
+                if (speed > 0f)
+                {
+                    mainState.Events.OnEnd = actorData.animancerEndEvent;
+                    mainState.Events.OnEnd += EndTimeState;
+                }
             }
             actor.xzVel = new Vector3(actorData.velocity.x, 0f, actorData.velocity.z);
             actor.yVel = actorData.velocity.y;
         }
 
-        if (lastData != null && lastData is ActorTimeTravelData actorLastData)
+        if (lastData != null && lastData is ActorTimeTravelData actorLastData && isRewinding)
         {
             AnimancerComponent afterimage = afterimages[imageIndex];
             afterimage.gameObject.SetActive(true);
@@ -133,7 +146,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         imageIndex = 0;
         isRewinding = true;
-        actor.isRewinding = true;
+        actor.isInTimeState = true;
         animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].SetWeight(1f);
         animancer.States.Current.Speed = 0f;
         lastHealth = actor.attributes.health.current;
@@ -146,7 +159,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public virtual void StopRewind()
     {
         isRewinding = false;
-        actor.isRewinding = false;
+        actor.isInTimeState = false;
         if (lastData != null && lastData is ActorTimeTravelData actorData)
         {
             actor.attributes.SetHealth(actorData.health);
@@ -156,12 +169,36 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         {
             player.walkAccelReal = player.walkAccel;
         }
+        EndTimeState();
+    }
+
+    public virtual void StartFreeze()
+    {
+        isFrozen = true;
+        actor.isInTimeState = true;
+        animancer.States.Current.Speed = 0f;
+        animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].SetWeight(1f);
+;
+    }
+
+    public virtual void StopFreeze()
+    {
+        isFrozen = false;
+        actor.isInTimeState = false;
+        if (actor is PlayerActor player)
+        {
+            player.walkAccelReal = player.walkAccel;
+        }
+        LoadTimeState(lastData, 1f);
+    }
+
+    void EndTimeState()
+    {
         actor.SetToIdle();
         animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].SetWeight(0f);
         animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].DestroyStates();
         animancer.States.Current.Speed = 1f;
     }
-
     public List<TimeTravelData> GetTimeStates()
     {
         return timeTravelStates;
@@ -170,5 +207,15 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public GameObject GetAfterImagePrefab()
     {
         return afterimagePrefab;
+    }
+
+    public bool IsFrozen()
+    {
+        return isFrozen;
+    }
+
+    public GameObject GetObject()
+    {
+        return this.gameObject;
     }
 }

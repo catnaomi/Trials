@@ -49,7 +49,7 @@ public class Actor : MonoBehaviour
     public GameObject FollowTarget;
     [Header("Time Travel Data")]
     public List<TimeTravelData> timeTravelStates;
-    public bool isRewinding;
+    public bool isInTimeState;
     void OnEnable()
     {
 
@@ -82,7 +82,7 @@ public class Actor : MonoBehaviour
 
     public void Update()
     {
-        if (isRewinding) return;
+        if (isInTimeState) return;
         ActorPreUpdate();
 
         ActorPostUpdate();
@@ -90,7 +90,7 @@ public class Actor : MonoBehaviour
 
     public virtual void ActorPreUpdate()
     {
-        if (!isRewinding && animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].Weight > 1f)
+        if (!isInTimeState && animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].Weight > 1f)
         {
             animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].Weight = 0f;
         }
@@ -195,6 +195,19 @@ public class Actor : MonoBehaviour
         return false;
     }
 
+    public virtual bool IsHitboxActive()
+    {
+        return false;
+    }
+
+    public virtual bool IsTimeStopped()
+    {
+        if (!isInTimeState)
+        {
+            return false;
+        }
+        return TryGetComponent<ActorTimeTravelHandler>(out ActorTimeTravelHandler timeTravelHandler) && timeTravelHandler.IsFrozen();
+    }
     public void PlayAudioClip(AudioClip audioClip)
     {
         if (audioSource != null)
@@ -254,9 +267,10 @@ public class Actor : MonoBehaviour
 
     IEnumerator MoveOverTimeRoutine(Vector3 targetPosition, Quaternion targetRotation, float timeToReach)
     {
+        bool usingCC = this.TryGetComponent<CharacterController>(out CharacterController cc) && cc.enabled;
+        
         if (timeToReach > 0f)
         {
-            bool usingCC = this.TryGetComponent<CharacterController>(out CharacterController cc) && cc.enabled;
             Vector3 startPosition = this.transform.position;
             Quaternion startRotation = this.transform.rotation;
             float t = 0f;
@@ -278,6 +292,18 @@ public class Actor : MonoBehaviour
                 }
                 this.transform.rotation = currentRotation;
             }
+        }
+        else
+        {
+            if (usingCC)
+            {
+                cc.Move(targetPosition - this.transform.position);
+            }
+            else
+            {
+                this.transform.position = targetPosition;
+            }
+            this.transform.rotation = targetRotation;
         }
     }
 }
