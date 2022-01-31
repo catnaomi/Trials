@@ -2064,7 +2064,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         if (this.GetCombatTarget() != null)
         {
-            this.transform.LookAt(this.GetCombatTarget().transform.position, Vector3.up);
+            Vector3 dir = this.GetCombatTarget().transform.position - this.transform.position;
+            dir.y = 0f;
+            this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
         }
     }
 

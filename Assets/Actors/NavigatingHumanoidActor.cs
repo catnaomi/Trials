@@ -454,7 +454,9 @@ public class NavigatingHumanoidActor : Actor, INavigates
     {
         if (destination != Vector3.zero)
         {
-            this.transform.LookAt(destination, Vector3.up);
+            Vector3 dir = destination - this.transform.position;
+            dir.y = 0f;
+            this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
         }
     }
 

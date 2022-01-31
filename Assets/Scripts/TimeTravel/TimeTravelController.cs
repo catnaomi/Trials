@@ -41,7 +41,10 @@ public class TimeTravelController : MonoBehaviour
     public float timeStopDrainRate;
     public float rewindDrainRate;
     public float timePowerCooldown = 5f;
-    float timePowerClock = 0f;
+    public float timePowerClock = 0f;
+    public UnityEvent OnCooldownFail;
+    public UnityEvent OnCooldownComplete;
+    public UnityEvent OnMeterFail;
     [Header("Shader Settings")]
     public Material fullscreenMaterial;
 
@@ -83,6 +86,7 @@ public class TimeTravelController : MonoBehaviour
             {
                 meter.current = 0f;
                 CancelRewind();
+                OnMeterFail.Invoke();
             }
         }
         else if (freeze)
@@ -93,6 +97,7 @@ public class TimeTravelController : MonoBehaviour
             {
                 meter.current = 0f;
                 StopFreeze();
+                OnMeterFail.Invoke();
             }
         }
         else
@@ -108,6 +113,10 @@ public class TimeTravelController : MonoBehaviour
             if (timePowerClock > 0f)
             {
                 timePowerClock -= Time.deltaTime;
+                if (timePowerClock <= 0f)
+                {
+                    OnCooldownComplete.Invoke();
+                }
             }
         }
     }
@@ -120,7 +129,7 @@ public class TimeTravelController : MonoBehaviour
             {
                 if (!CanStartPower())
                 {
-                    // invoke a ui event here
+                    OnCooldownFail.Invoke();
                     return;
                 }
 
@@ -140,7 +149,7 @@ public class TimeTravelController : MonoBehaviour
             {
                 if (!CanStartPower())
                 {
-                    // invoke a ui event here
+                    OnCooldownFail.Invoke();
                     return;
                 }
                 StartRewind();
