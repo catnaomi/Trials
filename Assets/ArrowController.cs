@@ -11,6 +11,7 @@ public class ArrowController : Projectile
     public Hitbox hitbox;
     public DamageKnockback damageKnockback;
     public GameObject origin;
+    public Interactable interactable;
     bool launched;
     bool inFlight;
     bool shouldStick;
@@ -66,6 +67,7 @@ public class ArrowController : Projectile
 
     private void OnArrowHit()
     {
+        bool allowInteract = true;
         EndFlight();
 
         if (hitbox.didHitTerrain)
@@ -84,13 +86,25 @@ public class ArrowController : Projectile
         {
             FXController.CreateFX(FXController.FX.FX_BleedPoint, feather.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
             Destroy(tip.gameObject);
+            allowInteract = false;
+        }
+        if (allowInteract)
+        {
+            EnablePickup();
         }
     }
 
 
     public void Stick(Collider hitCollider)
     {
-        Vector3 stickPos = hitCollider.ClosestPoint(tip.transform.position);
+        Vector3 stickPos;
+        if (hitCollider is BoxCollider || hitCollider is SphereCollider || hitCollider is CapsuleCollider || (hitCollider is MeshCollider meshCollider && meshCollider.convex)) {
+            stickPos = hitCollider.ClosestPoint(tip.transform.position);
+        }
+        else
+        {
+            stickPos = hitCollider.ClosestPointOnBounds(tip.transform.position);
+        }
 
         /*ParentConstraint parentConstraint = this.GetComponent<ParentConstraint>();
 
@@ -110,6 +124,11 @@ public class ArrowController : Projectile
         tip.transform.SetParent(empty.transform, true);
         tip.position = stickPos;
         this.GetComponentInChildren<TrailRenderer>().emitting = false;
+    }
+
+    public void EnablePickup()
+    {
+        interactable.gameObject.SetActive(true);
     }
     /*
     private void DisabledUpdate()

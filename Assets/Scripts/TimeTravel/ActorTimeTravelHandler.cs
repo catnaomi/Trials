@@ -31,9 +31,10 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         }
         if (useAfterimages)
         {
-            afterimages = new AnimancerComponent[timeTravelController.maxSteps];
-            timeRemaining = new float[timeTravelController.maxSteps];
-            for (int i = 0; i < timeTravelController.maxSteps; i++)
+            int images = (int)Mathf.Min(timeTravelController.maxSteps, Mathf.Ceil(fadeTime / TimeTravelController.time.rewindStepDuration));
+            afterimages = new AnimancerComponent[images];
+            timeRemaining = new float[images];
+            for (int i = 0; i < images; i++)
             {
                 GameObject image = GameObject.Instantiate(afterimagePrefab, timeTravelController.transform);
                 image.name = "Afterimage (" + i + ") for " + this.gameObject.name;
