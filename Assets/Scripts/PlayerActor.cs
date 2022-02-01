@@ -95,7 +95,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float waterVerticalSpeed;
     public float swimSpeed;
     public float swimAccel;
-    public float wadingHeight;
+    public float wadingHeightIn = 0.4f;
+    public float wadingHeightOut = 0.6f;
     float waterHeight;
     public float wadingSpeed = 3f;
     public bool wading;
@@ -1387,7 +1388,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void OnDodge(InputValue value)
     {
         if (!CanPlayerInput()) return;
-        if (animancer.States.Current == state.climb)
+        if (IsClimbing())
         {
             ledgeSnap = false;
             state.fall = animancer.Play(fallAnim, 1f);
@@ -1408,11 +1409,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void OnJump(InputValue value)
     {
         if (!CanPlayerInput()) return;
-        if (animancer.States.Current == state.climb)
+        if (IsClimbing() && currentClimb != null && currentClimb is Ledge)
         {
             ledgeSnap = false;
             animancer.Play(ledgeClimb);
             StartCoroutine("ClimbLockout");
+        }
+        else if (!GetGrounded() && !allowClimb)
+        {
+            StopCoroutine("ClimbLockout");
+            allowClimb = true;
         }
         else if (GetGrounded())
         {
@@ -1589,6 +1595,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool CheckWater()
     {
         wading = false;
+        float wadingHeight = (IsSwimming() ? wadingHeightOut : wadingHeightIn);
         inWater = Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit waterHit, cc.height + 0.1f, LayerMask.GetMask("Water"), QueryTriggerInteraction.Collide);
         if (inWater)
         {
@@ -2403,6 +2410,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     #region State Checks
 
+    public bool IsSwimming()
+    {
+        return animancer.States.Current == state.swim;
+    }
     public bool IsMoving()
     {
         return animancer.States.Current == state.move;
