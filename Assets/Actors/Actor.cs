@@ -83,6 +83,7 @@ public class Actor : MonoBehaviour
     public void Update()
     {
         if (isInTimeState) return;
+
         ActorPreUpdate();
 
         ActorPostUpdate();
@@ -90,9 +91,9 @@ public class Actor : MonoBehaviour
 
     public virtual void ActorPreUpdate()
     {
-        if (!isInTimeState && animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].Weight > 1f)
+        if (!isInTimeState && animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].Weight > 1f || animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].IsAnyStatePlaying())
         {
-            animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].Weight = 0f;
+            this.GetComponent<ActorTimeTravelHandler>().EndTimeState();
         }
         // run before base class 
     }

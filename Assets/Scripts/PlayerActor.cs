@@ -2422,6 +2422,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return animancer.States.Current == state.climb;
     }
 
+    public override bool IsDodging()
+    {
+        return animancer.States.Current == state.roll;
+    }
     public override bool IsHitboxActive()
     {
         return isHitboxActive;

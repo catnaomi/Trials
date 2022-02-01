@@ -463,7 +463,12 @@ public class NavigatingHumanoidActor : Actor, INavigates
     public float GetDistanceToTarget()
     {
         if (nav.enabled) {
-            return nav.remainingDistance;
+            float dist = nav.remainingDistance;
+            if (dist >= Mathf.Infinity)
+            {
+                nav.SetDestination(destination);
+            }
+            return dist;
         }
         if (destination == Vector3.zero)
         {

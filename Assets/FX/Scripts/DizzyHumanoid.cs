@@ -70,7 +70,11 @@ public class DizzyHumanoid : MonoBehaviour
         this.gameObject.SetActive(true);
         if (time > 0f)
         { 
-            timeRemaining = maxTime = time;
+            if (!actor.IsTimeStopped())
+            {
+                timeRemaining = maxTime = time;
+            }
+           
         }
         else
         {

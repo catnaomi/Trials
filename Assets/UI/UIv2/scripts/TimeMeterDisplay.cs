@@ -13,6 +13,7 @@ public class TimeMeterDisplay : MonoBehaviour
     [Header("Values")]
     public float meterValue;
     public float meterMax;
+    public float meterUpdateSpeed = 100f;
     public float cooldownValue;
     public float cooldownMax;
     public float fadeoutTime = 5f;
@@ -53,7 +54,7 @@ public class TimeMeterDisplay : MonoBehaviour
         bool cooldownMaxed = cooldownValue >= cooldownMax;
         if (timeController != null)
         {
-            meterValue = timeController.meter.current;
+            meterValue = Mathf.MoveTowards(meterValue, timeController.meter.current, meterUpdateSpeed * Time.deltaTime);
             cooldownValue = cooldownMax - timeController.timePowerClock;          
         }
         bool meterDecreasedLastFrame = meterValue < lastMeter;

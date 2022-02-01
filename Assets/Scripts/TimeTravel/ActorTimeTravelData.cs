@@ -6,7 +6,6 @@ using UnityEngine;
 [Serializable]
 public class ActorTimeTravelData : TimeTravelData
 {
-    public float time;
     public AnimancerState animancerState;
     public bool isMixer;
     public float[] animancerMixerParameters;

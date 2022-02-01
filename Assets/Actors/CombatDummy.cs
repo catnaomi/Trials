@@ -33,7 +33,7 @@ public class CombatDummy : Actor, IDamageable
         blockState = animancer.States.GetOrCreate(block);
         _OnEnd = () =>
         {
-            animancer.Play((!blockanim)? idleState : blockState);
+            animancer.Play((!blockanim)? animancer.States.GetOrCreate(idle) : animancer.States.GetOrCreate(block));
         };
         animancer.Play((!blockanim)? idleState : blockState);
         animancer.Layers[1].IsAdditive = true;
@@ -41,6 +41,7 @@ public class CombatDummy : Actor, IDamageable
 
         damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
         damageHandler.SetEndAction(_OnEnd);
+        damageHandler.SetBlockEndAction(_OnEnd);
     }
 
     public void Update()

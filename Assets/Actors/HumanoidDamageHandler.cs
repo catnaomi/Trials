@@ -72,6 +72,8 @@ public class HumanoidDamageHandler : IDamageable
 
     public void TakeDamage(DamageKnockback damage)
     {
+        bool isCrit = IsCritVulnerable();
+        float damageAmount = damage.GetDamageAmount(isCrit);
         if (actor.IsTimeStopped())
         {
             if (!inFrozenRoutine)
@@ -79,6 +81,7 @@ public class HumanoidDamageHandler : IDamageable
                 actor.StartCoroutine(FrozenRoutine());
             }
             timeStopDamages.Enqueue(damage);
+            TimeTravelController.time.TimeStopDamage(damageAmount);
             return;
         }
         lastDamage = damage.healthDamage;
@@ -99,8 +102,7 @@ public class HumanoidDamageHandler : IDamageable
         {
             dr.AddRange(actor.GetBlockResistance());
         }
-        bool isCrit = IsCritVulnerable();
-        float damageAmount = damage.healthDamage * (isCrit ? damage.critData.criticalMultiplier : 1f);
+        
         Debug.Log("damage before resistances = " + damageAmount);
         damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.GetTypes(), dr);
         Debug.Log("damage after resistances = " + damageAmount);
@@ -132,7 +134,7 @@ public class HumanoidDamageHandler : IDamageable
 
             if (!damage.breaksBlock)
             {
-                if (animancer.States.Current != block)
+                if (animancer.States.Current != block || damage.cannotAutoFlinch)
                 {
                     ClipTransition clip = blockStagger;
                     animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop();
@@ -212,7 +214,7 @@ public class HumanoidDamageHandler : IDamageable
                 float xdot = Vector3.Dot(actor.transform.right, dir);
                 float ydot = Vector3.Dot(actor.transform.forward, dir);
 
-                if (animancer.States.Current != hurt)
+                if (animancer.States.Current != hurt || damage.cannotAutoFlinch)
                 {
                     DirectionalMixerState state = (DirectionalMixerState)animancer.Play(damageAnims.staggerSmall);
                     state.Time = 0f;
@@ -247,8 +249,6 @@ public class HumanoidDamageHandler : IDamageable
             }
             else if (stagger != DamageKnockback.StaggerType.None)
             {
-
-                Debug.Log("look");
                 ClipTransition clip = damageAnims.GetClipFromStaggerType(stagger);
                 AnimancerState state = animancer.Play(clip);
                 state.Events.OnEnd = _OnEnd;
@@ -324,8 +324,11 @@ public class HumanoidDamageHandler : IDamageable
         inCritCoroutine = true;
         while (critTime > 0)
         {
-            yield return new WaitForEndOfFrame();
-            critTime -= Time.deltaTime;
+            yield return null;
+            if (!actor.IsTimeStopped())
+            {
+                critTime -= Time.deltaTime;
+            }
         }
         inCritCoroutine = false;
     }
@@ -336,7 +339,21 @@ public class HumanoidDamageHandler : IDamageable
         yield return new WaitWhile(actor.IsTimeStopped);
         while (timeStopDamages.Count > 0)
         {
-            TakeDamage(timeStopDamages.Dequeue());
+            DamageKnockback damage = timeStopDamages.Dequeue();
+            damage.breaksArmor = true;
+            damage.cannotAutoFlinch = true;
+            damage.bouncesOffBlock = false;
+            if (timeStopDamages.Count > 0)
+            {
+                damage.critData.doesNotConsumeCritState = true;
+                damage.critData.criticalExtensionTime = timeStopDamages.Count * unfreezeDamageDelay;
+            }
+            else
+            {
+                damage.critData.doesNotConsumeCritState = false;
+            }
+            
+            TakeDamage(damage);
             yield return new WaitForSeconds(unfreezeDamageDelay);
         }
         inFrozenRoutine = false;

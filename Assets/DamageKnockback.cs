@@ -21,6 +21,7 @@ public class DamageKnockback
     public bool bouncesOffBlock;
     public bool breaksBlock;
     public bool canDamageSelf;
+    public bool cannotAutoFlinch;
     public float stunTime;
     public StaggerData staggers;
     [Space(10)]
@@ -240,6 +241,14 @@ public class DamageKnockback
         return dtypes.ToArray();
     }
 
+    public float GetDamageAmount()
+    {
+        return GetDamageAmount(false);
+    }
+    public float GetDamageAmount(bool isCrit)
+    {
+        return this.healthDamage * (isCrit ? critData.criticalMultiplier : 1f);
+    }
 
 }
 

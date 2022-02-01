@@ -33,7 +33,7 @@ public class TimeTravelController : MonoBehaviour
     public AnimationCurve bubbleCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     public bool freeze;
     public List<IAffectedByTimeTravel> frozens;
-    
+    public UnityEvent OnTimeStopHit;
     bool updateFreeze;
     [Header("Meter Settings")]
     public AttributeValue meter = new AttributeValue(60f, 60f, 60f);
@@ -42,14 +42,13 @@ public class TimeTravelController : MonoBehaviour
     public float rewindDrainRate;
     public float timePowerCooldown = 5f;
     public float timePowerClock = 0f;
+    public float timeStopDamageCostRatio = 1f;
     public UnityEvent OnCooldownFail;
     public UnityEvent OnCooldownComplete;
     public UnityEvent OnMeterFail;
     [Header("Shader Settings")]
-    public Material fullscreenMaterial;
-
-    public Vector4 circleScreenPosition;
-    public float circleScreenRadius;
+    public Renderer bubbleInner;
+    MaterialPropertyBlock block;
     private void Awake()
     {
         time = this;
@@ -64,11 +63,18 @@ public class TimeTravelController : MonoBehaviour
         SetupInput();
         stepsRecorded = 0;
         StartRecord();
+        if (bubbleInner != null)
+        {
+            block = new MaterialPropertyBlock();
+            bubbleInner.SetPropertyBlock(block);
+        }
+        
     }
 
     // Update is called once per frame
     void Update()
     {
+        /*
         Vector3 screenSpacePoint = Camera.main.WorldToScreenPoint(timeStopOrigin);
         float dist = screenSpacePoint.z;
         float screenSpaceRadius = (timeStopRadius / (Mathf.Tan(Camera.main.fieldOfView * Mathf.Deg2Rad / 2f) * dist)) * (Screen.height / 2f);
@@ -77,7 +83,7 @@ public class TimeTravelController : MonoBehaviour
         circleScreenRadius = screenSpaceRadius;
         fullscreenMaterial.SetVector("_CircleScreenPosition", circleScreenPosition);
         fullscreenMaterial.SetFloat("_CircleScreenRadius", screenSpaceRadius);
-
+        */
         if (isRewinding)
         {
             meter.current -= rewindDrainRate * Time.deltaTime;
@@ -102,6 +108,10 @@ public class TimeTravelController : MonoBehaviour
         }
         else
         {
+            if (meter.current < 0f)
+            {
+                meter.current = 0f;
+            }
             if (meter.current < meter.max)
             {
                 meter.current += time.timePowerRecoveryRate * Time.deltaTime;
@@ -192,8 +202,23 @@ public class TimeTravelController : MonoBehaviour
         cancelRewind = false;
         stepsToRewind = Mathf.Min(stepsRecorded, maxSteps);
         StartCoroutine(RewindRoutine());
+        StartPostProcessing();
     }
 
+    public void StopRewind()
+    {
+        StopPostProcessing();
+    }
+
+    void StartPostProcessing()
+    {
+        PostProcessingController.SetVolumeWeight(PostProcessingController.instance.MagicVolume, 1f, timeToOpenBubble);
+    }
+
+    void StopPostProcessing()
+    {
+        PostProcessingController.SetVolumeWeight(PostProcessingController.instance.MagicVolume, 0f, timeToOpenBubble);
+    }
     public void CancelRewind()
     {
         cancelRewind = true;
@@ -272,13 +297,14 @@ public class TimeTravelController : MonoBehaviour
         freeze = true;
         //StartCoroutine(OpenBubbleRoutine());
         StartCoroutine(FreezeRoutine());
-        
+        StartPostProcessing();
     }
 
     public void StopFreeze()
     {
         //timeStopObject.SetActive(false);
         freeze = false;
+        StopPostProcessing();
     }
 
     IEnumerator FreezeRoutine()
@@ -313,6 +339,9 @@ public class TimeTravelController : MonoBehaviour
     {
         timeStopObject.transform.position = timeStopOrigin;
         timeStopObject.transform.localScale = Vector3.zero;
+        block.SetVector("_Center", timeStopOrigin);
+        block.SetFloat("_Radius", timeStopRadius);
+        bubbleInner.SetPropertyBlock(block);
         timeStopObject.SetActive(true);
         float t = 0f;
         float currentTime = 0f;
@@ -342,11 +371,6 @@ public class TimeTravelController : MonoBehaviour
         while (recording)
         {
             yield return null;
-            if (stepsRecorded > maxSteps)
-            {
-                //CancelRecord();
-                //break;
-            }
             foreach (IAffectedByTimeTravel affected in affectees)
             {
                 affected.SaveTimeState();
@@ -373,6 +397,10 @@ public class TimeTravelController : MonoBehaviour
             }
             foreach (IAffectedByTimeTravel affected in affectees)
             {
+                if (affected.IsFrozen())
+                {
+                    continue;
+                }
                 if (stepsRemaining == stepsToRewind)
                 {
                     affected.StartRewind();
@@ -393,10 +421,16 @@ public class TimeTravelController : MonoBehaviour
         }
         stepsRecorded = 0;
         isRewinding = false;
+        StopRewind();
         yield return null;
         StartRecord();
     }
 
+    public void TimeStopDamage(float damage)
+    {
+        meter.current -= damage * timeStopDamageCostRatio;
+        OnTimeStopHit.Invoke();
+    }
     public bool CanStartPower()
     {
         return meter.current >= 0f && timePowerClock <= 0f;
