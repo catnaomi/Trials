@@ -13,8 +13,6 @@ public interface IAffectedByTimeTravel
 
     public List<TimeTravelData> GetTimeStates();
 
-    public GameObject GetAfterImagePrefab();
-
     public bool IsFrozen();
 
     public void StartFreeze();
