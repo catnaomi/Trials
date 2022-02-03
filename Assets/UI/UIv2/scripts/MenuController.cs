@@ -17,6 +17,8 @@ public class MenuController : MonoBehaviour
 
     public bool inspectorShow;
     public List<string> itemsUnderCursor;
+
+    GameObject lastSelected;
     private void OnEnable()
     {
         menu = this;
@@ -29,12 +31,14 @@ public class MenuController : MonoBehaviour
 
     public void OnGUI()
     {
+        /*
         itemsUnderCursor.Clear();
         List<RaycastResult> results = RaycastMouse();
         foreach (RaycastResult result in results)
         {
             itemsUnderCursor.Add(result.gameObject.ToString());
         }
+        */
         if (inspectorShow && !showing)
         {
             ShowMenu();

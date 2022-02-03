@@ -1556,7 +1556,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void OnMenu(InputValue value)
     {
-        ToggleMenu();
+        if (!IsInDialogue())
+        {
+            ToggleMenu();
+        }
     }
     // checks to see if player input is accepted. used for inventory menu
     public bool CanPlayerInput()
@@ -1567,7 +1570,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         if (!isMenuOpen)
         {
-            MenuController.menu.ShowMenu();
+            MenuController.menu.OpenMenu(MenuController.Inventory);
             //isMenuOpen = true;
         }
         else
@@ -2097,7 +2100,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 yield return new WaitWhile(() => { return !animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].IsAnyStatePlaying(); });
             }
-            if (inventory.IsRangedDrawn())
+            else if (inventory.IsRangedDrawn())
             {
                 TriggerSheath(false, inventory.GetRangedWeapon().RangedEquipSlot, Inventory.RangedType);
             }
@@ -2109,7 +2112,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 TriggerSheath(false, inventory.GetOffWeapon().OffHandEquipSlot, Inventory.OffType);
             }
-            yield return new WaitForEndOfFrame();
+            yield return new WaitForSeconds(0.1f);
         }
     }
     #endregion

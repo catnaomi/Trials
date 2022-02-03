@@ -38,6 +38,7 @@ public class InventoryUI2 : MonoBehaviour
     public QuickSheatheIndicator sheathSlot;
 
     public GameObject selectPopup;
+    GameObject lastSelected;
     Item selectedItem;
     [ReadOnly] public EquippableWeapon quickSlotItem;
 
@@ -78,6 +79,18 @@ public class InventoryUI2 : MonoBehaviour
             }
            
         }
+        if (EventSystem.current.currentSelectedGameObject == null)
+        {
+            if (lastSelected != null && lastSelected.activeInHierarchy)
+            {
+                EventSystem.current.SetSelectedGameObject(lastSelected);
+            }
+            else
+            {
+                EventSystem.current.SetSelectedGameObject(GetFirstItem().gameObject);
+            }
+        }
+        lastSelected = EventSystem.current.currentSelectedGameObject;
     }
 
     public void Populate()
@@ -141,35 +154,37 @@ public class InventoryUI2 : MonoBehaviour
             }
             
         });
-        for (int j = 1; j < items.Count; j++)
+        for (int j = 0; j < items.Count; j++)
         {
             Selectable b = items[j];
 
             Navigation nav = new Navigation();
-            nav.mode =  Navigation.Mode.Automatic;
+            nav.mode =  Navigation.Mode.Explicit;
 
-            if (j >= 3) // up
+            int c = columns;
+
+            if (j >= c) // up
             {
-                if (items[j-3] != null)
+                if (items[j-c] != null)
                 {
-                    nav.selectOnUp = items[j - 3];
+                    nav.selectOnUp = items[j - c];
                 }
             }
-            if (j <= items.Count - 3) // down
+            if (j <= items.Count - c) // down
             {
-                if (j + 3 < items.Count && items[j + 3] != null)
+                if (j + c < items.Count && items[j + c] != null)
                 {
-                    nav.selectOnDown = items[j + 3];
+                    nav.selectOnDown = items[j + c];
                 }
             }
-            if (j % 3 != 0) // left
+            if (j % c != 0) // left
             {
                 if (items[j - 1] != null)
                 {
                     nav.selectOnLeft = items[j - 1];
                 }
             }
-            if (j % 3 != 2) // right
+            if (j % c != c-1) // right
             {
                 if (j + 1 < items.Count && items[j+1] != null)
                 {
