@@ -10,17 +10,16 @@ public class ArrowController : Projectile
     public Rigidbody feather;
     public Hitbox hitbox;
     public DamageKnockback damageKnockback;
-    public GameObject origin;
     public Interactable interactable;
+    public GameObject prefabRef;
     bool launched;
-    bool inFlight;
-    bool shouldStick;
-    Collider stickParent;
+    
     Vector3 stickPos;
     
     Vector3 initScale;
 
     Vector3 initPos;
+    float timeRemaining;
 
     private static readonly float ARROW_DURATION = 30f;
 
@@ -64,7 +63,10 @@ public class ArrowController : Projectile
         inFlight = false;
         //hitbox.SetActive(false);
     }
-
+    public override void SetHitbox(bool active)
+    {
+        hitbox.SetActive(active);
+    }
     private void OnArrowHit()
     {
         bool allowInteract = true;
@@ -231,6 +233,7 @@ public class ArrowController : Projectile
 
         arrowController.hitbox = Hitbox.CreateHitbox(arrowController.tip.position, 0.1f, arrowController.tip.transform, damageKnockback, source.gameObject);
 
+        arrowController.prefabRef = arrowPrefab;
 
         arrowController.Launch(position, angle, force, source, damageKnockback);
         //arrowController.hitbox.SetActive(true);

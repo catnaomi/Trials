@@ -2,7 +2,7 @@
 using System.Collections;
 
 [CreateAssetMenu(fileName = "Shield", menuName = "ScriptableObjects/CreateOffHandWeaponShield", order = 1)]
-public class OffHandShield : EquippableWeapon, HitboxHandler
+public class OffHandShield : EquippableWeapon, IHitboxHandler
 {
     [Range(0.01f, 1f)]
     public float reductionStrength;

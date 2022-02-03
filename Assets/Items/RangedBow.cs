@@ -3,7 +3,7 @@ using System.Collections;
 using CustomUtilities;
 
 [CreateAssetMenu(fileName = "Bow", menuName = "ScriptableObjects/Weapons/Create Bow", order = 1), SerializeField]
-public class RangedBow : RangedWeapon, HitboxHandler
+public class RangedBow : RangedWeapon, IHitboxHandler
 {
     public GameObject arrowPrefab;
     public GameObject deadArrowPrefab;

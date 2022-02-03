@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using CustomUtilities;
 
 [CreateAssetMenu(fileName = "BladeWeapon", menuName = "ScriptableObjects/Weapons/Create Blade Weapon", order = 1)]
-public class BladeWeapon : EquippableWeapon, HitboxHandler
+public class BladeWeapon : EquippableWeapon, IHitboxHandler
 {
     public float baseDamage;
     public float heartsDamage;

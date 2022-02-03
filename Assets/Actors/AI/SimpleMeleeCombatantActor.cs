@@ -317,18 +317,18 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         EquippableWeapon mainWeapon = inventory.GetMainWeapon();
         EquippableWeapon offHandWeapon = inventory.GetOffWeapon();
         EquippableWeapon rangedWeapon = inventory.GetRangedWeapon();
-        bool main = (mainWeapon != null && mainWeapon is HitboxHandler);
-        bool off = (offHandWeapon != null && offHandWeapon is HitboxHandler);
-        bool ranged = (rangedWeapon != null && rangedWeapon is HitboxHandler);
+        bool main = (mainWeapon != null && mainWeapon is IHitboxHandler);
+        bool off = (offHandWeapon != null && offHandWeapon is IHitboxHandler);
+        bool ranged = (rangedWeapon != null && rangedWeapon is IHitboxHandler);
         if (active == 0)
         {
             if (main)
             {
-                ((HitboxHandler)mainWeapon).HitboxActive(false);
+                ((IHitboxHandler)mainWeapon).HitboxActive(false);
             }
             if (off)
             {
-                ((HitboxHandler)offHandWeapon).HitboxActive(false);
+                ((IHitboxHandler)offHandWeapon).HitboxActive(false);
             }
             isHitboxActive = false;
         }
@@ -336,7 +336,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         {
             if (main)
             {
-                ((HitboxHandler)mainWeapon).HitboxActive(true);
+                ((IHitboxHandler)mainWeapon).HitboxActive(true);
             }
             isHitboxActive = true;
             OnHitboxActive.Invoke();
@@ -345,7 +345,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         {
             if (off)
             {
-                ((HitboxHandler)offHandWeapon).HitboxActive(true);
+                ((IHitboxHandler)offHandWeapon).HitboxActive(true);
             }
             isHitboxActive = true;
             OnHitboxActive.Invoke();
@@ -354,11 +354,11 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         {
             if (main)
             {
-                ((HitboxHandler)mainWeapon).HitboxActive(true);
+                ((IHitboxHandler)mainWeapon).HitboxActive(true);
             }
             if (off)
             {
-                ((HitboxHandler)offHandWeapon).HitboxActive(true);
+                ((IHitboxHandler)offHandWeapon).HitboxActive(true);
             }
             isHitboxActive = true;
             OnHitboxActive.Invoke();
@@ -367,7 +367,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         {
             if (ranged)
             {
-                ((HitboxHandler)rangedWeapon).HitboxActive(true);
+                ((IHitboxHandler)rangedWeapon).HitboxActive(true);
             }
             isHitboxActive = true;
             OnHitboxActive.Invoke();

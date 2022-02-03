@@ -8,6 +8,7 @@ public class Interactable : MonoBehaviour
     protected PlayerActor player;
     public bool canInteract;
     public GameObject interactIcon;
+    public float interactIconHeight = 1f;
     // Start is called before the first frame update
     void Start()
     {
@@ -59,7 +60,7 @@ public class Interactable : MonoBehaviour
     {
         if (interactIcon != null)
         {
-            interactIcon.SetActive(visible);
+            interactIcon.SetActive(false);
         }
         
     }

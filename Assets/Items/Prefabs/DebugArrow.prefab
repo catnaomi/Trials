@@ -212,6 +212,7 @@ GameObject:
   - component: {fileID: 9116056360068751391}
   - component: {fileID: 4963449807795735173}
   - component: {fileID: 4043126121033492655}
+  - component: {fileID: 3463198421341249673}
   m_Layer: 11
   m_Name: DebugArrow
   m_TagString: Untagged
@@ -329,6 +330,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b08aa21b5e3c774e972ed59379846e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  origin: {fileID: 0}
   tip: {fileID: 4963449807795735173}
   feather: {fileID: 495425492007682860}
   hitbox: {fileID: 0}
@@ -374,8 +376,26 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
-  origin: {fileID: 0}
   interactable: {fileID: 3029168984229030273}
+  prefabRef: {fileID: 0}
+  inFlight: 0
+--- !u!114 &3463198421341249673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4805927410726168974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6dba756fb12c50442ab4350923c1aff4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rigidbodies:
+  - {fileID: 4963449807795735173}
+  - {fileID: 495425492007682860}
+  timeTravelStates: []
+  timeTravelController: {fileID: 0}
 --- !u!1 &4833973344443458282
 GameObject:
   m_ObjectHideFlags: 0

@@ -186,7 +186,11 @@ public class TimeTravelController : MonoBehaviour
     public void RegisterAffectee(IAffectedByTimeTravel affectee)
     {
         affectees.Add(affectee);
-        
+    }
+
+    public void DeregisterAffectee(IAffectedByTimeTravel affectee)
+    {
+        affectees.Remove(affectee);
     }
 
     public void StartRecord()
@@ -373,7 +377,10 @@ public class TimeTravelController : MonoBehaviour
             yield return null;
             foreach (IAffectedByTimeTravel affected in affectees)
             {
-                affected.SaveTimeState();
+                if (!affected.IsFrozen())
+                {
+                    affected.SaveTimeState();
+                }
             }
             stepsRecorded++;
 

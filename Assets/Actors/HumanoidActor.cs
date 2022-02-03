@@ -842,17 +842,17 @@ public class HumanoidActor : Actor
     {
         EquippableWeapon mainWeapon = inventory.GetMainWeapon();
         EquippableWeapon offHandWeapon = inventory.GetOffWeapon();
-        bool main = (mainWeapon != null && mainWeapon is HitboxHandler);
-        bool off = (offHandWeapon != null && offHandWeapon is HitboxHandler);
+        bool main = (mainWeapon != null && mainWeapon is IHitboxHandler);
+        bool off = (offHandWeapon != null && offHandWeapon is IHitboxHandler);
         if (active == 0)
         {
             if (main)
             {
-                ((HitboxHandler)mainWeapon).HitboxActive(false);
+                ((IHitboxHandler)mainWeapon).HitboxActive(false);
             }
             if (off)
             {
-                ((HitboxHandler)offHandWeapon).HitboxActive(false);
+                ((IHitboxHandler)offHandWeapon).HitboxActive(false);
             }
             isHitboxActive = false;
         }
@@ -860,7 +860,7 @@ public class HumanoidActor : Actor
         {
             if (main)
             {
-                ((HitboxHandler)mainWeapon).HitboxActive(true);
+                ((IHitboxHandler)mainWeapon).HitboxActive(true);
             }
             isHitboxActive = true;
             OnHitboxActive.Invoke();
@@ -869,7 +869,7 @@ public class HumanoidActor : Actor
         {
             if (off)
             {
-                ((HitboxHandler)offHandWeapon).HitboxActive(true);
+                ((IHitboxHandler)offHandWeapon).HitboxActive(true);
             }
             isHitboxActive = true;
             OnHitboxActive.Invoke();
@@ -878,11 +878,11 @@ public class HumanoidActor : Actor
         {
             if (main)
             {
-                ((HitboxHandler)mainWeapon).HitboxActive(true);
+                ((IHitboxHandler)mainWeapon).HitboxActive(true);
             }
             if (off)
             {
-                ((HitboxHandler)offHandWeapon).HitboxActive(true);
+                ((IHitboxHandler)offHandWeapon).HitboxActive(true);
             }
             isHitboxActive = true;
             OnHitboxActive.Invoke();

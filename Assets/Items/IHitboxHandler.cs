@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public interface HitboxHandler
+public interface IHitboxHandler
 {
     void HitboxActive(bool active);
 }

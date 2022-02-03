@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class ArrowLauncher : MonoBehaviour
 {
@@ -19,14 +20,13 @@ public class ArrowLauncher : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Launch || Input.GetButtonDown("Debug"))
+        if (Gamepad.current != null && Gamepad.current.selectButton.wasPressedThisFrame)
+        {
+            Launch = true;
+        }
+        if (Launch)
         {
             Launch = false;
-            //GameObject newArrow = Instantiate(arrow, transform.position, transform.rotation);
-            //Transform tip = newArrow.transform.Find("TipRoot");
-            //newArrow.GetComponentInChildren<Rigidbody>().AddForce(this.transform.forward * force, ForceMode.VelocityChange);
-
-            //newArrow.GetComponentInChildren<ArrowController>().Launch(this.transform.forward * force, this.transform.root, damageKnockback);
 
             ArrowController.Launch(arrow, transform.position, Quaternion.LookRotation(this.transform.forward), this.transform.forward * force, this.transform, this.damageKnockback);
             

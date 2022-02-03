@@ -178,6 +178,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     [Header("Targeting")]
     public UnityEvent toggleTarget;
     public UnityEvent changeTarget;
+    [Header("Controls")]
+    public UnityEvent onControlsChanged;
+    public UnityEvent onNewCurrentInteractable;
     struct AnimState
     {
         public MixerState move;
@@ -1545,6 +1548,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         
     }
 
+    void OnControlsChanged()
+    {
+        onControlsChanged.Invoke();
+    }
     #region MENUS
 
     public void OnMenu(InputValue value)
@@ -2119,22 +2126,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         EquippableWeapon mainWeapon = inventory.GetMainWeapon();
         EquippableWeapon offHandWeapon = inventory.GetOffWeapon();
         EquippableWeapon rangedWeapon = inventory.GetRangedWeapon();
-        bool main = (mainWeapon != null && mainWeapon is HitboxHandler);
-        bool off = (offHandWeapon != null && offHandWeapon is HitboxHandler);
-        bool ranged = (rangedWeapon != null && rangedWeapon is HitboxHandler);
+        bool main = (mainWeapon != null && mainWeapon is IHitboxHandler);
+        bool off = (offHandWeapon != null && offHandWeapon is IHitboxHandler);
+        bool ranged = (rangedWeapon != null && rangedWeapon is IHitboxHandler);
         if (active == 0)
         {
             if (main)
             {
-                ((HitboxHandler)mainWeapon).HitboxActive(false);
+                ((IHitboxHandler)mainWeapon).HitboxActive(false);
             }
             if (off)
             {
-                ((HitboxHandler)offHandWeapon).HitboxActive(false);
+                ((IHitboxHandler)offHandWeapon).HitboxActive(false);
             }
             if (ranged)
             {
-                ((HitboxHandler)rangedWeapon).HitboxActive(false);
+                ((IHitboxHandler)rangedWeapon).HitboxActive(false);
             }
             isHitboxActive = false;
             //SetAimAtkLockout(false);
@@ -2143,7 +2150,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             if (main)
             {
-                ((HitboxHandler)mainWeapon).HitboxActive(true);
+                ((IHitboxHandler)mainWeapon).HitboxActive(true);
             }
             isHitboxActive = true;
             OnHitboxActive.Invoke();
@@ -2152,7 +2159,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             if (off)
             {
-                ((HitboxHandler)offHandWeapon).HitboxActive(true);
+                ((IHitboxHandler)offHandWeapon).HitboxActive(true);
             }
             isHitboxActive = true;
             OnHitboxActive.Invoke();
@@ -2161,11 +2168,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             if (main)
             {
-                ((HitboxHandler)mainWeapon).HitboxActive(true);
+                ((IHitboxHandler)mainWeapon).HitboxActive(true);
             }
             if (off)
             {
-                ((HitboxHandler)offHandWeapon).HitboxActive(true);
+                ((IHitboxHandler)offHandWeapon).HitboxActive(true);
             }
             isHitboxActive = true;
             OnHitboxActive.Invoke();
@@ -2174,7 +2181,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             if (ranged)
             {
-                 ((HitboxHandler)rangedWeapon).HitboxActive(true);
+                 ((IHitboxHandler)rangedWeapon).HitboxActive(true);
             }
             isHitboxActive = true;
             OnHitboxActive.Invoke();
@@ -2494,6 +2501,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public Interactable GetHighlightedInteractable()
     {
+        Interactable lastInteractable = highlightedInteractable;
         highlightedInteractable = null;
         float leadDist = Mathf.Infinity;
 
@@ -2511,6 +2519,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (highlightedInteractable != null)
         {
             highlightedInteractable.SetIconVisiblity(true);
+        }
+        if (highlightedInteractable != lastInteractable)
+        {
+            onNewCurrentInteractable.Invoke();
         }
         return highlightedInteractable;
     }

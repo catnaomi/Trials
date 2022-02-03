@@ -4,7 +4,8 @@ using UnityEngine;
 
 public abstract class Projectile : MonoBehaviour
 {
-   
+    public GameObject origin;
+    [ReadOnly] public bool inFlight;
     public static Projectile Launch(GameObject prefab, Vector3 position, Quaternion angle, Vector3 force, Transform source, DamageKnockback damageKnockback)
     {
         
@@ -22,4 +23,6 @@ public abstract class Projectile : MonoBehaviour
         obj.SetActive(false);
         return controller;
     }
+
+    public abstract void SetHitbox(bool active);
 }
