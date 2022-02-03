@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-[ExecuteInEditMode]
+//[ExecuteInEditMode]
 public class ScaleBasedOnText : MonoBehaviour
 {
     public RectTransform rectTransform;

@@ -20,15 +20,17 @@ public class DialogueActorOverride : Interactable
         player.SheatheAll();
         player.SetCombatTarget(lookAtTarget);
         player.StartDialogue();
-        try
+        this.GetComponent<YarnPlayer>().Play();
+        
+        /*try
         {
-            this.GetComponent<YarnPlayer>().Play();
+            
         }
         catch (Exception ex)
         {
             Debug.LogError(ex);
             return;
-        }
+        }*/
         
         dialogue = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
         dialogue.onDialogueComplete.AddListener(StopDialogue);

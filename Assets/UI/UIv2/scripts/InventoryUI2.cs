@@ -79,7 +79,7 @@ public class InventoryUI2 : MonoBehaviour
             }
            
         }
-        if (EventSystem.current.currentSelectedGameObject == null)
+        if (EventSystem.current.currentSelectedGameObject == null || !EventSystem.current.currentSelectedGameObject.activeInHierarchy)
         {
             if (lastSelected != null && lastSelected.activeInHierarchy)
             {
@@ -135,7 +135,7 @@ public class InventoryUI2 : MonoBehaviour
             if (usingQuickslots)
             {
                 //displayItem.GetComponent<Button>().onClick.AddListener(displayItem.StartEquip);
-                displayItem.onClick.AddListener(() => { ItemSelect(displayItem); });
+                displayItem.button.onClick.AddListener(() => { ItemSelect(displayItem); });
             }
             
             
@@ -156,7 +156,7 @@ public class InventoryUI2 : MonoBehaviour
         });
         for (int j = 0; j < items.Count; j++)
         {
-            Selectable b = items[j];
+            Selectable b = items[j].button;
 
             Navigation nav = new Navigation();
             nav.mode =  Navigation.Mode.Explicit;
@@ -167,28 +167,28 @@ public class InventoryUI2 : MonoBehaviour
             {
                 if (items[j-c] != null)
                 {
-                    nav.selectOnUp = items[j - c];
+                    nav.selectOnUp = items[j - c].button;
                 }
             }
             if (j <= items.Count - c) // down
             {
                 if (j + c < items.Count && items[j + c] != null)
                 {
-                    nav.selectOnDown = items[j + c];
+                    nav.selectOnDown = items[j + c].button;
                 }
             }
             if (j % c != 0) // left
             {
                 if (items[j - 1] != null)
                 {
-                    nav.selectOnLeft = items[j - 1];
+                    nav.selectOnLeft = items[j - 1].button;
                 }
             }
             if (j % c != c-1) // right
             {
                 if (j + 1 < items.Count && items[j+1] != null)
                 {
-                    nav.selectOnRight = items[j + 1];
+                    nav.selectOnRight = items[j + 1].button;
                 }
             }
             b.navigation = nav;

@@ -7,8 +7,9 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class InventoryItemDisplay : Selectable, ISelectHandler
+public class InventoryItemDisplay : MonoBehaviour, ISelectHandler
 {
+    public Button button;
     public Item item;
     public Sprite generic;
     public TMP_Text desc_text;
@@ -22,8 +23,6 @@ public class InventoryItemDisplay : Selectable, ISelectHandler
     bool updateOnGUI;
     bool highlighted;
     bool clicked;
-    public UnityEvent onHover;
-    public UnityEvent onClick;
     // Start is called before the first frame update
     void Start()
     {
@@ -63,16 +62,7 @@ public class InventoryItemDisplay : Selectable, ISelectHandler
         }
 
         selectHighlight.enabled = showSelectHighlight;
-        //Check if the GameObject is being highlighted
-        if (IsHighlighted() || IsPressed() == true)
-        {
-            //UpdatePreview();
-        }
-        if (!clicked && IsPressed())
-        {
-            onClick.Invoke();
-        }
-        clicked = IsPressed();
+
     }
     public void SetItem(Item item)
     {
@@ -80,10 +70,13 @@ public class InventoryItemDisplay : Selectable, ISelectHandler
         updateOnGUI = true;
     }
 
-    public override void OnSelect(BaseEventData eventData)
+    public void OnSelect(BaseEventData eventData)
     {
+        if (eventData.selectedObject != this.gameObject)
+        {
+            return;
+        }
         UpdatePreview();
-        onHover.Invoke();
         if (scroll) {
             Transform content = this.transform.parent;
             RectTransform viewport = (RectTransform)content.parent.parent;

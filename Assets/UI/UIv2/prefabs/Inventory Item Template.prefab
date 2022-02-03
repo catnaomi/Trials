@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5050991396303768378}
   - component: {fileID: 4682037414378931834}
   - component: {fileID: 6604889034934012215}
+  - component: {fileID: 4291416153158218012}
   m_Layer: 5
   m_Name: Inventory Item Template
   m_TagString: Untagged
@@ -92,6 +93,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c890fb0d1f7e36408c870801ba420e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  button: {fileID: 4291416153158218012}
+  item: {fileID: 0}
+  generic: {fileID: 0}
+  desc_text: {fileID: 0}
+  name_text: {fileID: 0}
+  number: {fileID: 156055331772929963}
+  scroll: 1
+  image: {fileID: 6359632858438990503}
+  selectHighlight: {fileID: 488858588159106165}
+  showSelectHighlight: 0
+--- !u!114 &4291416153158218012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4386732104074839357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 4
     m_WrapAround: 0
@@ -122,19 +145,7 @@ MonoBehaviour:
     m_DisabledTrigger: Disabled
   m_Interactable: 1
   m_TargetGraphic: {fileID: 4682037414378931834}
-  item: {fileID: 0}
-  generic: {fileID: 0}
-  desc_text: {fileID: 0}
-  name_text: {fileID: 0}
-  number: {fileID: 156055331772929963}
-  scroll: 1
-  image: {fileID: 6359632858438990503}
-  selectHighlight: {fileID: 488858588159106165}
-  showSelectHighlight: 0
-  onHover:
-    m_PersistentCalls:
-      m_Calls: []
-  onClick:
+  m_OnClick:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &5290128272399107619

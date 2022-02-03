@@ -1496,6 +1496,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void OnTarget(InputValue value)
     {
+        if (!CanPlayerInput()) return;
         toggleTarget.Invoke();
     }
 

@@ -151,32 +151,32 @@ public class CraftMenuController : MonoBehaviour
         {
             if (currentComponent is Hilt || currentComponent is Blade || currentComponent is Adornment)
             {
-                slotSelect_main.interactable = true;
+                slotSelect_main.button.interactable = true;
                 slotSelect_main.showSelectHighlight = true;
                 for (int i = 0; i < slotSelect_insets.Length; i++)
                 {
-                    slotSelect_insets[i].interactable = false;
+                    slotSelect_insets[i].button.interactable = false;
                     slotSelect_insets[i].showSelectHighlight = false;
                 }
             }
             else if (currentComponent is Inset)
             {
-                slotSelect_main.interactable = false;
+                slotSelect_main.button.interactable = false;
                 slotSelect_main.showSelectHighlight = false;
                 for (int i = 0; i < slotSelect_insets.Length; i++)
                 {
-                    slotSelect_insets[i].interactable = true;
+                    slotSelect_insets[i].button.interactable = true;
                     slotSelect_insets[i].showSelectHighlight = true;
                 }
             }
         }
         else
         {
-            slotSelect_main.interactable = true;
+            slotSelect_main.button.interactable = true;
             slotSelect_main.showSelectHighlight = false;
             for (int i = 0; i < slotSelect_insets.Length; i++)
             {
-                slotSelect_insets[i].interactable = true;
+                slotSelect_insets[i].button.interactable = true;
                 slotSelect_insets[i].showSelectHighlight = false;
             }
         }

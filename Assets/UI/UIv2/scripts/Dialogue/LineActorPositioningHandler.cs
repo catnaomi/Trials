@@ -11,6 +11,7 @@ public class LineActorPositioningHandler : MonoBehaviour
     public RectTransform dialogueParent;
     public Transform lineMount;
     public LineRenderer lineRenderer;
+    public CanvasGroup dialogueGroup;
     public float speed = 25f;
     public float width = 728f;
     public float height = 300f;
@@ -39,10 +40,11 @@ public class LineActorPositioningHandler : MonoBehaviour
     }
     private void OnGUI()
     {
-        if (dialogueRunner.IsDialogueRunning)
+        if (dialogueRunner.IsDialogueRunning && dialogueGroup.alpha > 0)
         {
             if (speaker != null)
             {
+                lineRenderer.enabled = true;
                 float x = Camera.main.WorldToViewportPoint(speaker.transform.position).x;
                 if (!isLeft && x > 0.6f)
                 {
@@ -50,6 +52,7 @@ public class LineActorPositioningHandler : MonoBehaviour
                 }
                 else if (isLeft && x < 0.4f)
                 {
+
                     isLeft = false;
                 }
                 t = Mathf.MoveTowards(t, isLeft ? 0f : 1f, speed * Time.deltaTime);
@@ -68,6 +71,15 @@ public class LineActorPositioningHandler : MonoBehaviour
                 lineRenderer.SetPosition(0, new Vector2(position.x,position.y + height * 0.75f));
                 lineRenderer.SetPosition(1, linePointReal);// - ((RectTransform)lineMount).rect.center);
             }
+            else
+            {
+                lineRenderer.enabled = false;
+            }
+            
+        }
+        else
+        {
+            lineRenderer.enabled = false;
         }
     }
 
