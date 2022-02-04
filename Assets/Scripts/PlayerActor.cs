@@ -118,6 +118,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float aimCancelTime = 2f;
     public float aimTime;
     public float aimStartTime = 0.25f;
+    Vector2 camAimSpeeds;
     [Range(-1f,1f)]
     public float thrustIKValue;
     public float thrustIKWeight;
@@ -321,6 +322,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         OnHurt.AddListener(() => { HitboxActive(0); });
         OnAttack.AddListener(RealignToTarget);
+
+        onControlsChanged.AddListener(HandleCinemachine);
+        
     }
 
 
@@ -739,7 +743,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 state.swim = animancer.Play(swimAnim);
                 this.gameObject.SendMessage("SplashBig");
             }
-            if (attack && !animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].IsAnyStatePlaying())
+            if (aiming)
+            {
+                Aim();
+            }
+            else if (attack && !animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].IsAnyStatePlaying())
             {
                 if (!inventory.IsMainDrawn())
                 {
@@ -894,33 +902,55 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             aimForwardVector = Quaternion.AngleAxis(look.x * horizontalAimSpeed * Time.deltaTime, Vector3.up) * aimForwardVector;
 
             bool turn = false;
-            /*
-            if (move.magnitude > 0f)
+            if (false)//GetGrounded())
             {
-                lookDirection = aimForwardVector;
+                
+                if (move.magnitude > 0f)
+                {
+                    lookDirection = aimForwardVector;
+                }
+                else
+                {
+                    turn = true;
+                    lookDirection = this.transform.forward;
+                }
             }
             else
             {
-                turn = true;
-                lookDirection = this.transform.forward;
-            }*/
-            lookDirection = Camera.main.transform.forward;
-            lookDirection.y = 0;
+                lookDirection = Camera.main.transform.forward;
+                lookDirection.y = 0;
+            }
+            
+            
             if (state.aim is DirectionalMixerState aimDir)
             {
-                aimDir.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
-                aimDir.ParameterY = Vector3.Dot(moveDirection, this.transform.forward) * (speed / walkSpeedMax);
-                if (aimDir.ChildStates[0] is LinearMixerState aimTurn)
+                try
                 {
-                    if (turn)
+                    aimDir.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
+                    aimDir.ParameterY = Vector3.Dot(moveDirection, this.transform.forward) * (speed / walkSpeedMax);
+                    if (aimDir.ChildStates[0] is LinearMixerState aimTurn)
                     {
-                        aimTurn.Parameter = Vector3.SignedAngle(lookDirection, aimForwardVector, Vector3.up);
-                    }
-                    else
-                    {
-                        aimTurn.Parameter = 0f;
+                        if (turn)
+                        {
+                            float angle = Vector3.SignedAngle(lookDirection, aimForwardVector, Vector3.up);
+                            aimTurn.Parameter = Mathf.Clamp(angle, -10f, 10f);
+                            if (Mathf.Abs(angle) > 10f)
+                            {
+                                lookDirection = Vector3.RotateTowards(lookDirection, aimForwardVector, (Mathf.Abs(angle) - 10f) * Mathf.Deg2Rad, 1f);
+                            }
+                        }
+                        else
+                        {
+                            aimTurn.Parameter = 0f;
+                        }
                     }
                 }
+                catch (ArgumentOutOfRangeException ex)
+                {
+                    Debug.LogError(ex);
+
+                }
+                
             }
             if (inventory.IsRangedEquipped())
             {
@@ -936,11 +966,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         begin = aiming;
                         break;
                     case RangedWeapon.FireMode.TriggerAndAttackRelease:
-                        atk = !IsAttackHeld();
-                        begin = IsAttackHeld();
+                        atk = !IsSlashHeld();
+                        begin = IsSlashHeld();
                         break;
                     case RangedWeapon.FireMode.TriggerAndAttackPress:
-                        atk = IsAttackHeld();
+                        atk = IsSlashHeld();
                         begin = aiming;
                         break;
                 }
@@ -1062,7 +1092,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         #endregion
 
-
+        if (TimeTravelController.time != null && TimeTravelController.time.IsSlowingTime())
+        {
+            animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Base].Speed = 1f / TimeTravelController.time.timeSlowAmount;
+            animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].Speed = 1f / TimeTravelController.time.timeSlowAmount;
+        }
+        else
+        {
+            animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Base].Speed = 1f;
+            animancer.Layers[(int)HumanoidPositionReference.AnimLayer.UpperBody].Speed = 1f;
+        }
 
         if (GetGrounded())
         {
@@ -1295,7 +1334,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             camState = CameraState.Free;
         }
-        if (camState != prevCamState)
+        if (true)
         {
             if (vcam.free != null) vcam.free.m_Priority = (camState == CameraState.Free) ? 10 : 1;//gameObject.SetActive(camState == CameraState.Free);
             if (vcam.climb != null) vcam.climb.m_Priority = (camState == CameraState.Climb) ? 10 : 1;//.gameObject.SetActive(camState == CameraState.Climb);
@@ -1304,6 +1343,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (vcam.dialogue != null) vcam.dialogue.m_Priority = (camState == CameraState.Dialogue) ? 10 : 1;//.gameObject.SetActive(camState == CameraState.D);
         }
         prevCamState = camState;
+    }
+
+    public void InitializeAimCameras()
+    {
+        if (vcam.aim is CinemachineMixingCamera aimMix)
+        {
+            //((CinemachineMixingCamera)vcam.aim).
+        }
     }
     public enum CameraState
     {
@@ -1463,6 +1510,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         bool s = this.GetComponent<PlayerInput>().actions["Atk_Slash"].IsPressed();
         bool t = this.GetComponent<PlayerInput>().actions["Atk_Thrust"].IsPressed();
         return s || t;
+    }
+
+    public bool IsSlashHeld()
+    {
+        if (!CanPlayerInput()) return false;
+        return this.GetComponent<PlayerInput>().actions["Atk_Slash"].IsPressed();
+    }
+
+    public bool IsThrustHeld()
+    {
+        if (!CanPlayerInput()) return false;
+        return this.GetComponent<PlayerInput>().actions["Atk_Thrust"].IsPressed();
     }
 
     void BlockStart()
@@ -2475,6 +2534,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return this.GetCombatTarget() != null && !IsInDialogue();
     }
 
+    public bool ShouldSlowTime()
+    {
+        return this.IsAiming() && camState == CameraState.Aim && IsAttackHeld();
+    }
     public override void SetToIdle()
     {
         animancer.Play(state.move);

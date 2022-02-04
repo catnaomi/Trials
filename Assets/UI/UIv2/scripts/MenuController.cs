@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
@@ -17,6 +18,9 @@ public class MenuController : MonoBehaviour
 
     public bool inspectorShow;
     public List<string> itemsUnderCursor;
+
+    public UnityEvent OnMenuOpen;
+    public UnityEvent OnMenuClose;
 
     GameObject lastSelected;
     private void OnEnable()

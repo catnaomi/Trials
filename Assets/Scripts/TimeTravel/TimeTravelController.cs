@@ -35,6 +35,11 @@ public class TimeTravelController : MonoBehaviour
     public List<IAffectedByTimeTravel> frozens;
     public UnityEvent OnTimeStopHit;
     bool updateFreeze;
+    [Header("Slow Time Settings")]
+    public float timeSlowAmount = 0.5f;
+    bool isSlowing;
+    public UnityEvent OnSlowTimeStart;
+    public UnityEvent OnSlowTimeStop;
     [Header("Meter Settings")]
     public AttributeValue meter = new AttributeValue(60f, 60f, 60f);
     public float timePowerRecoveryRate;
@@ -43,6 +48,7 @@ public class TimeTravelController : MonoBehaviour
     public float timePowerCooldown = 5f;
     public float timePowerClock = 0f;
     public float timeStopDamageCostRatio = 1f;
+    public float timeAimSlowDrainRate = 5f;
     public UnityEvent OnCooldownFail;
     public UnityEvent OnCooldownComplete;
     public UnityEvent OnMeterFail;
@@ -106,6 +112,15 @@ public class TimeTravelController : MonoBehaviour
                 OnMeterFail.Invoke();
             }
         }
+        else if (isSlowing)
+        {
+            meter.current -= timeAimSlowDrainRate * Time.deltaTime;
+            if (meter.current < 0f)
+            {
+                meter.current = 0f;
+                StopSlowTime();
+            }
+        }
         else
         {
             if (meter.current < 0f)
@@ -129,13 +144,29 @@ public class TimeTravelController : MonoBehaviour
                 }
             }
         }
+        bool slow = PlayerActor.player.ShouldSlowTime();
+        if (slow && !isSlowing)
+        {
+            if (meter.current >= 10f)
+            {
+                StartSlowTime();
+            }
+        }
+        else if (!slow && isSlowing)
+        {
+            StopSlowTime();
+        }
     }
 
     void SetupInput()
     {
         playerInput.actions["UsePower"].performed += (c) =>
         {
-            if (!isRewinding && !freeze && c.interaction is TapInteraction)
+            if (isSlowing)
+            {
+                // do nothing
+            }
+            else if (!isRewinding && !freeze && c.interaction is TapInteraction)
             {
                 if (!CanStartPower())
                 {
@@ -172,7 +203,11 @@ public class TimeTravelController : MonoBehaviour
 
         playerInput.actions["UsePower"].canceled += (c) =>
         {
-            if (isRewinding)
+            if (isSlowing)
+            {
+                // do nothing
+            }
+            else if (isRewinding)
             {
                 CancelRewind();
             }
@@ -437,6 +472,37 @@ public class TimeTravelController : MonoBehaviour
     {
         meter.current -= damage * timeStopDamageCostRatio;
         OnTimeStopHit.Invoke();
+    }
+
+    public bool IsSlowingTime()
+    {
+        return isSlowing;
+    }
+    public void StartSlowTime()
+    {
+        isSlowing = true;
+        //meter.current -= timeAimSlowDrainRate + timePowerRecoveryRate;
+        StartCoroutine("SlowTimeRoutine");
+        StartPostProcessing();
+        OnSlowTimeStart.Invoke();
+    }
+
+    public void StopSlowTime()
+    {
+        isSlowing = false;
+        StopPostProcessing();
+        OnSlowTimeStop.Invoke();
+    }
+
+    IEnumerator SlowTimeRoutine()
+    {
+        float timeScale = Time.timeScale;
+        float timeFixed = Time.fixedDeltaTime;
+        Time.timeScale = timeScale * timeSlowAmount;
+        Time.fixedDeltaTime = timeFixed * timeSlowAmount;
+        yield return new WaitWhile(() => { return isSlowing; });
+        Time.timeScale = timeScale;
+        Time.fixedDeltaTime = timeFixed;
     }
     public bool CanStartPower()
     {

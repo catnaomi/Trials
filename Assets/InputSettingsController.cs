@@ -9,65 +9,134 @@ public class InputSettingsController : MonoBehaviour
     public PlayerInput playerInput;
     [ReadOnly] public string currentControlScheme;
 
-    public CinemachineFreeLook free_gamepad;
-    public CinemachineFreeLook free_mouse;
-    Vector2 free_mouseSpeeds;
-    public CinemachineFreeLook dialogue_mouse;
-    Vector2 dialogue_mouseSpeeds;
-    public CinemachineFreeLook dialogue_gamepad;
+    //public float gamepad2Mouse = 1.3f;
+    //public float gamepad2MouseAim = 3f;
+
+    public PlayerActor.VirtualCameras mouseVcams;
+    public PlayerActor.VirtualCameras gamepadVcams;
+
+    Vector2 free_speedsMouse;
+    Vector2 dialogue_speedsMouse;
+
+    Vector2 aim_speedsGamepad;
+    Vector2 aim_speedsMouse;
+    //Vector2 climb_speeds;
     void Start()
     {
         if (playerInput == null)
         {
             playerInput = PlayerActor.player.GetComponent<PlayerInput>();
         }
+
+        aim_speedsGamepad = new Vector2(((CinemachineFreeLook)gamepadVcams.aim).m_XAxis.m_MaxSpeed, ((CinemachineFreeLook)gamepadVcams.aim).m_YAxis.m_MaxSpeed);
+        aim_speedsMouse = new Vector2(((CinemachineFreeLook)mouseVcams.aim).m_XAxis.m_MaxSpeed, ((CinemachineFreeLook)mouseVcams.aim).m_YAxis.m_MaxSpeed);
+
+        free_speedsMouse = new Vector2(((CinemachineFreeLook)mouseVcams.free).m_XAxis.m_MaxSpeed, ((CinemachineFreeLook)mouseVcams.free).m_YAxis.m_MaxSpeed);
+        dialogue_speedsMouse = new Vector2(((CinemachineFreeLook)mouseVcams.dialogue).m_XAxis.m_MaxSpeed, ((CinemachineFreeLook)mouseVcams.dialogue).m_YAxis.m_MaxSpeed);
+
+
         if (playerInput != null)
         {
             PlayerActor.player.onControlsChanged.AddListener(SetCameraBasedOnControlScheme);
             SetCameraBasedOnControlScheme();
+            playerInput.actions["AllowMenuLook"].started += (c) =>
+            {
+                CheckLook();
+            };
+            playerInput.actions["AllowMenuLook"].canceled += (c) =>
+            {
+                CheckLook();
+            };
         }
-        free_mouseSpeeds = new Vector2(free_mouse.m_XAxis.m_MaxSpeed, free_mouse.m_YAxis.m_MaxSpeed);
-        dialogue_mouseSpeeds = new Vector2(dialogue_mouse.m_XAxis.m_MaxSpeed, dialogue_mouse.m_YAxis.m_MaxSpeed);
+        
+        if (TimeTravelController.time != null)
+        {
+            TimeTravelController.time.OnSlowTimeStart.AddListener(OnStartSlowTime);
+            TimeTravelController.time.OnSlowTimeStop.AddListener(OnStopSlowTime);
+        }
+
+
     }
 
     public void SetCameraBasedOnControlScheme()
     {
         currentControlScheme = playerInput.currentControlScheme;
+
         switch(currentControlScheme)
         {
             case "Keyboard":
-                PlayerActor.player.vcam.free = free_mouse;
-                free_mouse.gameObject.SetActive(true);
-                free_gamepad.gameObject.SetActive(false);
-                dialogue_gamepad.gameObject.SetActive(false);
-                dialogue_mouse.gameObject.SetActive(true);
+                if (MenuController.menu != null)
+                {
+                    MenuController.menu.OnMenuOpen.AddListener(CheckLook);
+                    MenuController.menu.OnMenuClose.AddListener(CheckLook);
+                }
+                SetVirtualCamerasActive(gamepadVcams, false);
+                SetVirtualCamerasActive(mouseVcams, true);
+                PlayerActor.player.vcam = mouseVcams;
                 break;
             default:
             case "Gamepad":
-                PlayerActor.player.vcam.free = free_gamepad;
-                free_mouse.gameObject.SetActive(false);
-                free_gamepad.gameObject.SetActive(true);
-                dialogue_gamepad.gameObject.SetActive(true);
-                dialogue_mouse.gameObject.SetActive(false);
+                if (MenuController.menu != null)
+                {
+                    MenuController.menu.OnMenuOpen.RemoveListener(CheckLook);
+                    MenuController.menu.OnMenuClose.RemoveListener(CheckLook);
+                }
+                SetVirtualCamerasActive(mouseVcams, false);
+                SetVirtualCamerasActive(gamepadVcams, true);
+                PlayerActor.player.vcam = gamepadVcams;
                 break;
         }
+
     }
-    // Update is called once per frame
-    void Update()
+
+    public void CheckLook()
     {
-        
-        if (currentControlScheme == "Keyboard")
+        bool allowLook = playerInput.actions["AllowMenuLook"].IsPressed();
+        if (currentControlScheme == "Keyboard" && !allowLook && PlayerActor.player.isMenuOpen)
         {
-            float allowLook = 1f;
-            if (PlayerActor.player.isMenuOpen)
-            {
-                allowLook = playerInput.actions["AllowMenuLook"].IsPressed() ? 1f : 0f;
-                Cursor.visible = !playerInput.actions["AllowMenuLook"].IsPressed();
-            }
-            dialogue_mouse.m_XAxis.m_MaxSpeed = dialogue_mouseSpeeds.x * allowLook;
-            dialogue_mouse.m_YAxis.m_MaxSpeed = dialogue_mouseSpeeds.y * allowLook;
-            free_mouse.m_XAxis.m_MaxSpeed = free_mouseSpeeds.x * allowLook;
-            free_mouse.m_YAxis.m_MaxSpeed = free_mouseSpeeds.y * allowLook;
+            ((CinemachineFreeLook)mouseVcams.dialogue).m_XAxis.m_MaxSpeed = 0f;
+            ((CinemachineFreeLook)mouseVcams.dialogue).m_YAxis.m_MaxSpeed = 0f;
+            ((CinemachineFreeLook)mouseVcams.free).m_XAxis.m_MaxSpeed = 0f;
+            ((CinemachineFreeLook)mouseVcams.free).m_YAxis.m_MaxSpeed = 0f;
         }
+        else
+        {
+            ((CinemachineFreeLook)mouseVcams.free).m_XAxis.m_MaxSpeed = free_speedsMouse.x;
+            ((CinemachineFreeLook)mouseVcams.free).m_YAxis.m_MaxSpeed = free_speedsMouse.y;
+
+            ((CinemachineFreeLook)mouseVcams.dialogue).m_XAxis.m_MaxSpeed = dialogue_speedsMouse.x;
+            ((CinemachineFreeLook)mouseVcams.dialogue).m_YAxis.m_MaxSpeed = dialogue_speedsMouse.y;
+            if (currentControlScheme == "Keyboard" && PlayerActor.player.isMenuOpen)
+            {
+                Cursor.visible = false;
+            }
+        }
+    }
+
+    public void AdjustAimCameraSpeed(bool slow)
+    {
+        float multiplier = slow ? (1f / TimeTravelController.time.timeSlowAmount) : 1f;
+        Vector2 speeds = (currentControlScheme == "Keyboard") ? aim_speedsMouse : aim_speedsGamepad;
+        PlayerActor.VirtualCameras vcam = (currentControlScheme == "Keyboard") ? mouseVcams : gamepadVcams;
+        ((CinemachineFreeLook)vcam.aim).m_XAxis.m_MaxSpeed = speeds.x * multiplier;
+        ((CinemachineFreeLook)vcam.aim).m_YAxis.m_MaxSpeed = speeds.y * multiplier;
+    } 
+
+    public void OnStartSlowTime()
+    {
+        AdjustAimCameraSpeed(true);
+    }
+    public void OnStopSlowTime()
+    {
+        AdjustAimCameraSpeed(false);
+    }
+
+    public void SetVirtualCamerasActive(PlayerActor.VirtualCameras vcams, bool active)
+    {
+        vcams.aim.gameObject.SetActive(active);
+        vcams.climb.gameObject.SetActive(active);
+        vcams.dialogue.gameObject.SetActive(active);
+        vcams.free.gameObject.SetActive(active);
+        vcams.target.gameObject.SetActive(active);
     }
 }
