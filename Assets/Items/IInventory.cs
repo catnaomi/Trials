@@ -12,4 +12,6 @@ public interface IInventory
     public void Clear();
     public UnityEvent GetChangeEvent();
 
+    public int GetCount();
+
 }

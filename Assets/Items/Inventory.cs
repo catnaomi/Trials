@@ -9,7 +9,7 @@ public class Inventory : MonoBehaviour, IInventory
     public List<Item> StartingContents;
 
     public UnityEvent OnChange;
-
+    public float lastChanged;
     public enum EquipSlot
     {
         none,  // 0
@@ -31,6 +31,7 @@ public class Inventory : MonoBehaviour, IInventory
             contents.Add(ScriptableObject.Instantiate(item));
         }
         StartingContents.Clear();
+        OnChange.AddListener(() => { lastChanged = Time.time; });
     }
     public List<Item> GetContents()
     {
@@ -44,6 +45,7 @@ public class Inventory : MonoBehaviour, IInventory
 
     public bool Add(Item item)
     {
+        if (item == null) return false;
         if (item.MaxStackSize > 1)
         {
             foreach (Item presentItem in contents)
@@ -53,18 +55,22 @@ public class Inventory : MonoBehaviour, IInventory
                     if (presentItem.Quantity < presentItem.MaxStackSize)
                     {
                         presentItem.Quantity++;
+                        OnChange.Invoke();
                         return true;
                     }
                 }
             }
         }
         contents.Add(item);
+        OnChange.Invoke();
         return true;
     }
 
     public bool Remove(Item item)
     {
-        return contents.Remove(item);
+        bool r = contents.Remove(item);
+        if (r) OnChange.Invoke();
+        return r;
     }
 
     public bool RemoveOne(Item item)
@@ -89,6 +95,7 @@ public class Inventory : MonoBehaviour, IInventory
         else if (presentItem.Quantity > 1)
         {
             presentItem.Quantity--;
+            OnChange.Invoke();
             return true;
         }
         else
@@ -121,10 +128,28 @@ public class Inventory : MonoBehaviour, IInventory
     public void Clear()
     {
         contents.Clear();
+        OnChange.Invoke();
     }
 
     public UnityEvent GetChangeEvent()
     {
         return OnChange;
+    }
+
+    public int GetCount()
+    {
+        int amt = 0;
+        foreach (Item item in contents)
+        {
+            if (item.MaxStackSize > 1)
+            {
+                amt += item.Quantity;
+            }
+            else
+            {
+                amt++;
+            }
+        }
+        return amt;
     }
 }

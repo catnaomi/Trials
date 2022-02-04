@@ -52,6 +52,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                 AddItem(newItem);
             }
         }
+        OnChange.AddListener(() => { lastChanged = Time.time; });
         StartingContents.Clear();
     }
     void Start()
@@ -1001,16 +1002,5 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             return true;
         }
         return false;
-    }
-
-    public bool Add(Item item)
-    {
-        AddItem(item);
-        return true;
-    }
-
-    public bool Remove(Item item)
-    {
-        return RemoveItem(item);
     }
 }

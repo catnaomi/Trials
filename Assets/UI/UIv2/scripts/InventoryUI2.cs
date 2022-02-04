@@ -40,6 +40,7 @@ public class InventoryUI2 : MonoBehaviour
     public GameObject selectPopup;
     GameObject lastSelected;
     Item selectedItem;
+    int lastCount;
     [ReadOnly] public EquippableWeapon quickSlotItem;
 
     public Item.ItemType[] filterType;
@@ -87,7 +88,11 @@ public class InventoryUI2 : MonoBehaviour
             }
             else
             {
-                EventSystem.current.SetSelectedGameObject(GetFirstItem().gameObject);
+                if (GetFirstItem() != null)
+                {
+                    EventSystem.current.SetSelectedGameObject(GetFirstItem().gameObject);
+                }
+                
             }
         }
         lastSelected = EventSystem.current.currentSelectedGameObject;
@@ -102,7 +107,10 @@ public class InventoryUI2 : MonoBehaviour
     {
         List<Item> contents = inventory.GetContents();
 
-        if (!force && contents.Count == items.Count) return;
+        if (!force && inventory.GetContents().Count == items.Count && inventory.GetCount() == lastCount)
+        {
+            return;
+        }
 
         foreach (InventoryItemDisplay displayItem in items)
         {
@@ -194,6 +202,7 @@ public class InventoryUI2 : MonoBehaviour
             b.navigation = nav;
 
         }
+        lastCount = inventory.GetCount();
         ((RectTransform)viewport.transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Ceil((float)count / (float)columns) * itemHeight);
         if (items.Count > 0 && usingQuickslots)
         {

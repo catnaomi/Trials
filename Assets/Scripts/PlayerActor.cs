@@ -966,11 +966,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         begin = aiming;
                         break;
                     case RangedWeapon.FireMode.TriggerAndAttackRelease:
-                        atk = !IsSlashHeld();
-                        begin = IsSlashHeld();
+                        atk = !IsAttackHeld();
+                        begin = IsAttackHeld();
                         break;
                     case RangedWeapon.FireMode.TriggerAndAttackPress:
-                        atk = IsSlashHeld();
+                        atk = IsAttackHeld();
                         begin = aiming;
                         break;
                 }
@@ -1055,6 +1055,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (shouldDodge)
             {
                 shouldDodge = false;
+                attack = false;
+                thrust = false;
+                slash = false;
                 if (stickDirection.magnitude > 0)
                 {
                     lookDirection = stickDirection.normalized;
