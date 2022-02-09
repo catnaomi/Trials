@@ -49,8 +49,14 @@ public class FXController : MonoBehaviour
     }
     public static Dictionary<FX, GameObject> fxDictionary;
     public static Dictionary<string, AudioClip> clipDictionary;
-    private void OnEnable()
+    private void Awake()
     {
+        Init();
+    }
+
+    public void Init()
+    {
+        if (main != null) return;
         fxDictionary = new Dictionary<FX, GameObject>()
         {
             { FX.FX_Block,  this.fx_block },
@@ -102,7 +108,6 @@ public class FXController : MonoBehaviour
 
         main = this;
     }
-
     public static void CreateFX(FX name, Vector3 position, Quaternion rotation, float duration)
     {
         CreateFX(name, position, rotation, duration, null);
@@ -110,6 +115,7 @@ public class FXController : MonoBehaviour
 
     public static void CreateFX(FX name, Vector3 position, Quaternion rotation, float duration, AudioClip audioClipOverwrite)
     {
+        EnsureSingleton();
         GameObject newFX = GameObject.Instantiate(fxDictionary[name], position, rotation);
 
         if (audioClipOverwrite != null)
@@ -127,18 +133,21 @@ public class FXController : MonoBehaviour
 
     public static GameObject CreateSwordSlash()
     {
+        EnsureSingleton();
         GameObject newFX = GameObject.Instantiate(main.fx_slash);
         return newFX;
     }
 
     public static GameObject CreateSwordThrust()
     {
+        EnsureSingleton();
         GameObject newFX = GameObject.Instantiate(main.fx_thrust);
         return newFX;
     }
 
     public static GameObject CreateDizzy()
     {
+        EnsureSingleton();
         GameObject newFX = GameObject.Instantiate(main.fx_dizzy);
         return newFX;
     }
@@ -255,6 +264,15 @@ public class FXController : MonoBehaviour
                 return main.trueColor2;
             case DamageType.Fire:
                 return main.fireColor2;
+        }
+    }
+
+
+    public static void EnsureSingleton()
+    {
+        if (main == null)
+        {
+            GameObject.FindObjectOfType<FXController>().Init();
         }
     }
 }

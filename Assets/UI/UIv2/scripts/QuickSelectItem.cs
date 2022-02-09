@@ -31,6 +31,11 @@ public class QuickSelectItem : MonoBehaviour
         UpdateSlots();
     }
 
+    private void OnEnable()
+    {
+        if (PlayerActor.player == null) return;
+        UpdateSlots();
+    }
     public void UpdateSlots()
     {
         //Debug.Log("Updating Quickslot UI: " + slot);

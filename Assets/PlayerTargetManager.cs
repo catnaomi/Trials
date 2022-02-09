@@ -45,6 +45,10 @@ public class PlayerTargetManager : MonoBehaviour
         targets = new List<GameObject>();
         cmtg = GetComponent<CinemachineTargetGroup>();
         //InputHandler.main.SecondaryStickFlick.AddListener(SwitchTargets);
+        if (cam == null)
+        {
+            cam = Camera.main;
+        }
         StartCoroutine(UpdateTargets());
         lockedOn = false;
 

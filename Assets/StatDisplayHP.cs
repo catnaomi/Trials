@@ -30,6 +30,12 @@ public class StatDisplayHP : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        if (PlayerActor.player == null) return;
+        UpdateHeartsFromActor();
+    }
+
     public void UpdateHearts()
     {
         int hp = healthyHealth;

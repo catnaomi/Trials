@@ -151,78 +151,81 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         if (shouldAct && CanAct())
         {
             clock = Random.Range(ActionDelayMinimum, ActionDelayMaximum);
-            float navdist = GetDistanceToTarget();
-            float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
+            if (CombatTarget != null)
+            {
+                float navdist = GetDistanceToTarget();
+                float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
-            InSightRange = realdist <= SightRange;
-            InMeleeRange = navdist <= MeleeAttackRange && nav.hasPath;
-            InQuickRange = navdist <= QuickAttackRange && nav.hasPath;
-            InGapRange = navdist <= GapCloserMaxRange && navdist >= GapCloserMinRange && nav.hasPath;
-            InPowerRange = navdist <= PowerAttackRange && nav.hasPath;
+                InSightRange = realdist <= SightRange;
+                InMeleeRange = navdist <= MeleeAttackRange && nav.hasPath;
+                InQuickRange = navdist <= QuickAttackRange && nav.hasPath;
+                InGapRange = navdist <= GapCloserMaxRange && navdist >= GapCloserMinRange && nav.hasPath;
+                InPowerRange = navdist <= PowerAttackRange && nav.hasPath;
 
-            bool counterattack = false;
-            if (tryCounterAttack)
-            {
-                counterattack = true;
-                tryCounterAttack = false;
-            }
-            if (InSightRange)
-            {
-                SetDestination(CombatTarget);
-                ResumeNavigation();
-                if (!inventory.IsMainDrawn())
+                bool counterattack = false;
+                if (tryCounterAttack)
                 {
-                    cstate.sheathe = animancer.Play(Draw);
+                    counterattack = true;
+                    tryCounterAttack = false;
                 }
-            }
-            else
-            {
-                StopNavigation();
-                if (inventory.IsMainDrawn())
+                if (InSightRange)
                 {
-                    cstate.sheathe = animancer.Play(Sheath);
-                }
-                
-            }
-            if (CanAct())
-            {
-                if (InMeleeRange && counterattack)
-                {
-                    StartQuickAttack();
-                }
-                else if (InPowerRange && Random.value < powerAttackChance)
-                {
-                    RealignToTarget();
-                    StartPowerAttack();
-                }
-                else if (InQuickRange && InMeleeRange)
-                {
-                    RealignToTarget();
-                    if (Random.value > 0.5f)
+                    SetDestination(CombatTarget);
+                    ResumeNavigation();
+                    if (!inventory.IsMainDrawn())
                     {
-                        StartMeleeAttack();
+                        cstate.sheathe = animancer.Play(Draw);
                     }
-                    else
+                }
+                else
+                {
+                    StopNavigation();
+                    if (inventory.IsMainDrawn())
+                    {
+                        cstate.sheathe = animancer.Play(Sheath);
+                    }
+
+                }
+                if (CanAct())
+                {
+                    if (InMeleeRange && counterattack)
                     {
                         StartQuickAttack();
                     }
+                    else if (InPowerRange && Random.value < powerAttackChance)
+                    {
+                        RealignToTarget();
+                        StartPowerAttack();
+                    }
+                    else if (InQuickRange && InMeleeRange)
+                    {
+                        RealignToTarget();
+                        if (Random.value > 0.5f)
+                        {
+                            StartMeleeAttack();
+                        }
+                        else
+                        {
+                            StartQuickAttack();
+                        }
+                    }
+                    else if (InMeleeRange)
+                    {
+                        RealignToTarget();
+                        StartMeleeAttack();
+                    }
+                    else if (InQuickRange)
+                    {
+                        RealignToTarget();
+                        StartQuickAttack();
+                    }
+                    else if (InGapRange)
+                    {
+                        RealignToTarget();
+                        StartGapCloser();
+                    }
+
                 }
-                else if (InMeleeRange)
-                {
-                    RealignToTarget();
-                    StartMeleeAttack();
-                }
-                else if (InQuickRange)
-                {
-                    RealignToTarget();
-                    StartQuickAttack();
-                }
-                else if (InGapRange)
-                {
-                    RealignToTarget();
-                    StartGapCloser();
-                }
-                
             }
         }
 
@@ -407,6 +410,11 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
 
     public bool DetermineCombatTarget(out GameObject target)
     {
+        if (PlayerActor.player == null)
+        {
+            target = null;
+            return false;
+        }
         target = PlayerActor.player.gameObject;
         return PlayerActor.player.gameObject.tag != "Corpse";
     }
