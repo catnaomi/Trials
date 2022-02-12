@@ -106,6 +106,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool slash;
     bool thrust;
     bool plunge;
+    bool hold;
     ClipTransition plungeEnd;
     float cancelTime;
     int attackIndex = 0;
@@ -887,6 +888,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 xzVel = Vector3.zero;
                 speed = 0f;
             }
+            else if (hold)
+            {
+                if ((currentDamage.isThrust && !IsThrustHeld()))
+                {
+                    HoldThrustRelease(false);
+                }
+                else if ((currentDamage.isSlash && !IsSlashHeld()))
+                {
+                    HoldSlashRelease(false);
+                }
+            }
             if (CheckWater())
             {
                 state.swim = animancer.Play(swimAnim);
@@ -1401,6 +1413,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             AimEnd();
         };
 
+        inputs.actions["Atk_Slash"].performed += (context) =>
+        {
+            if (context.interaction is HoldInteraction)
+            {
+                hold = true;
+            }
+        };
+
+        inputs.actions["Atk_Thrust"].performed += (context) =>
+        {
+            if (context.interaction is HoldInteraction)
+            {
+                hold = true;
+            }
+        };
+
         inputs.actions["QuickSlot - 0"].performed += (context) =>
         {
             if (context.interaction is HoldInteraction)
@@ -1567,7 +1595,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (value.Get<Vector2>().magnitude > 0.9f) changeTarget.Invoke();
     }
 
-    public void OnAtk_Slash()
+    public void OnAtk_Slash(InputValue value)
     {
         if (!CanPlayerInput()) return;
         attack = true;
@@ -1901,7 +1929,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     #region attacks
     public void MainSlash()
     {
-        if (GetMoveset().quickSlash1h is ComboAttack combo)
+        if (hold && GetMoveset().powerSlash != null)
+        {
+            PowerSlash();
+            return;
+        } 
+        else if (GetMoveset().quickSlash1h is ComboAttack combo)
         {
             state.attack = animancer.Play(combo.GetClip(attackIndex));
             cancelTime = combo.GetExitTime(attackIndex);
@@ -1920,11 +1953,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         state.attack.Events.OnEnd = _AttackEnd;
         attackDecelReal = attackDecel;
         OnAttack.Invoke();
+        hold = false;
     }
 
     public void MainThrust()
     {
-        if (GetMoveset().quickThrust1h is ComboAttack combo && combo.HasNext(attackIndex))
+        if (hold && GetMoveset().powerThrust != null)
+        {
+            PowerThrust();
+            return;
+        }
+        else if (GetMoveset().quickThrust1h is ComboAttack combo && combo.HasNext(attackIndex))
         {
             state.attack = animancer.Play(combo.GetClip(attackIndex));
             cancelTime = combo.GetExitTime(attackIndex);
@@ -1943,6 +1982,92 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         state.attack.Events.OnEnd = _AttackEnd;
         attackDecelReal = attackDecel;
         OnAttack.Invoke();
+        hold = false;
+    }
+
+    public void PowerSlash()
+    {
+        InputAttack attack = GetMoveset().powerSlash;
+        if (attack is HoldAttack holdAttack)
+        {
+            hold = true;
+            state.attack = animancer.Play(holdAttack.GetStartClip());
+            state.attack.Events.OnEnd = () => { HoldSlashRelease(true); };
+            SetCurrentDamage(attack.GetDamage());
+        }
+        else
+        {
+            hold = false;
+            state.attack = animancer.Play(attack.GetClip());
+            SetCurrentDamage(attack.GetDamage());
+            state.attack.Events.OnEnd = _AttackEnd;
+        }
+        OnAttack.Invoke();
+    }
+
+    public void PowerThrust()
+    {
+        InputAttack attack = GetMoveset().powerThrust;
+        if (attack is HoldAttack holdAttack)
+        {
+            hold = true;
+            state.attack = animancer.Play(holdAttack.GetStartClip());
+            state.attack.Events.OnEnd = () => { HoldThrustRelease(true); };
+            SetCurrentDamage(attack.GetDamage());
+        }
+        else
+        {
+            hold = false;
+            state.attack = animancer.Play(attack.GetClip());
+            SetCurrentDamage(attack.GetDamage());
+            state.attack.Events.OnEnd = _AttackEnd;
+        }
+        OnAttack.Invoke();
+    }
+
+    public void HoldSlashRelease(bool wasFullyCharged)
+    {
+        hold = false;
+        if (GetMoveset().powerSlash is not HoldAttack holdAttack)
+        {
+            _AttackEnd();
+            return;
+        }
+        else {
+            state.attack = animancer.Play(holdAttack.GetClip());
+            if (wasFullyCharged)
+            {
+                SetCurrentDamage(holdAttack.GetDamage());
+            }
+            else
+            {
+                SetCurrentDamage(holdAttack.GetHeldDamage());
+            }
+            state.attack.Events.OnEnd = _AttackEnd;
+        }
+    }
+
+    public void HoldThrustRelease(bool wasFullyCharged)
+    {
+        hold = false;
+        if (GetMoveset().powerThrust is not HoldAttack holdAttack)
+        {
+            _AttackEnd();
+            return;
+        }
+        else
+        {
+            state.attack = animancer.Play(holdAttack.GetClip());
+            if (!wasFullyCharged)
+            {
+                SetCurrentDamage(holdAttack.GetDamage());
+            }
+            else
+            {
+                SetCurrentDamage(holdAttack.GetHeldDamage());
+            }
+            state.attack.Events.OnEnd = _AttackEnd;
+        }
     }
 
     public void CancelSlash()

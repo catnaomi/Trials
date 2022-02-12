@@ -10,9 +10,10 @@ public class Moveset : ScriptableObject
 {
     [Header("Main Hand Attacks")] // exclusively determined by main hand
     public InputAttack quickSlash1h;
-    public InputAttack strongSlash1h;
     public InputAttack quickThrust1h;
-    public InputAttack strongThrust1h;
+    [Header("Power Attacks")] // hold attacks, not always used.
+    public InputAttack powerSlash;
+    public InputAttack powerThrust;
     [Header("Stance Attacks")] // used by off hand if available, otherwise main hand
     public InputAttack stanceSlash;
     public InputAttack stanceThrust;
