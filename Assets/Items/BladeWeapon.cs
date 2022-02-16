@@ -336,6 +336,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
 
     private void SetTrails(bool thrust, bool slash)
     {
+        return;
         if (GetModel() == null) return;
         trailSystem = GetModel().GetComponentInChildren<ParticleSystem>();
 

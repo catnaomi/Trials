@@ -48,9 +48,9 @@ public class HumanoidDamageHandler : IDamageable
 
         DizzyHumanoid dizzy = FXController.CreateDizzy().GetComponent<DizzyHumanoid>();
         dizzy.SetActor(actor, this);
-        animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].SetMask(damageAnims.flinchMask);
-        animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].IsAdditive = true;
-        animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].SetWeight(1f);
+        animancer.Layers[HumanoidAnimLayers.Flinch].SetMask(damageAnims.flinchMask);
+        animancer.Layers[HumanoidAnimLayers.Flinch].IsAdditive = true;
+        animancer.Layers[HumanoidAnimLayers.Flinch].SetWeight(1f);
 
         timeStopDamages = new Queue<DamageKnockback>();
     }
@@ -137,7 +137,7 @@ public class HumanoidDamageHandler : IDamageable
                 if (animancer.States.Current != block || damage.cannotAutoFlinch)
                 {
                     ClipTransition clip = blockStagger;
-                    animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop();
+                    animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
                     block = animancer.Play(clip);
                     block.Events.OnEnd = _OnBlockEnd;
                     
@@ -145,8 +145,8 @@ public class HumanoidDamageHandler : IDamageable
                 else
                 {
                     ClipTransition clip = blockStagger;
-                    AnimancerState state = animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Play(clip);
-                    state.Events.OnEnd = () => { animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop(); };
+                    AnimancerState state = animancer.Layers[HumanoidAnimLayers.Flinch].Play(clip);
+                    state.Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
                 }
                 if (damage.bouncesOffBlock && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
                 {
@@ -155,7 +155,7 @@ public class HumanoidDamageHandler : IDamageable
             }
             else
             {
-                animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop();
+                animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
                 ClipTransition clip = damageAnims.guardBreak;
                 AnimancerState state = animancer.Play(clip);
                 state.Events.OnEnd = _OnEnd;
@@ -203,9 +203,9 @@ public class HumanoidDamageHandler : IDamageable
             bool isFlinch = (stagger == DamageKnockback.StaggerType.Flinch);
             if (stagger == DamageKnockback.StaggerType.Flinch)
             {
-                AnimancerState state = animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Play(damageAnims.flinch);
+                AnimancerState state = animancer.Layers[HumanoidAnimLayers.Flinch].Play(damageAnims.flinch);
                 state.Time = 0f;
-                state.Events.OnEnd = () => { animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop(); };
+                state.Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
                 maxTime = state.RemainingDuration / state.Speed;
             }
             else if (stagger == DamageKnockback.StaggerType.StaggerSmall)
@@ -227,9 +227,9 @@ public class HumanoidDamageHandler : IDamageable
                 else
                 {
                     isFlinch = true;
-                    AnimancerState state = animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Play(damageAnims.flinch);
+                    AnimancerState state = animancer.Layers[HumanoidAnimLayers.Flinch].Play(damageAnims.flinch);
                     state.Time = 0f;
-                    state.Events.OnEnd = () => { animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop(); };
+                    state.Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
                     maxTime = state.RemainingDuration / state.Speed;
                 }
             }
@@ -278,7 +278,7 @@ public class HumanoidDamageHandler : IDamageable
             if (!isFlinch)
             {
                 AdjustDefendingPosition(damage.source);
-                animancer.Layers[(int)HumanoidPositionReference.AnimLayer.Flinch].Stop();
+                animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
             }
             damage.OnHit.Invoke();
             actor.OnHurt.Invoke();

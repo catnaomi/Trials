@@ -91,7 +91,7 @@ public class Actor : MonoBehaviour
 
     public virtual void ActorPreUpdate()
     {
-        if (!isInTimeState && animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].Weight > 1f || animancer.Layers[(int)HumanoidPositionReference.AnimLayer.TimeEffects].IsAnyStatePlaying())
+        if (!isInTimeState && animancer.Layers[HumanoidAnimLayers.TimeEffects].Weight > 1f || animancer.Layers[HumanoidAnimLayers.TimeEffects].IsAnyStatePlaying())
         {
             this.GetComponent<ActorTimeTravelHandler>().EndTimeState();
         }
