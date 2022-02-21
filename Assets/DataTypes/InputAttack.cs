@@ -15,6 +15,10 @@ public class InputAttack : InputAction
     public DamageKnockback attackData = DamageKnockback.GetDefaultDamage();
     public float staminaCost;
     public float exitTime = -1f;
+    public float cancelStartTime = 0f;
+    [Space(5)]
+    public float mainHandAngleAdjust = 0f;
+    public float offHandAngleAdjust = 0f;
     public int GetAttackID()
     {
         return attackId;
@@ -55,5 +59,31 @@ public class InputAttack : InputAction
     public float GetExitTime()
     {
         return exitTime;
+    }
+
+    public float GetCancelStartTime()
+    {
+        return cancelStartTime;
+    }
+
+    public virtual AnimancerState ProcessAttack(PlayerActor player, out float cancelTime, System.Action endEvent)
+    {
+        
+        AnimancerState state = player.animancer.Play(this.GetClip());
+        cancelTime = this.GetExitTime();
+        player.SetCurrentDamage(this.GetDamage());
+        cancelTime = this.GetExitTime();
+        state.Events.OnEnd = endEvent;
+        if (mainHandAngleAdjust != 0f)
+        {
+            player.ResetMainRotation();
+            player.RotateMainWeapon(mainHandAngleAdjust);
+        }
+        if (offHandAngleAdjust != 0f)
+        {
+            player.ResetOffRotation();
+            player.RotateOffWeapon(offHandAngleAdjust);
+        }
+        return state;
     }
 }

@@ -109,9 +109,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool hold;
     ClipTransition plungeEnd;
     float cancelTime;
-    int attackIndex = 0;
     public float blockSpeed = 2.5f;
-    float attackResetTimer = 0f;
     float aimTimer;
     bool isHitboxActive;
     bool isSheathing;
@@ -123,6 +121,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     [Range(-1f,1f)]
     public float thrustIKValue;
     public float thrustIKWeight;
+    public float thrustIKMultiplier = 1f;
     public float thrustIKAdjustSpeed;
     public float thrustInitialHeight;
     public float thrustIKHeightRange;
@@ -179,6 +178,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     private System.Action _MoveOnEnd;
     private System.Action _AttackEnd;
     private System.Action _StopUpperLayer;
+    [Header("Movesets")]
+    public Moveset runtimeMoveset;
+    public Moveset runtimeOffMoveset;
     [Header("Targeting")]
     public UnityEvent toggleTarget;
     public UnityEvent changeTarget;
@@ -291,6 +293,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             attack = false;
             slash = false;
             thrust = false;
+            if (mainWeaponAngle != 0f)
+            {
+                StartCoroutine("GradualResetMainRotation");
+            }
+            if (offWeaponAngle != 0f)
+            {
+                StartCoroutine("GradualResetOffRotation");
+            }
         };
 
         _StopUpperLayer = () =>
@@ -441,6 +451,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 if ((itemSlot == Inventory.MainType && !inventory.IsMainDrawn()) || (itemSlot == Inventory.OffType && !inventory.IsOffDrawn()))
                 {
                     inventory.SetDrawn(inventory.GetItemEquipType(blockWeapon), true);
+                    UpdateFromMoveset();
                 }
                 animancer.Play(state.block, 0.25f);
                 /*
@@ -468,6 +479,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 if (!inventory.IsMainDrawn())
                 {
                     inventory.SetDrawn(true, true);
+                    UpdateFromMoveset();
                 }
                 if (inventory.IsMainDrawn())
                 {
@@ -500,6 +512,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     TriggerSheath(false, inventory.GetOffWeapon().OffHandEquipSlot, false);
                 }
             }
+            /*
             if (attackResetTimer <= 0f)
             {
                 attackIndex = 0;
@@ -508,6 +521,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 attackResetTimer -= Time.deltaTime;
             }
+            */
             animancer.Layers[0].ApplyAnimatorIK = true;
         }
         else if (animancer.States.Current == state.block)
@@ -886,11 +900,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     cancelTime = -1f;
                     CancelThrust();
                 }
-                attackResetTimer = 0.5f;
-            }
-            else
-            {
-                attackResetTimer = 0f;
             }
             if (plunge && GetGrounded())
             {
@@ -1169,7 +1178,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         if (bilayerMove != null)
         {
-            animancer.Layers[HumanoidAnimLayers.BilayerBlend].Weight = (IsMoving()) ? bilayerMove.weight : 0f;
+            animancer.Layers[HumanoidAnimLayers.BilayerBlend].Weight = (IsMoving()) ? Mathf.Min(state.move.Weight, bilayerMove.weight) : 0f;
         }
         else
         {
@@ -1751,6 +1760,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         if (inventory.IsMainDrawn())
         {
+            if (runtimeMoveset != null)
+            {
+                return runtimeMoveset;
+            }
             return inventory.GetMainWeapon().moveset;
         }
         return null;
@@ -1760,13 +1773,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         if (inventory.IsOffDrawn())
         {
+            if (runtimeOffMoveset != null)
+            {
+                return runtimeOffMoveset;
+            }
             return inventory.GetOffWeapon().moveset;
         }
-        else if (inventory.IsMainDrawn())
+        else
         {
-            return inventory.GetMainWeapon().moveset;
+            return GetMoveset();
         }
-        return null;
     }
     public void UpdateFromMoveset()
     {
@@ -1834,6 +1850,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else
         {
             aimAnim = moveAnim;
+        }
+        if (inventory.IsMainEquipped())
+        {
+            if (runtimeMoveset != null && runtimeMoveset.isClone)
+            {
+                Destroy(runtimeMoveset);
+            }
+            runtimeMoveset = inventory.GetMainWeapon().moveset.Clone();
+        }
+        if (inventory.IsOffEquipped())
+        {
+            if (runtimeOffMoveset != null && runtimeOffMoveset.isClone)
+            {
+                Destroy(runtimeOffMoveset);
+            }
+            runtimeOffMoveset = inventory.GetOffWeapon().moveset.Clone();
         }
     }
 
@@ -1913,7 +1945,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             blade.GetHitboxes().root.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
         }
         mainWeaponAngle = angle;
-        Debug.Log("rotating");
     }
 
     // rotates the off hand weapon model around the upwards axis of the off hand mount
@@ -1944,12 +1975,36 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void ResetMainRotation()
     {
+        StopCoroutine("GradualResetMainRotation");
         RotateMainWeapon(0f);
     }
 
     public void ResetOffRotation()
     {
+        StopCoroutine("GradualResetOffRotation");
         RotateOffWeapon(0f);
+    }
+    
+    IEnumerator GradualResetMainRotation()
+    {
+        float angle;
+        while (mainWeaponAngle != 0f)
+        {
+            angle = Mathf.MoveTowards(mainWeaponAngle, 0f, 45f * Time.deltaTime);
+            RotateMainWeapon(angle);
+            yield return null;
+        }
+    }
+
+    IEnumerator GradualResetOffRotation()
+    {
+        float angle;
+        while (offWeaponAngle != 0f)
+        {
+            angle = Mathf.MoveTowards(offWeaponAngle, 0f, 45f * Time.deltaTime);
+            RotateOffWeapon(angle);
+            yield return null;
+        }
     }
     #endregion
 
@@ -1964,23 +2019,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             PowerSlash();
             return;
         } 
-        else if (GetMoveset().quickSlash1h is ComboAttack combo)
-        {
-            state.attack = animancer.Play(combo.GetClip(attackIndex));
-            cancelTime = combo.GetExitTime(attackIndex);
-            attackIndex++;
-            attackResetTimer = 0.5f;
-            SetCurrentDamage(combo.GetDamage(attackIndex));
-        }
-        else
-        {
-            state.attack = animancer.Play(GetMoveset().quickSlash1h.GetClip());
-            cancelTime = GetMoveset().quickSlash1h.GetExitTime();
-            SetCurrentDamage(GetMoveset().quickSlash1h.GetDamage());
-        }
-        
-        
-        state.attack.Events.OnEnd = _AttackEnd;
+
+        state.attack = GetMoveset().quickSlash1h.ProcessAttack(this, out cancelTime, _AttackEnd);
         attackDecelReal = attackDecel;
         OnAttack.Invoke();
         hold = false;
@@ -1993,23 +2033,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             PowerThrust();
             return;
         }
-        else if (GetMoveset().quickThrust1h is ComboAttack combo && combo.HasNext(attackIndex))
-        {
-            state.attack = animancer.Play(combo.GetClip(attackIndex));
-            cancelTime = combo.GetExitTime(attackIndex);
-            attackIndex++;
-            attackResetTimer = 0.5f;
-            SetCurrentDamage(combo.GetDamage(attackIndex));
-        }
-        else
-        {
-            state.attack = animancer.Play(GetMoveset().quickThrust1h.GetClip());
-            cancelTime = GetMoveset().quickThrust1h.GetExitTime();
-            SetCurrentDamage(GetMoveset().quickThrust1h.GetDamage());
-        }
 
-
-        state.attack.Events.OnEnd = _AttackEnd;
+        state.attack = GetMoveset().quickThrust1h.ProcessAttack(this, out cancelTime, _AttackEnd);
         attackDecelReal = attackDecel;
         OnAttack.Invoke();
         hold = false;
@@ -2028,9 +2053,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else
         {
             hold = false;
-            state.attack = animancer.Play(attack.GetClip());
-            SetCurrentDamage(attack.GetDamage());
-            state.attack.Events.OnEnd = _AttackEnd;
+            state.attack = GetMoveset().powerSlash.ProcessAttack(this, out cancelTime, _AttackEnd);
         }
         OnAttack.Invoke();
     }
@@ -2048,9 +2071,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else
         {
             hold = false;
-            state.attack = animancer.Play(attack.GetClip());
-            SetCurrentDamage(attack.GetDamage());
-            state.attack.Events.OnEnd = _AttackEnd;
+            state.attack = GetMoveset().powerSlash.ProcessAttack(this, out cancelTime, _AttackEnd);
         }
         OnAttack.Invoke();
     }
@@ -2102,62 +2123,28 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void CancelSlash()
     {
-        if (GetMoveset().quickSlash1h is ComboAttack combo)
-        {
-            state.attack = animancer.Play(combo.GetClip(attackIndex));
-            cancelTime = combo.GetExitTime(attackIndex);
-            attackResetTimer = 0.5f;
-            attackIndex++;
-            SetCurrentDamage(combo.GetDamage(attackIndex));
-        }
-        else
-        {
-            state.attack = animancer.Play(GetMoveset().quickSlash1h.GetClip());
-            cancelTime = GetMoveset().quickSlash1h.GetExitTime();
-            SetCurrentDamage(GetMoveset().quickSlash1h.GetDamage());
-        }
-        state.attack.Events.OnEnd = _AttackEnd;
+        state.attack = GetMoveset().quickSlash1h.ProcessAttack(this, out cancelTime, _AttackEnd);
         OnAttack.Invoke();
     }
 
     public void CancelThrust()
     {
-        if (GetMoveset().quickThrust1h is ComboAttack combo)
-        {
-            state.attack = animancer.Play(combo.GetClip(attackIndex));
-            cancelTime = combo.GetExitTime(attackIndex);
-            attackResetTimer = 0.5f;
-            attackIndex++;
-            SetCurrentDamage(combo.GetDamage(attackIndex));
-        }
-        else
-        {
-            state.attack = animancer.Play(GetMoveset().quickThrust1h.GetClip());
-            cancelTime = GetMoveset().quickThrust1h.GetExitTime();
-            SetCurrentDamage(GetMoveset().quickThrust1h.GetDamage());
-        }
-        state.attack.Events.OnEnd = _AttackEnd;
+        state.attack = GetMoveset().quickThrust1h.ProcessAttack(this, out cancelTime, _AttackEnd);
         OnAttack.Invoke();
     }
     public void DashSlash()
     {
-        state.attack = animancer.Play(GetMoveset().dashSlash.GetClip());
+        state.attack = GetMoveset().dashSlash.ProcessAttack(this, out cancelTime, _AttackEnd);
         attackDecelReal = dashAttackDecel;
-        state.attack.Events.OnEnd = _MoveOnEnd;
         dashed = false;
-        attackIndex = 0;
-        SetCurrentDamage(GetMoveset().dashSlash.GetDamage());
         OnAttack.Invoke();
     }
 
     public void DashThrust()
     {
-        state.attack = animancer.Play(GetMoveset().dashThrust.GetClip());
+        state.attack = GetMoveset().dashThrust.ProcessAttack(this, out cancelTime, _AttackEnd);
         attackDecelReal = dashAttackDecel;
-        state.attack.Events.OnEnd = _MoveOnEnd;
         dashed = false;
-        attackIndex = 0;
-        SetCurrentDamage(GetMoveset().dashThrust.GetDamage());
         OnAttack.Invoke();
     }
     
@@ -2175,19 +2162,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 _MoveOnEnd();
             }
         };
-        if (inventory.IsOffDrawn() && inventory.GetOffWeapon().moveset.stanceSlash != null)
+        if (inventory.IsOffDrawn() && GetMovesetOff().stanceSlash != null)
         {
-            state.attack = animancer.Play(inventory.GetOffWeapon().moveset.stanceSlash.GetClip());
-            state.attack.Events.OnEnd = _BlockAttackEnd;
-            attackIndex = 0;
-            SetCurrentDamage(inventory.GetOffWeapon().moveset.stanceSlash.GetDamage());
+            state.attack = GetMovesetOff().stanceSlash.ProcessAttack(this, out cancelTime, _BlockAttackEnd);
         }
-        else if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.stanceSlash != null)
+        else if (inventory.IsMainDrawn() && GetMoveset().stanceSlash != null)
         {
-            state.attack = animancer.Play(inventory.GetMainWeapon().moveset.stanceSlash.GetClip());
-            state.attack.Events.OnEnd = _BlockAttackEnd;
-            attackIndex = 0;
-            SetCurrentDamage(inventory.GetMainWeapon().moveset.stanceSlash.GetDamage());
+            state.attack = GetMoveset().stanceSlash.ProcessAttack(this, out cancelTime, _BlockAttackEnd);
         }
         else
         {
@@ -2208,19 +2189,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 _MoveOnEnd();
             }
         };
-        if (inventory.IsOffDrawn() && inventory.GetOffWeapon().moveset.stanceThrust != null)
+        if (inventory.IsOffDrawn() && GetMovesetOff().stanceThrust != null)
         {
-            state.attack = animancer.Play(inventory.GetOffWeapon().moveset.stanceThrust.GetClip());
-            state.attack.Events.OnEnd = _BlockAttackEnd;
-            attackIndex = 0;
-            SetCurrentDamage(inventory.GetOffWeapon().moveset.stanceThrust.GetDamage());
+            state.attack = GetMovesetOff().stanceSlash.ProcessAttack(this, out cancelTime, _BlockAttackEnd);
         }
-        else if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.stanceThrust != null)
+        else if (inventory.IsMainDrawn() && GetMoveset().stanceThrust != null)
         {
-            state.attack = animancer.Play(inventory.GetMainWeapon().moveset.stanceThrust.GetClip());
-            state.attack.Events.OnEnd = _BlockAttackEnd;
-            attackIndex = 0;
-            SetCurrentDamage(inventory.GetMainWeapon().moveset.stanceThrust.GetDamage());
+            state.attack = GetMovesetOff().stanceSlash.ProcessAttack(this, out cancelTime, _BlockAttackEnd);
         }
         else
         {
@@ -2230,25 +2205,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public void RollSlash()
     {
-        state.attack = animancer.Play(GetMoveset().rollSlash.GetClip());
+        state.attack = GetMoveset().rollSlash.ProcessAttack(this, out cancelTime, _MoveOnEnd);
         attackDecelReal = dashAttackDecel;
-        state.attack.Events.OnEnd = _MoveOnEnd;
-        rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
+        rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };   
         dashed = false;
-        attackIndex = 0;
-        SetCurrentDamage(GetMoveset().rollSlash.GetDamage());
         OnAttack.Invoke();
     }
 
     public void RollThrust()
     {
-        state.attack = animancer.Play(GetMoveset().rollThrust.GetClip());
+        state.attack = GetMoveset().rollThrust.ProcessAttack(this, out cancelTime, _MoveOnEnd);
         attackDecelReal = dashAttackDecel;
-        state.attack.Events.OnEnd = _MoveOnEnd;
         rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
         dashed = false;
-        attackIndex = 0;
-        SetCurrentDamage(GetMoveset().rollThrust.GetDamage());
         OnAttack.Invoke();
     }
 
@@ -2265,7 +2234,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             plungeEnd.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
         }
         plunge = true;
-        attackIndex = 0;
         SetCurrentDamage(GetMoveset().plungeSlash.GetDamage());
         OnAttack.Invoke();
     }
@@ -2283,7 +2251,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             plungeEnd.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
         }
         plunge = true;
-        attackIndex = 0;
         SetCurrentDamage(GetMoveset().plungeThrust.GetDamage());
         OnAttack.Invoke();
     }
@@ -2546,8 +2513,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     private void OnAnimatorIK(int layerIndex)
     {
-        Vector3 initialThrustPos = this.transform.position + this.transform.up * thrustInitialHeight;
-
+        //Vector3 initialThrustPos = this.transform.position + this.transform.up * thrustInitialHeight;
+        Vector3 initialThrustPos = positionReference.Spine.position;
         float y = 0f;
         float h = 0f;
         if (GetCombatTarget() != null)
@@ -2562,7 +2529,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             h = Mathf.Clamp(h, -thrustIKHeightRange, thrustIKHeightRange);
         }
         //Vector3 ikThrustVector = initialThrustPos + this.transform.forward * 2f + (thrustIKValue * this.transform.up * thrustIKHeightRange);
-        Vector3 ikThrustVector = initialThrustPos + this.transform.forward * 2f + (h * this.transform.up);
+        float forwardOffset = 2f;
+        if (inventory.IsMainEquipped() && inventory.GetMainWeapon() is BladeWeapon mwep)
+        {
+            forwardOffset = mwep.GetLength() * 2f;
+        }
+        Vector3 ikThrustVector = initialThrustPos + this.transform.forward * forwardOffset + (h * this.transform.up);
         Debug.DrawLine(initialThrustPos, ikThrustVector, Color.red);
         if (IsAttacking())
         {
@@ -2571,7 +2543,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
 
                 animancer.Animator.SetIKPosition(AvatarIKGoal.RightHand, ikThrustVector);
-                animancer.Animator.SetIKPositionWeight(AvatarIKGoal.RightHand, thrustIKWeight);
+                animancer.Animator.SetIKPositionWeight(AvatarIKGoal.RightHand, thrustIKWeight * thrustIKMultiplier);
             }
             else
             {

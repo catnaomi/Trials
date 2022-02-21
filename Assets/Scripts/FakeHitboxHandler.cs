@@ -16,7 +16,7 @@ public class FakeHitboxHandler : MonoBehaviour
         if (active > 0)
         {
             OnActive.Invoke();
-            Debug.Log("start");
+           
         }
         else
         {

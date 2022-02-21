@@ -39,6 +39,7 @@ public class Moveset : ScriptableObject
     public bool overridesSprint;
     public ClipTransition sprintAnim; // main weapon only
 
+    [ReadOnly] public bool isClone = false;
     public static Dictionary<string, Moveset> movesetTable;
     public static bool movesetsLoaded = false;
     public static void LoadMovesetCombinations()
@@ -104,6 +105,39 @@ public class Moveset : ScriptableObject
         }
     }
 
+    public Moveset Clone()
+    {
+        Moveset newMoveset = Instantiate(this);
+        if (quickSlash1h != null) newMoveset.quickSlash1h = Instantiate(this.quickSlash1h);
+        if (quickThrust1h != null) newMoveset.quickThrust1h = Instantiate(this.quickThrust1h);
+        if (powerSlash != null) newMoveset.powerSlash = Instantiate(this.powerSlash);
+        if (powerThrust != null) newMoveset.powerThrust = Instantiate(this.powerThrust);
+        if (stanceSlash != null) newMoveset.stanceSlash = Instantiate(this.stanceSlash);
+        if (stanceThrust != null) newMoveset.stanceThrust = Instantiate(this.stanceThrust);
+        if (dashSlash != null) newMoveset.dashSlash = Instantiate(this.dashSlash);
+        if (dashThrust != null) newMoveset.dashThrust = Instantiate(this.dashThrust);
+        if (plungeSlash != null) newMoveset.plungeSlash = Instantiate(this.plungeSlash);
+        if (plungeThrust != null) newMoveset.plungeThrust = Instantiate(this.plungeThrust);
+        if (rollSlash != null) newMoveset.rollSlash = Instantiate(this.rollSlash);
+        if (rollThrust != null) newMoveset.rollThrust = Instantiate(this.rollThrust);
+        newMoveset.isClone = true;
+        return newMoveset;
+    }
+
+    private void OnDestroy()
+    {
+        if (isClone)
+        {
+            Destroy(stanceSlash);
+            Destroy(stanceThrust);
+            Destroy(dashSlash);
+            Destroy(dashThrust);
+            Destroy(plungeSlash);
+            Destroy(plungeThrust);
+            Destroy(rollSlash);
+            Destroy(rollThrust);
+        }
+    }
     private static string GetMovesetKey(string hiltType, string bladeType)
     {
         return hiltType.Replace(' ','-').ToLower() + "+" + bladeType.Replace(' ', '-').ToLower();
