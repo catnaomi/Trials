@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e242662a52220dc40932f531094d4de5, type: 3}
   m_Name: 2h-lancestab
   m_EditorClassIdentifier: 
-  desc: One-Handed Rapier Lunge
+  desc: Two-handed Lance Stab
   attackId: 1
   isBlockOK: 0
   isSprintOK: 0
@@ -22,13 +22,12 @@ MonoBehaviour:
     _FadeDuration: 0.25
     _Events:
       _NormalizedTimes:
-      - 0.63187855
+      - 0.56305504
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: -7911894043268297317, guid: 7c7da79be4202bb46a2154a2e93215f5,
-      type: 3}
-    _Speed: 1.25
-    _NormalizedStartTime: 0.1
+    _Clip: {fileID: 7400000, guid: c0c34b56d500a8c4fa6649639ab98ac1, type: 3}
+    _Speed: NaN
+    _NormalizedStartTime: 0
   attackData:
     healthDamage: 25
     staminaDamage: 25
@@ -72,4 +71,7 @@ MonoBehaviour:
         m_Calls: []
     hitClip: {fileID: 0}
   staminaCost: 0
-  exitTime: 0.5
+  exitTime: 0.7
+  cancelStartTime: 0.1
+  mainHandAngleAdjust: -25
+  offHandAngleAdjust: 0

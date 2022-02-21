@@ -71,6 +71,9 @@ MonoBehaviour:
     hitClip: {fileID: 0}
   staminaCost: 0
   exitTime: -1
+  cancelStartTime: 0
+  mainHandAngleAdjust: 0
+  offHandAngleAdjust: 0
   sequence:
   - _FadeDuration: 0.25
     _Events:
@@ -82,15 +85,16 @@ MonoBehaviour:
     _NormalizedStartTime: NaN
   - _FadeDuration: 0.25
     _Events:
-      _NormalizedTimes:
-      - 0.7264654
+      _NormalizedTimes: []
       _Callbacks: []
       _Names: []
     _Clip: {fileID: 7400000, guid: 0cba881d4ededd24aaff42b24e40d43c, type: 3}
     _Speed: 1
-    _NormalizedStartTime: 0
+    _NormalizedStartTime: NaN
   exitTimes:
-  - 0.8
+  - 0.6
+  lastAttackTime: -100
+  currentIndex: 0
   damages:
   - healthDamage: 25
     staminaDamage: 25
@@ -174,3 +178,4 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}
+  maxTimeBetweenAttacks: 0.5

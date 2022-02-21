@@ -71,6 +71,9 @@ MonoBehaviour:
     hitClip: {fileID: 0}
   staminaCost: 0
   exitTime: -1
+  cancelStartTime: 0
+  mainHandAngleAdjust: 0
+  offHandAngleAdjust: 0
   sequence:
   - _FadeDuration: 0.25
     _Events:
@@ -102,6 +105,8 @@ MonoBehaviour:
   exitTimes:
   - 0.291439
   - 0.8
+  lastAttackTime: -100
+  currentIndex: 0
   damages:
   - healthDamage: 25
     staminaDamage: 25
@@ -226,3 +231,4 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}
+  maxTimeBetweenAttacks: 2
