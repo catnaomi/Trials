@@ -2532,7 +2532,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         float forwardOffset = 2f;
         if (inventory.IsMainEquipped() && inventory.GetMainWeapon() is BladeWeapon mwep)
         {
-            forwardOffset = mwep.GetLength() * 2f;
+            forwardOffset = mwep.GetLength();
         }
         Vector3 ikThrustVector = initialThrustPos + this.transform.forward * forwardOffset + (h * this.transform.up);
         Debug.DrawLine(initialThrustPos, ikThrustVector, Color.red);
@@ -2581,6 +2581,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             smoothedHeadPoint = Vector3.MoveTowards(smoothedHeadPoint, point, headPointSpeed * Time.deltaTime);
             animancer.Animator.SetLookAtPosition(smoothedHeadPoint);
             animancer.Animator.SetLookAtWeight(1f, 0.1f, 1f, 0f, 0.7f);
+            thrustIKWeight = 0f;
         }
         
     }
