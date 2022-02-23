@@ -895,6 +895,11 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         return RangedWeapon.model;
     }
 
+    public bool IsAnyWeaponDrawn()
+    {
+        return IsMainDrawn() || IsOffDrawn() || IsRangedDrawn();
+    }
+
     public void UnequipWeapon(EquippableWeapon weapon)
     {
         if (weapon == null) return;

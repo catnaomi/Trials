@@ -80,6 +80,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float walkAccelReal;
     public bool sprinting;
     public bool shouldDodge;
+    [Header("Carrying Settings")]
+    public Carryable carryable;
+    public bool isCarrying;
     [Header("Climbing Settings")]
     public ClimbDetector currentClimb;
     bool ledgeSnap;
@@ -179,6 +182,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     private System.Action _MoveOnEnd;
     private System.Action _AttackEnd;
     private System.Action _StopUpperLayer;
+    [Header("Carry Anims")]
+    public ClipTransition pickUpAnim;
+    public ClipTransition carryAnim;
+    public ClipTransition throwAnim;
     [Header("Movesets")]
     public Moveset runtimeMoveset;
     public Moveset runtimeOffMoveset;
@@ -204,6 +211,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState block;
         public AnimancerState aim;
         public AnimancerState dialogue;
+        public AnimancerState carry;
     }
 
     struct AimState
@@ -444,6 +452,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 state.swim = animancer.Play(swimStart, 0.25f);
                 this.gameObject.SendMessage("SplashBig");
             }
+            if (isCarrying)
+            {
+                if (!animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
+                {
+                    animancer.Layers[HumanoidAnimLayers.UpperBody].Play(carryAnim);
+                }
+            }
             EquippableWeapon blockWeapon = inventory.GetBlockWeapon();
             if (blocking && blockWeapon != null)
             {
@@ -476,7 +491,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 animancer.Layers[HumanoidAnimLayers.BilayerBlend].Stop();
             }
-            if (attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
+            if (attack && isCarrying)
+            {
+                StartThrow();
+                attack = false;
+                slash = false;
+                thrust = false;
+            }
+            else if (attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
             {
                 if (!inventory.IsMainDrawn())
                 {
@@ -1239,6 +1261,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (GetGrounded() && !IsFalling() && !IsClimbing())
         {
             UnsnapLedge();   
+        }
+        if (isCarrying)
+        {
+            if (animancer.States.Current != state.move && animancer.States.Current != state.fall && animancer.States.Current != state.carry)
+            {
+                StopCarrying();
+            }
+            else if (inventory.IsAnyWeaponDrawn())
+            {
+                StopCarrying();
+            }
+            else
+            {
+                carryable.SetCarryPosition(this.transform.position + Vector3.up * (2f + carryable.yOffset));
+            }
+            
         }
         HandleCinemachine();
     }
@@ -2018,6 +2056,88 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     #endregion
 
+    #region CARRYING
+
+    public void Carry(Carryable c)
+    {
+        carryable = c;
+        isCarrying = true;
+        inventory.SetDrawn(Inventory.MainType, false);
+        inventory.SetDrawn(Inventory.OffType, false);
+        inventory.SetDrawn(Inventory.RangedType, false);
+        UpdateFromMoveset();
+        Physics.IgnoreCollision(this.GetComponent<Collider>(), c.GetComponent<Collider>());
+        
+        
+        
+    }
+
+    public void CarryWithAnimation(Carryable c)
+    {
+        carryable = c;
+        Physics.IgnoreCollision(this.GetComponent<Collider>(), c.GetComponent<Collider>());
+        StartCoroutine("StartCarryRoutine");
+    }
+
+
+    IEnumerator StartCarryRoutine()
+    {
+        SheatheAll();
+        Vector3 dir = carryable.transform.position - this.transform.position;
+        dir.Normalize();
+        dir.y = 0;
+        this.transform.rotation = Quaternion.LookRotation(dir);
+        yield return new WaitWhile(inventory.IsAnyWeaponDrawn);
+        state.carry = animancer.Play(pickUpAnim);
+        state.carry.Events.OnEnd = () =>
+        {
+            isCarrying = true;
+            carryable.StartCarry();
+            _MoveOnEnd();
+        };
+    }
+    public void StopCarrying()
+    {
+        StartCoroutine(DelayAllowingCollision(carryable));
+        isCarrying = false;
+        carryable.StopCarry();
+        if (animancer.Layers[HumanoidAnimLayers.UpperBody].IsPlayingClip(carryAnim.Clip))
+        {
+            animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+        }
+    }
+
+    public void StartThrow()
+    {
+        Throw();
+        /*if (animancer.States.Current != state.carry)
+        {
+            Throw();
+            state.carry = animancer.Play(throwAnim);
+            state.carry.Events.OnEnd = _MoveOnEnd;
+        }*/
+    }
+
+    public void Throw()
+    {
+        if (isCarrying)
+        {
+            StopCarrying();
+            carryable.Throw(this.transform.forward * 500f);
+            
+        }
+    }
+    IEnumerator DelayAllowingCollision(Carryable carryable)
+    {
+        yield return new WaitForSeconds(1f);
+        if (!isCarrying || this.carryable != carryable)
+        {
+            Physics.IgnoreCollision(this.GetComponent<Collider>(), carryable.GetComponent<Collider>(), false);
+        }
+        
+    }
+    #endregion
+
     #region COMBAT
 
     // attacks
@@ -2731,7 +2851,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         foreach (Interactable interactable in interactables)
         {
-            if (interactable == null) continue;
+            if (interactable == null || !interactable.canInteract) continue;
             float dist = Vector3.Distance(this.transform.position, interactable.transform.position);
             if (dist < leadDist)
             {
