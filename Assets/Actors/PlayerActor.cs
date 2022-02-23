@@ -114,6 +114,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool isHitboxActive;
     bool isSheathing;
     string test1;
+    bool dead;
     public float aimCancelTime = 2f;
     public float aimTime;
     public float aimStartTime = 0.25f;
@@ -345,6 +346,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     // Update is called once per frame
     public override void ActorPostUpdate()
     {
+        if (dead) return;
         instatemove = (animancer.States.Current == state.move);
         isGrounded = GetGrounded();
         moveSmoothed = Vector2.MoveTowards(moveSmoothed, move, Time.deltaTime);
@@ -1249,6 +1251,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+    #region GAME FLOW
+
+    public void ProcessDeath()
+    {
+        SceneLoader.DelayReloadCurrentScene();
+    }
+    #endregion
     #region CLIMBING
     public void SetLedge(Ledge ledge)
     {
@@ -2445,6 +2454,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         damageHandler.TakeDamage(damage);
     }
+
+    public override void Die()
+    {
+        base.Die();
+        dead = true;
+        ProcessDeath();
+    }
     #endregion
 
     #region IK
@@ -2613,6 +2629,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     #region State Checks
 
+    public override bool IsAlive()
+    {
+        return !dead;
+    }
     public bool IsSwimming()
     {
         return animancer.States.Current == state.swim;
@@ -2636,6 +2656,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return animancer.States.Current == state.climb;
     }
 
+    public override bool IsGrounded()
+    {
+        return GetGrounded();
+    }
     public override bool IsDodging()
     {
         return animancer.States.Current == state.roll;

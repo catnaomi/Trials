@@ -412,7 +412,7 @@ public class TimeTravelController : MonoBehaviour
             yield return null;
             foreach (IAffectedByTimeTravel affected in affectees)
             {
-                if (!affected.IsFrozen())
+                if (affected != null && !affected.IsFrozen())
                 {
                     affected.SaveTimeState();
                 }

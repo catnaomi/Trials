@@ -24,11 +24,12 @@ public class SceneLoader : MonoBehaviour
     public Quaternion playerRotation;
     [Header("Disable These GameObjects While Loading")]
     public GameObject[] objectsToDisable;
-
+    static SceneLoader instance;
     private void Awake()
     {
-        DontDestroyOnLoad(this.gameObject);
-        //DontDestroyOnLoad(Camera.main);
+        instance = this;
+        
+        DontDestroyOnLoad(this);
     }
     // Start is called before the first frame update
     void Start()
@@ -38,12 +39,13 @@ public class SceneLoader : MonoBehaviour
             LoadScenes();
         }
     }
+
     public void LoadScenes()
     {
         isLoadingComplete = false;
         isPreloadingComplete = false;
         StartCoroutine(DisableObjectsRoutine());
-        StartCoroutine(LoadScenesRoutine());
+        StartCoroutine(LoadScenesThenSetActive());
     }
     IEnumerator LoadScenesRoutine()
     {
@@ -71,28 +73,20 @@ public class SceneLoader : MonoBehaviour
             primarySceneData.isAlreadyLoaded = true;
             primarySceneData.scene = primary;
         }
-        if (!primarySceneData.isAlreadyLoaded || !shouldReloadScenes)
-        {
-            sceneLoadingDatas.Add(primarySceneData);
-        }
+
         if (shouldLoadInitScene)
         {
             SceneManager.LoadScene(initSceneName, LoadSceneMode.Single);
-            /*
-            SceneLoadingData initSceneData = new SceneLoadingData()
-            {
-                name = initSceneName,
-            };
-            Scene init = SceneManager.GetSceneByName(initSceneName);
-            if (init != null && init.isLoaded)
-            {
-                initSceneData.isAlreadyLoaded = true;
-                initSceneData.scene = init;
-            }
-            sceneLoadingDatas.Add(initSceneData);
-            */
-
         }
+
+        if (!primarySceneData.isAlreadyLoaded || !shouldReloadScenes)
+        {
+            sceneLoadingDatas.Add(primarySceneData);
+            primarySceneData.loadOperation = SceneManager.LoadSceneAsync(primarySceneToLoad, LoadSceneMode.Additive);
+            yield return primarySceneData.loadOperation;
+        }
+
+
         foreach (string secondarySceneName in secondaryScenesToLoad)
         {
             if (secondarySceneName == "")
@@ -113,8 +107,14 @@ public class SceneLoader : MonoBehaviour
             if (!sceneData.isAlreadyLoaded || !shouldReloadScenes)
             {
                 sceneLoadingDatas.Add(sceneData);
+                sceneData.loadOperation = SceneManager.LoadSceneAsync(primarySceneToLoad, LoadSceneMode.Additive);
+                yield return sceneData.loadOperation;
             }
+
+            
+
         }
+        
         float unloadingProgress;
         float loadingProgress;
         int preloadsCompleted = 0;
@@ -122,6 +122,8 @@ public class SceneLoader : MonoBehaviour
         int loadsToFinish = 0;
         int skips;
         bool primarySceneLoaded = false;
+
+        /*
         while (!isLoadingComplete)
         {
             unloadingProgress = 1f;
@@ -230,9 +232,15 @@ public class SceneLoader : MonoBehaviour
             totalLoading = 0.5f * unloadingProgress + 0.5f * loadingProgress;
             yield return null;
         }
+        */
         //SceneManager.UnloadSceneAsync("_LoadScene");
     }
 
+    IEnumerator LoadScenesThenSetActive()
+    {
+        yield return StartCoroutine(LoadScenesRoutine());
+        SceneManager.SetActiveScene(SceneManager.GetSceneByName(primarySceneToLoad));
+    }
     IEnumerator DisableObjectsRoutine()
     {
         if (player != null)
@@ -261,6 +269,24 @@ public class SceneLoader : MonoBehaviour
             obj.SetActive(true);
         }
         
+    }
+
+    public static void DelayReloadCurrentScene()
+    {
+        instance.StartCoroutine(instance.DelayReloadRoutine(5f));
+    }
+
+    IEnumerator DelayReloadRoutine(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        ReloadCurrentScene();
+    }
+    public void ReloadCurrentScene()
+    {
+        primarySceneToLoad = SceneManager.GetActiveScene().name;
+        allowSceneActivation = true;
+        loadOnStart = false;
+        LoadScenes();
     }
     void PositionPlayer()
     {

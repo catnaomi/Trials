@@ -27,6 +27,9 @@ public class HumanoidDamageHandler : IDamageable
     public Hitbox lastHitbox;
     ClipTransition blockStagger;
 
+    bool isFacingUp;
+
+
     System.Action _OnEnd;
     System.Action _OnBlockEnd;
     public void Recoil()
@@ -72,6 +75,7 @@ public class HumanoidDamageHandler : IDamageable
 
     public void TakeDamage(DamageKnockback damage)
     {
+        if (!actor.IsAlive()) return;
         bool isCrit = IsCritVulnerable();
         float damageAmount = damage.GetDamageAmount(isCrit);
         if (actor.IsTimeStopped())
@@ -208,6 +212,29 @@ public class HumanoidDamageHandler : IDamageable
                 state.Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
                 maxTime = state.RemainingDuration / state.Speed;
             }
+            else if (stagger == DamageKnockback.StaggerType.Knockdown)
+            {
+                bool faceUp = true;//!hitFromBehind;
+                ClipTransition clip = (!faceUp) ? damageAnims.knockdownFaceDown : damageAnims.knockdownFaceUp;
+                AnimancerState state = animancer.Play(clip);
+                
+                
+                state.Events.OnEnd = () =>
+                {
+                    AnimancerState prone = animancer.Play((!faceUp) ? damageAnims.proneFaceDown : damageAnims.proneFaceUp);
+                    prone.NormalizedTime = 0f;
+                    hurt = prone;
+                    if (willKill)
+                    {
+                        Die();
+                    }
+                };
+                hurt = state;
+                if (!willKill)
+                {
+                    actor.StartCoroutine(EndProne(faceUp));
+                }
+            }
             else if (stagger == DamageKnockback.StaggerType.StaggerSmall)
             {
                 Vector3 dir = (damage.source.transform.position - actor.transform.position).normalized;
@@ -319,6 +346,18 @@ public class HumanoidDamageHandler : IDamageable
         totalCritTime = 0f;
     }
 
+    void Die()
+    {
+        hurt.Speed = 0.1f;
+        actor.Die();
+    }
+
+    IEnumerator EndProne(bool faceUp)
+    {
+        yield return new WaitForSeconds(3f);
+        AnimancerState state = animancer.Play((faceUp) ? damageAnims.getupFaceUp : damageAnims.getupFaceDown);
+        hurt = state;
+    }
     IEnumerator CriticalTimeOut()
     {
         inCritCoroutine = true;

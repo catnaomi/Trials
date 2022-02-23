@@ -201,6 +201,10 @@ public class Actor : MonoBehaviour
         return false;
     }
 
+    public virtual bool IsGrounded()
+    {
+        return Physics.Raycast(this.transform.position, -this.transform.up, 2f, LayerMask.GetMask("Default, Terrain"));
+    }
     public virtual bool IsTimeStopped()
     {
         if (!isInTimeState)
@@ -223,6 +227,11 @@ public class Actor : MonoBehaviour
         moveAdditional = move;
     }
 
+    public virtual void Die()
+    {
+        OnDie.Invoke();
+        StartCleanUp();
+    }
     public void StartCleanUp()
     {
         StartCoroutine(CorpseClean());

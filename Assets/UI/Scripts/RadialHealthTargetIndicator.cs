@@ -81,11 +81,15 @@ public class RadialHealthTargetIndicator : MonoBehaviour
         damaged.fillAmount = damageHP;
 
         
-        if (showing)
+        if (showing && target != null)
         {
             RectTransform parent = GetComponentInParent<RectTransform>();
             Vector2 viewportPos = Camera.main.WorldToScreenPoint(target.transform.position);
             this.transform.position = viewportPos;//new Vector2(viewportPos.x * parent.rect.width, viewportPos.y * parent.rect.height);
+        }
+        else if (target == null)
+        {
+            showing = false;
         }
 
         changed = false;

@@ -9,13 +9,28 @@ public class DamageAnims : ScriptableObject
     public MixerTransition2D staggerSmall;
     public MixerTransition2D staggerLarge;
     public ClipTransition stumble;
-    public ClipTransition knockdown;
+    
     public ClipTransition stun;
     public ClipTransition crumple;
     public ClipTransition blockStagger;
     public ClipTransition guardBreak;
     public ClipTransition recoil;
+
     public AvatarMask flinchMask;
+
+    [Space(20)]
+    public ClipTransition knockdownFaceUp;
+    public ClipTransition fallFaceUp;
+    public ClipTransition proneFaceUp;
+    public ClipTransition getupFaceUp;
+    public ClipTransition deadFaceUp;
+    [Space(5)]
+    public ClipTransition knockdownFaceDown;
+    public ClipTransition fallFaceDown;
+    public ClipTransition proneFaceDown;
+    public ClipTransition getupFaceDown;
+    public ClipTransition deadFaceDown;
+
 
 
     public ClipTransition GetClipFromStaggerType(DamageKnockback.StaggerType type)
@@ -27,7 +42,7 @@ public class DamageAnims : ScriptableObject
             case DamageKnockback.StaggerType.Stumble:
                 return stumble;
             case DamageKnockback.StaggerType.Knockdown:
-                return knockdown;
+                return knockdownFaceUp;
             case DamageKnockback.StaggerType.Stun:
                 return stun;
             case DamageKnockback.StaggerType.Crumple:

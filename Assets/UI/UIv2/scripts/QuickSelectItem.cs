@@ -20,14 +20,14 @@ public class QuickSelectItem : MonoBehaviour
     public InventoryUI2 invUI;
 
     public float shadowAlpha = 0f;
-    Shadow shadow;
+    public Shadow shadow;
     // Start is called before the first frame update
     void Start()
     {
         
         PlayerActor.player.GetComponent<Inventory>().OnChange.AddListener(UpdateSlots);
 
-        shadow = this.GetComponentInChildren<Shadow>();
+        //shadow = this.GetComponentInChildren<Shadow>();
         UpdateSlots();
     }
 

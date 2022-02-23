@@ -238,4 +238,9 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         return this.gameObject;
     }
+
+    void OnDestroy()
+    {
+        TimeTravelController.time.DeregisterAffectee(this);
+    }
 }

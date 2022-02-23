@@ -272,7 +272,11 @@ public class FXController : MonoBehaviour
     {
         if (main == null)
         {
-            GameObject.FindObjectOfType<FXController>().Init();
+            FXController fx = GameObject.FindObjectOfType<FXController>();
+            if (fx != null)
+            {
+                fx.Init();
+            }
         }
     }
 }
