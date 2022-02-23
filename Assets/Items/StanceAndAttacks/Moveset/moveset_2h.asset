@@ -17,14 +17,14 @@ MonoBehaviour:
   powerSlash: {fileID: 0}
   powerThrust: {fileID: 0}
   stanceSlash: {fileID: 11400000, guid: 963317bb8f476474087da23f353b281d, type: 2}
-  stanceThrust: {fileID: 11400000, guid: 41c8b27088cd2c4428177d33fc222ab9, type: 2}
+  stanceThrust: {fileID: 0}
   aimAttack: {fileID: 0}
   dashSlash: {fileID: 11400000, guid: dbcf5971bcd6ed7439d2bc411dd2565c, type: 2}
-  dashThrust: {fileID: 11400000, guid: 41c8b27088cd2c4428177d33fc222ab9, type: 2}
+  dashThrust: {fileID: 11400000, guid: 951e91426ff3f9147a10e0489fe06dd2, type: 2}
   plungeSlash: {fileID: 11400000, guid: 8a1cb833646e5d8419fe1c06e4564dcb, type: 2}
   plungeThrust: {fileID: 11400000, guid: 0b7d4cab69116214d961989a1775d8f9, type: 2}
-  rollSlash: {fileID: 11400000, guid: 17a985406f03c564a84a0cc53156b9d1, type: 2}
-  rollThrust: {fileID: 11400000, guid: b647ca73f2382474f95506c303071b98, type: 2}
+  rollSlash: {fileID: 11400000, guid: 266b5d1b0259ff84d89f1ba86348bdd5, type: 2}
+  rollThrust: {fileID: 11400000, guid: 951e91426ff3f9147a10e0489fe06dd2, type: 2}
   draw:
     _FadeDuration: 0.25
     _Events:
@@ -45,24 +45,25 @@ MonoBehaviour:
     _NormalizedStartTime: 0
   moveAnim: {fileID: 11400000, guid: 6d9c71aab19d24e4f84f3803be29623c, type: 2}
   overridesBlock: 1
-  blockMove: {fileID: 11400000, guid: 13e76c46ea418c74c8bc91752968995c, type: 2}
+  blockMove: {fileID: 11400000, guid: 1ba21ca5a1eeaa543889f9920a22c7d1, type: 2}
   blockAnim:
     _FadeDuration: 0.25
     _Events:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: -203655887218126122, guid: b98d9549e0d40cd44880beb3b978b4f3, type: 3}
+    _Clip: {fileID: 7400006, guid: 1628507dca0acb944b57ad92cce7f4ff, type: 3}
     _Speed: 1
     _NormalizedStartTime: 0
   blockAnimStart:
     _FadeDuration: 0.25
     _Events:
-      _NormalizedTimes: []
+      _NormalizedTimes:
+      - 0.29129663
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: 421682445191526625, guid: 108838967d7aece45b2511a4a7eec950, type: 3}
-    _Speed: 1
+    _Clip: {fileID: 7400000, guid: 1628507dca0acb944b57ad92cce7f4ff, type: 3}
+    _Speed: NaN
     _NormalizedStartTime: 0
   blockStagger:
     _FadeDuration: 0.1
@@ -70,10 +71,9 @@ MonoBehaviour:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: -6641910558185409088, guid: 9523708bc7275be4e86adf7f41edbb25,
-      type: 3}
-    _Speed: 1
-    _NormalizedStartTime: 0
+    _Clip: {fileID: 7400002, guid: 1628507dca0acb944b57ad92cce7f4ff, type: 3}
+    _Speed: NaN
+    _NormalizedStartTime: NaN
   overridesSprint: 1
   sprintAnim:
     _FadeDuration: 0.25

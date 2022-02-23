@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e242662a52220dc40932f531094d4de5, type: 3}
+  m_Name: 2h-groundslam
+  m_EditorClassIdentifier: 
+  desc: One-Handed Ground Slam
+  attackId: 1
+  isBlockOK: 0
+  isSprintOK: 0
+  isFallingOK: 0
+  isParryOK: 0
+  anim:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: 8dbf0a9d34dd9e84aad9a32bcff8e044, type: 2}
+    _Speed: NaN
+    _NormalizedStartTime: 0.06
+  attackData:
+    healthDamage: 25
+    staminaDamage: 25
+    types: 0a000000
+    critData:
+      criticalMultiplier: 1
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0.25
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 0
+    isSlash: 1
+    bouncesOffBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    stunTime: 1
+    staggers:
+      onHit: 4
+      onArmorHit: 1
+      onCritical: 5
+      onKill: 6
+      onInjure: 7
+    kbForce: {x: 0, y: 1, z: 0}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    hitClip: {fileID: 0}
+  staminaCost: 0
+  exitTime: -1
+  cancelStartTime: 0
+  mainHandAngleAdjust: 0
+  offHandAngleAdjust: 0

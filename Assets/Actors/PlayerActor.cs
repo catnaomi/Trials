@@ -290,7 +290,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         _AttackEnd = () =>
         {
             animancer.Play(state.move, 0.5f);
-            attack = false;
+            //attack = false;
             slash = false;
             thrust = false;
             if (mainWeaponAngle != 0f)
@@ -806,6 +806,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 if (!inventory.IsMainDrawn())
                 {
                     inventory.SetDrawn(true, true);
+                    UpdateFromMoveset();
                 }
                 if (inventory.IsMainDrawn())
                 {
@@ -2018,9 +2019,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             PowerSlash();
             return;
-        } 
-
-        state.attack = GetMoveset().quickSlash1h.ProcessAttack(this, out cancelTime, _AttackEnd);
+        }
+        System.Action endAction = (GetMoveset().quickSlash1h is ComboAttack) ? _MoveOnEnd : _AttackEnd;
+        state.attack = GetMoveset().quickSlash1h.ProcessAttack(this, out cancelTime, endAction);
         attackDecelReal = attackDecel;
         OnAttack.Invoke();
         hold = false;
@@ -2034,7 +2035,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             return;
         }
 
-        state.attack = GetMoveset().quickThrust1h.ProcessAttack(this, out cancelTime, _AttackEnd);
+        System.Action endAction = (GetMoveset().quickThrust1h is ComboAttack) ? _MoveOnEnd : _AttackEnd;
+        state.attack = GetMoveset().quickThrust1h.ProcessAttack(this, out cancelTime, endAction);
         attackDecelReal = attackDecel;
         OnAttack.Invoke();
         hold = false;
