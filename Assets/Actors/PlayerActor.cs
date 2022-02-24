@@ -2109,7 +2109,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void StartThrow()
     {
-        Throw();
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Weight = 0f;
+        state.carry = animancer.Play(throwAnim);
+        state.carry.Events.OnEnd = _MoveOnEnd;
         /*if (animancer.States.Current != state.carry)
         {
             Throw();
