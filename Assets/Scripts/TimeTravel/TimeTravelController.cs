@@ -53,6 +53,8 @@ public class TimeTravelController : MonoBehaviour
     public UnityEvent OnCooldownComplete;
     public UnityEvent OnMeterFail;
     [Header("Shader Settings")]
+    public Material magicVignette;
+    public float magicVignetteStrength;
     public Renderer bubbleInner;
     MaterialPropertyBlock block;
     private void Awake()
@@ -74,7 +76,6 @@ public class TimeTravelController : MonoBehaviour
             block = new MaterialPropertyBlock();
             bubbleInner.SetPropertyBlock(block);
         }
-        
     }
 
     // Update is called once per frame
@@ -156,6 +157,10 @@ public class TimeTravelController : MonoBehaviour
         {
             StopSlowTime();
         }
+
+        bool isAnyPowerOn = freeze || isSlowing || isRewinding;
+        magicVignetteStrength = Mathf.MoveTowards(magicVignetteStrength, isAnyPowerOn ? 1f : 0f, 5f * Time.deltaTime);
+        magicVignette.SetFloat("_Weight", magicVignetteStrength);
     }
 
     void SetupInput()
@@ -251,12 +256,12 @@ public class TimeTravelController : MonoBehaviour
 
     void StartPostProcessing()
     {
-        PostProcessingController.SetVolumeWeight(PostProcessingController.instance.MagicVolume, 1f, timeToOpenBubble);
+        //PostProcessingController.SetVolumeWeight(PostProcessingController.instance.MagicVolume, 1f, timeToOpenBubble);
     }
 
     void StopPostProcessing()
     {
-        PostProcessingController.SetVolumeWeight(PostProcessingController.instance.MagicVolume, 0f, timeToOpenBubble);
+        //PostProcessingController.SetVolumeWeight(PostProcessingController.instance.MagicVolume, 0f, timeToOpenBubble);
     }
     public void CancelRewind()
     {
@@ -507,5 +512,10 @@ public class TimeTravelController : MonoBehaviour
     public bool CanStartPower()
     {
         return meter.current >= 0f && timePowerClock <= 0f;
+    }
+
+    private void OnApplicationQuit()
+    {
+        magicVignette.SetFloat("_Weight", 0f);
     }
 }

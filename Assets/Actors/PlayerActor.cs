@@ -2132,7 +2132,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     IEnumerator DelayAllowingCollision(Carryable carryable)
     {
         yield return new WaitForSeconds(1f);
-        if (!isCarrying || this.carryable != carryable)
+        if (!isCarrying && this.carryable != carryable && animancer.States.Current != state.carry)
         {
             Physics.IgnoreCollision(this.GetComponent<Collider>(), carryable.GetComponent<Collider>(), false);
         }
