@@ -9,7 +9,7 @@ public class HitboxGroup
     public GameObject root;
     public List<Hitbox> hitboxes;
     public int size;
-    public List<Actor> victims;
+    public List<IDamageable> victims;
 
     public bool didHitTerrain;
     public Hitbox terrainContactBox;
@@ -19,7 +19,7 @@ public class HitboxGroup
     {
         this.root = root;
         this.hitboxes = hitboxes;
-        this.victims = new List<Actor>();
+        this.victims = new List<IDamageable>();
 
         OnHitTerrain = new UnityEvent();
         OnHitWall = new UnityEvent();

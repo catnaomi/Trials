@@ -12,7 +12,7 @@ public class Hitbox : MonoBehaviour
     public SphereCollider collider;
     public Rigidbody rigidbody;
     public DamageKnockback damageKnockback;
-    public List<Actor> victims;
+    public List<IDamageable> victims;
     public bool isActive;
 
     public bool didHitTerrain;
@@ -69,7 +69,7 @@ public class Hitbox : MonoBehaviour
         rigidbody.isKinematic = true;
         if (victims == null)
         {
-            victims = new List<Actor>();
+            victims = new List<IDamageable>();
         }
         history = new List<HitboxHistoryInfo>();
         UpdatePosition();
@@ -127,7 +127,7 @@ public class Hitbox : MonoBehaviour
                 // cast
                 didCast = true;
 
-                RaycastHit[] hits = Physics.SphereCastAll(start, radius, end - start, dist, LayerMask.GetMask("Actors", "Terrain"));
+                RaycastHit[] hits = Physics.SphereCastAll(start, radius, end - start, dist, LayerMask.GetMask("Actors", "Terrain", "PhysicsObjects"));
 
                 foreach (RaycastHit hit in hits)
                 {
@@ -152,11 +152,15 @@ public class Hitbox : MonoBehaviour
             {
                 if (collider.transform.root.gameObject != source)
                 {
-                    Actor hitActor = collider.GetComponentInParent<Actor>();
+                    IDamageable hitActor = collider.GetComponentInParent<IDamageable>();
+                    if (hitActor == null)
+                    {
+                        hitActor = collider.GetComponent<IDamageable>();
+                    }
                     if (hitActor != null && !victims.Contains(hitActor))
                     {
                         victims.Add(hitActor);
-                        hitActor.ProcessDamageKnockback(this.damageKnockback);
+                        hitActor.TakeDamage(this.damageKnockback);
                         didHit = true;
                         OnHitActor.Invoke();
                         OnHitAnything.Invoke();

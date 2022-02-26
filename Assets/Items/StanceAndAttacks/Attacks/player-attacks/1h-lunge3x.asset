@@ -53,6 +53,7 @@ MonoBehaviour:
       onCritical: 3
       onKill: 6
       onInjure: 7
+      onCounterHit: 2
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
     hitboxSource: {fileID: 0}
@@ -71,6 +72,9 @@ MonoBehaviour:
     hitClip: {fileID: 0}
   staminaCost: 0
   exitTime: -1
+  cancelStartTime: 0
+  mainHandAngleAdjust: 0
+  offHandAngleAdjust: 0
   sequence:
   - _FadeDuration: 0.25
     _Events:
@@ -101,6 +105,8 @@ MonoBehaviour:
   exitTimes:
   - 0.4
   - 0.4
+  lastAttackTime: -100
+  currentIndex: 0
   damages:
   - healthDamage: 25
     staminaDamage: 10
@@ -127,7 +133,8 @@ MonoBehaviour:
       onCritical: 3
       onKill: 6
       onInjure: 0
-    kbForce: {x: 0, y: 0, z: 0}
+      onCounterHit: 0
+    kbForce: {x: 0, y: 2.5, z: 10}
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
@@ -168,7 +175,8 @@ MonoBehaviour:
       onCritical: 3
       onKill: 6
       onInjure: 0
-    kbForce: {x: 0, y: 0, z: 0}
+      onCounterHit: 0
+    kbForce: {x: 0, y: 2.5, z: 10}
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
@@ -209,7 +217,8 @@ MonoBehaviour:
       onCritical: 2
       onKill: 6
       onInjure: 0
-    kbForce: {x: 0, y: 0, z: 0}
+      onCounterHit: 0
+    kbForce: {x: 0, y: 2.5, z: 10}
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
@@ -225,3 +234,4 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
+  maxTimeBetweenAttacks: 0.5

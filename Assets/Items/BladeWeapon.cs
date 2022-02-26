@@ -142,7 +142,8 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
                     slashFX.SetNextCrit(true);
                 }
             });
-
+            dk.kbForce = DamageKnockback.GetKnockbackRelativeToTransform(dk.kbForce * baseDamage, holder.transform);
+            dk.originPoint = GetModel().transform.position;
             slashFX.transform.position = holder.transform.position;
             thrustFX.transform.position = holder.transform.position;
             wall = false;

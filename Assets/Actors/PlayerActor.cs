@@ -84,6 +84,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public Carryable carryable;
     public bool isCarrying;
     public bool isDropping;
+    public float throwForce = 500f;
+    public float throwForceUp = 50f;
+    public float throwMassMax = 20f;
     [Header("Climbing Settings")]
     public ClimbDetector currentClimb;
     bool ledgeSnap;
@@ -185,6 +188,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     private System.Action _StopUpperLayer;
     [Header("Carry Anims")]
     public ClipTransition pickUpAnim;
+    public ClipTransition slowPickUpAnim;
     public ClipTransition carryAnim;
     public ClipTransition throwAnim;
     public ClipTransition dropAnim;
@@ -1293,7 +1297,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 Vector3 carryPos = ((positionReference.MainHand.transform.position + positionReference.OffHand.transform.position) / 2f) + (dirVector * carryable.yOffset);
                 carryable.SetCarryPosition(carryPos);
             }
-            
+            if (!Physics.GetIgnoreCollision(carryable.GetComponent<Collider>(), this.GetComponent<Collider>()))
+            {
+                Physics.IgnoreCollision(carryable.GetComponent<Collider>(), this.GetComponent<Collider>());
+            }
         }
         HandleCinemachine();
     }
@@ -2108,6 +2115,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         this.transform.rotation = Quaternion.LookRotation(dir);
         yield return new WaitWhile(inventory.IsAnyWeaponDrawn);
         state.carry = animancer.Play(pickUpAnim);
+        if (carryable.GetMass() > 10f)
+        {
+            state.carry = animancer.Play(slowPickUpAnim);
+        }
+        else
+        {
+            state.carry = animancer.Play(pickUpAnim);
+        }
         state.carry.Events.OnEnd = () =>
         {
             isCarrying = true;
@@ -2145,7 +2160,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (isCarrying)
         {
             StopCarrying();
-            carryable.Throw(this.transform.forward * 500f);
+            carryable.Throw(this.transform.forward * Mathf.Clamp(carryable.GetMass(),1f,throwMassMax) * throwForce + Vector3.up * Mathf.Clamp(carryable.GetMass(), 1f, throwMassMax) * throwForceUp);
             
         }
     }
@@ -2174,8 +2189,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     IEnumerator DelayAllowingCollision(Carryable carryable)
     {
-        yield return new WaitForSeconds(1.5f);
-        if (!isCarrying && this.carryable != carryable && animancer.States.Current != state.carry)
+        yield return new WaitForSeconds(0.5f);
+        if (!((isCarrying || animancer.States.Current == state.carry) && this.carryable == carryable))
         {
             Physics.IgnoreCollision(this.GetComponent<Collider>(), carryable.GetComponent<Collider>(), false);
         }
@@ -2617,6 +2632,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void TakeDamage(DamageKnockback damage)
     {
+        HitboxActive(0);
         damageHandler.TakeDamage(damage);
     }
 

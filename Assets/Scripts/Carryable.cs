@@ -86,5 +86,18 @@ public class Carryable : MonoBehaviour
     public void SetCarryPosition(Vector3 position)
     {
         this.transform.position = position;
+        this.transform.rotation = Quaternion.LookRotation(player.transform.forward);
+    }
+
+    public float GetMass()
+    {
+        if (rigidbody != null)
+        {
+            return rigidbody.mass;
+        }
+        else
+        {
+            return 1f;
+        }
     }
 }

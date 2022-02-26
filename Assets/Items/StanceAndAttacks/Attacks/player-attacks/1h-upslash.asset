@@ -32,23 +32,47 @@ MonoBehaviour:
     healthDamage: 25
     staminaDamage: 25
     types: 0a000000
-    criticalMultiplier: 1.25
-    forceCritical: 0
+    critData:
+      criticalMultiplier: 1
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0.25
     breaksArmor: 0
     unblockable: 0
     disarm: 0
     isThrust: 1
     isSlash: 0
+    bouncesOffBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
     stunTime: 1
     staggers:
       onHit: 2
       onArmorHit: 1
       onCritical: 3
       onKill: 6
-    kbForce: {x: 0, y: 1, z: 0}
+      onInjure: 7
+      onCounterHit: 2
+    kbForce: {x: 0, y: 2.5, z: 10}
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
     hitClip: {fileID: 0}
   staminaCost: 0
+  exitTime: -1
+  cancelStartTime: 0
+  mainHandAngleAdjust: 0
+  offHandAngleAdjust: 0
