@@ -331,6 +331,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   origin: {fileID: 0}
+  inFlight: 0
   tip: {fileID: 4963449807795735173}
   feather: {fileID: 495425492007682860}
   hitbox: {fileID: 0}
@@ -358,8 +359,8 @@ MonoBehaviour:
       onHit: 1
       onArmorHit: 1
       onCritical: 2
-      onKill: 7
-      onInjure: 0
+      onKill: 6
+      onCounterHit: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     hitboxSource: {fileID: 0}
@@ -378,7 +379,6 @@ MonoBehaviour:
     hitClip: {fileID: 0}
   interactable: {fileID: 3029168984229030273}
   prefabRef: {fileID: 0}
-  inFlight: 0
 --- !u!114 &3463198421341249673
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -697,6 +697,7 @@ MonoBehaviour:
   interactionNode: {fileID: 74589775805465020}
   canInteract: 1
   interactIcon: {fileID: 0}
+  interactIconHeight: 1
   item: {fileID: 11400000, guid: d16790a012b3df64fba58b934c0a61e7, type: 2}
   destroyOnInteract: 1
   rootObject: {fileID: 4805927410726168974}

@@ -114,8 +114,8 @@ public class HumanoidDamageHandler : IDamageable
         bool isArmored = actor.IsArmored() && !damage.breaksArmor;
         bool willInjure = actor.attributes.spareable && actor.attributes.HasHealthRemaining() && damageAmount >= actor.attributes.health.current;
         bool willKill = (!willInjure) && damageAmount >= actor.attributes.health.current;
-
-        actor.attributes.ReduceHealth(damageAmount);
+        bool isCounterhit = actor.IsAttacking();
+        if (!actor.IsDodging()) actor.attributes.ReduceHealth(damageAmount);
 
         if (damage.hitboxSource != null)
         {
@@ -183,13 +183,14 @@ public class HumanoidDamageHandler : IDamageable
 
             
 
-            if (willKill)
+            if (willKill || willInjure)
             {
                 stagger = damage.staggers.onKill;
-            }
-            else if (willInjure)
-            {
-                stagger = damage.staggers.onInjure;
+
+                if (stagger != DamageKnockback.StaggerType.Stumble && stagger != DamageKnockback.StaggerType.Knockdown && stagger != DamageKnockback.StaggerType.FallOver && stagger != DamageKnockback.StaggerType.SpinDeath)
+                {
+                    stagger = DamageKnockback.StaggerType.FallOver;
+                }
             }
             else if (isCrit)
             {
@@ -198,6 +199,14 @@ public class HumanoidDamageHandler : IDamageable
             else if (isArmored)
             {
                 stagger = damage.staggers.onArmorHit;
+            }
+            else if (isCounterhit)
+            {
+                stagger = damage.staggers.onCounterHit;
+                if (stagger == DamageKnockback.StaggerType.None)
+                {
+                    stagger = damage.staggers.onHit;
+                }
             }
             else
             {
@@ -214,7 +223,9 @@ public class HumanoidDamageHandler : IDamageable
             }
             else if (stagger == DamageKnockback.StaggerType.Knockdown)
             {
-                bool faceUp = true;//!hitFromBehind;
+                bool faceUp = !hitFromBehind;
+                Vector3 dir = actor.transform.position - damage.source.transform.position;
+                dir = dir.normalized * (faceUp ? 1f : -1f);
                 ClipTransition clip = (!faceUp) ? damageAnims.knockdownFaceDown : damageAnims.knockdownFaceUp;
                 AnimancerState state = animancer.Play(clip);
                 
@@ -234,6 +245,51 @@ public class HumanoidDamageHandler : IDamageable
                 {
                     actor.StartCoroutine(EndProne(faceUp));
                 }
+            }
+            else if (stagger == DamageKnockback.StaggerType.Crumple)
+            {
+                AnimancerState state = animancer.Play(damageAnims.crumple);
+
+
+                if (willKill)
+                {
+                    Die();
+                }
+                else
+                {
+                    actor.StartCoroutine(EndProne(false));
+                }
+                hurt = state;
+            }
+            else if (stagger == DamageKnockback.StaggerType.FallOver)
+            {
+                AnimancerState state = animancer.Play(damageAnims.fallOver);
+
+
+                if (willKill)
+                {
+                    Die();
+                }
+                else
+                {
+                    actor.StartCoroutine(EndProne(true));
+                }
+                hurt = state;
+            }
+            else if (stagger == DamageKnockback.StaggerType.SpinDeath)
+            {
+                AnimancerState state = animancer.Play(damageAnims.spinDeath);
+
+
+                if (willKill)
+                {
+                    Die();
+                }
+                else
+                {
+                    actor.StartCoroutine(EndProne(true));
+                }
+                hurt = state;
             }
             else if (stagger == DamageKnockback.StaggerType.StaggerSmall)
             {
@@ -348,7 +404,10 @@ public class HumanoidDamageHandler : IDamageable
 
     void Die()
     {
-        hurt.Speed = 0.1f;
+        if (hurt != null)
+        {
+            hurt.Speed = 0.1f;
+        }
         actor.Die();
     }
 

@@ -52,7 +52,6 @@ public class DamageKnockback
         public StaggerType onArmorHit;
         public StaggerType onCritical;
         public StaggerType onKill;
-        public StaggerType onInjure;
         public StaggerType onCounterHit;
     }
 
@@ -80,9 +79,9 @@ public class DamageKnockback
         Stumble,   // 3
         // knockouts
         Knockdown,      // 4
-        Stun,           // 5
+        SpinDeath,           // 5
         Crumple,        // 6
-
+        FallOver,
         // on block
         BlockStagger,   // 7
         GuardBreak,     // 8
@@ -162,7 +161,6 @@ public class DamageKnockback
         onArmorHit = StaggerType.Flinch,
         onCritical = StaggerType.Stumble,
         onKill = StaggerType.Crumple,
-        onInjure = StaggerType.Crumple,
         onCounterHit = StaggerType.StaggerSmall,
     };
 
