@@ -73,15 +73,22 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public virtual TimeTravelData SaveTimeState()
     {
         if (isRewinding || isFrozen) return null;
-        ActorTimeTravelData data = new ActorTimeTravelData()
+        ActorTimeTravelData data;
+        if (actor is PlayerActor)
         {
-            time = Time.time,
-            position = this.transform.position,
-            rotation = this.transform.rotation,
-            heading = this.transform.forward,
-            velocity = actor.xzVel + Vector3.up * actor.yVel,
-            health = actor.attributes.health.current
-        };
+            data = new PlayerTimeTravelData();
+        }
+        else
+        {
+            data = new ActorTimeTravelData();
+        }
+        data.time = Time.time;
+        data.position = this.transform.position;
+        data.rotation = this.transform.rotation;
+        data.heading = this.transform.forward;
+        data.velocity = actor.xzVel + Vector3.up * actor.yVel;
+        data.health = actor.attributes.health.current;
+        
         if (animancer != null && animancer.States.Current != null)
         {
             data.animancerState = CustomUtilities.AnimancerUtilities.GetHighestWeightStateRecursive(animancer.States.Current);//animancer.States.Current;
@@ -103,6 +110,12 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             }
             data.animationClip = data.animancerState.Clip;//CustomUtilities.AnimancerUtilities.GetCurrentClip(animancer);
             
+        }
+
+        if (actor is PlayerActor player)
+        {
+            ((PlayerTimeTravelData)data).carryable = player.carryable;
+            ((PlayerTimeTravelData)data).isCarrying = player.isCarrying;
         }
         timeTravelStates.Add(data);
         if (timeTravelStates.Count > TimeTravelController.time.maxSteps)
@@ -183,11 +196,22 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         {
             actor.attributes.SetHealth(actorData.health);
         }
-        lastData = null;
         if (actor is PlayerActor player)
         {
             player.walkAccelReal = player.walkAccel;
+            if (((PlayerTimeTravelData)lastData).isCarrying || player.isCarrying)
+            {
+                if (player.carryable != null)
+                {
+                    player.Carry(player.carryable);
+                }
+                else if (((PlayerTimeTravelData)lastData).carryable != null)
+                {
+                    player.Carry(((PlayerTimeTravelData)lastData).carryable);
+                }
+            }
         }
+        lastData = null;
         EndTimeState();
     }
 
