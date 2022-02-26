@@ -25,6 +25,8 @@ public class DamageKnockback
     public float stunTime;
     public StaggerData staggers;
     [Space(10)]
+    public FXData fxData;
+    [Space(10)]
     public Vector3 kbForce;
     public bool kbRadial;
     [Space(5)]
@@ -51,6 +53,7 @@ public class DamageKnockback
         public StaggerType onCritical;
         public StaggerType onKill;
         public StaggerType onInjure;
+        public StaggerType onCounterHit;
     }
 
     [Serializable]
@@ -61,6 +64,11 @@ public class DamageKnockback
         public bool causesCritState;
         public bool doesNotConsumeCritState;
         public float criticalExtensionTime;
+    }
+
+    public struct FXData
+    {
+        public bool isHeavyAttack;
     }
     public enum StaggerType
     {
@@ -155,6 +163,7 @@ public class DamageKnockback
         onCritical = StaggerType.Stumble,
         onKill = StaggerType.Crumple,
         onInjure = StaggerType.Crumple,
+        onCounterHit = StaggerType.StaggerSmall,
     };
 
     public static readonly CriticalData StandardCritData = new CriticalData()

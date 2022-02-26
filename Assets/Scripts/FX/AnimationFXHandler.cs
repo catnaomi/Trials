@@ -8,34 +8,18 @@ using UnityEditor;
 
 public class AnimationFXHandler : MonoBehaviour
 {
+    public AnimationFXSounds animSounds;
     [Header("Footsteps")]
     public AudioSource footSourceLight;
     public AudioSource footSourceHeavy;
-    public AudioClip default_stepL;
-    public AudioClip default_stepR;
-    public AudioClip default_thud;
-    public AudioClip dash;
-    public AudioClip default_slide;
-    public AudioClip default_roll;
-    public AudioClip tap;
     [Space(10)]
     public Transform footL;
     public Transform footR;
     [Header("Swim")]
     public AudioSource waterSource;
-    public AudioClip swim;
-    public AudioClip splashSmall;
-    public AudioClip splashBig;
     [Header("Combat")]
     public AudioSource combatWhiffSource;
     public AudioSource combatHitSource;
-    public AudioClip slashLight;
-    public AudioClip thrustLight;
-    public AudioClip slashHeavy;
-    public AudioClip thrustHeavy;
-    [Space(10)]
-    public AudioClip bowPull;
-    public AudioClip bowFire;
     [Header("Events")]
     public UnityEvent OnDust;
     public UnityEvent OnDashDust;
@@ -51,7 +35,7 @@ public class AnimationFXHandler : MonoBehaviour
     public void StepL(int heavy)
     {
         AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
-        if (!footSourceHeavy.isPlaying && !footSourceLight.isPlaying) source.PlayOneShot(default_stepL);
+        if (!footSourceHeavy.isPlaying && !footSourceLight.isPlaying) source.PlayOneShot(animSounds.default_stepL);
         if (heavy > 0) OnDust.Invoke();
     }
 
@@ -62,7 +46,7 @@ public class AnimationFXHandler : MonoBehaviour
     public void StepR(int heavy)
     {
         AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
-        if (!footSourceHeavy.isPlaying && !footSourceLight.isPlaying) source.PlayOneShot(default_stepR);
+        if (!footSourceHeavy.isPlaying && !footSourceLight.isPlaying) source.PlayOneShot(animSounds.default_stepR);
         if (heavy > 0) OnDust.Invoke();
     }
 
@@ -74,33 +58,33 @@ public class AnimationFXHandler : MonoBehaviour
     public void Tap()
     {
         footSourceHeavy.Stop();
-        footSourceHeavy.PlayOneShot(tap);
+        footSourceHeavy.PlayOneShot(animSounds.tap);
     }
 
     public void Thud()
     {
         footSourceHeavy.Stop();
-        footSourceHeavy.PlayOneShot(default_thud);
+        footSourceHeavy.PlayOneShot(animSounds.default_thud);
     }
 
     public void Dash()
     {
         footSourceHeavy.Stop();
-        footSourceHeavy.PlayOneShot(dash);
+        footSourceHeavy.PlayOneShot(animSounds.dash);
         OnDashDust.Invoke();
     }
 
     public void Slide()
     {
         footSourceHeavy.Stop();
-        footSourceHeavy.PlayOneShot(default_slide);
+        footSourceHeavy.PlayOneShot(animSounds.default_slide);
         OnDashDust.Invoke();
     }
 
     public void Roll()
     {
         footSourceHeavy.Stop();
-        footSourceHeavy.PlayOneShot(default_roll);
+        footSourceHeavy.PlayOneShot(animSounds.default_roll);
         
     }
 
@@ -116,19 +100,19 @@ public class AnimationFXHandler : MonoBehaviour
     public void Swim()
     {
         //waterSource.Stop();
-        waterSource.PlayOneShot(swim);
+        waterSource.PlayOneShot(animSounds.swim);
     }
 
     public void SplashBig()
     {
         waterSource.Stop();
-        waterSource.PlayOneShot(splashBig);
+        waterSource.PlayOneShot(animSounds.splashBig);
     }
 
     public void SplashSmall()
     {
         waterSource.Stop();
-        waterSource.PlayOneShot(splashSmall);
+        waterSource.PlayOneShot(animSounds.splashSmall);
     }
     #endregion
 
@@ -137,25 +121,25 @@ public class AnimationFXHandler : MonoBehaviour
     public void SlashLight()
     {
         combatWhiffSource.Stop();
-        combatWhiffSource.PlayOneShot(slashLight);
+        combatWhiffSource.PlayOneShot(animSounds.slashLight);
     }
 
     public void SlashHeavy()
     {
         combatWhiffSource.Stop();
-        combatWhiffSource.PlayOneShot(slashHeavy);
+        combatWhiffSource.PlayOneShot(animSounds.slashHeavy);
     }
 
     public void ThrustLight()
     {
         combatWhiffSource.Stop();
-        combatWhiffSource.PlayOneShot(thrustLight);
+        combatWhiffSource.PlayOneShot(animSounds.thrustLight);
     }
 
     public void ThrustHeavy()
     {
         combatWhiffSource.Stop();
-        combatWhiffSource.PlayOneShot(thrustHeavy);
+        combatWhiffSource.PlayOneShot(animSounds.thrustHeavy);
     }
 
     public void ArrowDraw()
@@ -165,14 +149,14 @@ public class AnimationFXHandler : MonoBehaviour
 
     public void ArrowNock()
     {
-        combatWhiffSource.PlayOneShot(bowPull);
+        combatWhiffSource.PlayOneShot(animSounds.bowPull);
         OnArrowNock.Invoke();
     }
 
     public void ArrowFire()
     {
         combatWhiffSource.Stop();
-        combatHitSource.PlayOneShot(bowFire);
+        combatHitSource.PlayOneShot(animSounds.bowFire);
     }
     #endregion
 
@@ -182,25 +166,25 @@ public class AnimationFXHandler : MonoBehaviour
         Debug.Log("Populating AnimationSoundHandler on " + this);
 
         // footsteps
-        default_stepL = Resources.Load<AudioClip>("Sounds/Footsteps/tile-stepL");
-        default_stepR = Resources.Load<AudioClip>("Sounds/Footsteps/tile-stepR");
-        default_thud = Resources.Load<AudioClip>("Sounds/Footsteps/thud1");
-        dash = Resources.Load<AudioClip>("Sounds/Footsteps/dash1");
-        default_slide = Resources.Load<AudioClip>("Sounds/Footsteps/dirt-slide");
-        default_roll = Resources.Load<AudioClip>("Sounds/Footsteps/roll1");
-        tap = Resources.Load<AudioClip>("Sounds/Footsteps/tap1");
+        animSounds.default_stepL = Resources.Load<AudioClip>("Sounds/Footsteps/tile-stepL");
+        animSounds.default_stepR = Resources.Load<AudioClip>("Sounds/Footsteps/tile-stepR");
+        animSounds.default_thud = Resources.Load<AudioClip>("Sounds/Footsteps/thud1");
+        animSounds.dash = Resources.Load<AudioClip>("Sounds/Footsteps/dash1");
+        animSounds.default_slide = Resources.Load<AudioClip>("Sounds/Footsteps/dirt-slide");
+        animSounds.default_roll = Resources.Load<AudioClip>("Sounds/Footsteps/roll1");
+        animSounds.tap = Resources.Load<AudioClip>("Sounds/Footsteps/tap1");
         // swim
-        swim = Resources.Load<AudioClip>("Sounds/Water/swim1");
-        splashBig = Resources.Load<AudioClip>("Sounds/Water/splash1");
-        splashSmall = Resources.Load<AudioClip>("Sounds/Water/splash2");
+        animSounds.swim = Resources.Load<AudioClip>("Sounds/Water/swim1");
+        animSounds.splashBig = Resources.Load<AudioClip>("Sounds/Water/splash1");
+        animSounds.splashSmall = Resources.Load<AudioClip>("Sounds/Water/splash2");
         // combat
-        slashLight = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_light");
-        slashHeavy = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy");
-        thrustLight = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_light");
-        thrustHeavy = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy");
+        animSounds.slashLight = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_light");
+        animSounds.slashHeavy = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy");
+        animSounds.thrustLight = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_light");
+        animSounds.thrustHeavy = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy");
 
-        bowPull = Resources.Load<AudioClip>("Sounds/Effects/bow-draw1");
-        bowFire = Resources.Load<AudioClip>("Sounds/Effects/bow-fire");
+        animSounds.bowPull = Resources.Load<AudioClip>("Sounds/Effects/bow-draw1");
+        animSounds.bowFire = Resources.Load<AudioClip>("Sounds/Effects/bow-fire");
     }
 #endif
 }

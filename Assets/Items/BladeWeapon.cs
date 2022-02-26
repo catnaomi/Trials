@@ -154,12 +154,12 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
             float staminaCost = this.GetStamCost() * 1;
             if (dk.isSlash)
             {
-                holder.gameObject.SendMessage("SlashLight");
+                holder.gameObject.SendMessage(dk.fxData.isHeavyAttack ? "SlashHeavy" : "SlashLight");
                 slashFX.BeginSlash();
             }
             else if (dk.isThrust)
             {
-                holder.gameObject.SendMessage("ThrustLight");
+                holder.gameObject.SendMessage(dk.fxData.isHeavyAttack ? "ThrustHeavy" : "ThrustLight");
                 thrustFX.BeginThrust();
             }
 

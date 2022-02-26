@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(AnimationFXHandler))]
+[CustomEditor(typeof(AnimationFXSounds))]
 
 public class AnimSoundEditor : Editor
 {
@@ -9,7 +9,7 @@ public class AnimSoundEditor : Editor
     {
         DrawDefaultInspector();
 
-        AnimationFXHandler animationSoundHandler = (AnimationFXHandler)target;
+        AnimationFXSounds animationSoundHandler = (AnimationFXSounds)target;
         if (GUILayout.Button("Populate Fields"))
         {
             animationSoundHandler.PopulateWithDefaults();
