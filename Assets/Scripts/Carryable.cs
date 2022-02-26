@@ -75,6 +75,14 @@ public class Carryable : MonoBehaviour
         }
         OnStopCarry.Invoke();
     }
+    public void StopMovement()
+    {
+        if (rigidbody != null)
+        {
+            rigidbody.velocity = Vector3.zero;
+            rigidbody.angularVelocity = Vector3.zero;
+        }
+    }
     public void SetCarryPosition(Vector3 position)
     {
         this.transform.position = position;

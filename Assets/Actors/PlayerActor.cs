@@ -83,6 +83,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     [Header("Carrying Settings")]
     public Carryable carryable;
     public bool isCarrying;
+    public bool isDropping;
     [Header("Climbing Settings")]
     public ClimbDetector currentClimb;
     bool ledgeSnap;
@@ -186,6 +187,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public ClipTransition pickUpAnim;
     public ClipTransition carryAnim;
     public ClipTransition throwAnim;
+    public ClipTransition dropAnim;
     [Header("Movesets")]
     public Moveset runtimeMoveset;
     public Moveset runtimeOffMoveset;
@@ -435,7 +437,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }
 
             }
-            if (shouldDodge)
+            if (shouldDodge && isCarrying)
+            {
+                StartDrop();
+                shouldDodge = false;
+            }
+            else if (shouldDodge)
             {
                 shouldDodge = false;
                 lookDirection = stickDirection.normalized;
@@ -796,6 +803,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (aiming)
             {
                 Aim();
+            }
+            else if (attack && isCarrying)
+            {
+                StartThrow();
+                attack = false;
+                slash = false;
+                thrust = false;
             }
             else if (attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
             {
@@ -1264,7 +1278,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         if (isCarrying)
         {
-            if (animancer.States.Current != state.move && animancer.States.Current != state.fall && animancer.States.Current != state.carry)
+            if (animancer.States.Current != state.move && animancer.States.Current != state.jump && animancer.States.Current != state.fall && animancer.States.Current != state.carry)
             {
                 StopCarrying();
             }
@@ -1274,7 +1288,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             else
             {
-                carryable.SetCarryPosition(this.transform.position + Vector3.up * (2f + carryable.yOffset));
+                //carryable.SetCarryPosition(this.transform.position + Vector3.up * (2f + carryable.yOffset));
+                Vector3 dirVector = (isDropping) ? this.transform.forward : Vector3.up;
+                Vector3 carryPos = ((positionReference.MainHand.transform.position + positionReference.OffHand.transform.position) / 2f) + (dirVector * carryable.yOffset);
+                carryable.SetCarryPosition(carryPos);
             }
             
         }
@@ -1296,6 +1313,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         SceneLoader.DelayReloadCurrentScene();
     }
     #endregion
+    
     #region CLIMBING
     public void SetLedge(Ledge ledge)
     {
@@ -2067,7 +2085,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         inventory.SetDrawn(Inventory.RangedType, false);
         UpdateFromMoveset();
         Physics.IgnoreCollision(this.GetComponent<Collider>(), c.GetComponent<Collider>());
-        
+        isDropping = false;
         
         
     }
@@ -2077,6 +2095,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         carryable = c;
         Physics.IgnoreCollision(this.GetComponent<Collider>(), c.GetComponent<Collider>());
         StartCoroutine("StartCarryRoutine");
+        isDropping = false;
     }
 
 
@@ -2100,6 +2119,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         StartCoroutine(DelayAllowingCollision(carryable));
         isCarrying = false;
+        isDropping = false;
         carryable.StopCarry();
         if (animancer.Layers[HumanoidAnimLayers.UpperBody].IsPlayingClip(carryAnim.Clip))
         {
@@ -2127,6 +2147,29 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             StopCarrying();
             carryable.Throw(this.transform.forward * 500f);
             
+        }
+    }
+
+    public void StartDrop()
+    {
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Weight = 0f;
+        state.carry = animancer.Play(dropAnim);
+        state.carry.Events.OnEnd = _MoveOnEnd;
+        state.carry.Events.OnEnd += () =>
+        {
+            carryable.StopMovement();
+        };
+        isDropping = true;
+    }
+
+    public void Drop()
+    {
+        if (isCarrying)
+        {
+            StopCarrying();
+            carryable.StopMovement();
+            //carryable.StopCarry();
+            isDropping = false;
         }
     }
     IEnumerator DelayAllowingCollision(Carryable carryable)
