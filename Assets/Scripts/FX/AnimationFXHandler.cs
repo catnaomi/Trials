@@ -12,6 +12,9 @@ public class AnimationFXHandler : MonoBehaviour
     [Header("Footsteps")]
     public AudioSource footSourceLight;
     public AudioSource footSourceHeavy;
+    public float footstepDelay = 0.25f;
+    float stepLTime;
+    float stepRTime;
     [Space(10)]
     public Transform footL;
     public Transform footR;
@@ -26,17 +29,25 @@ public class AnimationFXHandler : MonoBehaviour
     [Header("Anim Events")]
     public UnityEvent OnArrowDraw;
     public UnityEvent OnArrowNock;
+    Actor actor;
     // Start is called before the first frame update
     void Start()
     {
+        actor = this.GetComponent<Actor>();
     }
 
     #region Footsteps
     public void StepL(int heavy)
     {
-        AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
-        if (!footSourceHeavy.isPlaying && !footSourceLight.isPlaying) source.PlayOneShot(animSounds.default_stepL);
-        if (heavy > 0) OnDust.Invoke();
+        //AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
+        AudioSource source = footSourceLight;
+        AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), true);
+        if (!footSourceLight.isPlaying || (Time.time - stepLTime > footstepDelay))
+        {
+            source.PlayOneShot(clip);
+            stepLTime = Time.time;
+        }
+        if (actor != null && actor.ShouldDustOnStep()) OnDust.Invoke();
     }
 
     public void StepL()
@@ -45,9 +56,15 @@ public class AnimationFXHandler : MonoBehaviour
     }
     public void StepR(int heavy)
     {
-        AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
-        if (!footSourceHeavy.isPlaying && !footSourceLight.isPlaying) source.PlayOneShot(animSounds.default_stepR);
-        if (heavy > 0) OnDust.Invoke();
+        //AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
+        AudioSource source = footSourceLight;
+        AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), false);
+        if (!footSourceLight.isPlaying || (Time.time - stepRTime > footstepDelay))
+        {
+            source.PlayOneShot(clip);
+            stepRTime = Time.time;
+        }
+        if (actor != null && actor.ShouldDustOnStep()) OnDust.Invoke();
     }
 
     public void StepR()
@@ -160,6 +177,46 @@ public class AnimationFXHandler : MonoBehaviour
     }
     #endregion
 
+    #region Terrain Handling
+
+    public AudioClip GetFootStepFromTerrain(string materialName, bool isLeft)
+    {
+        string material = materialName.ToLower();
+        if (material.Contains("metal"))
+        {
+            return (isLeft) ? animSounds.metal_stepL : animSounds.metal_stepR;
+        }
+        else if (material.Contains("stone"))
+        {
+            return (isLeft) ? animSounds.stone_stepL : animSounds.stone_stepR;
+        }
+        else if (material.Contains("grass"))
+        {
+            return (isLeft) ? animSounds.grass_stepL : animSounds.grass_stepR;
+        }
+        else if (material.Contains("dirt"))
+        {
+            return (isLeft) ? animSounds.dirt_stepL : animSounds.dirt_stepR;
+        }
+        else if (material.Contains("tile"))
+        {
+            return (isLeft) ? animSounds.tile_stepL : animSounds.tile_stepR;
+        }
+        else if (material.Contains("ice"))
+        {
+            return (isLeft) ? animSounds.ice_stepL : animSounds.ice_stepR;
+        }
+        else if (material.Contains("water"))
+        {
+            return (isLeft) ? animSounds.water_stepL : animSounds.water_stepR;
+        }
+        else
+        {
+            return (isLeft) ? animSounds.default_stepL : animSounds.default_stepR;
+        }
+    }
+
+    #endregion
 #if (UNITY_EDITOR)
     public void PopulateWithDefaults()
     {

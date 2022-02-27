@@ -71,6 +71,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     Vector3 smoothedHeadPoint;
     bool aimAtkLockout;
     public float headPointSpeed = 25f;
+    public PhysicMaterial lastPhysicsMaterial;
     [Space(5)]
     public float strafeSpeed = 2.5f;
     [Space(5)]
@@ -1319,8 +1320,24 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         SceneLoader.DelayReloadCurrentScene();
     }
+
+    public override string GetCurrentGroundPhysicsMaterial()
+    {
+        if (CheckWater() || wading)
+        {
+            return "water";
+        }
+        else if (lastPhysicsMaterial != null)
+        {
+            return lastPhysicsMaterial.name;
+        }
+        else
+        {
+            return base.GetCurrentGroundPhysicsMaterial();
+        }
+    }
     #endregion
-    
+
     #region CLIMBING
     public void SetLedge(Ledge ledge)
     {
@@ -2837,6 +2854,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return animancer.States.Current == state.climb;
     }
 
+    public override bool ShouldDustOnStep()
+    {
+        return animancer.States.Current == state.sprint || animancer.States.Current == state.dash;
+    }
     public override bool IsGrounded()
     {
         return GetGrounded();
@@ -2961,7 +2982,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Collider c = this.GetComponent<Collider>();
         Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down;
         Debug.DrawLine(bottom, bottom + Vector3.down * 0.2f, Color.red);
-        return Physics.Raycast(bottom, Vector3.down, 0.2f, LayerMask.GetMask("Terrain")) || cc.isGrounded;
+        bool didHit = Physics.Raycast(bottom, Vector3.down, out RaycastHit hit, 0.2f, LayerMask.GetMask("Terrain"));
+        if (didHit)
+        {
+            lastPhysicsMaterial = hit.collider.sharedMaterial;
+        }
+        return didHit || cc.isGrounded;
     }
 
     public void HitWall()

@@ -24,6 +24,27 @@ public class AnimationFXSounds : ScriptableObject
     [Space(10)]
     public AudioClip bowPull;
     public AudioClip bowFire;
+    [Header("Per Material")]
+    public AudioClip metal_stepL;
+    public AudioClip metal_stepR;
+    [Space(5)]
+    public AudioClip stone_stepL;
+    public AudioClip stone_stepR;
+    [Space(5)]
+    public AudioClip grass_stepL;
+    public AudioClip grass_stepR;
+    [Space(5)]
+    public AudioClip dirt_stepL;
+    public AudioClip dirt_stepR;
+    [Space(5)]
+    public AudioClip tile_stepL;
+    public AudioClip tile_stepR;
+    [Space(5)]
+    public AudioClip ice_stepL;
+    public AudioClip ice_stepR;
+    [Space(5)]
+    public AudioClip water_stepL;
+    public AudioClip water_stepR;
 
 #if (UNITY_EDITOR)
     public void PopulateWithDefaults()

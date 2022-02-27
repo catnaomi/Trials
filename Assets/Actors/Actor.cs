@@ -201,6 +201,10 @@ public class Actor : MonoBehaviour
         return false;
     }
 
+    public virtual bool ShouldDustOnStep()
+    {
+        return false;
+    }
     public virtual bool IsGrounded()
     {
         return Physics.Raycast(this.transform.position, -this.transform.up, 2f, LayerMask.GetMask("Default, Terrain"));
@@ -221,7 +225,10 @@ public class Actor : MonoBehaviour
         }
     }
 
-
+    public virtual string GetCurrentGroundPhysicsMaterial()
+    {
+        return "";
+    }
     public void SetAdditionalMovement(Vector3 move)
     {
         moveAdditional = move;
