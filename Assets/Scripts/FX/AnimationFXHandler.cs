@@ -42,8 +42,9 @@ public class AnimationFXHandler : MonoBehaviour
         //AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
         AudioSource source = footSourceLight;
         AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), true);
-        if (!footSourceLight.isPlaying || (Time.time - stepLTime > footstepDelay))
+        if (Time.time - stepLTime > footstepDelay)
         {
+            Debug.Log(Time.time - stepLTime);
             source.PlayOneShot(clip);
             stepLTime = Time.time;
         }
@@ -59,8 +60,9 @@ public class AnimationFXHandler : MonoBehaviour
         //AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
         AudioSource source = footSourceLight;
         AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), false);
-        if (!footSourceLight.isPlaying || (Time.time - stepRTime > footstepDelay))
+        if (Time.time - stepRTime > footstepDelay)
         {
+            Debug.Log(Time.time - stepRTime);
             source.PlayOneShot(clip);
             stepRTime = Time.time;
         }
