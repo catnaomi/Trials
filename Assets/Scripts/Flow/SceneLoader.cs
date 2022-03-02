@@ -293,6 +293,11 @@ public class SceneLoader : MonoBehaviour
         if (player == null) return;
         player.transform.SetPositionAndRotation(playerPosition, playerRotation);
     }
+
+    public static bool IsMovingPlayer()
+    {
+        return instance != null && instance.shouldSetPlayerPosition && instance.playerPosition != Vector3.zero;
+    }
 }
 
 [SerializeField]
