@@ -19,8 +19,8 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     [ReadOnly] public EquippableWeapon OffWeapon;
     private bool OffIsDrawn;
 
-    [ReadOnly] public EquippableWeapon RangedWeapon;
-    private bool RangedIsDrawn;
+    private bool RangedIsMain;
+    private bool RangedIsOff;
 
     EquippableWeapon BlockingWeapon;
 
@@ -36,8 +36,6 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     [ReadOnly] public EquippableWeapon Slot3Weapon; // down (disabled)
 
     public bool weaponChanged;
-
-    public bool TwoHanding;
 
 
     void Awake()
@@ -119,7 +117,6 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             {
                 EquippableWeapon mweapon = Slot0Weapon;
                 EquippableWeapon oweapon = Slot1Weapon;
-                EquippableWeapon rweapon = Slot2Weapon;
                 if (mweapon != null && oweapon != null)
                 {
                     EquipMainWeapon(mweapon, false);
@@ -132,10 +129,6 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                 else if (oweapon != null)
                 {
                     EquipOffHandWeapon(oweapon, true);
-                }
-                if (rweapon != null)
-                {
-                    EquipRangedWeapon(rweapon);
                 }
             }
 
@@ -193,14 +186,23 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         MainWeapon = weapon;
         //slot.slot = slot.weapon.MainHandEquipSlot;
 
+        if (weapon.EquippableRanged && weapon is RangedWeapon rweapon && !(IsOffEquipped() && RangedIsOff))
+        {
+            //RangedWeapon = rweapon;
+            RangedIsMain = true;
+            RangedIsOff = false;
+        }
+        else
+        {
+            RangedIsMain = false;
+        }
         MainIsDrawn = false;
         GenerateMainModel();
+        //ValidateHandedness(Inventory.MainType);
         PositionWeapon();
 
         weapon.isEquipped = true;
         weapon.EquipWeapon(this.player);
-
-        UpdateTwoHand(weapon.TwoHandOnly());
 
         //player.moveset = weapon.moveset;
 
@@ -239,16 +241,23 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         OffWeapon = weapon;
         //offHandModel = GameObject.Instantiate(weapon.prefab);
         //slot.isMain = false;
-
+        if (weapon.EquippableRanged && weapon is RangedWeapon rweapon)
+        {
+            RangedIsMain = false;
+            RangedIsOff = true;
+        }
+        else
+        {
+            RangedIsOff = false;
+        }
         OffIsDrawn = false;
-
+        
         GenerateModels();
+        //ValidateHandedness(Inventory.OffType);
         PositionWeapon();
 
         weapon.isEquipped = true;
         weapon.EquipWeapon(player);
-
-        UpdateTwoHand(false);
 
         if (draw)
         {
@@ -262,33 +271,6 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     public void EquipOffHandWeapon(EquippableWeapon weapon)
     {
         EquipOffHandWeapon(weapon, true);
-    }
-
-    public void EquipRangedWeapon(EquippableWeapon weapon)
-    {
-        if (!weapon.EquippableRanged || !weapon.IsEquippable())
-        {
-            return;
-        }
-        if (IsRangedEquipped())
-        {
-            if (weapon == RangedWeapon)
-            {
-                return;
-            }
-            UnequipRangedWeapon();
-        }
-        RangedWeapon = weapon;
-        //slot.slot = slot.weapon.MainHandEquipSlot;
-
-        GenerateRangedModel();
-        PositionWeapon();
-
-        weapon.isEquipped = true;
-        weapon.EquipWeapon(this.player);
-
-        OnChange.Invoke();
-        weaponChanged = true;
     }
 
     public void UnequipMainWeapon()
@@ -305,6 +287,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         //MainWeapon.isDrawn = false;
         //MainWeapon.is2h = false;
         MainWeapon = null;
+        RangedIsMain = false;
         player.ResetMainRotation();
         PositionWeapon();
 
@@ -327,6 +310,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         //OffWeapon.isDrawn = false;
         //OffWeapon.is2h = false;
         OffWeapon = null;
+        RangedIsOff = false;
         player.RotateOffWeapon(0f);
         PositionWeapon();
 
@@ -340,21 +324,16 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         {
             return;
         }
-        RangedWeapon.UnequipWeapon(player);
-        RangedWeapon.isEquipped = false;
-        RangedWeapon.DestroyModel();
-        //MainWeapon.isMain = false;
-        //MainWeapon.isOff = false;
-        //MainWeapon.isDrawn = false;
-        //MainWeapon.is2h = false;
-        RangedWeapon = null;
-
-        PositionWeapon();
-
-        OnChange.Invoke();
-        weaponChanged = true;
-
+        if (RangedIsMain)
+        {
+            UnequipMainWeapon();
+        }
+        else if (RangedIsOff)
+        {
+            UnequipOffHandWeapon();
+        }
     }
+
     public void GenerateMainModel()
     {
         if (IsMainEquipped())
@@ -371,54 +350,46 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
     }
 
-    public void GenerateRangedModel()
-    {
-        if (IsRangedEquipped())
-        {
-            RangedWeapon.GenerateModel();
-        }
-    }
     public void GenerateModels()
     {
         GenerateMainModel();
         GenerateOffModel();
-        GenerateRangedModel();
     }
 
     
-    public void UpdateTwoHand(bool set2h)
-    { 
-        if (MainWeapon == null)
-        {
-            return;
-        }
-        if (set2h)
-        {
-            // if weapon can be two handed, do so, and unequip off hand weapon
-            TwoHanding = MainWeapon.TwoHanded;           
-        }
-        else
-        {
-            // if weapon can be one handed, do so
-            TwoHanding = !MainWeapon.OneHanded;
-        }
+    public void ValidateHandedness(int prioritySlot)
+    {
+        bool isConflict = (IsOffDrawn() && IsMainDrawn()) && (GetMainWeapon().TwoHandOnly() || GetOffWeapon().TwoHandOnly());
 
-        if (IsOffEquipped())
+        if (isConflict)
         {
-            if (GetMainWeapon().TwoHandOnly())
+            if (prioritySlot == Inventory.MainType)
             {
-                UnequipOffHandWeapon();
+                if (RangedIsOff)
+                {
+                    SetDrawn(false, false);
+                }
+                else
+                {
+                    UnequipOffHandWeapon();
+                }
             }
-            else if (IsOffDrawn() && TwoHanding)
+            else if (prioritySlot == Inventory.OffType)
             {
-                player.TriggerSheath(false, GetOffWeapon().OffHandEquipSlot, false);
-                //SetDrawn(false, !TwoHanding);
+                SetDrawn(true, false);
             }
-        }
-        
-        OnChange.Invoke();
-        weaponChanged = true;
-        
+            else if (prioritySlot == Inventory.RangedType)
+            {
+                if (RangedIsMain)
+                {
+                    SetDrawn(false, false);
+                }
+                else if (RangedIsOff)
+                {
+                    SetDrawn(true, false);
+                }
+            }
+        }   
     }
     
     public void PositionWeapon()
@@ -475,33 +446,6 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             if (oIdentity) OffWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.forward, -parent.transform.up);
             OffWeapon.model.transform.SetParent(parent.transform, true);
         }
-        // ranged
-        if (IsRangedEquipped())
-        {
-            GameObject parent;
-            bool rIdentity = false;
-            if (IsRangedDrawn() && !RangedWeapon.ParentLeftAsMain)
-            {
-                parent = player.positionReference.MainHand;
-            }
-            else if (IsRangedDrawn() && RangedWeapon.ParentLeftAsMain)
-            {
-                parent = player.positionReference.OffHand;
-            }
-            else
-            {
-                parent = player.positionReference.GetPositionRefSlot(RangedWeapon.RangedEquipSlot);
-                if (RangedWeapon.RangedEquipSlot == EquipSlot.cBack)
-                {
-                    rIdentity = true;
-                }
-
-            }
-            RangedWeapon.model.transform.position = parent.transform.position;
-            RangedWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.up, parent.transform.forward);
-            if (rIdentity) RangedWeapon.model.transform.rotation = Quaternion.LookRotation(parent.transform.forward, -parent.transform.up);
-            RangedWeapon.model.transform.SetParent(parent.transform, true);
-        }
     }
 
     public bool IsMainDrawn()
@@ -516,7 +460,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
     public bool IsRangedDrawn()
     {
-        return IsRangedEquipped() && RangedIsDrawn;
+        return IsRangedEquipped() && ((RangedIsMain && IsMainDrawn()) || (RangedIsOff && IsOffDrawn()));
     }
 
     public void UpdateWeapon()
@@ -529,10 +473,6 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         {
             OffWeapon.UpdateWeapon(player);
         }
-        if (IsRangedEquipped())
-        {
-            RangedWeapon.UpdateWeapon(player);
-        }
     }
 // during fixed update
     public void FixedUpdateWeapon()
@@ -544,10 +484,6 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         if (IsOffEquipped())
         {
             OffWeapon.FixedUpdateWeapon(player);
-        }
-        if (IsRangedEquipped())
-        {
-            RangedWeapon.FixedUpdateWeapon(player);
         }
     }
     public EquippableWeapon GetMainWeapon()
@@ -572,7 +508,18 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     {
         if (IsRangedEquipped())
         {
-            return RangedWeapon;
+            if (RangedIsMain)
+            {
+                return MainWeapon;
+            }
+            else if (RangedIsOff)
+            {
+                return OffWeapon;
+            }
+            else
+            {
+                return null;
+            }
         }
         return null;
     }
@@ -588,11 +535,6 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         if (IsOffEquipped())
         {
             weight += GetOffWeapon().GetWeight();
-        }
-
-        if (IsRangedEquipped())
-        {
-            weight += GetRangedWeapon().GetWeight();
         }
 
         return weight;
@@ -627,10 +569,18 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             case Inventory.RangedType: // ranged
                 if (IsRangedEquipped())
                 {
-                    RangedIsDrawn = drawn;
+                    if (RangedIsMain)
+                    {
+                        MainIsDrawn = drawn;
+                    }
+                    else if (RangedIsOff)
+                    {
+                        OffIsDrawn = drawn;
+                    }
                 }
                 break;
         }
+        ValidateHandedness(type);
         PositionWeapon();
         weaponChanged = true;
     }
@@ -759,15 +709,36 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
     public bool IsRangedEquipped()
     {
-        if (RangedWeapon == null)
+        if (RangedIsMain)
+        {
+            if (IsMainEquipped())
+            {
+                RangedIsOff = false;
+                return true;
+            }
+            else
+            {
+                RangedIsMain = false;
+                return false;
+            }
+        }
+        else if (RangedIsOff)
+        {
+            if (IsOffEquipped())
+            {
+                RangedIsMain = false;
+                return true;
+            }
+            else
+            {
+                RangedIsOff = false;
+                return false;
+            }
+        }
+        else
         {
             return false;
         }
-        if (RangedWeapon.itemName == "")
-        {
-            return false;
-        }
-        return true;
     }
 
 
@@ -791,7 +762,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             {
                 bool isMain = weapon == MainWeapon;
                 bool isOff = weapon == OffWeapon;
-                bool isRanged = weapon == RangedWeapon;
+                bool isRanged = weapon == GetRangedWeapon();
                 if (isMain)
                 {
                     if (!IsMainDrawn())
@@ -835,11 +806,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                 }
                 else
                 {
-                    if (weapon.EquippableRanged && weapon is RangedWeapon)
-                    {
-                        EquipRangedWeapon(weapon);
-                    }
-                    else if ((IsMainEquipped() && weapon.EquippableOff && !MainWeapon.TwoHandOnly()) || (weapon.EquippableOff && !weapon.EquippableMain && (!IsMainEquipped() || !MainWeapon.TwoHandOnly())))
+                    if ((IsMainEquipped() && weapon.EquippableOff && !MainWeapon.TwoHandOnly()) || (weapon.EquippableOff && !weapon.EquippableMain && (!IsMainEquipped() || !MainWeapon.TwoHandOnly())))
                     {
                         EquipOffHandWeapon(weapon, IsMainDrawn());
                     }
@@ -892,7 +859,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     
     public GameObject GetRangedModel()
     {
-        return RangedWeapon.model;
+        return GetRangedWeapon().model;
     }
 
     public bool IsAnyWeaponDrawn()
@@ -989,7 +956,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         {
             return Inventory.OffType;
         }
-        else if (weapon == this.RangedWeapon)
+        else if (weapon == this.GetRangedWeapon())
         {
             return Inventory.RangedType;
         }
