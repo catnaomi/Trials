@@ -12,6 +12,14 @@ public class AimAttack : InputAction
     [SerializeField] protected MixerTransition2DAsset moveAnim;
     [SerializeField] protected IKHandler IKHandler;
 
+    public struct AimState
+    {
+        public AnimancerState idle;
+        public AnimancerState sheathe;
+        public AnimancerState start;
+        public AnimancerState hold;
+        public AnimancerState fire;
+    }
     public virtual ClipTransition GetIdleClip()
     {
         return idle;
@@ -41,5 +49,10 @@ public class AimAttack : InputAction
     public void OnIK(Animator animator)
     {
         IKHandler.OnIK(animator);
+    }
+
+    public virtual void ProcessAimAttack(PlayerActor player, bool aimHeld, bool attackDown, bool attackHeld)
+    {
+
     }
 }
