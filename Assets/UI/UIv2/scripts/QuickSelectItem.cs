@@ -81,7 +81,15 @@ public class QuickSelectItem : MonoBehaviour
         if (item is EquippableWeapon weapon && weapon.usesAmmunition)
         {
             number.gameObject.SetActive(true);
-            number.text = weapon.GetAmmunitionRemaining().ToString();
+            if (weapon is RangedGun gun)
+            {
+                number.text = gun.ammoCurrent + "/" + weapon.GetAmmunitionRemaining();
+            }
+            else
+            {
+                number.text = weapon.GetAmmunitionRemaining().ToString();
+            }
+            
         }
         else
         {

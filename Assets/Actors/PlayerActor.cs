@@ -2847,7 +2847,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public bool ShouldSlowTime()
     {
-        return this.IsAiming() && camState == CameraState.Aim && IsAttackHeld();
+        //return this.IsAiming() && camState == CameraState.Aim && IsAttackHeld();
+        return this.IsAiming() && !GetGrounded();
     }
     public override void SetToIdle()
     {

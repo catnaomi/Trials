@@ -104,6 +104,40 @@ public class Inventory : MonoBehaviour, IInventory
         }
     }
 
+    public int RemoveNumber(Item item, int amount)
+    {
+        if (amount <= 0) return 0;
+        Item presentItem = null;
+        foreach (Item pitem in contents)
+        {
+            if (pitem.ItemEqual(item))
+            {
+                presentItem = pitem;
+                break;
+            }
+        }
+        if (presentItem == null)
+        {
+            return 0;
+        }
+        else if (presentItem.Quantity > amount)
+        {
+            presentItem.Quantity -= amount;
+            OnChange.Invoke();
+            return amount;
+        }
+        else if (presentItem.Quantity > 0)
+        {
+            int q = presentItem.Quantity;
+            Remove(presentItem);
+            return q;
+        }
+        else
+        {
+            Remove(presentItem);
+            return 0;
+        }
+    }
     public int GetAmountOf(Item item)
     {
         int count = 0;

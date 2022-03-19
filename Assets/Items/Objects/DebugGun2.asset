@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b779af8ad6129a04f8ee069eb39c8dbd, type: 3}
+  m_Name: DebugGun2
+  m_EditorClassIdentifier: 
+  itemName: Debug Pistol
+  itemDesc: is that a monkey? he's got a gun! blam blam
+  holder: {fileID: 0}
+  MaxStackSize: 1
+  Quantity: 1
+  invID: 106
+  prefab: {fileID: 5692423714241634452, guid: e886399dabb134f41b5d966f69125c22, type: 3}
+  displayImage: {fileID: 21300000, guid: 75ade6ead379adc42a533f9e16a2e530, type: 3}
+  displayColor: {r: 1, g: 1, b: 1, a: 1}
+  isEquipped: 0
+  EquippableMain: 0
+  EquippableOff: 1
+  EquippableRanged: 1
+  OneHanded: 1
+  TwoHanded: 0
+  ParentLeftAsMain: 0
+  ParentRightAsOff: 0
+  MainHandEquipSlot: 0
+  OffHandEquipSlot: 2
+  RangedEquipSlot: 2
+  stance:
+    stanceStyle: 0
+    rightGrip: 0
+    leftGrip: 0
+    twohandGrip: 0
+    blockStyle: 0
+  moveset: {fileID: 11400000, guid: d913401d66fceb04da5dbb25875b41df, type: 2}
+  AttackSpeed: 0
+  weight: 0
+  usesAmmunition: 1
+  ammunitionReference: {fileID: 11400000, guid: 1dd2f2bf431cb5340a84f62775475cb7,
+    type: 2}
+  blockResistances: []
+  OnEquip:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnequip:
+    m_PersistentCalls:
+      m_Calls: []
+  model: {fileID: 0}
+  fireMode: 0
+  damageKnockback:
+    healthDamage: 30
+    staminaDamage: 0
+    types: 03000000
+    critData:
+      criticalMultiplier: 1
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 0
+    isSlash: 0
+    bouncesOffBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    stunTime: 0
+    staggers:
+      onHit: 2
+      onArmorHit: 1
+      onCritical: 8
+      onKill: 8
+      onCounterHit: 2
+    kbForce: {x: 0, y: 0, z: 0}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    hitClip: {fileID: 0}
+  ikHandler: {fileID: 11400000, guid: 3e1da2a0b87efea48b403875a190a4af, type: 2}
+  ammoCapacity: 12
+  maxDistance: 100

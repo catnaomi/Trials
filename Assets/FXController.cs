@@ -16,6 +16,8 @@ public class FXController : MonoBehaviour
     [Space(5)]
     public GameObject fx_bleedSword;
     public GameObject fx_bleedPoint;
+    [Space(5)]
+    public GameObject fx_gunTrail;
     private static float fixedDeltaTime;
     private static float hitpauseLength;
 
@@ -149,6 +151,22 @@ public class FXController : MonoBehaviour
     {
         EnsureSingleton();
         GameObject newFX = GameObject.Instantiate(main.fx_dizzy);
+        return newFX;
+    }
+
+    public static GameObject CreateGunTrail(Vector3 start, Vector3 end, Vector3 direction, float duration, AudioClip soundOverride)
+    {
+        EnsureSingleton();
+        GameObject newFX = GameObject.Instantiate(main.fx_gunTrail);
+        newFX.transform.position = start;
+        newFX.transform.rotation = Quaternion.LookRotation(direction);
+
+        LineRenderer line = newFX.GetComponentInChildren<LineRenderer>();
+        line.SetPosition(0, start);
+        line.SetPosition(1, end);
+
+        GameObject.Destroy(newFX, duration);
+
         return newFX;
     }
     public static void Hitpause(float duration)

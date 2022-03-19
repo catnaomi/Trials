@@ -29,6 +29,8 @@ public class AnimationFXHandler : MonoBehaviour
     [Header("Anim Events")]
     public UnityEvent OnArrowDraw;
     public UnityEvent OnArrowNock;
+    [Space(10)]
+    public UnityEvent OnGunLoad;
     Actor actor;
     // Start is called before the first frame update
     void Start()
@@ -176,6 +178,19 @@ public class AnimationFXHandler : MonoBehaviour
     {
         combatWhiffSource.Stop();
         combatHitSource.PlayOneShot(animSounds.bowFire);
+    }
+
+    public void GunFire()
+    {
+        combatWhiffSource.Stop();
+        combatHitSource.PlayOneShot(animSounds.bowFire);
+    }
+
+    public void GunReload()
+    {
+        combatWhiffSource.Stop();
+        combatHitSource.PlayOneShot(animSounds.bowPull);
+        OnGunLoad.Invoke();
     }
     #endregion
 
