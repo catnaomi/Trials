@@ -38,7 +38,7 @@ public class WorldTime : MonoBehaviour
     [Header("Scene Management")]
     [ReadOnly] public int sunCount;
     bool sunsInScene;
-
+    float assetSkyboxTime;
     Dictionary<string, SunSource> sunSourceDict;
 
     struct SunSource
@@ -54,6 +54,7 @@ public class WorldTime : MonoBehaviour
         //skybox = Instantiate(realSkybox);
         //RenderSettings.skybox = skybox;
         skybox = RenderSettings.skybox;
+        assetSkyboxTime = skybox.GetFloat("_ClockTime");
         GameObject dsunObj = GameObject.Find("_DaySunLight");
         if (dsunObj != null)
         {
@@ -315,7 +316,7 @@ public class WorldTime : MonoBehaviour
     }
     private void OnDestroy()
     {
-        //Destroy(skybox);
+        skybox.SetFloat("_ClockTime", assetSkyboxTime);
     }
 
     bool InRange(float x, float min, float max)
