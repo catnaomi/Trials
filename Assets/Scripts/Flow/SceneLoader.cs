@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 public class SceneLoader : MonoBehaviour
@@ -11,12 +12,17 @@ public class SceneLoader : MonoBehaviour
     public bool allowSceneActivation;
     public string initSceneName = "_InitScene";
     public bool shouldLoadInitScene = true;
+
     [ReadOnly] public bool isLoadingComplete;
     [ReadOnly] public bool isPreloadingComplete;
     [ReadOnly] public bool didSceneLoadFail;
+    [ReadOnly] public bool isLoading;
     [ReadOnly] public float totalLoading;
     public bool shouldReloadScenes;
     [SerializeField, ReadOnly] List<SceneLoadingData> sceneLoadingDatas;
+
+    public static bool isAfterFirstLoad;
+
     [Header("Player Settings")]
     public GameObject player;
     public bool shouldSetPlayerPosition;
@@ -25,10 +31,14 @@ public class SceneLoader : MonoBehaviour
     [Header("Disable These GameObjects While Loading")]
     public GameObject[] objectsToDisable;
     static SceneLoader instance;
+
+    public UnityEvent OnFinishLoad;
+    public UnityEvent OnActiveSceneChange;
     private void Awake()
     {
         instance = this;
-        
+        isAfterFirstLoad = false;
+
         DontDestroyOnLoad(this);
     }
     // Start is called before the first frame update
@@ -40,6 +50,10 @@ public class SceneLoader : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        isAfterFirstLoad = true;
+    }
     public void LoadScenes()
     {
         isLoadingComplete = false;
@@ -49,6 +63,7 @@ public class SceneLoader : MonoBehaviour
     }
     IEnumerator LoadScenesRoutine()
     {
+        isLoading = true;
         isLoadingComplete = false;
         isPreloadingComplete = false;
         didSceneLoadFail = false;
@@ -79,7 +94,7 @@ public class SceneLoader : MonoBehaviour
             SceneManager.LoadScene(initSceneName, LoadSceneMode.Single);
         }
 
-        if (!primarySceneData.isAlreadyLoaded || !shouldReloadScenes)
+        if (!primarySceneData.isAlreadyLoaded || shouldReloadScenes)
         {
             sceneLoadingDatas.Add(primarySceneData);
             primarySceneData.loadOperation = SceneManager.LoadSceneAsync(primarySceneToLoad, LoadSceneMode.Additive);
@@ -104,17 +119,20 @@ public class SceneLoader : MonoBehaviour
                 sceneData.isAlreadyLoaded = true;
                 sceneData.scene = scene;
             }
-            if (!sceneData.isAlreadyLoaded || !shouldReloadScenes)
+            if (!sceneData.isAlreadyLoaded || shouldReloadScenes)
             {
                 sceneLoadingDatas.Add(sceneData);
-                sceneData.loadOperation = SceneManager.LoadSceneAsync(primarySceneToLoad, LoadSceneMode.Additive);
+                sceneData.loadOperation = SceneManager.LoadSceneAsync(secondarySceneName, LoadSceneMode.Additive);
                 yield return sceneData.loadOperation;
             }
 
             
 
         }
+        isLoading = false;
+        OnFinishLoad.Invoke();
         
+        /*
         float unloadingProgress;
         float loadingProgress;
         int preloadsCompleted = 0;
@@ -123,7 +141,7 @@ public class SceneLoader : MonoBehaviour
         int skips;
         bool primarySceneLoaded = false;
 
-        /*
+        
         while (!isLoadingComplete)
         {
             unloadingProgress = 1f;
@@ -240,6 +258,7 @@ public class SceneLoader : MonoBehaviour
     {
         yield return StartCoroutine(LoadScenesRoutine());
         SceneManager.SetActiveScene(SceneManager.GetSceneByName(primarySceneToLoad));
+        OnActiveSceneChange.Invoke();
     }
     IEnumerator DisableObjectsRoutine()
     {
@@ -297,6 +316,48 @@ public class SceneLoader : MonoBehaviour
     public static bool IsMovingPlayer()
     {
         return instance != null && instance.shouldSetPlayerPosition && instance.playerPosition != Vector3.zero;
+    }
+
+    public static void EnsureScenesAreLoaded(string primary, params string[] secondaries)
+    {
+        if (instance.isLoading) return;
+        instance.primarySceneToLoad = primary;
+        instance.secondaryScenesToLoad = secondaries;
+        instance.StartCoroutine(instance.LoadScenesRoutine());
+    }
+
+    public static void SetActiveScene(string scene)
+    {
+        Scene ascene = SceneManager.GetSceneByName(scene);
+        if (ascene.isLoaded)
+        {
+            SceneManager.SetActiveScene(ascene);
+            instance.OnActiveSceneChange.Invoke();
+        }
+    }
+    public static void AllowSceneActivation(bool active)
+    {
+        instance.allowSceneActivation = active;
+    }
+
+    public static void ShouldReloadScenes(bool reload)
+    {
+        instance.shouldReloadScenes = reload;
+    }
+
+    public static void ShouldLoadInitScene(bool init)
+    {
+        instance.shouldLoadInitScene = init;
+    }
+
+    public static UnityEvent GetOnActiveSceneChange()
+    {
+        return instance.OnActiveSceneChange;
+    }
+
+    public static UnityEvent GetOnFinishLoad()
+    {
+        return instance.OnFinishLoad;
     }
 }
 

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class WorldTime : MonoBehaviour
 {
@@ -34,14 +35,25 @@ public class WorldTime : MonoBehaviour
     public float nsunIntensity;
     public float dsunShadow;
     public float nsunShadow;
-
+    [Header("Scene Management")]
+    [ReadOnly] public int sunCount;
     bool sunsInScene;
+
+    Dictionary<string, SunSource> sunSourceDict;
+
+    struct SunSource
+    {
+        public Light light;
+        public float targetIntensity;
+        public string scene;
+    }
     // Start is called before the first frame update
     void Start()
     {
-        Material realSkybox = RenderSettings.skybox;
-        skybox = Instantiate(realSkybox);
-        RenderSettings.skybox = skybox;
+        //Material realSkybox = RenderSettings.skybox;
+        //skybox = Instantiate(realSkybox);
+        //RenderSettings.skybox = skybox;
+        skybox = RenderSettings.skybox;
         GameObject dsunObj = GameObject.Find("_DaySunLight");
         if (dsunObj != null)
         {
@@ -60,6 +72,12 @@ public class WorldTime : MonoBehaviour
         {
             sunsInScene = true;
         }
+
+        GetAllSunSources();
+
+        HideInactiveSuns();
+        SceneLoader.GetOnActiveSceneChange().AddListener(FadeInactiveSuns);
+        SceneLoader.GetOnFinishLoad().AddListener(GetSunsAndHide);
         StartCoroutine(UpdateTime());
     }
 
@@ -183,9 +201,121 @@ public class WorldTime : MonoBehaviour
         dsun.enabled = (dsun.intensity != 0);
         nsun.enabled = (nsun.intensity != 0);
     }
+    
+    void GetAllSunSources()
+    {
+        if (sunSourceDict == null)
+        {
+            sunSourceDict = new Dictionary<string, SunSource>();
+        }
+
+        GameObject[] lightObjs = GameObject.FindGameObjectsWithTag("Sun");
+
+        string keyFormat = "{0}/{1}";
+        string key = "";
+        foreach (GameObject lightObj in lightObjs)
+        {
+            key = string.Format(keyFormat, lightObj.scene.name, lightObj.name);
+            if (sunSourceDict.TryGetValue(key, out SunSource current))
+            {
+                current.light = lightObj.GetComponent<Light>();
+                current.scene = lightObj.scene.name;
+                // do not overwrite intensity
+            }
+            else
+            {
+                Light nlight = lightObj.GetComponent<Light>();
+                if (nlight != null)
+                {
+                    sunSourceDict[key] = new SunSource()
+                    {
+                        light = nlight,
+                        scene = lightObj.scene.name,
+                        targetIntensity = nlight.intensity,
+                    };
+                }
+            }
+        }
+
+        var keys = sunSourceDict.Keys;
+        foreach (var sunKey in keys)
+        {
+            if (sunSourceDict[sunKey].light == null || sunSourceDict[sunKey].light.gameObject == null)
+            {
+                sunSourceDict.Remove(sunKey);
+            }
+        }
+
+        sunCount = sunSourceDict.Count;
+    }
+
+    void FadeInactiveSuns()
+    {
+        UnityEngine.SceneManagement.Scene scene = SceneManager.GetActiveScene();
+        float timeToFade = 1f;
+        foreach (SunSource sun in sunSourceDict.Values)
+        {
+            StartCoroutine(FadeSunRoutine(sun, sun.light.gameObject.scene == scene, timeToFade));
+        }
+    }
+
+    void HideInactiveSuns()
+    {
+        UnityEngine.SceneManagement.Scene scene = SceneManager.GetActiveScene();
+        foreach (SunSource sun in sunSourceDict.Values)
+        {
+            bool active = sun.light.gameObject.scene == scene;
+            if (!active && sun.light.intensity != 0)
+            {
+                sun.light.intensity = 0f;
+            }
+            else if (active && sun.light.intensity == 0)
+            {
+                sun.light.intensity = sun.targetIntensity;
+            }
+        }
+    }
+
+    void GetSunsAndHide()
+    {
+        GetAllSunSources();
+        HideInactiveSuns();
+    }
+    IEnumerator FadeSunRoutine(SunSource sun, bool active, float timeToFade)
+    {
+        if (timeToFade <= 0) yield break;
+
+        if (active && sun.light.intensity == sun.targetIntensity)
+        {
+            yield break;
+        }
+        else if (!active && sun.light.intensity == 0f)
+        {
+            yield break;
+        }
+        else
+        {
+            float t;
+
+            float currentTime = 0f;
+
+            float startingIntensity = sun.light.intensity;
+
+            float target = (active) ? sun.targetIntensity : 0f;
+
+            while (currentTime < timeToFade)
+            {
+                yield return null;
+                currentTime += Time.deltaTime;
+                t = Mathf.Clamp01(currentTime / timeToFade);
+
+                sun.light.intensity = Mathf.Lerp(startingIntensity, target, t);
+            }
+        }
+    }
     private void OnDestroy()
     {
-        Destroy(skybox);
+        //Destroy(skybox);
     }
 
     bool InRange(float x, float min, float max)

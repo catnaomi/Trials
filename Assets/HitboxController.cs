@@ -150,9 +150,9 @@ public class HitboxController : MonoBehaviour
         {
             Gizmos.DrawSphere(hitbox.bounds.center, 0.05f);
 
-            InterfaceUtilities.GizmosDrawWireTransform(hitbox.transform);
+            //InterfaceUtilities.GizmosDrawWireTransform(hitbox.transform);
             
-            InterfaceUtilities.GizmosDrawText(hitbox.bounds.center, Gizmos.color, "hitbox id: " + id);
+            //InterfaceUtilities.GizmosDrawText(hitbox.bounds.center, Gizmos.color, "hitbox id: " + id);
         }
     }
         

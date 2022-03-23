@@ -5,9 +5,10 @@ using System.Collections.Generic;
 
 namespace CustomUtilities
 {
+
     public class InterfaceUtilities
     {
-
+#if UNITY_EDITOR
         public static void GizmosDrawText(Vector3 position, Color color, string text)
         {
             GUIStyle style = new GUIStyle();
@@ -29,6 +30,7 @@ namespace CustomUtilities
             Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
         }
 
+#endif
         public static string GetClosestString(string search, IEnumerable<string> options)
         {
             string lead = "";

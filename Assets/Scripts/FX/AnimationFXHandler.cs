@@ -46,7 +46,7 @@ public class AnimationFXHandler : MonoBehaviour
         AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), true);
         if (Time.time - stepLTime > footstepDelay)
         {
-            Debug.Log(Time.time - stepLTime);
+            //Debug.Log(Time.time - stepLTime);
             source.PlayOneShot(clip);
             stepLTime = Time.time;
         }
@@ -64,7 +64,7 @@ public class AnimationFXHandler : MonoBehaviour
         AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), false);
         if (Time.time - stepRTime > footstepDelay)
         {
-            Debug.Log(Time.time - stepRTime);
+            //Debug.Log(Time.time - stepRTime);
             source.PlayOneShot(clip);
             stepRTime = Time.time;
         }
