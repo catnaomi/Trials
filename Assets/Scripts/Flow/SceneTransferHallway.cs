@@ -2,6 +2,7 @@ using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 public class SceneTransferHallway : MonoBehaviour
@@ -15,6 +16,9 @@ public class SceneTransferHallway : MonoBehaviour
     SceneTransferHallway other;
 
     public static bool IsTransferInProgress;
+
+    public UnityEvent OnTransferInto;
+    public UnityEvent OnTransferFrom;
     // Start is called before the first frame update
     void Start()
     {
@@ -80,7 +84,7 @@ public class SceneTransferHallway : MonoBehaviour
 
         Vector3 offset = PlayerActor.player.transform.position - _center.position;
 
-        PlayerActor.player.transform.position = other._center.position + offset;
+        PlayerActor.player.WarpTo(other._center.position + offset);
 
         Vector3 transferVector = other._center.position - _center.position;
 
@@ -89,5 +93,8 @@ public class SceneTransferHallway : MonoBehaviour
         IsTransferInProgress = false;
 
         SceneLoader.SetActiveScene(targetScene);
+
+        OnTransferFrom.Invoke();
+        other.OnTransferInto.Invoke();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Interactable : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class Interactable : MonoBehaviour
     public bool canInteract;
     public GameObject interactIcon;
     public float interactIconHeight = 1f;
+
+    public UnityEvent OnInteract;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -67,6 +71,7 @@ public class Interactable : MonoBehaviour
 
     public virtual void Interact(PlayerActor player)
     {
+        OnInteract.Invoke();
         // do nothing
     }
 }

@@ -8,6 +8,7 @@ public class PickupInteract : Interactable
     public GameObject rootObject;
     public override void Interact(PlayerActor player)
     {
+        base.Interact(player);
         player.inventory.Add(item);
         if (destroyOnInteract)
         {

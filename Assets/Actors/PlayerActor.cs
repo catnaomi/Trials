@@ -1299,6 +1299,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             return base.GetCurrentGroundPhysicsMaterial();
         }
     }
+    
+    public void WarpTo(Vector3 position)
+    {
+        Vector3 offset = this.transform.position - position;
+        cc.enabled = false;
+        this.transform.position = position;
+        smoothedHeadPoint += offset;
+        headPoint += offset;
+        cc.enabled = true;
+    }
     #endregion
 
     #region CLIMBING

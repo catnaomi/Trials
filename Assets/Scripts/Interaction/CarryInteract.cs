@@ -14,6 +14,7 @@ public class CarryInteract : Interactable
 
     public override void Interact(PlayerActor player)
     {
+        base.Interact(player);
         carryable.Carry(player);
         canInteract = false;
     }

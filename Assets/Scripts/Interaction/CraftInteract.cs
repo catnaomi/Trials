@@ -15,6 +15,7 @@ public class CraftInteract : Interactable
     CraftMenuController craftMenu;
     public override void Interact(PlayerActor player)
     {
+        base.Interact(player);
         Debug.Log(this.name + " was interacted with by " + player.name + "!!!!");
 
         this.player = player;
