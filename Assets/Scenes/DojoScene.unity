@@ -211,6 +211,21 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2007820579214872931, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2432585470246207073, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
+        type: 3}
+      propertyPath: doorCollider
+      value: 
+      objectReference: {fileID: 2082383553}
+    - target: {fileID: 2432585470417786737, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
+        type: 3}
+      propertyPath: doorCollider
+      value: 
+      objectReference: {fileID: 2082383553}
     - target: {fileID: 2549853218945210803, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
         type: 3}
       propertyPath: thisScene
@@ -235,7 +250,7 @@ PrefabInstance:
         type: 3}
       propertyPath: OnTransferInto.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 293347266}
+      objectReference: {fileID: 88845882}
     - target: {fileID: 2549853218945210803, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
         type: 3}
       propertyPath: OnTransferInto.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
@@ -244,12 +259,12 @@ PrefabInstance:
     - target: {fileID: 2549853218945210803, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
         type: 3}
       propertyPath: OnTransferInto.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: Open
+      value: StartTimeline
       objectReference: {fileID: 0}
     - target: {fileID: 2549853218945210803, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
         type: 3}
       propertyPath: OnTransferInto.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: DoorInteract, Assembly-CSharp
+      value: DoorPlayableInteract, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 2549853218945210803, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
         type: 3}
@@ -292,6 +307,11 @@ PrefabInstance:
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 3950399580487013442, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4677752443968904043, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
         type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -350,16 +370,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cb5a7b8a1ed1eb4c83211931c15bb77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &293347266 stripped
+--- !u!114 &88845882 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7007111101627048018, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
+  m_CorrespondingSourceObject: {fileID: 2432585470417786737, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
     type: 3}
   m_PrefabInstance: {fileID: 88845880}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 272a97cdeeb926041ba04ae0ed71646b, type: 3}
+  m_Script: {fileID: 11500000, guid: 8b534bd4e4aac88499bef6725d0d8cd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &652555745
@@ -509,3 +529,9 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!64 &2082383553 stripped
+MeshCollider:
+  m_CorrespondingSourceObject: {fileID: 7817542883061121602, guid: 66ee025e23a4e9c43bbc3c6707088b4d,
+    type: 3}
+  m_PrefabInstance: {fileID: 88845880}
+  m_PrefabAsset: {fileID: 0}

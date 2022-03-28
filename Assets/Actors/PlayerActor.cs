@@ -1302,13 +1302,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     
     public void WarpTo(Vector3 position)
     {
-        Vector3 offset = this.transform.position - position;
         cc.enabled = false;
         this.transform.position = position;
-        smoothedHeadPoint += offset;
-        headPoint += offset;
         cc.enabled = true;
+        ResetOnMove();
     }
+
+    public void ResetOnMove()
+    {
+        airTime = 0f;
+        lastAirTime = 0f;
+        headPoint = Vector3.zero;
+        GetHeadPoint();
+        smoothedHeadPoint = headPoint;
+        player.walkAccelReal = walkAccel;
+    }
+
     #endregion
 
     #region CLIMBING
