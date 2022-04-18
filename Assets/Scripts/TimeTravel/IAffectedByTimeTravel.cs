@@ -20,4 +20,6 @@ public interface IAffectedByTimeTravel
     public void StopFreeze();
 
     public GameObject GetObject();
+
+    public bool ShouldApplyTimeVisualEffect();
 }

@@ -19,10 +19,21 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     float lastHealth;
     TimeTravelData lastData;
     bool isFrozen;
+
+    List<Renderer> renderers;
+    int initLayer;
+    bool applyVisual;
     void Start()
     {
         actor = this.GetComponent<Actor>();
         animancer = this.GetComponent<AnimancerComponent>();
+        initLayer = this.gameObject.layer;
+        renderers = new List<Renderer>();
+        if (TryGetComponent<Renderer>(out Renderer r))
+        {
+            renderers.Add(r);
+        }
+        renderers.AddRange(this.GetComponentsInChildren<Renderer>());
         timeTravelController = TimeTravelController.time;
         if (timeTravelController == null)
         {
@@ -66,6 +77,22 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
                         }
                     }
                 }
+            }
+        }
+        if (ShouldApplyTimeVisualEffect() && !applyVisual)
+        {
+            applyVisual = true;
+            foreach (Renderer r in renderers)
+            {
+                r.gameObject.layer = LayerMask.NameToLayer("TimeAffected");
+            }
+        }
+        else if (!ShouldApplyTimeVisualEffect() && applyVisual)
+        {
+            applyVisual = false;
+            foreach (Renderer r in renderers)
+            {
+                r.gameObject.layer = initLayer;
             }
         }
     }
@@ -266,5 +293,10 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     void OnDestroy()
     {
         TimeTravelController.time.DeregisterAffectee(this);
+    }
+
+    public bool ShouldApplyTimeVisualEffect()
+    {
+        return IsFrozen() || (actor is PlayerActor player && player.IsResurrecting());
     }
 }

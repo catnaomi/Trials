@@ -122,6 +122,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool isSheathing;
     string test1;
     bool dead;
+    bool resurrecting;
     public float aimCancelTime = 2f;
     public float aimTime;
     public float aimStartTime = 0.25f;
@@ -2646,7 +2647,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void Resurrect()
     {
-       
+        resurrecting = true;
         attributes.lives--;
 
         StartCoroutine("ResurrectCoroutine");
@@ -2662,6 +2663,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             _MoveOnEnd();
             dead = false;
+            resurrecting = false;
         };
         attributes.RecoverHealth(999f);
     }
@@ -2836,6 +2838,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public override bool IsAlive()
     {
         return !dead;
+    }
+
+    public bool IsResurrecting()
+    {
+        return resurrecting;
     }
     public bool IsSwimming()
     {

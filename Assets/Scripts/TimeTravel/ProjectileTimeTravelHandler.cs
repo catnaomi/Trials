@@ -147,4 +147,9 @@ public class ProjectileTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         timeTravelController.DeregisterAffectee(this);
     }
+
+    public bool ShouldApplyTimeVisualEffect()
+    {
+        return IsFrozen();
+    }
 }

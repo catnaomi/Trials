@@ -303,6 +303,7 @@ public class SceneLoader : MonoBehaviour
     public void ReloadCurrentScene()
     {
         primarySceneToLoad = SceneManager.GetActiveScene().name;
+        isAfterFirstLoad = false;
         allowSceneActivation = true;
         loadOnStart = false;
         shouldReloadScenes = true;

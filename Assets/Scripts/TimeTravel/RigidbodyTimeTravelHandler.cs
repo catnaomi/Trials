@@ -108,4 +108,9 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         isRewinding = false;
         LoadTimeState(lastData);
     }
+
+    public bool ShouldApplyTimeVisualEffect()
+    {
+        return IsFrozen();
+    }
 }
