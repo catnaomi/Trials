@@ -34,6 +34,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool isMenuOpen;
     List<Interactable> interactables;
     public Interactable highlightedInteractable;
+    [Header("Respawning")]
+    public Vector3 lastSafePoint;
     [Header("Movement")]
     public float walkSpeedMax = 5f;
     public AnimationCurve walkSpeedCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
@@ -351,6 +353,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         OnHitboxActive.AddListener(RealignToTarget);
 
         onControlsChanged.AddListener(HandleCinemachine);
+
+        StartCoroutine("SafePointCoroutine");
     }
 
 
@@ -1322,6 +1326,43 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         player.walkAccelReal = walkAccel;
     }
 
+    public override void OnFallOffMap()
+    {
+        this.attributes.ReduceHealth(30f);
+        if (attributes.health.current > 0f)
+        {
+            ResetToSafePoint();
+            state.resurrect = animancer.Play(resurrectFaceUp);
+            state.resurrect.Events.OnEnd = _MoveOnEnd;
+        }
+        else if (attributes.lives > 0)
+        {
+            ResetToSafePoint();
+            state.resurrect = animancer.Play(resurrectFaceUp);
+            state.resurrect.Speed = 0f;
+            Die();
+        }
+        else
+        {
+            Die();
+        }
+    }
+    public void ResetToSafePoint()
+    {
+        WarpTo(lastSafePoint); 
+    }
+    IEnumerator SafePointCoroutine()
+    {
+        if (!GetGrounded())
+        {
+            yield return new WaitUntil(GetGrounded);
+        }
+        lastSafePoint = this.transform.position;
+        if (UnityEngine.AI.NavMesh.SamplePosition(lastSafePoint, out var hit, 10f, 1)) {
+            lastSafePoint = hit.position;
+        }
+        yield return new WaitForSecondsRealtime(1f);
+    }
     #endregion
 
     #region CLIMBING
@@ -2638,6 +2679,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public override void Die()
     {
+        if (dead) return;
         dead = true;
         if (attributes.lives <= 0)
         {

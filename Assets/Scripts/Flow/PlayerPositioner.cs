@@ -13,6 +13,7 @@ public class PlayerPositioner : MonoBehaviour
         {
             player.transform.position = spawnPoint.position;
             player.transform.rotation = spawnPoint.rotation;
+            player.lastSafePoint = spawnPoint.position;
         }
     }
 }

@@ -168,6 +168,10 @@ public class Actor : MonoBehaviour
         FollowTarget = target;
     }
 
+    public virtual void OnFallOffMap()
+    {
+        Die();
+    }
     public virtual bool IsAlive()
     {
         return attributes.health.current > 0;
