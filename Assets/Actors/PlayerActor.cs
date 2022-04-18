@@ -348,10 +348,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         });
 
         OnHurt.AddListener(() => { HitboxActive(0); });
-        OnAttack.AddListener(RealignToTarget);
+        OnHitboxActive.AddListener(RealignToTarget);
 
         onControlsChanged.AddListener(HandleCinemachine);
-        
     }
 
 
@@ -2453,6 +2452,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             Vector3 dir = this.GetCombatTarget().transform.position - this.transform.position;
             dir.y = 0f;
             this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+            animancer.Animator.rootRotation = Quaternion.LookRotation(dir, Vector3.up);
+        }
+        else
+        {
+            Vector3 dir = Camera.main.transform.forward * move.y + Camera.main.transform.right * move.x;
+            dir.y = 0f;
+            this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+            animancer.Animator.rootRotation = Quaternion.LookRotation(dir, Vector3.up);
         }
     }
 
