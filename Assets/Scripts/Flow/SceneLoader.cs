@@ -305,6 +305,7 @@ public class SceneLoader : MonoBehaviour
         primarySceneToLoad = SceneManager.GetActiveScene().name;
         allowSceneActivation = true;
         loadOnStart = false;
+        shouldReloadScenes = true;
         LoadScenes();
     }
     void PositionPlayer()

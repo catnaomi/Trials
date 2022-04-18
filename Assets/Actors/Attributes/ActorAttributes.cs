@@ -26,6 +26,9 @@ public class ActorAttributes : MonoBehaviour
     public bool usesHearts = false;
     public bool spareable = false;
 
+    public int lives;
+    public int maxLives;
+
     public UnityEvent OnHealthLoss;
     public UnityEvent OnHealthGain;
     public UnityEvent OnHealthChange;

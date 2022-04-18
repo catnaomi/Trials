@@ -27,7 +27,7 @@ public class HumanoidDamageHandler : IDamageable
     public Hitbox lastHitbox;
     ClipTransition blockStagger;
 
-    bool isFacingUp;
+    public bool isFacingUp;
 
 
     System.Action _OnEnd;
@@ -223,16 +223,16 @@ public class HumanoidDamageHandler : IDamageable
             }
             else if (stagger == DamageKnockback.StaggerType.Knockdown)
             {
-                bool faceUp = !hitFromBehind;
+                isFacingUp = !hitFromBehind;
                 Vector3 dir = actor.transform.position - damage.source.transform.position;
-                dir = dir.normalized * (faceUp ? 1f : -1f);
-                ClipTransition clip = (!faceUp) ? damageAnims.knockdownFaceDown : damageAnims.knockdownFaceUp;
+                dir = dir.normalized * (isFacingUp ? 1f : -1f);
+                ClipTransition clip = (!isFacingUp) ? damageAnims.knockdownFaceDown : damageAnims.knockdownFaceUp;
                 AnimancerState state = animancer.Play(clip);
                 
                 
                 state.Events.OnEnd = () =>
                 {
-                    AnimancerState prone = animancer.Play((!faceUp) ? damageAnims.proneFaceDown : damageAnims.proneFaceUp);
+                    AnimancerState prone = animancer.Play((!isFacingUp) ? damageAnims.proneFaceDown : damageAnims.proneFaceUp);
                     prone.NormalizedTime = 0f;
                     hurt = prone;
                     if (willKill)
@@ -243,7 +243,7 @@ public class HumanoidDamageHandler : IDamageable
                 hurt = state;
                 if (!willKill)
                 {
-                    actor.StartCoroutine(EndProne(faceUp));
+                    actor.StartCoroutine(EndProne(isFacingUp));
                 }
             }
             else if (stagger == DamageKnockback.StaggerType.Crumple)

@@ -159,6 +159,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public ClipTransition swimEnd;
     public ClipTransition swimStart;
     [Space(5)]
+    public ClipTransition resurrectFaceUp;
+    public ClipTransition resurrectFaceDown;
+    [Space(5)]
     public float horizontalAimSpeed = 90f;
     public float aimSpeed = 2.5f;
     Vector3 aimForwardVector;
@@ -218,6 +221,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState aim;
         public AnimancerState dialogue;
         public AnimancerState carry;
+        public AnimancerState resurrect;
     }
 
     
@@ -2626,9 +2630,40 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public override void Die()
     {
-        base.Die();
         dead = true;
-        ProcessDeath();
+        if (attributes.lives <= 0)
+        {
+            base.Die();
+ 
+            ProcessDeath();
+        }
+        else
+        {
+
+            Resurrect();
+        }
+    }
+
+    public void Resurrect()
+    {
+       
+        attributes.lives--;
+
+        StartCoroutine("ResurrectCoroutine");
+        OnDie.Invoke();
+    }
+
+    IEnumerator ResurrectCoroutine()
+    {
+        yield return new WaitForSecondsRealtime(1f);
+        bool facingUp = damageHandler.isFacingUp;
+        state.resurrect = animancer.Play(facingUp ? resurrectFaceUp : resurrectFaceDown);
+        state.resurrect.Events.OnEnd = () =>
+        {
+            _MoveOnEnd();
+            dead = false;
+        };
+        attributes.RecoverHealth(999f);
     }
     #endregion
 
