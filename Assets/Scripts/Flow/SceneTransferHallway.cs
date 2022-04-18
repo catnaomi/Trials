@@ -54,6 +54,7 @@ public class SceneTransferHallway : MonoBehaviour
 
     public void StartTransfer()
     {
+        if (!PlayerActor.player.IsAlive() || TimeTravelController.time.IsRewinding()) return;
         if (!IsTransferInProgress)
         {
             IsTransferInProgress = true;

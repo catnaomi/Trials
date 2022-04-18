@@ -13,6 +13,8 @@ public class SimpleCrosshair : MonoBehaviour
     }
     private void OnGUI()
     {
+        if (player == null) return;
+
         if (player.IsAiming() && player.GetCombatTarget() == null)
         {
             image.enabled = true;

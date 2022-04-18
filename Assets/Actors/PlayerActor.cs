@@ -355,6 +355,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         onControlsChanged.AddListener(HandleCinemachine);
 
         StartCoroutine("SafePointCoroutine");
+        if (SceneLoader.IsSceneLoaderActive())
+        {
+            SceneLoader.GetOnActiveSceneChange().AddListener(SetNewSafePoint);
+        }
     }
 
 
@@ -1328,40 +1332,75 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public override void OnFallOffMap()
     {
-        this.attributes.ReduceHealth(30f);
-        if (attributes.health.current > 0f)
+        
+        if (attributes.health.current > 30f || attributes.lives > 0f)
         {
             ResetToSafePoint();
-            state.resurrect = animancer.Play(resurrectFaceUp);
-            state.resurrect.Events.OnEnd = _MoveOnEnd;
-        }
-        else if (attributes.lives > 0)
-        {
-            ResetToSafePoint();
-            state.resurrect = animancer.Play(resurrectFaceUp);
-            state.resurrect.Speed = 0f;
-            Die();
         }
         else
         {
+            this.attributes.ReduceHealth(30f);
             Die();
         }
     }
     public void ResetToSafePoint()
     {
-        WarpTo(lastSafePoint); 
+        //WarpTo(lastSafePoint); 
+        StartCoroutine("RewindToSafePoint");
+    }
+
+    IEnumerator RewindToSafePoint()
+    {
+        float health = attributes.health.current;
+        ActorTimeTravelHandler timeTravelHandler = this.GetComponent<ActorTimeTravelHandler>();
+        TimeTravelController.time.IgnoreLimits();
+        TimeTravelController.time.StartRewindSelective(timeTravelHandler);
+        do
+        {
+            Debug.Log("distance: " + Vector3.Distance(this.transform.position, lastSafePoint));
+            yield return null;
+            
+        }
+        while (timeTravelHandler.IsRewinding() && Vector3.Distance(this.transform.position, lastSafePoint) > 2f);
+        TimeTravelController.time.CancelRewind();
+        yield return new WaitWhile(() => { return timeTravelHandler.IsRewinding(); });
+        this.attributes.health.current = health;
+        this.attributes.ReduceHealth(30f);
+        WarpTo(lastSafePoint);
+        state.resurrect = animancer.Play(resurrectFaceUp);
+        state.resurrect.Events.OnEnd = _MoveOnEnd;
+        if (attributes.health.current <= 0f && attributes.lives > 0)
+        {
+            state.resurrect.Speed = 0f;
+            damageHandler.isFacingUp = true;
+            Die();
+        }
     }
     IEnumerator SafePointCoroutine()
     {
-        if (!GetGrounded())
+        while (true)
         {
-            yield return new WaitUntil(GetGrounded);
+            if (!GetGrounded())
+            {
+                yield return new WaitUntil(GetGrounded);
+            }
+            if (dead || resurrecting || !IsMoving() || this.GetComponent<ActorTimeTravelHandler>().IsRewinding())
+            {
+                yield return new WaitForSecondsRealtime(0.25f);
+                continue;
+            }
+            SetNewSafePoint();
+            yield return new WaitForSecondsRealtime(1f);
         }
+    }
+
+    public void SetNewSafePoint()
+    {
         lastSafePoint = this.transform.position;
-        if (UnityEngine.AI.NavMesh.SamplePosition(lastSafePoint, out var hit, 10f, 1)) {
+        if (UnityEngine.AI.NavMesh.SamplePosition(lastSafePoint, out var hit, 10f, 1))
+        {
             lastSafePoint = hit.position;
         }
-        yield return new WaitForSecondsRealtime(1f);
     }
     #endregion
 

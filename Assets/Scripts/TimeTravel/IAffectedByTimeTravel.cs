@@ -22,4 +22,6 @@ public interface IAffectedByTimeTravel
     public GameObject GetObject();
 
     public bool ShouldApplyTimeVisualEffect();
+
+    public void ClearTimeData();
 }

@@ -57,6 +57,7 @@ public class TimeTravelController : MonoBehaviour
     public float magicVignetteStrength;
     public Renderer bubbleInner;
     MaterialPropertyBlock block;
+    bool ignoreLimits;
     private void Awake()
     {
         time = this;
@@ -75,6 +76,10 @@ public class TimeTravelController : MonoBehaviour
         {
             block = new MaterialPropertyBlock();
             bubbleInner.SetPropertyBlock(block);
+        }
+        if (SceneLoader.IsSceneLoaderActive())
+        {
+            SceneLoader.GetOnActiveSceneChange().AddListener(ClearTimeDatas);
         }
     }
 
@@ -98,8 +103,12 @@ public class TimeTravelController : MonoBehaviour
             if (meter.current <= 0f)
             {
                 meter.current = 0f;
-                CancelRewind();
-                OnMeterFail.Invoke();
+                if (!ignoreLimits)
+                {
+                    CancelRewind();
+                    OnMeterFail.Invoke();
+                }
+                
             }
         }
         else if (freeze)
@@ -109,8 +118,11 @@ public class TimeTravelController : MonoBehaviour
             if (meter.current <= 0f)
             {
                 meter.current = 0f;
-                StopFreeze();
-                OnMeterFail.Invoke();
+                if (!ignoreLimits)
+                {
+                    StopFreeze();
+                    OnMeterFail.Invoke();
+                }
             }
         }
         else if (isSlowing)
@@ -118,8 +130,11 @@ public class TimeTravelController : MonoBehaviour
             meter.current -= timeAimSlowDrainRate * Time.deltaTime;
             if (meter.current < 0f)
             {
-                meter.current = 0f;
-                StopSlowTime();
+                if (!ignoreLimits)
+                {
+                    meter.current = 0f;
+                    StopSlowTime();
+                }
             }
         }
         else
@@ -167,6 +182,7 @@ public class TimeTravelController : MonoBehaviour
     {
         playerInput.actions["UsePower"].performed += (c) =>
         {
+            if (ignoreLimits) return;
             if (isSlowing)
             {
                 // do nothing
@@ -208,6 +224,7 @@ public class TimeTravelController : MonoBehaviour
 
         playerInput.actions["UsePower"].canceled += (c) =>
         {
+            if (ignoreLimits) return;
             if (isSlowing)
             {
                 // do nothing
@@ -233,6 +250,18 @@ public class TimeTravelController : MonoBehaviour
         affectees.Remove(affectee);
     }
 
+    public void ClearTimeDatas()
+    {
+        if (isRewinding)
+        {
+            CancelRewind();
+        }
+        foreach (IAffectedByTimeTravel affectee in affectees)
+        {
+            affectee.ClearTimeData();
+        }
+    }
+
     public void StartRecord()
     {
         recording = true;
@@ -245,12 +274,23 @@ public class TimeTravelController : MonoBehaviour
         recording = false;
         cancelRewind = false;
         stepsToRewind = Mathf.Min(stepsRecorded, maxSteps);
-        StartCoroutine(RewindRoutine());
+        StartCoroutine(RewindRoutine(affectees));
+        StartPostProcessing();
+    }
+    public void StartRewindSelective(params IAffectedByTimeTravel[] affectees)
+    {
+        recording = false;
+        cancelRewind = false;
+        stepsToRewind = Mathf.Min(stepsRecorded, maxSteps);
+        List<IAffectedByTimeTravel> selectiveAffectees = new List<IAffectedByTimeTravel>();
+        selectiveAffectees.AddRange(affectees);
+        StartCoroutine(RewindRoutine(selectiveAffectees));
         StartPostProcessing();
     }
 
     public void StopRewind()
     {
+        ignoreLimits = false;
         StopPostProcessing();
     }
 
@@ -348,6 +388,7 @@ public class TimeTravelController : MonoBehaviour
     {
         //timeStopObject.SetActive(false);
         freeze = false;
+        ignoreLimits = false;
         StopPostProcessing();
     }
 
@@ -430,7 +471,7 @@ public class TimeTravelController : MonoBehaviour
         
     }
 
-    IEnumerator RewindRoutine()
+    IEnumerator RewindRoutine(List<IAffectedByTimeTravel> affectees)
     {
         isRewinding = true;
         int stepsRemaining = stepsToRewind;
@@ -495,10 +536,15 @@ public class TimeTravelController : MonoBehaviour
     public void StopSlowTime()
     {
         isSlowing = false;
+        ignoreLimits = false;
         StopPostProcessing();
         OnSlowTimeStop.Invoke();
     }
 
+    public void IgnoreLimits()
+    {
+        ignoreLimits = true;
+    }
     IEnumerator SlowTimeRoutine()
     {
         float timeScale = Time.timeScale;
@@ -514,6 +560,10 @@ public class TimeTravelController : MonoBehaviour
         return meter.current >= 0f && timePowerClock <= 0f;
     }
 
+    public bool IsRewinding()
+    {
+        return isRewinding;
+    }
     private void OnApplicationQuit()
     {
         magicVignette.SetFloat("_Weight", 0f);

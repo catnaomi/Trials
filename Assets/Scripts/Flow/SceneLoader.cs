@@ -361,6 +361,11 @@ public class SceneLoader : MonoBehaviour
     {
         return instance.OnFinishLoad;
     }
+
+    public static bool IsSceneLoaderActive()
+    {
+        return instance != null;
+    }
 }
 
 [SerializeField]

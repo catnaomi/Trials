@@ -27,6 +27,7 @@ public class KillPlane : MonoBehaviour
             Actor[] actors = FindObjectsOfType<Actor>();
             foreach (Actor actor in actors)
             {
+                if (!actor.IsAlive()) continue;
                 if (!plane.GetSide(actor.transform.position) && IsWithinPlane(actor.transform.position))
                 {
                     actor.OnFallOffMap();

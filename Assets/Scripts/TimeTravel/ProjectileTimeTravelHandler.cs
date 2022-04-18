@@ -152,4 +152,18 @@ public class ProjectileTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         return IsFrozen();
     }
+
+    public void ClearTimeData()
+    {
+
+        if (IsFrozen())
+        {
+            StopFreeze();
+        }
+        else if (isRewinding)
+        {
+            StopRewind();
+        }
+        timeTravelStates.Clear();
+    }
 }

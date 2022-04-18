@@ -285,6 +285,10 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         return isFrozen;
     }
 
+    public bool IsRewinding()
+    {
+        return isRewinding;
+    }
     public GameObject GetObject()
     {
         return this.gameObject;
@@ -298,5 +302,19 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public bool ShouldApplyTimeVisualEffect()
     {
         return IsFrozen() || (actor is PlayerActor player && player.IsResurrecting());
+    }
+
+    public void ClearTimeData()
+    {
+        
+        if (IsFrozen())
+        {
+            StopFreeze();
+        }
+        else if (IsRewinding())
+        {
+            StopRewind();
+        }
+        timeTravelStates.Clear();
     }
 }
