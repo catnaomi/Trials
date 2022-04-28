@@ -49,6 +49,12 @@ public class Ladder : ClimbDetector
         Gizmos.color = Color.red;
         Gizmos.DrawRay(this.transform.position, this.transform.up);
     }
+
+    public float GetDismountPoint(float climberHeight)
+    {
+        return ((height - climberHeight) / height);
+    }
+
     public float GetHeight()
     {
         height = snap.lossyScale.y;

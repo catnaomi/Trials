@@ -32,8 +32,8 @@ public class InputNameToText : MonoBehaviour
             int index = InputActionRebindingExtensions.GetBindingIndex(action, InputBinding.MaskByGroup(input.currentControlScheme));
             string buttonName = InputActionRebindingExtensions.GetBindingDisplayString(action, index, InputBinding.DisplayStringOptions.DontIncludeInteractions);
             text.text = buttonName;
-            Debug.Log("current control scheme [ " + input.currentControlScheme + " ]");
-            Debug.Log("new button name for interact:  [ " + buttonName + " ]");
+            //Debug.Log("current control scheme [ " + input.currentControlScheme + " ]");
+            //Debug.Log("new button name for interact:  [ " + buttonName + " ]");
         }
         catch (ArgumentOutOfRangeException ex)
         {
