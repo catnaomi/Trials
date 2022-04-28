@@ -72,6 +72,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool blocking;
     bool aiming;
     public bool sliding;
+    bool wasSliding;
+    public float slopeAngle;
+    public Vector3 groundNormal;
+    public Vector3 groundPoint;
     Vector3 targetDirection;
     Vector3 headPoint;
     Vector3 smoothedHeadPoint;
@@ -383,17 +387,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Vector3 lookDirection = this.transform.forward;
         Vector3 moveDirection = Vector3.zero;
         float grav = gravity;
-        float slopeAngle = -1f;
-        Vector3 groundNormal = Vector3.up;
+        slopeAngle = -1f;
+        groundNormal = Vector3.up;
         if (rayHit.collider != null)
         {
             slopeAngle = Vector3.Angle(Vector3.up, rayHit.normal);
             groundNormal = rayHit.normal;
+            groundPoint = rayHit.point;
         }
         else if (sphereHit.collider != null)
         {
             slopeAngle = Vector3.Angle(Vector3.up, sphereHit.normal);
             groundNormal = sphereHit.normal;
+            groundPoint = sphereHit.point;
         }
         stickDirection = camForward * move.y + camRight * move.x;
 
@@ -956,6 +962,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 slash = false;
                 thrust = false;
             }
+            animancer.Layers[0].ApplyAnimatorIK = sliding;
         }
         #endregion
 
@@ -3020,7 +3027,39 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             animancer.Animator.SetLookAtPosition(smoothedHeadPoint);
             animancer.Animator.SetLookAtWeight(1f, 0.1f, 1f, 0f, 0.7f);
             thrustIKWeight = 0f;
+
+            if (sliding)
+            {
+                Plane groundPlane = new Plane(groundNormal.normalized, groundPoint);
+                Vector3 horizNormal = Vector3.ProjectOnPlane(groundNormal, Vector3.up).normalized;
+                Vector3 handL = animancer.Animator.GetBoneTransform(HumanBodyBones.LeftHand).position;
+                float distanceL = groundPlane.GetDistanceToPoint(handL);
+                Vector3 handR = animancer.Animator.GetBoneTransform(HumanBodyBones.RightHand).position;
+                float distanceR = groundPlane.GetDistanceToPoint(handR);
+
+                Vector3 hips = animancer.Animator.GetBoneTransform(HumanBodyBones.Hips).position;
+                float distanceHips = groundPlane.GetDistanceToPoint(hips);
+                
+                this.transform.rotation = Quaternion.LookRotation(horizNormal);
+                animancer.Animator.bodyPosition = animancer.Animator.bodyPosition + groundNormal.normalized * (-distanceHips + 0.15f);
+
+                
+                
+                animancer.Animator.SetIKPosition(AvatarIKGoal.LeftHand, groundPlane.ClosestPointOnPlane(handL));
+                animancer.Animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1f);
+                animancer.Animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0f);
+                animancer.Animator.SetIKPosition(AvatarIKGoal.LeftFoot, groundPlane.ClosestPointOnPlane(animancer.Animator.GetBoneTransform(HumanBodyBones.LeftFoot).position));
+                animancer.Animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 1f);
+                animancer.Animator.SetIKPosition(AvatarIKGoal.RightFoot, groundPlane.ClosestPointOnPlane(animancer.Animator.GetBoneTransform(HumanBodyBones.RightFoot).position));
+                animancer.Animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1f);
+            }
         }
+        if (!sliding && wasSliding)
+        {
+            animancer.Animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 0f);
+            animancer.Animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 0f);
+        }
+        wasSliding = sliding;
         
     }
 
