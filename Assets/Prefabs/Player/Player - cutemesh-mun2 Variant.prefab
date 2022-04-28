@@ -2597,7 +2597,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 88ed38b3c02117b4c8ea17687cd43dbb,
         type: 3}
       propertyPath: m_Name
-      value: Player - cutemesh-mun2
+      value: Player - cutemesh-mun2 Variant
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 88ed38b3c02117b4c8ea17687cd43dbb,
         type: 3}
@@ -3464,6 +3464,7 @@ MonoBehaviour:
     dialogue: {fileID: 0}
   isMenuOpen: 0
   highlightedInteractable: {fileID: 0}
+  lastSafePoint: {x: 0, y: 0, z: 0}
   walkSpeedMax: 5
   walkSpeedCurve:
     serializedVersion: 2
@@ -3493,6 +3494,7 @@ MonoBehaviour:
   sprintTurnSpeed: 360
   walkAccel: 25
   walkTurnSpeed: 1080
+  airAccel: 0.1
   hardLandAccel: 2.5
   softLandAccel: 15
   skidAngle: 120
@@ -3507,12 +3509,19 @@ MonoBehaviour:
   isGrounded: 0
   airTime: 0
   headPointSpeed: 25
+  lastPhysicsMaterial: {fileID: 0}
   strafeSpeed: 2.5
   attackDecel: 25
   dashAttackDecel: 15
   walkAccelReal: 0
   sprinting: 0
   shouldDodge: 0
+  carryable: {fileID: 0}
+  isCarrying: 0
+  isDropping: 0
+  throwForce: 500
+  throwForceUp: 50
+  throwMassMax: 20
   currentClimb: {fileID: 0}
   hangCollider: {fileID: 1139518284}
   climbSpeed: 2
@@ -3562,7 +3571,7 @@ MonoBehaviour:
       onArmorHit: 0
       onCritical: 0
       onKill: 0
-      onInjure: 0
+      onCounterHit: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     hitboxSource: {fileID: 0}
@@ -3821,6 +3830,24 @@ MonoBehaviour:
     _Clip: {fileID: -203655887218126122, guid: a337257a3406eb64191bea63e48a4c5a, type: 3}
     _Speed: 0.5
     _NormalizedStartTime: 0
+  resurrectFaceUp:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  resurrectFaceDown:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: 0
   horizontalAimSpeed: 90
   aimSpeed: 2.5
   upperBodyMask: {fileID: 31900000, guid: 10f0253fb45ebbc4aa39f0f1073c3e5e, type: 2}
@@ -3829,6 +3856,51 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
+  pickUpAnim:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  slowPickUpAnim:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  carryAnim:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  throwAnim:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  dropAnim:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: 0
   runtimeMoveset: {fileID: 0}
   runtimeOffMoveset: {fileID: 0}
   toggleTarget:
@@ -3866,7 +3938,6 @@ MonoBehaviour:
   lastChanged: 0
   MainWeapon: {fileID: 0}
   OffWeapon: {fileID: 0}
-  RangedWeapon: {fileID: 0}
   equipOnStart: 1
   initialized: 0
   Slot0Weapon: {fileID: 11400000, guid: 83393d613dc23204bb4b827e671d3b6b, type: 2}
@@ -3874,7 +3945,6 @@ MonoBehaviour:
   Slot2Weapon: {fileID: 11400000, guid: d8b347b3b6ca1a240a5daa6e8658205c, type: 2}
   Slot3Weapon: {fileID: 0}
   weaponChanged: 0
-  TwoHanding: 0
 --- !u!114 &169090234
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4056,6 +4126,8 @@ MonoBehaviour:
     max: 0
   usesHearts: 1
   spareable: 0
+  lives: 0
+  maxLives: 0
   OnHealthLoss:
     m_PersistentCalls:
       m_Calls: []
@@ -4106,29 +4178,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20574a5f76923f74fba2f5acf3dea1e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  animSounds: {fileID: 0}
   footSourceLight: {fileID: 858358186}
   footSourceHeavy: {fileID: 1507777154}
-  default_stepL: {fileID: 8300000, guid: 0e6e6a2e088df3e4d922ea6e15afd293, type: 3}
-  default_stepR: {fileID: 8300000, guid: ebeb9de5af9020945ab5d14ff4ccfa89, type: 3}
-  default_thud: {fileID: 8300000, guid: 7bff1ada12ec0fa4aac78bd48c0e2a1f, type: 3}
-  dash: {fileID: 8300000, guid: 762f664cdcfd53040b08353d7345b2fe, type: 3}
-  default_slide: {fileID: 8300000, guid: 9bcb98108d2720b44ae31842cff8b928, type: 3}
-  default_roll: {fileID: 8300000, guid: 31c486b877202784887fad5e4d01fe6c, type: 3}
-  tap: {fileID: 8300000, guid: e3d6aa0918ac68c40970da86f298b349, type: 3}
+  footstepDelay: 0.25
   footL: {fileID: 0}
   footR: {fileID: 0}
   waterSource: {fileID: 1200495988}
-  swim: {fileID: 8300000, guid: 7a604a0847ccc734f9e889730420b260, type: 3}
-  splashSmall: {fileID: 8300000, guid: 150e0c8db88206b4f919b3ff444352af, type: 3}
-  splashBig: {fileID: 8300000, guid: 2047ec9354d3f644187d4c2bdd1b97e5, type: 3}
   combatWhiffSource: {fileID: 789576821}
   combatHitSource: {fileID: 1766336611}
-  slashLight: {fileID: 8300000, guid: 1f0f3821cc6956a45b58704b6b062be2, type: 3}
-  thrustLight: {fileID: 8300000, guid: 1f0f3821cc6956a45b58704b6b062be2, type: 3}
-  slashHeavy: {fileID: 8300000, guid: 1f0f3821cc6956a45b58704b6b062be2, type: 3}
-  thrustHeavy: {fileID: 8300000, guid: 1f0f3821cc6956a45b58704b6b062be2, type: 3}
-  bowPull: {fileID: 8300000, guid: 2b692c1a5e1a8f44d9a7f6e75eb0eecb, type: 3}
-  bowFire: {fileID: 8300000, guid: 0d1f1ab324603b84c9fc238792f48f10, type: 3}
   OnDust:
     m_PersistentCalls:
       m_Calls:
@@ -4163,6 +4221,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnArrowNock:
+    m_PersistentCalls:
+      m_Calls: []
+  OnGunLoad:
     m_PersistentCalls:
       m_Calls: []
 --- !u!114 &169090241

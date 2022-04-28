@@ -44,6 +44,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float walkAccel = 25f;
     public float walkTurnSpeed = 1080f;
     [Space(5)]
+    public float airAccel = 1f;
+    public float airTurnSpeed = 45f;
     public float hardLandAccel = 2.5f;
     public float softLandAccel = 2.5f;
     public float skidAngle = 160f;
@@ -469,6 +471,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (jump)
             {
                 jump = false;
+                if (stickDirection.magnitude > 0)
+                {
+                    lookDirection = stickDirection.normalized;
+                    moveDirection = stickDirection.normalized;
+                    xzVel = xzVel.magnitude * stickDirection.normalized;
+                }
                 state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
             }
             if (CheckWater())
@@ -676,11 +684,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             lastSprintForward = moveDirection;
             if (shouldDodge)
             {
+                lookDirection = stickDirection.normalized;
                 state.roll = animancer.Play(rollAnim);
             }
             else if (jump)
             {
                 jump = false;
+                if (stickDirection.magnitude > 0)
+                {
+                    lookDirection = stickDirection.normalized;
+                    moveDirection = stickDirection.normalized;
+                    xzVel = xzVel.magnitude * stickDirection.normalized;
+                }
                 state.jump = animancer.Play(runJumpAnim);
             }
             else if (state.dash.NormalizedTime >= 0.8f)
@@ -709,10 +724,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (shouldDodge)
             {
                 state.roll = animancer.Play(rollAnim);
+                lookDirection = stickDirection.normalized;
             }
             else if (jump)
             {
                 jump = false;
+                if (stickDirection.magnitude > 0)
+                {
+                    lookDirection = stickDirection.normalized;
+                    moveDirection = stickDirection.normalized;
+                    xzVel = xzVel.magnitude * stickDirection.normalized;
+                }
+                
                 state.jump = animancer.Play(runJumpAnim);
             }
             else if (move.magnitude > 0.75f && Vector3.Angle(lookDirection, stickDirection) >= skidAngle)
@@ -770,6 +793,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             speed = Mathf.MoveTowards(speed, 0f, skidDecel * Time.deltaTime);
             moveDirection = lastSprintForward;
+            if (jump)
+            {
+                jump = false;
+                if (stickDirection.magnitude > 0)
+                {
+                    lookDirection = stickDirection.normalized;
+                    moveDirection = stickDirection.normalized;
+                    xzVel = xzVel.magnitude * stickDirection.normalized;
+                }
+                state.jump = animancer.Play(runJumpAnim);
+            }
             animancer.Layers[0].ApplyAnimatorIK = false;
         }
         #endregion
@@ -779,7 +813,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             //speed = 0f;
             airTime += Time.deltaTime;
-            if (GetGrounded() && yVel <= 0)
+            RaycastHit rayHit;
+            RaycastHit sphereHit;
+            bool grounded = GetGrounded(out rayHit, out sphereHit);
+            if (grounded && yVel <= 0)
             {
                 if (lastAirTime >= hardLandingTime)
                 {
@@ -804,12 +841,33 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     walkAccelReal = softLandAccel;
                     //land.Events.OnEnd = _OnLandEnd;
                     speed = 0f;
-                    animancer.Play(state.move, 0.25f);
+                    animancer.Play(state.move, 0.05f);
                 }
                 else
                 {
                     this.gameObject.SendMessage("Thud");
-                    animancer.Play(state.move, 0.25f);
+                    animancer.Play(state.move, 0.05f);
+                }
+
+            }
+            else
+            {
+                if (!grounded && rayHit.collider == null && sphereHit.collider != null)
+                {
+                    //Physics.Raycast(bottom, Vector3.down, out groundRayHit, 0.2f, LayerMask.GetMask("Terrain"));
+                    Vector3 dir = sphereHit.point - this.transform.position;
+                    dir.y = 0f;
+                    dir.Normalize();
+                    xzVel = Vector3.MoveTowards(xzVel, dir * 1f, 1f * Time.deltaTime);
+                }
+                else
+                {
+                    if (stickDirection.sqrMagnitude > 0)
+                    {
+                        xzVel += stickDirection * airAccel * Time.deltaTime;
+                        xzVel = Vector3.ClampMagnitude(xzVel, sprintSpeed);
+                        lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * airTurnSpeed * Time.deltaTime, 1f).normalized;
+                    }
                 }
 
             }
@@ -908,6 +966,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             //speed = 0f;
             //speed = sprintSpeed;
             moveDirection = this.transform.forward;
+
+            if (stickDirection.sqrMagnitude > 0)
+            {
+                xzVel += stickDirection * airAccel * Time.deltaTime;
+                xzVel = Vector3.ClampMagnitude(xzVel, sprintSpeed);
+                lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * airTurnSpeed * Time.deltaTime, 1f).normalized;
+            }
+
             animancer.Layers[0].ApplyAnimatorIK = true;
         }
         #endregion
@@ -2527,22 +2593,46 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void RealignToTarget()
     {
+        Quaternion targetRot;
+        Vector3 dir = transform.forward;
         if (this.GetCombatTarget() != null)
         {
-            Vector3 dir = this.GetCombatTarget().transform.position - this.transform.position;
+            dir = this.GetCombatTarget().transform.position - this.transform.position;
             dir.y = 0f;
-            this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
-            animancer.Animator.rootRotation = Quaternion.LookRotation(dir, Vector3.up);
         }
         else
         {
-            Vector3 dir = Camera.main.transform.forward * move.y + Camera.main.transform.right * move.x;
+            dir = Camera.main.transform.forward * move.y + Camera.main.transform.right * move.x;
             dir.y = 0f;
-            this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
-            animancer.Animator.rootRotation = Quaternion.LookRotation(dir, Vector3.up);
         }
+        float maxRotation = 180f;
+        if (sprinting)
+        {
+            maxRotation = 90f;
+        }
+        if (dir.magnitude > 0)
+        {
+            targetRot = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(dir, Vector3.up), maxRotation);
+            StartCoroutine(RealignCoroutine(targetRot, 0.05f));
+        }
+        //this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+        //animancer.Animator.rootRotation = Quaternion.LookRotation(dir, Vector3.up);
     }
 
+    IEnumerator RealignCoroutine(Quaternion target, float timeToRealign)
+    {
+        float time = 0f;
+        float t;
+        Quaternion initRot = this.transform.rotation;
+        while (time < timeToRealign)
+        {
+            time += Time.deltaTime;
+            t = Mathf.Clamp01(time / timeToRealign);
+            this.transform.rotation = Quaternion.Lerp(initRot, target, t);
+            animancer.Animator.rootRotation = Quaternion.Lerp(initRot, target, t);
+            yield return null;
+        }
+    }
     public void SheatheAll()
     {
         StartCoroutine("SheatheAllRoutine");
@@ -3080,14 +3170,20 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public bool GetGrounded()
     {
+        return GetGrounded(out RaycastHit rhit, out RaycastHit shit);
+    }
+
+    public bool GetGrounded(out RaycastHit rayHit, out RaycastHit sphereHit)
+    {
         // return cc.isGrounded;
         Collider c = this.GetComponent<Collider>();
         Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down;
         Debug.DrawLine(bottom, bottom + Vector3.down * 0.2f, Color.red);
-        bool didHit = Physics.Raycast(bottom, Vector3.down, out RaycastHit hit, 0.2f, LayerMask.GetMask("Terrain"));
+        bool didHit = Physics.Raycast(bottom, Vector3.down, out rayHit, 0.2f, LayerMask.GetMask("Terrain"));
+        Physics.SphereCast(c.bounds.center, cc.radius, Vector3.down, out sphereHit, 1f, LayerMask.GetMask("Terrain"));
         if (didHit)
         {
-            lastPhysicsMaterial = hit.collider.sharedMaterial;
+            lastPhysicsMaterial = rayHit.collider.sharedMaterial;
         }
         return didHit || cc.isGrounded;
     }
