@@ -12,6 +12,8 @@ public class AnimationFXSounds : ScriptableObject
     public AudioClip default_slide;
     public AudioClip default_roll;
     public AudioClip tap;
+    [Space(10)]
+    public AudioClip continuousSlide;
     [Header("Swim")]
     public AudioClip swim;
     public AudioClip splashSmall;

@@ -52,6 +52,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float skidDecel = 10f;
     public float slideOffSpeed = 1f;
     public float slideSpeed = 4f;
+    public float slideAccel = 10f;
     Vector3 lastSprintForward;
     public float gravity = 9.81f;
     public float terminalVel = 70f;
@@ -72,7 +73,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool blocking;
     bool aiming;
     public bool sliding;
-    bool wasSliding;
+    bool wasSlidingIK;
+    bool wasSlidingUpdate;
     public float slopeAngle;
     public Vector3 groundNormal;
     public Vector3 groundPoint;
@@ -889,9 +891,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
                     if (sliding)
                     {
-                        xzVel = dir.normalized * slideSpeed;
+                        xzVel = Vector3.MoveTowards(xzVel, dir.normalized * slideSpeed, slideAccel * Time.deltaTime);
                         xzVel.Scale(new Vector3(1f, 0f, 1f));
-                        yVel = dir.normalized.y * slideSpeed;
+                        yVel = Mathf.MoveTowards(yVel, dir.normalized.y * slideSpeed, slideAccel * Time.deltaTime);
                     }
                     else
                     {
@@ -905,10 +907,20 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
                 if (stickDirection.sqrMagnitude > 0)
                 {
-                    xzVel += airAccel * Time.deltaTime * stickDirection;
-                    xzVel = Vector3.ClampMagnitude(xzVel, sprintSpeed);
-                    lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * airTurnSpeed * Time.deltaTime, 1f).normalized;
+                    if (!sliding)
+                    {
+                        xzVel += airAccel * Time.deltaTime * stickDirection;
+                        xzVel = Vector3.ClampMagnitude(xzVel, sprintSpeed);
+                        lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * airTurnSpeed * Time.deltaTime, 1f).normalized;
+                    }
+                    else
+                    {
+                        Vector3 horizTangent = Vector3.Cross(groundNormal, Vector3.down);
+                        xzVel += airAccel * Time.deltaTime * Vector3.Project(stickDirection,horizTangent);
+                    }
                 }
+                    
+                    
 
             }
             if (ledgeSnap)
@@ -1385,6 +1397,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 Physics.IgnoreCollision(carryable.GetComponent<Collider>(), this.GetComponent<Collider>());
             }
         }
+        if (sliding && !wasSlidingUpdate)
+        {
+            SendMessage("StartContinuousSlide");
+        }
+        else if (!sliding && wasSlidingUpdate)
+        {
+            SendMessage("StopContinuousSlide");
+        }
+        wasSlidingUpdate = sliding;
+        
         HandleCinemachine();
     }
 
@@ -3040,7 +3062,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 Vector3 hips = animancer.Animator.GetBoneTransform(HumanBodyBones.Hips).position;
                 float distanceHips = groundPlane.GetDistanceToPoint(hips);
                 
-                this.transform.rotation = Quaternion.LookRotation(horizNormal);
+                this.transform.rotation = Quaternion.LookRotation(xzVel.normalized);
                 animancer.Animator.bodyPosition = animancer.Animator.bodyPosition + groundNormal.normalized * (-distanceHips + 0.15f);
 
                 
@@ -3054,12 +3076,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 animancer.Animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 1f);
             }
         }
-        if (!sliding && wasSliding)
+        if (!sliding && wasSlidingIK)
         {
             animancer.Animator.SetIKPositionWeight(AvatarIKGoal.LeftFoot, 0f);
             animancer.Animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 0f);
         }
-        wasSliding = sliding;
+        wasSlidingIK = sliding;
         
     }
 

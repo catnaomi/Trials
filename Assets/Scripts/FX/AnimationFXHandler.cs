@@ -102,6 +102,27 @@ public class AnimationFXHandler : MonoBehaviour
         OnDashDust.Invoke();
     }
 
+    public void StartContinuousSlide()
+    {
+        
+        if (footSourceHeavy.clip != animSounds.continuousSlide)
+        {
+            footSourceHeavy.Stop();
+            footSourceHeavy.clip = animSounds.continuousSlide;
+        }
+        footSourceHeavy.loop = true;
+        if (!footSourceHeavy.isPlaying)
+        {
+            footSourceHeavy.Play();
+        }
+    }
+
+    public void StopContinuousSlide()
+    {
+        footSourceHeavy.Stop();
+        footSourceHeavy.loop = false;
+    }
+
     public void Roll()
     {
         footSourceHeavy.Stop();
