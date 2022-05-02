@@ -76,6 +76,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool wasSlidingIK;
     bool wasSlidingUpdate;
     public float slopeAngle;
+    public float maxSlideAngle = 60f;
+    public float minSlideAngle = 30f;
     public Vector3 groundNormal;
     public Vector3 groundPoint;
     Vector3 targetDirection;
@@ -877,12 +879,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     //Physics.Raycast(bottom, Vector3.down, out groundRayHit, 0.2f, LayerMask.GetMask("Terrain"));
                     Vector3 dir = Vector3.forward;
-                    if (slopeAngle > cc.slopeLimit) {
+                    if (slopeAngle > (!wasSlidingUpdate ? cc.slopeLimit : minSlideAngle) && slopeAngle < maxSlideAngle) {
 
                         sliding = true;
                         Vector3 horizTangent = Vector3.Cross(groundNormal, Vector3.down);
                         Vector3 downSlope = Vector3.Cross(horizTangent, groundNormal);
                         dir = downSlope;
+                    }
+                    else if (slopeAngle > maxSlideAngle && slopeAngle < 90f)
+                    {
+                        dir = Vector3.ProjectOnPlane(groundNormal, Vector3.up).normalized;
                     }
                     else if (rayHit.collider == null && sphereHit.collider != null)
                     {
@@ -2001,7 +2007,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         wading = false;
         float wadingHeight = (IsSwimming() ? wadingHeightOut : wadingHeightIn);
-        inWater = Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit waterHit, cc.height + 0.1f, LayerMask.GetMask("Water"), QueryTriggerInteraction.Collide);
+        int mask = UnityEngine.LayerMask.GetMask("Water");
+        inWater = Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit waterHit, cc.height + 0.2f, mask);
+        Debug.DrawRay(this.transform.position + Vector3.up * cc.height, Vector3.down * (cc.height + 0.2f), inWater ? Color.yellow : Color.cyan);
         if (inWater)
         {
             swimCollider = waterHit.collider;
