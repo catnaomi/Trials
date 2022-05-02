@@ -43,6 +43,7 @@ public class ForceAnimation : MonoBehaviour
 
     private void Play()
     {
+        if (clip == null) return;
         animancer.transform.localPosition = Vector3.zero;
         animancer.transform.localRotation = Quaternion.identity;
         AnimancerState state = animancer.Play(clip);
