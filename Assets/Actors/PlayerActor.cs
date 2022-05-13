@@ -1662,7 +1662,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             camState = (!IsInDialogue()) ? CameraState.Lock : CameraState.Dialogue;
         }
-        else if (IsAiming() || aiming)
+        else if (IsAiming() && aiming)
         {
             camState = CameraState.Aim;
         }
@@ -3137,7 +3137,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public bool IsAiming()
     {
-        return animancer.States.Current == state.aim;
+        return animancer.States.Current == state.aim && (state.aim != state.move || aiming);
     }
 
     public bool IsFalling()
