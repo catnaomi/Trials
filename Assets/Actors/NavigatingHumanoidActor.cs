@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.AI;
 using CustomUtilities;
 using Animancer;
+using UnityEngine.Events;
 
 [RequireComponent(typeof(HumanoidPositionReference)), RequireComponent(typeof(NavMeshAgent))]
 public class NavigatingHumanoidActor : Actor, INavigates
@@ -46,11 +47,18 @@ public class NavigatingHumanoidActor : Actor, INavigates
     protected ClipTransition landAnim;
 
     protected NavAnimState navstate;
+
     protected struct NavAnimState {
         public LinearMixerState idle;
         public DirectionalMixerState move;
         public AnimancerState fall;
     }
+
+    public bool actionsEnabled = true;
+
+    [Header("Combat")]
+    public UnityEvent OnHitboxActive;
+    
 
     System.Action _FinishJump;
     System.Action _FinishDrop;
@@ -75,6 +83,10 @@ public class NavigatingHumanoidActor : Actor, INavigates
         positionReference = GetComponent<HumanoidPositionReference>();
         navstate.move = (DirectionalMixerState)animancer.States.GetOrCreate(moveAnim);
         navstate.idle = (LinearMixerState)animancer.Play(idleAnim);
+
+        animancer.Layers[HumanoidAnimLayers.UpperBody].SetMask(positionReference.upperBodyMask);
+        animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = true;
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Weight = 1f;
 
         rigidbody = this.GetComponent<Rigidbody>();
         if (CombatTarget != null) SetDestination(CombatTarget);
@@ -125,6 +137,11 @@ public class NavigatingHumanoidActor : Actor, INavigates
         currentDistance = GetDistanceToTarget();
         bool inBufferRange = currentDistance <= bufferRange;
         bool inCloseRange = currentDistance <= closeRange;
+
+        if (!actionsEnabled)
+        {
+            shouldNavigate = false;
+        }
         if (followingTarget)
         {
             if (GetCombatTarget() == null)
@@ -479,7 +496,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
             return Vector3.Distance(this.transform.position, destination);
         }
     }
-
+    
     public bool IsClearLineToTarget()
     {
         if (CombatTarget != null)
@@ -494,6 +511,14 @@ public class NavigatingHumanoidActor : Actor, INavigates
         }
         return false;
     }
+
+    public void SetCurrentDamage(DamageKnockback damageKnockback)
+    {
+        currentDamage = new DamageKnockback(damageKnockback);
+        currentDamage.source = this.gameObject;
+    }
+
+
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;

@@ -66,7 +66,15 @@ public class InputAttack : InputAction
         return cancelStartTime;
     }
 
-    public virtual AnimancerState ProcessAttack(PlayerActor player, out float cancelTime, System.Action endEvent)
+    public virtual AnimancerState ProcessHumanoidAttack(NavigatingHumanoidActor actor, System.Action endEvent)
+    {
+        AnimancerState state = actor.animancer.Play(this.GetClip());
+        actor.SetCurrentDamage(this.GetDamage());
+        state.Events.OnEnd = endEvent;
+        return state;
+    }
+
+    public virtual AnimancerState ProcessPlayerAttack(PlayerActor player, out float cancelTime, System.Action endEvent)
     {
         
         AnimancerState state = player.animancer.Play(this.GetClip());

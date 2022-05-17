@@ -187,7 +187,7 @@ public class DamageKnockback
             //if (types.Contains(resist.type)) {
             if (DamageResistContains(resist.type, types))
             {
-                ratio *= resist.ratio;
+                ratio *= (1f - resist.ratio);
                 flat += resist.flat;
             }
         }

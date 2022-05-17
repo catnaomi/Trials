@@ -26,14 +26,8 @@ public class HumanoidPositionReference : MonoBehaviour
     public GameObject cBack;
     [Space(5)]
     public float eyeHeight;
-
-    public enum AnimLayer
-    {
-        Base = 0,
-        UpperBody = 1,
-        Flinch = 2,
-        TimeEffects = 3,
-    }
+    [Header("Masks")]
+    public AvatarMask upperBodyMask;
 
     // Use this for initialization
     void Awake()
@@ -159,7 +153,7 @@ public class HumanoidPositionReference : MonoBehaviour
             }
         }
     }
-
+    /*
     Transform LocateSlotsRecursive(Transform t, string n)
     {
         Transform s = t.Find(n);
@@ -180,7 +174,35 @@ public class HumanoidPositionReference : MonoBehaviour
             return s;
         }
     }
-
+    */
+    Transform LocateSlotsRecursive(Transform t, string n)
+    {
+        if (t.name.ToLower().Contains(n.ToLower()))
+        {
+            return t;
+        }
+        else
+        {
+            if (t.childCount == 0)
+            {
+                return null;
+            }
+            else
+            {
+                foreach (Transform c in t)
+                {
+                    Transform found = LocateSlotsRecursive(c, n);
+                    if (found != null)
+                    {
+                        return found;
+                    }
+                }
+                return null;
+            }
+            
+        }
+        
+    }
     public GameObject GetPositionRefSlot(Inventory.EquipSlot slot)
     {
         switch (slot)

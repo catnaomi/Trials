@@ -50,8 +50,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
     public float LowHealthThreshold = 50f;
     public bool isLowHealth;
     bool isHitboxActive;
-    DamageKnockback currentDamage;
-    public UnityEvent OnHitboxActive;
+
     bool tryCounterAttack;
     protected CombatState cstate;
     protected struct CombatState
@@ -397,12 +396,6 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         if (inventory.IsRangedEquipped()) inventory.SetDrawn(2, false);
     }
 
-    public void SetCurrentDamage(DamageKnockback damageKnockback)
-    {
-        currentDamage = new DamageKnockback(damageKnockback);
-        currentDamage.source = this.gameObject;
-    }
-
     public DamageKnockback GetCurrentDamage()
     {
         return currentDamage;
@@ -449,7 +442,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
 
     public bool CanAct()
     {
-        return animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle;
+        return (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle) && actionsEnabled;
     }
 
     public void TakeDamage(DamageKnockback damage)

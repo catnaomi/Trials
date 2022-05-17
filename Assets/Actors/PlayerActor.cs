@@ -150,7 +150,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float thrustIKAdjustSpeed;
     public float thrustInitialHeight;
     public float thrustIKHeightRange;
-    [ReadOnly, SerializeField] private DamageKnockback currentDamage;
     [Header("Animancer")]
     public MixerTransition2DAsset moveAnim;
     public AnimationClip idleAnim;
@@ -183,8 +182,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float aimSpeed = 2.5f;
     Vector3 aimForwardVector;
     MixerTransition2DAsset aimAnim;
-    [Space(5)]
-    public AvatarMask upperBodyMask;
     [Space(5)]
     [ReadOnly] public BilayerMixer2DAsset bilayerMove;
     [Header("Damage Anims")]
@@ -351,7 +348,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         landHardAnim.Events.OnEnd = _MoveAndReset;
         landSoftAnim.Events.OnEnd = _MoveAndReset;
         swimEnd.Events.OnEnd = _MoveAndReset;
-        animancer.Layers[HumanoidAnimLayers.UpperBody].SetMask(upperBodyMask);
+        animancer.Layers[HumanoidAnimLayers.UpperBody].SetMask(positionReference.upperBodyMask);
         //animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = true;
         UpdateFromMoveset();
 
@@ -2421,7 +2418,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             return;
         }
         System.Action endAction = (GetMoveset().quickSlash1h is ComboAttack) ? _MoveOnEnd : _AttackEnd;
-        state.attack = GetMoveset().quickSlash1h.ProcessAttack(this, out cancelTime, endAction);
+        state.attack = GetMoveset().quickSlash1h.ProcessPlayerAttack(this, out cancelTime, endAction);
         attackDecelReal = attackDecel;
         OnAttack.Invoke();
         hold = false;
@@ -2436,7 +2433,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
 
         System.Action endAction = (GetMoveset().quickThrust1h is ComboAttack) ? _MoveOnEnd : _AttackEnd;
-        state.attack = GetMoveset().quickThrust1h.ProcessAttack(this, out cancelTime, endAction);
+        state.attack = GetMoveset().quickThrust1h.ProcessPlayerAttack(this, out cancelTime, endAction);
         attackDecelReal = attackDecel;
         OnAttack.Invoke();
         hold = false;
@@ -2455,7 +2452,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else
         {
             hold = false;
-            state.attack = GetMoveset().powerSlash.ProcessAttack(this, out cancelTime, _AttackEnd);
+            state.attack = GetMoveset().powerSlash.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
         }
         OnAttack.Invoke();
     }
@@ -2473,7 +2470,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else
         {
             hold = false;
-            state.attack = GetMoveset().powerSlash.ProcessAttack(this, out cancelTime, _AttackEnd);
+            state.attack = GetMoveset().powerSlash.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
         }
         OnAttack.Invoke();
     }
@@ -2525,18 +2522,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void CancelSlash()
     {
-        state.attack = GetMoveset().quickSlash1h.ProcessAttack(this, out cancelTime, _AttackEnd);
+        state.attack = GetMoveset().quickSlash1h.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
         OnAttack.Invoke();
     }
 
     public void CancelThrust()
     {
-        state.attack = GetMoveset().quickThrust1h.ProcessAttack(this, out cancelTime, _AttackEnd);
+        state.attack = GetMoveset().quickThrust1h.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
         OnAttack.Invoke();
     }
     public void DashSlash()
     {
-        state.attack = GetMoveset().dashSlash.ProcessAttack(this, out cancelTime, _AttackEnd);
+        state.attack = GetMoveset().dashSlash.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
         attackDecelReal = dashAttackDecel;
         dashed = false;
         OnAttack.Invoke();
@@ -2544,7 +2541,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void DashThrust()
     {
-        state.attack = GetMoveset().dashThrust.ProcessAttack(this, out cancelTime, _AttackEnd);
+        state.attack = GetMoveset().dashThrust.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
         attackDecelReal = dashAttackDecel;
         dashed = false;
         OnAttack.Invoke();
@@ -2566,11 +2563,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         };
         if (inventory.IsOffDrawn() && GetMovesetOff().stanceSlash != null)
         {
-            state.attack = GetMovesetOff().stanceSlash.ProcessAttack(this, out cancelTime, _BlockAttackEnd);
+            state.attack = GetMovesetOff().stanceSlash.ProcessPlayerAttack(this, out cancelTime, _BlockAttackEnd);
         }
         else if (inventory.IsMainDrawn() && GetMoveset().stanceSlash != null)
         {
-            state.attack = GetMoveset().stanceSlash.ProcessAttack(this, out cancelTime, _BlockAttackEnd);
+            state.attack = GetMoveset().stanceSlash.ProcessPlayerAttack(this, out cancelTime, _BlockAttackEnd);
         }
         else
         {
@@ -2593,11 +2590,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         };
         if (inventory.IsOffDrawn() && GetMovesetOff().stanceThrust != null)
         {
-            state.attack = GetMovesetOff().stanceSlash.ProcessAttack(this, out cancelTime, _BlockAttackEnd);
+            state.attack = GetMovesetOff().stanceSlash.ProcessPlayerAttack(this, out cancelTime, _BlockAttackEnd);
         }
         else if (inventory.IsMainDrawn() && GetMoveset().stanceThrust != null)
         {
-            state.attack = GetMovesetOff().stanceSlash.ProcessAttack(this, out cancelTime, _BlockAttackEnd);
+            state.attack = GetMovesetOff().stanceSlash.ProcessPlayerAttack(this, out cancelTime, _BlockAttackEnd);
         }
         else
         {
@@ -2607,7 +2604,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public void RollSlash()
     {
-        state.attack = GetMoveset().rollSlash.ProcessAttack(this, out cancelTime, _MoveOnEnd);
+        state.attack = GetMoveset().rollSlash.ProcessPlayerAttack(this, out cancelTime, _MoveOnEnd);
         attackDecelReal = dashAttackDecel;
         rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };   
         dashed = false;
@@ -2616,7 +2613,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void RollThrust()
     {
-        state.attack = GetMoveset().rollThrust.ProcessAttack(this, out cancelTime, _MoveOnEnd);
+        state.attack = GetMoveset().rollThrust.ProcessPlayerAttack(this, out cancelTime, _MoveOnEnd);
         attackDecelReal = dashAttackDecel;
         rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
         dashed = false;

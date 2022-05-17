@@ -45,6 +45,8 @@ public class Actor : MonoBehaviour
     public float yVel;
     // targets
 
+    [SerializeField, ReadOnly] protected DamageKnockback currentDamage;
+
     public GameObject CombatTarget;
     public GameObject FollowTarget;
     [Header("Time Travel Data")]
@@ -168,6 +170,11 @@ public class Actor : MonoBehaviour
         FollowTarget = target;
     }
 
+    public virtual void SetCurrentDamage(DamageKnockback damageKnockback)
+    {
+        currentDamage = new DamageKnockback(damageKnockback);
+        currentDamage.source = this.gameObject;
+    }
     public virtual void OnFallOffMap()
     {
         Die();
