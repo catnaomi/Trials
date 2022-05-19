@@ -410,7 +410,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             aimTimer = aimCancelTime;
         }
 
-        GetHeadPoint();
+        //GetHeadPoint();
 
         if (!animancer.Layers[0].IsAnyStatePlaying())
         {
@@ -2935,7 +2935,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             point = Camera.main.transform.position + Camera.main.transform.forward * 10f;
         }
-        if (headPoint == Vector3.zero)
+        if (headPoint == Vector3.zero || Vector3.Distance(headPoint, point) > dist)
         {
             headPoint = point;
         }
@@ -2943,6 +2943,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             headPoint = Vector3.MoveTowards(headPoint, point, headPointSpeed * Time.deltaTime);
         }
+        Debug.DrawLine(positionReference.Head.position, point, Color.cyan);
+        Debug.DrawLine(positionReference.Head.position, headPoint, Color.magenta);
     }
 
     public override Vector3 GetLaunchVector(Vector3 origin)
@@ -3030,29 +3032,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else
         {
-            Vector3 point = Vector3.zero;
-            if (this.GetCombatTarget() != null || IsAiming())
+            GetHeadPoint();
+            animancer.Animator.SetLookAtPosition(headPoint);
+            if (IsAiming() || this.GetCombatTarget() != null)
             {
-                point = headPoint;
+                animancer.Animator.SetLookAtWeight(1f, 0.1f, 1f, 0f, 0.7f);
             }
             else
             {
-                float headY = this.transform.position.y + positionReference.eyeHeight;
-                Vector3 headDir = headPoint - this.transform.position;
-                headDir.Scale(new Vector3(1f, 0f, 1f));
-                if (Vector3.Angle(headDir.normalized, this.transform.forward) < 45f)
-                {
-                    point = new Vector3(headPoint.x, headY, headPoint.z);
-                    animancer.Animator.SetLookAtPosition(point);
-                }
-                else
-                {
-                    point = this.transform.position + this.transform.forward * headDir.magnitude + this.transform.up * positionReference.eyeHeight;
-                }
+                animancer.Animator.SetLookAtWeight(0f);
             }
-            smoothedHeadPoint = Vector3.MoveTowards(smoothedHeadPoint, point, headPointSpeed * Time.deltaTime);
-            animancer.Animator.SetLookAtPosition(smoothedHeadPoint);
-            animancer.Animator.SetLookAtWeight(1f, 0.1f, 1f, 0f, 0.7f);
             thrustIKWeight = 0f;
 
             if (sliding)
@@ -3229,7 +3218,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             if (interactable == null || !interactable.canInteract) continue;
             float dist = Vector3.Distance(this.transform.position, interactable.transform.position);
-            if (dist < leadDist)
+            if (dist < leadDist && dist <= interactable.interactionNode.bounds.extents.magnitude)
             {
                 leadDist = dist;
                 highlightedInteractable = interactable;

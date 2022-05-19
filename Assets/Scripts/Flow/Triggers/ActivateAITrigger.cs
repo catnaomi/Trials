@@ -15,11 +15,11 @@ public class ActivateAITrigger : MonoBehaviour
         {
             foreach (NavigatingHumanoidActor actor in actors)
             {
-                actor.actionsEnabled = true;
-                if (shouldAttackImmediately)
+                if (shouldAttackImmediately && !actor.actionsEnabled)
                 {
                     attack.ProcessHumanoidAttack(actor, actor.MoveOnEnd);
                 }
+                actor.actionsEnabled = true;
             }
         }
     }

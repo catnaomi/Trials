@@ -207,7 +207,7 @@ public class MeshSwordSlash : MonoBehaviour
     }
     private void UpdateTrail()
     {
-        
+        if (topPoint == null || bottomPoint == null) return;
         if (slashing)
         {
             topPoints.Add(topPoint.position);
