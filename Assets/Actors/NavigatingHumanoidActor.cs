@@ -227,7 +227,8 @@ public class NavigatingHumanoidActor : Actor, INavigates
                     nav.CompleteOffMeshLink();
                     offMeshInProgress = false;
                 }
-                animancer.Play(landAnim);
+                AnimancerState land = animancer.Play(landAnim);
+                land.Events.OnEnd = MoveOnEnd;
                 ignoreRoot = false;
             }
         }
@@ -505,7 +506,12 @@ public class NavigatingHumanoidActor : Actor, INavigates
     {
         if (CombatTarget != null)
         {
-            if (Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, CombatTarget.transform.position - this.transform.position, out RaycastHit hit, Vector3.Distance(CombatTarget.transform.position, this.transform.position), ~LayerMask.GetMask("Limbs", "Hitboxes")))
+            Vector3 targetPos = CombatTarget.transform.position;
+            if (CombatTarget.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference hpr))
+            {
+                targetPos = hpr.Spine.position;
+            }
+            if (Physics.SphereCast(positionReference.Spine.transform.position, 0.25f, targetPos - positionReference.Spine.transform.position, out RaycastHit hit, Vector3.Distance(targetPos, this.transform.position), ~LayerMask.GetMask("Limbs", "Hitboxes")))
             {
                 if (hit.transform.root == CombatTarget.transform.root)
                 {

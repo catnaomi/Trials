@@ -157,7 +157,15 @@ public class RangedBow : RangedWeapon, IHitboxHandler
 
             Debug.Log("aim assist: " + aimAssist.y*100f);
 
-            launchVector = (holder.GetCombatTarget().transform.position - positionReference.OffHand.transform.position).normalized + aimAssist;
+            if (holder.GetCombatTarget().TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference hpr))
+            {
+                launchVector = (hpr.Spine.position - positionReference.OffHand.transform.position).normalized + aimAssist;
+            }
+            else
+            {
+                launchVector = (holder.GetCombatTarget().transform.position - positionReference.OffHand.transform.position).normalized + aimAssist;
+            }
+            
         }
         float launchStrength = fireStrengthMult;
         if (holder.ShouldCalcFireStrength())
