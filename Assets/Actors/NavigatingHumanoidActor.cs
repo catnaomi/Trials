@@ -496,7 +496,11 @@ public class NavigatingHumanoidActor : Actor, INavigates
             return Vector3.Distance(this.transform.position, destination);
         }
     }
-    
+
+    public void MoveOnEnd()
+    {
+        animancer.Play(navstate.move);
+    }
     public bool IsClearLineToTarget()
     {
         if (CombatTarget != null)

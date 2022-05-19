@@ -6,6 +6,8 @@ public class ActivateAITrigger : MonoBehaviour
 {
     public NavigatingHumanoidActor[] actors;
 
+    public bool shouldAttackImmediately = false;
+    public InputAttack attack;
     public void OnTriggerEnter(Collider other)
     {
         if (PlayerActor.player == null) return;
@@ -14,6 +16,10 @@ public class ActivateAITrigger : MonoBehaviour
             foreach (NavigatingHumanoidActor actor in actors)
             {
                 actor.actionsEnabled = true;
+                if (shouldAttackImmediately)
+                {
+                    attack.ProcessHumanoidAttack(actor, actor.MoveOnEnd);
+                }
             }
         }
     }
