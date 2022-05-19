@@ -39,4 +39,9 @@ public class FakeHitboxHandler : MonoBehaviour
     {
 
     }
+
+    public void ChargeStart()
+    {
+
+    }
 }

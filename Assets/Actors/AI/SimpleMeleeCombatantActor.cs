@@ -377,7 +377,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
 
     }
 
-    public bool IsHitboxActive()
+    public override bool IsHitboxActive()
     {
         return isHitboxActive;
     }

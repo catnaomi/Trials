@@ -213,6 +213,12 @@ public class AnimationFXHandler : MonoBehaviour
         combatHitSource.PlayOneShot(animSounds.bowPull);
         OnGunLoad.Invoke();
     }
+
+    public void ChargeStart()
+    {
+        combatWhiffSource.Stop();
+        combatHitSource.PlayOneShot(animSounds.chargeStart);
+    }
     #endregion
 
     #region Terrain Handling

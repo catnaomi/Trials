@@ -26,6 +26,8 @@ public class AnimationFXSounds : ScriptableObject
     [Space(10)]
     public AudioClip bowPull;
     public AudioClip bowFire;
+    [Space(10)]
+    public AudioClip chargeStart;
     [Header("Per Material")]
     public AudioClip metal_stepL;
     public AudioClip metal_stepR;

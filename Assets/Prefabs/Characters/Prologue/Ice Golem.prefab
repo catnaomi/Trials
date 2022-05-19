@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1729733228
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1729733229}
+  m_Layer: 0
+  m_Name: Target
+  m_TagString: LockTarget
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1729733229
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1729733228}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.144, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2080545369736461827}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1969530443724544488
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -92,6 +123,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Ice Golem
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 480b2aac360f4f541a903e93e1acfcf4,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 1211709160268511299, guid: 480b2aac360f4f541a903e93e1acfcf4,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -117,6 +153,20 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1969530443724544488}
   m_PrefabAsset: {fileID: 0}
+--- !u!136 &603506088
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1699058074318922937}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.4
+  m_Height: 1.8
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.88, z: 0}
 --- !u!143 &5727023155610441568
 CharacterController:
   m_ObjectHideFlags: 0
@@ -350,7 +400,7 @@ MonoBehaviour:
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: ebd0e8a8970150e4198eed744433e702, type: 2}
   moveAnim: {fileID: 11400000, guid: 28683461edb485a4784728197d84066c, type: 2}
-  actionsEnabled: 1
+  actionsEnabled: 0
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
@@ -366,6 +416,8 @@ MonoBehaviour:
   FarAttackRotationSpeed: 45
   InFarAttackRange: 0
   damageAnims: {fileID: 11400000, guid: 9d9b14e5de6ad3d449aa822da5bc08b9, type: 2}
+  deathParticle: {fileID: 2759190588825693265, guid: b6cc573424a44724382c8510edfd3239,
+    type: 3}
   clock: 0
   ActionDelayMinimum: 2
   ActionDelayMaximum: 5
@@ -406,10 +458,7 @@ MonoBehaviour:
   OnHealthChange:
     m_PersistentCalls:
       m_Calls: []
-  resistances:
-  - type: 4
-    ratio: 1
-    flat: 0
+  resistances: []
   effects: []
 --- !u!195 &603506079
 NavMeshAgent:
@@ -543,20 +592,6 @@ MonoBehaviour:
   OnGunLoad:
     m_PersistentCalls:
       m_Calls: []
---- !u!136 &603506088
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1699058074318922937}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 1
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &2005013310454043186 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 37736868788292570, guid: 480b2aac360f4f541a903e93e1acfcf4,
@@ -566,6 +601,12 @@ Transform:
 --- !u!1 &2025010340939373430 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -8696620557452721506, guid: 480b2aac360f4f541a903e93e1acfcf4,
+    type: 3}
+  m_PrefabInstance: {fileID: 1969530443724544488}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &2080545369736461827 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 480b2aac360f4f541a903e93e1acfcf4,
     type: 3}
   m_PrefabInstance: {fileID: 1969530443724544488}
   m_PrefabAsset: {fileID: 0}

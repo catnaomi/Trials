@@ -25,6 +25,8 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     [Space(5)]
     public DamageAnims damageAnims;
     HumanoidDamageHandler damageHandler;
+    [Space(5)]
+    public GameObject deathParticle;
     [Space(10)]
     public float clock;
     public float ActionDelayMinimum = 2f;
@@ -97,7 +99,7 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
             CombatTarget = null;
         }
 
-        if (inventory.IsMainEquipped() && inventory.IsMainDrawn())
+        if (inventory.IsMainEquipped() && !inventory.IsMainDrawn())
         {
             inventory.SetDrawn(true, true);
         }
@@ -223,7 +225,7 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
 
     }
 
-    public bool IsHitboxActive()
+    public override bool IsHitboxActive()
     {
         return isHitboxActive;
     }
@@ -258,6 +260,10 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
         return PlayerActor.player.gameObject.tag != "Corpse";
     }
 
+    public override bool IsArmored()
+    {
+        return true;
+    }
     public override bool IsDodging()
     {
         return animancer.States.Current == cstate.dodge;
@@ -294,5 +300,18 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     public void Recoil()
     {
         ((IDamageable)damageHandler).Recoil();
+    }
+
+    public override void Die()
+    {
+        base.Die();
+        foreach(Renderer r in this.GetComponentsInChildren<Renderer>())
+        {
+            r.enabled = false;
+        }
+        GameObject particle = Instantiate(deathParticle);
+        particle.transform.position = this.GetComponent<Collider>().bounds.center;
+        Destroy(particle, 5f);
+
     }
 }
