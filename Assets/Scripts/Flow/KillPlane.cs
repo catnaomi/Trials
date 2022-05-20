@@ -28,6 +28,7 @@ public class KillPlane : MonoBehaviour
             foreach (Actor actor in actors)
             {
                 if (!actor.IsAlive()) continue;
+                if (actor is not PlayerActor && actor.gameObject.scene != this.gameObject.scene) continue;
                 if (!plane.GetSide(actor.transform.position) && IsWithinPlane(actor.transform.position))
                 {
                     actor.OnFallOffMap();
