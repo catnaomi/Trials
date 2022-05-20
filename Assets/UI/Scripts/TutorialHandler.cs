@@ -34,7 +34,7 @@ public class TutorialHandler : MonoBehaviour
         }
         tutorial.button1 = icon1;
         tutorial.button2 = icon2;
-        tutorial.button2 = icon3;
+        tutorial.button3 = icon3;
         tutorial.text = text;
         tutorial.PopulateTutorial();
     }
