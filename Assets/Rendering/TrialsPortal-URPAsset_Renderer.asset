@@ -33,7 +33,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
   m_Name: Render UI3D
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     passTag: Render UI3D
     Event: 300
@@ -72,7 +72,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
   m_Name: Render Actors
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     passTag: Render Actors
     Event: 350
@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
   m_Name: Render Time Affected pt 1
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     passTag: Render Time Affected pt 1
     Event: 300
@@ -150,7 +150,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 280bc722e3edaf644b24f7ce86f70f07, type: 3}
   m_Name: Watercolor Canvas Overlay
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     renderPassEvent: 500
     blitMaterial: {fileID: 2100000, guid: 55a41ba4be6d47c4d853230b7017b379, type: 2}
@@ -159,6 +159,45 @@ MonoBehaviour:
     destinationType: 0
     sourceTextureId: _Source2
     destinationTextureId: 
+--- !u!114 &-3281621104622284896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: Depth Hack pt 2
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  settings:
+    passTag: Depth Hack pt 2
+    Event: 250
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 2097152
+      PassNames: []
+    overrideMaterial: {fileID: 0}
+    overrideMaterialPassIndex: 0
+    overrideDepthState: 1
+    depthCompareFunction: 8
+    enableWrite: 1
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -169,7 +208,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de640fe3d0db1804a85f9fc8f5cadab6, type: 3}
-  m_Name: TrialsDefault-URPAsset_Renderer
+  m_Name: TrialsPortal-URPAsset_Renderer
   m_EditorClassIdentifier: 
   debugShaders:
     debugReplacementPS: {fileID: 4800000, guid: cf852408f2e174538bcd9b7fda1c5ae7,
@@ -177,11 +216,13 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -6740207369289946677}
   - {fileID: -6308885335009602308}
+  - {fileID: 6219042623670888988}
+  - {fileID: -3281621104622284896}
   - {fileID: -9203595374137552199}
   - {fileID: -6015469835893730196}
   - {fileID: 3675593080771107755}
   - {fileID: -5784520422823111315}
-  m_RendererFeatureMap: cba900d91bf975a2fcd414b6365672a8b9521a1cc54246806c147a3a0ec284acabdb3ece6e5402336dd5a2b95241b9af
+  m_RendererFeatureMap: cba900d91bf975a2fcd414b6365672a81caaeafa507a4e56a04f90fbfd5675d2b9521a1cc54246806c147a3a0ec284acabdb3ece6e5402336dd5a2b95241b9af
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -203,10 +244,10 @@ MonoBehaviour:
   m_AssetVersion: 1
   m_OpaqueLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 6234071
   m_TransparentLayerMask:
     serializedVersion: 2
-    m_Bits: 2147483647
+    m_Bits: 6234071
   m_DefaultStencilState:
     overrideStencilState: 0
     stencilReference: 0
@@ -220,7 +261,7 @@ MonoBehaviour:
   m_AccurateGbufferNormals: 0
   m_ClusteredRendering: 0
   m_TileSize: 32
-  m_IntermediateTextureMode: 0
+  m_IntermediateTextureMode: 1
 --- !u!114 &3675593080771107755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -233,7 +274,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
   m_Name: Render Time Affected pt 2
   m_EditorClassIdentifier: 
-  m_Active: 1
+  m_Active: 0
   settings:
     passTag: Render Time Affected pt 2
     Event: 450
@@ -248,6 +289,45 @@ MonoBehaviour:
     overrideDepthState: 0
     depthCompareFunction: 8
     enableWrite: 1
+    stencilSettings:
+      overrideStencilState: 0
+      stencilReference: 0
+      stencilCompareFunction: 8
+      passOperation: 0
+      failOperation: 0
+      zFailOperation: 0
+    cameraSettings:
+      overrideCamera: 0
+      restoreCamera: 1
+      offset: {x: 0, y: 0, z: 0, w: 0}
+      cameraFieldOfView: 60
+--- !u!114 &6219042623670888988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b3d386ba5cd94485973aee1479b272e, type: 3}
+  m_Name: Depth Hack pt 1
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  settings:
+    passTag: Depth Hack pt 1
+    Event: 250
+    filterSettings:
+      RenderQueueType: 0
+      LayerMask:
+        serializedVersion: 2
+        m_Bits: 4194304
+      PassNames: []
+    overrideMaterial: {fileID: 0}
+    overrideMaterialPassIndex: 0
+    overrideDepthState: 0
+    depthCompareFunction: 8
+    enableWrite: 0
     stencilSettings:
       overrideStencilState: 0
       stencilReference: 0
