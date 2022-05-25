@@ -1349,7 +1349,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }*/
                 cc.Move((xzVel + downwardsVelocity) * Time.deltaTime);
             }
-            else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain", "Terrain2")) && yVel <= 0 && animancer.States.Current != state.swim)
+            else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only")) && yVel <= 0 && animancer.States.Current != state.swim)
             {
                 Vector3 temp = Vector3.Cross(hit.normal, finalMov);
                 cc.Move((Vector3.Cross(temp, hit.normal) + gravity * Vector3.down) * Time.deltaTime);
@@ -2004,14 +2004,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         wading = false;
         float wadingHeight = (IsSwimming() ? wadingHeightOut : wadingHeightIn);
-        int mask = UnityEngine.LayerMask.GetMask("Water");
+        int mask = UnityEngine.LayerMask.GetMask("Water", "Water2");
         inWater = Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit waterHit, cc.height + 0.2f, mask);
         Debug.DrawRay(this.transform.position + Vector3.up * cc.height, Vector3.down * (cc.height + 0.2f), inWater ? Color.yellow : Color.cyan);
         if (inWater)
         {
             swimCollider = waterHit.collider;
             waterHeight = swimCollider.bounds.center.y + swimCollider.bounds.extents.y;
-            if (Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit wadingHit, 10f, LayerMask.GetMask("Terrain")))
+            if (Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit wadingHit, 10f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only")))
             {
                 wading = (waterHeight - wadingHit.point.y) <= wadingHeight;
                 if (wading)
@@ -2927,7 +2927,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             point = this.GetCombatTarget().transform.position;
         }
-        else if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, dist, LayerMask.GetMask("Terrain")))
+        else if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, dist, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only")))
         {
             point = hit.point;
         }
@@ -2966,7 +2966,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             Vector3 aimPos = Camera.main.transform.position + Camera.main.transform.forward * 100f;
 
-            if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, 100f, LayerMask.GetMask("Terrain", "Actors", "Default", "Wall", "Terrain2", "Default2")) && !hit.transform.IsChildOf(this.transform.root))
+            if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, 100f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only", "Actors", "Default", "Wall", "World1Only", "World2Only")) && !hit.transform.IsChildOf(this.transform.root))
             {
                 aimPos = hit.point;
                 
@@ -3273,8 +3273,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down;
         Vector3 top = c.bounds.center + Vector3.up * c.bounds.extents.y;
         
-        bool didHit = Physics.Raycast(bottom, Vector3.down, out rayHit, CAST_DISTANCE, LayerMask.GetMask("Terrain","Terrain2"));
-        bool didSphereHit = Physics.SphereCast(top, cc.radius, Vector3.down, out sphereHit, c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius), LayerMask.GetMask("Terrain", "Terrain2"));
+        bool didHit = Physics.Raycast(bottom, Vector3.down, out rayHit, CAST_DISTANCE, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
+        bool didSphereHit = Physics.SphereCast(top, cc.radius, Vector3.down, out sphereHit, c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius), LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
         
         float slopeAngle = -1f;
         if (didHit)
