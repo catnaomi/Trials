@@ -12,6 +12,7 @@ public class PortalCamera : MonoBehaviour
         manager = PortalManager.instance;
         camera = this.GetComponent<Camera>();
         manager.OnSwap.AddListener(Swap);
+        Swap();
         camera.targetTexture = manager.GetPortalTex();
     }
 
