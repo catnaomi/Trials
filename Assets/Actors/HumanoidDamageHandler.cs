@@ -138,19 +138,22 @@ public class HumanoidDamageHandler : IDamageable
 
             if (!damage.breaksBlock)
             {
-                if (animancer.States.Current != block || damage.cannotAutoFlinch)
+                if (!actor.IsAttacking())
                 {
-                    ClipTransition clip = blockStagger;
-                    animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
-                    block = animancer.Play(clip);
-                    block.Events.OnEnd = _OnBlockEnd;
-                    
-                }
-                else
-                {
-                    ClipTransition clip = blockStagger;
-                    AnimancerState state = animancer.Layers[HumanoidAnimLayers.Flinch].Play(clip);
-                    state.Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
+                    if (animancer.States.Current != block || damage.cannotAutoFlinch)
+                    {
+                        ClipTransition clip = blockStagger;
+                        animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
+                        block = animancer.Play(clip);
+                        block.Events.OnEnd = _OnBlockEnd;
+
+                    }
+                    else
+                    {
+                        ClipTransition clip = blockStagger;
+                        AnimancerState state = animancer.Layers[HumanoidAnimLayers.Flinch].Play(clip);
+                        state.Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
+                    }
                 }
                 if (damage.bouncesOffBlock && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
                 {
@@ -168,7 +171,10 @@ public class HumanoidDamageHandler : IDamageable
                 damage.OnCrit.Invoke();
                 StartCritVulnerability(clip.MaximumDuration / clip.Speed);
             }
-            actor.transform.rotation = Quaternion.LookRotation(-(actor.transform.position - damage.source.transform.position), Vector3.up);
+            if (!actor.IsAttacking())
+            {
+                actor.transform.rotation = Quaternion.LookRotation(-(actor.transform.position - damage.source.transform.position), Vector3.up);
+            }
             damage.OnBlock.Invoke();
             actor.OnBlock.Invoke();
         }

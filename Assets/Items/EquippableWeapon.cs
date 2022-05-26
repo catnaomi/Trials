@@ -70,10 +70,21 @@ public class EquippableWeapon : Item, IGeneratesModel
             DestroyModel();
         }
         model = GameObject.Instantiate(prefab);
-
+        SetModelLayer();
         return model;
     }
 
+    public void SetModelLayer()
+    {
+        if (model != null && holder != null)
+        {
+            int layer = holder.gameObject.layer;
+            foreach (Renderer r in model.GetComponentsInChildren<Renderer>())
+            {
+                r.gameObject.layer = layer;
+            }
+        }
+    }
     public virtual void DestroyModel()
     {
         if (model == null)

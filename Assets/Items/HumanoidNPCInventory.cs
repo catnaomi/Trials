@@ -575,5 +575,30 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
         return false;
     }
 
-
+    public EquippableWeapon GetBlockWeapon()
+    {
+        if (IsOffEquipped() && GetOffWeapon().GetMoveset().overridesBlock)
+        {
+            return GetOffWeapon();
+        }
+        else if (IsMainEquipped() && GetMainWeapon().GetMoveset().overridesBlock)
+        {
+            return GetMainWeapon();
+        }
+        else
+        {
+            return null;
+        }
+    }
+    public DamageResistance[] GetBlockResistance()
+    {
+        if (GetBlockWeapon() != null)
+        {
+            return GetBlockWeapon().blockResistances;
+        }
+        else
+        {
+            return new DamageResistance[0];
+        }
+    }
 }

@@ -12,6 +12,9 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     public float width = 1f;
     public float length = 1.5f;
     //public float weight = 1f;
+    [Space(10)]
+    [SerializeField]private float slashModifier = 1f;
+    [SerializeField]private float thrustModifier = 1f;
     bool wall;
     bool active;
     //[HideInInspector] WeaponController weaponController;
@@ -279,12 +282,12 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
 
     public virtual float GetSlashingModifier()
     {
-        return 1f;
+        return slashModifier;
     }
 
     public virtual float GetPiercingModifier()
     {
-        return 1f;
+        return thrustModifier;
     }
 
     public virtual float GetBaseDamage()

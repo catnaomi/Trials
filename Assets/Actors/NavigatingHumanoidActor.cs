@@ -4,6 +4,7 @@ using UnityEngine.AI;
 using CustomUtilities;
 using Animancer;
 using UnityEngine.Events;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(HumanoidPositionReference)), RequireComponent(typeof(NavMeshAgent))]
 public class NavigatingHumanoidActor : Actor, INavigates
@@ -478,6 +479,16 @@ public class NavigatingHumanoidActor : Actor, INavigates
         }
     }
 
+    public void RealignToTargetWithOffset(float angle)
+    {
+        if (destination != Vector3.zero)
+        {
+            Vector3 dir = destination - this.transform.position;
+            dir.y = 0f;
+            this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up) * Quaternion.AngleAxis(angle, Vector3.up);
+        }
+    }
+
     public float GetDistanceToTarget()
     {
         if (nav.enabled) {
@@ -528,7 +539,6 @@ public class NavigatingHumanoidActor : Actor, INavigates
         currentDamage.source = this.gameObject;
     }
 
-
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -537,14 +547,6 @@ public class NavigatingHumanoidActor : Actor, INavigates
     public bool ShouldFaceTarget()
     {
         string TAG = "FACING";
-        bool ALLOW_IN_TRANSITION = true;
-
-        return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
-    }
-    public bool IsBlocking()
-    {
-        string TAG = "BLOCKING";
         bool ALLOW_IN_TRANSITION = true;
 
         return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&

@@ -457,7 +457,7 @@ public class CraftableWeapon : BladeWeapon
                 }
             }
         }
-
+        SetModelLayer();
         return model;
     }
 
