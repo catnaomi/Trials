@@ -8,35 +8,36 @@ public class TutorialHandler : MonoBehaviour
     public BasicTutorialItem tutorial1;
     public BasicTutorialItem tutorial2;
     public BasicTutorialItem tutorial3;
+    AudioSource source;
     private void Awake()
     {
         instance = this;
     }
 
+    private void Start()
+    {
+        source = this.GetComponent<AudioSource>();
+    }
     public void ShowTutorial(Sprite icon1, Sprite icon2, Sprite icon3, string text)
     {
-        BasicTutorialItem tutorial = null;
-        if (instance.tutorial1.group.alpha <= 0)
-        {
-            tutorial = tutorial1;
-        }
-        else if (instance.tutorial2.group.alpha <= 0)
+        BasicTutorialItem tutorial = tutorial1;
+        float lastUpdateTime = instance.tutorial1.lastUpdateTime;
+        if (instance.tutorial2.lastUpdateTime < lastUpdateTime)
         {
             tutorial = tutorial2;
+            lastUpdateTime = instance.tutorial2.lastUpdateTime;
         }
-        else if (instance.tutorial3.group.alpha <= 0)
+        if (instance.tutorial3.lastUpdateTime < lastUpdateTime)
         {
             tutorial = tutorial3;
-        }
-        else
-        {
-            tutorial = tutorial1;
+            lastUpdateTime = instance.tutorial3.lastUpdateTime;
         }
         tutorial.button1 = icon1;
         tutorial.button2 = icon2;
         tutorial.button3 = icon3;
         tutorial.text = text;
         tutorial.PopulateTutorial();
+        source.Play();
     }
     public static void ShowTutorialStatic(Sprite icon1, Sprite icon2, Sprite icon3, string text)
     {

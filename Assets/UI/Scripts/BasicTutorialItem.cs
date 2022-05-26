@@ -21,6 +21,7 @@ public class BasicTutorialItem : MonoBehaviour
     public float fadeInTime = 0.25f;
     float alpha;
     public float clock;
+    [ReadOnly] public float lastUpdateTime;
     // Start is called before the first frame update
     void Start()
     {
@@ -77,5 +78,6 @@ public class BasicTutorialItem : MonoBehaviour
             icon3.gameObject.SetActive(false);
         }
         textbox.text = text;
+        lastUpdateTime = Time.time;
     }
 }
