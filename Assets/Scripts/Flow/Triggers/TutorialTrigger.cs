@@ -15,8 +15,13 @@ public class TutorialTrigger : MonoBehaviour
         if (PlayerActor.player == null || triggered) return;
         if (other.GetComponent<PlayerActor>() != null || other.transform.IsChildOf(PlayerActor.player.transform))
         {
-            TutorialHandler.ShowTutorialStatic(icon1, icon2, icon3, text);
-            triggered = true;
+            ShowTutorial();
         }
+    }
+
+    public void ShowTutorial()
+    {
+        TutorialHandler.ShowTutorialStatic(icon1, icon2, icon3, text);
+        triggered = true;
     }
 }

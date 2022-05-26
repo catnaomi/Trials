@@ -79,6 +79,11 @@ public class EquippableWeapon : Item, IGeneratesModel
         if (model != null && holder != null)
         {
             int layer = holder.gameObject.layer;
+            Renderer firstRenderer = holder.GetComponentInChildren<Renderer>();
+            if (firstRenderer != null)
+            {
+                layer = firstRenderer.gameObject.layer;
+            }
             foreach (Renderer r in model.GetComponentsInChildren<Renderer>())
             {
                 r.gameObject.layer = layer;
