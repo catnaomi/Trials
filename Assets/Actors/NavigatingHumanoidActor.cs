@@ -16,6 +16,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     Rigidbody rigidbody;
 
     HumanoidPositionReference positionReference;
+    CharacterController cc;
     [Header("Navigation Settings")]
 
     public float bufferRange = 2f;
@@ -73,7 +74,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
 
         nav = GetComponent<NavMeshAgent>();
         animancer = GetComponent<AnimancerComponent>();
-
+        cc = GetComponent<CharacterController>();
         nav.updatePosition = false;
 
         nav.updateRotation = false;
@@ -360,7 +361,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        CharacterController cc = this.GetComponent<CharacterController>();
+        //CharacterController cc = this.GetComponent<CharacterController>();
         if (!GetGrounded() && cc.isGrounded && animancer.States.Current == navstate.fall)
         {
             Debug.DrawLine(this.transform.position, hit.point, Color.blue);
@@ -441,9 +442,11 @@ public class NavigatingHumanoidActor : Actor, INavigates
         if (!ignoreRoot) transform.rotation = animancer.Animator.rootRotation;
         position.y = nav.nextPosition.y;
         Vector3 dir = position - this.transform.position;
-        if (!ignoreRoot && (animancer.States.Current == navstate.move || !Physics.SphereCast(this.transform.position + (Vector3.up * positionReference.eyeHeight), 0.25f, dir, out RaycastHit hit, dir.magnitude, LayerMask.GetMask("Terrain"))))
+        if (!ignoreRoot && ((animancer.States.Current != navstate.idle && animancer.States.Current != navstate.fall) || !Physics.SphereCast(this.transform.position + (Vector3.up * positionReference.eyeHeight), 0.25f, dir, out RaycastHit hit, dir.magnitude, LayerMask.GetMask("Terrain"))))
         {
+            cc.enabled = false;
             transform.position = position;
+            cc.enabled = true;
         }
         animatorVelocity = animancer.Animator.velocity;
 

@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a6f27a4c77dc804388a7677a7e0f44e, type: 3}
+  m_Script: {fileID: 11500000, guid: 436db610af4b4004081c5637fa4923a3, type: 3}
   m_Name: enemy_walk-slash1
   m_EditorClassIdentifier: 
   desc: 
@@ -24,7 +24,7 @@ MonoBehaviour:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: 7400000, guid: f1613afb92638e743bace9a9392b5ee7, type: 3}
+    _Clip: {fileID: 0}
     _Speed: 1
     _NormalizedStartTime: 0
   attackData:
@@ -41,7 +41,7 @@ MonoBehaviour:
     unblockable: 0
     disarm: 0
     isThrust: 0
-    isSlash: 0
+    isSlash: 1
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
@@ -74,13 +74,12 @@ MonoBehaviour:
   cancelStartTime: 0
   mainHandAngleAdjust: 0
   offHandAngleAdjust: 0
-  walk:
+  controller:
     _FadeDuration: 0.25
     _Events:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: -203655887218126122, guid: d70eec63fffb856498cc6d6336007017, type: 3}
-    _Speed: 1
+    _Controller: {fileID: 9100000, guid: f8c3a2384a7ae674da8281534b075124, type: 2}
     _NormalizedStartTime: 0
-  transitionTime: 0
+    _KeepStateOnStop: 0
