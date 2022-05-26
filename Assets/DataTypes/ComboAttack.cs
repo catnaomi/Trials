@@ -46,9 +46,9 @@ public class ComboAttack : InputAttack
 
     public DamageKnockback GetDamage(int index)
     {
-        if ((index - 1) <= 0) return damages[0];
-        if ((index - 1) >= damages.Length) return damages[damages.Length - 1];
-        return damages[index-1];
+        if ((index) <= 0) return damages[0];
+        if ((index) >= damages.Length) return damages[damages.Length - 1];
+        return damages[index];
     }
 
     public override DamageKnockback GetDamage()
@@ -61,6 +61,10 @@ public class ComboAttack : InputAttack
         if (Time.time > lastAttackTime + maxTimeBetweenAttacks && currentIndex != 0)
         {
             currentIndex = 0;
+        }
+        if (currentIndex == 2)
+        {
+            bool b = false;
         }
         AnimancerState state = player.animancer.Play(this.GetClip(currentIndex));
         player.SetCurrentDamage(this.GetDamage(currentIndex));

@@ -34,6 +34,10 @@ public class OffHandShield : EquippableWeapon, IHitboxHandler
 
     public void HitboxActive(bool active)
     {
+        if (hitbox == null)
+        {
+            return;
+        }
         hitbox.SetActive(active);
         bashDamage.kbForce = GetHeldActor().transform.forward;
 

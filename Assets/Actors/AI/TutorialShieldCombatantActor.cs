@@ -61,6 +61,7 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
 
         animancer.Layers[HumanoidAnimLayers.BilayerBlend].SetMask(rightHandMask);
 
+        OnBlock.AddListener(TriggerOnBlock);
         OnHurt.AddListener(() => {
             HitboxActive(0);
         });
@@ -239,6 +240,10 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
         return currentDamage;
     }
 
+    void TriggerOnBlock()
+    {
+        clock = ActionDelayMinimum;
+    }
     public bool DetermineCombatTarget(out GameObject target)
     {
         if (PlayerActor.player == null)
@@ -262,7 +267,7 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
 
     public override bool IsBlocking()
     {
-        return true;
+        return !damageHandler.IsCritVulnerable();
     }
 
     public override List<DamageResistance> GetBlockResistance()
