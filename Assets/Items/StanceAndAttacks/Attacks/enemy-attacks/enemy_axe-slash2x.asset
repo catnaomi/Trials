@@ -45,13 +45,14 @@ MonoBehaviour:
     bouncesOffBlock: 0
     breaksBlock: 1
     canDamageSelf: 0
+    cannotAutoFlinch: 0
     stunTime: 1
     staggers:
       onHit: 3
       onArmorHit: 1
-      onCritical: 4
+      onCritical: 5
       onKill: 5
-      onInjure: 7
+      onCounterHit: 3
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
     hitboxSource: {fileID: 0}
@@ -70,3 +71,6 @@ MonoBehaviour:
     hitClip: {fileID: 0}
   staminaCost: 0
   exitTime: -1
+  cancelStartTime: 0
+  mainHandAngleAdjust: 0
+  offHandAngleAdjust: 0

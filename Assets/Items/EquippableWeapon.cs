@@ -86,7 +86,10 @@ public class EquippableWeapon : Item, IGeneratesModel
             }
             foreach (Renderer r in model.GetComponentsInChildren<Renderer>())
             {
-                r.gameObject.layer = layer;
+                if (r.enabled)
+                {
+                    r.gameObject.layer = layer;
+                }
             }
         }
     }
@@ -142,6 +145,16 @@ public class EquippableWeapon : Item, IGeneratesModel
     public virtual Moveset GetMoveset()
     {
         return moveset;
+    }
+
+    public virtual void FlashWarning()
+    {
+        if (model != null)
+        {
+            GameObject fx = FXController.CreateBladeWarning();
+            fx.transform.position = model.transform.position;
+            Destroy(fx, 1f);
+        }
     }
 
     public int GetAmmunitionRemaining()

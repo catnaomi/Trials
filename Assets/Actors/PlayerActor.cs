@@ -130,6 +130,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool thrust;
     bool plunge;
     bool hold;
+    bool isUsingShield;
     ClipTransition plungeEnd;
     float cancelTime;
     public float blockSpeed = 2.5f;
@@ -2098,12 +2099,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
 
         MixerTransition2DAsset blockingMoveAnim = moveAnim;
+        ClipTransition guardBreak = null;
         if (inventory.IsOffEquipped() && inventory.GetOffWeapon().moveset.overridesBlock)
         {
             blockingMoveAnim = inventory.GetOffWeapon().moveset.blockMove;
             blockAnim = inventory.GetOffWeapon().moveset.blockAnim;
             blockAnimStart = inventory.GetOffWeapon().moveset.blockAnimStart;
             blockStagger = inventory.GetOffWeapon().moveset.blockStagger;
+            guardBreak = inventory.GetOffWeapon().moveset.guardBreak;
         }
         else if (inventory.IsMainEquipped() && inventory.GetMainWeapon().moveset.overridesBlock)
         {
@@ -2111,10 +2114,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             blockAnim = inventory.GetMainWeapon().moveset.blockAnim;
             blockAnimStart = inventory.GetMainWeapon().moveset.blockAnimStart;
             blockStagger = inventory.GetMainWeapon().moveset.blockStagger;
+            guardBreak = inventory.GetMainWeapon().moveset.guardBreak;
         }
 
         state.block = (MixerState)animancer.States.GetOrCreate(blockingMoveAnim);
         damageHandler.SetBlockClip(blockStagger);
+        damageHandler.SetGuardBreakClip(guardBreak);
 
         ClipTransition sprintingAnim = sprintAnim;
         if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.overridesSprint)
@@ -2836,6 +2841,43 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
         }
     }
+
+    public override void FlashWarning(int hand)
+    {
+        return; // flash won't appear for player
+        /*
+        EquippableWeapon mainWeapon = inventory.GetMainWeapon();
+        EquippableWeapon offHandWeapon = inventory.GetOffWeapon();
+        EquippableWeapon rangedWeapon = inventory.GetRangedWeapon();
+        bool main = (mainWeapon != null && mainWeapon is IHitboxHandler);
+        bool off = (offHandWeapon != null && offHandWeapon is IHitboxHandler);
+        bool ranged = (rangedWeapon != null && rangedWeapon is IHitboxHandler);
+        if (hand == 1 && main)
+        {
+            mainWeapon.FlashWarning();
+        }
+        else if (hand == 2 && off)
+        {
+            offHandWeapon.FlashWarning();
+        }
+        else if (hand == 3)
+        {
+            if (main)
+            {
+                mainWeapon.FlashWarning();
+            }
+            if (off)
+            {
+                offHandWeapon.FlashWarning();
+            }
+        }
+        else if (hand == 4 && ranged)
+        {
+            rangedWeapon.FlashWarning();
+        }
+        */
+    }
+
     public void SetCurrentDamage(DamageKnockback damageKnockback)
     {
         if (damageKnockback == null)

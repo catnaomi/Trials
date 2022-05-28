@@ -13,6 +13,7 @@ public class FXController : MonoBehaviour
     public GameObject fx_slash;
     public GameObject fx_thrust;
     public GameObject fx_dizzy;
+    public GameObject fx_warn;
     [Space(5)]
     public GameObject fx_bleedSword;
     public GameObject fx_bleedPoint;
@@ -154,6 +155,12 @@ public class FXController : MonoBehaviour
         return newFX;
     }
 
+    public static GameObject CreateBladeWarning()
+    {
+        EnsureSingleton();
+        GameObject newFX = GameObject.Instantiate(main.fx_warn);
+        return newFX;
+    }
     public static GameObject CreateGunTrail(Vector3 start, Vector3 end, Vector3 direction, float duration, AudioClip soundOverride)
     {
         EnsureSingleton();

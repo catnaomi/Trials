@@ -36,6 +36,7 @@ public class Moveset : ScriptableObject
     public ClipTransition blockAnim;
     public ClipTransition blockAnimStart;
     public ClipTransition blockStagger;
+    public ClipTransition guardBreak;
     public bool overridesSprint;
     public ClipTransition sprintAnim; // main weapon only
 

@@ -216,6 +216,7 @@ public class Actor : MonoBehaviour
     {
         return false;
     }
+
     public virtual bool IsGrounded()
     {
         return Physics.Raycast(this.transform.position, -this.transform.up, 2f, LayerMask.GetMask("Default, Terrain"));
@@ -273,6 +274,13 @@ public class Actor : MonoBehaviour
     {
         return this.transform.forward;
     }
+
+    public virtual void FlashWarning(int hand)
+    {
+        GameObject fx = FXController.CreateBladeWarning();
+        fx.transform.position = this.transform.position;
+    }
+
     IEnumerator CorpseClean()
     {
         int iterations = 5;

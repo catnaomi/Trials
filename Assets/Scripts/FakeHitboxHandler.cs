@@ -44,4 +44,9 @@ public class FakeHitboxHandler : MonoBehaviour
     {
 
     }
+
+    public void FlashWarning(int hand)
+    {
+
+    }
 }

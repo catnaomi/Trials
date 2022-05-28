@@ -24,6 +24,8 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     MeshSwordSlash slashFX;
     LineSwordThrust thrustFX;
 
+    Transform top;
+    Transform bottom;
     public List<DamageType> elements;
 
 
@@ -40,15 +42,17 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         hitboxes.OnHitTerrain.AddListener(TerrainContact);
         hitboxes.OnHitWall.AddListener(WallContact);
 
+        top = InterfaceUtilities.FindRecursively(GetModel().transform, "_top");
+        bottom = InterfaceUtilities.FindRecursively(GetModel().transform, "_bottom");
 
         slashFX = FXController.CreateSwordSlash().GetComponent<MeshSwordSlash>();
-        slashFX.topPoint = InterfaceUtilities.FindRecursively(GetModel().transform, "_top");
-        slashFX.bottomPoint = InterfaceUtilities.FindRecursively(GetModel().transform, "_bottom");
+        slashFX.topPoint = top;
+        slashFX.bottomPoint = bottom;
         slashFX.pseudoParent = actor.transform;
 
         thrustFX = FXController.CreateSwordThrust().GetComponent<LineSwordThrust>();
-        thrustFX.topPoint = InterfaceUtilities.FindRecursively(GetModel().transform, "_top");
-        thrustFX.bottomPoint = InterfaceUtilities.FindRecursively(GetModel().transform, "_bottom");
+        thrustFX.topPoint = top;
+        thrustFX.bottomPoint = bottom;
         thrustFX.pseudoParent = actor.transform;
         //slashMesh.transform.rotation = Quaternion.identity;
     }
@@ -208,6 +212,27 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         thrustFX.Block(holder.lastBlockPoint);
     }
 
+    public override void FlashWarning()
+    {
+        GameObject fx = FXController.CreateBladeWarning();
+        fx.transform.SetParent(bottom);
+        fx.transform.localScale = Vector3.one;
+        holder.StartCoroutine(FlashWarningRoutine(fx));
+        Destroy(fx, 5f);
+    }
+
+    IEnumerator FlashWarningRoutine(GameObject fx)
+    {
+        float clock = 0f;
+        float t;
+        while (clock < 0.5f)
+        {
+            yield return null;
+            clock += Time.deltaTime;
+            t = Mathf.Clamp01(clock / 0.5f);
+            fx.transform.position = Vector3.Lerp(bottom.position, top.position, t);
+        }
+    }
     public float GetStamCost()
     {
         return (10 + 1 * GetWeight() + 15 * Mathf.Abs(GetBalance()));

@@ -26,6 +26,7 @@ public class HumanoidDamageHandler : IDamageable
 
     public Hitbox lastHitbox;
     ClipTransition blockStagger;
+    ClipTransition guardBreak;
 
     public bool isFacingUp;
 
@@ -46,6 +47,7 @@ public class HumanoidDamageHandler : IDamageable
         this.damageAnims = anims;
         this.animancer = animancer;
         blockStagger = damageAnims.blockStagger;
+        guardBreak = damageAnims.guardBreak;
 
         totalCritTime = 0f;
 
@@ -71,6 +73,11 @@ public class HumanoidDamageHandler : IDamageable
     public void SetBlockClip(ClipTransition clip)
     {
         blockStagger = clip;
+    }
+
+    public void SetGuardBreakClip(ClipTransition clip)
+    {
+        guardBreak = clip;
     }
 
     public void TakeDamage(DamageKnockback damage)
@@ -163,7 +170,7 @@ public class HumanoidDamageHandler : IDamageable
             else
             {
                 animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
-                ClipTransition clip = damageAnims.guardBreak;
+                ClipTransition clip = guardBreak;
                 AnimancerState state = animancer.Play(clip);
                 state.Events.OnEnd = _OnEnd;
                 hurt = state;

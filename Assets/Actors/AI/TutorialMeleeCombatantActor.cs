@@ -314,4 +314,37 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
         Destroy(particle, 5f);
 
     }
+
+    public override void FlashWarning(int hand)
+    {
+        EquippableWeapon mainWeapon = inventory.GetMainWeapon();
+        EquippableWeapon offHandWeapon = inventory.GetOffWeapon();
+        EquippableWeapon rangedWeapon = inventory.GetRangedWeapon();
+        bool main = (mainWeapon != null && mainWeapon is IHitboxHandler);
+        bool off = (offHandWeapon != null && offHandWeapon is IHitboxHandler);
+        bool ranged = (rangedWeapon != null && rangedWeapon is IHitboxHandler);
+        if (hand == 1 && main)
+        {
+            mainWeapon.FlashWarning();
+        }
+        else if (hand == 2 && off)
+        {
+            offHandWeapon.FlashWarning();
+        }
+        else if (hand == 3)
+        {
+            if (main)
+            {
+                mainWeapon.FlashWarning();
+            }
+            if (off)
+            {
+                offHandWeapon.FlashWarning();
+            }
+        }
+        else if (hand == 4 && ranged)
+        {
+            rangedWeapon.FlashWarning();
+        }
+    }
 }
