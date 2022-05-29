@@ -2,6 +2,7 @@
 using System.Collections;
 using Animancer;
 using UnityEngine.Events;
+using UnityEngine.AI;
 
 [RequireComponent(typeof(HumanoidNPCInventory))]
 public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDamageable
@@ -22,6 +23,8 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     public float FarAttackRange = 3.5f;
     public float FarAttackRotationSpeed = 45f;
     public bool InFarAttackRange;
+    [Space(5)]
+    public InputAttack OffMeshAttack;
     [Space(5)]
     public DamageAnims damageAnims;
     HumanoidDamageHandler damageHandler;
@@ -260,6 +263,31 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
         return PlayerActor.player.gameObject.tag != "Corpse";
     }
 
+
+    public override void HandleCustomOffMeshLink()
+    {
+        Drop();
+        return;
+        if (OffMeshAttack == null)
+        {
+            base.HandleCustomOffMeshLink();
+        }
+        else
+        {
+            OffMeshLinkData data = nav.currentOffMeshLinkData;
+            Vector3 dir = data.endPos - this.transform.position;
+            dir.y = 0f;
+            this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+            cstate.attack = OffMeshAttack.ProcessHumanoidAttack(this, () =>
+            {
+                Vector3 pos = animancer.Animator.rootPosition;
+                this.transform.position = pos;
+                nav.nextPosition = pos;
+                offMeshInProgress = false;
+                _MoveOnEnd();
+            });
+        }
+    }
     public override bool IsArmored()
     {
         return true;
@@ -304,11 +332,18 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
 
     public override void Die()
     {
+        if (dead) return;
         base.Die();
+        
         foreach(Renderer r in this.GetComponentsInChildren<Renderer>())
         {
             r.enabled = false;
         }
+        foreach (Collider c in this.GetComponentsInChildren<Collider>())
+        {
+            c.enabled = false;
+        }
+        this.GetComponent<Collider>().enabled = false;
         GameObject particle = Instantiate(deathParticle);
         particle.transform.position = this.GetComponent<Collider>().bounds.center;
         Destroy(particle, 5f);

@@ -138,7 +138,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool isHitboxActive;
     bool isSheathing;
     string test1;
-    bool dead;
     bool resurrecting;
     public float aimCancelTime = 2f;
     public float aimTime;
@@ -3029,6 +3028,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     private void OnAnimatorIK(int layerIndex)
     {
+        if (isInTimeState) return;
         //Vector3 initialThrustPos = this.transform.position + this.transform.up * thrustInitialHeight;
         Vector3 initialThrustPos = positionReference.Spine.position;
         float y = 0f;

@@ -32,7 +32,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     bool obstacleTransitioning;
     bool ignoreRoot;
     bool shouldFall;
-    bool offMeshInProgress;
+    protected bool offMeshInProgress;
     public float airTime = 0f;
     float lastAirTime;
     float landTime = 0f;
@@ -107,6 +107,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
             navstate.fall = animancer.Play(fallAnim);
             this.transform.position = pos;
             nav.nextPosition = pos;
+            cc.enabled = true;
         };
 
         landAnim.Events.OnEnd = () =>
@@ -209,6 +210,10 @@ public class NavigatingHumanoidActor : Actor, INavigates
                     {
                         Drop();
                     }
+                    else if (nav.currentOffMeshLinkData.linkType == OffMeshLinkType.LinkTypeManual)
+                    {
+                        HandleCustomOffMeshLink();
+                    }
                 }
             }
             else
@@ -247,6 +252,10 @@ public class NavigatingHumanoidActor : Actor, INavigates
                 xzVel = (this.transform.position - lastPosition);
             }
             lastPosition = this.transform.position;
+        }
+        else if (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle)
+        {
+            navstate.fall = animancer.Play(fallAnim);
         }
     }
 
@@ -291,6 +300,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     {
         ignoreRoot = true;
         Vector3 dir;
+        cc.enabled = false;
         while (Vector3.Distance(this.transform.position, data.startPos) > 0.1f)
         {
             dir = (data.endPos - this.transform.position).normalized;
@@ -299,15 +309,31 @@ public class NavigatingHumanoidActor : Actor, INavigates
             this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, dir, 360f * Mathf.Deg2Rad * Time.fixedDeltaTime, 10f));
             yield return new WaitForFixedUpdate();
         }
+
         ignoreRoot = false;
         dir = (data.endPos - this.transform.position).normalized;
         dir.Scale(new Vector3(1f, 0f, 1f));
         this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+        //cc.enabled = true;
         jumpDown.Events.OnEnd = _FinishDrop;
         animancer.Play(jumpDown);
-
+        yield return new WaitUntil(() => { return animancer.States.Current == navstate.fall; });
+        while (animancer.States.Current == navstate.fall)
+        {
+            dir = data.endPos - this.transform.position;
+            dir.y = 0f;
+            dir = Vector3.ClampMagnitude(dir, (data.endPos - this.transform.position).magnitude * Time.deltaTime);
+            xzVel = Vector3.Lerp(xzVel, dir, 0.5f);
+            yield return null;
+        }
     }
 
+    public virtual void HandleCustomOffMeshLink()
+    {
+        OffMeshLinkData data = nav.currentOffMeshLinkData;
+        this.transform.position = data.endPos;
+        nav.nextPosition = data.endPos;
+    }
     void FixedUpdate()
     {
         Vector3 velocity = Vector3.zero;
@@ -348,9 +374,9 @@ public class NavigatingHumanoidActor : Actor, INavigates
     {
         Collider c = this.GetComponent<Collider>();
         Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down * 0.9f;
-        
-        bool hit = Physics.Raycast(bottom, Vector3.down, out hitInfo, 0.2f, LayerMask.GetMask("Terrain"));
-        Debug.DrawLine(bottom, bottom + Vector3.down * 0.2f, hit ? Color.green : Color.red);
+        Vector3 top = c.bounds.center + c.bounds.extents.y * Vector3.up;
+        bool hit = Physics.Raycast(top, Vector3.down, out hitInfo, c.bounds.extents.y * 2f + 0.5f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
+        Debug.DrawLine(top, bottom + Vector3.down * 0.2f, hit ? Color.green : Color.red);
         return hit;
     }
 
@@ -525,7 +551,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
             {
                 targetPos = hpr.Spine.position;
             }
-            if (Physics.SphereCast(positionReference.Spine.transform.position, 0.25f, targetPos - positionReference.Spine.transform.position, out RaycastHit hit, Vector3.Distance(targetPos, this.transform.position), ~LayerMask.GetMask("Limbs", "Hitboxes")))
+            if (Physics.Raycast(positionReference.Spine.transform.position, targetPos - positionReference.Spine.transform.position, out RaycastHit hit, Vector3.Distance(targetPos, positionReference.Spine.transform.position), ~LayerMask.GetMask("Limbs", "Hitboxes","InteractionNode"), QueryTriggerInteraction.Ignore))
             {
                 if (hit.transform.root == CombatTarget.transform.root)
                 {

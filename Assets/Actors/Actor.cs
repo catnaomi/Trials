@@ -43,6 +43,8 @@ public class Actor : MonoBehaviour
 
     public Vector3 xzVel;
     public float yVel;
+
+    protected bool dead;
     // targets
 
     [SerializeField, ReadOnly] protected DamageKnockback currentDamage;
@@ -248,6 +250,8 @@ public class Actor : MonoBehaviour
 
     public virtual void Die()
     {
+        if (dead) return;
+        dead = true;
         OnDie.Invoke();
         StartCleanUp();
     }
