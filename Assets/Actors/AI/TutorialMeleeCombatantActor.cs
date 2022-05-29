@@ -58,7 +58,7 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
         };
 
         damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
-        //damageHandler.SetEndAction(_MoveOnEnd);
+        damageHandler.SetEndAction(_MoveOnEnd);
 
         OnHurt.AddListener(() => {
             HitboxActive(0);
