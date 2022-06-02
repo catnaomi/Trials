@@ -39,6 +39,8 @@ public class PlayerTargetManager : MonoBehaviour
     public bool billboard = true;
     public float targetDelay;
 
+    float invalidTime;
+    public float invalidExpiryTime = 1f;
     // Start is called before the first frame update
     void Start()
     {
@@ -63,6 +65,7 @@ public class PlayerTargetManager : MonoBehaviour
             leftGraphic = GameObject.Instantiate(leftGraphic);
             rightGraphic = GameObject.Instantiate(rightGraphic);
         }
+        invalidTime = invalidExpiryTime;
     }
 
     IEnumerator UpdateTargets()
@@ -94,6 +97,13 @@ public class PlayerTargetManager : MonoBehaviour
                 bool onScreen = (Mathf.Abs(vpp.x) <= 1f) && (Mathf.Abs(vpp.y) <= 1f) && (vpp.z >= 0);
                 bool invalid = !onScreen || ((!playerInRange || playerTerrainBlocked) && (!camInRange || camTerrainBlocked));
 
+                if (target.transform.root.TryGetComponent<Actor>(out Actor actor))
+                {
+                    if (!actor.IsAlive())
+                    {
+                        invalid = true;
+                    }
+                }
 
                 if (!invalid)
                 {
@@ -144,8 +154,8 @@ public class PlayerTargetManager : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {      
-
+    {
+        bool shouldExpire = false;
         if (false)//Input.GetButtonDown("Target"))
         {
             Debug.Log("target?");
@@ -195,6 +205,28 @@ public class PlayerTargetManager : MonoBehaviour
         {
             player.SetCombatTarget(null);
             lockedOn = false;
+        }
+        else if (currentTarget != null && currentTarget == player.GetCombatTarget() && !IsValidTarget(currentTarget))
+        {    
+            shouldExpire = true;
+        }
+
+        if (shouldExpire)
+        {
+            if (invalidTime > 0f)
+            {
+                invalidTime -= Time.deltaTime;
+            }
+            else
+            {
+                player.SetCombatTarget(null);
+                currentTarget = null;
+                lockedOn = false;
+            }
+        }
+        else
+        {
+            invalidTime = invalidExpiryTime;
         }
     }
 
@@ -246,6 +278,36 @@ public class PlayerTargetManager : MonoBehaviour
                 UpdateDirections();
             }            
         }
+    }
+
+    public bool IsValidTarget(GameObject target)
+    {
+        if (target.transform.root.TryGetComponent<Actor>(out Actor actor))
+        {
+            if (!actor.IsAlive())
+            {
+                return false;
+            }
+        }
+        float playerDist = Vector3.Distance(target.transform.position, player.positionReference.Spine.position);
+        float camDist = Vector3.Distance(target.transform.position, cam.transform.position);
+
+        Ray pRay = new Ray(player.positionReference.Spine.position, (target.transform.position - player.positionReference.Spine.position));
+        Ray cRay = new Ray(cam.transform.position, (target.transform.position - cam.transform.position));
+
+        bool playerTerrainBlocked = Physics.Raycast(pRay, playerDist, LayerMask.GetMask("Terrain"));
+        bool camTerrainBlocked = Physics.Raycast(cRay, camDist, LayerMask.GetMask("Terrain"));
+
+        bool playerInRange = playerDist < maxPlayerDistance;
+        bool camInRange = camDist < maxCamDistance;
+
+        Vector3 vpp = Camera.main.WorldToViewportPoint(target.transform.position);
+        bool onScreen = (Mathf.Abs(vpp.x) <= 1f) && (Mathf.Abs(vpp.y) <= 1f) && (vpp.z >= 0);
+        bool invalid = !onScreen || ((!playerInRange || playerTerrainBlocked) && (!camInRange || camTerrainBlocked));
+
+
+
+        return !invalid;
     }
 
     void SetTarget(GameObject t)

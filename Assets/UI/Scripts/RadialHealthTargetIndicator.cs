@@ -67,8 +67,19 @@ public class RadialHealthTargetIndicator : MonoBehaviour
             float dist = Vector3.Distance(canvas.transform.position, Camera.main.transform.position);
             canvas.transform.localScale = initialScale * dist / camInitialDistance;
         }
-        
+        if (target == null)
+        {
+            showing = false;
+        }
 
+        if (showing && !canvas.enabled)
+        {
+            canvas.enabled = true;
+        }
+        else if (!showing && canvas.enabled)
+        {
+            canvas.enabled = false;
+        }
     }
     // Update is called once per frame
     void OnGUI()
