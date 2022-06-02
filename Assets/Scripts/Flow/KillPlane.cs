@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 public class KillPlane : MonoBehaviour
 {
     public float interval = 0.1f;
+    public bool ignorePlayer = false;
     Plane plane;
     Bounds bounds;
     // Start is called before the first frame update
@@ -28,6 +29,7 @@ public class KillPlane : MonoBehaviour
             foreach (Actor actor in actors)
             {
                 if (!actor.IsAlive()) continue;
+                if (actor is PlayerActor && ignorePlayer) continue;
                 if (actor is not PlayerActor && actor.gameObject.scene != this.gameObject.scene) continue;
                 if (!plane.GetSide(actor.transform.position) && IsWithinPlane(actor.transform.position))
                 {
