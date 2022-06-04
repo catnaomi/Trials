@@ -180,7 +180,10 @@ public class HumanoidDamageHandler : IDamageable
             }
             if (!actor.IsAttacking())
             {
-                actor.transform.rotation = Quaternion.LookRotation(-(actor.transform.position - damage.source.transform.position), Vector3.up);
+                Vector3 dir = damage.source.transform.position - actor.transform.position;
+                dir.y = 0f;
+
+                actor.transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
             }
             damage.OnBlock.Invoke();
             actor.OnBlock.Invoke();

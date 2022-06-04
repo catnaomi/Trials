@@ -125,6 +125,11 @@ public class MeshSwordSlash : MonoBehaviour
     }
     private void Update()
     {
+        if (pseudoParent == null)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
         //UpdateTrail();
         topCurve.DrawSpline(Color.white);
         topCurve.DrawTangents(0.25f, Color.blue);
