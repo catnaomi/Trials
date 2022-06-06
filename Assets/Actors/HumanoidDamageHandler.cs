@@ -4,17 +4,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-public class HumanoidDamageHandler : IDamageable
+public class HumanoidDamageHandler : IDamageable, IDamageHandler
 {
-    Actor actor;
-    DamageAnims damageAnims;
-    AnimancerComponent animancer;
+    protected Actor actor;
+    protected DamageAnims damageAnims;
+    protected AnimancerComponent animancer;
 
     public float lastDamage;
     public float damageTaken;
 
     public float critTime = -1f;
-    float totalCritTime;
+    protected float totalCritTime;
     bool inCritCoroutine;
 
     public float unfreezeDamageDelay = 0.25f;
@@ -25,14 +25,14 @@ public class HumanoidDamageHandler : IDamageable
     public AnimancerState block;
 
     public Hitbox lastHitbox;
-    ClipTransition blockStagger;
-    ClipTransition guardBreak;
+    protected ClipTransition blockStagger;
+    protected ClipTransition guardBreak;
 
     public bool isFacingUp;
 
 
-    System.Action _OnEnd;
-    System.Action _OnBlockEnd;
+    protected System.Action _OnEnd;
+    protected System.Action _OnBlockEnd;
     public void Recoil()
     {
         AnimancerState state = animancer.Play(damageAnims.recoil);
@@ -479,6 +479,10 @@ public class HumanoidDamageHandler : IDamageable
         return isCritVuln;
     }
 
+    public float GetCritTime()
+    {
+        return critTime;
+    }
     public HumanoidDamageHandler GetDamageHandler()
     {
         return this;

@@ -6,7 +6,7 @@ using UnityEngine.Animations;
 public class DizzyHumanoid : MonoBehaviour
 {
     Actor actor;
-    HumanoidDamageHandler damageHandler;
+    IDamageHandler damageHandler;
     public Transform pseudoParent;
     public AnimationCurve curve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     [SerializeField, ReadOnly] private float timeRemaining;
@@ -46,7 +46,7 @@ public class DizzyHumanoid : MonoBehaviour
 
     void OnCritVulnerable()
     {
-        float time = damageHandler.critTime;
+        float time = damageHandler.GetCritTime();
         SetTime(time);
     }
     public void SetPseudoParent(Transform parent)
@@ -83,7 +83,7 @@ public class DizzyHumanoid : MonoBehaviour
         
     }
 
-    public void SetActor(Actor actor, HumanoidDamageHandler handler)
+    public void SetActor(Actor actor, IDamageHandler handler)
     {
         this.actor = actor;
         this.damageHandler = handler;
