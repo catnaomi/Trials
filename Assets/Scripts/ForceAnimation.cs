@@ -11,11 +11,24 @@ public class ForceAnimation : MonoBehaviour
     public AnimationClip clip;
     public bool play = true;
     public bool baseClipLoops = true;
+    [Header("Layer")]
+    public bool hasLayer = false;
+    public int layerIndex = 1;
+    public AnimationClip layerClip;
+    public bool additive;
+    public AvatarMask mask;
+
     // Start is called before the first frame update
     void Start()
     {
         anim = GetComponent<Animation>();
         animancer = GetComponent<AnimancerComponent>();
+
+        if (hasLayer)
+        {
+            //animancer.Layers[layerIndex].SetMask(mask);
+            animancer.Layers[layerIndex].IsAdditive = additive;
+        }
     }
 
     // Update is called once per frame
@@ -36,9 +49,14 @@ public class ForceAnimation : MonoBehaviour
 
     private void Stop()
     {
+        if (hasLayer)
+        {
+            animancer.Layers[layerIndex].Stop();
+        }
         animancer.Stop();
         animancer.transform.localPosition = Vector3.zero;
         animancer.transform.localRotation = Quaternion.identity;
+        
     }
 
     private void Play()
@@ -52,7 +70,10 @@ public class ForceAnimation : MonoBehaviour
         {
             state.Events.OnEnd = () => { animancer.Stop(); };
         }
-        
+        if (hasLayer)
+        {
+            animancer.Layers[layerIndex].Play(layerClip);
+        }
     }
 
     private void OnDestroy()
