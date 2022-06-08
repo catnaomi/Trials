@@ -1446,6 +1446,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     
     public void WarpTo(Vector3 position)
     {
+        CharacterController cc = this.GetComponent<CharacterController>();
         cc.enabled = false;
         this.transform.position = position;
         cc.enabled = true;
@@ -1460,6 +1461,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         GetHeadPoint();
         smoothedHeadPoint = headPoint;
         player.walkAccelReal = walkAccel;
+        Cloth cloth = player.GetComponentInChildren<Cloth>();
+        if (cloth != null)
+        cloth.ClearTransformMotion();
     }
 
     public override void OnFallOffMap()
@@ -2158,28 +2162,35 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public AnimancerState TriggerSheath(bool draw, Inventory.EquipSlot slot, int targetSlot)
     {
+        void _OnSheathEnd()
+        {
+            StartCoroutine("SleepCloth");
+            _StopUpperLayer();
+        }
         isSheathing = true;
         if ((targetSlot == Inventory.MainType) && inventory.IsMainEquipped())
         {
             AnimancerState drawState = animancer.Layers[HumanoidAnimLayers.UpperBody].Play((draw) ? inventory.GetMainWeapon().moveset.draw : inventory.GetMainWeapon().moveset.sheathe);
-            drawState.Events.OnEnd = _StopUpperLayer;
+            drawState.Events.OnEnd = _OnSheathEnd;
             equipToType = targetSlot;
             return drawState;
         }
         else if ((targetSlot == Inventory.OffType) && inventory.IsOffEquipped())
         {
             AnimancerState drawState = animancer.Layers[HumanoidAnimLayers.UpperBody].Play((draw) ? inventory.GetOffWeapon().moveset.draw : inventory.GetOffWeapon().moveset.sheathe);
-            drawState.Events.OnEnd = _StopUpperLayer;
+            drawState.Events.OnEnd = _OnSheathEnd;
             equipToType = targetSlot;
             return drawState;
         }
         else if ((targetSlot == Inventory.RangedType) && inventory.IsRangedEquipped())
         {
             AnimancerState drawState = animancer.Layers[HumanoidAnimLayers.UpperBody].Play((draw) ? inventory.GetRangedWeapon().moveset.draw : inventory.GetRangedWeapon().moveset.sheathe);
-            drawState.Events.OnEnd = _StopUpperLayer;
+            drawState.Events.OnEnd = _OnSheathEnd;
             equipToType = targetSlot;
             return drawState;
         }
+
+        
         return null;
     }
 
@@ -3357,6 +3368,35 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         ccHitNormal = hit.normal;
     }
 
+    public void SkipCloth()
+    {
+        Cloth cloth = this.GetComponentInChildren<Cloth>();
+        if (cloth != null)
+        {
+            cloth.ClearTransformMotion();
+        }
+    }
+
+    IEnumerator SleepCloth()
+    {
+        Cloth cloth = this.GetComponentInChildren<Cloth>();
+        if (cloth != null)
+        {
+            float clock = 1f;
+            float acc = cloth.worldAccelerationScale;
+            float vel = cloth.worldVelocityScale;
+            while (clock > 0f)
+            {
+                cloth.ClearTransformMotion();
+                cloth.worldAccelerationScale = 0f;
+                cloth.worldVelocityScale = 0f;
+                yield return null;
+                clock -= Time.deltaTime;
+            }
+            cloth.worldAccelerationScale = acc;
+            cloth.worldVelocityScale = vel;
+        }
+    }
     public void HitWall()
     {
         Debug.Log("wall hit");
