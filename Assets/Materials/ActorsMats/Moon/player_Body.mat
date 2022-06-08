@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: player_Body
-  m_Shader: {fileID: -6465566751694194690, guid: a7098a958dd28654fb80953cec1e2a57,
+  m_Shader: {fileID: -6465566751694194690, guid: b980c977180d4e24ba653c7333d90f2c,
     type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -34,6 +34,10 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BaseTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -62,6 +66,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _GlowMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GreaseMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -119,6 +127,8 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _GreaseMapStrength: 0
+    - _HighlightThreshold: 0
     - _Metallic: 0.082
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -129,6 +139,7 @@ Material:
     - _ReceiveShadows: 1
     - _RimBrightness: 1
     - _RimPower: 0.75
+    - _ShadowThreshold: 0
     - _Smoothness: 0
     - _SmoothnessTextureChannel: 1
     - _SpecularHighlights: 1
@@ -141,6 +152,10 @@ Material:
     - _BaseColor: {r: 0.040915217, g: 0.026241219, b: 0.017641958, a: 1}
     - _Color: {r: 0.035, g: 0.021093333, b: 0.0141400015, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _HighlightColor: {r: 0.14899999, g: 0.08413011, b: 0.036952, a: 1}
+    - _MidtoneColor: {r: 0.10980392, g: 0.06887146, b: 0.042823527, a: 1}
+    - _ShadowColor: {r: 0.05490196, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
     - _Tinting: {r: 0.6117647, g: 0.3764706, b: 0.34117648, a: 1}
   m_BuildTextureStacks: []
