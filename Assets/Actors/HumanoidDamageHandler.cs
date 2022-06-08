@@ -80,7 +80,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         guardBreak = clip;
     }
 
-    public void TakeDamage(DamageKnockback damage)
+    public virtual void TakeDamage(DamageKnockback damage)
     {
         if (!actor.IsAlive()) return;
         bool isCrit = IsCritVulnerable();

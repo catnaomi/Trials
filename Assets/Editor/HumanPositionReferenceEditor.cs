@@ -12,7 +12,7 @@ public class HumanPositionReferenceEditor : Editor
         HumanoidPositionReference positionReference = (HumanoidPositionReference)target;
         if (GUILayout.Button("Populate Fields"))
         {
-            positionReference.LocateSlotsByName();
+            positionReference.LocateSlotsByName(true);
         }
     }
 }

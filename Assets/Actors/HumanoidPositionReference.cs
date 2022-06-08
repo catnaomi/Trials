@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CustomUtilities;
 
 public class HumanoidPositionReference : MonoBehaviour
 {
@@ -43,6 +44,10 @@ public class HumanoidPositionReference : MonoBehaviour
 
     public void LocateSlotsByName()
     {
+        LocateSlotsByName(false);
+    }
+    public void LocateSlotsByName(bool assetLocate)
+    {
         string HAND_R_NAME = "_equipHandR";
         string HAND_L_NAME = "_equipHandL";
 
@@ -67,7 +72,15 @@ public class HumanoidPositionReference : MonoBehaviour
 
         if (this.Spine == null)
         {
-            current = LocateSlotsRecursive(this.transform, SPINE_NAME);
+            //current = LocateSlotsRecursive(this.transform, SPINE_NAME);
+            if (assetLocate)
+            {
+                current = LocateAssetSlot(this.transform, SPINE_NAME);
+            }
+            else
+            {
+                current = LocateSlotsRecursive(this.transform, SPINE_NAME);
+            }
             if (current != null)
             {
                 this.Spine = current;
@@ -76,7 +89,15 @@ public class HumanoidPositionReference : MonoBehaviour
 
         if (this.Hips == null)
         {
-            current = LocateSlotsRecursive(this.transform, HIPS_NAME);
+            //current = LocateSlotsRecursive(this.transform, HIPS_NAME);
+            if (assetLocate)
+            {
+                current = LocateAssetSlot(this.transform, HIPS_NAME);
+            }
+            else
+            {
+                current = LocateSlotsRecursive(this.transform, HIPS_NAME);
+            }
             if (current != null)
             {
                 this.Hips = current;
@@ -85,7 +106,15 @@ public class HumanoidPositionReference : MonoBehaviour
 
         if (this.Head == null)
         {
-            current = LocateSlotsRecursive(this.transform, HEAD_NAME);
+            //current = LocateSlotsRecursive(this.transform, HEAD_NAME);
+            if (assetLocate)
+            {
+                current = LocateAssetSlot(this.transform, HEAD_NAME);
+            }
+            else
+            {
+                current = LocateSlotsRecursive(this.transform, HEAD_NAME);
+            }
             if (current != null)
             {
                 this.Head = current;
@@ -94,7 +123,15 @@ public class HumanoidPositionReference : MonoBehaviour
 
         if (this.MainHand == null)
         {
-            current = LocateSlotsRecursive(this.transform, HAND_R_NAME);
+            //current = LocateSlotsRecursive(this.transform, HAND_R_NAME);
+            if (assetLocate)
+            {
+                current = LocateAssetSlot(this.transform, HAND_R_NAME);
+            }
+            else
+            {
+                current = LocateSlotsRecursive(this.transform, HAND_R_NAME);
+            }
             if (current != null)
             {
                 this.MainHand = current.gameObject;
@@ -102,7 +139,15 @@ public class HumanoidPositionReference : MonoBehaviour
         }
         if (this.OffHand == null)
         {
-            current = LocateSlotsRecursive(this.transform, HAND_L_NAME);
+            //current = LocateSlotsRecursive(this.transform, HAND_L_NAME);
+            if (assetLocate)
+            {
+                current = LocateAssetSlot(this.transform, HAND_L_NAME);
+            }
+            else
+            {
+                current = LocateSlotsRecursive(this.transform, HAND_L_NAME);
+            }
             if (current != null)
             {
                 this.OffHand = current.gameObject;
@@ -110,7 +155,15 @@ public class HumanoidPositionReference : MonoBehaviour
         }
         if (this.FootR == null)
         {
-            current = LocateSlotsRecursive(this.transform, FOOT_R_NAME);
+            //current = LocateSlotsRecursive(this.transform, FOOT_R_NAME);
+            if (assetLocate)
+            {
+                current = LocateAssetSlot(this.transform, FOOT_R_NAME);
+            }
+            else
+            {
+                current = LocateSlotsRecursive(this.transform, FOOT_R_NAME);
+            }
             if (current != null)
             {
                 this.FootR = current;
@@ -118,7 +171,15 @@ public class HumanoidPositionReference : MonoBehaviour
         }
         if (this.FootL == null)
         {
-            current = LocateSlotsRecursive(this.transform, FOOT_L_NAME);
+            //current = LocateSlotsRecursive(this.transform, FOOT_L_NAME);
+            if (assetLocate)
+            {
+                current = LocateAssetSlot(this.transform, FOOT_L_NAME);
+            }
+            else
+            {
+                current = LocateSlotsRecursive(this.transform, FOOT_L_NAME);
+            }
             if (current != null)
             {
                 this.FootL = current;
@@ -126,7 +187,15 @@ public class HumanoidPositionReference : MonoBehaviour
         }
         if (this.ShoulderR == null)
         {
-            current = LocateSlotsRecursive(this.transform, SHOULDER_R_NAME);
+            //current = LocateSlotsRecursive(this.transform, SHOULDER_R_NAME);
+            if (assetLocate)
+            {
+                current = LocateAssetSlot(this.transform, SHOULDER_R_NAME);
+            }
+            else
+            {
+                current = LocateSlotsRecursive(this.transform, SHOULDER_R_NAME);
+            }
             if (current != null)
             {
                 this.ShoulderR = current;
@@ -134,7 +203,15 @@ public class HumanoidPositionReference : MonoBehaviour
         }
         if (this.ShoulderL == null)
         {
-            current = LocateSlotsRecursive(this.transform, SHOULDER_L_NAME);
+            //current = LocateSlotsRecursive(this.transform, SHOULDER_L_NAME);
+            if (assetLocate)
+            {
+                current = LocateAssetSlot(this.transform, SHOULDER_L_NAME);
+            }
+            else
+            {
+                current = LocateSlotsRecursive(this.transform, SHOULDER_L_NAME);
+            }
             if (current != null)
             {
                 this.ShoulderL = current;
@@ -145,7 +222,15 @@ public class HumanoidPositionReference : MonoBehaviour
         {
             if (this.GetPositionRefSlot(slot) == null)
             {
-                current = LocateSlotsRecursive(this.transform, SLOT_NAMES[slot]);
+                //current = LocateSlotsRecursive(this.transform, SLOT_NAMES[slot]);
+                if (assetLocate)
+                {
+                    current = LocateAssetSlot(this.transform, SLOT_NAMES[slot]);
+                }
+                else
+                {
+                    current = LocateSlotsRecursive(this.transform, SLOT_NAMES[slot]);
+                }
                 if (current != null)
                 {
                     this.SetPositionRefSlot(slot, current.gameObject);
@@ -202,6 +287,34 @@ public class HumanoidPositionReference : MonoBehaviour
             
         }
         
+    }
+
+    Transform LocateAssetSlot(Transform t, string n)
+    {
+        if (t.name.ToLower().Contains(n.ToLower()))
+        {
+            return t;
+        }
+        else
+        {
+            if (t.childCount == 0)
+            {
+                return null;
+            }
+            else
+            {
+                Transform[] cs = t.gameObject.GetComponentsInChildrenOfAsset<Transform>();
+                foreach (Transform c in cs)
+                {
+                    if (c.name.ToLower().Contains(n.ToLower()))
+                    {
+                        return c;
+                    }
+                }
+                return null;
+            }
+
+        }
     }
     public GameObject GetPositionRefSlot(Inventory.EquipSlot slot)
     {

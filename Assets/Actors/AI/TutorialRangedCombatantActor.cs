@@ -52,7 +52,7 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
             animancer.Play(navstate.move, 0.1f);
         };
 
-        damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
+        damageHandler = new SingleWeaknessDamageHandler(this, damageAnims, animancer);
         //damageHandler.SetEndAction(_MoveOnEnd);
 
         OnHurt.AddListener(() => {

@@ -28,7 +28,7 @@ public class SingleWeaknessDamageHandler : HumanoidDamageHandler
 
         timeStopDamages = new Queue<DamageKnockback>();
     }
-    public void TakeDamage(DamageKnockback damage)
+    public override void TakeDamage(DamageKnockback damage)
     {
 
         if (!actor.IsAlive()) return;
@@ -58,6 +58,9 @@ public class SingleWeaknessDamageHandler : HumanoidDamageHandler
 
         bool willKill = simplifiedDamageAmount >= actor.attributes.health.current || isCrit;
         bool tink = simplifiedDamageAmount <= 0f;
+
+
+        actor.attributes.ReduceHealth(simplifiedDamageAmount);
 
         if (damage.hitboxSource != null)
         {
@@ -96,6 +99,17 @@ public class SingleWeaknessDamageHandler : HumanoidDamageHandler
                     damageable.Recoil();
                 }
             }
+            else
+            {
+                animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
+                ClipTransition clip = guardBreak;
+                AnimancerState state = animancer.Play(clip);
+                state.Events.OnEnd = _OnEnd;
+                hurt = state;
+                actor.OnHurt.Invoke();
+                damage.OnCrit.Invoke();
+                StartCritVulnerability(clip.MaximumDuration / clip.Speed);
+            }
         }
         else if (tink)
         {
@@ -103,11 +117,47 @@ public class SingleWeaknessDamageHandler : HumanoidDamageHandler
             {
                 damageable.Recoil();
             }
+            damage.OnBlock.Invoke();
+            actor.OnBlock.Invoke();
         }
         else if (!willKill)
         {
+            DamageKnockback.StaggerType stagger = DamageKnockback.StaggerType.StaggerLarge;
+
+            Vector3 dir = (damage.source.transform.position - actor.transform.position).normalized;
+            float xdot = Vector3.Dot(actor.transform.right, dir);
+            float ydot = Vector3.Dot(actor.transform.forward, dir);
+
+            DirectionalMixerState state = (DirectionalMixerState)animancer.Play(damageAnims.staggerLarge);
+            state.Time = 0f;
+            state.ParameterX = xdot;
+            state.ParameterY = ydot;
+            state.Events.OnEnd = _OnEnd;
+            hurt = state;
+
+            animancer.Layers[HumanoidAnimLayers.BilayerBlend].Stop();
+
+            damage.OnHit.Invoke();
+            actor.OnHurt.Invoke();
+        }
+        else if (willKill)
+        {
+            /*
+            DamageKnockback.StaggerType stagger = DamageKnockback.StaggerType.SpinDeath;
+
+            AnimancerState state = animancer.Play(damageAnims.spinDeath);
+
+            state.Events.OnEnd = actor.Die;
+            hurt = state;
+
+            damage.OnHit.Invoke();
+            actor.OnHurt.Invoke();
+            */
+
+            damage.OnHit.Invoke();
+            actor.OnHurt.Invoke();
+            actor.Die();
 
         }
-
     }
 }

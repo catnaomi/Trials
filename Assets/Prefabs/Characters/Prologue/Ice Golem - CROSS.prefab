@@ -8,6 +8,18 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 603506078, guid: 6de0ff76d8b74e045aa4b2faedb0a56c, type: 3}
+      propertyPath: health.max
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 603506078, guid: 6de0ff76d8b74e045aa4b2faedb0a56c, type: 3}
+      propertyPath: health.current
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 603506078, guid: 6de0ff76d8b74e045aa4b2faedb0a56c, type: 3}
+      propertyPath: health.baseValue
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 603506078, guid: 6de0ff76d8b74e045aa4b2faedb0a56c, type: 3}
       propertyPath: resistances.Array.size
       value: 3
       objectReference: {fileID: 0}
@@ -24,6 +36,10 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 603506078, guid: 6de0ff76d8b74e045aa4b2faedb0a56c, type: 3}
+      propertyPath: resistances.Array.data[0].ratio
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 603506078, guid: 6de0ff76d8b74e045aa4b2faedb0a56c, type: 3}
       propertyPath: resistances.Array.data[1].ratio
       value: 1
       objectReference: {fileID: 0}
@@ -34,7 +50,7 @@ PrefabInstance:
     - target: {fileID: 1699058074318922937, guid: 6de0ff76d8b74e045aa4b2faedb0a56c,
         type: 3}
       propertyPath: m_Name
-      value: Ice Golem
+      value: Ice Golem - CROSS
       objectReference: {fileID: 0}
     - target: {fileID: 2080545369736461827, guid: 6de0ff76d8b74e045aa4b2faedb0a56c,
         type: 3}
@@ -98,3 +114,60 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 12a515c70124e884bbfe9cb0032a971a, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6de0ff76d8b74e045aa4b2faedb0a56c, type: 3}
+--- !u!1 &2314907631184150886 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1699058074318922937, guid: 6de0ff76d8b74e045aa4b2faedb0a56c,
+    type: 3}
+  m_PrefabInstance: {fileID: 4013956763230103007}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &579917600842904003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2314907631184150886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f58f79a4e4e3c64e8a9b1f1d0aa785e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layer: 6
+  idle:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -6251524501102889944, guid: 00cb3a6aece3d5b47ab3341f234dec7c,
+      type: 3}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  hurt:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -332829458071823360, guid: 00cb3a6aece3d5b47ab3341f234dec7c, type: 3}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  stun:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -975354626136805123, guid: 00cb3a6aece3d5b47ab3341f234dec7c, type: 3}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  tink:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -332829458071823360, guid: 00cb3a6aece3d5b47ab3341f234dec7c, type: 3}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  world: 0
