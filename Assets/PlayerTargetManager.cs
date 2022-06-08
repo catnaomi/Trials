@@ -44,6 +44,7 @@ public class PlayerTargetManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        player = PlayerActor.player;
         targets = new List<GameObject>();
         cmtg = GetComponent<CinemachineTargetGroup>();
         //InputHandler.main.SecondaryStickFlick.AddListener(SwitchTargets);
