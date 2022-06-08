@@ -1,20 +1,20 @@
 fileFormatVersion: 2
-guid: ce960f8e8088c2144a4db7218d929de9
+guid: 7f17f9f2fc5658f40aab8b7a2b4ee5c3
 ModelImporter:
   serializedVersion: 21202
   internalIDToNameTable:
   - first:
-      74: -5705345834940392652
-    second: dummy_Armature|dummy_ArmatureAction
-  - first:
-      74: -2300727946979365548
-    second: dummy_Armature|dummy_ArmatureAction.001
-  - first:
-      74: -678543501477631072
-    second: IceGolem_Shards@idle
-  - first:
       74: 7319882790018179290
     second: dummy_Armature|dummy_Armature|dummy_Armature|CubeAction|dummy_Armature|CubeAct
+  - first:
+      74: -332829458071823360
+    second: dummy_Armature|slashDummy_damage
+  - first:
+      74: -6251524501102889944
+    second: dummy_Armature|slashDummy_floatIdle
+  - first:
+      74: -975354626136805123
+    second: dummy_Armature|slashDummy_stun
   externalObjects: {}
   materials:
     materialImportMode: 2
@@ -29,11 +29,15 @@ ModelImporter:
     removeConstantScaleCurves: 1
     motionNodeName: 
     rigImportErrors: 
-    rigImportWarnings: "Avatar Rig Configuration mis-match. Bone length in configuration
-      does not match position in animation file:\n\t'LeftUpLeg' : position error
-      = 1.950806 mm\n\t'RightUpLeg' : position error = 1.907460 mm\n"
+    rigImportWarnings: 
     animationImportErrors: 
-    animationImportWarnings: 
+    animationImportWarnings: "\nClip 'dummy_Armature|slashDummy_damage' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'float_Head' has translation
+      animation that will be discarded.\n\nClip 'dummy_Armature|slashDummy_stun'
+      has import animation warnings that might lower retargeting quality:\nNote:
+      Activate translation DOF on avatar to improve retargeting quality.\n\t'float_Head'
+      has translation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -45,349 +49,7 @@ ModelImporter:
     animationWrapMode: 0
     extraExposedTransformPaths: []
     extraUserProperties: []
-    clipAnimations:
-    - serializedVersion: 16
-      name: dummy_Armature|dummy_ArmatureAction
-      takeName: dummy_Armature|dummy_ArmatureAction
-      internalID: 0
-      firstFrame: 0
-      lastFrame: 1
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: dummy_Armature|dummy_ArmatureAction.001
-      takeName: dummy_Armature|dummy_ArmatureAction.001
-      internalID: 0
-      firstFrame: 0
-      lastFrame: 1
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: IceGolem_Shards@idle
-      takeName: dummy_Armature|dummy_ArmatureAction.002
-      internalID: 0
-      firstFrame: 0
-      lastFrame: 530
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 1
-      loopTime: 1
-      loopBlend: 0
-      loopBlendOrientation: 1
-      loopBlendPositionY: 1
-      loopBlendPositionXZ: 1
-      keepOriginalOrientation: 1
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 1
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-      curves: []
-      events: []
-      transformMask:
-      - path: 
-        weight: 1
-      - path: dummy_Armature
-        weight: 1
-      - path: dummy_Armature/Hips
-        weight: 1
-      - path: dummy_Armature/Hips/LeftUpLeg
-        weight: 1
-      - path: dummy_Armature/Hips/LeftUpLeg/_equipSheathR
-        weight: 0
-      - path: dummy_Armature/Hips/LeftUpLeg/float_LeftUpLeg
-        weight: 1
-      - path: dummy_Armature/Hips/LeftUpLeg/float_LeftUpLeg/float_LeftUpLeg_end
-        weight: 1
-      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg
-        weight: 1
-      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftKnee
-        weight: 1
-      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftKnee/float_LeftKnee_end
-        weight: 1
-      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftLeg
-        weight: 1
-      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftLeg/float_LeftLeg_end
-        weight: 1
-      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/LeftFoot
-        weight: 1
-      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/LeftFoot/LeftToeBase
-        weight: 1
-      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/LeftFoot/LeftToeBase/LeftToeBase_end
-        weight: 0
-      - path: dummy_Armature/Hips/RightUpLeg
-        weight: 1
-      - path: dummy_Armature/Hips/RightUpLeg/_equipSheathL
-        weight: 0
-      - path: dummy_Armature/Hips/RightUpLeg/float_RightUpLeg
-        weight: 1
-      - path: dummy_Armature/Hips/RightUpLeg/float_RightUpLeg/float_RightUpLeg_end
-        weight: 1
-      - path: dummy_Armature/Hips/RightUpLeg/RightLeg
-        weight: 1
-      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightKnee
-        weight: 1
-      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightKnee/float_RightKnee_end
-        weight: 1
-      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightLeg
-        weight: 1
-      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightLeg/float_RightLeg_end
-        weight: 1
-      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/RightFoot
-        weight: 1
-      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/RightFoot/RightToeBase
-        weight: 1
-      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/RightFoot/RightToeBase/RightToeBase_end
-        weight: 0
-      - path: dummy_Armature/Hips/Spine
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/float_Spinea
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/float_Spinea/float_Spinea_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/float_Spineb
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/float_Spineb/float_Spineb_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1a
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1a/float_Spine1a_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1b
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1b/float_Spine1b_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/_equipBackC
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/_equipBackL
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/_equipBackR
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2a
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2a/float_Spine2a_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2b
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2b/float_Spine2b_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftArm
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftArm/float_LeftArm_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftElbow
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftElbow/float_LeftElbow_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/float_LeftForeArm
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/float_LeftForeArm/float_LeftForeArm_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/_equipHandL
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1/LeftHandIndex2
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1/LeftHandIndex2/LeftHandIndex3
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1/LeftHandIndex2/LeftHandIndex3/LeftHandIndex3_end
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1/LeftHandMiddle2
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1/LeftHandMiddle2/LeftHandMiddle3
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1/LeftHandMiddle2/LeftHandMiddle3/LeftHandMiddle3_end
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1/LeftHandPinky2
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1/LeftHandPinky2/LeftHandPinky3
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1/LeftHandPinky2/LeftHandPinky3/LeftHandPinky3_end
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1/LeftHandRing2
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1/LeftHandRing2/LeftHandRing3
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1/LeftHandRing2/LeftHandRing3/LeftHandRing3_end
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1/LeftHandThumb2
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1/LeftHandThumb2/LeftHandThumb3
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1/LeftHandThumb2/LeftHandThumb3/LeftHandThumb3_end
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1/Head
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1/Head/float_Head
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1/Head/float_Head/float_Head_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightArm
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightArm/float_RightArm_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightElbow
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightElbow/float_RightElbow_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/float_RightForeArm
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/float_RightForeArm/float_RightForeArm_end
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/_equipHandR
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1/RightHandIndex2
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1/RightHandIndex2/RightHandIndex3
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1/RightHandIndex2/RightHandIndex3/RightHandIndex3_end
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1/RightHandMiddle2
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1/RightHandMiddle2/RightHandMiddle3
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1/RightHandMiddle2/RightHandMiddle3/RightHandMiddle3_end
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1/RightHandPinky2
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1/RightHandPinky2/RightHandPinky3
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1/RightHandPinky2/RightHandPinky3/RightHandPinky3_end
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1/RightHandRing2
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1/RightHandRing2/RightHandRing3
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1/RightHandRing2/RightHandRing3/RightHandRing3_end
-        weight: 0
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2/RightHandThumb3
-        weight: 1
-      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2/RightHandThumb3/RightHandThumb3_end
-        weight: 0
-      - path: slashDummy
-        weight: 0
-      maskType: 0
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    - serializedVersion: 16
-      name: dummy_Armature|dummy_Armature|dummy_Armature|CubeAction|dummy_Armature|CubeAct
-      takeName: dummy_Armature|dummy_Armature|dummy_Armature|CubeAction|dummy_Armature|CubeAct
-      internalID: 0
-      firstFrame: 0
-      lastFrame: 1
-      wrapMode: 0
-      orientationOffsetY: 0
-      level: 0
-      cycleOffset: 0
-      loop: 0
-      hasAdditiveReferencePose: 0
-      loopTime: 0
-      loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
-      keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
-      heightFromFeet: 0
-      mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
-      curves: []
-      events: []
-      transformMask: []
-      maskType: 3
-      maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
+    clipAnimations: []
     isReadable: 0
   meshes:
     lODScreenPercentages: []
@@ -432,7 +94,7 @@ ModelImporter:
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
   referencedClips: []
-  importAnimation: 1
+  importAnimation: 0
   humanDescription:
     serializedVersion: 3
     human:
@@ -829,13 +491,13 @@ ModelImporter:
         length: 0
         modified: 0
     skeleton:
-    - name: slashDummyIdle(Clone)
+    - name: slashDummy2A(Clone)
       parentName: 
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: dummy_Armature
-      parentName: slashDummyIdle(Clone)
+      parentName: slashDummy2A(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: 0.00000008146034, y: -0, z: -0, w: 1}
       scale: {x: 93.87353, y: 93.87353, z: 93.87353}
@@ -891,7 +553,7 @@ ModelImporter:
       scale: {x: 1.0000001, y: 0.9999999, z: 0.99999994}
     - name: float_Head
       parentName: Head
-      position: {x: 2.0010905e-19, y: -0.0004749853, z: 0.00012526126}
+      position: {x: 1.9158675e-19, y: -0.0003687696, z: 0.00012526126}
       rotation: {x: 0.000000029802319, y: -0, z: -0, w: 1}
       scale: {x: 0.99999994, y: 0.9999999, z: 0.99999994}
     - name: float_Head_end
@@ -1026,7 +688,7 @@ ModelImporter:
       scale: {x: 0.99999946, y: 1.0000018, z: 0.999999}
     - name: float_LeftForeArm
       parentName: LeftForeArm
-      position: {x: 0.000028539487, y: -0.000027282425, z: -0.000092528775}
+      position: {x: 0.00002828025, y: 0.000010698649, z: -0.0000911697}
       rotation: {x: 0.017537113, y: 0.08299118, z: 0.0048756395, w: 0.996384}
       scale: {x: 1.0000005, y: 1.0000002, z: 1.0000001}
     - name: float_LeftForeArm_end
@@ -1036,7 +698,7 @@ ModelImporter:
       scale: {x: 1.0000002, y: 1.0000008, z: 0.99999934}
     - name: float_LeftElbow
       parentName: LeftArm
-      position: {x: -0.00024873955, y: 0.002535842, z: -0.0004944619}
+      position: {x: -0.00011809947, y: 0.002503866, z: -0.0004666256}
       rotation: {x: 0.081200115, y: -0.065729395, z: -0.78090507, w: 0.6158519}
       scale: {x: 0.99999964, y: 0.99999964, z: 1}
     - name: float_LeftElbow_end
@@ -1046,7 +708,7 @@ ModelImporter:
       scale: {x: 1, y: 0.99999994, z: 0.99999994}
     - name: float_LeftArm
       parentName: LeftArm
-      position: {x: 0.00004158198, y: -0.00021147962, z: 0.000063737985}
+      position: {x: 0.000039883133, y: -0.00025079926, z: 0.000067207446}
       rotation: {x: -0.042239863, y: 0.07415267, z: -0.024741892, w: 0.9960447}
       scale: {x: 0.9999998, y: 1.0000001, z: 1}
     - name: float_LeftArm_end
@@ -1077,8 +739,8 @@ ModelImporter:
     - name: _equipHandR
       parentName: RightHand
       position: {x: 0.000124439, y: 0.00067312026, z: 0.00012027174}
-      rotation: {x: 0.66264135, y: 0.5773823, z: -0.37494668, w: 0.29487476}
-      scale: {x: -0.9999999, y: -1.0000001, z: -1.0000001}
+      rotation: {x: -0.3749468, y: -0.29487473, z: -0.66264147, w: 0.5773821}
+      scale: {x: 1, y: 1.0000001, z: 1.0000002}
     - name: RightHandThumb1
       parentName: RightHand
       position: {x: -0.000014181403, y: 0.00044570828, z: 0.00047831467}
@@ -1181,7 +843,7 @@ ModelImporter:
       scale: {x: 0.99999946, y: 1.0000018, z: 0.999999}
     - name: float_RightForeArm
       parentName: RightForeArm
-      position: {x: -0.00002853996, y: -0.000027283382, z: -0.0000925242}
+      position: {x: -0.000028280674, y: 0.00001069827, z: -0.00009116552}
       rotation: {x: 0.017531937, y: -0.08299633, z: -0.004875759, w: 0.9963837}
       scale: {x: 1.0000002, y: 1.0000002, z: 0.9999999}
     - name: float_RightForeArm_end
@@ -1191,7 +853,7 @@ ModelImporter:
       scale: {x: 0.9999997, y: 1.0000007, z: 0.99999934}
     - name: float_RightElbow
       parentName: RightArm
-      position: {x: 0.00024873955, y: 0.002535842, z: -0.0004944619}
+      position: {x: -0.000008869213, y: 0.0023091245, z: -0.00048364542}
       rotation: {x: 0.081200115, y: 0.065729395, z: 0.78090507, w: 0.6158519}
       scale: {x: 0.99999964, y: 0.99999964, z: 1}
     - name: float_RightElbow_end
@@ -1201,7 +863,7 @@ ModelImporter:
       scale: {x: 1, y: 0.99999994, z: 0.99999994}
     - name: float_RightArm
       parentName: RightArm
-      position: {x: -0.0000415784, y: -0.0002114791, z: 0.000063737294}
+      position: {x: -0.00003647803, y: -0.00032945815, z: 0.000074147436}
       rotation: {x: -0.0422395, y: -0.074152246, z: 0.024742426, w: 0.9960447}
       scale: {x: 0.9999999, y: 1, z: 0.9999998}
     - name: float_RightArm_end
@@ -1211,7 +873,7 @@ ModelImporter:
       scale: {x: 0.99999964, y: 1.0000002, z: 0.99999976}
     - name: float_Spine2a
       parentName: Spine2
-      position: {x: -0.0021543698, y: 0.0005183795, z: -0.00014205328}
+      position: {x: -0.0023739294, y: 0.00055689603, z: -0.00013813673}
       rotation: {x: 0.03255491, y: 0.038797732, z: -0.76506114, w: 0.64196295}
       scale: {x: 0.99999994, y: 0.99999994, z: 1.0000002}
     - name: float_Spine2a_end
@@ -1221,7 +883,7 @@ ModelImporter:
       scale: {x: 0.99999994, y: 0.9999998, z: 1}
     - name: float_Spine2b
       parentName: Spine2
-      position: {x: 0.0015978666, y: 0.0008845952, z: -0.000104814804}
+      position: {x: 0.0018488432, y: 0.0010287538, z: -0.00009015595}
       rotation: {x: 0.025324564, y: -0.04386243, z: 0.86491406, w: 0.49935794}
       scale: {x: 0.99999976, y: 1.0000001, z: 0.9999998}
     - name: float_Spine2b_end
@@ -1231,7 +893,7 @@ ModelImporter:
       scale: {x: 0.9999996, y: 0.99999994, z: 1.0000001}
     - name: float_Spine1a
       parentName: Spine1
-      position: {x: 0.001850529, y: 0.0010114571, z: -0.0005117235}
+      position: {x: 0.0021379155, y: 0.0010884531, z: -0.00051292084}
       rotation: {x: -0.055978335, y: 0.045484785, z: 0.791366, w: 0.60707295}
       scale: {x: 1.0000001, y: 1.0000002, z: 0.9999999}
     - name: float_Spine1a_end
@@ -1241,7 +903,7 @@ ModelImporter:
       scale: {x: 0.9999998, y: 1.0000005, z: 0.99999934}
     - name: float_Spine1b
       parentName: Spine1
-      position: {x: -0.0016941036, y: 0.0006973552, z: -0.00018722197}
+      position: {x: -0.0021576076, y: 0.0005731737, z: -0.00018529061}
       rotation: {x: -0.3596077, y: -0.46596265, z: -0.4912113, w: 0.64208454}
       scale: {x: 1, y: 1, z: 0.99999994}
     - name: float_Spine1b_end
@@ -1251,7 +913,7 @@ ModelImporter:
       scale: {x: 1.0000001, y: 1.0000005, z: 1.0000004}
     - name: float_Spineb
       parentName: Spine
-      position: {x: -0.001294949, y: 0.00042952163, z: -0.00048169098}
+      position: {x: -0.0015618994, y: 0.00045285327, z: -0.00048276986}
       rotation: {x: -0.009484464, y: -0.01142182, z: -0.73718464, w: 0.67552835}
       scale: {x: 0.9999997, y: 0.9999998, z: 0.99999976}
     - name: float_Spineb_end
@@ -1261,7 +923,7 @@ ModelImporter:
       scale: {x: 0.99999994, y: 1, z: 1}
     - name: float_Spinea
       parentName: Spine
-      position: {x: 0.00063913077, y: -0.0010681928, z: -0.00019914996}
+      position: {x: 0.00090617314, y: -0.0012222052, z: -0.00019202773}
       rotation: {x: -0.024161026, y: 0.018745217, z: 0.4996835, w: 0.86566806}
       scale: {x: 0.9999998, y: 1, z: 0.99999994}
     - name: float_Spinea_end
@@ -1301,7 +963,7 @@ ModelImporter:
       scale: {x: 1, y: 0.99999994, z: 1}
     - name: float_LeftKnee
       parentName: LeftLeg
-      position: {x: 0.00003591459, y: -0.00058442436, z: -0.00026136482}
+      position: {x: 0.00009671818, y: -0.00071961735, z: -0.00023333465}
       rotation: {x: -0.9963315, y: -0.056795232, z: 0.003507348, w: 0.063918255}
       scale: {x: 0.9999965, y: 0.99999964, z: 0.99999547}
     - name: float_LeftKnee_end
@@ -1311,7 +973,7 @@ ModelImporter:
       scale: {x: 0.99999994, y: 1.0000036, z: 0.99999595}
     - name: float_LeftLeg
       parentName: LeftLeg
-      position: {x: -0.000028639317, y: 0.0039500776, z: -0.000008026579}
+      position: {x: -0.000005729948, y: 0.004040542, z: -0.000013405952}
       rotation: {x: -0.99989974, y: -0.013135606, z: 0.0004559112, w: -0.0052686036}
       scale: {x: 1.0000002, y: 0.9999996, z: 0.9999998}
     - name: float_LeftLeg_end
@@ -1321,7 +983,7 @@ ModelImporter:
       scale: {x: 0.99999994, y: 0.99999917, z: 0.9999998}
     - name: float_LeftUpLeg
       parentName: LeftUpLeg
-      position: {x: 0.000054052758, y: -0.0004119424, z: -0.000059610375}
+      position: {x: 0.000055301767, y: -0.00046914184, z: -0.00006681909}
       rotation: {x: -0.0014204531, y: -0.25976738, z: 0.011675347, w: 0.96559966}
       scale: {x: 0.99999994, y: 0.9999998, z: 1}
     - name: float_LeftUpLeg_end
@@ -1361,7 +1023,7 @@ ModelImporter:
       scale: {x: 1, y: 0.99999994, z: 1}
     - name: float_RightKnee
       parentName: RightLeg
-      position: {x: -0.00003591459, y: -0.00058442436, z: -0.00026136482}
+      position: {x: -0.0002504223, y: -0.00057878863, z: -0.00026159015}
       rotation: {x: -0.9963315, y: 0.056795232, z: -0.003507348, w: 0.063918255}
       scale: {x: 0.9999965, y: 0.99999964, z: 0.99999547}
     - name: float_RightKnee_end
@@ -1371,7 +1033,7 @@ ModelImporter:
       scale: {x: 0.99999994, y: 1.0000036, z: 0.99999595}
     - name: float_RightLeg
       parentName: RightLeg
-      position: {x: 0.000028638347, y: 0.0039500776, z: -0.000008026171}
+      position: {x: 0.000029676381, y: 0.003989571, z: -0.000008441978}
       rotation: {x: -0.99989974, y: 0.013135487, z: -0.00045591214, w: -0.0052685663}
       scale: {x: 1.0000001, y: 1.0000004, z: 0.99999994}
     - name: float_RightLeg_end
@@ -1381,7 +1043,7 @@ ModelImporter:
       scale: {x: 1.0000001, y: 0.99999994, z: 0.9999995}
     - name: float_RightUpLeg
       parentName: RightUpLeg
-      position: {x: -0.000054052387, y: -0.00041194237, z: -0.000059611008}
+      position: {x: -0.00005491404, y: -0.0004514392, z: -0.000059262973}
       rotation: {x: -0.0014203264, y: 0.2597699, z: -0.011675204, w: 0.96559894}
       scale: {x: 0.9999999, y: 1, z: 1}
     - name: float_RightUpLeg_end
@@ -1390,7 +1052,7 @@ ModelImporter:
       rotation: {x: -0.71198666, y: 0.17543012, z: -0.19144817, w: -0.6524162}
       scale: {x: 1.0000001, y: 0.99999976, z: 1.0000002}
     - name: slashDummy
-      parentName: slashDummyIdle(Clone)
+      parentName: slashDummy2A(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 99.999985, y: 99.999985, z: 99.999985}

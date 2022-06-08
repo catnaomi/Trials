@@ -1,20 +1,26 @@
 fileFormatVersion: 2
-guid: ce960f8e8088c2144a4db7218d929de9
+guid: 00cb3a6aece3d5b47ab3341f234dec7c
 ModelImporter:
   serializedVersion: 21202
   internalIDToNameTable:
   - first:
-      74: -5705345834940392652
-    second: dummy_Armature|dummy_ArmatureAction
+      74: 6911140070678367366
+    second: dummy_Armature|Action
   - first:
       74: -2300727946979365548
     second: dummy_Armature|dummy_ArmatureAction.001
   - first:
-      74: -678543501477631072
-    second: IceGolem_Shards@idle
-  - first:
       74: 7319882790018179290
     second: dummy_Armature|dummy_Armature|dummy_Armature|CubeAction|dummy_Armature|CubeAct
+  - first:
+      74: -332829458071823360
+    second: dummy_Armature|slashDummy_damage
+  - first:
+      74: -6251524501102889944
+    second: dummy_Armature|slashDummy_floatIdle
+  - first:
+      74: -975354626136805123
+    second: dummy_Armature|slashDummy_stun
   externalObjects: {}
   materials:
     materialImportMode: 2
@@ -29,11 +35,15 @@ ModelImporter:
     removeConstantScaleCurves: 1
     motionNodeName: 
     rigImportErrors: 
-    rigImportWarnings: "Avatar Rig Configuration mis-match. Bone length in configuration
-      does not match position in animation file:\n\t'LeftUpLeg' : position error
-      = 1.950806 mm\n\t'RightUpLeg' : position error = 1.907460 mm\n"
+    rigImportWarnings: 
     animationImportErrors: 
-    animationImportWarnings: 
+    animationImportWarnings: "\nClip 'dummy_Armature|slashDummy_damage' has import
+      animation warnings that might lower retargeting quality:\nNote: Activate translation
+      DOF on avatar to improve retargeting quality.\n\t'float_Head' has translation
+      animation that will be discarded.\n\nClip 'dummy_Armature|slashDummy_stun'
+      has import animation warnings that might lower retargeting quality:\nNote:
+      Activate translation DOF on avatar to improve retargeting quality.\n\t'float_Head'
+      has translation animation that will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -47,8 +57,8 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: dummy_Armature|dummy_ArmatureAction
-      takeName: dummy_Armature|dummy_ArmatureAction
+      name: dummy_Armature|Action
+      takeName: dummy_Armature|Action
       internalID: 0
       firstFrame: 0
       lastFrame: 1
@@ -105,8 +115,292 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: IceGolem_Shards@idle
-      takeName: dummy_Armature|dummy_ArmatureAction.002
+      name: dummy_Armature|dummy_Armature|dummy_Armature|CubeAction|dummy_Armature|CubeAct
+      takeName: dummy_Armature|dummy_Armature|dummy_Armature|CubeAction|dummy_Armature|CubeAct
+      internalID: 0
+      firstFrame: 0
+      lastFrame: 1
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: dummy_Armature|slashDummy_damage
+      takeName: dummy_Armature|slashDummy_damage
+      internalID: 0
+      firstFrame: 0
+      lastFrame: 39
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
+      keepOriginalOrientation: 1
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 1
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: dummy_Armature
+        weight: 1
+      - path: dummy_Armature/Hips
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/_equipSheathR
+        weight: 0
+      - path: dummy_Armature/Hips/LeftUpLeg/float_LeftUpLeg
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/float_LeftUpLeg/float_LeftUpLeg_end
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftKnee
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftKnee/float_LeftKnee_end
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftLeg
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftLeg/float_LeftLeg_end
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/LeftFoot
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/LeftFoot/LeftToeBase
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/LeftFoot/LeftToeBase/LeftToeBase_end
+        weight: 0
+      - path: dummy_Armature/Hips/RightUpLeg
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/_equipSheathL
+        weight: 0
+      - path: dummy_Armature/Hips/RightUpLeg/float_RightUpLeg
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/float_RightUpLeg/float_RightUpLeg_end
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightKnee
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightKnee/float_RightKnee_end
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightLeg
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightLeg/float_RightLeg_end
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/RightFoot
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/RightFoot/RightToeBase
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/RightFoot/RightToeBase/RightToeBase_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/float_Spinea
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/float_Spinea/float_Spinea_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/float_Spineb
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/float_Spineb/float_Spineb_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1a
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1a/float_Spine1a_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1b
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1b/float_Spine1b_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/_equipBackC
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/_equipBackL
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/_equipBackR
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2a
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2a/float_Spine2a_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2b
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2b/float_Spine2b_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftArm/float_LeftArm_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftElbow
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftElbow/float_LeftElbow_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/float_LeftForeArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/float_LeftForeArm/float_LeftForeArm_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/_equipHandL
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1/LeftHandIndex2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1/LeftHandIndex2/LeftHandIndex3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1/LeftHandIndex2/LeftHandIndex3/LeftHandIndex3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1/LeftHandMiddle2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1/LeftHandMiddle2/LeftHandMiddle3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1/LeftHandMiddle2/LeftHandMiddle3/LeftHandMiddle3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1/LeftHandPinky2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1/LeftHandPinky2/LeftHandPinky3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1/LeftHandPinky2/LeftHandPinky3/LeftHandPinky3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1/LeftHandRing2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1/LeftHandRing2/LeftHandRing3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1/LeftHandRing2/LeftHandRing3/LeftHandRing3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1/LeftHandThumb2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1/LeftHandThumb2/LeftHandThumb3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1/LeftHandThumb2/LeftHandThumb3/LeftHandThumb3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1/Head
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1/Head/float_Head
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1/Head/float_Head/float_Head_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightArm/float_RightArm_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightElbow
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightElbow/float_RightElbow_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/float_RightForeArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/float_RightForeArm/float_RightForeArm_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/_equipHandR
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1/RightHandIndex2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1/RightHandIndex2/RightHandIndex3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1/RightHandIndex2/RightHandIndex3/RightHandIndex3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1/RightHandMiddle2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1/RightHandMiddle2/RightHandMiddle3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1/RightHandMiddle2/RightHandMiddle3/RightHandMiddle3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1/RightHandPinky2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1/RightHandPinky2/RightHandPinky3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1/RightHandPinky2/RightHandPinky3/RightHandPinky3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1/RightHandRing2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1/RightHandRing2/RightHandRing3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1/RightHandRing2/RightHandRing3/RightHandRing3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2/RightHandThumb3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2/RightHandThumb3/RightHandThumb3_end
+        weight: 0
+      - path: slashDummy
+        weight: 0
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: dummy_Armature|slashDummy_floatIdle
+      takeName: dummy_Armature|slashDummy_floatIdle
       internalID: 0
       firstFrame: 0
       lastFrame: 530
@@ -115,7 +409,7 @@ ModelImporter:
       level: 0
       cycleOffset: 0
       loop: 0
-      hasAdditiveReferencePose: 1
+      hasAdditiveReferencePose: 0
       loopTime: 1
       loopBlend: 0
       loopBlendOrientation: 1
@@ -360,11 +654,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: dummy_Armature|dummy_Armature|dummy_Armature|CubeAction|dummy_Armature|CubeAct
-      takeName: dummy_Armature|dummy_Armature|dummy_Armature|CubeAction|dummy_Armature|CubeAct
+      name: dummy_Armature|slashDummy_stun
+      takeName: dummy_Armature|slashDummy_stun
       internalID: 0
       firstFrame: 0
-      lastFrame: 1
+      lastFrame: 68
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -373,19 +667,245 @@ ModelImporter:
       hasAdditiveReferencePose: 0
       loopTime: 0
       loopBlend: 0
-      loopBlendOrientation: 0
-      loopBlendPositionY: 0
-      loopBlendPositionXZ: 0
-      keepOriginalOrientation: 0
+      loopBlendOrientation: 1
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 1
+      keepOriginalOrientation: 1
       keepOriginalPositionY: 1
-      keepOriginalPositionXZ: 0
+      keepOriginalPositionXZ: 1
       heightFromFeet: 0
       mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      bodyMask: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
       curves: []
       events: []
-      transformMask: []
-      maskType: 3
+      transformMask:
+      - path: 
+        weight: 1
+      - path: dummy_Armature
+        weight: 1
+      - path: dummy_Armature/Hips
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/_equipSheathR
+        weight: 0
+      - path: dummy_Armature/Hips/LeftUpLeg/float_LeftUpLeg
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/float_LeftUpLeg/float_LeftUpLeg_end
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftKnee
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftKnee/float_LeftKnee_end
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftLeg
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/float_LeftLeg/float_LeftLeg_end
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/LeftFoot
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/LeftFoot/LeftToeBase
+        weight: 1
+      - path: dummy_Armature/Hips/LeftUpLeg/LeftLeg/LeftFoot/LeftToeBase/LeftToeBase_end
+        weight: 0
+      - path: dummy_Armature/Hips/RightUpLeg
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/_equipSheathL
+        weight: 0
+      - path: dummy_Armature/Hips/RightUpLeg/float_RightUpLeg
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/float_RightUpLeg/float_RightUpLeg_end
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightKnee
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightKnee/float_RightKnee_end
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightLeg
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/float_RightLeg/float_RightLeg_end
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/RightFoot
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/RightFoot/RightToeBase
+        weight: 1
+      - path: dummy_Armature/Hips/RightUpLeg/RightLeg/RightFoot/RightToeBase/RightToeBase_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/float_Spinea
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/float_Spinea/float_Spinea_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/float_Spineb
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/float_Spineb/float_Spineb_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1a
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1a/float_Spine1a_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1b
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/float_Spine1b/float_Spine1b_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/_equipBackC
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/_equipBackL
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/_equipBackR
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2a
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2a/float_Spine2a_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2b
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/float_Spine2b/float_Spine2b_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftArm/float_LeftArm_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftElbow
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/float_LeftElbow/float_LeftElbow_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/float_LeftForeArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/float_LeftForeArm/float_LeftForeArm_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/_equipHandL
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1/LeftHandIndex2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1/LeftHandIndex2/LeftHandIndex3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandIndex1/LeftHandIndex2/LeftHandIndex3/LeftHandIndex3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1/LeftHandMiddle2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1/LeftHandMiddle2/LeftHandMiddle3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandMiddle1/LeftHandMiddle2/LeftHandMiddle3/LeftHandMiddle3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1/LeftHandPinky2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1/LeftHandPinky2/LeftHandPinky3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandPinky1/LeftHandPinky2/LeftHandPinky3/LeftHandPinky3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1/LeftHandRing2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1/LeftHandRing2/LeftHandRing3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandRing1/LeftHandRing2/LeftHandRing3/LeftHandRing3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1/LeftHandThumb2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1/LeftHandThumb2/LeftHandThumb3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/LeftShoulder/LeftArm/LeftForeArm/LeftHand/LeftHandThumb1/LeftHandThumb2/LeftHandThumb3/LeftHandThumb3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1/Head
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1/Head/float_Head
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/Neck/Neck1/Head/float_Head/float_Head_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightArm/float_RightArm_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightElbow
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/float_RightElbow/float_RightElbow_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/float_RightForeArm
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/float_RightForeArm/float_RightForeArm_end
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/_equipHandR
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1/RightHandIndex2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1/RightHandIndex2/RightHandIndex3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandIndex1/RightHandIndex2/RightHandIndex3/RightHandIndex3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1/RightHandMiddle2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1/RightHandMiddle2/RightHandMiddle3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandMiddle1/RightHandMiddle2/RightHandMiddle3/RightHandMiddle3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1/RightHandPinky2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1/RightHandPinky2/RightHandPinky3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandPinky1/RightHandPinky2/RightHandPinky3/RightHandPinky3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1/RightHandRing2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1/RightHandRing2/RightHandRing3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandRing1/RightHandRing2/RightHandRing3/RightHandRing3_end
+        weight: 0
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2/RightHandThumb3
+        weight: 1
+      - path: dummy_Armature/Hips/Spine/Spine1/Spine2/RightShoulder/RightArm/RightForeArm/RightHand/RightHandThumb1/RightHandThumb2/RightHandThumb3/RightHandThumb3_end
+        weight: 0
+      - path: slashDummy
+        weight: 0
+      maskType: 0
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     isReadable: 0
@@ -829,13 +1349,13 @@ ModelImporter:
         length: 0
         modified: 0
     skeleton:
-    - name: slashDummyIdle(Clone)
+    - name: slashDummy2Animations(Clone)
       parentName: 
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: dummy_Armature
-      parentName: slashDummyIdle(Clone)
+      parentName: slashDummy2Animations(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: 0.00000008146034, y: -0, z: -0, w: 1}
       scale: {x: 93.87353, y: 93.87353, z: 93.87353}
@@ -1390,7 +1910,7 @@ ModelImporter:
       rotation: {x: -0.71198666, y: 0.17543012, z: -0.19144817, w: -0.6524162}
       scale: {x: 1.0000001, y: 0.99999976, z: 1.0000002}
     - name: slashDummy
-      parentName: slashDummyIdle(Clone)
+      parentName: slashDummy2Animations(Clone)
       position: {x: -0, y: 0, z: 0}
       rotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
       scale: {x: 99.999985, y: 99.999985, z: 99.999985}
