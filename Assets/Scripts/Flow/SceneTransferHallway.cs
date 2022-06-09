@@ -89,7 +89,8 @@ public class SceneTransferHallway : MonoBehaviour
 
         Vector3 transferVector = other._center.position - _center.position;
 
-        FindObjectOfType<CinemachineBrain>().ActiveVirtualCamera.OnTargetObjectWarped(PlayerActor.player.transform, transferVector);
+        CinemachineBrain brain = FindObjectOfType<CinemachineBrain>();
+        brain.ActiveVirtualCamera.OnTargetObjectWarped(brain.ActiveVirtualCamera.Follow, transferVector);
 
         IsTransferInProgress = false;
 

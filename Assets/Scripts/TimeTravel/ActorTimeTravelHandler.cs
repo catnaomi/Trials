@@ -197,6 +197,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         if (actor is PlayerActor player)
         {
             player.UnsnapLedge();
+            player.SkipCloth();
         }
 
         lastData = data;
@@ -209,6 +210,10 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         animancer.Layers[HumanoidAnimLayers.TimeEffects].SetWeight(1f);
         animancer.States.Current.IsPlaying = false;
         lastHealth = actor.attributes.health.current;
+        if (actor is PlayerActor player)
+        {
+            player.DisableCloth();
+        }
         foreach (AnimancerComponent afterimage in afterimages)
         {
             afterimage.gameObject.SetActive(false);
@@ -237,6 +242,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
                     player.Carry(((PlayerTimeTravelData)lastData).carryable);
                 }
             }
+            player.EnableCloth();
         }
         lastData = null;
         EndTimeState();

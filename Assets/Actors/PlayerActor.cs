@@ -3397,6 +3397,24 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             cloth.worldVelocityScale = vel;
         }
     }
+
+    public void DisableCloth()
+    {
+        Cloth cloth = this.GetComponentInChildren<Cloth>();
+        if (cloth != null)
+        {
+            cloth.enabled = false;
+        }
+    }
+
+    public void EnableCloth()
+    {
+        Cloth cloth = this.GetComponentInChildren<Cloth>();
+        if (cloth != null)
+        {
+            cloth.enabled = true;
+        }
+    }
     public void HitWall()
     {
         Debug.Log("wall hit");

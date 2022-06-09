@@ -199,8 +199,12 @@ public class WorldTime : MonoBehaviour
         //sunDir = Quaternion.Euler(sunAngle * Mathf.PI * Mathf.Rad2Deg, 0f, 0f) * sunDir; Vector3.rot
         dsun.transform.rotation = Quaternion.Euler(dsunAngle, 0f, 0f);
         nsun.transform.rotation = Quaternion.Euler(nsunAngle, 0f, 0f);
-        dsun.enabled = (dsun.intensity != 0);
-        nsun.enabled = (nsun.intensity != 0);
+        //dsun.enabled = (dsun.intensity != 0);
+        //nsun.enabled = (nsun.intensity != 0);
+        foreach (SunSource sun in sunSourceDict.Values)
+        {
+            sun.light.enabled = sun.light.intensity != 0f;
+        }
     }
     
     void GetAllSunSources()
