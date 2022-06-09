@@ -99,6 +99,7 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
             }
         }
 
+        actor.OnDie.AddListener(CreateDrops);
     }
 
     public bool Add(Item item)
@@ -599,6 +600,26 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
         else
         {
             return new DamageResistance[0];
+        }
+    }
+
+    public void CreateDrops()
+    {
+        if (drops == null || drops.Count == 0) return;
+
+
+        float mag = 0.2f * drops.Count;
+        for (int i = 0; i < drops.Count; i++)
+        {
+            Item item = drops[i];
+            LooseItem looseItem = LooseItem.CreateLooseItem(item);
+            Rigidbody rigidbody = looseItem.GetComponent<Rigidbody>();
+
+            float angle = (i / drops.Count) * 360f;
+
+            Vector3 dir = Quaternion.Euler(0f, angle, 0f) * Vector3.forward * mag;
+
+            rigidbody.position = actor.transform.position + Vector3.up * 0.5f + dir;
         }
     }
 }
