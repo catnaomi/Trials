@@ -174,6 +174,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public LinearMixerTransition swimAnim;
     public ClipTransition swimEnd;
     public ClipTransition swimStart;
+    public ClipTransition swimDive;
     [Space(5)]
     public ClipTransition resurrectFaceUp;
     public ClipTransition resurrectFaceDown;
@@ -942,8 +943,25 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             if (CheckWater())
             {
-                state.swim = animancer.Play(swimAnim);
-                this.gameObject.SendMessage("SplashBig");
+                if (lastAirTime > softLandingTime)
+                {
+                    //xzVel = Vector3.zero;
+                    AnimancerState astate = animancer.Play(swimDive);
+                    StartCoroutine(DecelXZVel(1f));
+                    speed = 0f;
+
+                    astate.Events.OnEnd = () =>
+                    {
+                        state.swim = animancer.Play(swimAnim, 0.5f);
+                    };
+                    //walkAccelReal = hardLandAccel;
+                }
+                else
+                {
+                    //walkAccelReal = swimAccel;
+                    state.swim = animancer.Play(swimAnim);
+                    this.gameObject.SendMessage("SplashBig");
+                }
             }
             if (aiming)
             {
@@ -1530,6 +1548,20 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+    IEnumerator DecelXZVel(float time)
+    {
+        float clock = 0f;
+        float t;
+        Vector3 startingVel = xzVel;
+        while (clock <= time)
+        {
+            yield return null;
+            clock += Time.deltaTime;
+            t = Mathf.Clamp01(clock / time);
+            xzVel = Vector3.Lerp(startingVel, Vector3.zero, t);
+        }
+        xzVel = Vector3.zero;
+    }
     public void SetNewSafePoint()
     {
         lastSafePoint = this.transform.position;
