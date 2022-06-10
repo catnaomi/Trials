@@ -25,12 +25,14 @@ public class DamageAnims : ScriptableObject
     public ClipTransition proneFaceUp;
     public ClipTransition getupFaceUp;
     public ClipTransition deadFaceUp;
+    public ClipTransition landFaceUp;
     [Space(5)]
     public ClipTransition knockdownFaceDown;
     public ClipTransition fallFaceDown;
     public ClipTransition proneFaceDown;
     public ClipTransition getupFaceDown;
     public ClipTransition deadFaceDown;
+    public ClipTransition landFaceDown;
 
 
 

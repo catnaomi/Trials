@@ -148,6 +148,10 @@ public class Actor : MonoBehaviour
         return false;
     }
 
+    public virtual bool IsFalling()
+    {
+        return false;
+    }
     public virtual void SetLastBlockpoint(Vector3 point)
     {
         lastBlockPoint = point;
@@ -215,6 +219,11 @@ public class Actor : MonoBehaviour
     }
 
     public virtual bool ShouldDustOnStep()
+    {
+        return false;
+    }
+
+    public virtual bool IsClimbing()
     {
         return false;
     }

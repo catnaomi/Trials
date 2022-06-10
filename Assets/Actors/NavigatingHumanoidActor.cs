@@ -239,6 +239,10 @@ public class NavigatingHumanoidActor : Actor, INavigates
                 ignoreRoot = false;
             }
         }
+        else if (IsFalling()) // likely a hurt fall animation
+        {
+            ignoreRoot = true;
+        }
         else
         {
             Vector3 worldDeltaPosition = nav.nextPosition - transform.position;
@@ -365,7 +369,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
             }
             airTime += Time.fixedDeltaTime;
             lastAirTime = airTime;
-            if (animancer.States.Current == navstate.fall) velocity += xzVel;
+            if (IsFalling()) velocity += xzVel;
         }
         velocity += yVel * Vector3.up * Time.fixedDeltaTime;
         this.GetComponent<CharacterController>().Move((velocity));
@@ -385,10 +389,14 @@ public class NavigatingHumanoidActor : Actor, INavigates
         return GetGrounded(out RaycastHit unused);
     }
 
+    public override bool IsGrounded()
+    {
+        return GetGrounded();
+    }
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         //CharacterController cc = this.GetComponent<CharacterController>();
-        if (!GetGrounded() && cc.isGrounded && animancer.States.Current == navstate.fall)
+        if (!GetGrounded() && cc.isGrounded && IsFalling())
         {
             Debug.DrawLine(this.transform.position, hit.point, Color.blue);
             Vector3 dir = this.transform.position - hit.point;
@@ -468,7 +476,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
         if (!ignoreRoot) transform.rotation = animancer.Animator.rootRotation;
         position.y = nav.nextPosition.y;
         Vector3 dir = position - this.transform.position;
-        if (!ignoreRoot && ((animancer.States.Current != navstate.idle && animancer.States.Current != navstate.fall) || !Physics.SphereCast(this.transform.position + (Vector3.up * positionReference.eyeHeight), 0.25f, dir, out RaycastHit hit, dir.magnitude, LayerMask.GetMask("Terrain"))))
+        if (!ignoreRoot && ((animancer.States.Current != navstate.idle && !IsFalling()) || !Physics.SphereCast(this.transform.position + (Vector3.up * positionReference.eyeHeight), 0.25f, dir, out RaycastHit hit, dir.magnitude, LayerMask.GetMask("Terrain"))))
         {
             cc.enabled = false;
             transform.position = position;
@@ -581,7 +589,10 @@ public class NavigatingHumanoidActor : Actor, INavigates
         return animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Actions")).IsTag(TAG) &&
                 (ALLOW_IN_TRANSITION || !animator.IsInTransition(animator.GetLayerIndex("Actions")));
     }
-
+    public override bool IsFalling()
+    {
+        return animancer.States.Current == navstate.fall;
+    }
     public bool CanMove()
     {
         return true;

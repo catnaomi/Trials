@@ -113,7 +113,7 @@ public class SingleWeaknessDamageHandler : HumanoidDamageHandler
         }
         else if (tink)
         {
-            if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+            if (damage.bouncesOffBlock && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
             {
                 damageable.Recoil();
             }
@@ -128,11 +128,14 @@ public class SingleWeaknessDamageHandler : HumanoidDamageHandler
             float xdot = Vector3.Dot(actor.transform.right, dir);
             float ydot = Vector3.Dot(actor.transform.forward, dir);
 
+            isFacingUp = ydot > 0f;
+
             DirectionalMixerState state = (DirectionalMixerState)animancer.Play(damageAnims.staggerLarge);
             state.Time = 0f;
             state.ParameterX = xdot;
             state.ParameterY = ydot;
             state.Events.OnEnd = _OnEnd;
+            CheckFallContinuous(state, willKill);
             hurt = state;
 
             animancer.Layers[HumanoidAnimLayers.BilayerBlend].Stop();

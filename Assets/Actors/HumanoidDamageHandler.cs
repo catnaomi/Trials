@@ -23,7 +23,8 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
     public AnimancerState hurt;
     public AnimancerState block;
-
+    public AnimancerState fall;
+    AnimancerState invuln;
     public Hitbox lastHitbox;
     protected ClipTransition blockStagger;
     protected ClipTransition guardBreak;
@@ -37,6 +38,8 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     {
         AnimancerState state = animancer.Play(damageAnims.recoil);
         state.Events.OnEnd = _OnEnd;
+        isFacingUp = true;
+        CheckFallContinuous(state, false);
         hurt = state;
         actor.OnHurt.Invoke();
     }
@@ -82,7 +85,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
     public virtual void TakeDamage(DamageKnockback damage)
     {
-        if (!actor.IsAlive()) return;
+        if (!actor.IsAlive() || IsInInvulnClip()) return;
         bool isCrit = IsCritVulnerable();
         float damageAmount = damage.GetDamageAmount(isCrit);
         if (actor.IsTimeStopped())
@@ -173,6 +176,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 ClipTransition clip = guardBreak;
                 AnimancerState state = animancer.Play(clip);
                 state.Events.OnEnd = _OnEnd;
+                CheckFallContinuous(state, willKill);
                 hurt = state;
                 actor.OnHurt.Invoke();
                 damage.OnCrit.Invoke();
@@ -229,6 +233,17 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 stagger = damage.staggers.onHit;
             }
 
+            if (actor.IsClimbing())
+            {
+                if (willKill)
+                {
+                    stagger = DamageKnockback.StaggerType.Knockdown;
+                }
+                else
+                {
+                    stagger = DamageKnockback.StaggerType.Flinch;
+                }
+            }
             bool isFlinch = (stagger == DamageKnockback.StaggerType.Flinch);
             if (stagger == DamageKnockback.StaggerType.Flinch)
             {
@@ -244,19 +259,28 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 dir = dir.normalized * (isFacingUp ? 1f : -1f);
                 ClipTransition clip = (!isFacingUp) ? damageAnims.knockdownFaceDown : damageAnims.knockdownFaceUp;
                 AnimancerState state = animancer.Play(clip);
-                
-                
+
+                SetInvulnClip(state);
                 state.Events.OnEnd = () =>
                 {
-                    AnimancerState prone = animancer.Play((!isFacingUp) ? damageAnims.proneFaceDown : damageAnims.proneFaceUp);
-                    prone.NormalizedTime = 0f;
-                    hurt = prone;
-                    if (willKill)
+                    if (actor.IsGrounded())
                     {
-                        Die();
+                        AnimancerState prone = animancer.Play((!isFacingUp) ? damageAnims.proneFaceDown : damageAnims.proneFaceUp);
+                        prone.NormalizedTime = 0f;
+                        SetInvulnClip(prone);
+                        hurt = prone;
+                        if (willKill)
+                        {
+                            Die();
+                        }
+                    }
+                    else
+                    {
+                        StartHurtFall(willKill);
                     }
                 };
                 hurt = state;
+                fall = hurt;
                 if (!willKill)
                 {
                     actor.StartCoroutine(EndProne(isFacingUp));
@@ -267,13 +291,15 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 AnimancerState state = animancer.Play(damageAnims.crumple);
 
 
+                CheckFallContinuous(state, willKill);
+                SetInvulnClip(state);
                 if (willKill)
                 {
-                    Die();
+                    state.Events.OnEnd = Die;
                 }
                 else
                 {
-                    actor.StartCoroutine(EndProne(false));
+                    actor.StartCoroutine(EndProne(true));
                 }
                 hurt = state;
             }
@@ -282,9 +308,11 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 AnimancerState state = animancer.Play(damageAnims.fallOver);
 
 
+                CheckFallContinuous(state, willKill);
+                SetInvulnClip(state);
                 if (willKill)
                 {
-                    Die();
+                    state.Events.OnEnd = Die;
                 }
                 else
                 {
@@ -296,10 +324,12 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             {
                 AnimancerState state = animancer.Play(damageAnims.spinDeath);
 
-
+                
+                CheckFallContinuous(state, willKill);
+                SetInvulnClip(state);
                 if (willKill)
                 {
-                    Die();
+                    state.Events.OnEnd = Die;
                 }
                 else
                 {
@@ -320,6 +350,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                     state.ParameterX = xdot;
                     state.ParameterY = ydot;
                     state.Events.OnEnd = _OnEnd;
+                    CheckFallContinuous(state, willKill);
                     hurt = state;
                     maxTime = state.RemainingDuration / state.Speed;
                 }
@@ -338,11 +369,14 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 float xdot = Vector3.Dot(actor.transform.right, dir);
                 float ydot = Vector3.Dot(actor.transform.forward, dir);
 
+                isFacingUp = ydot > 0f;
+
                 DirectionalMixerState state = (DirectionalMixerState)animancer.Play(damageAnims.staggerLarge);
                 state.Time = 0f;
                 state.ParameterX = xdot;
                 state.ParameterY = ydot;
                 state.Events.OnEnd = _OnEnd;
+                CheckFallContinuous(state, willKill);
                 hurt = state;
                 maxTime = state.RemainingDuration / state.Speed;
             }
@@ -351,6 +385,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 ClipTransition clip = damageAnims.GetClipFromStaggerType(stagger);
                 AnimancerState state = animancer.Play(clip);
                 state.Events.OnEnd = _OnEnd;
+                CheckFallContinuous(state, willKill);
                 hurt = state;
                 actor.transform.rotation = Quaternion.LookRotation(-(actor.transform.position - damage.source.transform.position), Vector3.up);
                 maxTime = clip.MaximumDuration / clip.Speed;
@@ -427,11 +462,27 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         actor.Die();
     }
 
+    public bool IsInInvulnClip()
+    {
+        return animancer.States.Current == invuln;
+    }
+
+    public void SetInvulnClip(AnimancerState state)
+    {
+        invuln = state;
+    }
     IEnumerator EndProne(bool faceUp)
     {
         yield return new WaitForSeconds(3f);
+        if (!actor.IsGrounded())
+        {
+            StartHurtFall(false);
+            yield break;
+        }
         AnimancerState state = animancer.Play((faceUp) ? damageAnims.getupFaceUp : damageAnims.getupFaceDown);
+        SetInvulnClip(state);
         hurt = state;
+        hurt.Events.OnEnd = _OnEnd;
     }
     IEnumerator CriticalTimeOut()
     {
@@ -471,6 +522,76 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             yield return new WaitForSeconds(unfreezeDamageDelay);
         }
         inFrozenRoutine = false;
+    }
+
+    protected System.Action CheckFallOnEnd(System.Action end, bool willKill)
+    {
+        void _CheckFall()
+        {
+            if (actor.IsGrounded())
+            {
+                end();
+            }
+            else
+            {
+                StartHurtFall(willKill);
+            }
+        }
+        return _CheckFall;
+    }
+
+    IEnumerator HurtFallRoutine(AnimancerState state, bool willkill)
+    {
+        while (state.IsActive)
+        {
+            if (actor.IsGrounded())
+            {
+                yield return new WaitForSeconds(0.1f);
+                if (!actor.IsGrounded()) continue;
+
+                AnimancerState landState = animancer.Play((isFacingUp) ? damageAnims.landFaceUp : damageAnims.landFaceDown);
+                if (!willkill)
+                {
+                    actor.StartCoroutine(EndProne(isFacingUp));
+                }
+                else
+                {
+                    landState.Events.OnEnd = Die;
+                    hurt = landState;
+                }
+                hurt = landState;
+                yield break;
+            }
+            yield return null;
+        }
+    }
+
+    protected void CheckFallContinuous(AnimancerState current, bool willKill)
+    {
+        actor.StartCoroutine(HurtFallRoutineContinuous(current, willKill));
+    }
+
+    IEnumerator HurtFallRoutineContinuous(AnimancerState state, bool willKill)
+    {
+        while (state.IsActive)
+        {
+            if (!actor.IsGrounded())
+            {
+                yield return new WaitForSeconds(0.1f);
+                if (actor.IsGrounded()) continue;
+
+                StartHurtFall(willKill);
+                yield break;
+            }
+            yield return null;
+        }
+    }
+
+    public void StartHurtFall(bool willKill)
+    {
+        hurt = animancer.Play(isFacingUp ? damageAnims.fallFaceUp : damageAnims.fallFaceDown);
+        fall = hurt;
+        actor.StartCoroutine(HurtFallRoutine(hurt, willKill));
     }
     public bool IsCritVulnerable()
     {

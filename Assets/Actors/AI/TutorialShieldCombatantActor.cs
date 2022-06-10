@@ -9,9 +9,6 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
 {
     HumanoidNPCInventory inventory;
     [Header("Combatant Settings")]
-    public float MinEngageRange = 3.5f;
-    public float MaxEngageRange = 10f;
-    [Space(5)]
     public float SightRange = 15f;
     public bool InSightRange;
     [Space(5)]
@@ -47,15 +44,12 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
     public override void ActorStart()
     {
         base.ActorStart();
-        
-        closeRange = MinEngageRange;
-        bufferRange = MaxEngageRange;
         _MoveOnEnd = () =>
         {
             animancer.Play(navstate.move, 0.1f);
         };
 
-        damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
+        damageHandler = new SingleWeaknessDamageHandler(this, damageAnims, animancer);
         damageHandler.SetEndAction(_MoveOnEnd);
         damageHandler.SetBlockEndAction(_MoveOnEnd);
 
@@ -268,6 +262,11 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
     public override bool IsBlocking()
     {
         return !damageHandler.IsCritVulnerable();
+    }
+
+    public override bool IsFalling()
+    {
+        return animancer.States.Current == navstate.fall || animancer.States.Current == damageHandler.fall;
     }
 
     public override List<DamageResistance> GetBlockResistance()

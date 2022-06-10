@@ -175,6 +175,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public ClipTransition swimEnd;
     public ClipTransition swimStart;
     public ClipTransition swimDive;
+    public ClipTransition swimDiveHurt;
+    public ClipTransition swimDiveRise;
     [Space(5)]
     public ClipTransition resurrectFaceUp;
     public ClipTransition resurrectFaceDown;
@@ -270,6 +272,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         movementController = this.GetComponent<PlayerActor>();
         animancer = this.GetComponent<AnimancerComponent>();
         interactables = new List<Interactable>();
+
+        state = new AnimState();
         state.move = (MixerState)animancer.States.GetOrCreate(moveAnim);
         state.attack = animancer.States.GetOrCreate(rollAnim);
         animancer.Play(state.move);
@@ -1283,6 +1287,51 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             animancer.Layers[0].ApplyAnimatorIK = true;
         }
         #endregion
+
+        #region hurt fall
+        else if (animancer.States.Current == damageHandler.fall)
+        {
+            if (CheckWater())
+            {
+                AnimancerState astate = animancer.Play(swimDiveHurt);
+                StartCoroutine(DecelXZVel(1f));
+                speed = 0f;
+
+                astate.Events.OnEnd = () =>
+                {
+                    AnimancerState rstate = animancer.Play(swimDiveRise);
+                    rstate.Events.OnEnd = () =>
+                    {
+                        state.swim = animancer.Play(swimAnim, 1f);
+                    };
+                };
+
+                if (!attributes.HasHealthRemaining())
+                {
+                    Resurrect(astate);
+                }
+            }
+            else if (!isGrounded && (rayHit.collider != null || sphereHit.collider != null))
+            {
+                //Physics.Raycast(bottom, Vector3.down, out groundRayHit, 0.2f, LayerMask.GetMask("Terrain"));
+                Vector3 dir = Vector3.forward;
+                if (slopeAngle > maxSlideAngle && slopeAngle < 90f)
+                {
+                    dir = Vector3.ProjectOnPlane(groundNormal, Vector3.up).normalized;
+                }
+                else if (rayHit.collider == null && sphereHit.collider != null)
+                {
+                    dir = this.transform.position - sphereHit.point;
+                }
+
+                dir.y = 0f;
+                xzVel = Vector3.MoveTowards(xzVel, dir.normalized * 1f, slideOffSpeed * Time.deltaTime);
+
+
+                Debug.DrawRay(this.transform.position, dir * 5f, Color.magenta);
+            }
+        }
+        #endregion
         #endregion
 
         if (TimeTravelController.time != null && TimeTravelController.time.IsSlowingTime())
@@ -1396,6 +1445,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             UnsnapLedge();   
         }
+        if (IsHurt() && IsFalling())
+        {
+            UnsnapLedge();
+        }
         if (isCarrying)
         {
             if (animancer.States.Current != state.move && animancer.States.Current != state.jump && animancer.States.Current != state.fall && animancer.States.Current != state.carry)
@@ -1505,6 +1558,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     IEnumerator RewindToSafePoint()
     {
+        float rewindTimeout = 3f;
         float health = attributes.health.current;
         ActorTimeTravelHandler timeTravelHandler = this.GetComponent<ActorTimeTravelHandler>();
         TimeTravelController.time.IgnoreLimits();
@@ -1513,10 +1567,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             //Debug.Log("distance: " + Vector3.Distance(this.transform.position, lastSafePoint));
             yield return null;
-            
+            rewindTimeout -= Time.deltaTime;
         }
-        while (timeTravelHandler.IsRewinding() && Vector3.Distance(this.transform.position, lastSafePoint) > 2f);
+        while (timeTravelHandler.IsRewinding() && Vector3.Distance(this.transform.position, lastSafePoint) > 2f && rewindTimeout > 0);  
         TimeTravelController.time.CancelRewind();
+        if (rewindTimeout <= 0)
+        {
+            Debug.Log("rewind timed out!");
+        }
         yield return new WaitWhile(() => { return timeTravelHandler.IsRewinding(); });
         this.attributes.health.current = health;
         this.attributes.ReduceHealth(30f);
@@ -2986,12 +3044,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         OnDie.Invoke();
     }
 
-    IEnumerator ResurrectCoroutine()
+    public void Resurrect(AnimancerState rez)
     {
-        yield return new WaitForSecondsRealtime(1f);
-        bool facingUp = damageHandler.isFacingUp;
-        state.resurrect = animancer.Play(facingUp ? resurrectFaceUp : resurrectFaceDown);
-        state.resurrect.Events.OnEnd = () =>
+        resurrecting = true;
+        attributes.lives--;
+        OnDie.Invoke();
+        rez.Speed *= 0.1f;
+        ResurrectAnimation(rez);
+    }
+    public void ResurrectAnimation(AnimancerState rez)
+    {
+        rez.Events.OnEnd = () =>
         {
             _MoveOnEnd();
             dead = false;
@@ -2999,6 +3062,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         };
         attributes.RecoverHealth(999f);
     }
+
+    IEnumerator ResurrectCoroutine()
+    {
+        yield return new WaitForSecondsRealtime(1f);
+        bool facingUp = damageHandler.isFacingUp;
+        state.resurrect = animancer.Play(facingUp ? resurrectFaceUp : resurrectFaceDown);
+        ResurrectAnimation(state.resurrect);
+    }
+
     #endregion
 
     #region IK
@@ -3211,12 +3283,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return animancer.States.Current == state.aim && (state.aim != state.move || aiming);
     }
 
-    public bool IsFalling()
+    public override bool IsFalling()
     {
-        return animancer.States.Current == state.fall;
+        return animancer.States.Current == state.fall || animancer.States.Current == damageHandler.fall;
     }
 
-    public bool IsClimbing()
+    public bool IsHurt()
+    {
+        return animancer.States.Current == damageHandler.hurt;
+    }
+    public override bool IsClimbing()
     {
         return animancer.States.Current == state.climb;
     }

@@ -9,9 +9,6 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
 {
     HumanoidNPCInventory inventory;
     [Header("Combatant Settings")]
-    public float MinEngageRange = 3.5f;
-    public float MaxEngageRange = 10f;
-    [Space(5)]
     public float SightRange = 15f;
     public bool InSightRange;
     [Space(5)]
@@ -52,9 +49,6 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     public override void ActorStart()
     {
         base.ActorStart();
-        
-        closeRange = MinEngageRange;
-        bufferRange = MaxEngageRange;
         _MoveOnEnd = () =>
         {
             animancer.Play(navstate.move, 0.1f);
@@ -137,10 +131,18 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
                 }
             }
         }
-        if (animancer.States.Current == cstate.attack && !IsHitboxActive())
+        if (animancer.States.Current == cstate.attack)
         {
-            Vector3 dir = (destination - this.transform.position).normalized;
-            this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, dir, FarAttackRotationSpeed * Mathf.Deg2Rad * Time.deltaTime, 0f));
+            if (!IsHitboxActive())
+            {
+                Vector3 dir = (destination - this.transform.position).normalized;
+                this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, dir, FarAttackRotationSpeed * Mathf.Deg2Rad * Time.deltaTime, 0f));
+            }
+            if (!GetGrounded() && airTime > 1f)
+            {
+                navstate.fall = animancer.Play(fallAnim, 1f);
+                HitboxActive(0);
+            }
         }
     }
 
@@ -300,6 +302,11 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     public override bool IsAttacking()
     {
         return animancer.States.Current == cstate.attack;
+    }
+
+    public override bool IsFalling()
+    {
+        return animancer.States.Current == navstate.fall || animancer.States.Current == damageHandler.fall;
     }
 
     public override void ProcessDamageKnockback(DamageKnockback damageKnockback)

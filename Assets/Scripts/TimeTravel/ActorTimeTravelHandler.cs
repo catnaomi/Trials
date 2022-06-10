@@ -166,7 +166,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         {
             if (actorData.animationClip != null)
             {
-                AnimancerState mainState = animancer.Layers[HumanoidAnimLayers.TimeEffects].CreateState("loaded_time_state-"+data.time.ToString("F3"),actorData.animationClip);//animancer.Layers[HumanoidAnimLayers.TimeEffects].Play(actorData.animationClip, TimeTravelController.time.rewindStepDuration);
+                AnimancerState mainState = animancer.Layers[HumanoidAnimLayers.TimeEffects].GetOrCreateState("loaded_time_state-"+data.time.ToString("F3"),actorData.animationClip);//animancer.Layers[HumanoidAnimLayers.TimeEffects].Play(actorData.animationClip, TimeTravelController.time.rewindStepDuration);
                 mainState.NormalizedTime = actorData.animancerNormalizedTime;
                 mainState.Speed = actorData.animancerSpeed * speed;
                 if (speed > 0f)
@@ -231,7 +231,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         if (actor is PlayerActor player)
         {
             player.walkAccelReal = player.walkAccel;
-            if (((PlayerTimeTravelData)lastData).isCarrying || player.isCarrying)
+            if (lastData != null && (((PlayerTimeTravelData)lastData).isCarrying || player.isCarrying))
             {
                 if (player.carryable != null)
                 {

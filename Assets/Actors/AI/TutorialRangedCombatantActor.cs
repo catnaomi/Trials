@@ -8,9 +8,6 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
 {
     HumanoidNPCInventory inventory;
     [Header("Combatant Settings")]
-    public float MinEngageRange = 3.5f;
-    public float MaxEngageRange = 10f;
-    [Space(5)]
     public float SightRange = 15f;
     public bool InSightRange;
     [Space(5)]
@@ -44,9 +41,6 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
     public override void ActorStart()
     {
         base.ActorStart();
-        
-        closeRange = MinEngageRange;
-        bufferRange = MaxEngageRange;
         _MoveOnEnd = () =>
         {
             animancer.Play(navstate.move, 0.1f);
@@ -293,6 +287,10 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
         return animancer.States.Current == cstate.attack;
     }
 
+    public override bool IsFalling()
+    {
+        return animancer.States.Current == navstate.fall || animancer.States.Current == damageHandler.fall;
+    }
     public override void ProcessDamageKnockback(DamageKnockback damageKnockback)
     {
         damageHandler.TakeDamage(damageKnockback);
