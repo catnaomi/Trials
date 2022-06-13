@@ -736,9 +736,38 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     animancer.Play(state.move, 0.5f);
                 }
             }
+            else if (stickDirection.magnitude > 0)
+            {
+                lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * sprintTurnSpeed * Time.deltaTime, 1f);
+                moveDirection = lookDirection;
+            }
+            else
+            {
+                lookDirection = moveDirection = this.transform.forward;
+            }
             if (!isGrounded && lastAirTime > fallBufferTime)
             {
                 state.fall = animancer.Play(fallAnim);
+            }
+            if (attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
+            {
+                if (!inventory.IsMainDrawn())
+                {
+                    inventory.SetDrawn(true, true);
+                }
+                if (inventory.IsMainDrawn())
+                {
+                    if (slash)
+                    {
+                        DashSlash();
+                    }
+                    else if (thrust)
+                    {
+                        DashThrust();
+                    }
+                }
+                attack = false;
+                slash = false;
             }
             animancer.Layers[0].ApplyAnimatorIK = false;
         }
@@ -830,6 +859,26 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     xzVel = xzVel.magnitude * stickDirection.normalized;
                 }
                 state.jump = animancer.Play(runJumpAnim);
+            }
+            if (attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
+            {
+                if (!inventory.IsMainDrawn())
+                {
+                    inventory.SetDrawn(true, true);
+                }
+                if (inventory.IsMainDrawn())
+                {
+                    if (slash)
+                    {
+                        DashSlash();
+                    }
+                    else if (thrust)
+                    {
+                        DashThrust();
+                    }
+                }
+                attack = false;
+                slash = false;
             }
             animancer.Layers[0].ApplyAnimatorIK = false;
         }
