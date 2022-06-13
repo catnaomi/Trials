@@ -328,6 +328,33 @@ public class SceneLoader : MonoBehaviour
         instance.StartCoroutine(instance.LoadScenesRoutine());
     }
 
+    public static AsyncOperation LoadSceneAdditively(string scene)
+    {
+        return SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
+    }
+    public static void EnsureScenesAreUnloaded(string primary, params string[] secondaries)
+    {
+        if (SceneManager.GetSceneByName(primary) != null)
+        {
+            instance.StartCoroutine(instance.UnloadScene(primary));
+        }
+
+        foreach (string scene in secondaries)
+        {
+            if (SceneManager.GetSceneByName(scene) != null)
+            {
+                instance.StartCoroutine(instance.UnloadScene(scene));
+            }
+        }
+    }
+
+    IEnumerator UnloadScene(string scene)
+    {
+        var operation = SceneManager.UnloadSceneAsync(scene);
+        yield return operation;
+        Debug.Log("scene " + name + " unloaded");
+    }
+
     public static void SetActiveScene(string scene)
     {
         Scene ascene = SceneManager.GetSceneByName(scene);
@@ -350,6 +377,11 @@ public class SceneLoader : MonoBehaviour
     public static void ShouldLoadInitScene(bool init)
     {
         instance.shouldLoadInitScene = init;
+    }
+
+    public static bool IsSceneLoaded(string scene)
+    {
+        return SceneManager.GetSceneByName(scene) != null;
     }
 
     public static UnityEvent GetOnActiveSceneChange()
