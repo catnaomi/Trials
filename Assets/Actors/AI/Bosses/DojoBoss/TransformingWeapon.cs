@@ -4,14 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-[CreateAssetMenu(fileName = "BladeWeapon", menuName = "ScriptableObjects/Weapons/Qi's Transforming Weapon", order = 1)]
+[CreateAssetMenu(fileName = "BladeWeapon", menuName = "ScriptableObjects/Weapons/Special/Qi's Transforming Weapon", order = 1)]
 public class TransformingWeapon : BladeWeapon
 {
-
     TransformingWeaponModelHandler handler;
-    DojoBossCombatantActor.WeaponState weaponState;
+    [HideInInspector]public DojoBossCombatantActor.WeaponState weaponState;
 
-    TransformingSubWeapon subWeapon;
+    public TransformingSubWeapon subWeapon;
     TransformingWeaponModelHandler subHandler;
     public override void EquipWeapon(Actor actor)
     {
@@ -37,7 +36,8 @@ public class TransformingWeapon : BladeWeapon
         hitboxes.OnHitTerrain.AddListener(TerrainContact);
         hitboxes.OnHitWall.AddListener(WallContact);
 
-        subWeapon = ScriptableObject.CreateInstance<TransformingSubWeapon>();
+        subWeapon = ScriptableObject.Instantiate(subWeapon);
+        
         subWeapon.prefab = this.prefab;
         subWeapon.baseDamage = this.baseDamage;
         subWeapon.width = 0.25f;
@@ -47,15 +47,17 @@ public class TransformingWeapon : BladeWeapon
         subWeapon.elements = this.elements;
         subWeapon.EquippableOff = true;
         subWeapon.OneHanded = true;
-        subWeapon.itemName = this.itemName+"2";
         subWeapon.OffHandEquipSlot = Inventory.EquipSlot.lHip;
-
+        
+        subWeapon.primaryWeapon = this;
         holder.GetComponent<HumanoidNPCInventory>().Add(subWeapon);
         holder.GetComponent<HumanoidNPCInventory>().EquipOffHandWeapon(subWeapon);
 
 
         subHandler = subWeapon.GetModel().GetComponent<TransformingWeaponModelHandler>();
         UpdateTransformWeapon();
+
+        
         //slashMesh.transform.rotation = Quaternion.identity;
     }
 
@@ -66,8 +68,11 @@ public class TransformingWeapon : BladeWeapon
         handler = GetModel().GetComponent<TransformingWeaponModelHandler>();
         subHandler = subWeapon.GetModel().GetComponent<TransformingWeaponModelHandler>();
 
-
-        if (handler.state != weaponState)
+        if (weaponState == DojoBossCombatantActor.WeaponState.Bow && (handler.state != DojoBossCombatantActor.WeaponState.None))
+        {
+            handler.state = DojoBossCombatantActor.WeaponState.None;
+        }
+        else if (handler.state != weaponState)
         {
             handler.state = weaponState;
             GenerateHitboxes();
@@ -91,6 +96,10 @@ public class TransformingWeapon : BladeWeapon
         if (weaponState == DojoBossCombatantActor.WeaponState.Daox2)
         {
             subHandler.state = DojoBossCombatantActor.WeaponState.Daox2;
+        }
+        else if (weaponState == DojoBossCombatantActor.WeaponState.Bow)
+        {
+            subHandler.state = DojoBossCombatantActor.WeaponState.Bow;
         }
         else
         {
@@ -160,7 +169,7 @@ public class TransformingWeapon : BladeWeapon
         {DojoBossCombatantActor.WeaponState.Hammer, new WeaponStats(1f, 0.25f) },
         {DojoBossCombatantActor.WeaponState.Daox2, new WeaponStats(0.75f, 0.1f) },
         {DojoBossCombatantActor.WeaponState.Spear, new WeaponStats(1.5f, 0.2f) },
-
+        {DojoBossCombatantActor.WeaponState.Bow, new WeaponStats(1f, 0.25f) },
          {DojoBossCombatantActor.WeaponState.None, new WeaponStats(1.5f, 0.2f) }
     };
     struct WeaponStats

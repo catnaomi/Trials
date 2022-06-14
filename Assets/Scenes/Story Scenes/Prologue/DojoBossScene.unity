@@ -1784,8 +1784,8 @@ MonoBehaviour:
     _Speed: 1
     _NormalizedStartTime: 0
   JumpShot: {fileID: 0}
-  RangedShot: {fileID: 0}
-  PillarShot: {fileID: 0}
+  RangedAttack: {fileID: 11400000, guid: bfa457ecef813e44c9cbcea731d8f7af, type: 2}
+  aiming: 0
   Summon: {fileID: 0}
   damageAnims: {fileID: 11400000, guid: 9d9b14e5de6ad3d449aa822da5bc08b9, type: 2}
   AttackRotationSpeed: 720
@@ -2033,6 +2033,139 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0.92, z: 0}
+--- !u!82 &315540959
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 315540948}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: -6717479181932004499, guid: 1d804c0b8e0c699499513b803216061d,
+    type: 2}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &315540960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 315540948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20574a5f76923f74fba2f5acf3dea1e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animSounds: {fileID: 11400000, guid: aea093d2a4dacd446b7cbe83d8da0de3, type: 2}
+  footSourceLight: {fileID: 315540959}
+  footSourceHeavy: {fileID: 315540959}
+  footstepDelay: 0.25
+  footL: {fileID: 0}
+  footR: {fileID: 0}
+  waterSource: {fileID: 315540959}
+  combatWhiffSource: {fileID: 315540959}
+  combatHitSource: {fileID: 315540959}
+  OnDust:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDashDust:
+    m_PersistentCalls:
+      m_Calls: []
+  OnArrowDraw:
+    m_PersistentCalls:
+      m_Calls: []
+  OnArrowNock:
+    m_PersistentCalls:
+      m_Calls: []
+  OnGunLoad:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &335651973 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -7502789784821338417, guid: 480b2aac360f4f541a903e93e1acfcf4,

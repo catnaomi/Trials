@@ -1268,7 +1268,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             if (inventory.IsRangedEquipped())
             {
-                RangedWeapon rwep = (RangedWeapon)inventory.GetRangedWeapon();
+                IRangedWeapon rwep = (IRangedWeapon)inventory.GetRangedWeapon();
                 bool anyPlaying = animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying();
                 bool atk = false;
                 bool begin = false;
@@ -1289,7 +1289,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         break;
                 }
 
-                rwep.moveset.aimAttack.ProcessAimAttack(this, aiming, slash || thrust, IsAttackHeld());
+                inventory.GetRangedWeapon().moveset.aimAttack.ProcessAimAttack(this, aiming, slash || thrust, IsAttackHeld());
             }
             if (shouldDodge)
             {

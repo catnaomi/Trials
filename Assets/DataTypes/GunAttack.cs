@@ -13,7 +13,7 @@ public class GunAttack : AimAttack
         }
         AnimancerComponent animancer = player.animancer;
         PlayerInventory inventory = player.inventory;
-        RangedWeapon rwep = (RangedWeapon)player.inventory.GetRangedWeapon();
+        IRangedWeapon rwep = (IRangedWeapon)player.inventory.GetRangedWeapon();
         bool anyPlaying = animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying();
 
         if (!anyPlaying)

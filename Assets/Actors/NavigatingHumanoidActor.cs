@@ -158,6 +158,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
         }
         if (animancer.States.Current == navstate.idle)
         {
+            nav.enabled = true;
             ignoreRoot = false;
             nav.isStopped = true;
             if (destination != Vector3.zero)
@@ -185,6 +186,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
         }
         else if (animancer.States.Current == navstate.move)
         {
+            nav.enabled = true;
             nav.isStopped = false;
             float xmov = 0;
             float ymov = 0;

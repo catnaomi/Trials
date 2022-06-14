@@ -58,8 +58,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public ClipTransition JumpLand;
     public InputAttack JumpShot;
     [Space(10)]
-    public InputAttack RangedShot;
-    public InputAttack PillarShot;
+    public AimAttack RangedAttack;
+    [ReadOnly]public bool aiming;
+    float aimTime;
     [Space(10)]
     public InputAttack Summon;
     [Space(5)]
@@ -218,7 +219,16 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 {
                     action = CrouchAction.JumpTo_Pillar3;
                 }*/
-                StartCrouch(actionAfterCrouch);
+                //StartCrouch(actionAfterCrouch);
+
+                if (!aiming)
+                {
+                    StartAiming();
+                }
+                else
+                {
+                    if (aimTime > 1f) StartRangedAttack();
+                }
                 /*
                 if (!onPillar)
                 {
@@ -283,6 +293,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         else if (crouching)
         {
             ProcessCrouch();
+        }
+        if (aiming)
+        {
+            aimTime += Time.deltaTime;
+            animancer.Layers[0].ApplyAnimatorIK = true;
         }
         if (CombatTarget != null)
         {
@@ -511,6 +526,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         onPillar = false;
         _MoveOnEnd();
     }
+
+
     public void DodgeJump(Vector3 position)
     {
         DodgeJumpThen(position, JumpEnd, 1f);
@@ -533,6 +550,24 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         AnimancerState land = animancer.Play(JumpLand);
         land.Events.OnEnd = _MoveOnEnd;
         nav.enabled = true;
+    }
+
+    public void StartAiming()
+    {
+        weaponState = DojoBossCombatantActor.WeaponState.Bow;
+        OnWeaponTransform.Invoke();
+        animancer.Play(navstate.idle);
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Play(RangedAttack.GetStartClip());
+        aiming = true;
+        aimTime = 0f;
+    }
+    public void StartRangedAttack()
+    {
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+        cstate.attack = animancer.Play(RangedAttack.GetFireClip(), 0f);
+        cstate.attack.Events.OnEnd = _MoveOnEnd;
+        aiming = false;
+        OnAttack.Invoke();
     }
 
     public Vector3 GetProjectedPosition(float timeOut)
@@ -614,6 +649,47 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public override bool IsHitboxActive()
     {
         return isHitboxActive;
+    }
+
+    public void Shockwave(int active)
+    {
+        if (currentDamage == null) return;
+        currentDamage.source = this.gameObject;
+        float SHOCKWAVE_RADIUS = 2f;
+
+        bool main = (inventory.IsMainDrawn());
+        bool off = (inventory.IsOffDrawn());
+
+        Vector3 origin = this.transform.position;
+        if (active == 1 && main)
+        {
+            origin = inventory.GetMainWeapon().GetModel().transform.position;
+            if (inventory.GetMainWeapon() is BladeWeapon blade)
+            {
+                origin += inventory.GetMainWeapon().GetModel().transform.up * blade.length;
+            }
+        }
+        else if (active == 2 && off)
+        {
+            origin = inventory.GetOffWeapon().GetModel().transform.position;
+            if (inventory.GetOffWeapon() is BladeWeapon blade)
+            {
+                origin += inventory.GetOffWeapon().GetModel().transform.up * blade.length;
+            }
+        }
+
+        Collider[] colliders = Physics.OverlapSphere(origin, SHOCKWAVE_RADIUS, LayerMask.GetMask("Actors"));
+        foreach (Collider collider in colliders)
+        {
+            if (collider.TryGetComponent<IDamageable>(out IDamageable damageable) && (collider.transform.root != this.transform.root || currentDamage.canDamageSelf))
+            {
+                damageable.TakeDamage(currentDamage);
+            }
+        }
+        Debug.DrawRay(origin, Vector3.forward * SHOCKWAVE_RADIUS, Color.red, 5f);
+        Debug.DrawRay(origin, Vector3.back * SHOCKWAVE_RADIUS, Color.red, 5f);
+        Debug.DrawRay(origin, Vector3.right * SHOCKWAVE_RADIUS, Color.red, 5f);
+        Debug.DrawRay(origin, Vector3.left * SHOCKWAVE_RADIUS, Color.red, 5f);
     }
 
     public void AnimTransWep(int wep)
@@ -755,7 +831,14 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     private void OnAnimatorIK(int layerIndex)
     {
-        animancer.Animator.SetLookAtPosition(CombatTarget.transform.position + Vector3.up);
-        animancer.Animator.SetLookAtWeight(1f);
+        if (aiming)
+        {
+            RangedAttack.OnIK(animancer.Animator);
+        }
+        else
+        {
+            animancer.Animator.SetLookAtPosition(CombatTarget.transform.position + Vector3.up);
+            animancer.Animator.SetLookAtWeight(1f);
+        }
     }
 }

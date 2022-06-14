@@ -99,7 +99,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         }
         hitboxes.DestroyAll();
     }
-    public void HitboxActive(bool active)
+    public virtual void HitboxActive(bool active)
     {
         if (hitboxes == null || hitboxes.IsDestroyed())
         {

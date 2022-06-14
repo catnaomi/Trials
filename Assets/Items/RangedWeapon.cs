@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class RangedWeapon : EquippableWeapon
+public class RangedWeapon : EquippableWeapon, IRangedWeapon
 {
     protected float strength;
     [Header("Ranged Weapon Settings")]
