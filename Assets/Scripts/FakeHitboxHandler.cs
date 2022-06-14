@@ -49,4 +49,9 @@ public class FakeHitboxHandler : MonoBehaviour
     {
 
     }
+
+    public void AnimTransWep(int wep)
+    {
+
+    }
 }

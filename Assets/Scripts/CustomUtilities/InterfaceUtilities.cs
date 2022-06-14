@@ -90,5 +90,25 @@ namespace CustomUtilities
                 return null;
             }
         }
+
+        public static Transform FindRecursivelyActiveOnly(Transform transform, string name)
+        {
+            if (transform.name.ToLower().Contains(name.ToLower()) && transform.gameObject.activeInHierarchy)
+            {
+                return transform;
+            }
+            else
+            {
+                foreach (Transform child in transform)
+                {
+                    Transform find = FindRecursivelyActiveOnly(child, name);
+                    if (find != null && find.gameObject.activeInHierarchy)
+                    {
+                        return find;
+                    }
+                }
+                return null;
+            }
+        }
     }
 }

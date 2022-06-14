@@ -18,14 +18,14 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     bool wall;
     bool active;
     //[HideInInspector] WeaponController weaponController;
-    [HideInInspector] HitboxGroup hitboxes;
+    [HideInInspector] protected HitboxGroup hitboxes;
 
     ParticleSystem trailSystem;
-    MeshSwordSlash slashFX;
-    LineSwordThrust thrustFX;
+    protected MeshSwordSlash slashFX;
+    protected LineSwordThrust thrustFX;
 
-    Transform top;
-    Transform bottom;
+    protected Transform top;
+    protected Transform bottom;
     public List<DamageType> elements;
 
 
@@ -75,7 +75,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         return hitboxes;
     }
 
-    protected void GenerateHitboxes()
+    protected virtual void GenerateHitboxes()
     {
         if (hitboxes != null)
         {
@@ -155,10 +155,10 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
             thrustFX.transform.position = holder.transform.position;
             wall = false;
             //holder.attributes.ReduceAttribute(holder.attributes.stamina, this.GetPoiseCost(((HumanoidActor)holder).nextAttackType));
-            slashFX.SetTopPoint(InterfaceUtilities.FindRecursively(GetModel().transform, "_top"));
-            slashFX.SetBottomPoint(InterfaceUtilities.FindRecursively(GetModel().transform, "_bottom"));
-            thrustFX.SetTopPoint(InterfaceUtilities.FindRecursively(GetModel().transform, "_top"));
-            thrustFX.SetBottomPoint(InterfaceUtilities.FindRecursively(GetModel().transform, "_bottom"));
+            slashFX.SetTopPoint(InterfaceUtilities.FindRecursivelyActiveOnly(GetModel().transform, "_top"));
+            slashFX.SetBottomPoint(InterfaceUtilities.FindRecursivelyActiveOnly(GetModel().transform, "_bottom"));
+            thrustFX.SetTopPoint(InterfaceUtilities.FindRecursivelyActiveOnly(GetModel().transform, "_top"));
+            thrustFX.SetBottomPoint(InterfaceUtilities.FindRecursivelyActiveOnly(GetModel().transform, "_bottom"));
             float staminaCost = this.GetStamCost() * 1;
             if (dk.isSlash)
             {
@@ -724,11 +724,11 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         return 5f + (5f * weight) + chargeCost;
     }
 
-    private void WallContact()
+    protected void WallContact()
     {
         wall = true;
     }
-    private void TerrainContact()
+    protected void TerrainContact()
     {
         Hitbox contactBox = hitboxes.terrainContactBox;
 

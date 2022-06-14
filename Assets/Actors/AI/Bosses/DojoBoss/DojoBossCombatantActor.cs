@@ -23,7 +23,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
      */
     [Header("Combatant Settings")]
     public InputAttack MeleeCombo1; // 1h slash -> 2h slash -> stab
-    public InputAttack MeleeCombo2; // 3x stab - > slash
+    public InputAttack MeleeCombo2; // 3x stab left hand - > slash R -(transform to gs)> slash R
     public InputAttack MeleeComboApproach; // (jump into position) walk slash 1h -> 2h slash -> stab
     [Space(10)]
     public InputAttack GroundPlunge;
@@ -63,7 +63,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     [SerializeField] float jumpVertMult = 1f;
     Vector3 startJumpPosition;
     Vector3 endJumpPosition;
-
+    [Header("Enumerated States")]
+    public WeaponState weaponState;
+    public UnityEvent OnWeaponTransform;
     CharacterController cc;
     protected CombatState cstate;
     protected struct CombatState
@@ -72,6 +74,19 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         public AnimancerState jump;
     }
 
+    public enum WeaponState
+    {
+        None,           // 0
+        Quarterstaff,   // 1
+        Scimitar,       // 2
+        Greatsword,     // 3
+        Rapier,         // 4
+        Bow,            // 5
+        Hammer,         // 6
+        Daox2,          // 7
+        MagicStaff,     // 8
+        Spear           // 9
+    }
     System.Action _MoveOnEnd;
     public override void ActorStart()
     {
@@ -136,7 +151,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 float navdist = GetDistanceToTarget();
                 float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
-
+                StartMeleeCombo1();
+                /*
                 Transform pillar = pillar1;
                 int r = Random.Range(1, 4);
                 if (r == 1)
@@ -168,7 +184,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                         DodgeJump(pillar.position);
                         onPillar = true;
                     }
-                }
+                }*/
             }
         }
         if (animancer.States.Current == cstate.jump)
@@ -177,19 +193,29 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             cc.enabled = false;
             shouldNavigate = false;
 
-            Vector3 targetPosition = Vector3.Lerp(startJumpPosition, endJumpPosition, jumpHorizCurve.Evaluate(t)) + Vector3.up * jumpVertCurve.Evaluate(t);
+            Vector3 targetPosition = Vector3.Lerp(startJumpPosition, endJumpPosition, jumpHorizCurve.Evaluate(t)) + Vector3.up * jumpVertCurve.Evaluate(t) * jumpVertMult;
 
             this.transform.position = targetPosition;
 
             cc.enabled = true;
             yVel = 0f;
         }
+        if (Vector3.Distance(CombatTarget.transform.position, this.transform.position) < 10f)
+        {
+            //animancer.Layers[0].ApplyAnimatorIK = true;
+            //animancer.Animator.SetLookAtPosition(headPoint);
+        }
+        else
+        {
+            //animancer.Layers[0].ApplyAnimatorIK = false;
+        }
     }
 
-    public void StartCloseAttack()
+    public void StartMeleeCombo1()
     {
         RealignToTarget();
         //cstate.attack = CloseAttack.ProcessHumanoidAttack(this, _MoveOnEnd);
+        cstate.attack = MeleeCombo1.ProcessHumanoidAttack(this, _MoveOnEnd);
         OnAttack.Invoke();
     }
 
@@ -284,6 +310,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public override bool IsHitboxActive()
     {
         return isHitboxActive;
+    }
+
+    public void AnimTransWep(int wep)
+    {
+        weaponState = (WeaponState)wep;
+        OnWeaponTransform.Invoke();
     }
 
     public void AnimDrawWeapon(int slot)
@@ -411,5 +443,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             rangedWeapon.FlashWarning();
         }
+    }
+
+    private void OnAnimatorIK(int layerIndex)
+    {
+        animancer.Animator.SetLookAtPosition(CombatTarget.transform.position + Vector3.up);
+        animancer.Animator.SetLookAtWeight(1f);
     }
 }
