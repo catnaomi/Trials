@@ -195,6 +195,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8696620557452721506, guid: 480b2aac360f4f541a903e93e1acfcf4,
         type: 3}
+      propertyPath: m_Name
+      value: _equipHandR
+      objectReference: {fileID: 0}
+    - target: {fileID: -8696620557452721506, guid: 480b2aac360f4f541a903e93e1acfcf4,
+        type: 3}
       propertyPath: m_Layer
       value: 12
       objectReference: {fileID: 0}
@@ -1080,6 +1085,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3239550437592994278, guid: 480b2aac360f4f541a903e93e1acfcf4,
         type: 3}
+      propertyPath: m_Name
+      value: _equipHandL
+      objectReference: {fileID: 0}
+    - target: {fileID: 3239550437592994278, guid: 480b2aac360f4f541a903e93e1acfcf4,
+        type: 3}
       propertyPath: m_Layer
       value: 12
       objectReference: {fileID: 0}
@@ -1272,6 +1282,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 12
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 480b2aac360f4f541a903e93e1acfcf4,
+        type: 3}
+      propertyPath: m_Controller
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5917375922873668745, guid: 480b2aac360f4f541a903e93e1acfcf4,
         type: 3}
@@ -1632,6 +1647,39 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  heightPlungePillarCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0.6115064
+      outSlope: 0.6115064
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.3277182
+      value: 1.2004018
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1.006012
+      value: 0
+      inSlope: -3.826592
+      outSlope: -3.826592
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.030280385
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   horizPlungeCurve:
     serializedVersion: 2
     m_Curve:
@@ -1665,10 +1713,56 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  horizPlungePillarCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   PlungeJumpHeight: -1057.73
+  StopAdjustPoint: 0.75
   DescentPoint: 0.25
   AttackPoint: 0.9
   PlungeTime: 1.5
+  CrouchDown:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes:
+      - 0.54113346
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -203655887218126122, guid: c2f87f59b04a7d3498f6e578960a6dea, type: 3}
+    _Speed: 0.5
+    _NormalizedStartTime: 0
+  Crouch:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -203655887218126122, guid: d4a4617ac0141b54abaf6d3e67095606, type: 3}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  CrouchTime: 1
+  actionAfterCrouch: 0
   CrossParry: {fileID: 0}
   CircleParry: {fileID: 0}
   JumpDodge:
@@ -2703,7 +2797,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1382161546}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.49, y: -1057.73, z: -122.42}
+  m_LocalPosition: {x: -1.49, y: -1051.83, z: -122.42}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

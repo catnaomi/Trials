@@ -31,8 +31,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public ClipTransition PlungeJump;
     public ClipTransition PlungeFall;
     public AnimationCurve heightPlungeCurve;
+    public AnimationCurve heightPlungePillarCurve;
     public AnimationCurve horizPlungeCurve;
+    public AnimationCurve horizPlungePillarCurve;
     public float PlungeJumpHeight = -950f;
+    public float StopAdjustPoint = 0.75f;
     public float DescentPoint = 0.75f;
     public float AttackPoint = 0.9f;
     public float PlungeTime = 5f;
@@ -40,6 +43,13 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     bool plunging;
     Vector3 plungeTarget;
     Vector3 plungeStart;
+    [Space(10)]
+    public ClipTransition CrouchDown;
+    public ClipTransition Crouch;
+    public float CrouchTime = 1f;
+    bool crouching;
+    float crouchClock;
+    public CrouchAction actionAfterCrouch;
     [Space(10)]
     public InputAttack CrossParry;
     public InputAttack CircleParry;
@@ -82,6 +92,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public WeaponState weaponState;
     public UnityEvent OnWeaponTransform;
     CharacterController cc;
+    Vector3 lastTargetPos;
+    Vector3 targetSpeed;
     protected CombatState cstate;
     protected struct CombatState
     {
@@ -104,6 +116,15 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         Daox2,          // 7
         MagicStaff,     // 8
         Spear           // 9
+    }
+
+    public enum CrouchAction
+    {
+        Plunge,
+        JumpTo_Pillar1,
+        JumpTo_Pillar2,
+        JumpTo_Pillar3,
+        JumpTo_Center
     }
     System.Action _MoveOnEnd;
     public override void ActorStart()
@@ -180,22 +201,25 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
                 //StartMeleeCombo2();
 
-                StartPlungeAttack();
+                //StartCrouch();
+
                 /*
-                Transform pillar = pillar1;
-                int r = Random.Range(1, 4);
+                CrouchAction action = CrouchAction.Plunge;
+                int r = Random.Range(1, 10);
                 if (r == 1)
                 {
-                    pillar = pillar1;
+                    action = CrouchAction.JumpTo_Pillar1;
                 }
                 else if (r == 2)
                 {
-                    pillar = pillar2;
+                    action = CrouchAction.JumpTo_Pillar2;
                 }
                 else if (r == 3)
                 {
-                    pillar = pillar3;
-                }
+                    action = CrouchAction.JumpTo_Pillar3;
+                }*/
+                StartCrouch(actionAfterCrouch);
+                /*
                 if (!onPillar)
                 {
                     DodgeJump(pillar.position);
@@ -213,7 +237,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                         DodgeJump(pillar.position);
                         onPillar = true;
                     }
-                }*/
+                }
+                */
             }
         }
         if (animancer.States.Current == cstate.jump)
@@ -255,6 +280,24 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             ProcessPlunge();
         }
+        else if (crouching)
+        {
+            ProcessCrouch();
+        }
+        if (CombatTarget != null)
+        {
+            Vector3 delta = CombatTarget.transform.position - lastTargetPos;
+            if (Time.deltaTime > 0f)
+            {
+                targetSpeed = delta / Time.deltaTime;
+            }
+            else
+            {
+                targetSpeed = Vector3.zero;
+            }
+            lastTargetPos = CombatTarget.transform.position;
+        }
+        
     }
 
     public void StartMeleeCombo1()
@@ -334,20 +377,72 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         OnAttack.Invoke();
     }
 
-    public void StartPlungeAttack()
+    public void StartCrouch(CrouchAction action)
     {
         RealignToTarget();
-        
+
+        crouchClock = CrouchTime;
+        animancer.Play(CrouchDown).Events.OnEnd = () => { animancer.Play(Crouch); };
+        crouching = true;
+        actionAfterCrouch = action;
+    }
+    public void StartPlungeAttack()
+    {
+        Vector3 position = GetProjectedPosition(PlungeTime);
+        Vector3 offset = (this.transform.position - CombatTarget.transform.position);
+        offset.y = 0f;
+        offset = offset.normalized * 1.5f;
+        plungeTarget = CombatTarget.transform.position + Vector3.ClampMagnitude((position + offset) - CombatTarget.transform.position, 1.5f);
+
+        if (NavMesh.SamplePosition(plungeTarget, out NavMeshHit hit, Vector3.Distance(CombatTarget.transform.position, position) + 10f, NavMesh.AllAreas))
+        {
+            plungeTarget = hit.position;
+        }
+        else
+        {
+            _MoveOnEnd(); // cancel attack if destination isn't on mesh
+            return;
+        }
+
+        Vector3 dir = plungeTarget - this.transform.position;
+        dir.y = 0f;
+        this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
+
         plungeClock = PlungeTime;
         cstate.plunge_rise = animancer.Play(PlungeJump);
         cstate.plunge_rise.Events.OnEnd = null;
         plungeStart = this.transform.position;
-        plungeTarget = CombatTarget.transform.position + (this.transform.position - CombatTarget.transform.position).normalized * 1.5f;
-        
         OnAttack.Invoke();
         plunging = true;
     }
 
+    public void ProcessCrouch()
+    {
+        crouchClock -= Time.deltaTime;
+        if (crouchClock <= 0f)
+        {
+            crouching = false;
+            switch (actionAfterCrouch)
+            {
+                case CrouchAction.Plunge:
+                    StartPlungeAttack();
+                    return;
+                case CrouchAction.JumpTo_Pillar1:
+                    onPillar = true;
+                    DodgeJump(pillar1.position);
+                    return;
+                case CrouchAction.JumpTo_Pillar2:
+                    onPillar = true;
+                    DodgeJump(pillar2.position);
+                    return;
+                case CrouchAction.JumpTo_Pillar3:
+                    onPillar = true;
+                    DodgeJump(pillar3.position);
+                    return;
+            }
+            //StartPlungeAttack();
+        }
+    }
     public void ProcessPlunge()
     {
 
@@ -356,8 +451,27 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         float t = 1f - Mathf.Clamp01(plungeClock/PlungeTime);
         nav.enabled = false;
 
-        Vector3 pos = Vector3.Lerp(plungeStart, plungeTarget, horizPlungeCurve.Evaluate(t));
-        float vert = Mathf.Lerp(plungeStart.y, PlungeJumpHeight, heightPlungeCurve.Evaluate(t));
+        Vector3 pos;
+
+        if (!onPillar)
+        {
+            pos = Vector3.Lerp(plungeStart, plungeTarget, horizPlungeCurve.Evaluate(t));
+        }
+        else
+        {
+            pos = Vector3.Lerp(plungeStart, plungeTarget, horizPlungePillarCurve.Evaluate(t));
+        }
+
+        float vert = 0f;
+        if (!onPillar)
+        {
+            vert = Mathf.Lerp(plungeStart.y, PlungeJumpHeight, heightPlungeCurve.Evaluate(t));
+        }
+        else
+        {
+            vert = Mathf.Lerp(plungeTarget.y, plungeStart.y, heightPlungePillarCurve.Evaluate(t));
+        }
+       
 
         pos.y = vert;
 
@@ -394,6 +508,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         nav.enabled = true;
         plunging = false;
+        onPillar = false;
         _MoveOnEnd();
     }
     public void DodgeJump(Vector3 position)
@@ -418,6 +533,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         AnimancerState land = animancer.Play(JumpLand);
         land.Events.OnEnd = _MoveOnEnd;
         nav.enabled = true;
+    }
+
+    public Vector3 GetProjectedPosition(float timeOut)
+    {
+        Debug.DrawLine(CombatTarget.transform.position, CombatTarget.transform.position + targetSpeed * timeOut, Color.blue, 5f);
+        return CombatTarget.transform.position + targetSpeed * timeOut;
     }
     /*
    * triggered by animation:
