@@ -13,8 +13,8 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     public float length = 1.5f;
     //public float weight = 1f;
     [Space(10)]
-    [SerializeField]private float slashModifier = 1f;
-    [SerializeField]private float thrustModifier = 1f;
+    [SerializeField]public float slashModifier = 1f;
+    [SerializeField]public float thrustModifier = 1f;
     bool wall;
     bool active;
     //[HideInInspector] WeaponController weaponController;

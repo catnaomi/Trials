@@ -23,6 +23,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
      */
     [Header("Combatant Settings")]
     public InputAttack MeleeCombo1; // 1h slash -> 2h slash -> stab
+    public float MeleeCombo1StartDistance = 10f;
     public InputAttack MeleeCombo2; // 3x stab left hand - > slash R -(transform to gs)> slash R
     public InputAttack MeleeComboApproach; // (jump into position) walk slash 1h -> 2h slash -> stab
     [Space(10)]
@@ -44,6 +45,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public DamageAnims damageAnims;
     HumanoidDamageHandler damageHandler;
     [Space(10)]
+    public float AttackRotationSpeed = 720f;
+    [Space(10)]
     public float clock;
     public float ActionDelayMinimum = 2f;
     public float ActionDelayMaximum = 5f;
@@ -55,6 +58,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public Transform pillar1;
     public Transform pillar2;
     public Transform pillar3;
+    public Transform center;
     [ReadOnly]public bool onPillar;
     public float nonPillarHeight = -1000f;
     [Space(10)]
@@ -100,6 +104,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         damageHandler.SetEndAction(_MoveOnEnd);
 
         cc = this.GetComponent<CharacterController>();
+        OnHitboxActive.AddListener(RealignToTarget);
         OnHurt.AddListener(() => {
             HitboxActive(0);
         });
@@ -143,6 +148,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             inventory.SetDrawn(true, true);
         }
+        if (inventory.IsOffEquipped() && !inventory.IsOffDrawn())
+        {
+            inventory.SetDrawn(false, true);
+        }
         if (shouldAct && CanAct())
         {
             clock = Random.Range(ActionDelayMinimum, ActionDelayMaximum);
@@ -151,7 +160,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 float navdist = GetDistanceToTarget();
                 float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
-                StartMeleeCombo1();
+                //StartMeleeCombo1();
+
+                StartMeleeCombo2();
                 /*
                 Transform pillar = pillar1;
                 int r = Random.Range(1, 4);
@@ -200,6 +211,19 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             cc.enabled = true;
             yVel = 0f;
         }
+        if (animancer.States.Current == cstate.attack)
+        {
+            if (!IsHitboxActive())
+            {
+                Vector3 dir = (destination - this.transform.position).normalized;
+                this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, dir, AttackRotationSpeed * Mathf.Deg2Rad * Time.deltaTime, 0f));
+            }
+            if (!GetGrounded() && airTime > 1f)
+            {
+                navstate.fall = animancer.Play(fallAnim, 1f);
+                HitboxActive(0);
+            }
+        }
         if (Vector3.Distance(CombatTarget.transform.position, this.transform.position) < 10f)
         {
             //animancer.Layers[0].ApplyAnimatorIK = true;
@@ -215,14 +239,88 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         RealignToTarget();
         //cstate.attack = CloseAttack.ProcessHumanoidAttack(this, _MoveOnEnd);
-        cstate.attack = MeleeCombo1.ProcessHumanoidAttack(this, _MoveOnEnd);
-        OnAttack.Invoke();
+        nav.enabled = true;
+
+        Vector3 pos = Vector3.zero;
+
+        Vector3 centerPoint = CombatTarget.transform.position + (center.position - CombatTarget.transform.position).normalized * MeleeCombo1StartDistance;
+        bool centerOnNav = NavMesh.SamplePosition(centerPoint, out NavMeshHit hit, 10f, 0);
+        if (centerOnNav)
+        {
+            centerPoint = hit.position;
+        }
+        
+        Vector3 farPoint = this.transform.position + (this.transform.position - CombatTarget.transform.position).normalized * MeleeCombo1StartDistance;
+        bool farOnNav = NavMesh.SamplePosition(farPoint, out NavMeshHit hit2, 10f, 0);
+        if (farOnNav)
+        {
+            farPoint = hit.position;
+        }
+
+        float centerDist = Vector3.Distance(CombatTarget.transform.position, centerPoint);
+        float farDist = Vector3.Distance(CombatTarget.transform.position, farPoint);
+
+        if (centerDist < MeleeCombo1StartDistance && farDist >= MeleeCombo1StartDistance)
+        {
+            pos = farPoint;
+        }
+        else if (farDist < MeleeCombo1StartDistance && centerDist >= MeleeCombo1StartDistance)
+        {
+            pos = centerPoint;
+        }
+        else if (farDist < MeleeCombo1StartDistance && centerDist < MeleeCombo1StartDistance)
+        {
+            if (centerDist > farDist)
+            {
+                pos = centerPoint;
+            }
+            else
+            {
+                pos = farPoint;
+            }
+        }
+        else
+        {
+            pos = centerPoint;
+        }
+
+        void _Then()
+        {
+            RealignToTarget();
+            nav.enabled = true;
+            cstate.attack = MeleeCombo1.ProcessHumanoidAttack(this, () => { });
+            OnAttack.Invoke();
+        }
+
+        DodgeJumpThen(pos, _Then, 1.25f);
     }
 
+    // basic attack template
+    /*
+    public void StartFarAttack()
+    {
+        RealignToTarget();
+        cstate.attack = FarAttack.ProcessHumanoidAttack(this, _MoveOnEnd);
+        OnAttack.Invoke();
+    }
+    */
+
+    public void StartMeleeCombo2()
+    {
+        RealignToTarget();
+        cstate.attack = MeleeCombo2.ProcessHumanoidAttack(this, _MoveOnEnd);
+        OnAttack.Invoke();
+    }
     public void DodgeJump(Vector3 position)
     {
+        DodgeJumpThen(position, JumpEnd, 1f);
+    }
+
+    public void DodgeJumpThen(Vector3 position, System.Action endingAction, float speed)
+    {
         AnimancerState jump = animancer.Play(JumpDodge);
-        jump.Events.OnEnd = JumpEnd;
+        jump.Events.OnEnd = endingAction;
+        jump.Speed *= speed;
         cstate.jump = jump;
         endJumpPosition = position;
         startJumpPosition = this.transform.position;
@@ -395,6 +493,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         ((IDamageable)damageHandler).Recoil();
     }
 
+    public void EndAnim()
+    {
+        _MoveOnEnd();
+    }
     public override void Die()
     {
         if (dead) return;

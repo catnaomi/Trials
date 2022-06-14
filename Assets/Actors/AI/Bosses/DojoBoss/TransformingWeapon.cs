@@ -11,7 +11,8 @@ public class TransformingWeapon : BladeWeapon
     TransformingWeaponModelHandler handler;
     DojoBossCombatantActor.WeaponState weaponState;
 
-
+    TransformingSubWeapon subWeapon;
+    TransformingWeaponModelHandler subHandler;
     public override void EquipWeapon(Actor actor)
     {
         OnEquip.Invoke();
@@ -28,15 +29,33 @@ public class TransformingWeapon : BladeWeapon
         thrustFX = FXController.CreateSwordThrust().GetComponent<LineSwordThrust>();
         thrustFX.pseudoParent = actor.transform;
 
+
         handler = GetModel().GetComponent<TransformingWeaponModelHandler>();
 
-        UpdateTransformWeapon();
         GenerateHitboxes();
         hitboxes.OnHitTerrain.RemoveAllListeners();
         hitboxes.OnHitTerrain.AddListener(TerrainContact);
         hitboxes.OnHitWall.AddListener(WallContact);
 
+        subWeapon = ScriptableObject.CreateInstance<TransformingSubWeapon>();
+        subWeapon.prefab = this.prefab;
+        subWeapon.baseDamage = this.baseDamage;
+        subWeapon.width = 0.25f;
+        subWeapon.length = 1f;
+        subWeapon.slashModifier = 1f;
+        subWeapon.thrustModifier = 1f;
+        subWeapon.elements = this.elements;
+        subWeapon.EquippableOff = true;
+        subWeapon.OneHanded = true;
+        subWeapon.itemName = this.itemName+"2";
+        subWeapon.OffHandEquipSlot = Inventory.EquipSlot.lHip;
 
+        holder.GetComponent<HumanoidNPCInventory>().Add(subWeapon);
+        holder.GetComponent<HumanoidNPCInventory>().EquipOffHandWeapon(subWeapon);
+
+
+        subHandler = subWeapon.GetModel().GetComponent<TransformingWeaponModelHandler>();
+        UpdateTransformWeapon();
         //slashMesh.transform.rotation = Quaternion.identity;
     }
 
@@ -44,21 +63,38 @@ public class TransformingWeapon : BladeWeapon
     {
         DojoBossCombatantActor.WeaponState oldState = weaponState;
         weaponState = GetWeaponState();
+        handler = GetModel().GetComponent<TransformingWeaponModelHandler>();
+        subHandler = subWeapon.GetModel().GetComponent<TransformingWeaponModelHandler>();
 
-        handler.state = weaponState;
 
-        if (oldState != weaponState)
+        if (handler.state != weaponState)
         {
+            handler.state = weaponState;
             GenerateHitboxes();
 
-            Transform currentModel = handler.GetCurrentModel().transform;
-            top = InterfaceUtilities.FindRecursively(currentModel, "_top");
-            bottom = InterfaceUtilities.FindRecursively(currentModel, "_bottom");
 
-            slashFX.SetTopPoint(top);
-            slashFX.SetBottomPoint(bottom);
-            thrustFX.SetTopPoint(top);
-            thrustFX.SetBottomPoint(bottom);
+            GameObject currentModel = handler.GetCurrentModel();
+            if (currentModel != null)
+            {
+                top = InterfaceUtilities.FindRecursively(currentModel.transform, "_top");
+                bottom = InterfaceUtilities.FindRecursively(currentModel.transform, "_bottom");
+
+                slashFX.SetTopPoint(top);
+                slashFX.SetBottomPoint(bottom);
+                thrustFX.SetTopPoint(top);
+                thrustFX.SetBottomPoint(bottom);
+            }
+            
+
+            
+        }
+        if (weaponState == DojoBossCombatantActor.WeaponState.Daox2)
+        {
+            subHandler.state = DojoBossCombatantActor.WeaponState.Daox2;
+        }
+        else
+        {
+            subHandler.state = DojoBossCombatantActor.WeaponState.None;
         }
     }
 

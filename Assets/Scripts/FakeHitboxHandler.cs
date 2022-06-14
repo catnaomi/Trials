@@ -54,4 +54,9 @@ public class FakeHitboxHandler : MonoBehaviour
     {
 
     }
+
+    public void EndAnim()
+    {
+
+    }
 }

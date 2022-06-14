@@ -81,6 +81,11 @@ public class LineSwordThrust : MonoBehaviour
     }
     public void BeginThrust()
     {
+        if (bottomPoint == null || topPoint == null)
+        {
+            Debug.Log("one or more of thrust reference points missing!");
+            return;
+        }
         thrusting = true;
         points.Clear();
         lineRenderers[currentIndex].gameObject.SetActive(true);
@@ -114,6 +119,11 @@ public class LineSwordThrust : MonoBehaviour
     }
     private void UpdateTrail()
     {
+        if (bottomPoint == null || topPoint == null)
+        {
+            Debug.Log("one or more of thrust reference points missing!");
+            return;
+        }
         if (thrusting)
         {
             //lineRenderers[currentIndex].SetPosition(0, bottomPoint.position);
