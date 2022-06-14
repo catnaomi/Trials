@@ -27,8 +27,19 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public InputAttack MeleeCombo2; // 3x stab left hand - > slash R -(transform to gs)> slash R
     public InputAttack MeleeComboApproach; // (jump into position) walk slash 1h -> 2h slash -> stab
     [Space(10)]
-    public InputAttack GroundPlunge;
-    public InputAttack PillarPlunge;
+    public InputAttack Plunge;
+    public ClipTransition PlungeJump;
+    public ClipTransition PlungeFall;
+    public AnimationCurve heightPlungeCurve;
+    public AnimationCurve horizPlungeCurve;
+    public float PlungeJumpHeight = -950f;
+    public float DescentPoint = 0.75f;
+    public float AttackPoint = 0.9f;
+    public float PlungeTime = 5f;
+    float plungeClock;
+    bool plunging;
+    Vector3 plungeTarget;
+    Vector3 plungeStart;
     [Space(10)]
     public InputAttack CrossParry;
     public InputAttack CircleParry;
@@ -76,6 +87,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         public AnimancerState attack;
         public AnimancerState jump;
+        public AnimancerState plunge_rise;
+        public AnimancerState plunge_fall;
+        public AnimancerState plunge_attack;
     }
 
     public enum WeaponState
@@ -108,6 +122,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         OnHurt.AddListener(() => {
             HitboxActive(0);
         });
+
+        animancer.Play(navstate.idle);
     }
 
     void Awake()
@@ -162,7 +178,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
                 //StartMeleeCombo1();
 
-                StartMeleeCombo2();
+                //StartMeleeCombo2();
+
+                StartPlungeAttack();
                 /*
                 Transform pillar = pillar1;
                 int r = Random.Range(1, 4);
@@ -232,6 +250,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         else
         {
             //animancer.Layers[0].ApplyAnimatorIK = false;
+        }
+        if (plunging)
+        {
+            ProcessPlunge();
         }
     }
 
@@ -310,6 +332,69 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         RealignToTarget();
         cstate.attack = MeleeCombo2.ProcessHumanoidAttack(this, _MoveOnEnd);
         OnAttack.Invoke();
+    }
+
+    public void StartPlungeAttack()
+    {
+        RealignToTarget();
+        
+        plungeClock = PlungeTime;
+        cstate.plunge_rise = animancer.Play(PlungeJump);
+        cstate.plunge_rise.Events.OnEnd = null;
+        plungeStart = this.transform.position;
+        plungeTarget = CombatTarget.transform.position + (this.transform.position - CombatTarget.transform.position).normalized * 1.5f;
+        
+        OnAttack.Invoke();
+        plunging = true;
+    }
+
+    public void ProcessPlunge()
+    {
+
+        
+
+        float t = 1f - Mathf.Clamp01(plungeClock/PlungeTime);
+        nav.enabled = false;
+
+        Vector3 pos = Vector3.Lerp(plungeStart, plungeTarget, horizPlungeCurve.Evaluate(t));
+        float vert = Mathf.Lerp(plungeStart.y, PlungeJumpHeight, heightPlungeCurve.Evaluate(t));
+
+        pos.y = vert;
+
+        this.transform.position = pos;
+
+        
+        if (t >= 1f)
+        {
+            this.transform.position = plungeTarget;
+            //EndPlunge();
+        }
+        else if (t >= AttackPoint)
+        {
+            if (animancer.States.Current == cstate.plunge_fall)
+            {
+                cstate.plunge_attack = Plunge.ProcessHumanoidAttack(this, EndPlunge);
+            }
+        }
+        else if (t >= DescentPoint)
+        {
+            if (animancer.States.Current == cstate.plunge_rise)
+            {
+                cstate.plunge_fall = animancer.Play(PlungeFall);//Plunge.ProcessHumanoidAttack(this, EndPlunge);
+            }
+        }
+
+
+        plungeClock -= Time.deltaTime;
+
+        
+    }
+
+    void EndPlunge()
+    {
+        nav.enabled = true;
+        plunging = false;
+        _MoveOnEnd();
     }
     public void DodgeJump(Vector3 position)
     {
@@ -457,7 +542,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public override bool IsAttacking()
     {
-        return animancer.States.Current == cstate.attack;
+        return animancer.States.Current == cstate.attack || animancer.States.Current == cstate.plunge_attack;
     }
 
     public override bool IsFalling()
