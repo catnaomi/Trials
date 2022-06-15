@@ -181,6 +181,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public ClipTransition resurrectFaceUp;
     public ClipTransition resurrectFaceDown;
     [Space(5)]
+    public AnimatedFloat bowBend;
+    [Space(5)]
     public float horizontalAimSpeed = 90f;
     public float aimSpeed = 2.5f;
     Vector3 aimForwardVector;
@@ -375,6 +377,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             SceneLoader.GetOnActiveSceneChange().AddListener(SetNewSafePoint);
         }
+
+        bowBend = new AnimatedFloat(animancer, "_BowBend");
     }
 
 

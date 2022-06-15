@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f79f0958e32df0241858a7c1d664535c, type: 3}
+  m_Name: StarterBow
+  m_EditorClassIdentifier: 
+  itemName: Mun's Bow
+  itemDesc: a trusty old thing.
+  holder: {fileID: 0}
+  MaxStackSize: 1
+  Quantity: 1
+  invID: 103
+  prefab: {fileID: 2466058898901566405, guid: 326153db1276de74d93d0d6930f35a3d, type: 3}
+  displayImage: {fileID: 21300000, guid: 75ade6ead379adc42a533f9e16a2e530, type: 3}
+  displayColor: {r: 1, g: 1, b: 1, a: 1}
+  isEquipped: 0
+  EquippableMain: 0
+  EquippableOff: 1
+  EquippableRanged: 1
+  OneHanded: 0
+  TwoHanded: 1
+  ParentLeftAsMain: 1
+  ParentRightAsOff: 0
+  MainHandEquipSlot: 0
+  OffHandEquipSlot: 5
+  RangedEquipSlot: 5
+  stance:
+    stanceStyle: 0
+    rightGrip: 0
+    leftGrip: 0
+    twohandGrip: 0
+    blockStyle: 0
+  moveset: {fileID: 11400000, guid: bc549c059af4b0045b4e4f50b648e75d, type: 2}
+  AttackSpeed: 0
+  weight: 0
+  usesAmmunition: 1
+  ammunitionReference: {fileID: 11400000, guid: d16790a012b3df64fba58b934c0a61e7,
+    type: 2}
+  blockResistances: []
+  OnEquip:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnequip:
+    m_PersistentCalls:
+      m_Calls: []
+  model: {fileID: 0}
+  fireMode: 3
+  arrowPrefab: {fileID: 4805927410726168974, guid: 1be0e19a8c8967c4eb39716d4edc5885,
+    type: 3}
+  deadArrowPrefab: {fileID: 2667612872126298195, guid: c280cbff6c2afba4f8b6e43aa2ea9bc6,
+    type: 3}
+  damageKnockback:
+    healthDamage: 10
+    staminaDamage: 0
+    types: 02000000
+    critData:
+      criticalMultiplier: 0
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 0
+    isSlash: 0
+    bouncesOffBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    stunTime: 0
+    staggers:
+      onHit: 1
+      onArmorHit: 1
+      onCritical: 5
+      onKill: 5
+      onCounterHit: 1
+    kbForce: {x: 0, y: 0, z: 0}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    hitClip: {fileID: 0}
+  ikHandler: {fileID: 11400000, guid: 3e1da2a0b87efea48b403875a190a4af, type: 2}
+  fireStrengthMult: 100
+  fireStrengthMin: 25
+  drawTime: 1
+  bowBend: {fileID: 11400000, guid: 977d6e38cfb48fd4b90690a626a267cc, type: 2}
+  arrowCount: 4
+  arrowLength: 1

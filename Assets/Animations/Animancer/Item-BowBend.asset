@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a472a4806da7f9147a4a5cd7eee170df, type: 3}
-  m_Name: Turn-BlockShield
+  m_Name: Item-BowBend
   m_EditorClassIdentifier: 
   _Transition:
-    rid: 1585613935673081856
+    rid: 8615174220553125888
   references:
     version: 2
     RefIds:
-    - rid: 1585613935673081856
+    - rid: 8615174220553125888
       type: {class: LinearMixerTransition, ns: Animancer, asm: Animancer}
       data:
         _FadeDuration: 0.25
@@ -27,16 +27,12 @@ MonoBehaviour:
           _Names: []
         _Speed: 1
         _Animations:
-        - {fileID: -203655887218126122, guid: 3436e3546a14a23458fdc93d63fce1df, type: 3}
-        - {fileID: -203655887218126122, guid: 9454c6aa2bacf814cad89e9f6a7c85cc, type: 3}
-        - {fileID: -203655887218126122, guid: 9454c6aa2bacf814cad89e9f6a7c85cc, type: 3}
-        - {fileID: -203655887218126122, guid: 2c0ef440dca8b6e4dad08b324c19befa, type: 3}
+        - {fileID: 7868738932321818050, guid: 8589f5f9983bff14ea9e01d560c01390, type: 3}
+        - {fileID: -5281930383209654625, guid: 8589f5f9983bff14ea9e01d560c01390, type: 3}
         _Speeds: []
         _SynchronizeChildren: 
         _Thresholds:
-        - -10
-        - -0.5
-        - 0.5
-        - 10
+        - 0
+        - 1
         _DefaultParameter: 0
-        _ExtrapolateSpeed: 0
+        _ExtrapolateSpeed: 1

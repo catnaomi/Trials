@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using CustomUtilities;
+using Animancer;
 
 [CreateAssetMenu(fileName = "Bow", menuName = "ScriptableObjects/Weapons/Create Bow", order = 1), SerializeField]
 public class RangedBow : RangedWeapon, IHitboxHandler
 {
+    
     public GameObject arrowPrefab;
     public GameObject deadArrowPrefab;
     public DamageKnockback damageKnockback;
@@ -13,6 +15,8 @@ public class RangedBow : RangedWeapon, IHitboxHandler
     public float fireStrengthMin = 25f;
 
     public float drawTime = 1f;
+
+    public LinearMixerTransitionAsset bowBend;
     float nockTime;
     bool canFire;
     ArrowController[] arrows;
@@ -21,7 +25,9 @@ public class RangedBow : RangedWeapon, IHitboxHandler
     int index = 0;
     bool canReceiveAnimEvents = false;
     public float arrowLength = 1f;
-    
+
+    AnimancerComponent animancer;
+    LinearMixerState bowBendState;
     LineRenderer line;
     bool nocked;
     /*
@@ -80,6 +86,12 @@ public class RangedBow : RangedWeapon, IHitboxHandler
         deadArrow.transform.position = parent.transform.position + dir * arrowLength;
         deadArrow.transform.rotation = Quaternion.LookRotation(dir);
         deadArrow.transform.SetParent(parent.transform, true);
+
+        if (model.TryGetComponent<AnimancerComponent>(out AnimancerComponent animancerComponent))
+        {
+            animancer = animancerComponent;
+            bowBendState = (LinearMixerState)animancer.Play(bowBend);
+        }
     }
 
     public override void UnequipWeapon(Actor actor)
@@ -104,6 +116,10 @@ public class RangedBow : RangedWeapon, IHitboxHandler
         {
             Vector3 lineCenter = (nocked) ? line.transform.InverseTransformPoint(positionReference.MainHand.transform.position) : Vector3.zero;
             line.SetPosition(1, lineCenter);
+        }
+        if (actor is PlayerActor player && animancer != null)
+        {
+            bowBendState.Parameter = player.bowBend.Value;
         }
     }
 
