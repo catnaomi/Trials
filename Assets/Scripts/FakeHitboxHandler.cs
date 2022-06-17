@@ -59,4 +59,14 @@ public class FakeHitboxHandler : MonoBehaviour
     {
 
     }
+
+    public void ArrowDraw()
+    {
+
+    }
+
+    public void ArrowNock()
+    {
+
+    }
 }

@@ -56,9 +56,14 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     [Space(10)]
     public ClipTransition JumpDodge;
     public ClipTransition JumpLand;
-    public InputAttack JumpShot;
+    
     [Space(10)]
     public AimAttack RangedAttack;
+    public AimAttack RangedAttackMulti; // triple shot
+    public AimAttack JumpShot;
+    public ClipTransition JumpShotUp;
+    public ClipTransition JumpShotLand;
+    public float JumpShotTime = 0.2f;
     [ReadOnly]public bool aiming;
     float aimTime;
     [Space(10)]
@@ -82,6 +87,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public Transform pillar3;
     public Transform center;
     [ReadOnly]public bool onPillar;
+    public int currentPillar = 0;
     public float nonPillarHeight = -1000f;
     [Space(10)]
     [SerializeField] AnimationCurve jumpHorizCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
@@ -103,6 +109,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         public AnimancerState plunge_rise;
         public AnimancerState plunge_fall;
         public AnimancerState plunge_attack;
+        public AnimancerState ranged_idle;
+        public AnimancerState ranged_air;
     }
 
     public enum WeaponState
@@ -125,7 +133,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         JumpTo_Pillar1,
         JumpTo_Pillar2,
         JumpTo_Pillar3,
-        JumpTo_Center
+        JumpTo_Center,
+        JumpShot_Pillar1,
+        JumpShot_Pillar2,
+        JumpShot_Pillar3,
+        JumpShot_Center,
+
     }
     System.Action _MoveOnEnd;
     public override void ActorStart()
@@ -136,14 +149,21 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             animancer.Play(navstate.move, 0.1f);
         };
 
-        damageHandler = new SingleWeaknessDamageHandler(this, damageAnims, animancer);
+        damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
         damageHandler.SetEndAction(_MoveOnEnd);
 
         cc = this.GetComponent<CharacterController>();
         OnHitboxActive.AddListener(RealignToTarget);
         OnHurt.AddListener(() => {
             HitboxActive(0);
+            crouching = false;
+            plunging = false;
+            aiming = false;
+            animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
         });
+
+        //animancer.Layers[HumanoidAnimLayers.UpperBody].SetMask(GetComponent<HumanoidPositionReference>().upperBodyMask);
+        animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
 
         animancer.Play(navstate.idle);
     }
@@ -198,6 +218,103 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 float navdist = GetDistanceToTarget();
                 float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
+                float r = Random.value;
+                float p = Random.Range(0, 6);
+                if (!onPillar)
+                {
+                    if (aiming)
+                    {
+                        if (aimTime > 1f)
+                        {
+                            if (r < 0.5f)
+                            {
+                                StartRangedAttack();
+                            }
+                            else
+                            {
+                                StartRangedAttackMulti();
+                            }
+                        }
+                    }
+                    else if (r < 0.6f)
+                    {
+                        if (navdist < 2f)
+                        {
+                            StartMeleeCombo2();
+                        }
+                        else if (navdist < 6f)
+                        {
+                            StartMeleeCombo1();
+                        }
+                        else
+                        {
+                            StartAiming();
+                        }
+                        
+                    }
+                    else
+                    {
+                        CrouchAction action = CrouchAction.Plunge;
+                        if (p == 1)
+                        {
+                            if (r < 0.8) action = CrouchAction.JumpTo_Pillar1;
+                            else action = CrouchAction.JumpShot_Pillar1;
+                        }
+                        else if (p == 2)
+                        {
+                            if (r < 0.8) action = CrouchAction.JumpTo_Pillar2;
+                            else action = CrouchAction.JumpShot_Pillar2;
+                        }
+                        else if (p == 3)
+                        {
+                            if (r < 0.8) action = CrouchAction.JumpTo_Pillar3;
+                            else action = CrouchAction.JumpShot_Pillar3;
+                        }
+                        StartCrouch(action);
+                    }
+                    
+                }
+                else
+                {
+                    if (aiming)
+                    {
+                        if (aimTime > 1f)
+                        {
+                            if (r < 0.5f)
+                            {
+                                StartRangedAttack();
+                            }
+                            else
+                            {
+                                StartRangedAttackMulti();
+                            }
+                        }
+                    }
+                    else if (r < 0.3f)
+                    {
+                        StartAiming();
+                    }
+                    else
+                    {
+                        CrouchAction action = CrouchAction.Plunge;
+                        if (p == 1 && currentPillar != p)
+                        {
+                            if (r < 0.65f) action = CrouchAction.JumpTo_Pillar1;
+                            else action = CrouchAction.JumpShot_Pillar1;
+                        }
+                        else if (p == 2 && currentPillar != p)
+                        {
+                            if (r < 0.65f) action = CrouchAction.JumpTo_Pillar2;
+                            else action = CrouchAction.JumpShot_Pillar2;
+                        }
+                        else if (p == 3 && currentPillar != p)
+                        {
+                            if (r < 0.65f) action = CrouchAction.JumpTo_Pillar3;
+                            else action = CrouchAction.JumpShot_Pillar3;
+                        }
+                        StartCrouch(action);
+                    }
+                }
                 //StartMeleeCombo1();
 
                 //StartMeleeCombo2();
@@ -218,9 +335,24 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 else if (r == 3)
                 {
                     action = CrouchAction.JumpTo_Pillar3;
-                }*/
+                }
+                */
                 //StartCrouch(actionAfterCrouch);
-
+                /*
+                if (!onPillar)
+                {
+                    StartCrouch(CrouchAction.JumpShot_Pillar1);
+                }
+                else if (Random.value < 0.5f)
+                {
+                    StartCrouch(CrouchAction.JumpTo_Center);
+                }
+                else
+                {
+                    StartCrouch(CrouchAction.Plunge);
+                }
+                */
+                /*
                 if (!aiming)
                 {
                     StartAiming();
@@ -228,7 +360,18 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 else
                 {
                     if (aimTime > 1f) StartRangedAttack();
+                }*/
+                //StartRangedAttackMulti();
+                /*
+                if (!aiming)
+                {
+                    StartAiming();
                 }
+                else
+                {
+                    if (aimTime > 1f) StartRangedAttackMulti();
+                }
+                /*
                 /*
                 if (!onPillar)
                 {
@@ -263,6 +406,15 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
             cc.enabled = true;
             yVel = 0f;
+
+            if (aiming)
+            {
+                RealignToTarget();
+                if (t > JumpShotTime)
+                {
+                    JumpShotFire();
+                }
+            }
         }
         if (animancer.States.Current == cstate.attack)
         {
@@ -298,6 +450,23 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             aimTime += Time.deltaTime;
             animancer.Layers[0].ApplyAnimatorIK = true;
+        }
+        if (animancer.States.Current == cstate.ranged_idle && cstate.ranged_idle is MixerState mix && mix.ChildStates[0] is LinearMixerState rangedIdle)
+        {
+            Vector3 lookDirection = transform.forward;
+            nav.enabled = true;
+            nav.isStopped = true;
+            if (destination != Vector3.zero)
+            {
+                lookDirection = (destination - this.transform.position).normalized;
+                lookDirection.y = 0f;
+                angle = Mathf.MoveTowards(angle, Vector3.SignedAngle(this.transform.forward, lookDirection, Vector3.up), nav.angularSpeed * Time.deltaTime);
+            }
+            else
+            {
+                angle = 0f;
+            }
+            rangedIdle.Parameter = angle;
         }
         if (CombatTarget != null)
         {
@@ -372,7 +541,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             OnAttack.Invoke();
         }
 
-        DodgeJumpThen(pos, _Then, 1.25f);
+        DodgeJumpThen(pos, _Then, 2f);
     }
 
     // basic attack template
@@ -442,17 +611,43 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 case CrouchAction.Plunge:
                     StartPlungeAttack();
                     return;
+                case CrouchAction.JumpTo_Center:
+                    onPillar = false;
+                    DodgeJump(center.position);
+                    return;
                 case CrouchAction.JumpTo_Pillar1:
                     onPillar = true;
                     DodgeJump(pillar1.position);
+                    currentPillar = 1;
                     return;
                 case CrouchAction.JumpTo_Pillar2:
                     onPillar = true;
                     DodgeJump(pillar2.position);
+                    currentPillar = 2;
                     return;
                 case CrouchAction.JumpTo_Pillar3:
                     onPillar = true;
                     DodgeJump(pillar3.position);
+                    currentPillar = 3;
+                    return;
+                case CrouchAction.JumpShot_Center:
+                    onPillar = false;
+                    StartJumpShot(center.position);
+                    return;
+                case CrouchAction.JumpShot_Pillar1:
+                    onPillar = true;
+                    StartJumpShot(pillar1.position);
+                    currentPillar = 1;
+                    return;
+                case CrouchAction.JumpShot_Pillar2:
+                    onPillar = true;
+                    StartJumpShot(pillar2.position);
+                    currentPillar = 2;
+                    return;
+                case CrouchAction.JumpShot_Pillar3:
+                    onPillar = true;
+                    StartJumpShot(pillar3.position);
+                    currentPillar = 3;
                     return;
             }
             //StartPlungeAttack();
@@ -556,7 +751,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         weaponState = DojoBossCombatantActor.WeaponState.Bow;
         OnWeaponTransform.Invoke();
-        animancer.Play(navstate.idle);
+        cstate.ranged_idle = animancer.Play(RangedAttack.GetMovement());
         animancer.Layers[HumanoidAnimLayers.UpperBody].Play(RangedAttack.GetStartClip());
         aiming = true;
         aimTime = 0f;
@@ -570,6 +765,56 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         OnAttack.Invoke();
     }
 
+    public void StartRangedAttackMulti()
+    {
+        aiming = true;
+        aimTime = 0f;
+        weaponState = DojoBossCombatantActor.WeaponState.Bow;
+        OnWeaponTransform.Invoke();
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+        cstate.attack = animancer.Play(RangedAttackMulti.GetFireClip(), 0f);
+        cstate.attack.Events.OnEnd = QuickRangedEnd;
+        OnAttack.Invoke();
+    }
+
+    public void StartJumpShot(Vector3 position)
+    {
+        AnimancerState jump = animancer.Play(JumpShotUp);
+        jump.Events.OnEnd = () =>
+        {
+            shouldNavigate = !onPillar;
+            AnimancerState land = animancer.Play(JumpShotLand);
+            land.Events.OnEnd = _MoveOnEnd;
+            nav.enabled = true;
+        };
+        cstate.jump = jump;
+        endJumpPosition = position;
+        startJumpPosition = this.transform.position;
+        nav.enabled = false;
+
+        aiming = true;
+        aimTime = 0f;
+        weaponState = DojoBossCombatantActor.WeaponState.Bow;
+        OnWeaponTransform.Invoke();
+    }
+
+    public void JumpShotFire()
+    {
+        AnimancerState fire = animancer.Layers[HumanoidAnimLayers.UpperBody].Play(JumpShot.GetFireClip());
+        fire.Time = 0f;
+        fire.Events.OnEnd = () =>
+        {
+            animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+        };
+        aiming = false;
+        OnAttack.Invoke();
+    }
+
+    void QuickRangedEnd()
+    {
+        aiming = false;
+        _MoveOnEnd();
+    }
     public Vector3 GetProjectedPosition(float timeOut)
     {
         Debug.DrawLine(CombatTarget.transform.position, CombatTarget.transform.position + targetSpeed * timeOut, Color.blue, 5f);
@@ -730,7 +975,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public override bool IsArmored()
     {
-        return true;
+        return IsAttacking() && !onPillar;
     }
     public override bool IsDodging()
     {
@@ -762,7 +1007,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public bool CanAct()
     {
-        return (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle) && actionsEnabled;
+        return (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle || aiming) && actionsEnabled;
     }
 
     public void TakeDamage(DamageKnockback damage)

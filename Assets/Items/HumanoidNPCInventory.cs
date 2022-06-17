@@ -531,18 +531,34 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
                 if (IsMainEquipped())
                 {
                     MainIsDrawn = drawn;
+                    if (IsRangedEquipped() && MainWeapon == RangedWeapon)
+                    {
+                        RangedIsDrawn = drawn;
+                    }
                 }
                 break;
             case Inventory.OffType: // off
                 if (IsOffEquipped())
                 {
                     OffIsDrawn = drawn;
+                    if (IsRangedEquipped() && OffWeapon == RangedWeapon)
+                    {
+                        RangedIsDrawn = drawn;
+                    }
                 }
                 break;
             case Inventory.RangedType: // ranged
                 if (IsRangedEquipped())
                 {
                     RangedIsDrawn = drawn;
+                    if (IsMainEquipped() && MainWeapon == RangedWeapon)
+                    {
+                        MainIsDrawn = drawn;
+                    }
+                    else if (IsOffEquipped() && OffWeapon == RangedWeapon)
+                    {
+                        OffIsDrawn = drawn;
+                    }
                 }
                 break;
         }

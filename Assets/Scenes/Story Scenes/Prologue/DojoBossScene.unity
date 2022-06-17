@@ -1768,7 +1768,7 @@ MonoBehaviour:
     _Speed: 1
     _NormalizedStartTime: 0
   CrouchTime: 1
-  actionAfterCrouch: 0
+  actionAfterCrouch: 5
   CrossParry: {fileID: 0}
   CircleParry: {fileID: 0}
   JumpDodge:
@@ -1789,15 +1789,37 @@ MonoBehaviour:
     _Clip: {fileID: 7400002, guid: 39c1e8b66fab3ba418b191caaf714f42, type: 3}
     _Speed: 1
     _NormalizedStartTime: 0
-  JumpShot: {fileID: 0}
   RangedAttack: {fileID: 11400000, guid: bfa457ecef813e44c9cbcea731d8f7af, type: 2}
+  RangedAttackMulti: {fileID: 11400000, guid: 580accc5fbac05747a6e0ba3aef18173, type: 2}
+  JumpShot: {fileID: 11400000, guid: 31be852ba9b35154bbe21b5bdb376c3d, type: 2}
+  JumpShotUp:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -4959534095542806969, guid: 3eae6785f1f3da844bf31f86ca18e355,
+      type: 3}
+    _Speed: 0.5
+    _NormalizedStartTime: 0
+  JumpShotLand:
+    _FadeDuration: 0.5
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -5553186913386686226, guid: 3eae6785f1f3da844bf31f86ca18e355,
+      type: 3}
+    _Speed: 1.5
+    _NormalizedStartTime: 0
+  JumpShotTime: 0.05
   aiming: 0
   Summon: {fileID: 0}
   damageAnims: {fileID: 11400000, guid: 9d9b14e5de6ad3d449aa822da5bc08b9, type: 2}
   AttackRotationSpeed: 720
   clock: 5
-  ActionDelayMinimum: 10
-  ActionDelayMaximum: 10
+  ActionDelayMinimum: 1
+  ActionDelayMaximum: 2
   LowHealthThreshold: 50
   isLowHealth: 0
   pillar1: {fileID: 1443069018}
@@ -1805,6 +1827,7 @@ MonoBehaviour:
   pillar3: {fileID: 1339218316}
   center: {fileID: 375173133}
   onPillar: 0
+  currentPillar: 0
   nonPillarHeight: -1000
   jumpHorizCurve:
     serializedVersion: 2
@@ -1883,9 +1906,9 @@ MonoBehaviour:
   smoothedHealth: 0
   healthRecoveryClock: 0
   health:
-    baseValue: 100
-    current: 100
-    max: 100
+    baseValue: 1000
+    current: 1000
+    max: 1000
   healthRecoveryRate:
     baseValue: 0
     current: 0
@@ -1954,7 +1977,7 @@ MonoBehaviour:
   lBack: {fileID: 1407062762}
   cBack: {fileID: 335651973}
   eyeHeight: 0
-  upperBodyMask: {fileID: 0}
+  upperBodyMask: {fileID: 31900000, guid: 74da9ab124865d3498afd76d28f9bb59, type: 2}
 --- !u!114 &315540954
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2520,7 +2543,7 @@ PrefabInstance:
     - target: {fileID: 7989539723994557311, guid: fccef818e52ea5d4cbf4d27fbc63ae77,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -146.60391
+      value: -138.52
       objectReference: {fileID: 0}
     - target: {fileID: 7989539723994557311, guid: fccef818e52ea5d4cbf4d27fbc63ae77,
         type: 3}
@@ -3301,7 +3324,7 @@ Transform:
   m_GameObject: {fileID: 1837338034}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 50, y: 1, z: 50}
+  m_LocalScale: {x: 30, y: 1, z: 30}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1091666983}

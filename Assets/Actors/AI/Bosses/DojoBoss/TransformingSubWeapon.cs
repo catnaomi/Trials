@@ -131,11 +131,11 @@ public class TransformingSubWeapon : BladeWeapon
         if (!GetHeldActor().TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference)) return;
         deadArrow.SetActive(false);
         GetHeldActor().SendMessage("ArrowFire");
-        if (GetAmmunitionRemaining() <= 0)
+        if (usesAmmunition && GetAmmunitionRemaining() <= 0)
         {
             return;
         }
-        else
+        else if (usesAmmunition)
         {
             holder.GetComponent<Inventory>().RemoveOne(ammunitionReference);
         }

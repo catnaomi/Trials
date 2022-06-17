@@ -52,7 +52,7 @@ public class TransformingWeapon : BladeWeapon
         subWeapon.primaryWeapon = this;
         holder.GetComponent<HumanoidNPCInventory>().Add(subWeapon);
         holder.GetComponent<HumanoidNPCInventory>().EquipOffHandWeapon(subWeapon);
-
+        holder.GetComponent<HumanoidNPCInventory>().EquipRangedWeapon(subWeapon);
 
         subHandler = subWeapon.GetModel().GetComponent<TransformingWeaponModelHandler>();
         UpdateTransformWeapon();
@@ -68,7 +68,7 @@ public class TransformingWeapon : BladeWeapon
         handler = GetModel().GetComponent<TransformingWeaponModelHandler>();
         subHandler = subWeapon.GetModel().GetComponent<TransformingWeaponModelHandler>();
 
-        if (weaponState == DojoBossCombatantActor.WeaponState.Bow && (handler.state != DojoBossCombatantActor.WeaponState.None))
+        if (weaponState == DojoBossCombatantActor.WeaponState.Bow)
         {
             handler.state = DojoBossCombatantActor.WeaponState.None;
         }
