@@ -189,6 +189,10 @@ public class CombatDummy : Actor, IDamageable
         damageHandler.Recoil();
     }
 
+    public void StartCritVulnerability(float time)
+    {
+        ((IDamageable)damageHandler).StartCritVulnerability(time);
+    }
     public override bool IsBlocking ()
     {
         return isBlocking && animancer.States.Current != damageHandler.hurt;

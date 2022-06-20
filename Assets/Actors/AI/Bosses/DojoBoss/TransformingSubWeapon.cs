@@ -104,6 +104,10 @@ public class TransformingSubWeapon : BladeWeapon
         throw new System.NotImplementedException();
     }
 
+    public override Bounds GetBlockBounds()
+    {
+        return primaryWeapon.GetBlockBounds();
+    }
     public void Draw()
     {
         if (GetAmmunitionRemaining() > 0)

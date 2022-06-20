@@ -288,6 +288,10 @@ public class Actor : MonoBehaviour
         return this.transform.forward;
     }
 
+    public virtual void DeactivateHitboxes()
+    {
+        Debug.LogWarning("DeactivateHitboxes not implemented!");
+    }
     public virtual void FlashWarning(int hand)
     {
         GameObject fx = FXController.CreateBladeWarning();

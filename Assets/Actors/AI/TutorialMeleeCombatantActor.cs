@@ -337,6 +337,10 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
         ((IDamageable)damageHandler).Recoil();
     }
 
+    public void StartCritVulnerability(float time)
+    {
+        ((IDamageable)damageHandler).StartCritVulnerability(time);
+    }
     public override void Die()
     {
         if (dead) return;

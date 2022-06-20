@@ -111,5 +111,8 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
         }
     }
 
-    
+    public void StartCritVulnerability(float time)
+    {
+        // do nothing
+    }
 }

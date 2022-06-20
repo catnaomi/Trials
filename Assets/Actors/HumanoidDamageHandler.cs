@@ -86,7 +86,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     public virtual void TakeDamage(DamageKnockback damage)
     {
         if (!actor.IsAlive() || IsInInvulnClip()) return;
-        bool isCrit = IsCritVulnerable();
+        bool isCrit = IsCritVulnerable() || damage.critData.alwaysCritical;
         float damageAmount = damage.GetDamageAmount(isCrit);
         if (actor.IsTimeStopped())
         {

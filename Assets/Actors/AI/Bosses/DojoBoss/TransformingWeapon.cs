@@ -107,6 +107,29 @@ public class TransformingWeapon : BladeWeapon
         }
     }
 
+    public override Bounds GetBlockBounds()
+    {
+        GameObject currentModel = handler.GetCurrentModel();
+        GameObject offModel = subHandler.GetCurrentModel();
+        if (currentModel != null)
+        {
+            Transform blockTransform = InterfaceUtilities.FindRecursively(currentModel.transform, "_blockCollider");
+            if (blockTransform != null && blockTransform.TryGetComponent<Collider>(out Collider collider))
+            {
+                return collider.bounds;
+            }
+        }
+        else if (offModel != null)
+        {
+            Transform blockTransform = InterfaceUtilities.FindRecursively(offModel.transform, "_blockCollider");
+            if (blockTransform != null && blockTransform.TryGetComponent<Collider>(out Collider collider))
+            {
+                return collider.bounds;
+            }
+        }
+        return new Bounds();
+    }
+
     public override float GetLength()
     {
         return stats[weaponState].length;
@@ -116,6 +139,7 @@ public class TransformingWeapon : BladeWeapon
     {
         return stats[weaponState].width;
     }
+
     public DojoBossCombatantActor.WeaponState GetWeaponState()
     {
         if (holder is DojoBossCombatantActor boss)
@@ -167,7 +191,7 @@ public class TransformingWeapon : BladeWeapon
         {DojoBossCombatantActor.WeaponState.Greatsword, new WeaponStats(1.5f, 0.125f) },
         {DojoBossCombatantActor.WeaponState.Rapier, new WeaponStats(1f, 0.25f) },
         {DojoBossCombatantActor.WeaponState.Hammer, new WeaponStats(1f, 0.25f) },
-        {DojoBossCombatantActor.WeaponState.Daox2, new WeaponStats(0.75f, 0.1f) },
+        {DojoBossCombatantActor.WeaponState.Daox2, new WeaponStats(0.75f, 0.25f) },
         {DojoBossCombatantActor.WeaponState.Spear, new WeaponStats(1.5f, 0.2f) },
         {DojoBossCombatantActor.WeaponState.Bow, new WeaponStats(1f, 0.25f) },
          {DojoBossCombatantActor.WeaponState.None, new WeaponStats(1.5f, 0.2f) }

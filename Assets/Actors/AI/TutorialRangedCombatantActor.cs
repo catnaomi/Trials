@@ -319,6 +319,11 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
         ((IDamageable)damageHandler).Recoil();
     }
 
+    public void StartCritVulnerability(float time)
+    {
+        ((IDamageable)damageHandler).StartCritVulnerability(time);
+    }
+
     public override void Die()
     {
         if (dead) return;

@@ -454,4 +454,9 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
     {
         ((IDamageable)damageHandler).Recoil();
     }
+
+    public void StartCritVulnerability(float time)
+    {
+        ((IDamageable)damageHandler).StartCritVulnerability(time);
+    }
 }

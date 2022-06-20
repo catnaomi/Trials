@@ -51,8 +51,20 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     float crouchClock;
     public CrouchAction actionAfterCrouch;
     [Space(10)]
-    public InputAttack CrossParry;
-    public InputAttack CircleParry;
+    public ClipTransition CrossParry;
+    public MixerTransition2DAsset CrossParryMove;
+    public ClipTransition IntoCrossParry;
+    public ClipTransition CrossParryHit;
+    public InputAttack CrossParryFollowup;
+    [Space(5)]
+    public ClipTransition CircleParry;
+    public MixerTransition2DAsset CircleParryMove;
+    public ClipTransition IntoCircleParry;
+    public InputAttack CircleParryFollowup;
+    [Space(5)]
+    public UnityEvent ParrySuccess;
+    bool crossParrying;
+    bool circleParrying;
     [Space(10)]
     public ClipTransition JumpDodge;
     public ClipTransition JumpLand;
@@ -111,6 +123,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         public AnimancerState plunge_attack;
         public AnimancerState ranged_idle;
         public AnimancerState ranged_air;
+        public AnimancerState parry_cross;
+        public AnimancerState parry_circle;
+        public AnimancerState hurt;
     }
 
     public enum WeaponState
@@ -218,6 +233,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 float navdist = GetDistanceToTarget();
                 float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
+                StartCircleParry();
+                /*
                 float r = Random.value;
                 float p = Random.Range(0, 6);
                 if (!onPillar)
@@ -315,6 +332,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                         StartCrouch(action);
                     }
                 }
+                */
                 //StartMeleeCombo1();
 
                 //StartMeleeCombo2();
@@ -561,6 +579,37 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         OnAttack.Invoke();
     }
 
+    public void StartCrossParry()
+    {
+        RealignToTarget();
+        AnimancerState state = animancer.Play(IntoCrossParry);
+        state.Events.OnEnd = PlayCrossParry;
+    }
+
+    public void PlayCrossParry()
+    {
+        cstate.parry_cross = animancer.Play(CrossParryMove);
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Play(CrossParry);
+        animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
+        crossParrying = true;
+
+
+    }
+
+    public void StartCircleParry()
+    {
+        RealignToTarget();
+        AnimancerState state = animancer.Play(IntoCircleParry);
+        state.Events.OnEnd = PlayCircleParry;
+    }
+
+    public void PlayCircleParry()
+    {
+        cstate.parry_circle = animancer.Play(CircleParryMove);
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Play(CircleParry);
+        animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
+        circleParrying = true;
+    }
     public void StartCrouch(CrouchAction action)
     {
         RealignToTarget();
@@ -937,6 +986,53 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         Debug.DrawRay(origin, Vector3.left * SHOCKWAVE_RADIUS, Color.red, 5f);
     }
 
+    public void FrontHitbox(int active)
+    {
+        if (currentDamage == null) return;
+        currentDamage.source = this.gameObject;
+        float SHOCKWAVE_RADIUS = 2f;
+
+        Vector3 OFFSET = new Vector3(0f, 0.5f, 1f);
+
+        bool main = (inventory.IsMainDrawn());
+        bool off = (inventory.IsOffDrawn());
+        Vector3 dirToTarget = (this.transform.position - CombatTarget.transform.position);
+        dirToTarget.y = 0f;
+        Vector3 origin = this.transform.position + Vector3.Cross(dirToTarget.normalized, Vector3.up) * OFFSET.x + Vector3.up * OFFSET.y + dirToTarget.normalized * OFFSET.z;
+        if (active == 1 && main)
+        {
+            origin = inventory.GetMainWeapon().GetModel().transform.position;
+            if (inventory.GetMainWeapon() is BladeWeapon blade)
+            {
+                origin += inventory.GetMainWeapon().GetModel().transform.up * blade.length;
+            }
+        }
+        else if (active == 2 && off)
+        {
+            origin = inventory.GetOffWeapon().GetModel().transform.position;
+            if (inventory.GetOffWeapon() is BladeWeapon blade)
+            {
+                origin += inventory.GetOffWeapon().GetModel().transform.up * blade.length;
+            }
+        }
+
+        Collider[] colliders = Physics.OverlapSphere(origin, SHOCKWAVE_RADIUS, LayerMask.GetMask("Actors"));
+        foreach (Collider collider in colliders)
+        {
+            if (collider.TryGetComponent<IDamageable>(out IDamageable damageable) && (collider.transform.root != this.transform.root || currentDamage.canDamageSelf))
+            {
+                damageable.TakeDamage(currentDamage);
+            }
+        }
+        Debug.DrawRay(origin, Vector3.forward * SHOCKWAVE_RADIUS, Color.red, 5f);
+        Debug.DrawRay(origin, Vector3.back * SHOCKWAVE_RADIUS, Color.red, 5f);
+        Debug.DrawRay(origin, Vector3.right * SHOCKWAVE_RADIUS, Color.red, 5f);
+        Debug.DrawRay(origin, Vector3.left * SHOCKWAVE_RADIUS, Color.red, 5f);
+        Debug.DrawRay(origin, Vector3.up * SHOCKWAVE_RADIUS, Color.red, 5f);
+        Debug.DrawRay(origin, Vector3.down * SHOCKWAVE_RADIUS, Color.red, 5f);
+    }
+
+
     public void AnimTransWep(int wep)
     {
         weaponState = (WeaponState)wep;
@@ -1010,14 +1106,14 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         return (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle || aiming) && actionsEnabled;
     }
 
-    public void TakeDamage(DamageKnockback damage)
-    {
-        ((IDamageable)damageHandler).TakeDamage(damage);
-    }
-
     public void Recoil()
     {
         ((IDamageable)damageHandler).Recoil();
+    }
+
+    public void StartCritVulnerability(float time)
+    {
+        ((IDamageable)damageHandler).StartCritVulnerability(time);
     }
 
     public void EndAnim()
@@ -1086,4 +1182,112 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             animancer.Animator.SetLookAtWeight(1f);
         }
     }
+
+    #region Damage Handling
+
+    public virtual void TakeDamage(DamageKnockback damage)
+    {
+        if (!this.IsAlive()) return;
+        if (crossParrying && damage.isSlash)
+        {
+
+            
+
+            if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+            {
+                damageable.StartCritVulnerability(3f);
+                damageable.Recoil();
+            }
+            CrossParryComplete(damage);
+
+            OnBlock.Invoke();
+            damage.OnBlock.Invoke();
+        }
+        else if (circleParrying && damage.isThrust)
+        {
+            if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+            {
+                damageable.StartCritVulnerability(3f);
+                damageable.Recoil();
+            }
+            CircleParryComplete(damage);
+
+            OnBlock.Invoke();
+            damage.OnBlock.Invoke();
+        }
+        else
+        {
+            damageHandler.TakeDamage(damage);
+        }
+        
+    }
+
+
+    public void CrossParryComplete(DamageKnockback damage)
+    {
+        ParrySuccess.Invoke();
+        OnBlock.Invoke();
+        damage.OnBlock.Invoke();
+        Actor actor = damage.source.GetComponent<Actor>();
+        AnimancerComponent otherAnimancer;
+        
+        float otherSpeed = 0f;
+        if (actor.TryGetComponent<AnimancerComponent>(out otherAnimancer))
+        {
+            otherSpeed = otherAnimancer.States.Current.Speed;
+            otherAnimancer.States.Current.Speed = 0.25f;
+        }
+        
+        actor.DeactivateHitboxes();
+
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+        AnimancerState hit = animancer.Play(CrossParryHit);
+        
+        hit.Events.OnEnd = () =>
+        {
+            RealignToTarget();
+            cstate.attack = CrossParryFollowup.ProcessHumanoidAttack(this, _MoveOnEnd);
+            if (otherAnimancer != null)
+            {
+                otherAnimancer.States.Current.Speed = otherSpeed;
+            }
+            crossParrying = false;
+        };
+        
+    }
+
+    public void CircleParryComplete(DamageKnockback damage)
+    {
+        ParrySuccess.Invoke();
+        OnBlock.Invoke();
+        damage.OnBlock.Invoke();
+        Actor actor = damage.source.GetComponent<Actor>();
+        AnimancerComponent otherAnimancer;
+
+        float otherSpeed = 0f;
+        if (actor.TryGetComponent<AnimancerComponent>(out otherAnimancer))
+        {
+            otherSpeed = otherAnimancer.States.Current.Speed;
+            otherAnimancer.States.Current.Speed = 0.25f;
+        }
+
+        actor.DeactivateHitboxes();
+
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+        cstate.attack = CircleParryFollowup.ProcessHumanoidAttack(this, () => { });
+        OnHitboxActive.AddListener(End);
+        void End()
+        {
+            RealignToTarget();
+            if (otherAnimancer != null)
+            {
+                otherAnimancer.States.Current.Speed = otherSpeed;
+            }
+            OnHitboxActive.RemoveListener(End);
+            DeactivateHitboxes();
+            circleParrying = false;
+        };
+
+    }
+    #endregion
 }

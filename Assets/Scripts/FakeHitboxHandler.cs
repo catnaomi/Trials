@@ -69,4 +69,14 @@ public class FakeHitboxHandler : MonoBehaviour
     {
 
     }
+
+    public void FrontHitbox(int wep)
+    {
+
+    }
+
+    public void AnimEnd()
+    {
+
+    }
 }

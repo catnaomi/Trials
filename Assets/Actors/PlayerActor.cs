@@ -2995,6 +2995,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+    public override void DeactivateHitboxes()
+    {
+        HitboxActive(0);
+    }
     public override void FlashWarning(int hand)
     {
         return; // flash won't appear for player
@@ -3069,6 +3073,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         HitboxActive(0);
         damageHandler.TakeDamage(damage);
+    }
+
+    public void StartCritVulnerability(float time)
+    {
+        damageHandler.StartCritVulnerability(time);
     }
 
     public override void Die()
