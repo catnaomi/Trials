@@ -996,25 +996,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
         bool main = (inventory.IsMainDrawn());
         bool off = (inventory.IsOffDrawn());
-        Vector3 dirToTarget = (this.transform.position - CombatTarget.transform.position);
+        Vector3 dirToTarget = -(this.transform.position - CombatTarget.transform.position);
         dirToTarget.y = 0f;
         Vector3 origin = this.transform.position + Vector3.Cross(dirToTarget.normalized, Vector3.up) * OFFSET.x + Vector3.up * OFFSET.y + dirToTarget.normalized * OFFSET.z;
-        if (active == 1 && main)
-        {
-            origin = inventory.GetMainWeapon().GetModel().transform.position;
-            if (inventory.GetMainWeapon() is BladeWeapon blade)
-            {
-                origin += inventory.GetMainWeapon().GetModel().transform.up * blade.length;
-            }
-        }
-        else if (active == 2 && off)
-        {
-            origin = inventory.GetOffWeapon().GetModel().transform.position;
-            if (inventory.GetOffWeapon() is BladeWeapon blade)
-            {
-                origin += inventory.GetOffWeapon().GetModel().transform.up * blade.length;
-            }
-        }
+        currentDamage.originPoint = origin;
 
         Collider[] colliders = Physics.OverlapSphere(origin, SHOCKWAVE_RADIUS, LayerMask.GetMask("Actors"));
         foreach (Collider collider in colliders)

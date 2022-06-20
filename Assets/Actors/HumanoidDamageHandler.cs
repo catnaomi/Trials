@@ -137,6 +137,15 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 sourceActor.SetLastBlockpoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
             }
         }
+        else if (damage.originPoint != Vector3.zero)
+        {
+            Vector3 contactPosition = actor.GetComponent<Collider>().ClosestPoint(damage.originPoint);
+            if (damage.source.TryGetComponent<Actor>(out Actor sourceActor))
+            {
+                sourceActor.lastContactPoint = contactPosition;
+                sourceActor.SetLastBlockpoint(damage.originPoint);
+            }
+        }
 
         if (actor.IsDodging())
         {
@@ -473,7 +482,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     }
     IEnumerator EndProne(bool faceUp)
     {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(2f);
         if (!actor.IsGrounded())
         {
             StartHurtFall(false);
