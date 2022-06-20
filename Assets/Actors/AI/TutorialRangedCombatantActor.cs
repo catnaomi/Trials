@@ -304,9 +304,9 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
         }
     }
 
-    public bool CanAct()
+    public override bool CanAct()
     {
-        return (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle || aiming) && actionsEnabled;
+        return base.CanAct() || (aiming && actionsEnabled);
     }
 
     public void TakeDamage(DamageKnockback damage)

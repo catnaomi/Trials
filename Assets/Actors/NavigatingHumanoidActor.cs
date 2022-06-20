@@ -36,6 +36,9 @@ public class NavigatingHumanoidActor : Actor, INavigates
     public float airTime = 0f;
     float lastAirTime;
     float landTime = 0f;
+    float idleTime = 0f;
+    public float strafeDelay = 2f;
+    public int strafeDirection = 0;
     Vector3 lastPosition;
     Vector3 animatorVelocity;
     public float jumpAdjustSpeed = 3f;
@@ -54,6 +57,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
         public LinearMixerState idle;
         public DirectionalMixerState move;
         public AnimancerState fall;
+        public DirectionalMixerState strafe;
     }
 
     public bool actionsEnabled = true;
@@ -84,8 +88,10 @@ public class NavigatingHumanoidActor : Actor, INavigates
 
         positionReference = GetComponent<HumanoidPositionReference>();
         navstate.move = (DirectionalMixerState)animancer.States.GetOrCreate(moveAnim);
+        navstate.move.Key = "move";
         navstate.idle = (LinearMixerState)animancer.Play(idleAnim);
-
+        navstate.strafe = (DirectionalMixerState)animancer.States.GetOrCreate(moveAnim);
+        navstate.strafe.Key = "strafe";
         animancer.Layers[HumanoidAnimLayers.UpperBody].SetMask(positionReference.upperBodyMask);
         animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = true;
         animancer.Layers[HumanoidAnimLayers.UpperBody].Weight = 1f;
@@ -178,10 +184,22 @@ public class NavigatingHumanoidActor : Actor, INavigates
                 if (!inBufferRange)
                 {
                     animancer.Play(navstate.move, 0.25f);
+                    idleTime = 0f;
+                }
+                else if (idleTime > strafeDelay)
+                {
+                    strafeDirection = CheckStrafe();
+                    if (strafeDirection != 0)
+                    {
+                        animancer.Play(navstate.strafe);
+                    }
+                    idleTime = 0f;
                 }
             }
             
             navstate.idle.Parameter = angle;
+            idleTime += Time.deltaTime;
+            
             
         }
         else if (animancer.States.Current == navstate.move)
@@ -222,6 +240,39 @@ public class NavigatingHumanoidActor : Actor, INavigates
             {
                 animancer.Play(navstate.idle, 0.25f);
             }
+            
+        }
+        else if (animancer.States.Current == navstate.strafe)
+        {
+            nav.enabled = true;
+            ignoreRoot = false;
+            nav.isStopped = true;
+
+            if (idleTime > strafeDelay)
+            {
+                idleTime = 0f;
+                strafeDirection = CheckStrafe();
+            }
+
+            float xmov = Mathf.Sign(strafeDirection);
+            
+            if (inBufferRange && strafeDirection != 0)
+            {
+                moveDirection = this.transform.right * xmov;
+                Vector3 dir = (CombatTarget.transform.position - this.transform.position);
+                dir.y = 0f;
+                dir.Normalize();
+                lookDirection = dir;
+
+                this.transform.rotation = Quaternion.LookRotation(lookDirection);
+
+                navstate.strafe.ParameterX = xmov;
+            }
+            else
+            {
+                animancer.Play(navstate.move);
+            }
+
             
         }
 
@@ -548,6 +599,84 @@ public class NavigatingHumanoidActor : Actor, INavigates
         }
     }
 
+    public virtual bool CanAct()
+    {
+        return (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle || animancer.States.Current == navstate.strafe) && actionsEnabled;
+    }
+
+    public int CheckStrafe()
+    {
+        float MAX_DISTANCE = 3f;
+        float MIN_DISTANCE = 1f;
+        Vector3 pointLeft = this.transform.position + this.transform.right * MAX_DISTANCE;
+        Vector3 pointRight = this.transform.position + this.transform.right * -MAX_DISTANCE;
+
+        bool rayLeft = Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, -this.transform.right, out RaycastHit hitLeft, MAX_DISTANCE, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
+        bool rayRight = Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, this.transform.right, out RaycastHit hitRight, MAX_DISTANCE, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
+
+        if (rayLeft && !rayRight)
+        {
+            return -1;
+        }
+        else if (rayRight && !rayLeft)
+        {
+            return 1;
+        }
+        else if (rayLeft && rayRight)
+        {
+            if (hitLeft.distance < hitRight.distance && hitLeft.distance > MIN_DISTANCE)
+            {
+                return -1;
+            }
+            else if (hitRight.distance < hitLeft.distance && hitRight.distance > MIN_DISTANCE)
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            bool hasNavLeft = NavMesh.SamplePosition(pointLeft, out NavMeshHit navHitLeft, MAX_DISTANCE, NavMesh.AllAreas);
+            bool hasNavRight = NavMesh.SamplePosition(pointRight, out NavMeshHit navHitRight, MAX_DISTANCE, NavMesh.AllAreas);
+
+            float navDistLeft = Vector3.Distance(this.transform.position, navHitLeft.position);
+            float navDistRight = Vector3.Distance(this.transform.position, navHitRight.position);
+            if (hasNavLeft && !hasNavRight)
+            {
+                return -1;
+            }
+            else if (hasNavRight && !hasNavLeft)
+            {
+                return 1;
+            }
+            else if (hasNavLeft && hasNavRight)
+            {
+                if (navHitLeft.distance < navHitRight.distance && navDistLeft > MIN_DISTANCE)
+                {
+                    return -1;
+                }
+                else if (navHitRight.distance < navHitLeft.distance && navDistRight > MIN_DISTANCE)
+                {
+                    return 1;
+                }
+                else if (navDistLeft > MIN_DISTANCE && navDistRight > MIN_DISTANCE)
+                {
+                    return (Random.value > 0.5f) ? 1 : -1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            else
+            {
+                return (Random.value > 0.5f) ? 1 : -1;
+            }
+        }
+    }
     public void MoveOnEnd()
     {
         animancer.Play(navstate.move);

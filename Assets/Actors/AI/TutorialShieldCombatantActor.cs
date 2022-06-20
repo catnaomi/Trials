@@ -289,11 +289,6 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
         }
     }
 
-    public bool CanAct()
-    {
-        return (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle) && actionsEnabled;
-    }
-
     public void TakeDamage(DamageKnockback damage)
     {
         ((IDamageable)damageHandler).TakeDamage(damage);

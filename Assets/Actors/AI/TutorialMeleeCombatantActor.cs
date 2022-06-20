@@ -322,11 +322,6 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
         }
     }
 
-    public bool CanAct()
-    {
-        return (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle) && actionsEnabled;
-    }
-
     public void TakeDamage(DamageKnockback damage)
     {
         ((IDamageable)damageHandler).TakeDamage(damage);

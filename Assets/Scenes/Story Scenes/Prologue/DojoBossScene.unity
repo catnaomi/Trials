@@ -181,7 +181,7 @@ PrefabInstance:
     - target: {fileID: 3452983887894396656, guid: a7d5f923ad87c1c44b6f0ce38e84ad4b,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8466291109640931949, guid: a7d5f923ad87c1c44b6f0ce38e84ad4b,
         type: 3}
@@ -1431,7 +1431,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 152b6b118c102df429ba3f1af4bfa875, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 5917375922873668745, guid: 480b2aac360f4f541a903e93e1acfcf4,
         type: 3}
       propertyPath: m_Layer
@@ -1715,9 +1715,9 @@ MonoBehaviour:
   isInTimeState: 0
   nav: {fileID: 0}
   angleSpeed: 180
-  bufferRange: 2
-  closeRange: 1
-  shouldNavigate: 0
+  bufferRange: 8
+  closeRange: 4
+  shouldNavigate: 1
   currentDistance: 0
   updateSpeed: 0.25
   neg: -1
@@ -1725,6 +1725,8 @@ MonoBehaviour:
   destination: {x: 0, y: 0, z: 0}
   followingTarget: 0
   airTime: 0
+  strafeDelay: 10
+  strafeDirection: 0
   jumpAdjustSpeed: 3
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: 4f3fb63f3c96bb24ba0b6453ed67e547, type: 2}
@@ -1960,6 +1962,7 @@ MonoBehaviour:
   ParrySuccess:
     m_PersistentCalls:
       m_Calls: []
+  MaxParryTime: 15
   JumpDodge:
     _FadeDuration: 0.1
     _Events:

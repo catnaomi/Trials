@@ -63,6 +63,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public InputAttack CircleParryFollowup;
     [Space(5)]
     public UnityEvent ParrySuccess;
+    public float MaxParryTime = 30f;
+    float parryTime;
+    float parryStrafeTime;
     bool crossParrying;
     bool circleParrying;
     [Space(10)]
@@ -123,8 +126,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         public AnimancerState plunge_attack;
         public AnimancerState ranged_idle;
         public AnimancerState ranged_air;
-        public AnimancerState parry_cross;
-        public AnimancerState parry_circle;
+        public DirectionalMixerState parry_cross;
+        public DirectionalMixerState parry_circle;
         public AnimancerState hurt;
     }
 
@@ -232,9 +235,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             {
                 float navdist = GetDistanceToTarget();
                 float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
-
-                StartCircleParry();
-                /*
+                
                 float r = Random.value;
                 float p = Random.Range(0, 6);
                 if (!onPillar)
@@ -251,6 +252,17 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                             {
                                 StartRangedAttackMulti();
                             }
+                        }
+                    }
+                    else if (r < 0.4f)
+                    {
+                        if (r < 0.2f)
+                        {
+                            StartCircleParry();
+                        }
+                        else
+                        {
+                            StartCrossParry();
                         }
                     }
                     else if (r < 0.6f)
@@ -332,7 +344,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                         StartCrouch(action);
                     }
                 }
-                */
+                
                 //StartMeleeCombo1();
 
                 //StartMeleeCombo2();
@@ -446,6 +458,69 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 navstate.fall = animancer.Play(fallAnim, 1f);
                 HitboxActive(0);
             }
+        }
+        if (animancer.States.Current == cstate.parry_cross || animancer.States.Current == cstate.parry_circle)
+        {
+            bool inBufferRange = currentDistance <= bufferRange;
+
+            nav.enabled = true;
+            nav.isStopped = true;
+
+            parryStrafeTime += Time.deltaTime;
+            parryTime += Time.deltaTime;
+            if (parryStrafeTime > strafeDelay)
+            {
+                parryStrafeTime = 0f;
+                strafeDirection = CheckStrafe();
+                if (Random.value > 0.7f)
+                {
+                    strafeDirection = 0;
+                }
+            }
+            float xmov = Mathf.Sign(strafeDirection);
+
+            if (inBufferRange && strafeDirection != 0 && parryTime < MaxParryTime)
+            {
+                moveDirection = this.transform.right * xmov;
+                Vector3 dir = (CombatTarget.transform.position - this.transform.position);
+                dir.y = 0f;
+                dir.Normalize();
+
+                this.transform.rotation = Quaternion.LookRotation(dir);
+
+                if (crossParrying)
+                {
+                    cstate.parry_cross.ParameterX = xmov;
+                }
+                else if (circleParrying)
+                {
+                    cstate.parry_circle.ParameterX = xmov;
+                }
+            }
+            else
+            {
+                parryTime = 0f;
+                animancer.Play(navstate.move);
+                if (clock < 2f)
+                {
+                    clock = 2f;
+                }
+                circleParrying = false;
+                crossParrying = false;
+            }
+        }
+        else if (animancer.States.Current != cstate.attack)
+        {
+            if (circleParrying || crossParrying)
+            {
+                circleParrying = false;
+                crossParrying = false;
+            }
+            
+        }
+        if (animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying() && !aiming && animancer.States.Current != cstate.parry_circle && animancer.States.Current != cstate.parry_cross)
+        {
+            animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
         }
         if (Vector3.Distance(CombatTarget.transform.position, this.transform.position) < 10f)
         {
@@ -583,12 +658,14 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         RealignToTarget();
         AnimancerState state = animancer.Play(IntoCrossParry);
+        cstate.attack = state;
         state.Events.OnEnd = PlayCrossParry;
+        crossParrying = true;
     }
 
     public void PlayCrossParry()
     {
-        cstate.parry_cross = animancer.Play(CrossParryMove);
+        cstate.parry_cross = (DirectionalMixerState)animancer.Play(CrossParryMove);
         animancer.Layers[HumanoidAnimLayers.UpperBody].Play(CrossParry);
         animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
         crossParrying = true;
@@ -600,12 +677,14 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         RealignToTarget();
         AnimancerState state = animancer.Play(IntoCircleParry);
+        cstate.attack = state;
         state.Events.OnEnd = PlayCircleParry;
+        circleParrying = true;
     }
 
     public void PlayCircleParry()
     {
-        cstate.parry_circle = animancer.Play(CircleParryMove);
+        cstate.parry_circle = (DirectionalMixerState)animancer.Play(CircleParryMove);
         animancer.Layers[HumanoidAnimLayers.UpperBody].Play(CircleParry);
         animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
         circleParrying = true;
@@ -1086,9 +1165,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
     }
 
-    public bool CanAct()
+    public override bool CanAct()
     {
-        return (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle || aiming) && actionsEnabled;
+        return base.CanAct() || (aiming && actionsEnabled);
     }
 
     public void Recoil()
@@ -1173,7 +1252,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public virtual void TakeDamage(DamageKnockback damage)
     {
         if (!this.IsAlive()) return;
-        if (crossParrying && damage.isSlash)
+        if (crossParrying && !damage.isSlash)
         {
 
             
@@ -1188,7 +1267,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             OnBlock.Invoke();
             damage.OnBlock.Invoke();
         }
-        else if (circleParrying && damage.isThrust)
+        else if (circleParrying && !damage.isThrust)
         {
             if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
             {
@@ -1200,8 +1279,23 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             OnBlock.Invoke();
             damage.OnBlock.Invoke();
         }
+        else if ((crossParrying && damage.isSlash) || (circleParrying && damage.isThrust))
+        {
+            animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
+            animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+            ClipTransition clip = damageAnims.guardBreak;
+            AnimancerState state = animancer.Play(clip);
+            state.Events.OnEnd = _MoveOnEnd;
+            damageHandler.hurt = state;
+            this.OnHurt.Invoke();
+            damage.OnCrit.Invoke();
+            damage.OnBlock.Invoke();
+            this.OnBlock.Invoke();
+            StartCritVulnerability(clip.MaximumDuration / clip.Speed);
+        }
         else
         {
+            animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
             damageHandler.TakeDamage(damage);
         }
         
