@@ -526,13 +526,17 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
         }
-        else if (aiming && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
+        else if ((aiming || animancer.States.Current == cstate.ranged_idle) && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
         {
             aiming = false;
             if (animancer.States.Current == cstate.ranged_idle)
             {
                 animancer.Play(navstate.move);
             }
+        }
+        else if (!crouching && (animancer.IsPlayingClip(CrouchDown.Clip) || animancer.IsPlayingClip(Crouch.Clip)))
+        {
+            //animancer.Play(navstate.move);
         }
         if (Vector3.Distance(CombatTarget.transform.position, this.transform.position) < 10f)
         {

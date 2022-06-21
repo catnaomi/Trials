@@ -286,7 +286,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         skidAnim.Events.OnEnd += () => { state.sprint = animancer.Play(sprintAnim); };
         //landAnim.Events.OnEnd += () => { animancer.Play(state.move, 1f); };
-        rollAnim.Events.OnEnd += () => { animancer.Play(state.move, 0.5f); };
+        rollAnim.Events.OnEnd += () => {
+            animancer.Play(state.move, 0.5f);
+            EnableCloth();
+        };
         standJumpAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
         runJumpAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
         backflipAnim.Events.OnEnd += () => { state.fall = animancer.Play(fallAnim); };
@@ -1063,6 +1066,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             HitboxActive(0);
             speed = rollSpeed;
             moveDirection = this.transform.forward;
+            DisableCloth();
             if (attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
             {
                 if (!inventory.IsMainDrawn())
@@ -1074,12 +1078,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     if (slash)
                     {
-                        rollAnim.Events.OnEnd = () => { RollSlash(); };
+                        rollAnim.Events.OnEnd = () => {
+                            RollSlash();
+                            EnableCloth();
+                        };
                         
                     }
                     else if (thrust)
                     {
-                        rollAnim.Events.OnEnd = () => { RollThrust(); };
+                        rollAnim.Events.OnEnd = () => {
+                            RollThrust();
+                            EnableCloth();
+                        };
                     }
                 }
                 attack = false;
