@@ -68,6 +68,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     float parryStrafeTime;
     bool crossParrying;
     bool circleParrying;
+    bool spinning;
+    Quaternion initRot;
     [Space(10)]
     public ClipTransition JumpDodge;
     public ClipTransition JumpLand;
@@ -184,6 +186,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
 
         animancer.Play(navstate.idle);
+        initRot = this.GetComponent<HumanoidPositionReference>().MainHand.transform.localRotation;
     }
 
     void Awake()
@@ -194,7 +197,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public override void ActorPostUpdate()
     {
         base.ActorPostUpdate();
-        
+
         if (clock > -1)
         {
             clock -= Time.deltaTime;
@@ -235,7 +238,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             {
                 float navdist = GetDistanceToTarget();
                 float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
-                
+
                 float r = Random.value;
                 float p = Random.Range(0, 6);
                 if (!onPillar)
@@ -259,6 +262,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                         if (r < 0.2f)
                         {
                             StartCircleParry();
+                            //StartCrossParry();
                         }
                         else
                         {
@@ -279,7 +283,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                         {
                             StartAiming();
                         }
-                        
+
                     }
                     else
                     {
@@ -301,7 +305,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                         }
                         StartCrouch(action);
                     }
-                    
+
                 }
                 else
                 {
@@ -344,7 +348,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                         StartCrouch(action);
                     }
                 }
-                
+
                 //StartMeleeCombo1();
 
                 //StartMeleeCombo2();
@@ -479,7 +483,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             }
             float xmov = Mathf.Sign(strafeDirection);
 
-            if (inBufferRange && strafeDirection != 0 && parryTime < MaxParryTime)
+            if (inBufferRange && parryTime < MaxParryTime)
             {
                 moveDirection = this.transform.right * xmov;
                 Vector3 dir = (CombatTarget.transform.position - this.transform.position);
@@ -516,11 +520,19 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 circleParrying = false;
                 crossParrying = false;
             }
-            
+
         }
         if (animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying() && !aiming && animancer.States.Current != cstate.parry_circle && animancer.States.Current != cstate.parry_cross)
         {
             animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+        }
+        else if (aiming && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
+        {
+            aiming = false;
+            if (animancer.States.Current == cstate.ranged_idle)
+            {
+                animancer.Play(navstate.move);
+            }
         }
         if (Vector3.Distance(CombatTarget.transform.position, this.transform.position) < 10f)
         {
@@ -573,8 +585,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 targetSpeed = Vector3.zero;
             }
             lastTargetPos = CombatTarget.transform.position;
-        }
-        
+        }  
     }
 
     public void StartMeleeCombo1()
@@ -582,7 +593,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         RealignToTarget();
         //cstate.attack = CloseAttack.ProcessHumanoidAttack(this, _MoveOnEnd);
         nav.enabled = true;
-
+        ignoreRoot = false;
         Vector3 pos = Vector3.zero;
 
         Vector3 centerPoint = CombatTarget.transform.position + (center.position - CombatTarget.transform.position).normalized * MeleeCombo1StartDistance;
@@ -658,8 +669,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         RealignToTarget();
         AnimancerState state = animancer.Play(IntoCrossParry);
-        cstate.attack = state;
+        
         state.Events.OnEnd = PlayCrossParry;
+        cstate.attack = state;
         crossParrying = true;
     }
 
@@ -677,8 +689,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         RealignToTarget();
         AnimancerState state = animancer.Play(IntoCircleParry);
-        cstate.attack = state;
+        
         state.Events.OnEnd = PlayCircleParry;
+        cstate.attack = state;
         circleParrying = true;
     }
 
@@ -692,7 +705,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public void StartCrouch(CrouchAction action)
     {
         RealignToTarget();
-
         crouchClock = CrouchTime;
         animancer.Play(CrouchDown).Events.OnEnd = () => { animancer.Play(Crouch); };
         crouching = true;
@@ -1115,7 +1127,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         if (inventory.IsMainEquipped()) inventory.SetDrawn(0, false);
         if (inventory.IsOffEquipped()) inventory.SetDrawn(1, false);
         if (inventory.IsRangedEquipped()) inventory.SetDrawn(2, false);
-    }
+    } 
 
     public DamageKnockback GetCurrentDamage()
     {
@@ -1252,6 +1264,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public virtual void TakeDamage(DamageKnockback damage)
     {
         if (!this.IsAlive()) return;
+        
         if (crossParrying && !damage.isSlash)
         {
 
@@ -1298,7 +1311,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
             damageHandler.TakeDamage(damage);
         }
-        
+        DeactivateHitboxes();
     }
 
 

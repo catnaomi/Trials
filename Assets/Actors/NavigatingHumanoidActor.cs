@@ -30,7 +30,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     public Vector3 destination;
     [HideInInspector]public bool followingTarget;
     bool obstacleTransitioning;
-    bool ignoreRoot;
+    protected bool ignoreRoot;
     bool shouldFall;
     protected bool offMeshInProgress;
     public float airTime = 0f;
