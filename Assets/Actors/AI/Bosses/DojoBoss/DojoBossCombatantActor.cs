@@ -3,6 +3,7 @@ using System.Collections;
 using Animancer;
 using UnityEngine.Events;
 using UnityEngine.AI;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(HumanoidNPCInventory))]
 public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamageable
@@ -84,7 +85,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     [ReadOnly]public bool aiming;
     float aimTime;
     [Space(10)]
-    public InputAttack Summon;
+    public ClipTransition SummonStart;
+    public ClipTransition SummonHold;
+    public ClipTransition SummonEnd;
+    bool summoning;
     [Space(5)]
     public DamageAnims damageAnims;
     HumanoidDamageHandler damageHandler;
@@ -103,6 +107,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public Transform pillar2;
     public Transform pillar3;
     public Transform center;
+    public Transform spawn1;
+    public Transform spawn2;
+    public Transform spawn3;
     [ReadOnly]public bool onPillar;
     public int currentPillar = 0;
     public float nonPillarHeight = -1000f;
@@ -112,6 +119,24 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     [SerializeField] float jumpVertMult = 1f;
     Vector3 startJumpPosition;
     Vector3 endJumpPosition;
+    [Header("Spawn Data")]
+    public GameObject stabDummy;
+    public GameObject slashDummy;
+    [Space(5)]
+    public GameObject shieldDummy;
+    [Space(5)]
+    public GameObject archerDummy;
+    [Space(5)]
+    [SerializeField, ReadOnly] 
+    List<NavigatingHumanoidActor> spawnedEnemies;
+    public int spawnLimit = 3;
+    [SerializeField, ReadOnly] bool pillar1Occupied;
+    [SerializeField, ReadOnly] bool pillar2Occupied;
+    [SerializeField, ReadOnly] bool pillar3Occupied;
+    [SerializeField, ReadOnly] bool spawn1Occupied;
+    [SerializeField, ReadOnly] bool spawn2Occupied;
+    [SerializeField, ReadOnly] bool spawn3Occupied;
+
     [Header("Enumerated States")]
     public WeaponState weaponState;
     public UnityEvent OnWeaponTransform;
