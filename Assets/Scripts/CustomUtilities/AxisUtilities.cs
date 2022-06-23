@@ -446,5 +446,19 @@ namespace CustomUtilities
             }
             return axis;
         }
+
+        public static Vector3[] GetSortedPositionsByDistances(Vector3 origin, params Vector3[] vectors)
+        {
+            Array.Sort(vectors, (a, b) =>
+            {
+                return (int)Mathf.Sign(Vector3.Distance(origin, b) - Vector3.Distance(origin, a));
+            });
+
+
+            return vectors;
+        }
+
     }
+
+    
 }

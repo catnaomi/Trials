@@ -89,6 +89,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public ClipTransition SummonHold;
     public ClipTransition SummonEnd;
     bool summoning;
+    public float SummonTime;
+    float summonClock;
     [Space(5)]
     public DamageAnims damageAnims;
     HumanoidDamageHandler damageHandler;
@@ -156,6 +158,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         public DirectionalMixerState parry_cross;
         public DirectionalMixerState parry_circle;
         public AnimancerState hurt;
+        public AnimancerState summon;
     }
 
     public enum WeaponState
@@ -264,6 +267,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 float navdist = GetDistanceToTarget();
                 float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
+                /*
                 float r = Random.value;
                 float p = Random.Range(0, 6);
                 if (!onPillar)
@@ -373,7 +377,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                         StartCrouch(action);
                     }
                 }
-
+    */
                 //StartMeleeCombo1();
 
                 //StartMeleeCombo2();
@@ -984,6 +988,41 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         aiming = false;
         _MoveOnEnd();
     }
+
+    public void StartSummon()
+    {
+        cstate.summon = animancer.Play(SummonStart);
+        cstate.summon.Events.OnEnd = () =>
+        {
+            cstate.summon = animancer.Play(SummonHold);
+            summoning = true;
+        };
+    }
+
+    public void ProcessSummon()
+    {
+        float t = 1f - Mathf.Clamp01(summonClock / SummonTime);
+
+        if (t >= 1f)
+        {
+            cstate.summon = animancer.Play(SummonEnd);
+            summoning = false;
+        }
+    }
+
+    public void InstantiateSummons()
+    {
+        int type = Random.Range(1, 4);
+
+        Vector3 midpoint = (this.transform.position + CombatTarget.transform.position) * 0.5f;
+        if (type == 1) // stab and slash dummies
+        {
+            int pos1 = Random.Range(1, 4);
+            int pos2 = (pos1 + 1) % 4;
+        }
+    }
+
+
     public Vector3 GetProjectedPosition(float timeOut)
     {
         Debug.DrawLine(CombatTarget.transform.position, CombatTarget.transform.position + targetSpeed * timeOut, Color.blue, 5f);
