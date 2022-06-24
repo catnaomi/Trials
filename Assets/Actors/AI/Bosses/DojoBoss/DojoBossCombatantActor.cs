@@ -4,6 +4,7 @@ using Animancer;
 using UnityEngine.Events;
 using UnityEngine.AI;
 using System.Collections.Generic;
+using CustomUtilities;
 
 [RequireComponent(typeof(HumanoidNPCInventory))]
 public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamageable
@@ -1017,8 +1018,13 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         Vector3 midpoint = (this.transform.position + CombatTarget.transform.position) * 0.5f;
         if (type == 1) // stab and slash dummies
         {
-            int pos1 = Random.Range(1, 4);
-            int pos2 = (pos1 + 1) % 4;
+            Vector3[] positions = AxisUtilities.GetSortedPositionsByDistances(midpoint, spawn1.position, spawn2.position, spawn3.position);
+
+            Vector3 pos1 = positions[0];
+            Vector3 pos2 = positions[1];
+
+
+
         }
     }
 
