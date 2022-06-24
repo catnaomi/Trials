@@ -272,119 +272,88 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 float navdist = GetDistanceToTarget();
                 float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
+                bool inCloseRange = navdist < 10f;
                 if (spawnedEnemies.Count < spawnLimit)
                 StartSummon();
-                /*
+                
                 float r = Random.value;
                 float p = Random.Range(0, 6);
-                if (!onPillar)
+                if (aiming)
                 {
-                    if (aiming)
+                    if (aimTime > 1f)
                     {
-                        if (aimTime > 1f)
+                        if (r < 0.5f)
                         {
-                            if (r < 0.5f)
-                            {
-                                StartRangedAttack();
-                            }
-                            else
-                            {
-                                StartRangedAttackMulti();
-                            }
-                        }
-                    }
-                    else if (r < 0.4f)
-                    {
-                        if (r < 0.2f)
-                        {
-                            StartCircleParry();
-                            //StartCrossParry();
+                            StartRangedAttack();
                         }
                         else
                         {
-                            StartCrossParry();
+                            StartRangedAttackMulti();
                         }
                     }
-                    else if (r < 0.6f)
-                    {
-                        if (navdist < 2f)
+                }
+                else if (!onPillar)
+                {
+                   if (inCloseRange)
+                   {
+                        if (r < 0.35f)
+                        {
+                            StartCircleParry();
+                        }
+                        else if (r < 0.7f)
+                        {
+                            StartCrossParry();
+                        }
+                        else if (r < 0.8f && navdist < 2f)
                         {
                             StartMeleeCombo2();
                         }
-                        else if (navdist < 6f)
+                        else if (r < 0.9f && navdist < 6f)
                         {
                             StartMeleeCombo1();
                         }
                         else
                         {
-                            StartAiming();
+                            // do nothing or strafe?
                         }
-
-                    }
-                    else
-                    {
-                        CrouchAction action = CrouchAction.Plunge;
-                        if (p == 1)
-                        {
-                            if (r < 0.8) action = CrouchAction.JumpTo_Pillar1;
-                            else action = CrouchAction.JumpShot_Pillar1;
-                        }
-                        else if (p == 2)
-                        {
-                            if (r < 0.8) action = CrouchAction.JumpTo_Pillar2;
-                            else action = CrouchAction.JumpShot_Pillar2;
-                        }
-                        else if (p == 3)
-                        {
-                            if (r < 0.8) action = CrouchAction.JumpTo_Pillar3;
-                            else action = CrouchAction.JumpShot_Pillar3;
-                        }
-                        StartCrouch(action);
-                    }
-
-                }
-                else
-                {
-                    if (aiming)
-                    {
-                        if (aimTime > 1f)
-                        {
-                            if (r < 0.5f)
-                            {
-                                StartRangedAttack();
-                            }
-                            else
-                            {
-                                StartRangedAttackMulti();
-                            }
-                        }
-                    }
-                    else if (r < 0.3f)
+                    } // not close range
+                    else if (r < 0.4f)
                     {
                         StartAiming();
                     }
+                    else if (r < 0.8f)
+                    {
+                        StartSummon();
+                    }
+                    else if (TryGetAvailablePillar(out CrouchAction crouchAction, r < 0.85f))
+                    {
+                        StartCrouch(crouchAction);
+                    }
                     else
                     {
-                        CrouchAction action = CrouchAction.Plunge;
-                        if (p == 1 && currentPillar != p)
-                        {
-                            if (r < 0.65f) action = CrouchAction.JumpTo_Pillar1;
-                            else action = CrouchAction.JumpShot_Pillar1;
-                        }
-                        else if (p == 2 && currentPillar != p)
-                        {
-                            if (r < 0.65f) action = CrouchAction.JumpTo_Pillar2;
-                            else action = CrouchAction.JumpShot_Pillar2;
-                        }
-                        else if (p == 3 && currentPillar != p)
-                        {
-                            if (r < 0.65f) action = CrouchAction.JumpTo_Pillar3;
-                            else action = CrouchAction.JumpShot_Pillar3;
-                        }
-                        StartCrouch(action);
+                        StartCrouch(CrouchAction.Plunge);
                     }
                 }
-    */
+                else
+                {
+                    if (r < 0.5f)
+                    {
+                        StartAiming();
+                    }
+                    else if (r < 0.75f)
+                    {
+                        StartSummon();
+                    }
+                    else if (r > 0.85f && TryGetAvailablePillar(out CrouchAction crouchAction, r < 0.8f))
+                    {
+                        StartCrouch(crouchAction);
+                    }
+                    else
+                    {
+                        StartCrouch(CrouchAction.Plunge);
+                    }
+                }
+    
                 //StartMeleeCombo1();
 
                 //StartMeleeCombo2();
@@ -1267,6 +1236,46 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         Debug.DrawLine(CombatTarget.transform.position, CombatTarget.transform.position + targetSpeed * timeOut, Color.blue, 5f);
         return CombatTarget.transform.position + targetSpeed * timeOut;
+    }
+
+    public bool TryGetAvailablePillar(out CrouchAction crouchAction, bool shoot)
+    {
+        crouchAction = CrouchAction.JumpTo_Center;
+
+        if (pillar1Occupied && pillar2Occupied && pillar3Occupied) return false;
+
+        List<Transform> availableTransforms = new List<Transform>();
+        if (!pillar1Occupied && (!onPillar || currentPillar != 1))
+        {
+            availableTransforms.Add(pillar1);
+        }
+        if (!pillar2Occupied && (!onPillar || currentPillar != 2))
+        {
+            availableTransforms.Add(pillar2);
+        }
+        if (!pillar3Occupied && (!onPillar || currentPillar != 3))
+        {
+            availableTransforms.Add(pillar3);
+        }
+
+        if (availableTransforms.Count <= 0) return false;
+
+        availableTransforms = (List<Transform>)AxisUtilities.GetSortedTransformsByDistances(this.transform.position, availableTransforms);
+
+        if (availableTransforms[0] == pillar1)
+        {
+            crouchAction = (!shoot) ? CrouchAction.JumpTo_Pillar1 : CrouchAction.JumpShot_Pillar1;
+
+        }
+        else if (availableTransforms[0] == pillar2)
+        {
+            crouchAction = (!shoot) ? CrouchAction.JumpTo_Pillar2 : CrouchAction.JumpShot_Pillar2;
+        }
+        else if (availableTransforms[0] == pillar3)
+        {
+            crouchAction = (!shoot) ? CrouchAction.JumpTo_Pillar3 : CrouchAction.JumpShot_Pillar3;
+        }
+        return true;
     }
     /*
    * triggered by animation:
