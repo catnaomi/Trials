@@ -89,6 +89,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public ClipTransition SummonStart;
     public ClipTransition SummonHold;
     public ClipTransition SummonEnd;
+    public ClipTransition SpawnAnim;
     bool summoning;
     public float SummonTime;
     float summonClock;
@@ -132,6 +133,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     [Space(5)]
     [SerializeField, ReadOnly] 
     List<NavigatingHumanoidActor> spawnedEnemies;
+    List<NavigatingHumanoidActor> recentlySpawned;
     public int spawnLimit = 3;
     [SerializeField, ReadOnly] bool pillar1Occupied;
     [SerializeField, ReadOnly] bool pillar2Occupied;
@@ -216,6 +218,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
         animancer.Play(navstate.idle);
         initRot = this.GetComponent<HumanoidPositionReference>().MainHand.transform.localRotation;
+
+        recentlySpawned = new List<NavigatingHumanoidActor>();
     }
 
     void Awake()
@@ -268,6 +272,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 float navdist = GetDistanceToTarget();
                 float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
+                if (spawnedEnemies.Count < spawnLimit)
+                StartSummon();
                 /*
                 float r = Random.value;
                 float p = Random.Range(0, 6);
@@ -619,7 +625,28 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 targetSpeed = Vector3.zero;
             }
             lastTargetPos = CombatTarget.transform.position;
-        }  
+        }
+        if (summoning)
+        {
+            ProcessSummon();
+        }
+        /*
+        if (recentlySpawned.Count > 1)
+        {
+            foreach (NavigatingHumanoidActor spawnedActor in recentlySpawned)
+            {
+                if (spawnedActor == null) continue;
+                spawnedActor.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
+                {
+                    spawnedActor.shouldNavigate = true;
+                    spawnedActor.actionsEnabled = true;
+                    spawnedActor.PlayIdle();
+                };
+            }
+            recentlySpawned.Clear();    
+
+        }
+        */
     }
 
     public void StartMeleeCombo1()
@@ -998,33 +1025,240 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             cstate.summon = animancer.Play(SummonHold);
             summoning = true;
         };
+        summonClock = SummonTime;
     }
 
     public void ProcessSummon()
     {
+        if (!animancer.IsPlayingClip(SummonHold.Clip))
+        {
+            summoning = false;
+            return;
+        }
         float t = 1f - Mathf.Clamp01(summonClock / SummonTime);
 
         if (t >= 1f)
         {
             cstate.summon = animancer.Play(SummonEnd);
+            cstate.summon.Events.OnEnd = _MoveOnEnd;
             summoning = false;
         }
+
+        summonClock -= Time.deltaTime;
     }
 
     public void InstantiateSummons()
     {
-        int type = Random.Range(1, 4);
+        if (spawnedEnemies.Count >= spawnLimit) return;
+
+        int type = (spawnedEnemies.Count < 2) ? Random.Range(1, 4) : Random.Range(2, 4); // don't spawn doubles if there's no space
 
         Vector3 midpoint = (this.transform.position + CombatTarget.transform.position) * 0.5f;
         if (type == 1) // stab and slash dummies
         {
-            Vector3[] positions = AxisUtilities.GetSortedPositionsByDistances(midpoint, spawn1.position, spawn2.position, spawn3.position);
+            List<Transform> availableTransforms = new List<Transform>();
+            if (!spawn1Occupied)
+            {
+                availableTransforms.Add(spawn1);
+            }
+            if (!spawn2Occupied)
+            {
+                availableTransforms.Add(spawn2);
+            }
+            if (!spawn3Occupied)
+            {
+                availableTransforms.Add(spawn3);
+            }
 
-            Vector3 pos1 = positions[0];
-            Vector3 pos2 = positions[1];
+            availableTransforms = (List<Transform>)AxisUtilities.GetSortedTransformsByDistances(midpoint, availableTransforms);
+
+            Vector3 pos1 = availableTransforms[0].position;
+            Vector3 pos2 = availableTransforms[1].position;
+
+            GameObject actor1Obj = Instantiate(slashDummy, pos1, Quaternion.LookRotation(-(pos1 - CombatTarget.transform.position).normalized));
+            NavigatingHumanoidActor actor1 = actor1Obj.GetComponent<NavigatingHumanoidActor>();
 
 
+            actor1Obj.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
+            {
+                actor1.shouldNavigate = true;
+                actor1.actionsEnabled = true;
+                actor1.PlayIdle();
+            };
+            //recentlySpawned.Add(actor1);
+            spawnedEnemies.Add(actor1);
+            if (availableTransforms[0] == spawn1)
+            {
+                spawn1Occupied = true;
+                actor1.OnDie.AddListener(() => {
+                    spawn1Occupied = false;
+                    spawnedEnemies.Remove(actor1);
+                });
+            }
+            else if (availableTransforms[0] == spawn2)
+            {
+                spawn2Occupied = true;
+                actor1.OnDie.AddListener(() => {
+                    spawn2Occupied = false;
+                    spawnedEnemies.Remove(actor1);
+                });
+            }
+            else if (availableTransforms[0] == spawn3)
+            {
+                spawn3Occupied = true;
+                actor1.OnDie.AddListener(() => {
+                    spawn3Occupied = false;
+                    spawnedEnemies.Remove(actor1);
+                });
+            }
 
+            GameObject actor2Obj = Instantiate(stabDummy, pos2, Quaternion.LookRotation(-(pos2 - CombatTarget.transform.position).normalized));
+            NavigatingHumanoidActor actor2 = actor2Obj.GetComponent<NavigatingHumanoidActor>();
+
+            actor2Obj.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
+            {
+                actor2.shouldNavigate = true;
+                actor2.actionsEnabled = true;
+                actor2.PlayIdle();
+            };
+
+            spawnedEnemies.Add(actor2);
+            if (availableTransforms[1] == spawn1)
+            {
+                spawn1Occupied = true;
+                actor2.OnDie.AddListener(() => {
+                    spawn1Occupied = false;
+                    spawnedEnemies.Remove(actor2);
+                });
+            }
+            else if (availableTransforms[1] == spawn2)
+            {
+                spawn2Occupied = true;
+                actor2.OnDie.AddListener(() => {
+                    spawn2Occupied = false;
+                    spawnedEnemies.Remove(actor2);
+                });
+            }
+            else if (availableTransforms[1] == spawn3)
+            {
+                spawn3Occupied = true;
+                actor2.OnDie.AddListener(() => {
+                    spawn3Occupied = false;
+                    spawnedEnemies.Remove(actor2);
+                });
+            }
+        }
+        else if (type == 2) // shield dummy
+        {
+            List<Transform> availableTransforms = new List<Transform>();
+            if (!spawn1Occupied)
+            {
+                availableTransforms.Add(spawn1);
+            }
+            if (!spawn2Occupied)
+            {
+                availableTransforms.Add(spawn2);
+            }
+            if (!spawn3Occupied)
+            {
+                availableTransforms.Add(spawn3);
+            }
+
+            availableTransforms = (List<Transform>)AxisUtilities.GetSortedTransformsByDistances(midpoint, availableTransforms);
+
+            Vector3 pos1 = availableTransforms[0].position;
+
+            GameObject actor1Obj = Instantiate(shieldDummy, pos1, Quaternion.LookRotation(-(pos1 - CombatTarget.transform.position).normalized));
+            NavigatingHumanoidActor actor1 = actor1Obj.GetComponent<NavigatingHumanoidActor>();
+
+            actor1Obj.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
+            {
+                actor1.shouldNavigate = true;
+                actor1.actionsEnabled = true;
+                actor1.PlayIdle();
+            };
+
+            spawnedEnemies.Add(actor1);
+            if (availableTransforms[0] == spawn1)
+            {
+                spawn1Occupied = true;
+                actor1.OnDie.AddListener(() => {
+                    spawn1Occupied = false;
+                    spawnedEnemies.Remove(actor1);
+                });
+            }
+            else if (availableTransforms[0] == spawn2)
+            {
+                spawn2Occupied = true;
+                actor1.OnDie.AddListener(() => {
+                    spawn2Occupied = false;
+                    spawnedEnemies.Remove(actor1);
+                });
+            }
+            else if (availableTransforms[0] == spawn3)
+            {
+                spawn3Occupied = true;
+                actor1.OnDie.AddListener(() => {
+                    spawn3Occupied = false;
+                    spawnedEnemies.Remove(actor1);
+                });
+            }
+        }
+        else if (type == 3) // archer dummy
+        {
+            List<Transform> availableTransforms = new List<Transform>();
+            if (!pillar1Occupied && (!onPillar || currentPillar != 1))
+            {
+                availableTransforms.Add(pillar1);
+            }
+            if (!pillar2Occupied && (!onPillar || currentPillar != 2))
+            {
+                availableTransforms.Add(pillar2);
+            }
+            if (!pillar3Occupied && (!onPillar || currentPillar != 3))
+            {
+                availableTransforms.Add(pillar3);
+            }
+
+            availableTransforms = (List<Transform>)AxisUtilities.GetSortedTransformsByDistances(this.transform.position, availableTransforms);
+
+            Vector3 pos1 = availableTransforms[0].position;
+
+            GameObject actor1Obj = Instantiate(archerDummy, pos1, Quaternion.LookRotation(-(pos1 - CombatTarget.transform.position).normalized));
+            NavigatingHumanoidActor actor1 = actor1Obj.GetComponent<NavigatingHumanoidActor>();
+
+            actor1Obj.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
+            {
+                actor1.shouldNavigate = true;
+                actor1.actionsEnabled = true;
+                actor1.PlayIdle();
+            };
+
+            spawnedEnemies.Add(actor1);
+            if (availableTransforms[0] == pillar1)
+            {
+                pillar1Occupied = true;
+                actor1.OnDie.AddListener(() => {
+                    pillar1Occupied = false;
+                    spawnedEnemies.Remove(actor1);
+                });
+            }
+            else if (availableTransforms[0] == pillar2)
+            {
+                pillar2Occupied = true;
+                actor1.OnDie.AddListener(() => {
+                    pillar2Occupied = false;
+                    spawnedEnemies.Remove(actor1);
+                });
+            }
+            else if (availableTransforms[0] == pillar3)
+            {
+                pillar3Occupied = true;
+                actor1.OnDie.AddListener(() => {
+                    pillar3Occupied = false;
+                    spawnedEnemies.Remove(actor1);
+                });
+            }
         }
     }
 

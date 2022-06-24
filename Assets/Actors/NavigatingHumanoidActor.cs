@@ -89,13 +89,18 @@ public class NavigatingHumanoidActor : Actor, INavigates
         positionReference = GetComponent<HumanoidPositionReference>();
         navstate.move = (DirectionalMixerState)animancer.States.GetOrCreate(moveAnim);
         navstate.move.Key = "move";
-        navstate.idle = (LinearMixerState)animancer.Play(idleAnim);
+        navstate.idle = (LinearMixerState)animancer.States.GetOrCreate(idleAnim);
         navstate.strafe = (DirectionalMixerState)animancer.States.GetOrCreate(moveAnim);
         navstate.strafe.Key = "strafe";
         animancer.Layers[HumanoidAnimLayers.UpperBody].SetMask(positionReference.upperBodyMask);
         animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = true;
         animancer.Layers[HumanoidAnimLayers.UpperBody].Weight = 1f;
 
+
+        if (!animancer.IsPlaying())
+        {
+            animancer.Play(navstate.idle);
+        }
         rigidbody = this.GetComponent<Rigidbody>();
         if (CombatTarget != null) SetDestination(CombatTarget);
 
@@ -699,6 +704,11 @@ public class NavigatingHumanoidActor : Actor, INavigates
             }
         }
         return false;
+    }
+
+    public void PlayIdle()
+    {
+        animancer.Play(navstate.idle);
     }
 
     public void SetCurrentDamage(DamageKnockback damageKnockback)

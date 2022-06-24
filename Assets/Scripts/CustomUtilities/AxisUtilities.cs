@@ -451,13 +451,45 @@ namespace CustomUtilities
         {
             Array.Sort(vectors, (a, b) =>
             {
-                return (int)Mathf.Sign(Vector3.Distance(origin, b) - Vector3.Distance(origin, a));
+                return (int)Mathf.Sign(Vector3.Distance(origin, a) - Vector3.Distance(origin, b));
             });
 
 
             return vectors;
         }
 
+        public static IEnumerable<Vector3> GetSortedPositionsByDistances(Vector3 origin, IEnumerable<Vector3> vectors)
+        {
+
+            ((List<Vector3>)vectors).Sort((a, b) =>
+            {
+                return (int)Mathf.Sign(Vector3.Distance(origin, a) - Vector3.Distance(origin, b));
+            });
+
+            return vectors;
+        }
+
+        public static Transform[] GetSortedTransformsByDistances(Vector3 origin, params Transform[] transforms)
+        {
+            Array.Sort(transforms, (a, b) =>
+            {
+                return (int)Mathf.Sign(Vector3.Distance(origin, a.position) - Vector3.Distance(origin, b.position));
+            });
+
+
+            return transforms;
+        }
+
+        public static IEnumerable<Transform> GetSortedTransformsByDistances(Vector3 origin, IEnumerable<Transform> transforms)
+        {
+
+            ((List<Transform>)transforms).Sort((a, b) =>
+            {
+                return (int)Mathf.Sign(Vector3.Distance(origin, a.position) - Vector3.Distance(origin, b.position));
+            });
+
+            return transforms;
+        }
     }
 
     
