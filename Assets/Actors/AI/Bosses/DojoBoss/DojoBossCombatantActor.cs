@@ -780,7 +780,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         
         state.Events.OnEnd = PlayCrossParry;
         cstate.attack = state;
-        crossParrying = true;
+        //crossParrying = true;
         parryTime = 0f;
     }
 
@@ -801,7 +801,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         
         state.Events.OnEnd = PlayCircleParry;
         cstate.attack = state;
-        circleParrying = true;
+        //circleParrying = true;
         parryTime = 0f;
     }
 
@@ -1767,6 +1767,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             }
 
         }
+        else if (willKill)
+        {
+            damageHandler.TakeDamage(damage);
+        }
         DeactivateHitboxes();
     }
 
@@ -1953,12 +1957,16 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             {
                 StartCrouch(crouchAction);
             }
-            else if (r < 0.4f)
+            else if (r < 0.3f)
             {
                 StartCrossParry();
             }
-            else if (r < 0.8f) {
+            else if (r < 0.6f) {
                 StartCircleParry();
+            }
+            else if (r < 0.9f && Vector3.Distance(this.transform.position, center.position) > 10f)
+            {
+                StartCrouch(CrouchAction.JumpTo_Center);
             }
             else
             {
