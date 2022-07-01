@@ -480,7 +480,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     {
         invuln = state;
     }
-    IEnumerator EndProne(bool faceUp)
+    public IEnumerator EndProne(bool faceUp)
     {
         yield return new WaitForSeconds(2f);
         if (!actor.IsGrounded())
@@ -602,6 +602,16 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         fall = hurt;
         actor.StartCoroutine(HurtFallRoutine(hurt, willKill));
     }
+    public void SetCritVulnState(AnimancerState state, float time)
+    {
+        hurt = state;
+        critTime = time;
+        if (animancer.States.Current == state)
+        {
+            actor.OnCritVulnerable.Invoke();
+        }
+    }
+
     public bool IsCritVulnerable()
     {
         bool isCritVuln = animancer.States.Current == hurt && critTime > 0f;
