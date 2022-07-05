@@ -249,6 +249,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         initRot = this.GetComponent<HumanoidPositionReference>().MainHand.transform.localRotation;
 
         recentlySpawned = new List<NavigatingHumanoidActor>();
+
+        BossHealthIndicator.SetTarget(this.gameObject);
     }
 
     void Awake()

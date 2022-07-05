@@ -64,4 +64,24 @@ public class UIImpulseReceiver : MonoBehaviour
         moving = true;
         clock = time;
     }
+
+    public void SetActor(Actor target)
+    {
+        if (actor != null)
+        {
+            actor.OnHurt.RemoveListener(StartMoving);
+        }
+        actor = target;
+        if (target == null)
+        {
+            Debug.Log("Disabling UI Impuse Receiver: No Actors.");
+            this.enabled = false;
+            return;
+        }
+        if (onlyOnActorHurt)
+        {
+            moving = false;
+            actor.OnHurt.AddListener(StartMoving);
+        }
+    }
 }
