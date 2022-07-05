@@ -1654,8 +1654,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
         else
         {
-            animancer.Animator.SetLookAtPosition(CombatTarget.transform.position + Vector3.up);
-            animancer.Animator.SetLookAtWeight(1f);
+            //animancer.Animator.SetLookAtPosition(CombatTarget.transform.position + Vector3.up);
+            //animancer.Animator.SetLookAtWeight(1f);
         }
     }
 
