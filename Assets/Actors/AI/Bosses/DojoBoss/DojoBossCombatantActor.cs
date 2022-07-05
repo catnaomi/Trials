@@ -1680,6 +1680,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             PillarFall(damage);
             this.attributes.ReduceHealth(damageAmount);
         }
+        else if ((circleParrying || crossParrying) && damage.isRanged)
+        {
+            damage.OnBlock.Invoke();
+            this.OnBlock.Invoke();
+        }
         else if (crossParrying && !damage.isSlash)
         {
             if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))

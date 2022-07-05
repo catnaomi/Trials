@@ -18,6 +18,7 @@ public class DamageKnockback
     public bool disarm;
     public bool isThrust;
     public bool isSlash;
+    public bool isRanged;
     public bool bouncesOffBlock;
     public bool breaksBlock;
     public bool canDamageSelf;
@@ -114,6 +115,7 @@ public class DamageKnockback
         this.stunTime = damageKnockback.stunTime;
         this.isSlash = damageKnockback.isSlash;
         this.isThrust = damageKnockback.isThrust;
+        this.isRanged = damageKnockback.isRanged;
         this.bouncesOffBlock = damageKnockback.bouncesOffBlock;
         
         this.breaksBlock = damageKnockback.breaksBlock;

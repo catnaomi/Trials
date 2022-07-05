@@ -15,7 +15,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public TimeTravelController timeTravelController;
     int imageIndex;
     bool isRewinding;
-    Actor actor;
+    protected Actor actor;
     float lastHealth;
     TimeTravelData lastData;
     bool isFrozen;
@@ -309,9 +309,9 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         TimeTravelController.time.DeregisterAffectee(this);
     }
 
-    public bool ShouldApplyTimeVisualEffect()
+    public virtual bool ShouldApplyTimeVisualEffect()
     {
-        return IsFrozen() || (actor is PlayerActor player && player.IsResurrecting());
+        return false;// IsFrozen() || (actor is PlayerActor player && player.IsResurrecting());
     }
 
     public void ClearTimeData()
