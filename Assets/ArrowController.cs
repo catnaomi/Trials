@@ -19,6 +19,7 @@ public class ArrowController : Projectile
     Vector3 initScale;
 
     Vector3 initPos;
+    [ReadOnly]public Vector3 initForce;
     float timeRemaining;
 
     private static readonly float ARROW_DURATION = 30f;
@@ -284,7 +285,7 @@ public class ArrowController : Projectile
         this.tip.AddForce(force, ForceMode.VelocityChange);
 
         this.hitbox.SetDamage(damageKnockback);
-
+        this.initForce = force;
         launched = false;
         
 

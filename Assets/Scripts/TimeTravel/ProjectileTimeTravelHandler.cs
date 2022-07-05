@@ -10,6 +10,7 @@ public class ProjectileTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public TimeTravelController timeTravelController;
     bool isRewinding;
     bool isFrozen;
+    bool frozenOnCreate;
     Projectile projectile;
     ProjectileTimeTravelData lastData;
 
@@ -24,6 +25,11 @@ public class ProjectileTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         projectile = this.GetComponent<Projectile>();
         timeTravelStates = new List<TimeTravelData>();
         timeTravelController.RegisterAffectee(this);
+        if (timeTravelController.IsFreezing() && timeTravelController.globalFreeze)
+        {
+            frozenOnCreate = true;
+            projectile.enabled = false;
+        }
     }
     public GameObject GetObject()
     {
@@ -103,7 +109,7 @@ public class ProjectileTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         isFrozen = false;
         LoadTimeState(lastData);
-        if (lastData.inFlight) LaunchNew();
+        if (lastData.inFlight || frozenOnCreate) LaunchNew();
     }
 
     public void StopRewind()
@@ -130,9 +136,16 @@ public class ProjectileTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     }
     void LaunchNew()
     {
-        if (lastData == null) return;
         Vector3 velocity = Vector3.zero;
-        if (lastData.rigidbodyDatas.Length > 0)
+        if (frozenOnCreate && projectile is ArrowController arrow1)
+        {
+            velocity = arrow1.initForce;
+        }
+        else if (lastData == null)
+        {
+            return;
+        }
+        else if (lastData.rigidbodyDatas.Length > 0)
         {
             velocity = lastData.rigidbodyDatas[0].velocity;
         }

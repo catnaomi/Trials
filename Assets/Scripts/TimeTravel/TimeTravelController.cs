@@ -51,6 +51,7 @@ public class TimeTravelController : MonoBehaviour
     public float timeStopDamageCostRatio = 1f;
     public float timeAimSlowDrainRate = 5f;
     public float timeStopMovementCostRatio = 1f;
+    public float timeStopHitboxActivationCost = 10f;
     Vector3 lastPosition;
     public UnityEvent OnCooldownFail;
     public UnityEvent OnCooldownComplete;
@@ -85,7 +86,11 @@ public class TimeTravelController : MonoBehaviour
             SceneLoader.GetOnActiveSceneChange().AddListener(ClearTimeDatas);
         }
         if (PlayerActor.player != null)
-        lastPosition = PlayerActor.player.transform.position;
+        {
+            lastPosition = PlayerActor.player.transform.position;
+            PlayerActor.player.OnHitboxActive.AddListener(TimeStopHitboxActivation);
+        }
+        
     }
 
     // Update is called once per frame
@@ -561,6 +566,13 @@ public class TimeTravelController : MonoBehaviour
         OnTimeStopHit.Invoke();
     }
 
+    public void TimeStopHitboxActivation()
+    {
+        if (!freeze) return;
+        meter.current -= timeStopHitboxActivationCost;
+        OnTimeStopHit.Invoke();
+    }
+
     public bool IsSlowingTime()
     {
         return isSlowing;
@@ -605,6 +617,12 @@ public class TimeTravelController : MonoBehaviour
     {
         return isRewinding;
     }
+    
+    public bool IsFreezing()
+    {
+        return freeze;
+    }
+
     private void OnApplicationQuit()
     {
         magicVignette.SetFloat("_Weight", 0f);
