@@ -51,7 +51,7 @@ Shader "Unlit/Billboard"
 
 				o.pos = outPos;
 
-				UNITY_TRANSFER_FOG(o,o.vertex);
+				UNITY_TRANSFER_FOG(o,o.pos);
 				return o;
 			}
 
