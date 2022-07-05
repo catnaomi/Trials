@@ -26,6 +26,7 @@ public class TimeTravelController : MonoBehaviour
     bool cancelRewind;
     PlayerInput playerInput;
     [Header("Time Stop Settings")]
+    public bool globalFreeze;
     public GameObject timeStopObject;
     public Vector3 timeStopOrigin;
     public float timeStopRadius;
@@ -49,6 +50,8 @@ public class TimeTravelController : MonoBehaviour
     public float timePowerClock = 0f;
     public float timeStopDamageCostRatio = 1f;
     public float timeAimSlowDrainRate = 5f;
+    public float timeStopMovementCostRatio = 1f;
+    Vector3 lastPosition;
     public UnityEvent OnCooldownFail;
     public UnityEvent OnCooldownComplete;
     public UnityEvent OnMeterFail;
@@ -81,6 +84,8 @@ public class TimeTravelController : MonoBehaviour
         {
             SceneLoader.GetOnActiveSceneChange().AddListener(ClearTimeDatas);
         }
+        if (PlayerActor.player != null)
+        lastPosition = PlayerActor.player.transform.position;
     }
 
     // Update is called once per frame
@@ -96,6 +101,10 @@ public class TimeTravelController : MonoBehaviour
         fullscreenMaterial.SetVector("_CircleScreenPosition", circleScreenPosition);
         fullscreenMaterial.SetFloat("_CircleScreenRadius", screenSpaceRadius);
         */
+        Vector3 movementDelta = Vector3.zero;
+        if (PlayerActor.player != null) 
+            movementDelta = lastPosition - PlayerActor.player.transform.position;
+
         if (isRewinding)
         {
             meter.current -= rewindDrainRate * Time.deltaTime;
@@ -108,13 +117,18 @@ public class TimeTravelController : MonoBehaviour
                     CancelRewind();
                     OnMeterFail.Invoke();
                 }
-                
+                    
             }
         }
         else if (freeze)
         {
             meter.current -= timeStopDrainRate * Time.deltaTime;
+
+            meter.current -= movementDelta.magnitude * timeStopMovementCostRatio * Time.deltaTime;
+
             timePowerClock = timePowerCooldown;
+
+            
             if (meter.current <= 0f)
             {
                 meter.current = 0f;
@@ -176,6 +190,8 @@ public class TimeTravelController : MonoBehaviour
         bool isAnyPowerOn = freeze || isSlowing || isRewinding;
         magicVignetteStrength = Mathf.MoveTowards(magicVignetteStrength, isAnyPowerOn ? 1f : 0f, 5f * Time.deltaTime);
         magicVignette.SetFloat("_Weight", magicVignetteStrength);
+
+        lastPosition = PlayerActor.player.transform.position;
     }
 
     void SetupInput()
@@ -204,8 +220,16 @@ public class TimeTravelController : MonoBehaviour
                 {
                     timeStopOrigin = PlayerActor.player.GetCombatTarget().transform.position;
                 }
-                StartCoroutine(OpenBubbleRoutine());
-                StartFreeze();
+                if (!globalFreeze)
+                {
+                    StartCoroutine(OpenBubbleRoutine());
+                    StartFreeze();
+                }
+                else
+                {
+                    AddAllToFreeze();
+                    StartFreeze();
+                }
             }
             else if (!freeze && recording && !isRewinding && c.interaction is HoldInteraction)
             {
@@ -243,6 +267,10 @@ public class TimeTravelController : MonoBehaviour
     public void RegisterAffectee(IAffectedByTimeTravel affectee)
     {
         affectees.Add(affectee);
+        if (freeze && globalFreeze)
+        {
+            AddFrozen(affectee);
+        }
     }
 
     public void DeregisterAffectee(IAffectedByTimeTravel affectee)
@@ -296,12 +324,12 @@ public class TimeTravelController : MonoBehaviour
 
     void StartPostProcessing()
     {
-        //PostProcessingController.SetVolumeWeight(PostProcessingController.instance.MagicVolume, 1f, timeToOpenBubble);
+        PostProcessingController.SetVolumeWeight(PostProcessingController.instance.MagicVolume, 1f, timeToOpenBubble);
     }
 
     void StopPostProcessing()
     {
-        //PostProcessingController.SetVolumeWeight(PostProcessingController.instance.MagicVolume, 0f, timeToOpenBubble);
+        PostProcessingController.SetVolumeWeight(PostProcessingController.instance.MagicVolume, 0f, timeToOpenBubble);
     }
     public void CancelRewind()
     {
@@ -374,6 +402,19 @@ public class TimeTravelController : MonoBehaviour
     {
         frozens.Remove(affected);
         updateFreeze = false;
+    }
+
+    public void AddAllToFreeze()
+    {
+        foreach (IAffectedByTimeTravel affected in affectees)
+        {
+            //if (affected)
+            if (affected is not PlayerTimeTravelHandler)
+            {
+                frozens.Add(affected);
+            }
+        }
+        updateFreeze = true;
     }
 
     public void StartFreeze()

@@ -2829,6 +2829,7 @@ GameObject:
   - component: {fileID: 8622797609942491596}
   - component: {fileID: 8622797609942491598}
   - component: {fileID: 1881633995381627644}
+  - component: {fileID: 3225870421009706122}
   m_Layer: 10
   m_Name: Ice Golem - Neutral
   m_TagString: Untagged
@@ -3117,6 +3118,8 @@ MonoBehaviour:
   destination: {x: 0, y: 0, z: 0}
   followingTarget: 0
   airTime: 0
+  strafeDelay: 2
+  strafeDirection: 0
   jumpAdjustSpeed: 3
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: ebd0e8a8970150e4198eed744433e702, type: 2}
@@ -3372,6 +3375,26 @@ MonoBehaviour:
     _Speed: 1
     _NormalizedStartTime: 0
   world: 0
+--- !u!114 &3225870421009706122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6934999084977914064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2891b161e6427a14fb911707653b31e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animancer: {fileID: 0}
+  afterimagePrefab: {fileID: 0}
+  fadeTime: 3
+  afterimages: []
+  useAfterimages: 0
+  timeRemaining: []
+  timeTravelStates: []
+  timeTravelController: {fileID: 0}
 --- !u!1 &6944458169832037831
 GameObject:
   m_ObjectHideFlags: 0

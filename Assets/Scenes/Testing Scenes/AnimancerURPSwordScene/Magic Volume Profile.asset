@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Magic Volume Profile
   m_EditorClassIdentifier: 
   components:
-  - {fileID: 8119643054209428294}
---- !u!114 &8119643054209428294
+  - {fileID: 2025631455513477168}
+--- !u!114 &2025631455513477168
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -23,22 +23,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 899c54efeace73346a0a16faa3afe726, type: 3}
-  m_Name: Vignette
+  m_Script: {fileID: 11500000, guid: 66f335fb1ffd8684294ad653bf1c7564, type: 3}
+  m_Name: ColorAdjustments
   m_EditorClassIdentifier: 
   active: 1
-  color:
-    m_OverrideState: 1
-    m_Value: {r: 1, g: 0.8886111, b: 0.3066038, a: 1}
-  center:
+  postExposure:
     m_OverrideState: 0
-    m_Value: {x: 0.5, y: 0.5}
-  intensity:
-    m_OverrideState: 1
-    m_Value: 0.5
-  smoothness:
-    m_OverrideState: 0
-    m_Value: 0.533
-  rounded:
-    m_OverrideState: 1
     m_Value: 0
+  contrast:
+    m_OverrideState: 0
+    m_Value: 0
+  colorFilter:
+    m_OverrideState: 0
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+  hueShift:
+    m_OverrideState: 0
+    m_Value: 0
+  saturation:
+    m_OverrideState: 1
+    m_Value: -75

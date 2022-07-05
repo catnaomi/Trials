@@ -252,7 +252,11 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         isFrozen = true;
         actor.isInTimeState = true;
-        animancer.States.Current.IsPlaying = false;
+        if (animancer.States.Current != null)
+        {
+            animancer.States.Current.IsPlaying = false;
+        }
+        
         animancer.Layers[HumanoidAnimLayers.TimeEffects].SetWeight(1f);
     }
 

@@ -628,6 +628,7 @@ GameObject:
   - component: {fileID: 603506081}
   - component: {fileID: 603506085}
   - component: {fileID: 603506087}
+  - component: {fileID: -4895630850663263629}
   m_Layer: 10
   m_Name: Ice Golem
   m_TagString: Untagged
@@ -916,6 +917,8 @@ MonoBehaviour:
   destination: {x: 0, y: 0, z: 0}
   followingTarget: 0
   airTime: 0
+  strafeDelay: 2
+  strafeDirection: 0
   jumpAdjustSpeed: 3
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: ebd0e8a8970150e4198eed744433e702, type: 2}
@@ -924,8 +927,6 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  MinEngageRange: 5
-  MaxEngageRange: 10
   SightRange: 15
   InSightRange: 0
   CloseAttack: {fileID: 11400000, guid: 70f7755717551254ca1f8d109c882372, type: 2}
@@ -1113,6 +1114,26 @@ MonoBehaviour:
   OnGunLoad:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &-4895630850663263629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1699058074318922937}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2891b161e6427a14fb911707653b31e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animancer: {fileID: 0}
+  afterimagePrefab: {fileID: 0}
+  fadeTime: 3
+  afterimages: []
+  useAfterimages: 0
+  timeRemaining: []
+  timeTravelStates: []
+  timeTravelController: {fileID: 0}
 --- !u!1 &1701364141175377732
 GameObject:
   m_ObjectHideFlags: 0
