@@ -63,7 +63,7 @@ public class MenuController : MonoBehaviour
         inspectorShow = true;
         SetPlayerMenuOpen(true);
         Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.Confined;
+        //Cursor.lockState = CursorLockMode.Confined;
     }
 
     public void HideMenu()
@@ -75,8 +75,8 @@ public class MenuController : MonoBehaviour
         showing = false;
         inspectorShow = false;
         SetPlayerMenuOpen(false);
-        Cursor.visible = false;
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.visible = false;
+        //Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void OpenMenu(int index)

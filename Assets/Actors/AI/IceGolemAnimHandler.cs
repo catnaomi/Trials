@@ -12,6 +12,8 @@ public class IceGolemAnimHandler : MonoBehaviour
     public ClipTransition stun;
     public ClipTransition tink;
     AnimancerComponent animancer;
+    ActorTimeTravelHandler timeTravelHandler;
+    bool frozen;
     Actor actor;
 
     [SerializeField] World world;
@@ -31,7 +33,7 @@ public class IceGolemAnimHandler : MonoBehaviour
     {
         animancer = this.GetComponent<AnimancerComponent>();
         actor = this.GetComponent<Actor>();
-
+        timeTravelHandler = this.GetComponent<ActorTimeTravelHandler>();
         animancer.Layers[layer].IsAdditive = true;
         animancer.Layers[layer].Weight = 1f;
         PlayIdle();
@@ -44,7 +46,14 @@ public class IceGolemAnimHandler : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (timeTravelHandler.IsFrozen() && animancer.Layers[layer].Speed > 0f)
+        {
+            animancer.Layers[layer].Speed = 0f;
+        }
+        else if (!timeTravelHandler.IsFrozen() && animancer.Layers[layer].Speed == 0f)
+        {
+            animancer.Layers[layer].Speed = 1f;
+        }
     }
 
     public void PlayIdle()
