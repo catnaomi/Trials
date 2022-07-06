@@ -40,7 +40,6 @@ public class TimeStopParticleController : MonoBehaviour
     {
         bool isFrozen = timeTravelController.IsFreezing();
 
-        bool stopVelocity = false;
         if (state == ParticleState.Stopped)
         {
             if (isFrozen)
@@ -134,11 +133,11 @@ public class TimeStopParticleController : MonoBehaviour
             }
             
         }
-
+        Vector3 midPoint = (PlayerActor.player.transform.position + Camera.main.transform.position) * 0.5f;
+        this.transform.position = midPoint;
         if (system.IsAlive())
         {
-            Vector3 midPoint = (PlayerActor.player.transform.position + Camera.main.transform.position) * 0.5f;
-            this.transform.position = midPoint;
+            
             GetParticles();
             for (int i = 0; i < particleCount; i++)
             {
