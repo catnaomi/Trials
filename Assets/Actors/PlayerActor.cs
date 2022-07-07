@@ -34,6 +34,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool isMenuOpen;
     List<Interactable> interactables;
     public Interactable highlightedInteractable;
+    float externalSourceClock;
+    public float maxExternalSourceTime = 30000f;
     [Header("Respawning")]
     public Vector3 lastSafePoint;
     [Header("Movement")]
@@ -239,6 +241,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState block;
         public AnimancerState aim;
         public AnimancerState dialogue;
+        public AnimancerState externalSource;
         public AnimancerState carry;
         public AnimancerState resurrect;
     }
@@ -1544,6 +1547,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         wasSlidingUpdate = sliding;
         
+        if (animancer.States.Current == state.externalSource)
+        {
+            externalSourceClock += Time.deltaTime;
+            if (externalSourceClock >= maxExternalSourceTime)
+            {
+                Debug.Log("External Source animation timed out!");
+                animancer.Play(state.move);
+            }
+        }
+        else if (externalSourceClock >= 0f)
+        {
+            externalSourceClock = 0f;
+        }
         HandleCinemachine();
     }
 
@@ -3490,9 +3506,26 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         this.SetCombatTarget(null);
         animancer.Play(state.move);
     }
-    #endregion
 
-    public bool GetGrounded()
+    public void SetExternalSourceState(AnimancerState state, float timeout)
+    {
+        this.state.externalSource = state;
+
+    }
+
+    public void SetExternalSourceState(AnimancerState state)
+    {
+        float DEFAULT_TIMEOUT = 30000f;
+        SetExternalSourceState(state, DEFAULT_TIMEOUT);
+    }
+
+    public void PlayMove()
+    {
+        _MoveOnEnd();
+    }
+#endregion
+
+public bool GetGrounded()
     {
         return GetGrounded(out RaycastHit rhit, out RaycastHit shit);
     }

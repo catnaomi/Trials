@@ -8,6 +8,7 @@ public class WorldTime : MonoBehaviour
 
     public static float MAX_TIME = 24f;
     float SECONDS_TO_HOURS = 3600f;
+    public bool enableDayCycle = true;
     [Range(0f, 24f)]
     public float currentTime;
     public float timeScale;
@@ -79,7 +80,7 @@ public class WorldTime : MonoBehaviour
         HideInactiveSuns();
         SceneLoader.GetOnActiveSceneChange().AddListener(FadeInactiveSuns);
         SceneLoader.GetOnFinishLoad().AddListener(GetSunsAndHide);
-        StartCoroutine(UpdateTime());
+        if (enableDayCycle) StartCoroutine(UpdateTime());
     }
 
     // Update is called once per frame
