@@ -8,6 +8,8 @@ public class PassTimeToShader : MonoBehaviour
     float time;
     MaterialPropertyBlock block;
     Renderer renderer;
+    public bool applyRandomness;
+    float rand;
     // Start is called before the first frame update
     void Start()
     {
@@ -18,6 +20,14 @@ public class PassTimeToShader : MonoBehaviour
         block.SetFloat("_UseTime", 1f);
         block.SetFloat("_InputTime", time);
         renderer.SetPropertyBlock(block);
+        if (applyRandomness)
+        {
+            rand = Random.Range(0f, Mathf.PI * 2f);
+        }
+        else
+        {
+            rand = 0f;
+        }
     }
 
     // Update is called once per frame
@@ -27,7 +37,7 @@ public class PassTimeToShader : MonoBehaviour
         {
             time += Time.deltaTime;
             block.SetFloat("_UseTime", 1f);
-            block.SetFloat("_InputTime", time);
+            block.SetFloat("_InputTime", time + rand);
             renderer.SetPropertyBlock(block);
         }
     }
