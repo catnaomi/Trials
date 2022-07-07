@@ -723,6 +723,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             pos = farPoint;
         }
+        else if (!farOnNav && !centerOnNav)
+        {
+            return;
+        }
         else if (centerDist < MeleeCombo1StartDistance && farDist >= MeleeCombo1StartDistance)
         {
             pos = farPoint;
@@ -1668,6 +1672,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             damageHandler.TakeDamage(damage);
             return;
+        }
+        if (!onPillar && this.transform.position.y > (-1055.5f))
+        {
+            // isn't on a pillar but is above for some reason? probably a bug
+            bool b = false;
         }
         bool isCrit = damageHandler.IsCritVulnerable() || damage.critData.alwaysCritical || onPillar;
         bool willKill = damage.GetDamageAmount(isCrit) >= attributes.health.current;

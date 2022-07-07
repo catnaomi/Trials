@@ -609,12 +609,14 @@ public class NavigatingHumanoidActor : Actor, INavigates
         return (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle || animancer.States.Current == navstate.strafe) && actionsEnabled;
     }
 
+    // determines which direction should be strafed in
+    // -1 = left, 1 = right, 0 = shouldn't strafe
     public int CheckStrafe()
     {
         float MAX_DISTANCE = 3f;
         float MIN_DISTANCE = 1f;
-        Vector3 pointLeft = this.transform.position + this.transform.right * MAX_DISTANCE;
-        Vector3 pointRight = this.transform.position + this.transform.right * -MAX_DISTANCE;
+        Vector3 pointLeft = this.transform.position + this.transform.right * -MAX_DISTANCE;
+        Vector3 pointRight = this.transform.position + this.transform.right * MAX_DISTANCE;
 
         bool rayLeft = Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, -this.transform.right, out RaycastHit hitLeft, MAX_DISTANCE, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
         bool rayRight = Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, this.transform.right, out RaycastHit hitRight, MAX_DISTANCE, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));

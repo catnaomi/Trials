@@ -48,6 +48,7 @@ public class ProjectileTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public void LoadTimeState(TimeTravelData data)
     {
+        if (this == null) return;
         this.transform.position = data.position;
         this.transform.rotation = data.rotation;
         if (data is ProjectileTimeTravelData pdata)
