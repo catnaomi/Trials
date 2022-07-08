@@ -1561,6 +1561,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             externalSourceClock = 0f;
         }
         HandleCinemachine();
+
+        if (Keyboard.current.kKey.wasReleasedThisFrame) ProcessDeath();
     }
 
     private void LateUpdate()

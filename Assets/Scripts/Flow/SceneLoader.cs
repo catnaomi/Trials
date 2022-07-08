@@ -30,7 +30,7 @@ public class SceneLoader : MonoBehaviour
     public Quaternion playerRotation;
     [Header("Disable These GameObjects While Loading")]
     public GameObject[] objectsToDisable;
-    static SceneLoader instance;
+    public static SceneLoader instance;
 
     public UnityEvent OnFinishLoad;
     public UnityEvent OnActiveSceneChange;

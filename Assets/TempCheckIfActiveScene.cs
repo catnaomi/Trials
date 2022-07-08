@@ -6,11 +6,11 @@ using UnityEngine.SceneManagement;
 public class TempCheckIfActiveScene : MonoBehaviour
 {
     float clock = 0f;
-
+    bool listening;
     private void Start()
     {
-        SceneLoader.GetOnActiveSceneChange().AddListener(Check);
-        SceneLoader.GetOnFinishLoad().AddListener(Check);
+        CheckListeners();
+        
     }
     // Start is called before the first frame update
     void OnEnable()
@@ -28,7 +28,18 @@ public class TempCheckIfActiveScene : MonoBehaviour
             
         }
     }
-
+    public void CheckListeners()
+    {
+        if (!listening)
+        {
+            if (SceneLoader.instance != null)
+            {
+                SceneLoader.GetOnActiveSceneChange().AddListener(Check);
+                SceneLoader.GetOnFinishLoad().AddListener(Check);
+                listening = true;
+            }
+        }
+    }
     public void Check()
     {
         if (this.gameObject.scene == SceneManager.GetActiveScene())
@@ -40,5 +51,6 @@ public class TempCheckIfActiveScene : MonoBehaviour
             this.GetComponent<Light>().enabled = false;
         }
         clock = 0f;
+        CheckListeners();
     }
 }

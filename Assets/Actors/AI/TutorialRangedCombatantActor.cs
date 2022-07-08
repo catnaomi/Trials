@@ -341,5 +341,6 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
         GameObject particle = Instantiate(deathParticle);
         particle.transform.position = this.GetComponent<Collider>().bounds.center;
         Destroy(particle, 5f);
+        actionsEnabled = false;
     }
 }

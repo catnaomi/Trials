@@ -353,6 +353,7 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
         GameObject particle = Instantiate(deathParticle);
         particle.transform.position = this.GetComponent<Collider>().bounds.center;
         Destroy(particle, 5f);
+        actionsEnabled = false;
 
     }
 
