@@ -58,23 +58,27 @@ public class IceGolemAnimHandler : MonoBehaviour
 
     public void PlayIdle()
     {
+        if (idle == null || idle.Clip == null) return;
         animancer.Layers[layer].Play(idle);
     }
 
     public void PlayHurt()
     {
+        if (hurt == null || hurt.Clip == null) return;
         AnimancerState state = animancer.Layers[layer].Play(hurt);
         state.Events.OnEnd = PlayIdle;
     }
 
     public void PlayStun()
     {
+        if (stun == null || stun.Clip == null) return;
         AnimancerState state = animancer.Layers[layer].Play(stun);
         state.Events.OnEnd = PlayIdle;
     }
 
     public void PlayTink()
     {
+        if (tink == null || tink.Clip == null) return;
         AnimancerState state = animancer.Layers[layer].Play(tink);
         state.Events.OnEnd = PlayIdle;
         //this.GetComponent<AudioSource>().Play()

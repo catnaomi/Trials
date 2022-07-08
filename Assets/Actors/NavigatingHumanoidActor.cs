@@ -58,6 +58,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
         public DirectionalMixerState move;
         public AnimancerState fall;
         public DirectionalMixerState strafe;
+        public AnimancerState land;
     }
 
     public bool actionsEnabled = true;
@@ -292,8 +293,12 @@ public class NavigatingHumanoidActor : Actor, INavigates
                     nav.CompleteOffMeshLink();
                     offMeshInProgress = false;
                 }
-                AnimancerState land = animancer.Play(landAnim);
-                land.Events.OnEnd = MoveOnEnd;
+                navstate.land = animancer.Play(landAnim);
+                navstate.land.Events.OnEnd = () =>
+                {
+                    Debug.Log(this.ToString() + " is landing");
+                    animancer.Play(navstate.move);
+                };
                 ignoreRoot = false;
             }
         }
@@ -307,6 +312,13 @@ public class NavigatingHumanoidActor : Actor, INavigates
             if (worldDeltaPosition.magnitude > nav.radius) nav.nextPosition = transform.position + 0.9f * worldDeltaPosition;
         }
 
+        if (animancer.States.Current == navstate.land)
+        {
+            if (navstate.land.NormalizedTime >= 0.99f)
+            {
+                animancer.Play(navstate.move);
+            }
+        }
         if (GetGrounded())
         {
             if (lastPosition != Vector3.zero)
@@ -315,7 +327,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
             }
             lastPosition = this.transform.position;
         }
-        else if (animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle)
+        else if ((animancer.States.Current == navstate.move || animancer.States.Current == navstate.idle) && airTime > 0.1f)
         {
             navstate.fall = animancer.Play(fallAnim);
         }

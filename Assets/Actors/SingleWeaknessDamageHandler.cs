@@ -110,6 +110,8 @@ public class SingleWeaknessDamageHandler : HumanoidDamageHandler
                 damage.OnCrit.Invoke();
                 StartCritVulnerability(clip.MaximumDuration / clip.Speed);
             }
+            damage.OnBlock.Invoke();
+            actor.OnBlock.Invoke();
         }
         else if (tink)
         {
