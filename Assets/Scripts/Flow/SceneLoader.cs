@@ -350,9 +350,22 @@ public class SceneLoader : MonoBehaviour
 
     IEnumerator UnloadScene(string scene)
     {
-        var operation = SceneManager.UnloadSceneAsync(scene);
-        yield return operation;
-        Debug.Log("scene " + name + " unloaded");
+        AsyncOperation operation = null;
+        try
+        {
+            operation = SceneManager.UnloadSceneAsync(scene);
+        }
+        catch (System.ArgumentException ex)
+        {
+            Debug.LogWarning("Scene " + scene + " is not loaded!");
+            yield break;
+        }
+
+        if (operation != null)
+        {
+            yield return operation;
+            Debug.Log("scene " + name + " unloaded");
+        }
     }
 
     public static void SetActiveScene(string scene)

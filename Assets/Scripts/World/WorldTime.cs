@@ -261,6 +261,7 @@ public class WorldTime : MonoBehaviour
         float timeToFade = 1f;
         foreach (SunSource sun in sunSourceDict.Values)
         {
+            if (sun.light == null) continue;
             StartCoroutine(FadeSunRoutine(sun, sun.light.gameObject.scene == scene, timeToFade));
         }
     }
@@ -321,7 +322,7 @@ public class WorldTime : MonoBehaviour
     }
     private void OnDestroy()
     {
-        skybox.SetFloat("_ClockTime", assetSkyboxTime);
+        //skybox.SetFloat("_ClockTime", assetSkyboxTime);
     }
 
     bool InRange(float x, float min, float max)

@@ -6,7 +6,7 @@ public class SceneLoaderChecker : MonoBehaviour
 {
     public GameObject sceneLoaderPrefab;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         SceneLoader loader = FindObjectOfType<SceneLoader>();
         if (loader == null)
