@@ -62,7 +62,7 @@ public class DoorPlayableInteract : Interactable
             player.GetComponent<Collider>().enabled = false;
             AnimancerState state = player.GetComponent<Animancer.AnimancerComponent>().Play(openHumanAnim);
             player.airTime = 0f;
-            player.transform.position = refTransform.position;
+            //player.transform.position = refTransform.position;
             player.transform.rotation = refTransform.rotation;
             player.SetExternalSourceState(state);
             state.Events.OnEnd = player.PlayMove;
@@ -72,7 +72,7 @@ public class DoorPlayableInteract : Interactable
         {
             AnimancerState state = player.GetComponent<Animancer.AnimancerComponent>().Play(openHumanAnim);
             player.airTime = 0f;
-            player.transform.position = refTransform.position;
+            //player.transform.position = refTransform.position;
             player.transform.rotation = refTransform.rotation;
             player.SetExternalSourceState(state);
             state.Events.OnEnd = player.PlayMove;

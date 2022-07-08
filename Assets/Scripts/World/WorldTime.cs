@@ -55,7 +55,7 @@ public class WorldTime : MonoBehaviour
         //skybox = Instantiate(realSkybox);
         //RenderSettings.skybox = skybox;
         skybox = RenderSettings.skybox;
-        assetSkyboxTime = skybox.GetFloat("_ClockTime");
+        //assetSkyboxTime = skybox.GetFloat("_ClockTime");
         GameObject dsunObj = GameObject.Find("_DaySunLight");
         if (dsunObj != null)
         {

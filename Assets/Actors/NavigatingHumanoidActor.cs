@@ -686,6 +686,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     }
     public void MoveOnEnd()
     {
+        if (animancer == null) return;
         animancer.Play(navstate.move);
     }
     public bool IsClearLineToTarget()
