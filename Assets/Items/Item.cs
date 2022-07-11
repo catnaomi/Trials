@@ -11,7 +11,7 @@ public class Item : ScriptableObject
     [HideInInspector] public Actor holder;
     public int MaxStackSize = 0;
     public int Quantity = 1;
-    public int invID;
+    public string invID;
     public GameObject prefab;
     public Sprite displayImage;
     public Color displayColor = Color.white;
