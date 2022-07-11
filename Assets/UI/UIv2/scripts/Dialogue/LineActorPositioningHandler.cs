@@ -23,20 +23,27 @@ public class LineActorPositioningHandler : MonoBehaviour
     Vector3 linePointReal;
     float offset;
     Vector3 position;
+    Vector3 centerPoint;
     private void Start()
     {
         width = dialogueParent.rect.width;
         height = dialogueParent.rect.height;
+        centerPoint = dialogueParent.localPosition;
+
+        dialogueRunner.onNodeStart.AddListener((n) => { MenuController.menu.OpenMenu(MenuController.Dialogue); });
     }
     public void SetSpeaker(GameObject speak, Transform mount)
     {
         speaker = speak;
         dialogueMount = mount;
         offset = 0f;
-        linePointReal = linePointOffset;
-        float x = Camera.main.WorldToViewportPoint(speaker.transform.position).x;
-        isLeft = x > 0.5f;
-        t = isLeft ? 0f : 1f;
+        if (speak != null)
+        {
+            linePointReal = linePointOffset;
+            float x = Camera.main.WorldToViewportPoint(speaker.transform.position).x;
+            isLeft = x > 0.5f;
+            t = isLeft ? 0f : 1f;
+        }
     }
     private void OnGUI()
     {
@@ -74,6 +81,7 @@ public class LineActorPositioningHandler : MonoBehaviour
             else
             {
                 lineRenderer.enabled = false;
+                dialogueParent.localPosition = centerPoint;
             }
             
         }

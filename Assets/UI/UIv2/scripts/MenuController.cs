@@ -57,7 +57,14 @@ public class MenuController : MonoBehaviour
     {
         for(int i = 0; i < categories.Length; i++)
         {
-            categories[i].SetActive(i == current);
+            if (i == Dialogue)
+            {
+                categories[i].GetComponent<CanvasGroup>().alpha = 1f;
+            }
+            else
+            {
+                categories[i].SetActive(false);
+            }
         }
         showing = true;
         inspectorShow = true;
@@ -70,7 +77,15 @@ public class MenuController : MonoBehaviour
     {
         for (int i = 0; i < categories.Length; i++)
         {
-            categories[i].SetActive(false);
+            if (i == Dialogue)
+            {
+                categories[i].GetComponent<CanvasGroup>().alpha = 0f;
+            }
+            else
+            {
+                categories[i].SetActive(false);
+            }
+            
         }
         showing = false;
         inspectorShow = false;

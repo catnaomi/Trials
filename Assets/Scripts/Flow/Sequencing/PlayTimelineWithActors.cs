@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
+using Yarn.Unity;
 
 public class PlayTimelineWithActors : MonoBehaviour
 {
@@ -23,6 +24,7 @@ public class PlayTimelineWithActors : MonoBehaviour
         public UnityEngine.Object obj;
         public bool isPlayer;
         public bool isCinemachineBrain;
+        public bool isDialogueRunner;
     }
 
     // Start is called before the first frame update
@@ -69,6 +71,10 @@ public class PlayTimelineWithActors : MonoBehaviour
             else if (bindingIndex.isCinemachineBrain)
             {
                 director.SetGenericBinding(track, Camera.main.GetComponent<CinemachineBrain>());
+            }
+            else if (bindingIndex.isDialogueRunner)
+            {
+                director.SetGenericBinding(track, GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>());
             }
             else
             {

@@ -4,18 +4,17 @@ using UnityEngine.UI;
 
 public class SimpleCrosshair : MonoBehaviour
 {
-    public PlayerActor player;
     public Image image;
 
-    private void Start()
-    {
-        player = PlayerActor.player;
-    }
     private void OnGUI()
     {
-        if (player == null) return;
+        if (PlayerActor.player == null)
+        {
+            image.enabled = false;
+            return;
+        }
 
-        if (player.IsAiming() && player.GetCombatTarget() == null)
+        if (PlayerActor.player.IsAiming() && PlayerActor.player.GetCombatTarget() == null)
         {
             image.enabled = true;
         }
