@@ -223,6 +223,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public UnityEvent toggleTarget;
     public UnityEvent changeTarget;
     [Header("Controls")]
+    public float inputBufferTimeoutTime;
+    [SerializeField]InputBuffer buffer;
     public UnityEvent onControlsChanged;
     public UnityEvent onNewCurrentInteractable;
     struct AnimState
@@ -326,6 +328,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         damageHandler.SetEndAction(_MoveOnEnd);
         damageHandler.SetBlockEndAction(() => { animancer.Play(state.block, 0.5f); });
 
+        buffer = new InputBuffer();
+
         _AttackEnd = () =>
         {
             animancer.Play(state.move, 0.5f);
@@ -424,6 +428,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             aimTimer = aimCancelTime;
         }
+
+        PollInputs();
 
         //GetHeadPoint();
 
@@ -1949,6 +1955,114 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         };
     }
 
+    [Serializable]
+    struct InputBuffer
+    {
+        public enum Inputs
+        {
+            None,
+            Jump,
+            Dodge,
+            SprintStart,
+            BlockStart,
+            Thrust,
+            ThrustHold,
+            Slash,
+            SlashHold,
+        }
+
+        public Inputs lastInput;
+        public float lastInputTime;
+
+        public void SetInput(Inputs input, float time)
+        {
+            lastInput = input;
+            lastInputTime = time;
+        }
+
+        public void ClearInput(Inputs input)
+        {
+            if (lastInput == input)
+            {
+                lastInput = Inputs.None;
+            }
+        }
+
+        public void ClearAll()
+        {
+            lastInput = Inputs.None;
+        }
+        public bool IsAttack(Inputs input)
+        {
+            return input == Inputs.Thrust || input == Inputs.ThrustHold || input == Inputs.Slash || input == Inputs.SlashHold;
+        }
+    
+        public Inputs PollInput(float bufferLength)
+        {
+            Inputs input = Inputs.None;
+            if (lastInputTime > Time.time - bufferLength)
+            {
+                input = lastInput;
+            }
+            //ClearAll();
+            return input;
+        }
+    }
+    
+    // shouldDodge
+    // jump
+    // attack
+    // slash
+    // blocking
+    // sprinting
+
+    void PollInputs()
+    {
+        shouldDodge = false;
+        jump = false;
+        attack = false;
+        slash = false;
+        thrust = false;
+        blocking = blocking && IsBlockHeld();
+        sprinting = sprinting && IsSprintHeld();
+        switch (buffer.PollInput(inputBufferTimeoutTime))
+        {
+            case InputBuffer.Inputs.Dodge:
+                shouldDodge = true;
+                break;
+            case InputBuffer.Inputs.Jump:
+                jump = true;
+                break;
+            case InputBuffer.Inputs.Slash:
+                attack = true;
+                slash = true;
+                break;
+            case InputBuffer.Inputs.SlashHold:
+                attack = true;
+                slash = true;
+                hold = true;
+                break;
+            case InputBuffer.Inputs.Thrust:
+                attack = true;
+                thrust = true;
+                break;
+            case InputBuffer.Inputs.ThrustHold:
+                attack = true;
+                thrust = true;
+                hold = true;
+                break;
+            case InputBuffer.Inputs.SprintStart:
+                sprinting = true;
+                dashed = false;
+                break;
+            case InputBuffer.Inputs.BlockStart:
+                blocking = true;
+                break;
+
+        }
+    }
+
+
     public void OnDodge(InputValue value)
     {
         if (!CanPlayerInput()) return;
@@ -1965,7 +2079,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else
         {
-            shouldDodge = true;
+            //shouldDodge = true;
+            buffer.SetInput(InputBuffer.Inputs.Dodge, Time.time);
         }
         
     }
@@ -1986,7 +2101,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else if (GetGrounded())
         {
-            jump = true;
+            //jump = true;
+            buffer.SetInput(InputBuffer.Inputs.Jump, Time.time);
         }
         
     }
@@ -2034,19 +2150,25 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     void BlockStart()
     {
         if (!CanPlayerInput()) return;
-        blocking = true;
-
+        //blocking = true;
+        buffer.SetInput(InputBuffer.Inputs.BlockStart, Time.time);
     }
 
     void BlockEnd()
     {
         blocking = false;
     }
+
+    public bool IsBlockHeld()
+    {
+        return this.GetComponent<PlayerInput>().actions["Block"].IsPressed();
+    }
     void SprintStart()
     {
         if (!CanPlayerInput()) return;
-        sprinting = true;
-        dashed = false;
+        //sprinting = true;
+        buffer.SetInput(InputBuffer.Inputs.SprintStart, Time.time);
+        //dashed = false;
     }
 
     void SprintEnd()
@@ -2054,6 +2176,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         sprinting = false;
     }
 
+    public bool IsSprintHeld()
+    {
+        return this.GetComponent<PlayerInput>().actions["Sprint"].IsPressed();
+    }
     public void DashEnd()
     {
         Debug.Log("dash-end");
@@ -2074,15 +2200,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void OnAtk_Slash(InputValue value)
     {
         if (!CanPlayerInput()) return;
-        attack = true;
-        slash = true;
+        buffer.SetInput(InputBuffer.Inputs.Slash, Time.time);
+        //attack = true;
+        //slash = true;
     }
 
     public void OnAtk_Thrust(InputValue value)
     {
         if (!CanPlayerInput()) return;
-        attack = true;
-        thrust = true;
+        buffer.SetInput(InputBuffer.Inputs.Thrust, Time.time);
+        //attack = true;
+        //thrust = true;
     }
     public Vector2 GetMovementVector()
     {
@@ -2120,6 +2248,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         attack = false;
         slash = false;
         thrust = false;
+        buffer.ClearAll();
     }
     void OnControlsChanged()
     {
