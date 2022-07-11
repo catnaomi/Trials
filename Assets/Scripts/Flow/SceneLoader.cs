@@ -295,7 +295,7 @@ public class SceneLoader : MonoBehaviour
         instance.StartCoroutine(instance.DelayReloadRoutine(5f));
     }
 
-    IEnumerator DelayReloadRoutine(float delay)
+    public IEnumerator DelayReloadRoutine(float delay)
     {
         yield return new WaitForSeconds(delay);
         ReloadCurrentScene();
