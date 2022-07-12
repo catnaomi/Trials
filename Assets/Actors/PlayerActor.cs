@@ -98,6 +98,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float walkAccelReal;
     public bool sprinting;
     public bool shouldDodge;
+    public bool secondary;
     [Header("Carrying Settings")]
     public Carryable carryable;
     public bool isCarrying;
@@ -144,6 +145,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float aimCancelTime = 2f;
     public float aimTime;
     public float aimStartTime = 0.25f;
+    public Moveset.SecondaryStyle secondaryStyle;
     Vector2 camAimSpeeds;
     [Range(-1f,1f)]
     public float thrustIKValue;
@@ -423,13 +425,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         stickDirection = camForward * move.y + camRight * move.x;
 
-        aiming = GetAiming();
+        PollInputs();
+        ProcessSecondary();
+        //aiming = IsAimHeld();
         if (aiming)
         {
             aimTimer = aimCancelTime;
         }
 
-        PollInputs();
+        
 
         //GetHeadPoint();
 
@@ -459,7 +463,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 speedMax = walkSpeedMax;
             }
             speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * speedMax, walkAccelReal * Time.deltaTime);
-            if (camState == CameraState.Free)
+            if (camState == CameraState.Free || camState == CameraState.Aim)
             {
                 if (stickDirection.sqrMagnitude > 0)
                 {
@@ -482,6 +486,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }
                 moveDirection = stickDirection;
             }
+
             if (!isGrounded && lastAirTime > fallBufferTime)
             {
                 state.fall = animancer.Play(fallAnim);
@@ -1239,79 +1244,84 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             aimForwardVector = Quaternion.AngleAxis(look.x * horizontalAimSpeed * Time.deltaTime, Vector3.up) * aimForwardVector;
 
             bool turn = false;
-            if (false)//isGrounded)
+
+            if (camState == CameraState.Free)
             {
-                
                 if (move.magnitude > 0f)
                 {
-                    lookDirection = aimForwardVector;
+                    lookDirection = stickDirection;
                 }
                 else
                 {
-                    turn = true;
                     lookDirection = this.transform.forward;
                 }
             }
-            else
+            else if (camState == CameraState.Lock)
+            {
+                if (GetCombatTarget() != null)
+                {
+                    lookDirection = GetCombatTarget().transform.position - this.transform.position;
+                    lookDirection.y = 0f;
+
+                }
+                else
+                {
+                    lookDirection = this.transform.forward;
+                }
+            }
+            else if (camState == CameraState.Aim)
             {
                 lookDirection = Camera.main.transform.forward;
                 lookDirection.y = 0;
             }
-            
-            
-            if (state.aim is DirectionalMixerState aimDir)
+
+            try
             {
-                try
+                if (state.aim is DirectionalMixerState aimDir)
                 {
-                    aimDir.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
-                    aimDir.ParameterY = Vector3.Dot(moveDirection, this.transform.forward) * (speed / walkSpeedMax);
-                    if (aimDir.ChildStates[0] is LinearMixerState aimTurn)
+                    if (camState == CameraState.Free)
                     {
-                        if (turn)
+                        aimDir.ParameterX = 0f;
+                        aimDir.ParameterY = move.magnitude * (speed / walkSpeedMax);
+                    }
+                    else if (camState == CameraState.Lock)
+                    {
+                        aimDir.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
+                        aimDir.ParameterY = Vector3.Dot(moveDirection, this.transform.forward) * (speed / walkSpeedMax);
+                    }
+                    else if (camState == CameraState.Aim)
+                    {
+                        aimDir.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
+                        aimDir.ParameterY = Vector3.Dot(moveDirection, this.transform.forward) * (speed / walkSpeedMax);
+                        if (aimDir.ChildStates[0] is LinearMixerState aimTurn)
                         {
-                            float angle = Vector3.SignedAngle(lookDirection, aimForwardVector, Vector3.up);
-                            aimTurn.Parameter = Mathf.Clamp(angle, -10f, 10f);
-                            if (Mathf.Abs(angle) > 10f)
+                            if (turn)
                             {
-                                lookDirection = Vector3.RotateTowards(lookDirection, aimForwardVector, (Mathf.Abs(angle) - 10f) * Mathf.Deg2Rad, 1f);
+                                float angle = Vector3.SignedAngle(lookDirection, aimForwardVector, Vector3.up);
+                                aimTurn.Parameter = Mathf.Clamp(angle, -10f, 10f);
+                                if (Mathf.Abs(angle) > 10f)
+                                {
+                                    lookDirection = Vector3.RotateTowards(lookDirection, aimForwardVector, (Mathf.Abs(angle) - 10f) * Mathf.Deg2Rad, 1f);
+                                }
                             }
-                        }
-                        else
-                        {
-                            aimTurn.Parameter = 0f;
+                            else
+                            {
+                                aimTurn.Parameter = 0f;
+                            }
                         }
                     }
                 }
-                catch (ArgumentOutOfRangeException ex)
-                {
-                    Debug.LogError(ex);
-
-                }
-                
             }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Debug.LogError(ex);
+            }
+           
             if (inventory.IsRangedEquipped())
             {
                 IRangedWeapon rwep = (IRangedWeapon)inventory.GetRangedWeapon();
                 bool anyPlaying = animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying();
-                bool atk = false;
-                bool begin = false;
-                switch (rwep.GetFireMode())
-                {
-                    default:
-                    case RangedWeapon.FireMode.TriggerRelease:
-                        atk = !aiming;
-                        begin = aiming;
-                        break;
-                    case RangedWeapon.FireMode.TriggerAndAttackRelease:
-                        atk = !IsAttackHeld();
-                        begin = IsAttackHeld();
-                        break;
-                    case RangedWeapon.FireMode.TriggerAndAttackPress:
-                        atk = IsAttackHeld();
-                        begin = aiming;
-                        break;
-                }
-
+                
                 inventory.GetRangedWeapon().moveset.aimAttack.ProcessAimAttack(this, aiming, slash || thrust, IsAttackHeld());
             }
             if (shouldDodge)
@@ -1503,7 +1513,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             xzVel = finalMov;
             xzVel.y = 0;
         }
-        if (IsAiming() && inventory.IsRangedDrawn())
+        if (IsAiming() && inventory.IsRangedDrawn() && camState == CameraState.Aim)
         {
             inventory.GetRangedWeapon().moveset.aimAttack.OnUpdate(this);
             animancer.Layers[HumanoidAnimLayers.UpperBody].ApplyAnimatorIK = true;
@@ -1573,7 +1583,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     private void LateUpdate()
     {
-        if (IsAiming() && inventory.IsRangedDrawn())
+        if (IsAiming() && inventory.IsRangedDrawn() && camState == CameraState.Aim)
         {
             inventory.GetRangedWeapon().moveset.aimAttack.OnUpdate(this);
         }
@@ -1836,13 +1846,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             camState = CameraState.Climb;
         }
-        else if (GetCombatTarget() != null)
+        else if (IsInDialogue() && GetCombatTarget() != null)
         {
-            camState = (!IsInDialogue()) ? CameraState.Lock : CameraState.Dialogue;
+            camState = CameraState.Dialogue;
         }
-        else if (IsAiming() && aiming)
+        else if (IsAimHeld())//(IsAiming() && aiming)
         {
             camState = CameraState.Aim;
+        }
+        else if (GetCombatTarget() != null)
+        {
+            camState = CameraState.Lock;
         }
         else
         {
@@ -1900,6 +1914,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         inputs.actions["Block"].canceled += (context) =>
         {
             BlockEnd();
+        };
+
+        inputs.actions["UseSecondary"].started += (context) =>
+        {
+            SecondaryStart();
+        };
+
+        inputs.actions["UseSecondary"].canceled += (context) =>
+        {
+            SecondaryEnd();
         };
 
         inputs.actions["Atk_Slash"].performed += (context) =>
@@ -1969,6 +1993,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             ThrustHold,
             Slash,
             SlashHold,
+            SecondaryStart,
         }
 
         public Inputs lastInput;
@@ -2025,6 +2050,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         thrust = false;
         blocking = blocking && IsBlockHeld();
         sprinting = sprinting && IsSprintHeld();
+        secondary = secondary && IsSecondaryHeld();
         switch (buffer.PollInput(inputBufferTimeoutTime))
         {
             case InputBuffer.Inputs.Dodge:
@@ -2057,6 +2083,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 break;
             case InputBuffer.Inputs.BlockStart:
                 blocking = true;
+                break;
+            case InputBuffer.Inputs.SecondaryStart:
+                secondary = true;
                 break;
 
         }
@@ -2122,7 +2151,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         look = value.Get<Vector2>();
     }
 
-    bool GetAiming()
+    bool IsAimHeld()
     {
         return (CanPlayerInput() && GetComponent<PlayerInput>().actions["Aim"].IsPressed());
     }
@@ -2146,7 +2175,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (!CanPlayerInput()) return false;
         return this.GetComponent<PlayerInput>().actions["Atk_Thrust"].IsPressed();
     }
-
+    
     void BlockStart()
     {
         if (!CanPlayerInput()) return;
@@ -2179,6 +2208,25 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool IsSprintHeld()
     {
         return this.GetComponent<PlayerInput>().actions["Sprint"].IsPressed();
+    }
+
+    void SecondaryStart()
+    {
+        if (!CanPlayerInput()) return;
+        //sprinting = true;
+        buffer.SetInput(InputBuffer.Inputs.SecondaryStart, Time.time);
+    }
+
+    void SecondaryEnd()
+    {
+        if (!CanPlayerInput()) return;
+        //sprinting = true;
+        secondary = false;
+    }
+
+    public bool IsSecondaryHeld()
+    {
+        return this.GetComponent<PlayerInput>().actions["UseSecondary"].IsPressed();
     }
     public void DashEnd()
     {
@@ -2214,7 +2262,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public Vector2 GetMovementVector()
     {
-        if (camState == CameraState.Free)
+        if (camState == CameraState.Free || camState == CameraState.Aim)
         {
             return new Vector2(0f, speed / walkSpeedMax);
             //return new Vector2(0f, move.magnitude);
@@ -2249,6 +2297,32 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         slash = false;
         thrust = false;
         buffer.ClearAll();
+    }
+
+    public void ProcessSecondary()
+    {
+        if (secondaryStyle == Moveset.SecondaryStyle.Block)
+        {
+            if (secondary && IsSecondaryHeld())
+            {
+                blocking = true;
+            }
+            else
+            {
+                blocking = false;
+            }
+        }
+        else if (secondaryStyle == Moveset.SecondaryStyle.RangedAttack)
+        {
+            if (secondary && IsSecondaryHeld())
+            {
+                aiming = true;
+            }
+            else
+            {
+                aiming = false;
+            }
+        }
     }
     void OnControlsChanged()
     {
@@ -2403,7 +2477,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         MixerTransition2DAsset blockingMoveAnim = moveAnim;
         ClipTransition guardBreak = null;
-        if (inventory.IsOffEquipped() && inventory.GetOffWeapon().moveset.overridesBlock)
+        if (inventory.IsOffEquipped() && inventory.GetOffWeapon().moveset.overridesBlock )
         {
             blockingMoveAnim = inventory.GetOffWeapon().moveset.blockMove;
             blockAnim = inventory.GetOffWeapon().moveset.blockAnim;
@@ -2418,6 +2492,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             blockAnimStart = inventory.GetMainWeapon().moveset.blockAnimStart;
             blockStagger = inventory.GetMainWeapon().moveset.blockStagger;
             guardBreak = inventory.GetMainWeapon().moveset.guardBreak;
+        }
+
+        if (inventory.IsOffEquipped())
+        {
+            secondaryStyle = inventory.GetOffWeapon().moveset.secondaryStyle;
+        }
+        else if (inventory.IsMainEquipped())
+        {
+            secondaryStyle = inventory.GetMainWeapon().moveset.secondaryStyle;
+        }
+        else
+        {
+            secondaryStyle = Moveset.SecondaryStyle.None;
         }
 
         state.block = (MixerState)animancer.States.GetOrCreate(blockingMoveAnim);
@@ -2905,11 +2992,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         };
         if (inventory.IsOffDrawn() && GetMovesetOff().stanceThrust != null)
         {
-            state.attack = GetMovesetOff().stanceSlash.ProcessPlayerAttack(this, out cancelTime, _BlockAttackEnd);
+            state.attack = GetMovesetOff().stanceThrust.ProcessPlayerAttack(this, out cancelTime, _BlockAttackEnd);
         }
         else if (inventory.IsMainDrawn() && GetMoveset().stanceThrust != null)
         {
-            state.attack = GetMovesetOff().stanceSlash.ProcessPlayerAttack(this, out cancelTime, _BlockAttackEnd);
+            state.attack = GetMoveset().stanceThrust.ProcessPlayerAttack(this, out cancelTime, _BlockAttackEnd);
         }
         else
         {
@@ -3027,6 +3114,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         while (inventory.IsMainDrawn() || inventory.IsOffDrawn() || inventory.IsRangedDrawn())
         {
+            if (attack)
+            {
+                yield break;
+            }
             if (animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
             {
                 yield return new WaitWhile(() => { return !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying(); });
@@ -3402,7 +3493,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             float weightTarget = (isHitboxActive) ? 1f : 0f;
             thrustIKWeight = Mathf.MoveTowards(thrustIKWeight, weightTarget, thrustIKAdjustSpeed * Time.deltaTime);
         }
-        else if (IsAiming() && inventory.IsRangedDrawn())
+        else if (IsAiming() && camState == CameraState.Aim && inventory.IsRangedDrawn())
         {
             inventory.GetRangedWeapon().moveset.aimAttack.OnIK(animancer.Animator);
         }
@@ -3499,7 +3590,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public bool IsAiming()
     {
-        return animancer.States.Current == state.aim && (state.aim != state.move || aiming);
+        return IsAimHeld();
+        //return animancer.States.Current == state.aim && (state.aim != state.move || aiming);
     }
 
     public override bool IsFalling()

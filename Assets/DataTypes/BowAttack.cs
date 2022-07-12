@@ -28,7 +28,7 @@ public class BowAttack : AimAttack
                 inventory.SetDrawn(Inventory.OffType, false);
                 player.astate.sheathe = player.TriggerSheath(true, inventory.GetRangedWeapon().RangedEquipSlot, Inventory.RangedType);
             }
-            else if (attackHeld)
+            else if (aimHeld)
             {
                 ClipTransition clip = this.GetStartClip();
 
@@ -38,7 +38,7 @@ public class BowAttack : AimAttack
         }
         else if (animancer.Layers[HumanoidAnimLayers.UpperBody].CurrentState == player.astate.start || animancer.Layers[HumanoidAnimLayers.UpperBody].CurrentState == player.astate.hold)
         {
-            if (!attackHeld && rwep.CanFire())
+            if (!aimHeld && rwep.CanFire())
             {
                 ClipTransition clip = this.GetFireClip();
 

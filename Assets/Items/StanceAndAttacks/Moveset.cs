@@ -31,6 +31,7 @@ public class Moveset : ScriptableObject
     public ClipTransition draw;
     public ClipTransition sheathe;
     public MixerTransition2DAsset moveAnim; // main weapon only
+    public SecondaryStyle secondaryStyle;
     public bool overridesBlock;
     public MixerTransition2DAsset blockMove; // off weapon > main weapon
     public ClipTransition blockAnim;
@@ -43,6 +44,14 @@ public class Moveset : ScriptableObject
     [ReadOnly] public bool isClone = false;
     public static Dictionary<string, Moveset> movesetTable;
     public static bool movesetsLoaded = false;
+
+    public enum SecondaryStyle
+    {
+        None,
+        Block,
+        Attack,
+        RangedAttack,
+    }
     public static void LoadMovesetCombinations()
     {
         Debug.Log("loading moveset combinations");

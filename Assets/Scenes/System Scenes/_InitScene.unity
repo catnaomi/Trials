@@ -4827,7 +4827,7 @@ MonoBehaviour:
   equipOnStart: 1
   initialized: 0
   Slot0Weapon: {fileID: 11400000, guid: 18f6ed37a4989b94e81cd0739fa74c6b, type: 2}
-  Slot1Weapon: {fileID: 0}
+  Slot1Weapon: {fileID: 11400000, guid: 35a85d4c060656d4784f67a3782b0e87, type: 2}
   Slot2Weapon: {fileID: 11400000, guid: a71804c18f2aeb94dadab2e7ade72bb3, type: 2}
   Slot3Weapon: {fileID: 0}
   weaponChanged: 0
@@ -5011,6 +5011,7 @@ MonoBehaviour:
   walkAccelReal: 0
   sprinting: 0
   shouldDodge: 0
+  secondary: 0
   carryable: {fileID: 0}
   isCarrying: 0
   isDropping: 0
@@ -5035,6 +5036,7 @@ MonoBehaviour:
   aimCancelTime: 0.5
   aimTime: 0
   aimStartTime: 0.25
+  secondaryStyle: 0
   thrustIKValue: 0
   thrustIKWeight: 0
   thrustIKMultiplier: 0
@@ -5393,6 +5395,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   inputBufferTimeoutTime: 0.25
+  buffer:
+    lastInput: 0
+    lastInputTime: 0
   onControlsChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -10802,7 +10807,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 462353258}
-  m_LocalRotation: {x: -0.1335583, y: -0.49071148, z: -0.0764185, w: 0.85762733}
+  m_LocalRotation: {x: 0.21016242, y: 0.6804329, z: 0.6686595, w: -0.21386285}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -12890,8 +12895,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
-  m_LocalRotation: {x: 0.076418474, y: 0.85762733, z: -0.13355833, w: 0.4907115}
-  m_LocalPosition: {x: 22.503843, y: 3.6442757, z: -28.468887}
+  m_LocalRotation: {x: 0.66866004, y: 0.21386096, z: -0.21016055, w: 0.6804336}
+  m_LocalPosition: {x: 27.936794, y: 11.288477, z: -31.86407}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13832,8 +13837,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1132656376}
-  m_LocalRotation: {x: 0.6720767, y: 0.20246728, z: -0.19896403, w: 0.68391025}
-  m_LocalPosition: {x: 27.941631, y: 11.288477, z: -31.867321}
+  m_LocalRotation: {x: 0.66866004, y: 0.21386096, z: -0.21016055, w: 0.6804336}
+  m_LocalPosition: {x: 27.936794, y: 11.288477, z: -31.86407}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -18280,8 +18285,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925080555}
-  m_LocalRotation: {x: 0.07641854, y: 0.8576274, z: -0.13355842, w: 0.4907114}
-  m_LocalPosition: {x: 22.503843, y: 3.6442757, z: -28.468887}
+  m_LocalRotation: {x: 0.66866004, y: 0.21386145, z: -0.21016109, w: 0.6804332}
+  m_LocalPosition: {x: 27.936794, y: 11.288477, z: -31.864075}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -20003,6 +20008,7 @@ MonoBehaviour:
   walkAccelReal: 0
   sprinting: 0
   shouldDodge: 0
+  secondary: 0
   carryable: {fileID: 0}
   isCarrying: 0
   isDropping: 0
@@ -20027,6 +20033,7 @@ MonoBehaviour:
   aimCancelTime: 0.5
   aimTime: 0
   aimStartTime: 0.25
+  secondaryStyle: 0
   thrustIKValue: 0
   thrustIKWeight: 0
   thrustIKMultiplier: 0
@@ -20385,6 +20392,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   inputBufferTimeoutTime: 0
+  buffer:
+    lastInput: 0
+    lastInputTime: 0
   onControlsChanged:
     m_PersistentCalls:
       m_Calls: []
