@@ -12,7 +12,7 @@ public class PlayerTargetManager : MonoBehaviour
     public float maxPlayerDistance = 20f;
     public float maxCamDistance = 20f;
     public List<GameObject> targets;
-
+    public LayerMask blocksTargetingMask;
     public int index = 0;
     public bool lockedOn;
     public GameObject currentTarget;
@@ -88,8 +88,8 @@ public class PlayerTargetManager : MonoBehaviour
                 Ray pRay = new Ray(player.positionReference.Spine.position, (target.transform.position - player.positionReference.Spine.position));
                 Ray cRay = new Ray(cam.transform.position, (target.transform.position - cam.transform.position));
 
-                bool playerTerrainBlocked = Physics.Raycast(pRay, playerDist, LayerMask.GetMask("Terrain"));
-                bool camTerrainBlocked = Physics.Raycast(cRay, camDist, LayerMask.GetMask("Terrain"));
+                bool playerTerrainBlocked = Physics.Raycast(pRay, playerDist, blocksTargetingMask);
+                bool camTerrainBlocked = Physics.Raycast(cRay, camDist, blocksTargetingMask);
 
                 bool playerInRange = playerDist < maxPlayerDistance;
                 bool camInRange = camDist < maxCamDistance;
