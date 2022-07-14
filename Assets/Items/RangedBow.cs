@@ -147,7 +147,7 @@ public class RangedBow : RangedWeapon, IHitboxHandler
     }
     public void Fire()
     {
-        if (!GetHeldActor().TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference)) return;
+        if (GetHeldActor() == null || !GetHeldActor().TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference)) return;
         deadArrow.SetActive(false);
         GetHeldActor().SendMessage("ArrowFire");
         if (GetAmmunitionRemaining() <= 0)

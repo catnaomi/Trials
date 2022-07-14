@@ -630,9 +630,18 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             Slot3Weapon = weapon;
         }
 
-        UnequipMainWeapon();
-        UnequipOffHandWeapon();
-        UnequipRangedWeapon();
+        if (FindSlotFromWeapon(GetMainWeapon()) < 0)
+        {
+            UnequipMainWeapon();
+        }
+        if (FindSlotFromWeapon(GetOffWeapon()) < 0)
+        {
+            UnequipOffHandWeapon();
+        }
+        if (FindSlotFromWeapon(GetRangedWeapon()) < 0)
+        {
+            UnequipRangedWeapon();
+        }
     }
 
     public int FindSlotFromWeapon(EquippableWeapon weapon)
@@ -766,14 +775,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                 bool isRanged = weapon == GetRangedWeapon();
                 if (isMain)
                 {
-                    if (!IsMainDrawn())
-                    {
-                        player.TriggerSheath(true, MainWeapon.MainHandEquipSlot, true);
-                    }
-                    else
-                    {
-                        //UpdateTwoHand(!TwoHanding);
-                    }
+                    player.TriggerSheath(!IsMainDrawn(), MainWeapon.MainHandEquipSlot, true);
                 }
                 else if (isOff)
                 {
@@ -792,6 +794,10 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                             }
                         }
                         EquipMainWeapon(weapon);
+                    }
+                    else if (IsOffDrawn())
+                    {
+                        player.TriggerSheath(false, OffWeapon.OffHandEquipSlot, false);
                     }
                 }
                 else if (isRanged)

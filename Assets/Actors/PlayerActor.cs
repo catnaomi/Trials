@@ -2295,15 +2295,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void InputSheathe()
     {
-        if (inventory.IsMainEquipped() && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
+        if (!animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
         {
-            if (!inventory.IsMainDrawn())
+            if (inventory.IsOffDrawn() && inventory.IsOffEquipped())
             {
-                TriggerSheath(true, inventory.GetMainWeapon().MainHandEquipSlot, true);
+                TriggerSheath(false, inventory.GetOffWeapon().MainHandEquipSlot, true);
             }
-            else
+            else if (inventory.IsMainDrawn() && inventory.IsMainEquipped())
             {
                 TriggerSheath(false, inventory.GetMainWeapon().MainHandEquipSlot, true);
+            }
+            else if (!inventory.IsMainDrawn() && inventory.IsMainEquipped())
+            {
+                TriggerSheath(true, inventory.GetMainWeapon().MainHandEquipSlot, true);
             }
         }
     }
@@ -2361,16 +2365,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public void ToggleMenu()
     {
-        if (!isMenuOpen)
-        {
-            MenuController.menu.OpenMenu(MenuController.Inventory);
-            //isMenuOpen = true;
-        }
-        else
-        {
-            MenuController.menu.HideMenu();
-            //isMenuOpen = false;
-        }
+        MenuController.menu.TryToggleInventory();
     }
 
     public void OnQuickSlot(int slot)

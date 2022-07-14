@@ -61,6 +61,7 @@ public class Inventory : MonoBehaviour, IInventory
                 }
             }
         }
+        item.holder = this.GetComponent<Actor>();
         contents.Add(item);
         OnChange.Invoke();
         return true;

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using Yarn.Unity;
 
 public class MenuController : MonoBehaviour
 {
@@ -55,43 +56,50 @@ public class MenuController : MonoBehaviour
 
     public void ShowMenu()
     {
-        for(int i = 0; i < categories.Length; i++)
+        if (current < 0)
         {
-            if (i == Dialogue)
-            {
-                categories[i].GetComponent<CanvasGroup>().alpha = 1f;
-            }
-            else
-            {
-                categories[i].SetActive(false);
-            }
+            HideMenu();
+            return;
         }
         showing = true;
         inspectorShow = true;
         SetPlayerMenuOpen(true);
         Cursor.visible = true;
-        //Cursor.lockState = CursorLockMode.Confined;
+        UpdateMenus();
+#if !UNITY_EDITOR
+        Cursor.lockState = CursorLockMode.Confined;
+#endif
     }
 
     public void HideMenu()
+    {
+        showing = false;
+        inspectorShow = false;
+        SetPlayerMenuOpen(false);
+        current = -1;
+        UpdateMenus();
+#if !UNITY_EDITOR
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+#endif
+    }
+
+    public void UpdateMenus()
     {
         for (int i = 0; i < categories.Length; i++)
         {
             if (i == Dialogue)
             {
-                categories[i].GetComponent<CanvasGroup>().alpha = 0f;
+                if (current == i)
+                {
+                    categories[i].GetComponent<CanvasGroup>().alpha = 1f;
+                }
             }
             else
             {
-                categories[i].SetActive(false);
+                categories[i].SetActive(current == i);
             }
-            
         }
-        showing = false;
-        inspectorShow = false;
-        SetPlayerMenuOpen(false);
-        //Cursor.visible = false;
-        //Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void OpenMenu(int index)
@@ -103,6 +111,30 @@ public class MenuController : MonoBehaviour
     {
         if (PlayerActor.player == null) return;
         PlayerActor.player.isMenuOpen = open;
+    }
+
+    public void TryToggleInventory()
+    {
+        GameObject runnerObj = GameObject.FindGameObjectWithTag("DialogueRunner");
+
+        if (runnerObj != null)
+        {
+            DialogueRunner runner = runnerObj.GetComponent<DialogueRunner>();
+            if (runner.IsDialogueRunning)
+            {
+                Debug.Log("could not open inventory, dialogue is running");
+                return;
+            }
+        }
+
+        if (showing && current == Inventory)
+        {
+            HideMenu();
+        }
+        else if (!showing)
+        {
+            OpenMenu(Inventory);
+        }
     }
     public List<RaycastResult> RaycastMouse()
     {

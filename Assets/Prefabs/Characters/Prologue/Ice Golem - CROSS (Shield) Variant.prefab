@@ -5,12 +5,13 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2314907631184150886, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
       propertyPath: m_Name
-      value: Ice Golem - CROSS (Shield)
+      value: Ice Golem - CROSS (Shield) Variant
       objectReference: {fileID: 0}
     - target: {fileID: 3128845696319544284, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
@@ -116,6 +117,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4013956763830427714, guid: 8f083315fa2a75947ab86f7218ad8af3, type: 3}
+    m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 8f083315fa2a75947ab86f7218ad8af3, type: 3}
 --- !u!1 &3312977810330401476 stripped
 GameObject:
@@ -206,6 +208,7 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 0
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
@@ -249,6 +252,8 @@ MonoBehaviour:
   destination: {x: 0, y: 0, z: 0}
   followingTarget: 0
   airTime: 0
+  strafeDelay: 2
+  strafeDirection: 0
   jumpAdjustSpeed: 3
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: b3c749a2726bf1b4e9d06eb7464f533c, type: 2}
@@ -257,8 +262,6 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  MinEngageRange: 3.5
-  MaxEngageRange: 10
   SightRange: 15
   InSightRange: 0
   CloseAttack: {fileID: 11400000, guid: 64e0b0cfee048ec479610a3517eb546a, type: 2}
