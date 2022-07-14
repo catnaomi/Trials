@@ -5,12 +5,18 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4093822132945269513, guid: 884f1ae2ae5a0fb42a0aaeeedfbf7890,
+        type: 3}
+      propertyPath: m_Radius
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6934999084977914064, guid: 884f1ae2ae5a0fb42a0aaeeedfbf7890,
         type: 3}
       propertyPath: m_Name
-      value: Ice Golem - Neutral (Shield)
+      value: Ice Golem - Neutral (Shield) Variant
       objectReference: {fileID: 0}
     - target: {fileID: 7743306516172954218, guid: 884f1ae2ae5a0fb42a0aaeeedfbf7890,
         type: 3}
@@ -82,6 +88,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8622797609942491585, guid: 884f1ae2ae5a0fb42a0aaeeedfbf7890,
+        type: 3}
+      propertyPath: m_Radius
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8622797609942491592, guid: 884f1ae2ae5a0fb42a0aaeeedfbf7890,
         type: 3}
       propertyPath: equipToOff
@@ -116,6 +127,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8622797609942491636, guid: 884f1ae2ae5a0fb42a0aaeeedfbf7890, type: 3}
+    m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 884f1ae2ae5a0fb42a0aaeeedfbf7890, type: 3}
 --- !u!1 &7909054546482848306 stripped
 GameObject:
@@ -206,6 +218,7 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 0
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
@@ -249,6 +262,8 @@ MonoBehaviour:
   destination: {x: 0, y: 0, z: 0}
   followingTarget: 0
   airTime: 0
+  strafeDelay: 2
+  strafeDirection: 0
   jumpAdjustSpeed: 3
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: b3c749a2726bf1b4e9d06eb7464f533c, type: 2}
@@ -257,8 +272,6 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  MinEngageRange: 3.5
-  MaxEngageRange: 10
   SightRange: 15
   InSightRange: 0
   CloseAttack: {fileID: 11400000, guid: 64e0b0cfee048ec479610a3517eb546a, type: 2}
