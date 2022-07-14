@@ -1977,6 +1977,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 OnQuickSlot(2);
             }
         };
+
+        inputs.actions["QuickSlot - 3"].performed += (context) =>
+        {
+            if (context.interaction is HoldInteraction)
+            {
+                OnQuickSlotHold(3);
+            }
+            else
+            {
+                OnQuickSlot(3);
+            }
+        };
     }
 
     [Serializable]
@@ -2277,6 +2289,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void OnSheathe(InputValue value)
     {
         if (!CanPlayerInput()) return;
+        InputSheathe();
+        
+    }
+
+    public void InputSheathe()
+    {
         if (inventory.IsMainEquipped() && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
         {
             if (!inventory.IsMainDrawn())
@@ -2288,7 +2306,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 TriggerSheath(false, inventory.GetMainWeapon().MainHandEquipSlot, true);
             }
         }
-        
     }
 
     public void ResetInputs()
@@ -2361,8 +2378,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if ((IsMoving() && CanPlayerInput()) || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
         {
             inventory.InputOnSlot(slot);
-            InventoryUI2.invUI.FlareSlot(slot);
+            
         }
+        InventoryUI2.invUI.FlareSlot(slot);
     }
 
     public void OnQuickSlotHold(int slot)
@@ -2370,8 +2388,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (IsMoving() && CanPlayerInput())
         {
             inventory.UnequipOnSlot(slot);
-            InventoryUI2.invUI.FlareSlot(slot);
+            
         }
+        InventoryUI2.invUI.FlareSlot(slot);
     }
     #endregion
     #endregion
@@ -3717,7 +3736,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             interactable.Interact(this);
         }
-
+        else
+        {
+            InputSheathe();
+        }
     }
 
     public void StartDialogue()

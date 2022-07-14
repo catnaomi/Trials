@@ -33,7 +33,8 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     public EquippableWeapon Slot1Weapon; // left
     [Tooltip("Right Slot. Equips to Ranged.")]
     public EquippableWeapon Slot2Weapon; // right
-    [ReadOnly] public EquippableWeapon Slot3Weapon; // down (disabled)
+    [Tooltip("Botton Slot. Does not Equip.")]
+    public EquippableWeapon Slot3Weapon; // down
 
     public bool weaponChanged;
 

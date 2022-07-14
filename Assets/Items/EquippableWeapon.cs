@@ -25,6 +25,7 @@ public class EquippableWeapon : Item, IGeneratesModel
     public StanceHandler stance;
     public Moveset moveset;
     [Header("Stats")]
+    public Size size;
     public float AttackSpeed;
     public float weight;
     [Header("Ammunition")]
@@ -36,6 +37,13 @@ public class EquippableWeapon : Item, IGeneratesModel
     public UnityEvent OnUnequip = new UnityEvent();
 
     [HideInInspector] public GameObject model;
+
+    public enum Size
+    {
+        Light,
+        Medium,
+        Heavy
+    }
     public virtual void EquipWeapon(Actor actor)
     {
         OnEquip.Invoke();

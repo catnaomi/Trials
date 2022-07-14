@@ -35,6 +35,7 @@ public class InventoryUI2 : MonoBehaviour
     public QuickSelectItem quickSlot0;
     public QuickSelectItem quickSlot1;
     public QuickSelectItem quickSlot2;
+    public QuickSelectItem quickSlot3;
     public QuickSheatheIndicator sheathSlot;
 
     public GameObject selectPopup;
@@ -296,7 +297,7 @@ public class InventoryUI2 : MonoBehaviour
                 quickSlot2.Flare();
                 break;
             case 3:
-    
+                quickSlot3.Flare();
                 break;
         }
     }
