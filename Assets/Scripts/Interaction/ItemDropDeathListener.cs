@@ -54,6 +54,7 @@ public class ItemDropDeathListener : MonoBehaviour
         {
             PlayerActor.player.inventory.EquipToSlot(equippableWeapon, autoEquipToSlot);
         }
+        spawned = false;
         Destroy(dropLocation.gameObject);
     }
 }

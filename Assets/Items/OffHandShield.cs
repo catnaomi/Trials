@@ -15,23 +15,6 @@ public class OffHandShield : EquippableWeapon, IHitboxHandler
 
     [HideInInspector] Hitbox hitbox;
 
-    public bool HandleInput(out InputAction action)
-    {
-        action = null;
-        bool down = Input.GetButtonDown("Attack2");
-
-        
-        if (down)
-        {
-            //action = ActionsLibrary.GetInputAction("Shield Bash");
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
     public void HitboxActive(bool active)
     {
         if (hitbox == null)
@@ -39,7 +22,7 @@ public class OffHandShield : EquippableWeapon, IHitboxHandler
             return;
         }
         hitbox.SetActive(active);
-        bashDamage.kbForce = GetHeldActor().transform.forward;
+        //bashDamage.kbForce = GetHeldActor().transform.forward;
 
         if (active)
         {
