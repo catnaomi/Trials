@@ -13,7 +13,7 @@ public class PlayerPositioner : MonoBehaviour
         {
             player.transform.rotation = spawnPoint.rotation;
             player.WarpTo(spawnPoint.position);
-            player.lastSafePoint = spawnPoint.position;
+            player.SetNewSafePoint();
         }
     }
 }

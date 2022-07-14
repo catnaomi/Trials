@@ -327,8 +327,13 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
     public override void Die()
     {
         if (dead) return;
-        base.Die();
-
+        OnDie.Invoke();
+        GameObject particle = Instantiate(deathParticle);
+        particle.transform.position = this.GetComponent<Collider>().bounds.center;
+        Destroy(particle, 5f);
+        Destroy(this.gameObject);
+        return;
+        /*
         foreach (Renderer r in this.GetComponentsInChildren<Renderer>())
         {
             r.enabled = false;
@@ -338,9 +343,8 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
             c.enabled = false;
         }
         this.GetComponent<Collider>().enabled = false;
-        GameObject particle = Instantiate(deathParticle);
-        particle.transform.position = this.GetComponent<Collider>().bounds.center;
-        Destroy(particle, 5f);
+        
         actionsEnabled = false;
+        */
     }
 }

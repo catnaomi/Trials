@@ -38,6 +38,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float maxExternalSourceTime = 30000f;
     [Header("Respawning")]
     public Vector3 lastSafePoint;
+    public float safePointClock;
     [Header("Movement")]
     public float walkSpeedMax = 5f;
     public AnimationCurve walkSpeedCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
@@ -384,7 +385,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         onControlsChanged.AddListener(HandleCinemachine);
 
-        StartCoroutine("SafePointCoroutine");
+        //StartCoroutine("SafePointCoroutine");
         if (SceneLoader.IsSceneLoaderActive())
         {
             SceneLoader.GetOnActiveSceneChange().AddListener(SetNewSafePoint);
@@ -1578,7 +1579,24 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         HandleCinemachine();
 
-        if (Keyboard.current.kKey.wasReleasedThisFrame) ProcessDeath();
+        if (lastSafePoint == Vector3.zero || safePointClock < 0f)
+        {
+            if (dead || resurrecting || !IsMoving() || this.GetComponent<ActorTimeTravelHandler>().IsRewinding())
+            {
+                safePointClock = 0.25f;
+            }
+            else if (!GetGrounded())
+            {
+                safePointClock = 0f;
+            }
+            else
+            {
+                SetNewSafePoint();
+                safePointClock = 1f;
+            }
+        }
+        //yield return new WaitForSecondsRealtime(1f);
+    
     }
 
     private void LateUpdate()
@@ -1621,6 +1639,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         ResetOnMove();
     }
 
+    public void JumpToNavMesh(float range)
+    {
+        if (UnityEngine.AI.NavMesh.SamplePosition(this.transform.position, out var hit, range, 1))
+        {
+            WarpTo(hit.position);
+        }
+    }
+
+    public void JumpToNavMesh()
+    {
+        JumpToNavMesh(10f);
+    }
     public void ResetOnMove()
     {
         airTime = 0f;
@@ -1685,23 +1715,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             Die();
         }
     }
-    IEnumerator SafePointCoroutine()
-    {
-        while (true)
-        {
-            if (!GetGrounded())
-            {
-                yield return new WaitUntil(GetGrounded);
-            }
-            if (dead || resurrecting || !IsMoving() || this.GetComponent<ActorTimeTravelHandler>().IsRewinding())
-            {
-                yield return new WaitForSecondsRealtime(0.25f);
-                continue;
-            }
-            SetNewSafePoint();
-            yield return new WaitForSecondsRealtime(1f);
-        }
-    }
+    
 
     IEnumerator DecelXZVel(float time)
     {
@@ -2833,7 +2847,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             PowerSlash();
             return;
         }
-        System.Action endAction = (GetMoveset().quickSlash1h is ComboAttack) ? _MoveOnEnd : _AttackEnd;
+        System.Action endAction = (GetMoveset().quickSlash1h != null && GetMoveset().quickSlash1h is ComboAttack) ? _MoveOnEnd : _AttackEnd;
         state.attack = GetMoveset().quickSlash1h.ProcessPlayerAttack(this, out cancelTime, endAction);
         attackDecelReal = attackDecel;
         OnAttack.Invoke();

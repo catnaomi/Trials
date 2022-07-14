@@ -630,17 +630,25 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             Slot3Weapon = weapon;
         }
 
+        bool changed = false;
         if (FindSlotFromWeapon(GetMainWeapon()) < 0)
         {
             UnequipMainWeapon();
+            changed = true;
         }
         if (FindSlotFromWeapon(GetOffWeapon()) < 0)
         {
             UnequipOffHandWeapon();
+            changed = true;
         }
         if (FindSlotFromWeapon(GetRangedWeapon()) < 0)
         {
             UnequipRangedWeapon();
+            changed = true;
+        }
+        if (!changed)
+        {
+            OnChange.Invoke();
         }
     }
 

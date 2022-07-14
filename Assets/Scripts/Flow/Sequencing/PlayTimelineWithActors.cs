@@ -96,6 +96,7 @@ public class PlayTimelineWithActors : MonoBehaviour
         {
             PlayerActor.player.gameObject.SetActive(true);
         }
+        PlayerActor.player.JumpToNavMesh();
         playerRefTransform.gameObject.SetActive(false);
         if (destroyOnComplete)
         {

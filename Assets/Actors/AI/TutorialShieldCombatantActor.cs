@@ -307,20 +307,24 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
     public override void Die()
     {
         if (dead) return;
-        base.Die();
-
+        OnDie.Invoke();
+        GameObject particle = Instantiate(deathParticle);
+        particle.transform.position = this.GetComponent<Collider>().bounds.center;
+        Destroy(particle, 5f);
+        Destroy(this.gameObject);
+        return;
+        /*
         foreach (Renderer r in this.GetComponentsInChildren<Renderer>())
         {
             r.enabled = false;
         }
-        this.GetComponent<Collider>().enabled = false;
         foreach (Collider c in this.GetComponentsInChildren<Collider>())
         {
             c.enabled = false;
         }
-        GameObject particle = Instantiate(deathParticle);
-        particle.transform.position = this.GetComponent<Collider>().bounds.center;
-        Destroy(particle, 5f);
+        this.GetComponent<Collider>().enabled = false;
+        
         actionsEnabled = false;
+        */
     }
 }

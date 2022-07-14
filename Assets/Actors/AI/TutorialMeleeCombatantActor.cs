@@ -339,9 +339,14 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     public override void Die()
     {
         if (dead) return;
-        base.Die();
-        
-        foreach(Renderer r in this.GetComponentsInChildren<Renderer>())
+        OnDie.Invoke();
+        GameObject particle = Instantiate(deathParticle);
+        particle.transform.position = this.GetComponent<Collider>().bounds.center;
+        Destroy(particle, 5f);
+        Destroy(this.gameObject);
+        return;
+        /*
+        foreach (Renderer r in this.GetComponentsInChildren<Renderer>())
         {
             r.enabled = false;
         }
@@ -350,11 +355,9 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
             c.enabled = false;
         }
         this.GetComponent<Collider>().enabled = false;
-        GameObject particle = Instantiate(deathParticle);
-        particle.transform.position = this.GetComponent<Collider>().bounds.center;
-        Destroy(particle, 5f);
+        
         actionsEnabled = false;
-
+        */
     }
 
     public override void FlashWarning(int hand)

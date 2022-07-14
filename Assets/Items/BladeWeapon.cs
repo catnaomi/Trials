@@ -49,11 +49,19 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         slashFX.topPoint = top;
         slashFX.bottomPoint = bottom;
         slashFX.pseudoParent = actor.transform;
+        if (slashFX.gameObject.scene != actor.gameObject.scene)
+        {
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(slashFX.gameObject, actor.gameObject.scene);
+        }
 
         thrustFX = FXController.CreateSwordThrust().GetComponent<LineSwordThrust>();
         thrustFX.topPoint = top;
         thrustFX.bottomPoint = bottom;
         thrustFX.pseudoParent = actor.transform;
+        if (thrustFX.gameObject.scene != actor.gameObject.scene)
+        {
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(thrustFX.gameObject, actor.gameObject.scene);
+        }
         //slashMesh.transform.rotation = Quaternion.identity;
     }
 
