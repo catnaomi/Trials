@@ -159,6 +159,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float thrustIKAdjustSpeed;
     public float thrustInitialHeight;
     public float thrustIKHeightRange;
+
+    float holdAttackClock;
+    float holdAttackMin;
     [Header("Animancer")]
     public MixerTransition2DAsset moveAnim;
     public AnimationClip idleAnim;
@@ -247,6 +250,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState climb;
         public AnimancerState swim;
         public AnimancerState attack;
+        public AnimancerState holdAttack;
         public AnimancerState block;
         public AnimancerState aim;
         public AnimancerState dialogue;
@@ -1222,13 +1226,35 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             else if (hold)
             {
-                if ((currentDamage.isThrust && !IsThrustHeld()))
+                if (camState != CameraState.Lock || GetCombatTarget() == null)
                 {
-                    HoldThrustRelease(false);
+                    if (stickDirection.magnitude > 0)
+                    {
+                        lookDirection = stickDirection;
+                    }
                 }
-                else if ((currentDamage.isSlash && !IsSlashHeld()))
+                else
                 {
-                    HoldSlashRelease(false);
+                    targetDirection = GetCombatTarget().transform.position - this.transform.position;
+                    targetDirection.y = 0f;
+                    lookDirection = targetDirection.normalized;
+                }
+                
+                if ((currentDamage.isThrust && !IsThrustHeld()) && holdAttackClock < holdAttackMin)
+                {
+                    HoldThrustRelease(holdAttackClock <= 0);
+                }
+                else if ((currentDamage.isSlash && !IsSlashHeld()) && holdAttackClock < holdAttackMin)
+                {
+                    HoldSlashRelease(holdAttackClock <= 0);
+                }
+                else if (holdAttackClock > 0f)
+                {
+                    holdAttackClock -= Time.deltaTime;
+                    if (holdAttackClock <= 0f)
+                    {
+                        FlashWarning(1);
+                    }
                 }
             }
             if (CheckWater())
@@ -1419,6 +1445,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
         }
         #endregion
+        
+        
         #endregion
 
         if (TimeTravelController.time != null && TimeTravelController.time.IsSlowingTime())
@@ -2898,8 +2926,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (attack is HoldAttack holdAttack)
         {
             hold = true;
-            state.attack = animancer.Play(holdAttack.GetStartClip());
-            state.attack.Events.OnEnd = () => { HoldSlashRelease(true); };
+            AnimancerState atkState = animancer.Play(holdAttack.GetStartClip());
+            atkState.Events.OnEnd = () => { state.holdAttack = state.attack = animancer.Play(holdAttack.GetLoopClip()); };
+            state.holdAttack = state.attack = atkState;
+            holdAttackClock = holdAttack.chargeTime;
+            holdAttackMin = holdAttack.chargeTime - holdAttack.minDuration;
+            cancelTime = -1f;
+            //state.attack.Events.OnEnd = () => { HoldSlashRelease(true); };
             SetCurrentDamage(attack.GetDamage());
         }
         else
@@ -2908,6 +2941,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             state.attack = GetMoveset().powerSlash.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
         }
         OnAttack.Invoke();
+        attackDecelReal = attackDecel;
     }
 
     public void PowerThrust()
@@ -2916,8 +2950,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (attack is HoldAttack holdAttack)
         {
             hold = true;
-            state.attack = animancer.Play(holdAttack.GetStartClip());
-            state.attack.Events.OnEnd = () => { HoldThrustRelease(true); };
+            AnimancerState atkState = animancer.Play(holdAttack.GetStartClip());
+            atkState.Events.OnEnd = () => {
+                state.holdAttack = state.attack = animancer.Play(holdAttack.GetLoopClip());
+            };
+            state.holdAttack = state.attack = atkState;
+            holdAttackClock = holdAttack.chargeTime;
+            holdAttackMin = holdAttack.chargeTime - holdAttack.minDuration;
+            cancelTime = -1f;
+            //state.attack.Events.OnEnd = () => { HoldThrustRelease(true); };
             SetCurrentDamage(attack.GetDamage());
         }
         else
@@ -2926,33 +2967,38 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             state.attack = GetMoveset().powerSlash.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
         }
         OnAttack.Invoke();
+        attackDecelReal = attackDecel;
     }
 
     public void HoldSlashRelease(bool wasFullyCharged)
     {
         hold = false;
+        holdAttackClock = 10f;
         if (GetMoveset().powerSlash is not HoldAttack holdAttack)
         {
             _AttackEnd();
             return;
         }
         else {
-            state.attack = animancer.Play(holdAttack.GetClip());
+            //state.attack = animancer.Play(holdAttack.GetClip());
             if (wasFullyCharged)
             {
-                SetCurrentDamage(holdAttack.GetDamage());
+                state.attack = holdAttack.chargedAttack.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
+                //SetCurrentDamage(holdAttack.GetDamage());
             }
             else
             {
-                SetCurrentDamage(holdAttack.GetHeldDamage());
+                state.attack = holdAttack.unchargedAttack.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
+                //SetCurrentDamage(holdAttack.GetHeldDamage());
             }
-            state.attack.Events.OnEnd = _AttackEnd;
+            //state.attack.Events.OnEnd = _AttackEnd;
         }
     }
 
     public void HoldThrustRelease(bool wasFullyCharged)
     {
         hold = false;
+        holdAttackClock = 10f;
         if (GetMoveset().powerThrust is not HoldAttack holdAttack)
         {
             _AttackEnd();
@@ -2960,16 +3006,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else
         {
-            state.attack = animancer.Play(holdAttack.GetClip());
-            if (!wasFullyCharged)
+            //state.attack = animancer.Play(holdAttack.GetClip());
+            if (wasFullyCharged)
             {
-                SetCurrentDamage(holdAttack.GetDamage());
+                state.attack = holdAttack.chargedAttack.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
+                //SetCurrentDamage(holdAttack.GetDamage());
             }
             else
             {
-                SetCurrentDamage(holdAttack.GetHeldDamage());
+                state.attack = holdAttack.unchargedAttack.ProcessPlayerAttack(this, out cancelTime, _AttackEnd);
+                //SetCurrentDamage(holdAttack.GetHeldDamage());
             }
-            state.attack.Events.OnEnd = _AttackEnd;
+            //state.attack.Events.OnEnd = _AttackEnd;
         }
     }
 
@@ -3300,8 +3348,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public override void FlashWarning(int hand)
     {
-        return; // flash won't appear for player
-        /*
+        //return; // flash won't appear for player
+        
         EquippableWeapon mainWeapon = inventory.GetMainWeapon();
         EquippableWeapon offHandWeapon = inventory.GetOffWeapon();
         EquippableWeapon rangedWeapon = inventory.GetRangedWeapon();
@@ -3331,7 +3379,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             rangedWeapon.FlashWarning();
         }
-        */
+        
     }
 
     public void SetCurrentDamage(DamageKnockback damageKnockback)

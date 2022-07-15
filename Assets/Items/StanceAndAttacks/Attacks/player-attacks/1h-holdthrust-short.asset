@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4fd124a1fc3ebcd41a8573194e3810f5, type: 3}
-  m_Name: 1h-holdthrust
+  m_Script: {fileID: 11500000, guid: e242662a52220dc40932f531094d4de5, type: 3}
+  m_Name: 1h-holdthrust-short
   m_EditorClassIdentifier: 
-  desc: 1h Hold and Release Thrust
-  attackId: 0
+  desc: One-Handed Rapier Lunge
+  attackId: 1
   isBlockOK: 0
   isSprintOK: 0
   isFallingOK: 0
@@ -24,18 +24,18 @@ MonoBehaviour:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: 7400000, guid: d27cd6a0888c9a54ca64c50d8437d238, type: 2}
+    _Clip: {fileID: 7400000, guid: fce1448a75b1aa047ac31bb4e736b02c, type: 2}
     _Speed: 1
-    _NormalizedStartTime: 0
+    _NormalizedStartTime: NaN
   attackData:
-    healthDamage: 20
-    staminaDamage: 20
+    healthDamage: 10
+    staminaDamage: 10
     types: 0a000000
     critData:
       criticalMultiplier: 1
       alwaysCritical: 0
       causesCritState: 0
-      doesNotConsumeCritState: 0
+      doesNotConsumeCritState: 1
       criticalExtensionTime: 0.25
     breaksArmor: 0
     unblockable: 0
@@ -43,7 +43,7 @@ MonoBehaviour:
     isThrust: 1
     isSlash: 0
     isRanged: 0
-    bouncesOffBlock: 1
+    bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
@@ -51,9 +51,9 @@ MonoBehaviour:
     staggers:
       onHit: 3
       onArmorHit: 1
-      onCritical: 7
+      onCritical: 5
       onKill: 5
-      onCounterHit: 3
+      onCounterHit: 5
     kbForce: {x: 0, y: 2.5, z: 10}
     kbRadial: 0
     hitboxSource: {fileID: 0}
@@ -71,29 +71,7 @@ MonoBehaviour:
         m_Calls: []
     hitClip: {fileID: 0}
   staminaCost: 0
-  exitTime: -1
-  cancelStartTime: -1
+  exitTime: 0.5
+  cancelStartTime: 0
   mainHandAngleAdjust: 0
   offHandAngleAdjust: 0
-  start:
-    _FadeDuration: 0.25
-    _Events:
-      _NormalizedTimes: []
-      _Callbacks: []
-      _Names: []
-    _Clip: {fileID: 5871594349952861629, guid: dca536fc66cb76443b015357013e3e48, type: 3}
-    _Speed: 1
-    _NormalizedStartTime: NaN
-  loop:
-    _FadeDuration: 1
-    _Events:
-      _NormalizedTimes: []
-      _Callbacks: []
-      _Names: []
-    _Clip: {fileID: -203655887218126122, guid: 17b6b8ac3da3f7b4d819f55e9e4a6fe0, type: 3}
-    _Speed: 1
-    _NormalizedStartTime: 0
-  minDuration: 0.1
-  chargeTime: 1
-  unchargedAttack: {fileID: 11400000, guid: 5d9dbf7812770de4288c337b260c8a0f, type: 2}
-  chargedAttack: {fileID: 11400000, guid: c121fef25b426044aa8ee2be7c61f146, type: 2}
