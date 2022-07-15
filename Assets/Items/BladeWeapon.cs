@@ -236,6 +236,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         while (clock < 0.5f)
         {
             yield return null;
+            if (fx == null || bottom == null || top == null) yield break;
             clock += Time.deltaTime;
             t = Mathf.Clamp01(clock / 0.5f);
             fx.transform.position = Vector3.Lerp(bottom.position, top.position, t);
