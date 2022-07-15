@@ -39,6 +39,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     [Header("Respawning")]
     public Vector3 lastSafePoint;
     public float safePointClock;
+    public float rewindDistanceThreshold = 2f;
+    public float rewingTimeoutDuration = 3f;
+    bool rewindingToSafePoint;
     [Header("Movement")]
     public float walkSpeedMax = 5f;
     public AnimationCurve walkSpeedCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
@@ -68,6 +71,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     [Space(5)]
     public bool isGrounded;
     public float airTime = 0f;
+    public float groundBias = 0f;
     float lastAirTime;
     float landTime = 0f;
     float speed;
@@ -1579,9 +1583,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         HandleCinemachine();
 
-        if (lastSafePoint == Vector3.zero || safePointClock < 0f)
+        if (lastSafePoint == Vector3.zero || safePointClock <= 0f)
         {
-            if (dead || resurrecting || !IsMoving() || this.GetComponent<ActorTimeTravelHandler>().IsRewinding())
+            if (dead || resurrecting || (!IsMoving() && animancer.States.Current != state.sprint) || this.GetComponent<ActorTimeTravelHandler>().IsRewinding())
             {
                 safePointClock = 0.25f;
             }
@@ -1594,6 +1598,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 SetNewSafePoint();
                 safePointClock = 1f;
             }
+        }
+        if (safePointClock > 0f)
+        {
+            safePointClock -= Time.deltaTime;
         }
         //yield return new WaitForSecondsRealtime(1f);
     
@@ -1655,6 +1663,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         airTime = 0f;
         lastAirTime = 0f;
+        xzVel = Vector3.zero;
+        yVel = 0f;
         headPoint = Vector3.zero;
         GetHeadPoint();
         smoothedHeadPoint = headPoint;
@@ -1680,27 +1690,39 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void ResetToSafePoint()
     {
         //WarpTo(lastSafePoint); 
-        StartCoroutine("RewindToSafePoint");
+        if (!rewindingToSafePoint) StartCoroutine("RewindToSafePoint");
     }
 
     IEnumerator RewindToSafePoint()
     {
-        float rewindTimeout = 3f;
+        rewindingToSafePoint = true;
+        Debug.Log("starting safe point rewind");
+        float rewindTimeout = rewingTimeoutDuration;
         float health = attributes.health.current;
         ActorTimeTravelHandler timeTravelHandler = this.GetComponent<ActorTimeTravelHandler>();
         TimeTravelController.time.IgnoreLimits();
         TimeTravelController.time.StartRewindSelective(timeTravelHandler);
+        float closestDistance = Mathf.Infinity;
         do
         {
             //Debug.Log("distance: " + Vector3.Distance(this.transform.position, lastSafePoint));
             yield return null;
             rewindTimeout -= Time.deltaTime;
+            float dist = Vector3.Distance(this.transform.position, lastSafePoint);
+            if (dist < closestDistance)
+            {
+                closestDistance = dist;
+            }
         }
-        while (timeTravelHandler.IsRewinding() && Vector3.Distance(this.transform.position, lastSafePoint) > 2f && rewindTimeout > 0);  
+        while (timeTravelHandler.IsRewinding() && Vector3.Distance(this.transform.position, lastSafePoint) > rewindDistanceThreshold && rewindTimeout > 0);  
         TimeTravelController.time.CancelRewind();
         if (rewindTimeout <= 0)
         {
-            Debug.Log("rewind timed out!");
+            Debug.Log("rewind timed out! closest distance: " + closestDistance);
+        }
+        else
+        {
+            Debug.Log("rewind completed with " + rewindTimeout + " second(s) remaining");
         }
         yield return new WaitWhile(() => { return timeTravelHandler.IsRewinding(); });
         this.attributes.health.current = health;
@@ -1714,6 +1736,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             damageHandler.isFacingUp = true;
             Die();
         }
+        rewindingToSafePoint = false;
     }
     
 
@@ -3791,7 +3814,7 @@ public bool GetGrounded()
         float RADIUS_MULT = 1f;
         float CAST_DISTANCE = 0.2f;
         Collider c = this.GetComponent<Collider>();
-        Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down;
+        Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down + Vector3.up * groundBias;
         Vector3 top = c.bounds.center + Vector3.up * c.bounds.extents.y;
         
         bool didHit = Physics.Raycast(bottom, Vector3.down, out rayHit, CAST_DISTANCE, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));

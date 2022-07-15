@@ -6,4 +6,5 @@ public class PlayerTimeTravelData : ActorTimeTravelData
 {
     public bool isCarrying;
     public Carryable carryable;
+    public bool inWorld2;
 }

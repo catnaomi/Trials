@@ -157,7 +157,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         LoadTimeState(data, 0f);
     }
 
-    public void LoadTimeState(TimeTravelData data, float speed)
+    public virtual void LoadTimeState(TimeTravelData data, float speed)
     {
 
 

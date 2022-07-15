@@ -3657,6 +3657,11 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 12
       objectReference: {fileID: 0}
+    - target: {fileID: 736258652621594351, guid: a6bc2285722fcda408e15d42f078ba4a,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 739780134737363750, guid: a6bc2285722fcda408e15d42f078ba4a,
         type: 3}
       propertyPath: m_Layer
@@ -4993,6 +4998,7 @@ MonoBehaviour:
   jumpVel: 4
   isGrounded: 0
   airTime: 0
+  groundBias: 0.04
   sliding: 0
   slopeAngle: 0
   maxSlideAngle: 60
@@ -13833,8 +13839,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1132656376}
-  m_LocalRotation: {x: 0.6662927, y: 0.22137997, z: -0.21754946, w: 0.67802453}
-  m_LocalPosition: {x: 27.933651, y: 11.288477, z: -31.86183}
+  m_LocalRotation: {x: 0.66578317, y: 0.22296174, z: -0.21910381, w: 0.677506}
+  m_LocalPosition: {x: 27.932997, y: 11.288476, z: -31.861345}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -17061,7 +17067,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1582206131}
-  m_LocalRotation: {x: 0.013978533, y: -0.7106167, z: 0.33130595, w: 0.62053597}
+  m_LocalRotation: {x: 0.013978541, y: -0.71061677, z: 0.33130595, w: 0.6205359}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -20001,6 +20007,7 @@ MonoBehaviour:
   jumpVel: 4
   isGrounded: 0
   airTime: 0
+  groundBias: 0
   sliding: 0
   slopeAngle: 0
   maxSlideAngle: 60

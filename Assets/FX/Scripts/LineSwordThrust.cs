@@ -121,7 +121,6 @@ public class LineSwordThrust : MonoBehaviour
     {
         if (bottomPoint == null || topPoint == null)
         {
-            Debug.Log("one or more of thrust reference points missing!");
             return;
         }
         if (thrusting)

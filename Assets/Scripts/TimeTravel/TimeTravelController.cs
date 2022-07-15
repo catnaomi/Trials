@@ -112,7 +112,11 @@ public class TimeTravelController : MonoBehaviour
 
         if (isRewinding)
         {
-            meter.current -= rewindDrainRate * Time.deltaTime;
+            if (!ignoreLimits)
+            {
+                meter.current -= rewindDrainRate * Time.deltaTime;
+            }
+            
             timePowerClock = timePowerCooldown;
             if (meter.current <= 0f)
             {
@@ -127,9 +131,13 @@ public class TimeTravelController : MonoBehaviour
         }
         else if (freeze)
         {
-            meter.current -= timeStopDrainRate * Time.deltaTime;
+            if (!ignoreLimits)
+            {
+                meter.current -= timeStopDrainRate * Time.deltaTime;
 
-            meter.current -= movementDelta.magnitude * timeStopMovementCostRatio * Time.deltaTime;
+                meter.current -= movementDelta.magnitude * timeStopMovementCostRatio * Time.deltaTime;
+            }
+            
 
             timePowerClock = timePowerCooldown;
 
@@ -146,7 +154,11 @@ public class TimeTravelController : MonoBehaviour
         }
         else if (isSlowing)
         {
-            meter.current -= timeAimSlowDrainRate * Time.deltaTime;
+            if (!ignoreLimits)
+            {
+                meter.current -= timeAimSlowDrainRate * Time.deltaTime;
+            }
+            
             if (meter.current < 0f)
             {
                 if (!ignoreLimits)

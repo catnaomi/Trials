@@ -44,6 +44,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     public float jumpAdjustSpeed = 3f;
     [Header("Animancer")]
     public NavAnims navAnims;
+    NavAnims runtimeNavAnims;
     public LinearMixerTransitionAsset idleAnim;
     public MixerTransition2DAsset moveAnim;
     protected ClipTransition jumpHorizontal;
@@ -72,10 +73,11 @@ public class NavigatingHumanoidActor : Actor, INavigates
     public override void ActorStart()
     {
         base.ActorStart();
-        jumpHorizontal = navAnims.jumpHorizontal;
-        jumpDown = navAnims.jumpDown;
-        fallAnim = navAnims.fallAnim;
-        landAnim = navAnims.landAnim;
+        runtimeNavAnims = ScriptableObject.Instantiate(navAnims);
+        jumpHorizontal = runtimeNavAnims.jumpHorizontal;
+        jumpDown = runtimeNavAnims.jumpDown;
+        fallAnim = runtimeNavAnims.fallAnim;
+        landAnim = runtimeNavAnims.landAnim;
 
         nav = GetComponent<NavMeshAgent>();
         animancer = GetComponent<AnimancerComponent>();
@@ -296,7 +298,6 @@ public class NavigatingHumanoidActor : Actor, INavigates
                 navstate.land = animancer.Play(landAnim);
                 navstate.land.Events.OnEnd = () =>
                 {
-                    Debug.Log(this.ToString() + " is landing");
                     animancer.Play(navstate.move);
                 };
                 ignoreRoot = false;
@@ -312,13 +313,6 @@ public class NavigatingHumanoidActor : Actor, INavigates
             if (worldDeltaPosition.magnitude > nav.radius) nav.nextPosition = transform.position + 0.9f * worldDeltaPosition;
         }
 
-        if (animancer.States.Current == navstate.land)
-        {
-            if (navstate.land.NormalizedTime >= 0.99f)
-            {
-                animancer.Play(navstate.move);
-            }
-        }
         if (GetGrounded())
         {
             if (lastPosition != Vector3.zero)
@@ -732,6 +726,10 @@ public class NavigatingHumanoidActor : Actor, INavigates
         currentDamage.source = this.gameObject;
     }
 
+    void OnDisable()
+    {
+        //ScriptableObject.Destroy(runtimeNavAnims);
+    }
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
