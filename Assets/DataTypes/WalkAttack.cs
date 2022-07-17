@@ -14,7 +14,7 @@ public class WalkAttack : InputAttack
     }
 
 
-    public override AnimancerState ProcessHumanoidAttack(NavigatingHumanoidActor actor, Action endEvent)
+    public override AnimancerState ProcessHumanoidAction(NavigatingHumanoidActor actor, Action endEvent)
     {
         
         AnimancerState walkState = actor.animancer.Play(this.GetWalkClip());

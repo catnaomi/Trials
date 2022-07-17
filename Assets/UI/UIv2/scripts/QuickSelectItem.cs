@@ -85,16 +85,16 @@ public class QuickSelectItem : MonoBehaviour
         switch (slot)
         {
             case 0:
-                SetItem(inventory.Slot0Weapon);
+                SetItem(inventory.Slot0Equippable);
                 break;
             case 1:
-                SetItem(inventory.Slot1Weapon);
+                SetItem(inventory.Slot1Equippable);
                 break;
             case 2:
-                SetItem(inventory.Slot2Weapon);
+                SetItem(inventory.Slot2Equippable);
                 break;
             case 3:
-                SetItem(inventory.Slot3Weapon);
+                SetItem(inventory.Slot3Equippable);
                 break;
         }
         if (item != null)
@@ -144,9 +144,10 @@ public class QuickSelectItem : MonoBehaviour
                 {
                     primaryIndicator.enabled = false;
                     vizData.isEquipped = false;
-                    if (item is Consumable)
+                    if (item is Consumable consumable)
                     {
                         vizData.isConsumable = true;
+                        vizData.quantity = consumable.GetUsesRemaining();
                     }
                     else if (item is EquippableWeapon equippableWeapon && equippableWeapon.usesAmmunition)
                     {

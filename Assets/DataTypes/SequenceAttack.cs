@@ -13,7 +13,7 @@ public class SequenceAttack : InputAttack
     }
 
 
-    public override AnimancerState ProcessHumanoidAttack(NavigatingHumanoidActor actor, Action endEvent)
+    public override AnimancerState ProcessHumanoidAction(NavigatingHumanoidActor actor, Action endEvent)
     {
         if (sequence.Length <= 0) return null;
 
@@ -21,11 +21,11 @@ public class SequenceAttack : InputAttack
         {
             if (index < sequence.Length - 1)
             {
-                return sequence[index].ProcessHumanoidAttack(actor, () => PlayIndex(index + 1));
+                return sequence[index].ProcessHumanoidAction(actor, () => PlayIndex(index + 1));
             }
             else
             {
-                return sequence[index].ProcessHumanoidAttack(actor, endEvent);
+                return sequence[index].ProcessHumanoidAction(actor, endEvent);
             }
         }
 

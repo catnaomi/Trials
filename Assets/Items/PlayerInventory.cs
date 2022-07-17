@@ -28,13 +28,13 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     public bool initialized = false;
     [Header("Inspector-set Weapons")]
     [Tooltip("Up Slot. Equips to Mainhand.")]
-    public EquippableWeapon Slot0Weapon; // starts equipped. up
+    public Equippable Slot0Equippable; // starts equipped. up
     [Tooltip("Left Slot. Equips to Offhand.")]
-    public EquippableWeapon Slot1Weapon; // left
+    public Equippable Slot1Equippable; // left
     [Tooltip("Right Slot. Equips to Ranged.")]
-    public EquippableWeapon Slot2Weapon; // right
+    public Equippable Slot2Equippable; // right
     [Tooltip("Botton Slot. Does not Equip.")]
-    public EquippableWeapon Slot3Weapon; // down
+    public Equippable Slot3Equippable; // down
 
     public bool weaponChanged;
 
@@ -53,61 +53,42 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
         OnChange.AddListener(() => { lastChanged = Time.time; });
         StartingContents.Clear();
+
+        if (Slot0Equippable != null)
+        {
+            Equippable slot0 = Instantiate(Slot0Equippable);
+            AddItem(slot0);
+            Slot0Equippable = slot0;
+
+        }
+
+        if (Slot1Equippable != null)
+        {
+            Equippable slot1 = Instantiate(Slot1Equippable);
+            AddItem(slot1);
+            Slot1Equippable = slot1;
+        }
+
+        if (Slot2Equippable != null)
+        {
+            Equippable slot2 = Instantiate(Slot2Equippable);
+            AddItem(slot2);
+            Slot2Equippable = slot2;
+        }
+
+        if (Slot3Equippable != null)
+        {
+            Equippable slot3 = Instantiate(Slot3Equippable);
+            AddItem(slot3);
+            Slot3Equippable = slot3;
+        }
     }
     void Start()
     {
         
         MainWeapon = null;
         OffWeapon = null;
-
-        EquippableWeapon mweapon = null;
-        EquippableWeapon oweapon = null;
-        EquippableWeapon rweapon = null;
-
-        if (Slot0Weapon != null)
-        {
-            mweapon = Instantiate(Slot0Weapon);
-            Slot0Weapon = mweapon;
-            AddItem(mweapon);
-            
-        }
-
-        if (Slot1Weapon != null)
-        {
-            oweapon = Instantiate(Slot1Weapon);
-            Slot1Weapon = oweapon;
-            AddItem(oweapon);
-            //if (equipOnStart) EquipOffHandWeapon(oweapon);
-        }
-
-        if (Slot2Weapon != null)
-        {
-            rweapon = Instantiate(Slot2Weapon);
-            Slot2Weapon = rweapon;
-            AddItem(rweapon);
-        }
-
-        if (Slot3Weapon != null)
-        {
-            var sweapon = Instantiate(Slot3Weapon);
-            Slot3Weapon = sweapon;
-            AddItem(sweapon);
-        }
-
         
-        /*
-        if (EquippedIsMainEquipped())
-        {
-            EquippableWeapon weapon = ScriptableObject.Instantiate(EquippedMainWeapon);
-            AddItem(weapon);
-            EquipMainWeapon((BladeWeapon)weapon);
-        }
-        if (EquippedOffHand != null)
-        {
-            EquippableWeapon weapon = ScriptableObject.Instantiate(EquippedOffHand);
-            AddItem(weapon);
-            EquipOffHandWeapon(weapon);
-        }*/
     }
 
     void Update()
@@ -116,8 +97,8 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         {
             if (equipOnStart)
             {
-                EquippableWeapon mweapon = Slot0Weapon;
-                EquippableWeapon oweapon = Slot1Weapon;
+                EquippableWeapon mweapon = (Slot0Equippable != null && Slot0Equippable is EquippableWeapon) ? (EquippableWeapon)Slot0Equippable : null;
+                EquippableWeapon oweapon = (Slot1Equippable != null && Slot1Equippable is EquippableWeapon) ? (EquippableWeapon)Slot1Equippable : null;
                 if (mweapon != null && oweapon != null)
                 {
                     EquipMainWeapon(mweapon, false);
@@ -148,8 +129,8 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     {
         if (item != null)
         {
-            contents.Add(item);
             item.holder = player;
+            contents.Add(item);
             OnChange.Invoke();
         }
     }
@@ -597,37 +578,37 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         int currentSlot = FindSlotFromWeapon(weapon);
         if (currentSlot == 0)
         {
-            Slot0Weapon = null;
+            Slot0Equippable = null;
         }
         else if (currentSlot == 1)
         {
-            Slot1Weapon = null;
+            Slot1Equippable = null;
         }
         else if (currentSlot == 2)
         {
-            Slot2Weapon = null;
+            Slot2Equippable = null;
         }
         else if (currentSlot == 3)
         {
-            Slot3Weapon = null;
+            Slot3Equippable = null;
         }
 
         // add to new slot
         if (slot == 0)
         {
-            Slot0Weapon = weapon;
+            Slot0Equippable = weapon;
         }
         else if (slot == 1)
         {
-            Slot1Weapon = weapon;
+            Slot1Equippable = weapon;
         }
         else if (slot == 2)
         {
-            Slot2Weapon = weapon;
+            Slot2Equippable = weapon;
         }
         else if (slot == 3)
         {
-            Slot3Weapon = weapon;
+            Slot3Equippable = weapon;
         }
 
         bool changed = false;
@@ -654,45 +635,45 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
     public int FindSlotFromWeapon(EquippableWeapon weapon)
     {
-        if (Slot0Weapon == weapon)
+        if (Slot0Equippable == weapon)
         {
             return 0;
         }
-        else if (Slot1Weapon == weapon)
+        else if (Slot1Equippable == weapon)
         {
             return 1;
         }
-        else if (Slot2Weapon == weapon)
+        else if (Slot2Equippable == weapon)
         {
             return 2;
         }
-        else if (Slot3Weapon == weapon)
+        else if (Slot3Equippable == weapon)
         {
             return 3;
         }
         return -1;
     }
 
-    public EquippableWeapon FindWeaponFromSlot(int slot)
+    public Equippable FindItemFromSlot(int slot)
     {
-        EquippableWeapon weapon = null;
+        Equippable item = null;
         if (slot == 0)
         {
-            weapon = Slot0Weapon;
+            item = Slot0Equippable;
         }
         else if (slot == 1)
         {
-            weapon = Slot1Weapon;
+            item = Slot1Equippable;
         }
         else if (slot == 2)
         {
-            weapon = Slot2Weapon;
+            item = Slot2Equippable;
         }
         else if (slot == 3)
         {
-            weapon = Slot3Weapon;
+            item = Slot3Equippable;
         }
-        return weapon;
+        return item;
     }
     public bool IsWeaponDrawn()
     {
@@ -774,8 +755,9 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
         else
         {
-            EquippableWeapon weapon = FindWeaponFromSlot(slot);
-
+            Equippable item = FindItemFromSlot(slot);
+            EquippableWeapon weapon = item as EquippableWeapon;
+            Consumable consumable = item as Consumable;
             if (weapon != null)
             {
                 bool isMain = weapon == MainWeapon;
@@ -835,17 +817,21 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                     }
                     else if (weapon.EquippableOff && MainWeapon.TwoHandOnly())
                     {
-                        if (Slot0Weapon != null && Slot0Weapon != weapon && Slot0Weapon.EquippableMain && !Slot0Weapon.TwoHandOnly())
+                        if (Slot0Equippable != null && Slot0Equippable != weapon && Slot0Equippable is EquippableWeapon Slot0Weapon && Slot0Weapon.EquippableMain && !Slot0Weapon.TwoHandOnly())
                         {
                             EquipMainWeapon(Slot0Weapon, false);
                         }
-                        else if (Slot1Weapon != null && Slot1Weapon != weapon && Slot1Weapon.EquippableMain && !Slot1Weapon.TwoHandOnly())
+                        else if (Slot1Equippable != null && Slot1Equippable != weapon && Slot1Equippable is EquippableWeapon Slot1Weapon && Slot1Weapon.EquippableMain && !Slot1Weapon.TwoHandOnly())
                         {
                             EquipMainWeapon(Slot1Weapon, false);
                         }
-                        else if (Slot2Weapon != null && Slot2Weapon != weapon && Slot2Weapon.EquippableMain && !Slot2Weapon.TwoHandOnly())
+                        else if (Slot2Equippable != null && Slot2Equippable != weapon && Slot2Equippable is EquippableWeapon Slot2Weapon && Slot2Weapon.EquippableMain && !Slot2Weapon.TwoHandOnly())
                         {
                             EquipMainWeapon(Slot2Weapon, false);
+                        }
+                        else if (Slot3Equippable != null && Slot3Equippable != weapon && Slot3Equippable is EquippableWeapon Slot3Weapon && Slot3Weapon.EquippableMain && !Slot3Weapon.TwoHandOnly())
+                        {
+                            EquipMainWeapon(Slot3Weapon, false);
                         }
                         else
                         {
@@ -855,12 +841,21 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                     }
                 }
             }
+            else if (consumable != null)
+            {
+                player.StartUsingConsumable(consumable);
+            }
         }
     }
 
     public void UnequipOnSlot(int slot)
     {
-        UnequipWeapon(FindWeaponFromSlot(slot));
+        Equippable item = FindItemFromSlot(slot);
+        if (item is EquippableWeapon weapon)
+        {
+            UnequipWeapon(weapon);
+        }
+        
     }
     public GameObject GetOffhandModel()
     {

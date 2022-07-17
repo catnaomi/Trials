@@ -48,7 +48,7 @@ public class Actor : MonoBehaviour
     // targets
 
     [SerializeField, ReadOnly] protected DamageKnockback currentDamage;
-
+    [SerializeField, ReadOnly] protected Consumable currentConsumable;
     public GameObject CombatTarget;
     public GameObject FollowTarget;
     [Header("Time Travel Data")]
@@ -156,6 +156,11 @@ public class Actor : MonoBehaviour
     {
         lastBlockPoint = point;
     }
+
+    public virtual IInventory GetInventory()
+    {
+        return null;
+    }
     public GameObject GetCombatTarget()
     {
         return CombatTarget;
@@ -181,6 +186,15 @@ public class Actor : MonoBehaviour
         currentDamage = new DamageKnockback(damageKnockback);
         currentDamage.source = this.gameObject;
     }
+
+    public virtual void SetCurrentConsumable(Consumable consumable)
+    {
+        if (consumable != null)
+        {
+            currentConsumable = consumable;
+        }
+    }
+
     public virtual void OnFallOffMap()
     {
         Die();

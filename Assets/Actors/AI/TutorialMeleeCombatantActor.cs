@@ -149,13 +149,13 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     public void StartFarAttack()
     {
         RealignToTarget();
-        cstate.attack = FarAttack.ProcessHumanoidAttack(this, _MoveOnEnd);
+        cstate.attack = FarAttack.ProcessHumanoidAction(this, _MoveOnEnd);
         OnAttack.Invoke();
     }
     public void StartCloseAttack()
     {
         RealignToTarget();
-        cstate.attack = CloseAttack.ProcessHumanoidAttack(this, _MoveOnEnd);
+        cstate.attack = CloseAttack.ProcessHumanoidAction(this, _MoveOnEnd);
         OnAttack.Invoke();
     }
 
@@ -280,7 +280,7 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
             Vector3 dir = data.endPos - this.transform.position;
             dir.y = 0f;
             this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
-            cstate.attack = OffMeshAttack.ProcessHumanoidAttack(this, () =>
+            cstate.attack = OffMeshAttack.ProcessHumanoidAction(this, () =>
             {
                 Vector3 pos = animancer.Animator.rootPosition;
                 this.transform.position = pos;

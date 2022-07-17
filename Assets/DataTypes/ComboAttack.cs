@@ -56,7 +56,7 @@ public class ComboAttack : InputAttack
         return GetDamage(0);
     }
 
-    public override AnimancerState ProcessPlayerAttack(PlayerActor player, out float cancelTime, Action endEvent)
+    public override AnimancerState ProcessPlayerAction(PlayerActor player, out float cancelTime, Action endEvent)
     {
         if (Time.time > lastAttackTime + maxTimeBetweenAttacks && currentIndex != 0)
         {

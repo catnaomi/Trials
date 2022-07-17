@@ -135,7 +135,7 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
     public void StartCloseAttack()
     {
         RealignToTargetWithOffset(CloseAttackAngleOffset);
-        cstate.attack = CloseAttack.ProcessHumanoidAttack(this, _MoveOnEnd);
+        cstate.attack = CloseAttack.ProcessHumanoidAction(this, _MoveOnEnd);
         OnAttack.Invoke();
     }
 

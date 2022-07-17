@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.Events;
 using CustomUtilities;
 
-public class EquippableWeapon : Item, IGeneratesModel
+public class EquippableWeapon : Equippable, IGeneratesModel
 {   
     [ReadOnly] public bool isEquipped;
 
@@ -12,7 +12,7 @@ public class EquippableWeapon : Item, IGeneratesModel
     public bool EquippableOff = true;
     public bool EquippableRanged = false;
     [Space(5)]
-    public bool OneHanded = true;
+    public bool OneHanded = true; 
     public bool TwoHanded = true;
     [Space(5)]
     public bool ParentLeftAsMain = false;
@@ -188,5 +188,15 @@ public class EquippableWeapon : Item, IGeneratesModel
     public override ItemType GetItemType()
     {
         return ItemType.Weapons;
+    }
+
+    public UnityEvent GetEquipEvent()
+    {
+        return OnEquip;
+    }
+
+    public UnityEvent GetUnequipEvent()
+    {
+        return OnUnequip;
     }
 }

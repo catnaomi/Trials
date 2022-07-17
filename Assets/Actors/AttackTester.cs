@@ -23,7 +23,7 @@ public class AttackTester : NavigatingHumanoidActor, IAttacker
         if (go)
         {
             go = false;
-            attack.ProcessHumanoidAttack(this, () => { animancer.Play(navstate.move); });
+            attack.ProcessHumanoidAction(this, () => { animancer.Play(navstate.move); });
         }
     }
     public DamageKnockback GetCurrentDamage()

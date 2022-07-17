@@ -13,7 +13,7 @@ public class ControllerAttack : InputAttack
     }
 
 
-    public override AnimancerState ProcessHumanoidAttack(NavigatingHumanoidActor actor, Action endEvent)
+    public override AnimancerState ProcessHumanoidAction(NavigatingHumanoidActor actor, Action endEvent)
     {
 
         AnimancerState state = actor.animancer.Play(this.GetController());

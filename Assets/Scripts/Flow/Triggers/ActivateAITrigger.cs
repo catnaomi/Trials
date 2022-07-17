@@ -18,7 +18,7 @@ public class ActivateAITrigger : MonoBehaviour
                 if (actor == null || !actor.IsAlive() || !actor.gameObject.activeInHierarchy) continue;
                 if (shouldAttackImmediately && !actor.actionsEnabled)
                 {
-                    attack.ProcessHumanoidAttack(actor, actor.MoveOnEnd);
+                    attack.ProcessHumanoidAction(actor, actor.MoveOnEnd);
                 }
                 actor.actionsEnabled = true;
             }

@@ -755,7 +755,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             RealignToTarget();
             nav.enabled = true;
-            cstate.attack = MeleeCombo1.ProcessHumanoidAttack(this, () => { });
+            cstate.attack = MeleeCombo1.ProcessHumanoidAction(this, () => { });
             OnAttack.Invoke();
         }
 
@@ -775,7 +775,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public void StartMeleeCombo2()
     {
         RealignToTarget();
-        cstate.attack = MeleeCombo2.ProcessHumanoidAttack(this, _MoveOnEnd);
+        cstate.attack = MeleeCombo2.ProcessHumanoidAction(this, _MoveOnEnd);
         OnAttack.Invoke();
     }
 
@@ -954,7 +954,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             if (animancer.States.Current == cstate.plunge_fall)
             {
-                cstate.plunge_attack = Plunge.ProcessHumanoidAttack(this, EndPlunge);
+                cstate.plunge_attack = Plunge.ProcessHumanoidAction(this, EndPlunge);
             }
         }
         else if (t >= DescentPoint)
@@ -1814,7 +1814,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         hit.Events.OnEnd = () =>
         {
             RealignToTarget();
-            cstate.attack = CrossParryFollowup.ProcessHumanoidAttack(this, _MoveOnEnd);
+            cstate.attack = CrossParryFollowup.ProcessHumanoidAction(this, _MoveOnEnd);
             if (otherAnimancer != null)
             {
                 otherAnimancer.States.Current.Speed = otherSpeed;
@@ -1842,7 +1842,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         actor.DeactivateHitboxes();
 
         animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-        cstate.attack = CircleParryFollowup.ProcessHumanoidAttack(this, () => { });
+        cstate.attack = CircleParryFollowup.ProcessHumanoidAction(this, () => { });
         OnHitboxActive.AddListener(End);
         void End()
         {
