@@ -26,6 +26,9 @@ public class AnimationFXHandler : MonoBehaviour
     [Header("Events")]
     public UnityEvent OnDust;
     public UnityEvent OnDashDust;
+    [Header("Spiral")]
+    public UnityEvent StartSpiral;
+    public UnityEvent EndSpiral;
     [Header("Anim Events")]
     public UnityEvent OnArrowDraw;
     public UnityEvent OnArrowNock;

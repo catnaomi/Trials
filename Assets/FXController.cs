@@ -19,6 +19,8 @@ public class FXController : MonoBehaviour
     public GameObject fx_bleedPoint;
     [Space(5)]
     public GameObject fx_gunTrail;
+    [Space(5)]
+    public GameObject fx_spiral;
     private static float fixedDeltaTime;
     private static float hitpauseLength;
 
@@ -159,6 +161,13 @@ public class FXController : MonoBehaviour
     {
         EnsureSingleton();
         GameObject newFX = GameObject.Instantiate(main.fx_warn);
+        return newFX;
+    }
+
+    public static GameObject CreateSpiral()
+    {
+        EnsureSingleton();
+        GameObject newFX = GameObject.Instantiate(main.fx_spiral);
         return newFX;
     }
     public static GameObject CreateGunTrail(Vector3 start, Vector3 end, Vector3 direction, float duration, AudioClip soundOverride)

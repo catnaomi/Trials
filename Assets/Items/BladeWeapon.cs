@@ -22,7 +22,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
 
     ParticleSystem trailSystem;
     protected MeshSwordSlash slashFX;
-    protected LineSwordThrust thrustFX;
+    protected SpiralSwordThrust thrustFX;
 
     protected Transform top;
     protected Transform bottom;
@@ -54,7 +54,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
             UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(slashFX.gameObject, actor.gameObject.scene);
         }
 
-        thrustFX = FXController.CreateSwordThrust().GetComponent<LineSwordThrust>();
+        thrustFX = FXController.CreateSwordThrust().GetComponent<SpiralSwordThrust>();
         thrustFX.topPoint = top;
         thrustFX.bottomPoint = bottom;
         thrustFX.pseudoParent = actor.transform;
@@ -160,7 +160,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
             dk.kbForce = DamageKnockback.GetKnockbackRelativeToTransform(dk.kbForce * baseDamage, holder.transform);
             dk.originPoint = GetModel().transform.position;
             slashFX.transform.position = holder.transform.position;
-            thrustFX.transform.position = holder.transform.position;
+            //thrustFX.transform.position = holder.transform.position;
             wall = false;
             //holder.attributes.ReduceAttribute(holder.attributes.stamina, this.GetPoiseCost(((HumanoidActor)holder).nextAttackType));
             slashFX.SetTopPoint(InterfaceUtilities.FindRecursivelyActiveOnly(GetModel().transform, "_top"));

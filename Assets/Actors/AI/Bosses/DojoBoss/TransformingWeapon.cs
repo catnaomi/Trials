@@ -25,7 +25,7 @@ public class TransformingWeapon : BladeWeapon
         slashFX = FXController.CreateSwordSlash().GetComponent<MeshSwordSlash>();
         slashFX.pseudoParent = actor.transform;
 
-        thrustFX = FXController.CreateSwordThrust().GetComponent<LineSwordThrust>();
+        thrustFX = FXController.CreateSwordThrust().GetComponent<SpiralSwordThrust>();
         thrustFX.pseudoParent = actor.transform;
 
 
