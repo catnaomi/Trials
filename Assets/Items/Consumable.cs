@@ -9,6 +9,10 @@ public class Consumable : Equippable, IGeneratesModel
     public InputAction consumeAction;
     [ReadOnly]public GameObject model;
     public bool removeFromInventoryOnUse;
+    public bool generateModelOnUse;
+    public bool sheatheMainOnUse;
+    public bool sheatheOffOnUse;
+    public Inventory.EquipSlot parentSlot;
     public InputAction GetAction()
     {
         return consumeAction;
