@@ -29,7 +29,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     CameraState prevCamState;
     [SerializeField]
     public VirtualCameras vcam;
-
+    GameObject consumableModel;
     [Header("Interaction & Dialogue")]
     public bool isMenuOpen;
     List<Interactable> interactables;
@@ -399,6 +399,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             SceneLoader.GetOnActiveSceneChange().AddListener(SetNewSafePoint);
         }
+
 
         bowBend = new AnimatedFloat(animancer, "_BowBend");
     }
@@ -1633,7 +1634,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             safePointClock -= Time.deltaTime;
         }
         //yield return new WaitForSecondsRealtime(1f);
-    
+
+        if (consumableModel != null && animancer.States.Current != state.consume)
+        {
+            Destroy(consumableModel);
+        }
+
     }
 
     private void LateUpdate()
@@ -2779,7 +2785,48 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (IsMoving() && consumable.CanBeUsed())
         {
             SetCurrentConsumable(consumable);
-            state.consume = consumable.GetAction().ProcessPlayerAction(this, out cancelTime, _MoveOnEnd);
+            if (consumable.generateModelOnUse)
+            {
+                consumableModel = consumable.GenerateModel();
+                Transform parent;
+                if (consumable.parentMain)
+                {
+                    parent = positionReference.MainHand.transform;
+                }
+                else if (consumable.parentOff)
+                {
+                    parent = positionReference.OffHand.transform;
+                }
+                else
+                {
+                    parent = positionReference.GetPositionRefSlot(consumable.parentSlot).transform;
+                    
+                }
+                if (consumableModel != null && parent != null)
+                {
+                    consumableModel.transform.SetParent(parent);
+                    consumableModel.transform.localPosition = Vector3.zero;
+                    consumableModel.transform.localRotation = Quaternion.identity;
+                }
+                
+            }
+            if (consumable.sheatheMainOnUse)
+            {
+                inventory.SetDrawn(true, false);
+            }
+            if (consumable.sheatheOffOnUse)
+            {
+                inventory.SetDrawn(false, false);
+            }
+            state.consume = consumable.GetAction().ProcessPlayerAction(this, out cancelTime,() =>
+            {
+                if (consumable.generateModelOnUse && consumableModel != null)
+                {
+                    Destroy(consumableModel);
+                }
+                animancer.Play(state.move, 0.5f);
+            });
+            
         }
     }
     #endregion
@@ -3760,7 +3807,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public override bool IsBlocking()
     {
-        return animancer.States.Current == state.block || animancer.States.Current == damageHandler.block;
+        return secondaryStyle == Moveset.SecondaryStyle.Block && (animancer.States.Current == state.block || animancer.States.Current == damageHandler.block);
     }
    
     public bool IsInDialogue()

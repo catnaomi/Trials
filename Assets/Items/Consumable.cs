@@ -12,6 +12,8 @@ public class Consumable : Equippable, IGeneratesModel
     public bool generateModelOnUse;
     public bool sheatheMainOnUse;
     public bool sheatheOffOnUse;
+    public bool parentMain;
+    public bool parentOff;
     public Inventory.EquipSlot parentSlot;
     public InputAction GetAction()
     {
