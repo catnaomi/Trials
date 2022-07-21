@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace CustomUtilities
 {
 
-    public class InterfaceUtilities
+    public static class InterfaceUtilities
     {
 #if UNITY_EDITOR
         public static void GizmosDrawText(Vector3 position, Color color, string text)
@@ -71,7 +71,7 @@ namespace CustomUtilities
             }
         }
 
-        public static Transform FindRecursively(Transform transform, string name)
+        public static Transform FindRecursively(this Transform transform, string name)
         {
             if (transform.name.ToLower().Contains(name.ToLower()))
             {

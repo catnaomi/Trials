@@ -3,37 +3,20 @@ using UnityEditor;
 using System.Collections;
 using System;
 
-[Serializable]
-public class Effect
+[CreateAssetMenu(fileName = "Effect", menuName = "ScriptableObjects/Status Effects/Create Effect", order = 1)]
+public class Effect : ScriptableObject
 {
-    [ReadOnly]
-    public string displayName;
-    [ReadOnly, TextArea]
+    [TextArea]
     public string desc;
-    [ReadOnly]
-    public bool isIndefinite;
-    [ReadOnly]
     public float duration;
-    [ReadOnlyAttribute]
-    public bool applied;
 
-    public Effect()
+    public bool HasExpired(float elapsed)
     {
-        displayName = "Undefined Effect";
-        desc = "";
-        applied = false;
-        isIndefinite = false;
-        duration = -1f;
-    }
-
-    public bool HasExpired(float deltaTime)
-    {
-        if (!isIndefinite)
+        if (duration < 0)
         {
             return false;
         }
-        duration -= deltaTime;
-        if (duration < 0f)
+        else if (elapsed >= duration)
         {
             return true;
         }
@@ -42,42 +25,18 @@ public class Effect
             return false;
         }
     }
-    public void Apply(ActorAttributes attributes)
+
+    public virtual bool ApplyEffect(ActorAttributes attributes)
     {
-        // do nothing
-
-        if (!attributes.effects.Contains(this))
-        {
-            attributes.effects.Add(this);
-            if (ApplyEffect(attributes))
-            {
-                applied = true;
-            }
-        }
-
+        return true;
     }
 
-    public void Remove(ActorAttributes attributes)
+    public virtual bool UpdateEffect(ActorAttributes attributes, float deltaTime)
     {
-        // do nothing
-
-        bool success = attributes.effects.Remove(this);
-        if (success)
-        {
-            success = RemoveEffect(attributes);
-            if (success)
-            {
-                applied = false;
-            }          
-        }
+        return true;
     }
 
-    protected virtual bool ApplyEffect(ActorAttributes attributes)
-    {
-        return true; // do nothing
-    }
-
-    protected virtual bool RemoveEffect(ActorAttributes attributes)
+    public virtual bool RemoveEffect(ActorAttributes attributes)
     {
         return true;// do nothing
     }

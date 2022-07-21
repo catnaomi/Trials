@@ -35,11 +35,11 @@ public class ActorAttributes : MonoBehaviour
     [Header("Resistances & Weaknesses")]
     public List<DamageResistance> resistances;
 
-    public List<Effect> effects;
+    public List<EffectDuration> effects;
 
     private void Start()
     {
-        effects = new List<Effect>();
+        effects = new List<EffectDuration>();
     }
     // Update is called once per frame
     void Update()
@@ -65,15 +65,20 @@ public class ActorAttributes : MonoBehaviour
 
         healthLast = health.current;
         effectClock += Time.deltaTime;
-        if (effectClock > EFFECT_UPDATE_FREQUENCY)
+        if (effectClock >= EFFECT_UPDATE_FREQUENCY)
         {
-            foreach (Effect effect in effects)
+            for (int i = 0; i < effects.Count; i++)
             {
-                if (effect.HasExpired(EFFECT_UPDATE_FREQUENCY))
+                EffectDuration effectDuration = effects[i];
+                effectDuration.elapsed += effectClock;
+                Effect effect = effectDuration.effect;
+                effect.UpdateEffect(this, effectClock);
+                if (effect.HasExpired(effectDuration.elapsed))
                 {
-                    effect.Remove(this);
+                    RemoveEffect(effect);
                 }
             }
+            effectClock = 0f;
         }
     }
 
@@ -173,12 +178,45 @@ public class ActorAttributes : MonoBehaviour
 
     public void AddEffect(Effect effect)
     {
-        effect.Apply(this);
+        if (effect.ApplyEffect(this))
+        {
+            effects.Add(new EffectDuration(effect, 0f));
+        }
+            
     }
 
     public void RemoveEffect(Effect effect)
     {
-        effect.Remove(this);
+        if (effect.RemoveEffect(this))
+        {
+            int removeIndex = -1;
+            for (int i = 0; i < effects.Count; i++)
+            {
+                EffectDuration effectDuration = effects[i];
+                if (effectDuration.effect == effect)
+                {
+                    removeIndex = i;
+                    break;
+                }
+            }
+            if (removeIndex >= 0)
+            {
+                effects.RemoveAt(removeIndex);
+            }
+        }
+    }
+
+    [Serializable]
+    public struct EffectDuration
+    {
+        public Effect effect;
+        public float elapsed;
+
+        public EffectDuration(Effect effect, float elapsed)
+        {
+            this.effect = effect;
+            this.elapsed = elapsed;
+        }
     }
 }
 

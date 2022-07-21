@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Consumable", menuName = "ScriptableObjects/Items/Consumables/Create Consumable", order = 1)]
 public class Consumable : Equippable, IGeneratesModel
 {
-    public InputAction consumeAction;
+    
     [ReadOnly]public GameObject model;
     public bool removeFromInventoryOnUse;
     public bool generateModelOnUse;
@@ -15,7 +15,8 @@ public class Consumable : Equippable, IGeneratesModel
     public bool parentMain;
     public bool parentOff;
     public Inventory.EquipSlot parentSlot;
-    public InputAction GetAction()
+    public InputAction consumeAction;
+    public virtual InputAction GetAction()
     {
         return consumeAction;
     }
