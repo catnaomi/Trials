@@ -18,7 +18,15 @@ public class ItemDropDeathListener : MonoBehaviour
     {
         interact.canInteract = false;
         interact.gameObject.SetActive(false);
-        targetListenForDeath.OnDie.AddListener(OnDie);
+        if (targetListenForDeath == null)
+        {
+            OnDie();
+        }
+        else
+        {
+            targetListenForDeath.OnDie.AddListener(OnDie);
+        }
+        
         interact.OnInteract.AddListener(OnInteract);
     }
 
