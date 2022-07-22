@@ -14,8 +14,10 @@ public class PlayTimelineWithActors : MonoBehaviour
     public bool playOnAwake;
     public bool destroyOnComplete;
     public bool hidePlayer;
+    public bool disablePlayerMovement;
     bool playing;
     public Transform playerRefTransform;
+    public bool refTransformFollowsPlayer = false;
     public Animator fakePlayer;
     public UnityEvent OnStart;
     public UnityEvent OnEnd;
@@ -71,6 +73,11 @@ public class PlayTimelineWithActors : MonoBehaviour
         {
             PlayerActor.player.transform.position = fakePlayer.transform.position;
         }
+        if (playing && playerRefTransform != null && refTransformFollowsPlayer)
+        {
+            playerRefTransform.position = PlayerActor.player.transform.position;
+            playerRefTransform.rotation = PlayerActor.player.transform.rotation;
+        }
     }
 
 
@@ -86,6 +93,10 @@ public class PlayTimelineWithActors : MonoBehaviour
             PlayerActor.player.gameObject.SetActive(false);
             
         }
+        else if (disablePlayerMovement)
+        {
+            PlayerActor.player.StartDialogue();
+        }
         director.stopped += (context) =>
         {
             Stop(context);
@@ -98,6 +109,10 @@ public class PlayTimelineWithActors : MonoBehaviour
         if (hidePlayer)
         {
             PlayerActor.player.gameObject.SetActive(true);
+        }
+        else if (disablePlayerMovement)
+        {
+            PlayerActor.player.StopDialogue();
         }
         PlayerActor.player.JumpToNavMesh();
         playerRefTransform.gameObject.SetActive(false);
