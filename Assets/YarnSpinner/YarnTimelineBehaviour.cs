@@ -39,13 +39,13 @@ public class YarnTimelineBehaviour : PlayableBehaviour
 
     void OnNodeStart(string node)
     {
-        director.Pause();
+        if (pauseOnStart) director.Pause();
     }
 
     void OnDialogueComplete()
     {
         runner.onDialogueComplete.RemoveListener(OnDialogueComplete);
         runner.onNodeStart.RemoveListener(OnNodeStart);
-        director.Resume();
+        if (pauseOnStart) director.Resume();
     }
 }

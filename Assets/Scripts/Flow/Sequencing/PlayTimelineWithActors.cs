@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 using Yarn.Unity;
@@ -16,7 +17,8 @@ public class PlayTimelineWithActors : MonoBehaviour
     bool playing;
     public Transform playerRefTransform;
     public Animator fakePlayer;
-
+    public UnityEvent OnStart;
+    public UnityEvent OnEnd;
     [SerializeField] BindingIndex[] bindingIndexMap;
     [Serializable]
     struct BindingIndex
@@ -65,7 +67,7 @@ public class PlayTimelineWithActors : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (playing)
+        if (playing && fakePlayer != null)
         {
             PlayerActor.player.transform.position = fakePlayer.transform.position;
         }
@@ -78,6 +80,7 @@ public class PlayTimelineWithActors : MonoBehaviour
         SetBindings();
         director.Play();
         playing = true;
+        OnStart.Invoke();
         if (hidePlayer)
         {
             PlayerActor.player.gameObject.SetActive(false);
@@ -136,6 +139,7 @@ public class PlayTimelineWithActors : MonoBehaviour
                 director.SetGenericBinding(track, bindingIndex.obj);
             }
         }
+        OnEnd.Invoke();
     }
     List<PlayableBinding> GetBindings()
     {

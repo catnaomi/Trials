@@ -81,6 +81,7 @@ public class Actor : MonoBehaviour
     public virtual void ActorStart()
     {
         animancer = this.GetComponent<AnimancerComponent>();
+        animancer.Layers.Capacity = 10;
         // run after base class Start()
     }
 
