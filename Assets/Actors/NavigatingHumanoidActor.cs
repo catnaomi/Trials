@@ -25,6 +25,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     public float currentDistance;
     public float updateSpeed = 0.25f;
     public float neg = -1;
+
     Vector3 additMove;
     public float angle;
     public Vector3 destination;
@@ -42,6 +43,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     Vector3 lastPosition;
     Vector3 animatorVelocity;
     public float jumpAdjustSpeed = 3f;
+    public float turningDelay = 1f;
     [Header("Animancer")]
     public NavAnims navAnims;
     NavAnims runtimeNavAnims;
@@ -149,12 +151,17 @@ public class NavigatingHumanoidActor : Actor, INavigates
     {
         base.ActorPostUpdate();
 
+
         Vector3 moveDirection = Vector3.zero;
         Vector3 lookDirection = this.transform.forward;
         currentDistance = GetDistanceToTarget();
         bool inBufferRange = currentDistance <= bufferRange;
         bool inCloseRange = currentDistance <= closeRange;
-
+        bool allowTurning = turningDelay <= 0f;
+        if (!allowTurning)
+        {
+            turningDelay -= Time.deltaTime;
+        }
         if (!actionsEnabled)
         {
             shouldNavigate = false;
@@ -205,7 +212,15 @@ public class NavigatingHumanoidActor : Actor, INavigates
                 }
             }
             
-            navstate.idle.Parameter = angle;
+            if (allowTurning)
+            {
+                navstate.idle.Parameter = angle;
+            }
+            else
+            {
+                navstate.idle.Parameter = 0f;
+            }
+            
             idleTime += Time.deltaTime;
             
             
@@ -536,6 +551,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     void OnAnimatorMove()
     {
         // Update position based on animation movement using navigation surface height
+        if (animancer == null || animancer.Animator == null) return;
         Vector3 position = animancer.Animator.rootPosition + yVel * Vector3.up;
         if (!ignoreRoot) transform.rotation = animancer.Animator.rootRotation;
         position.y = nav.nextPosition.y;

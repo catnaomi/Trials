@@ -64,11 +64,17 @@ public class PlayTimelineWithActors : MonoBehaviour
     void Start()
     {
         playerRefTransform.gameObject.SetActive(false);
+        
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!playing && playOnAwake)
+        {
+            Play();
+            playOnAwake = false;
+        }
         if (playing && fakePlayer != null)
         {
             PlayerActor.player.transform.position = fakePlayer.transform.position;
