@@ -572,7 +572,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         SetDrawn((main) ? 0 : 1, drawn);
     }
 
-    public void EquipToSlot(EquippableWeapon weapon, int slot)
+    public void EquipToSlot(Equippable weapon, int slot)
     {
         // remove from old slot
         int currentSlot = FindSlotFromWeapon(weapon);
@@ -633,7 +633,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
     }
 
-    public int FindSlotFromWeapon(EquippableWeapon weapon)
+    public int FindSlotFromWeapon(Equippable weapon)
     {
         if (Slot0Equippable == weapon)
         {
