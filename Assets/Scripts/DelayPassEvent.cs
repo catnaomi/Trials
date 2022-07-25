@@ -9,6 +9,8 @@ public class DelayPassEvent : MonoBehaviour
     float clock;
     public UnityEvent OnDelayComplete;
 
+    public int repeatEventsRequired = 0;
+    [SerializeField, ReadOnly] int eventsPassed;
     // Update is called once per frame
     void Update()
     {
@@ -24,6 +26,14 @@ public class DelayPassEvent : MonoBehaviour
 
     public void DelayEvent()
     {
+        if (repeatEventsRequired > 0)
+        {
+            eventsPassed++;
+            if (eventsPassed < repeatEventsRequired)
+            {
+                return;
+            }
+        }
         clock = delay;
     }
 }
