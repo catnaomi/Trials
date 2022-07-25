@@ -26,6 +26,7 @@ public class TimeTravelController : MonoBehaviour
     bool cancelRewind;
     PlayerInput playerInput;
     [Header("Time Stop Settings")]
+    public UnityEvent OnTimeStopStart;
     public bool globalFreeze;
     public GameObject timeStopObject;
     public Vector3 timeStopOrigin;
@@ -364,6 +365,7 @@ public class TimeTravelController : MonoBehaviour
 
     public void Freeze(IAffectedByTimeTravel affected)
     {
+
         TimeTravelData data = affected.SaveTimeState();
         affected.LoadTimeState(data);
         affected.StartFreeze();
@@ -440,6 +442,7 @@ public class TimeTravelController : MonoBehaviour
         //StartCoroutine(OpenBubbleRoutine());
         StartCoroutine(FreezeRoutine());
         StartPostProcessing();
+        OnTimeStopStart.Invoke();
     }
 
     public void StopFreeze()
