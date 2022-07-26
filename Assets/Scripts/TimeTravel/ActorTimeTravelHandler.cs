@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 {
@@ -23,6 +24,9 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     List<Renderer> renderers;
     int initLayer;
     bool applyVisual;
+
+    public UnityEvent OnFreeze;
+    public UnityEvent OnUnfreeze;
     void Start()
     {
         actor = this.GetComponent<Actor>();
@@ -258,6 +262,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         }
         
         animancer.Layers[HumanoidAnimLayers.TimeEffects].SetWeight(1f);
+        OnFreeze.Invoke();
     }
 
     public virtual void StopFreeze()
@@ -271,6 +276,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         animancer.Layers[HumanoidAnimLayers.TimeEffects].SetWeight(0f);
         animancer.Layers[HumanoidAnimLayers.TimeEffects].DestroyStates();
         animancer.States.Current.IsPlaying = true;
+        OnUnfreeze.Invoke();
     }
 
     public void EndTimeState()

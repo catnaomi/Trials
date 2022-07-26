@@ -184,10 +184,20 @@ public class Actor : MonoBehaviour
 
     public virtual void SetCurrentDamage(DamageKnockback damageKnockback)
     {
+        if (currentDamage != null)
+        {
+            currentDamage.OnHit.RemoveListener(RegisterHit);
+        }
         currentDamage = new DamageKnockback(damageKnockback);
         currentDamage.source = this.gameObject;
+        currentDamage.OnHit.AddListener(RegisterHit);
+
     }
 
+    public void RegisterHit()
+    {
+        OnHit.Invoke();
+    }
     public virtual void SetCurrentConsumable(Consumable consumable)
     {
         if (consumable != null)

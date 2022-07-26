@@ -736,11 +736,6 @@ public class NavigatingHumanoidActor : Actor, INavigates
         animancer.Play(navstate.idle);
     }
 
-    public void SetCurrentDamage(DamageKnockback damageKnockback)
-    {
-        currentDamage = new DamageKnockback(damageKnockback);
-        currentDamage.source = this.gameObject;
-    }
 
     void OnDisable()
     {

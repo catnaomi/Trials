@@ -3459,7 +3459,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             currentDamage.source = this.gameObject;
             throw new NullReferenceException("Damage Knockback data is null");
         }
-        currentDamage = new DamageKnockback(damageKnockback);
+        else
+        {
+            base.SetCurrentDamage(damageKnockback);
+        }
     }
     
     public DamageKnockback GetCurrentDamage()

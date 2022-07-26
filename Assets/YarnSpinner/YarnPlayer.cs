@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using Yarn.Unity;
 
 public class YarnPlayer : MonoBehaviour
@@ -9,6 +10,10 @@ public class YarnPlayer : MonoBehaviour
     public string[] nodes;
     public int index;
     public bool loopThroughNodes;
+
+    public UnityEvent OnFinish;
+
+    DialogueRunner runner;
     public void Play()
     {
        if (nodes.Length > 0)
@@ -17,9 +22,10 @@ public class YarnPlayer : MonoBehaviour
             {
                 MenuController.menu.OpenMenu(MenuController.Dialogue);
             }
-            DialogueRunner runner = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
+            runner = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
             runner.SetProject(yarnProject);
             runner.StartDialogue(nodes[index]);
+            runner.onDialogueComplete.AddListener(CallFinish);
             if (loopThroughNodes)
             {
                 index++;
@@ -27,5 +33,11 @@ public class YarnPlayer : MonoBehaviour
             }
             
        }
+    }
+
+    void CallFinish()
+    {
+        OnFinish.Invoke();
+        runner.onDialogueComplete.RemoveListener(CallFinish);
     }
 }

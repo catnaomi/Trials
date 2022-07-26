@@ -638,6 +638,17 @@ public class TimeTravelController : MonoBehaviour
         return freeze;
     }
 
+    public static float GetTimeAffectedDeltaTime()
+    {
+        if (time != null && time.IsFreezing())
+        {
+            return 0f;
+        }
+        else
+        {
+            return Time.deltaTime;
+        }
+    }
     private void OnApplicationQuit()
     {
         magicVignette.SetFloat("_Weight", 0f);

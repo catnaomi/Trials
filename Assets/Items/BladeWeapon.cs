@@ -28,7 +28,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     protected Transform bottom;
     public List<DamageType> elements;
 
-
+    DamageKnockback lastDK;
     public override void EquipWeapon(Actor actor)
     {
         base.EquipWeapon(actor);
@@ -118,45 +118,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         if (active)
         {
             DamageKnockback dk = this.GetDamageFromAttack(holder);
-            dk.OnHit.RemoveAllListeners();
-            dk.OnCrit.RemoveAllListeners();
-            dk.OnBlock.RemoveAllListeners();
-            dk.OnHit.AddListener(() =>
-            {
-                //slashFX.SetContactPoint(GetHand().transform.position + GetHand().transform.forward * GetLength());
-                if (dk.isSlash)
-                {
-                    holder.StartCoroutine(BleedSlash());
-                }
-                else if (dk.isThrust)
-                {
-                    thrustFX.SetContactPoint(holder.lastContactPoint);
-                    thrustFX.Bleed();
-                }
-
-            });
-            dk.OnBlock.AddListener(() =>
-            {
-                if (dk.isSlash)
-                {
-                    holder.StartCoroutine(BlockSlash());
-                }
-                else if (dk.isThrust)
-                {
-                    holder.StartCoroutine(BlockThrust());
-                }
-            });
-            dk.OnCrit.AddListener(() =>
-            {
-                if (dk.isThrust)
-                {
-                    thrustFX.SetNextCrit(true);
-                }
-                else if (dk.isSlash)
-                {
-                    slashFX.SetNextCrit(true);
-                }
-            });
+            SetUpDamageListeners(dk);
             dk.kbForce = DamageKnockback.GetKnockbackRelativeToTransform(dk.kbForce * baseDamage, holder.transform);
             dk.originPoint = GetModel().transform.position;
             slashFX.transform.position = holder.transform.position;
@@ -199,6 +161,57 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         this.active = active;
     }
 
+    public void SetUpDamageListeners(DamageKnockback dk)
+    {
+        if (lastDK != null)
+        {
+            lastDK.OnHit.RemoveListener(DamageOnHit);
+            lastDK.OnBlock.RemoveListener(DamageOnBlock);
+            lastDK.OnCrit.RemoveListener(DamageOnCrit);
+        }
+        lastDK = dk;
+        lastDK.OnHit.AddListener(DamageOnHit);
+        lastDK.OnBlock.AddListener(DamageOnBlock);
+        lastDK.OnCrit.AddListener(DamageOnCrit);
+    }
+
+    void DamageOnHit()
+    {
+        if (lastDK.isSlash)
+        {
+            holder.StartCoroutine(BleedSlash());
+        }
+        else if (lastDK.isThrust)
+        {
+            thrustFX.SetContactPoint(holder.lastContactPoint);
+            thrustFX.Bleed();
+        }
+    }
+
+    void DamageOnBlock()
+    {
+        if (lastDK.isSlash)
+        {
+            holder.StartCoroutine(BlockSlash());
+        }
+        else if (lastDK.isThrust)
+        {
+            holder.StartCoroutine(BlockThrust());
+        }
+    }
+
+    void DamageOnCrit()
+    {
+
+        if (lastDK.isThrust)
+        {
+            thrustFX.SetNextCrit(true);
+        }
+        else if (lastDK.isSlash)
+        {
+            slashFX.SetNextCrit(true);
+        }
+    }
     IEnumerator BleedSlash()
     {
         yield return new WaitForEndOfFrame();
