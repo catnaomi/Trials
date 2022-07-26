@@ -164,7 +164,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public virtual void LoadTimeState(TimeTravelData data, float speed)
     {
 
-
+        if (!this.gameObject.activeInHierarchy) return;
         actor.MoveOverTime(data.position, data.rotation, isRewinding ? TimeTravelController.time.rewindStepDuration : 0f);
         if (data is ActorTimeTravelData actorData)
         {

@@ -10,7 +10,6 @@ public class YarnPlayer : MonoBehaviour
     public string[] nodes;
     public int index;
     public bool loopThroughNodes;
-
     public UnityEvent OnFinish;
 
     DialogueRunner runner;
