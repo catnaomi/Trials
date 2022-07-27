@@ -9,7 +9,7 @@ public class PlayerPositioner : MonoBehaviour
     void Start()
     {
         PlayerActor player = FindObjectOfType<PlayerActor>();
-        if (player != null && !SceneLoader.IsMovingPlayer() && !SceneLoader.isAfterFirstLoad && this.gameObject.scene == UnityEngine.SceneManagement.SceneManager.GetActiveScene())
+        if (player != null && SceneLoader.ShouldRespawnPlayer() && this.gameObject.scene == UnityEngine.SceneManagement.SceneManager.GetActiveScene())
         {
             player.transform.rotation = spawnPoint.rotation;
             player.WarpTo(spawnPoint.position);

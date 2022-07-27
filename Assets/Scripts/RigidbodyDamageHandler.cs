@@ -44,7 +44,7 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
     {
         if (rigidbody.isKinematic) return;
         Vector3 force = collision.impulse / Time.fixedDeltaTime;
-        Debug.Log(collision.collider + "----" + force.magnitude);
+        //Debug.Log(collision.collider + "----" + force.magnitude);
         if (collision.collider.TryGetComponent<IDamageable>(out IDamageable damageable))
         {
             

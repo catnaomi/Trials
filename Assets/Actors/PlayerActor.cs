@@ -2433,7 +2433,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     // checks to see if player input is accepted. used for inventory menu
     public bool CanPlayerInput()
     {
-        return !isMenuOpen;
+        return !isMenuOpen && Time.timeScale > 0;
     }
     public void ToggleMenu()
     {

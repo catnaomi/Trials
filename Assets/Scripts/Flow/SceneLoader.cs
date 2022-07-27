@@ -38,7 +38,7 @@ public class SceneLoader : MonoBehaviour
     {
         instance = this;
         isAfterFirstLoad = false;
-
+        shouldSetPlayerPosition = true;
         DontDestroyOnLoad(this);
     }
     // Start is called before the first frame update
@@ -48,6 +48,7 @@ public class SceneLoader : MonoBehaviour
         {
             LoadScenes();
         }
+        OnFinishLoad.AddListener(ValidateDoubleInitScenes);
     }
 
     private void Update()
@@ -307,6 +308,24 @@ public class SceneLoader : MonoBehaviour
         allowSceneActivation = true;
         loadOnStart = false;
         shouldReloadScenes = true;
+        shouldSetPlayerPosition = true;
+        LoadScenes();
+    }
+
+    public static void LoadSceneSingle(string sceneName)
+    {
+        instance.LoadSceneSingleInstance(sceneName);
+    }
+
+    public void LoadSceneSingleInstance(string sceneName)
+    {
+        primarySceneToLoad = sceneName;
+        secondaryScenesToLoad = new string[0];
+        isAfterFirstLoad = false;
+        allowSceneActivation = true;
+        loadOnStart = false;
+        shouldReloadScenes = true;
+        shouldSetPlayerPosition = true;
         LoadScenes();
     }
     void PositionPlayer()
@@ -315,9 +334,17 @@ public class SceneLoader : MonoBehaviour
         player.transform.SetPositionAndRotation(playerPosition, playerRotation);
     }
 
-    public static bool IsMovingPlayer()
+    public static bool ShouldRespawnPlayer()
     {
-        return instance != null && instance.shouldSetPlayerPosition && instance.playerPosition != Vector3.zero;
+        if (instance != null)
+        {
+            if (instance.shouldSetPlayerPosition)
+            {
+                instance.shouldSetPlayerPosition = false;
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void EnsureScenesAreLoaded(string primary, params string[] secondaries)
@@ -410,6 +437,41 @@ public class SceneLoader : MonoBehaviour
     public static bool IsSceneLoaderActive()
     {
         return instance != null;
+    }
+
+    public void ValidateDoubleInitScenes()
+    {
+        bool foundInit = false;
+        int countLoaded = SceneManager.sceneCount;
+
+        for (int i = 0; i < countLoaded; i++)
+        {
+            Scene scene = SceneManager.GetSceneAt(i);
+            if (scene.name == "_InitScene")
+            {
+                if (!foundInit)
+                {
+                    foundInit = true;
+                }
+                else
+                {
+                    SceneManager.UnloadSceneAsync(scene);
+                    Debug.LogWarning("InitScene was loaded multiple times. Unloading.");
+                }
+            }
+        }
+    }
+
+    public static Scene[] GetAllOpenScenes()
+    {
+        int countLoaded = SceneManager.sceneCount;
+        Scene[] loadedScenes = new Scene[countLoaded];
+
+        for (int i = 0; i < countLoaded; i++)
+        {
+            loadedScenes[i] = SceneManager.GetSceneAt(i);
+        }
+        return loadedScenes;
     }
 }
 

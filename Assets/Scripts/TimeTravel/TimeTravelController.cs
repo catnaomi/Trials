@@ -216,6 +216,7 @@ public class TimeTravelController : MonoBehaviour
     {
         playerInput.actions["UsePower"].performed += (c) =>
         {
+            if (!ShouldAllowInput()) return;
             if (ignoreLimits) return;
             if (isSlowing)
             {
@@ -266,6 +267,7 @@ public class TimeTravelController : MonoBehaviour
 
         playerInput.actions["UsePower"].canceled += (c) =>
         {
+            if(!ShouldAllowInput()) return;
             if (ignoreLimits) return;
             if (isSlowing)
             {
@@ -638,6 +640,10 @@ public class TimeTravelController : MonoBehaviour
         return freeze;
     }
 
+    public bool ShouldAllowInput()
+    {
+        return Time.timeScale > 0f;
+    }
     public static float GetTimeAffectedDeltaTime()
     {
         if (time != null && time.IsFreezing())

@@ -240,7 +240,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
                 navstate.move.ParameterX = xmov;
                 navstate.move.ParameterY = ymov;
 
-                Quaternion targetRot = Quaternion.LookRotation(NumberUtilities.FlattenVector(nav.desiredVelocity));
+                Quaternion targetRot = nav.desiredVelocity.magnitude > 0 ? Quaternion.LookRotation(NumberUtilities.FlattenVector(nav.desiredVelocity)) : Quaternion.identity;
                 this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, targetRot, nav.angularSpeed * Time.deltaTime);
                 if (nav.isOnOffMeshLink && !offMeshInProgress)
                 {

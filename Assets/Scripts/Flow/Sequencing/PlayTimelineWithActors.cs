@@ -112,15 +112,19 @@ public class PlayTimelineWithActors : MonoBehaviour
     private void Stop(PlayableDirector d)
     {
         playing = false;
-        if (hidePlayer)
+        if (PlayerActor.player != null)
         {
-            PlayerActor.player.gameObject.SetActive(true);
+            if (hidePlayer)
+            {
+                PlayerActor.player.gameObject.SetActive(true);
+            }
+            else if (disablePlayerMovement)
+            {
+                PlayerActor.player.StopDialogue();
+            }
+            PlayerActor.player.JumpToNavMesh();
         }
-        else if (disablePlayerMovement)
-        {
-            PlayerActor.player.StopDialogue();
-        }
-        PlayerActor.player.JumpToNavMesh();
+        
         playerRefTransform.gameObject.SetActive(false);
         if (destroyOnComplete)
         {

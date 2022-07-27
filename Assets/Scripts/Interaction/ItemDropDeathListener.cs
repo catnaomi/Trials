@@ -36,7 +36,7 @@ public class ItemDropDeathListener : MonoBehaviour
         if (spawned)
         {
             looseItem.transform.position = dropLocation.transform.position;
-            looseItem.rigidbody.isKinematic = true;
+            looseItem.GetComponent<Rigidbody>().isKinematic = true;
             looseItem.transform.localRotation *= Quaternion.AngleAxis(RotationSpeed * Time.deltaTime, Vector3.up);
         }
     }
