@@ -45,7 +45,7 @@ public class InventoryUI2 : MonoBehaviour
     [ReadOnly] public EquippableWeapon quickSlotItem;
 
     public Item.ItemType[] filterType;
-    void OnEnable()
+    void Awake()
     {
         invUI = this;
         if (items != null && items.Count > 0)

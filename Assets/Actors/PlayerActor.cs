@@ -3757,10 +3757,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public bool IsSwimming()
     {
+        if (animancer == null) return false;
         return animancer.States.Current == state.swim;
     }
     public bool IsMoving()
     {
+        if (animancer == null) return false;
         return animancer.States.Current == state.move;
     }
     public bool IsAiming()
@@ -3771,20 +3773,24 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public override bool IsFalling()
     {
+        if (animancer == null) return false;
         return animancer.States.Current == state.fall || animancer.States.Current == damageHandler.fall;
     }
 
     public bool IsHurt()
     {
+        if (animancer == null) return false;
         return animancer.States.Current == damageHandler.hurt;
     }
     public override bool IsClimbing()
     {
+        if (animancer == null) return false;
         return animancer.States.Current == state.climb;
     }
 
     public override bool ShouldDustOnStep()
     {
+        if (animancer == null) return false;
         return animancer.States.Current == state.sprint || animancer.States.Current == state.dash;
     }
     public override bool IsGrounded()
@@ -3793,6 +3799,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public override bool IsDodging()
     {
+        if (animancer == null) return false;
         return animancer.States.Current == state.roll;
     }
     public override bool IsHitboxActive()
@@ -3806,15 +3813,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public override bool IsAttacking()
     {
+        if (animancer == null) return false;
         return animancer.States.Current == state.attack;
     }
     public override bool IsBlocking()
     {
+        if (animancer == null) return false;
         return secondaryStyle == Moveset.SecondaryStyle.Block && (animancer.States.Current == state.block || animancer.States.Current == damageHandler.block);
     }
    
     public bool IsInDialogue()
     {
+        if (animancer == null) return false;
         return animancer.States.Current == state.dialogue;
     }
     public bool ShouldShowTargetIcon()
