@@ -157,6 +157,7 @@ public static class DebugReflectionMethods
         {
             SceneLoader.ShouldReloadScenes(true);
             SceneLoader.instance.StartCoroutine(SceneLoader.instance.DelayReloadRoutine(0.25f));
+            Debug.Log("Reloading. Exit the console to complete.");
         }
         catch (Exception ex)
         {
@@ -303,6 +304,7 @@ public static class DebugReflectionMethods
         {
             StringBuilder stringBuilder = new StringBuilder();
             System.Reflection.MethodInfo[] methods = typeof(DebugReflectionMethods).GetMethods(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            Array.Sort(methods, (a,b) => { return string.Compare(a.Name, b.Name); });
             stringBuilder.AppendLine();
             foreach(System.Reflection.MethodInfo method in methods)
             {

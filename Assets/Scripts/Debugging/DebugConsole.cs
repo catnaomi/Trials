@@ -63,6 +63,7 @@ public class DebugConsole : MonoBehaviour
         if (open && EventSystem.current.currentSelectedGameObject != input.gameObject)
         {
             EventSystem.current.SetSelectedGameObject(input.gameObject);
+            input.ActivateInputField();
         }
     }
     public void UpdateLogs(string logString, string stackTrace, LogType type)
@@ -87,6 +88,7 @@ public class DebugConsole : MonoBehaviour
         RunMethod(eventData);
         UpdateLogs();
         EventSystem.current.SetSelectedGameObject(input.gameObject);
+        input.ActivateInputField();
     }
 
     public void RunMethod(string input)
@@ -136,6 +138,7 @@ public class DebugConsole : MonoBehaviour
             open = true;
             timeScale = Time.timeScale;
             Time.timeScale = 0f;
+
         }
         else
         {
