@@ -59,7 +59,7 @@ public class SceneLoader : MonoBehaviour
     {
         isLoadingComplete = false;
         isPreloadingComplete = false;
-        StartCoroutine(DisableObjectsRoutine());
+        //StartCoroutine(DisableObjectsRoutine());
         StartCoroutine(LoadScenesThenSetActive());
     }
     IEnumerator LoadScenesRoutine()
@@ -307,6 +307,7 @@ public class SceneLoader : MonoBehaviour
         isAfterFirstLoad = false;
         allowSceneActivation = true;
         loadOnStart = false;
+        shouldLoadInitScene = true;
         shouldReloadScenes = true;
         shouldSetPlayerPosition = true;
         LoadScenes();
@@ -324,6 +325,7 @@ public class SceneLoader : MonoBehaviour
         isAfterFirstLoad = false;
         allowSceneActivation = true;
         loadOnStart = false;
+        shouldLoadInitScene = true;
         shouldReloadScenes = true;
         shouldSetPlayerPosition = true;
         LoadScenes();

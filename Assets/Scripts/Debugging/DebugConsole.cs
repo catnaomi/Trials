@@ -133,6 +133,8 @@ public class DebugConsole : MonoBehaviour
         {
             UpdateLogs();
             group.alpha = 1f;
+            group.interactable = true;
+            group.blocksRaycasts = true;
             input.interactable = true;
             EventSystem.current.SetSelectedGameObject(input.gameObject);
             open = true;
@@ -143,6 +145,8 @@ public class DebugConsole : MonoBehaviour
         else
         {
             group.alpha = 0f;
+            group.interactable = false;
+            group.blocksRaycasts = false;
             input.interactable = false;
             Time.timeScale = timeScale;
             open = false;
