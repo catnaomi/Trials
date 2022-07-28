@@ -69,6 +69,7 @@ public class DebugConsole : MonoBehaviour
     public void UpdateLogs(string logString, string stackTrace, LogType type)
     {
         LogRecordService.instance.GetLastNumberOfLogs(logEntriesToShow, logStrings);
+        
         for (int i = 0; i < logEntriesToShow; i++)
         {
             entries[i].text = logStrings[i];
@@ -161,5 +162,10 @@ public class DebugConsole : MonoBehaviour
             if (!removeChars.Contains(c)) // prevent dirty chars
                 result.Append(c);
         return result.ToString();
+    }
+
+    private void OnApplicationQuit()
+    {
+        Application.logMessageReceivedThreaded -= UpdateLogs;
     }
 }
