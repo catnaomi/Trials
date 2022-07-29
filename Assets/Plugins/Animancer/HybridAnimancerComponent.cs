@@ -1,8 +1,4 @@
-// Animancer // https://kybernetik.com.au/animancer // Copyright 2021 Kybernetik //
-
-#if ! UNITY_EDITOR
-#pragma warning disable CS0618 // Type or member is obsolete (for ControllerState in Animancer Lite).
-#endif
+// Animancer // https://kybernetik.com.au/animancer // Copyright 2022 Kybernetik //
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,9 +14,6 @@ namespace Animancer
     /// </remarks>
     /// https://kybernetik.com.au/animancer/api/Animancer/HybridAnimancerComponent
     /// 
-#if !UNITY_EDITOR
-    [System.Obsolete(Validate.ProOnlyMessage)]
-#endif
     [AddComponentMenu(Strings.MenuPrefix + "Hybrid Animancer Component")]
     [HelpURL(Strings.DocsURLs.APIDocumentation + "/" + nameof(HybridAnimancerComponent))]
     public class HybridAnimancerComponent : NamedAnimancerComponent
@@ -73,7 +66,6 @@ namespace Animancer
         /// Plays the <see cref="Controller"/> if <see cref="PlayAutomatically"/> is false (otherwise it plays the
         /// first animation in the <see cref="NamedAnimancerComponent.Animations"/> array).
         /// </summary>
-        /// <remarks>Called by Unity when this component becomes enabled and active.</remarks>
         protected override void OnEnable()
         {
             PlayController();
@@ -90,6 +82,7 @@ namespace Animancer
 
         /************************************************************************************************************************/
 
+        /// <inheritdoc/>
         public override void GatherAnimationClips(ICollection<AnimationClip> clips)
         {
             base.GatherAnimationClips(clips);

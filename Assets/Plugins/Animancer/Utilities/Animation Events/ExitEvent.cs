@@ -1,10 +1,10 @@
-// Animancer // https://kybernetik.com.au/animancer // Copyright 2021 Kybernetik //
+// Animancer // https://kybernetik.com.au/animancer // Copyright 2022 Kybernetik //
 
 using System;
 
 namespace Animancer
 {
-    /// <summary>A callback for when an <see cref="AnimancerNode.EffectiveWeight"/> becomes 0.</summary>
+    /// <summary>[Pro-Only] A callback for when an <see cref="AnimancerNode.EffectiveWeight"/> becomes 0.</summary>
     /// 
     /// <remarks>
     /// Most <see href="https://kybernetik.com.au/animancer/docs/manual/fsm">Finite State Machine</see> systems
@@ -47,7 +47,7 @@ namespace Animancer
     /// 
     /// https://kybernetik.com.au/animancer/api/Animancer/ExitEvent
     /// 
-    public sealed class ExitEvent : Key, IUpdatable
+    public class ExitEvent : Key, IUpdatable
     {
         /************************************************************************************************************************/
 

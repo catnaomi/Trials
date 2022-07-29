@@ -163,7 +163,7 @@ namespace Animancer
                 !state.HasEvents)
                 return false;
 
-            var endEvent = state.Events.endEvent;
+            var endEvent = state.Events.EndEvent;
             if (endEvent.callback != null)
             {
                 Debug.Assert(CurrentEvent == null, $"Recursive call to {nameof(TryInvokeOnEndEvent)} detected");
