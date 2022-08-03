@@ -551,7 +551,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     void OnAnimatorMove()
     {
         // Update position based on animation movement using navigation surface height
-        if (animancer == null || animancer.Animator == null) return;
+        if (animancer == null || animancer.Animator == null || nav == null) return;
         Vector3 position = animancer.Animator.rootPosition + yVel * Vector3.up;
         if (!ignoreRoot) transform.rotation = animancer.Animator.rootRotation;
         position.y = nav.nextPosition.y;

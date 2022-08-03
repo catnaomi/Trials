@@ -10,6 +10,7 @@ public class YarnPlayer : MonoBehaviour
     public string[] nodes;
     public int index;
     public bool loopThroughNodes;
+    public bool closeAlreadyRunningDialogue = true;
     public UnityEvent OnFinish;
 
     DialogueRunner runner;
@@ -22,6 +23,11 @@ public class YarnPlayer : MonoBehaviour
                 MenuController.menu.OpenMenu(MenuController.Dialogue);
             }
             runner = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
+
+            if (runner.IsDialogueRunning && closeAlreadyRunningDialogue)
+            {
+                runner.Stop();
+            }
             runner.SetProject(yarnProject);
             runner.StartDialogue(nodes[index]);
             runner.onDialogueComplete.AddListener(CallFinish);

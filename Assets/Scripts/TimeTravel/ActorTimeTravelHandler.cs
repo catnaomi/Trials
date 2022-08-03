@@ -254,6 +254,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public virtual void StartFreeze()
     {
+        if (!gameObject.activeInHierarchy) return;
         isFrozen = true;
         actor.isInTimeState = true;
         if (animancer.States.Current != null)
@@ -267,6 +268,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public virtual void StopFreeze()
     {
+        if (!gameObject.activeInHierarchy) return;
         isFrozen = false;
         actor.isInTimeState = false;
         if (actor is PlayerActor player)

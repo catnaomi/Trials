@@ -34,7 +34,8 @@ public class DialogueActorOverride : Interactable
         
         dialogue = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
         dialogue.onDialogueComplete.AddListener(StopDialogue);
-        dialogue.GetComponent<LineActorPositioningHandler>().SetSpeaker(this.gameObject, dialogueMount);
+        LineActorPositioningHandler line = dialogue.GetComponent<LineActorPositioningHandler>();
+        if (line != null) line.SetSpeaker(this.gameObject, dialogueMount);
         talking = true;
         if (actor is NavigatingHumanoidActor navactor)
         {

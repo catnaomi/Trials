@@ -177,15 +177,33 @@ public class AnimatedDialogueView : DialogueViewBase
     // line's presentation should be interrupted. This is a 'hurry up' signal -
     // the view should finish whatever presentation it needs to do as quickly as
     // possible.
-    //
-    // In the case of this view, we'll stop the scaling animation, go to full
-    // scale, and then report that the presentation is complete.
     public override void InterruptLine(LocalizedLine dialogueLine, Action onDialogueLineFinished)
     {
         if (gameObject.activeInHierarchy == false)
         {
             // This line view isn't active; it should immediately report that
             // it's finished presenting.
+            onDialogueLineFinished();
+            return;
+        }
+
+        bool isSmall = false;
+
+        string[] meta = dialogueLine.Metadata;
+
+        if (meta?.Length > 0)
+        {
+            for (int i = 0; i < meta.Length; i++)
+            {
+                if (meta[i].Contains("small"))
+                {
+                    isSmall = true;
+                }
+            }
+        }
+        if (isSmall)
+        {
+            showing = false;
             onDialogueLineFinished();
             return;
         }
@@ -232,7 +250,7 @@ public class AnimatedDialogueView : DialogueViewBase
             return;
         }
 
-        Debug.Log($"{this.name} dismissing line");
+        //Debug.Log($"{this.name} dismissing line");
         interrupt = false;
         Action EndAction = () =>
         {

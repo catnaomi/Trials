@@ -3910,11 +3910,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void StartDialogue()
     {
-        state.dialogue = animancer.Play(idleAnim);
+        state.dialogue = animancer.States.GetOrCreate("dialogue", idleAnim);
+        animancer.Play(state.dialogue);
     }
 
     public void StopDialogue()
     {
+        isMenuOpen = false;
         this.SetCombatTarget(null);
         animancer.Play(state.move);
     }
