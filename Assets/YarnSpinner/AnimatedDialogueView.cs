@@ -134,12 +134,12 @@ public class AnimatedDialogueView : DialogueViewBase
             return;
         }
 
-        Debug.Log($"{this.name} running line {dialogueLine.TextID}");
+        //Debug.Log($"{this.name} running line {dialogueLine.TextID}");
         
         advanceHandler = requestInterrupt;
 
         activeTextBox.text = dialogueLine.TextWithoutCharacterName.Text;
-
+        
         characterNameText.text = dialogueLine.CharacterName.SplitCamelCase();
 
         showing = true;
@@ -220,7 +220,7 @@ public class AnimatedDialogueView : DialogueViewBase
             }
         };
         
-        Debug.Log($"{this.name} was interrupted while presenting {dialogueLine.TextID}");
+        //Debug.Log($"{this.name} was interrupted while presenting {dialogueLine.TextID}");
 
         // If we're in the middle of an animation, stop it.
         if (!lineFinished)
@@ -294,6 +294,8 @@ public class AnimatedDialogueView : DialogueViewBase
         timingArray = new float[characterCount];
         currentIndex = 0;
         activeTextBox.ForceMeshUpdate();
+        activeTextBox.verticalAlignment = activeTextBox.textInfo.lineCount > 1 ? VerticalAlignmentOptions.Top : VerticalAlignmentOptions.Middle;
+
         while (!lineFinished)
         {
             activeTextBox.maxVisibleCharacters = currentIndex + 1;
