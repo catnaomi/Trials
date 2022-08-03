@@ -28,7 +28,7 @@ public class YarnTimelineBehaviour : PlayableBehaviour
             runner.onDialogueComplete.AddListener(OnDialogueComplete);
             //runner.onNodeComplete.AddListener(OnNodeEnd);
             runner.onNodeStart.AddListener(OnNodeStart);
-            runner.GetComponent<LineActorPositioningHandler>().SetSpeaker(null, null);
+            runner.GetComponent<LineActorPositioningHandler>()?.SetSpeaker(null, null);
 
             runner.StartDialogue(node);
 

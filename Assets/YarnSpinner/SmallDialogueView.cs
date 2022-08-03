@@ -7,27 +7,20 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Yarn.Unity;
-public class AnimatedDialogueView : DialogueViewBase
+public class SmallDialogueView : DialogueViewBase
 {
-    public bool waitForInput = true;
     public float characterInDuration = 1f;
     public float nextCharacterDelay = 1f;
     public float whitespaceDelay = 1f;
+    public float defaultContinueTime = 5f;
     public Vector2 characterScaleRange = Vector2.one;
     public Vector2 characterAlphaRange = Vector2.one;
     public float uiFadeInTime = 1f;
-    [Space(10)]
-    public float boxHeight = 240f;
-    public float wipeOffDuration = 1f;
-    public Color historyColor = Color.gray;
-    public Material greyscaleSpriteMaterial;
     [Header("References")]
-    public RectTransform textContainersParent;
-    public RectTransform activeTextContainer;
     public TMP_Text activeTextBox;
-    public TMP_Text characterNameText;
     public Image portrait;
-    public Button continueButton;
+    public GameObject progressBarParent;
+    public Image progressBar;
     public CanvasGroup group;
 
     [SerializeField, ReadOnly] float[] timingArray;
@@ -37,17 +30,14 @@ public class AnimatedDialogueView : DialogueViewBase
     bool interrupt;
     bool lineFinished;
     Coroutine FadeRoutine;
-    Coroutine HideRoutine;
-    List<RectTransform> historyBoxes;
-    int historyIndex = -1;
-    bool wipeFinished;
+    float continueDuration;
+    float continueRemaining;
     // Stores a reference to the method to call when the user wants to advance
     // the line.
     Action advanceHandler = null;
+    Action naturalFinishCallback;
     private void Start()
     {
-        historyBoxes = new List<RectTransform>();
-        continueButton.onClick.AddListener(OnContinueButtonClick);
         GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>().onDialogueComplete.AddListener(Close);
     }
 
@@ -58,14 +48,11 @@ public class AnimatedDialogueView : DialogueViewBase
             if (uiFadeInTime <= 0)
             {
                 group.alpha = 1f;
-                
             }
             else
             {
                 group.alpha += Mathf.Clamp01(Time.deltaTime / uiFadeInTime);
             }
-            group.blocksRaycasts = true;
-            group.interactable = true;
         }
         else if (!showing && group.alpha > 0)
         {
@@ -77,11 +64,35 @@ public class AnimatedDialogueView : DialogueViewBase
             {
                 group.alpha -= Mathf.Clamp01(Time.deltaTime / uiFadeInTime);
             }
-            group.blocksRaycasts = false;
-            group.interactable = false;
         }
     }
 
+    private void Update()
+    {
+        if (continueDuration > 0)
+        {
+            if (!progressBarParent.activeSelf)
+            {
+                progressBarParent.SetActive(true);
+            }
+            progressBar.fillAmount = Mathf.Clamp01(continueRemaining / continueDuration);
+            if (continueRemaining < 0)
+            {
+                naturalFinishCallback?.Invoke();
+            }
+            else if (TimeTravelController.time == null || !TimeTravelController.time.IsFreezing())
+            {
+                continueRemaining -= Time.deltaTime;
+            }
+        }
+        else
+        {
+            if (progressBarParent.activeSelf)
+            {
+                progressBarParent.SetActive(false);
+            }
+        }
+    }
     public void Close()
     {
         showing = false;
@@ -111,6 +122,7 @@ public class AnimatedDialogueView : DialogueViewBase
 
         string[] meta = dialogueLine.Metadata;
 
+        continueDuration = -1f;
         if (meta?.Length > 0)
         {
             for (int i = 0; i < meta.Length; i++)
@@ -124,10 +136,14 @@ public class AnimatedDialogueView : DialogueViewBase
                 {
                     isSmall = true;
                 }
-
+                if (meta[i].Contains("duration"))
+                {
+                    string[] split = meta[i].Split(":");
+                    continueDuration = float.Parse(split[1].Trim());
+                }
             }
         }
-        if (isSmall)
+        if (!isSmall)
         {
             showing = false;
             onDialogueLineFinished();
@@ -136,14 +152,19 @@ public class AnimatedDialogueView : DialogueViewBase
 
         Debug.Log($"{this.name} running line {dialogueLine.TextID}");
         
+        if (continueDuration < 0)
+        {
+            continueDuration = defaultContinueTime;
+        }
+        continueRemaining = continueDuration;
+
         advanceHandler = requestInterrupt;
 
         activeTextBox.text = dialogueLine.TextWithoutCharacterName.Text;
 
-        characterNameText.text = dialogueLine.CharacterName.SplitCamelCase();
-
         showing = true;
 
+        
         Sprite portraitSprite = CharacterPortraitProvider.GetPortrait(dialogueLine.CharacterName, mood);
 
         if (portraitSprite != null)
@@ -156,21 +177,18 @@ public class AnimatedDialogueView : DialogueViewBase
             portrait.sprite = null;
             portrait.color = Color.clear;
         }
-        continueButton.gameObject.SetActive(false);
 
         Action OnFinish = () =>
         {
-            if (waitForInput || interrupt)
+            if (interrupt)
             {
-                OpenContinueButton();
-            }
-            else
-            {
-                interrupt = false;
-                onDialogueLineFinished();
+                naturalFinishCallback = null;
+                continueDuration = -1f;
+                //onDialogueLineFinished();
             }
         };
         StartCoroutine(FadeInText(dialogueLine.TextWithoutCharacterName.Text.Length, OnFinish));
+        naturalFinishCallback = onDialogueLineFinished;
     }
 
     // InterruptLine is called when the dialogue runner indicates that the
@@ -208,7 +226,8 @@ public class AnimatedDialogueView : DialogueViewBase
         if (!lineFinished)
         {
             interrupt = true;
-            OpenContinueButton();
+            continueDuration = -1f;
+            onDialogueLineFinished();
         }
         else
         {
@@ -233,25 +252,16 @@ public class AnimatedDialogueView : DialogueViewBase
         }
 
         Debug.Log($"{this.name} dismissing line");
-        interrupt = false;
-        Action EndAction = () =>
-        {
-            onDismissalComplete();
-        };
-
-        advanceHandler = null;
-
-        
-        if (!lineFinished && FadeRoutine != null)
+        if (FadeRoutine != null)
         {
             StopCoroutine(FadeRoutine);
         }
-
-
-        HideRoutine = StartCoroutine(HideText(EndAction));
-
+        interrupt = false;
         activeTextBox.text = "";
-        continueButton.gameObject.SetActive(false);
+        continueDuration = -1f;
+
+        
+        onDismissalComplete();
     }
 
 
@@ -349,50 +359,5 @@ public class AnimatedDialogueView : DialogueViewBase
         }
         interrupt = false;
         finishCallBack();
-    }
-
-    IEnumerator HideText(Action finishCallback)
-    {
-        wipeFinished = false;
-        float clock = 0f;
-
-        Vector3 initialWorldPos = activeTextContainer.transform.position;
-        RectTransform hidingTextBox = Instantiate(activeTextContainer.gameObject).GetComponent<RectTransform>();
-        hidingTextBox.transform.SetParent(textContainersParent);
-        hidingTextBox.localScale = Vector3.one;
-        hidingTextBox.transform.position = initialWorldPos;
-        activeTextBox.text = "";
-
-        Vector2 initialPos = textContainersParent.anchoredPosition;
-
-        while (!wipeFinished)
-        {
-            clock += Time.deltaTime;
-            float t = Mathf.Clamp01(clock / wipeOffDuration);
-            float offset = boxHeight * AnimationCurve.EaseInOut(0f, 0f, 1f, 1f).Evaluate(t);
-            textContainersParent.anchoredPosition = initialPos + Vector2.up * offset;
-            if (t >= 1)
-            {
-                wipeFinished = true;
-            }
-            else
-            yield return null;
-        }
-
-        Destroy(hidingTextBox.gameObject);
-        textContainersParent.localPosition = Vector3.zero;
-        finishCallback();
-    }
-    public void OpenContinueButton()
-    {
-        continueButton.gameObject.SetActive(true);
-        continueButton.interactable = true;
-        EventSystem.current.SetSelectedGameObject(continueButton.gameObject);
-    }
-
-    public void OnContinueButtonClick()
-    {
-        continueButton.interactable = false;
-        UserRequestedViewAdvancement();
     }
 }
