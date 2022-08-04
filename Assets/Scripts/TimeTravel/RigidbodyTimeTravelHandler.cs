@@ -10,6 +10,7 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     bool isRewinding;
     bool isFrozen;
     RigidbodyTimeTravelData lastData;
+    public float fixedTime;
 
     void Start()
     {
@@ -46,6 +47,10 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         return isFrozen;
     }
 
+    public bool IsRewinding()
+    {
+        return isRewinding;
+    }
     public void LoadTimeState(TimeTravelData data)
     {
         rigidbody.position = data.position;
@@ -58,6 +63,7 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             }
             lastData = rigidData;
         }
+        
     }
 
     public TimeTravelData SaveTimeState()
@@ -69,7 +75,9 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             heading = rigidbody.transform.forward,
             time = Time.time,
             velocity = rigidbody.velocity,
-            angularVelocity = rigidbody.angularVelocity
+            angularVelocity = rigidbody.angularVelocity,
+            fixedTime = this.fixedTime,
+            kinematic = rigidbody.isKinematic,
         };
         timeTravelStates.Add(data);
         return data;
@@ -79,9 +87,17 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         if (data != null)
         {
-            rigidbody.isKinematic = false;
-            rigidbody.AddForce(data.velocity, ForceMode.VelocityChange);
-            rigidbody.AddTorque(data.angularVelocity, ForceMode.VelocityChange);
+            fixedTime = data.fixedTime;
+            if (!data.kinematic)
+            {
+                rigidbody.isKinematic = false;
+                rigidbody.AddForce(data.velocity, ForceMode.VelocityChange);
+                rigidbody.AddTorque(data.angularVelocity, ForceMode.VelocityChange);
+            }
+            else
+            {
+                rigidbody.isKinematic = true;
+            }
         }
     }
     public void StartFreeze()
@@ -126,5 +142,18 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             StopRewind();
         }
         timeTravelStates.Clear();
+    }
+
+    void FixedUpdate()
+    {
+        if (!IsFrozen() && !IsRewinding())
+        {
+            fixedTime += Time.fixedDeltaTime;
+        }
+    }
+
+    public float GetFixedTime()
+    {
+        return fixedTime;
     }
 }

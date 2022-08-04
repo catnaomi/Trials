@@ -24,4 +24,6 @@ public interface IAffectedByTimeTravel
     public bool ShouldApplyTimeVisualEffect();
 
     public void ClearTimeData();
+
+    public bool IsRewinding();
 }

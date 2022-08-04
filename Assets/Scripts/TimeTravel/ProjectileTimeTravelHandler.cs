@@ -45,6 +45,10 @@ public class ProjectileTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         return isFrozen;
     }
+    public bool IsRewinding()
+    {
+        return isRewinding;
+    }
 
     public void LoadTimeState(TimeTravelData data)
     {

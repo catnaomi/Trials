@@ -5,4 +5,6 @@ public class RigidbodyTimeTravelData : TimeTravelData
 {
     public Vector3 velocity;
     public Vector3 angularVelocity;
+    public float fixedTime;
+    public bool kinematic;
 }
