@@ -18,6 +18,7 @@ public class MovingPlatformController : MonoBehaviour
     public Vector3 velocity;
     public Vector3 angularVelocity;
     RigidbodyTimeTravelHandler timeTravelHandler;
+    public bool useExternalTriggers = false;
     public void Start()
     {
         /*
@@ -31,9 +32,9 @@ public class MovingPlatformController : MonoBehaviour
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (other.transform.root.gameObject == PlayerActor.player.gameObject)
+        if (other.transform.root.gameObject == PlayerActor.player.gameObject && !useExternalTriggers)
         {
-            attached = true;
+            Entry();
         }
     }
 
@@ -60,9 +61,19 @@ public class MovingPlatformController : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.transform.root.gameObject == PlayerActor.player.gameObject)
+        if (other.transform.root.gameObject == PlayerActor.player.gameObject && !useExternalTriggers)
         {
-            attached = false;
+            Exit();
         }
+    }
+
+    public void Entry()
+    {
+        attached = true;
+    }
+
+    public void Exit()
+    {
+        attached = false;
     }
 }
