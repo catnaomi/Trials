@@ -1978,7 +1978,7 @@ Transform:
   - {fileID: 7306827525893766287}
   - {fileID: 7306827524824730729}
   m_Father: {fileID: 0}
-  m_RootOrder: 55
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7306827524412607680
 MonoBehaviour:
@@ -1996,8 +1996,16 @@ MonoBehaviour:
   playOnAwake: 0
   destroyOnComplete: 1
   hidePlayer: 0
+  disablePlayerMovement: 0
   playerRefTransform: {fileID: 7306827525740722280}
+  refTransformFollowsPlayer: 0
   fakePlayer: {fileID: 7306827524793221004}
+  OnStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnEnd:
+    m_PersistentCalls:
+      m_Calls: []
   bindingIndexMap:
   - index: 4
     bindingType: 3
@@ -3939,7 +3947,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7306827524636856859
 Transform:
   m_ObjectHideFlags: 0
