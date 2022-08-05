@@ -8,6 +8,8 @@ public class BreakableObject : MonoBehaviour, IDamageable
     public List<DamageType> brokenByElements;
     public GameObject particlePrefab;
     public UnityEvent OnBreak;
+    public UnityEvent OnFail;
+    public bool recoilOnFail = true;
     public void Recoil()
     {
         
@@ -25,8 +27,17 @@ public class BreakableObject : MonoBehaviour, IDamageable
             if (brokenByElements.Contains(element))
             {
                 BreakObject();
-                break;
+                return;
             }
+        }
+        if (recoilOnFail)
+        {
+            
+            if (!damage.isRanged && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+            {
+                damageable.Recoil();   
+            }
+            damage.OnBlock.Invoke();
         }
     }
 

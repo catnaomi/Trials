@@ -1156,7 +1156,43 @@ MonoBehaviour:
       m_Calls: []
   OnDie:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3693750383195628821}
+        m_TargetAssemblyTypeName: FreeRigidbodyEvent, Assembly-CSharp
+        m_MethodName: FreeRigidbody
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 6944690266880876873}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 6944690266656859160}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   OnAttack:
     m_PersistentCalls:
       m_Calls: []
@@ -1248,6 +1284,7 @@ MonoBehaviour:
   strafeDelay: 2
   strafeDirection: 0
   jumpAdjustSpeed: 3
+  turningDelay: 1
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: ebd0e8a8970150e4198eed744433e702, type: 2}
   moveAnim: {fileID: 11400000, guid: 28683461edb485a4784728197d84066c, type: 2}
@@ -1477,6 +1514,12 @@ MonoBehaviour:
   timeRemaining: []
   timeTravelStates: []
   timeTravelController: {fileID: 0}
+  OnFreeze:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnfreeze:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &579917600842904003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4579,6 +4622,16 @@ PrefabInstance:
     serializedVersion: 2
     m_TransformParent: {fileID: 340527186719415538}
     m_Modifications:
+    - target: {fileID: 6590004802693576614, guid: 1d6cb30720552ac4c879f2d67596ac53,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6590004802738389235, guid: 1d6cb30720552ac4c879f2d67596ac53,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 6590004803033560457, guid: 1d6cb30720552ac4c879f2d67596ac53,
         type: 3}
       propertyPath: m_RootOrder
@@ -4657,9 +4710,33 @@ PrefabInstance:
     m_RemovedComponents: []
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 1d6cb30720552ac4c879f2d67596ac53, type: 3}
+--- !u!114 &3693750383195628821 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 600895285116109999, guid: 1d6cb30720552ac4c879f2d67596ac53,
+    type: 3}
+  m_PrefabInstance: {fileID: 4257055530421002682}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bf12b16d9436b449b234d7931b6f1a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &6944690266656859160 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6590004802966177186, guid: 1d6cb30720552ac4c879f2d67596ac53,
+    type: 3}
+  m_PrefabInstance: {fileID: 4257055530421002682}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6944690266858443827 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6590004803033560457, guid: 1d6cb30720552ac4c879f2d67596ac53,
+    type: 3}
+  m_PrefabInstance: {fileID: 4257055530421002682}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6944690266880876873 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6590004802738389235, guid: 1d6cb30720552ac4c879f2d67596ac53,
     type: 3}
   m_PrefabInstance: {fileID: 4257055530421002682}
   m_PrefabAsset: {fileID: 0}

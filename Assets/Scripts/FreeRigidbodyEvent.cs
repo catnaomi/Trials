@@ -8,7 +8,7 @@ public class FreeRigidbodyEvent : MonoBehaviour
     public void FreeRigidbody()
     {
         target.GetComponent<Collider>().enabled = true;
-        target.transform.parent.SetParent(null);
+        target.transform.SetParent(null);
         target.isKinematic = false;
         target.Sleep();
     }
