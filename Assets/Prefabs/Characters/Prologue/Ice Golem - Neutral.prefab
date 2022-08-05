@@ -3352,6 +3352,7 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
+  currentConsumable: {fileID: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   timeTravelStates: []
@@ -3371,6 +3372,7 @@ MonoBehaviour:
   strafeDelay: 2
   strafeDirection: 0
   jumpAdjustSpeed: 3
+  turningDelay: 1
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: ebd0e8a8970150e4198eed744433e702, type: 2}
   moveAnim: {fileID: 11400000, guid: 28683461edb485a4784728197d84066c, type: 2}
@@ -3518,7 +3520,7 @@ MonoBehaviour:
   RangedWeapon: {fileID: 0}
   RangedIsDrawn: 0
   DroppedContents: []
-  equipToMain: {fileID: 11400000, guid: 83393d613dc23204bb4b827e671d3b6b, type: 2}
+  equipToMain: {fileID: 11400000, guid: f3635d04d39edf14f9d7ba0507247031, type: 2}
   shouldEquipMain: 1
   equipToOff: {fileID: 0}
   shouldEquipOff: 0
@@ -3563,6 +3565,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnDashDust:
+    m_PersistentCalls:
+      m_Calls: []
+  StartSpiral:
+    m_PersistentCalls:
+      m_Calls: []
+  EndSpiral:
     m_PersistentCalls:
       m_Calls: []
   OnArrowDraw:
@@ -3645,6 +3653,12 @@ MonoBehaviour:
   timeRemaining: []
   timeTravelStates: []
   timeTravelController: {fileID: 0}
+  OnFreeze:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnfreeze:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &6971900654237909572
 GameObject:
   m_ObjectHideFlags: 0

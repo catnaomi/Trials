@@ -7,42 +7,37 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: IceGolemOpaque
-  m_Shader: {fileID: 4800000, guid: 650dd9526735d5b46b79224bc6e94025, type: 3}
+  m_Name: IceOpaque
+  m_Shader: {fileID: -6465566751694194690, guid: 1493bb12e700cde4f8c54a9f5a311e85,
+    type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _EMISSION
+  m_InvalidKeywords: []
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap:
-    RenderType: Opaque
+  stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: 
+  m_LockedProperties: _BaseTex
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _BaseMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _BaseTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 7e9a3b59a3306c74e902f8745d6059e2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _HighlightTex:
+    - _HighlightTexture:
         m_Texture: {fileID: 2800000, guid: bb0cb719a1c89a945872dc69ba7d1a2b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _MainTex:
-        m_Texture: {fileID: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 2800000, guid: 5fabbc23f21498a46a9ff6f90cb47afe, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _SpecularTex:
-        m_Texture: {fileID: 2800000, guid: bb0cb719a1c89a945872dc69ba7d1a2b, type: 3}
+    - _ToonSubgraph_73703f314db845a39ea31455881e81d2_GlowMap_1978569769:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -59,32 +54,27 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _AlphaClip: 0
-    - _Blend: 0
-    - _BlendOp: 0
-    - _Cull: 2
-    - _Cutoff: 0.5
-    - _DstBlend: 0
-    - _DstBlendAlpha: 0
-    - _Edge1: 0.12
-    - _Edge2: 0.5
-    - _HighlightStrength: 0.212
+    - _Alpha: 1
+    - _Float: 0
+    - _FresnelPower: 1.5
+    - _HighlightTextureStrength: 0.328
+    - _HighlightThreshold: 0.99
+    - _NormalStrength: 8
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _SampleGI: 0
+    - _RefractionIndex: 0
+    - _ShadowThreshold: 0.31
     - _Smoothness: 0
-    - _SpecularThreshold: 1.44
-    - _SrcBlend: 1
-    - _SrcBlendAlpha: 1
-    - _Surface: 0
-    - _ZWrite: 1
+    - _ToonBrightness: 0
+    - _ToonOffset: 0.3
+    - _ToonSmoothness: 0.05
     m_Colors:
-    - _BaseColor: {r: 0.41099998, g: 0.41099998, b: 0.41099998, a: 1}
-    - _Color: {r: 0.41099998, g: 0.41099998, b: 0.41099998, a: 1}
-    - _HighlightColor: {r: 0.88235295, g: 0.93333334, b: 1, a: 1}
-    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 3.0079997, g: 5.702094, b: 7.999999, a: 1}
+    - _HighlightColor: {r: 2.143547, g: 2.143547, b: 2.143547, a: 1}
+    - _ShadowColor: {r: 0.26635566, g: 0.67244333, b: 0.68668544, a: 1}
+    - _UnderColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &3988513282530935507
+--- !u!114 &2822670639745386066
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
