@@ -81,4 +81,10 @@ public class DialogueActorOverride : Interactable
         yield return new WaitForSecondsRealtime(1f);
         talking = false;
     }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(0f, 0f, 1f, 0.5f);
+        Gizmos.DrawSphere(this.transform.position + Vector3.up * interactIconHeight, 0.25f);
+    }
 }
