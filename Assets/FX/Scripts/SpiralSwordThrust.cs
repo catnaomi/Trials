@@ -33,7 +33,7 @@ public class SpiralSwordThrust : MonoBehaviour
     public float impulseCritMag = 0.2f;
     public float impulseBlockMult = 0.5f;
     [Space(10)]
-    public ParticleLineController spiral;
+    public ParticleSystem spiral;
     public Transform spiralParent;
     public float rotateSpeed = 360f;
     public UnityEvent BeginSpiral;
@@ -57,24 +57,28 @@ public class SpiralSwordThrust : MonoBehaviour
         {
             SetSpiralPosition();
             spiral.transform.localRotation = Quaternion.identity;
-            if (!spiral.particleSystem.isEmitting)
+            if (!spiral.isEmitting)
             {
-                spiral.particleSystem.Clear();
-                spiral.particleSystem.Play();
-                spiral.updateLine = true;
+                spiral.Clear();
+                spiral.Play();
             }
             spiralFadeClock = spiralFadeTime + spiralFadeDelay;
-            maxPositionCount = spiral.line.positionCount;
         }
         else
         {
 
             //SetSpiralPosition();
-            if (spiral.particleSystem.isEmitting)
+            if (spiral.isEmitting)
             {
-                spiral.particleSystem.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-                spiral.updateLine = false;
+                spiralFadeClock -= Time.deltaTime;
+                if (spiralFadeClock <= 0)
+                {
+                    spiral.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                }
+                
+                //spiral.Pause();
             }
+            /*
             if (spiral.line.positionCount > 0)
             {
                 spiralFadeClock -= Time.deltaTime;
@@ -88,12 +92,13 @@ public class SpiralSwordThrust : MonoBehaviour
                 /*Vector3[] posArray = new Vector3[spiral.line.positionCount];
                 spiral.line.GetPositions(posArray);
                 posArray = posArray.Skip(1).ToArray();
-                spiral.line.SetPositions(posArray);*/
+                spiral.line.SetPositions(posArray);
             }
             if (!spiral.updateLine)
             {
                 //spiral.transform.localRotation *= Quaternion.Euler(0f, 0f,  rotateSpeed * Time.deltaTime);
             }
+            */
             
         }
         for (int j = 0; j < bloodParticles.Length; j++)

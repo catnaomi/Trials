@@ -38,6 +38,10 @@ public static class DebugReflectionMethods
         }
     }
 
+    public static void API()
+    {
+        AddPlayerItems();
+    }
     public static void GiveItem(string target, string itemName)
     {
         try
@@ -283,6 +287,36 @@ public static class DebugReflectionMethods
         }
     }
 
+
+    public static void SetHealth(string actorName, string number)
+    {
+        try
+        {
+            GameObject obj = GameObject.Find(actorName);
+            if (obj == null)
+            {
+                Debug.LogError("Could not find object " + actorName);
+                return;
+            }
+            Actor actor = obj.GetComponent<Actor>();
+            if (actor == null)
+            {
+                Debug.LogError("Object " + obj + " lacks an actor component");
+                return;
+            }
+            if (!float.TryParse(number, out float health))
+            {
+                Debug.LogError("Could not parse " + number);
+                return;
+            }
+            actor.attributes.SetHealth(health);
+            Debug.Log(string.Format("Set {0} health to {1}", actor.name, health.ToString()));
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
 
     /*
     public static void Template()

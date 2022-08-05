@@ -94,6 +94,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public ClipTransition SummonHold;
     public ClipTransition SummonEnd;
     public ClipTransition SpawnAnim;
+    public FlyToTargetThenEmitSecondary[] SummonBalls;
     bool summoning;
     public float SummonTime;
     float summonClock;
@@ -166,7 +167,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     [SerializeField, ReadOnly] bool spawn1Occupied;
     [SerializeField, ReadOnly] bool spawn2Occupied;
     [SerializeField, ReadOnly] bool spawn3Occupied;
-
+    public ParticleSystem summonParticle;
     [Header("Enumerated States")]
     public WeaponState weaponState;
     public UnityEvent OnWeaponTransform;
@@ -262,6 +263,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         base.ActorPostUpdate();
 
+        
         if (clock > -1)
         {
             clock -= Time.deltaTime;
@@ -656,6 +658,17 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         if (summoning)
         {
             ProcessSummon();
+            if (summonParticle != null && !summonParticle.isEmitting)
+            {
+                summonParticle.Play();
+            }
+        }
+        else
+        {
+            if (summonParticle != null && summonParticle.isEmitting)
+            {
+                summonParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            }
         }
         if (pillarStunned)
         {
@@ -1203,6 +1216,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                     spawnedEnemies.Remove(actor2);
                 });
             }
+
+            SummonBalls[0].Fly(summonParticle.transform.position, pos1);
+            SummonBalls[1].Fly(summonParticle.transform.position, pos2);
         }
         else if (type == 2) // shield dummy
         {
@@ -1259,6 +1275,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                     spawnedEnemies.Remove(actor1);
                 });
             }
+            SummonBalls[0].Fly(summonParticle.transform.position, pos1);
+            //SummonBalls[1].Fly(summonParticle.transform.position, pos2);
         }
         else if (type == 3) // archer dummy
         {
@@ -1315,6 +1333,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                     spawnedEnemies.Remove(actor1);
                 });
             }
+            SummonBalls[0].Fly(summonParticle.transform.position, pos1);
+            //SummonBalls[1].Fly(summonParticle.transform.position, pos2);
         }
     }
 

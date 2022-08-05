@@ -140,7 +140,7 @@ public class ActorAttributes : MonoBehaviour
         }
         else
         {
-            ReduceHealth(diff);
+            ReduceHealth(-diff);
         }
     }
     public void ReduceHealth(float damage)
