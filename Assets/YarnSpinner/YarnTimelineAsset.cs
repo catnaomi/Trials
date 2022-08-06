@@ -16,7 +16,15 @@ public class YarnTimelineAsset : PlayableAsset
 
         var yarnTimelineBehaviour = playable.GetBehaviour();
         yarnTimelineBehaviour.yarnProject = yarnProject;
-        yarnTimelineBehaviour.node = node;
+        if ((node == "" || node == "_fillfromdirector") && owner.TryGetComponent<YarnTimelineDialogueReference>(out YarnTimelineDialogueReference reference))
+        {
+            yarnTimelineBehaviour.node = reference.node;
+        }
+        else
+        {
+            yarnTimelineBehaviour.node = node;
+        }
+        
         yarnTimelineBehaviour.pauseOnStart = pauseOnStart;
 
         return playable;

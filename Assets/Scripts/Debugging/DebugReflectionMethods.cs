@@ -318,6 +318,23 @@ public static class DebugReflectionMethods
         }
     }
 
+    public static void Quit()
+    {
+        try
+        {
+            Application.Quit();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
+    public static void QQQ()
+    {
+        Quit();
+    }
+
     /*
     public static void Template()
     {

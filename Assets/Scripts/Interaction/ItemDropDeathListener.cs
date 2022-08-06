@@ -18,6 +18,7 @@ public class ItemDropDeathListener : MonoBehaviour
     {
         interact.canInteract = false;
         interact.gameObject.SetActive(false);
+        dropLocation.gameObject.SetActive(false);
         if (targetListenForDeath == null)
         {
             OnDie();
@@ -46,6 +47,7 @@ public class ItemDropDeathListener : MonoBehaviour
         interact.canInteract = true;
         looseItem = LooseItem.CreateLooseItem(itemToDrop);
         looseItem.canInteract = false;
+        dropLocation.gameObject.SetActive(true);
         //looseItem.transform.position = targetListenForDeath.transform.position + Vector3.up * 0.5f;
         looseItem.transform.position = dropLocation.position;
         
