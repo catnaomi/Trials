@@ -87,8 +87,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public ClipTransition JumpShotUp;
     public ClipTransition JumpShotLand;
     public float JumpShotTime = 0.2f;
+    public float aimTime = 2f;
     [ReadOnly]public bool aiming;
-    float aimTime;
     [Space(10)]
     public ClipTransition SummonStart;
     public ClipTransition SummonHold;
@@ -167,14 +167,21 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     [SerializeField, ReadOnly] bool spawn1Occupied;
     [SerializeField, ReadOnly] bool spawn2Occupied;
     [SerializeField, ReadOnly] bool spawn3Occupied;
-    public ParticleSystem summonParticle;
     [Header("Enumerated States")]
     public WeaponState weaponState;
     public UnityEvent OnWeaponTransform;
     CharacterController cc;
     Vector3 lastTargetPos;
     Vector3 targetSpeed;
+    
     protected CombatState cstate;
+
+    [Header("Particles")]
+    public ParticleSystem summonParticle;
+    public ParticleSystem aimParticle;
+    public ParticleSystem fireParticle;
+    public ParticleSystem circleParticle;
+    public ParticleSystem crossParticle;
     protected struct CombatState
     {
         public AnimancerState attack;
@@ -327,17 +334,17 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
                 if (aiming)
                 {
-                    if (aimTime > 1f)
+                    StartRangedAttack();
+                    /*
+                    if (r < 0.5f)
                     {
-                        if (r < 0.5f)
-                        {
-                            StartRangedAttack();
-                        }
-                        else
-                        {
-                            StartRangedAttackMulti();
-                        }
+                        StartRangedAttack();
                     }
+                    else
+                    {
+                        StartRangedAttackMulti();
+                    }
+                    */
                 }
                 else if (shouldPillarJump)
                 {
@@ -587,6 +594,24 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             }
 
         }
+
+        if (circleParrying && !circleParticle.isPlaying)
+        {
+            circleParticle.Play();
+        }
+        else if (!circleParrying && circleParticle.isPlaying)
+        {
+            circleParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
+        if (crossParrying && !crossParticle.isPlaying)
+        {
+            crossParticle.Play();
+        }
+        else if (!crossParrying && crossParticle.isPlaying)
+        {
+            crossParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        }
+
         if (animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying() && !aiming && animancer.States.Current != cstate.parry_circle && animancer.States.Current != cstate.parry_cross)
         {
             animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
@@ -622,7 +647,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
         if (aiming)
         {
-            aimTime += Time.deltaTime;
             animancer.Layers[0].ApplyAnimatorIK = true;
         }
         if (animancer.States.Current == cstate.ranged_idle && cstate.ranged_idle is MixerState mix && mix.ChildStates[0] is LinearMixerState rangedIdle)
@@ -801,6 +825,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         cstate.attack = state;
         //crossParrying = true;
         parryTime = 0f;
+        //crossParticle.Play();
     }
 
     public void PlayCrossParry()
@@ -822,6 +847,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         cstate.attack = state;
         //circleParrying = true;
         parryTime = 0f;
+        //circleParticle.Play();
     }
 
     public void PlayCircleParry()
@@ -1023,8 +1049,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         OnWeaponTransform.Invoke();
         cstate.ranged_idle = animancer.Play(RangedAttack.GetMovement());
         animancer.Layers[HumanoidAnimLayers.UpperBody].Play(RangedAttack.GetStartClip());
+        clock = aimTime;
         aiming = true;
-        aimTime = 0f;
+        aimParticle.Play();
     }
     public void StartRangedAttack()
     {
@@ -1033,12 +1060,13 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         cstate.attack.Events.OnEnd = _MoveOnEnd;
         aiming = false;
         OnAttack.Invoke();
+        aimParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+        fireParticle.Play();
     }
 
     public void StartRangedAttackMulti()
     {
         aiming = true;
-        aimTime = 0f;
         weaponState = DojoBossCombatantActor.WeaponState.Bow;
         OnWeaponTransform.Invoke();
         animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
@@ -1063,7 +1091,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         nav.enabled = false;
 
         aiming = true;
-        aimTime = 0f;
         weaponState = DojoBossCombatantActor.WeaponState.Bow;
         OnWeaponTransform.Invoke();
     }

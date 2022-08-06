@@ -8,6 +8,9 @@
         },
         {
             "m_Id": "b05ab341c406476ab47c0ba257ae336e"
+        },
+        {
+            "m_Id": "6d9d65f9ac1842d38d767b2175f9812f"
         }
     ],
     "m_Keywords": [],
@@ -128,20 +131,6 @@
     ],
     "m_StickyNoteDatas": [],
     "m_Edges": [
-        {
-            "m_OutputSlot": {
-                "m_Node": {
-                    "m_Id": "017a9e1940e6477980fd0f1c9f300f39"
-                },
-                "m_SlotId": 2
-            },
-            "m_InputSlot": {
-                "m_Node": {
-                    "m_Id": "8d903dc6f0a44aa49b648c58065465d2"
-                },
-                "m_SlotId": 1
-            }
-        },
         {
             "m_OutputSlot": {
                 "m_Node": {
@@ -574,7 +563,7 @@
     },
     "m_PreviewData": {
         "serializedMesh": {
-            "m_SerializedMesh": "{\"mesh\":{\"instanceID\":0}}",
+            "m_SerializedMesh": "{\"mesh\":{\"fileID\":10210,\"guid\":\"0000000000000000e000000000000000\",\"type\":0}}",
             "m_Guid": ""
         },
         "preventRotation": false
@@ -920,6 +909,9 @@
         },
         {
             "m_Id": "b05ab341c406476ab47c0ba257ae336e"
+        },
+        {
+            "m_Id": "6d9d65f9ac1842d38d767b2175f9812f"
         }
     ]
 }
@@ -1875,6 +1867,36 @@
 }
 
 {
+    "m_SGVersion": 3,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.ColorShaderProperty",
+    "m_ObjectId": "6d9d65f9ac1842d38d767b2175f9812f",
+    "m_Guid": {
+        "m_GuidSerialized": "5b41eb6e-0611-40ef-b7bc-bba3806763a3"
+    },
+    "m_Name": "SubtractiveColor",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "SubtractiveColor",
+    "m_DefaultReferenceName": "_SubtractiveColor",
+    "m_OverrideReferenceName": "",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+    },
+    "isMainColor": false,
+    "m_ColorMode": 0
+}
+
+{
     "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.OneMinusNode",
     "m_ObjectId": "6e885ddac11c4813ae6ba4b8294d0f67",
@@ -2110,7 +2132,7 @@
     "m_ZWriteControl": 2,
     "m_AlphaMode": 0,
     "m_RenderFace": 0,
-    "m_AlphaClip": true,
+    "m_AlphaClip": false,
     "m_CastShadows": true,
     "m_ReceiveShadows": true,
     "m_CustomEditorGUI": "",
@@ -2644,7 +2666,7 @@
     "isMainTexture": false,
     "useTilingAndOffset": false,
     "m_Modifiable": true,
-    "m_DefaultType": 0
+    "m_DefaultType": 1
 }
 
 {
@@ -2877,7 +2899,7 @@
     "m_ShaderOutputName": "B",
     "m_StageCapability": 3,
     "m_Value": {
-        "e00": 2.0,
+        "e00": 0.5,
         "e01": 2.0,
         "e02": 2.0,
         "e03": 2.0,

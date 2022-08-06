@@ -41,7 +41,7 @@ public class SpiralSwordThrust : MonoBehaviour
     public UnityEvent OnBleed;
     public float spiralFadeDelay = 0.5f;
     public float spiralFadeTime = 0.5f;
-    int maxPositionCount;
+    float maxSpiralSpeed;
     float spiralFadeClock;
     bool eraseSpiral;
     // Start is called before the first frame update
@@ -73,7 +73,7 @@ public class SpiralSwordThrust : MonoBehaviour
                 spiralFadeClock -= Time.deltaTime;
                 if (spiralFadeClock <= 0)
                 {
-                    spiral.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                    //spiral.Stop(true, ParticleSystemStopBehavior.StopEmitting);
                 }
                 
                 //spiral.Pause();
@@ -201,8 +201,8 @@ public class SpiralSwordThrust : MonoBehaviour
 
             spiral.gameObject.SetActive(true);
 
-            LineRenderer line = spiral.GetComponent<LineRenderer>();
-            line.positionCount = 1;
+            //LineRenderer line = spiral.GetComponent<LineRenderer>();
+            //line.positionCount = 1;
             //line.SetPosition(0, topPoint.position);
             spiral.GetComponent<ParticleSystem>().Stop();
             spiral.GetComponent<ParticleSystem>().Clear();
