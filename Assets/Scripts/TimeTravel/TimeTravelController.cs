@@ -361,7 +361,7 @@ public class TimeTravelController : MonoBehaviour
         recording = false;
         foreach (IAffectedByTimeTravel affected in affectees)
         {
-            affected.GetTimeStates().Clear();
+            affected.GetTimeStates()?.Clear();
         }
     }
 
@@ -556,7 +556,7 @@ public class TimeTravelController : MonoBehaviour
                 {
                     affected.StartRewind();
                 }
-                if (stepsRemaining > 0 && affected.GetTimeStates().Count > index)
+                if (stepsRemaining > 0 && affected.GetTimeStates()?.Count > index)
                 {
                     TimeTravelData data = affected.GetTimeStates()[affected.GetTimeStates().Count - 1 - index];
                     affected.LoadTimeState(data);

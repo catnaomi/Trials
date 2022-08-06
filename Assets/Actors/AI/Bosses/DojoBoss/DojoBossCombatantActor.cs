@@ -182,6 +182,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public ParticleSystem fireParticle;
     public ParticleSystem circleParticle;
     public ParticleSystem crossParticle;
+    public ParticleSystem jumpParticle;
+    public ParticleSystem hammerParticle;
     protected struct CombatState
     {
         public AnimancerState attack;
@@ -649,6 +651,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             animancer.Layers[0].ApplyAnimatorIK = true;
         }
+        else if (aimParticle.isPlaying)
+        {
+            aimParticle.Stop();
+        }
         if (animancer.States.Current == cstate.ranged_idle && cstate.ranged_idle is MixerState mix && mix.ChildStates[0] is LinearMixerState rangedIdle)
         {
             Vector3 lookDirection = transform.forward;
@@ -893,6 +899,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         plungeStart = this.transform.position;
         OnAttack.Invoke();
         plunging = true;
+        jumpParticle.Play();
     }
 
     public void ProcessCrouch()
@@ -1033,6 +1040,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         endJumpPosition = position;
         startJumpPosition = this.transform.position;
         nav.enabled = false;
+        jumpParticle.Play();
     }
 
     void JumpEnd()
@@ -1522,6 +1530,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 damageable.TakeDamage(currentDamage);
             }
         }
+        hammerParticle.transform.position = origin;
+        hammerParticle.Play();
         Debug.DrawRay(origin, Vector3.forward * SHOCKWAVE_RADIUS, Color.red, 5f);
         Debug.DrawRay(origin, Vector3.back * SHOCKWAVE_RADIUS, Color.red, 5f);
         Debug.DrawRay(origin, Vector3.right * SHOCKWAVE_RADIUS, Color.red, 5f);
@@ -1813,6 +1823,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             {
                 RealignToTarget();
                 cstate.hurt = animancer.Play(KnockdownOverride);
+                cstate.hurt.NormalizedTime = 0f;
                 damageHandler.SetInvulnClip(cstate.hurt);
                 this.attributes.ReduceHealth(damageAmount);
                 damage.OnHit.Invoke();
@@ -1992,6 +2003,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             if (!isBackToWall)
             {
                 cstate.dodge = animancer.Play(DodgeBack);
+                jumpParticle.Play();
                 StartCoroutine(MoveForDuration(-this.transform.forward * 5f, 0.75f));
                 cstate.dodge.Events.OnEnd = AfterDodge;
                 Debug.DrawRay(origin, -this.transform.forward * dist, Color.magenta, 5f);
@@ -2000,6 +2012,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             {
                 int side = CheckStrafe();
                 cstate.dodge = animancer.Play((side < 0) ? DodgeLeft : DodgeRight);
+                jumpParticle.Play();
                 StartCoroutine(MoveForDuration(this.transform.right * ((side < 0) ? -1 : 1) * 5f, 0.75f));
                 cstate.dodge.Events.OnEnd = AfterDodge;
                 Debug.DrawRay(origin, -this.transform.forward * dist, (side < 0) ? Color.blue : Color.red, 5f);
