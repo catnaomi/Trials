@@ -67,6 +67,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float hardLandingTime = 2f;
     public float softLandingTime = 1f;
     public float friction = 1f;
+    public float groundFriction = 1f;
+    public float waterFriction = 1f;
     [Space(5)]
     public float rollSpeed = 5f;
     public float jumpVel = 10f;
@@ -428,7 +430,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Vector3 lookDirection = this.transform.forward;
         Vector3 moveDirection = Vector3.zero;
         bool applyMove = false;
-        float grav = gravity;
+        
         slopeAngle = -1f;
         groundNormal = Vector3.up;
         if (rayHit.collider != null)
@@ -453,7 +455,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             aimTimer = aimCancelTime;
         }
 
-        
+        if (lastPhysicsMaterial != null)
+        {
+            groundFriction = lastPhysicsMaterial.dynamicFriction;
+        }
+        else
+        {
+            groundFriction = 1f;
+        }
+        friction = groundFriction;
 
         //GetHeadPoint();
 
@@ -1208,6 +1218,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
             animancer.Layers[0].ApplyAnimatorIK = (speed < 0.1f);
             applyMove = true;
+            friction = waterFriction;
         }
         #endregion
 
@@ -1525,6 +1536,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (applyMove)
         {
             xzVel = Vector3.Lerp(xzVel, moveDirection * speed, friction);
+
         }
         if (IsAiming() && inventory.IsRangedDrawn() && camState == CameraState.Aim)
         {
