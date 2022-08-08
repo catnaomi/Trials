@@ -3554,6 +3554,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         bool facingUp = damageHandler.isFacingUp;
         state.resurrect = animancer.Play(facingUp ? resurrectFaceUp : resurrectFaceDown);
         ResurrectAnimation(state.resurrect);
+        yield return new WaitForSecondsRealtime(5f);
+        while (resurrecting)
+        {
+            _MoveOnEnd();
+            dead = false;
+            resurrecting = false;
+            yield return new WaitForSecondsRealtime(1f);
+        }
     }
 
     #endregion

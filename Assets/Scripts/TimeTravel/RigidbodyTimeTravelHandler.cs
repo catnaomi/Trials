@@ -156,4 +156,9 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         return fixedTime;
     }
+
+    void OnDestroy()
+    {
+        TimeTravelController.time.DeregisterAffectee(this);
+    }
 }

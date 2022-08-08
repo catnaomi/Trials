@@ -86,4 +86,9 @@ public class ParticleTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         // do nothing
     }
+
+    void OnDestroy()
+    {
+        TimeTravelController.time.DeregisterAffectee(this);
+    }
 }

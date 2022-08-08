@@ -214,76 +214,86 @@ public class TimeTravelController : MonoBehaviour
 
     void SetupInput()
     {
-        playerInput.actions["UsePower"].performed += (c) =>
-        {
-            if (!ShouldAllowInput()) return;
-            if (ignoreLimits) return;
-            if (isSlowing)
-            {
-                // do nothing
-            }
-            else if (!isRewinding && !freeze && c.interaction is TapInteraction)
-            {
-                if (!CanStartPower())
-                {
-                    OnCooldownFail.Invoke();
-                    return;
-                }
+        playerInput.actions["UsePower"].performed += UsePowerInput;
 
-                GameObject target = PlayerActor.player.GetCombatTarget();
-                if (target == null)
-                {
-                    timeStopOrigin = PlayerActor.player.transform.position;
-                }
-                else
-                {
-                    timeStopOrigin = PlayerActor.player.GetCombatTarget().transform.position;
-                }
-                if (!globalFreeze)
-                {
-                    StartCoroutine(OpenBubbleRoutine());
-                    StartFreeze();
-                }
-                else
-                {
-                    AddAllToFreeze();
-                    StartFreeze();
-                }
-            }
-            else if (!freeze && recording && !isRewinding && c.interaction is HoldInteraction)
-            {
-                if (!CanStartPower())
-                {
-                    OnCooldownFail.Invoke();
-                    return;
-                }
-                StartRewind();
-            }
-            else if (freeze && c.interaction is TapInteraction)
-            {
-                StopFreeze();
-            }
-        };
-
-        playerInput.actions["UsePower"].canceled += (c) =>
-        {
-            if(!ShouldAllowInput()) return;
-            if (ignoreLimits) return;
-            if (isSlowing)
-            {
-                // do nothing
-            }
-            else if (isRewinding)
-            {
-                CancelRewind();
-            }
-            else if (freeze)
-            {
-                //StopFreeze();
-            }
-        };
+        playerInput.actions["UsePower"].canceled += CancelPowerInput;
     }
 
+    void UsePowerInput(UnityEngine.InputSystem.InputAction.CallbackContext c)
+    {
+        if (!ShouldAllowInput()) return;
+        if (ignoreLimits) return;
+        if (isSlowing)
+        {
+            // do nothing
+        }
+        else if (!isRewinding && !freeze && c.interaction is TapInteraction)
+        {
+            if (!CanStartPower())
+            {
+                OnCooldownFail.Invoke();
+                return;
+            }
+
+            GameObject target = PlayerActor.player.GetCombatTarget();
+            if (target == null)
+            {
+                timeStopOrigin = PlayerActor.player.transform.position;
+            }
+            else
+            {
+                timeStopOrigin = PlayerActor.player.GetCombatTarget().transform.position;
+            }
+            if (!globalFreeze)
+            {
+                StartCoroutine(OpenBubbleRoutine());
+                StartFreeze();
+            }
+            else
+            {
+                AddAllToFreeze();
+                StartFreeze();
+            }
+        }
+        else if (!freeze && recording && !isRewinding && c.interaction is HoldInteraction)
+        {
+            if (!CanStartPower())
+            {
+                OnCooldownFail.Invoke();
+                return;
+            }
+            StartRewind();
+        }
+        else if (freeze && c.interaction is TapInteraction)
+        {
+            StopFreeze();
+        }
+    }
+
+    void CancelPowerInput(UnityEngine.InputSystem.InputAction.CallbackContext c)
+    {
+        if (!ShouldAllowInput()) return;
+        if (ignoreLimits) return;
+        if (isSlowing)
+        {
+            // do nothing
+        }
+        else if (isRewinding)
+        {
+            CancelRewind();
+        }
+        else if (freeze)
+        {
+            //StopFreeze();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        playerInput.actions["UsePower"].performed -= UsePowerInput;
+
+        playerInput.actions["UsePower"].canceled -= CancelPowerInput;
+    }
     public void RegisterAffectee(IAffectedByTimeTravel affectee)
     {
         affectees.Add(affectee);
@@ -410,6 +420,7 @@ public class TimeTravelController : MonoBehaviour
     }
     public void Unfreeze(IAffectedByTimeTravel affected)
     {
+        if (affected == null) return;
         affected.StopFreeze();
     }
 
