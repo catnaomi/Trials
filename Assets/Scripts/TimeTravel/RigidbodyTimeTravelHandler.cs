@@ -51,6 +51,11 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         return isRewinding;
     }
+
+    public bool IsNull()
+    {
+        return this == null;
+    }
     public void LoadTimeState(TimeTravelData data)
     {
         rigidbody.position = data.position;

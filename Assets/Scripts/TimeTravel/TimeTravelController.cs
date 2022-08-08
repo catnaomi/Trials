@@ -473,6 +473,11 @@ public class TimeTravelController : MonoBehaviour
         {
             foreach (IAffectedByTimeTravel affected in affectees)
             {
+                if (affected == null || affected.IsNull())
+                {
+                    DeregisterAffectee(affected);
+                    continue;
+                }
                 if (!affected.IsFrozen() && frozens.Contains(affected))
                 {
                     Freeze(affected);

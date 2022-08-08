@@ -26,4 +26,6 @@ public interface IAffectedByTimeTravel
     public void ClearTimeData();
 
     public bool IsRewinding();
+
+    public bool IsNull();
 }

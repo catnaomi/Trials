@@ -43,6 +43,10 @@ public class ParticleTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         return false;
     }
 
+    public bool IsNull()
+    {
+        return this == null;
+    }
     public void LoadTimeState(TimeTravelData data)
     {
         // do nothing

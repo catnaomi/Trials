@@ -268,7 +268,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public virtual void StopFreeze()
     {
-        if (!gameObject.activeInHierarchy) return;
+        if (this == null || this.gameObject == null || !gameObject.activeInHierarchy) return;
         isFrozen = false;
         actor.isInTimeState = false;
         if (actor is PlayerActor player)
@@ -306,6 +306,11 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public bool IsRewinding()
     {
         return isRewinding;
+    }
+
+    public bool IsNull()
+    {
+        return this == null;
     }
     public GameObject GetObject()
     {

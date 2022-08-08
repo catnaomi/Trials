@@ -50,6 +50,11 @@ public class ProjectileTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         return isRewinding;
     }
 
+    public bool IsNull()
+    {
+        return this == null;
+    }
+
     public void LoadTimeState(TimeTravelData data)
     {
         if (this == null) return;
@@ -141,6 +146,7 @@ public class ProjectileTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     }
     void LaunchNew()
     {
+        if (this == null || this.gameObject == null) return;
         Vector3 velocity = Vector3.zero;
         if (frozenOnCreate && projectile is ArrowController arrow1)
         {
