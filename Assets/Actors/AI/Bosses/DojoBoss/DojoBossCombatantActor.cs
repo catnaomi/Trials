@@ -829,7 +829,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         
         state.Events.OnEnd = PlayCrossParry;
         cstate.attack = state;
-        //crossParrying = true;
+        crossParrying = true;
         parryTime = 0f;
         //crossParticle.Play();
     }
@@ -851,7 +851,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         
         state.Events.OnEnd = PlayCircleParry;
         cstate.attack = state;
-        //circleParrying = true;
+        circleParrying = true;
         parryTime = 0f;
         //circleParticle.Play();
     }
@@ -1730,6 +1730,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             damageHandler.TakeDamage(damage);
             return;
         }
+
+        aimParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         if (!onPillar && this.transform.position.y > (-1055.5f))
         {
             // isn't on a pillar but is above for some reason? probably a bug
@@ -1927,6 +1929,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         aiming = false;
         RealignToTargetWithOffset(90f);
         cstate.hurt = animancer.Play(PillarHit);
+        cstate.hurt.NormalizedTime = 0f;
         damageHandler.SetCritVulnState(cstate.hurt, 10f);
 
         Vector3 adjust = this.transform.forward * pillarFallAdjustVector.z + this.transform.right * pillarFallAdjustVector.x + this.transform.up * pillarFallAdjustVector.y;
