@@ -193,6 +193,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "DodgeJump",
+                    "type": "Button",
+                    "id": "ce0d43c6-7038-43d6-9d21-296c518e1bd5",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -202,7 +211,7 @@
                     "path": "<Gamepad>/leftStick",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": "Gamepad;Gamepad-Face",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -268,7 +277,7 @@
                     "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": "Gamepad;Gamepad-Face",
                     "action": "Dodge",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -290,7 +299,7 @@
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": "Gamepad;Gamepad-Face",
                     "action": "Jump",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -346,6 +355,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
+                    "action": "Atk_Thrust",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e87d38ab-2625-4a02-b48e-304ac6d49be8",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad-Face",
                     "action": "Atk_Thrust",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -422,7 +442,7 @@
                     "path": "<Gamepad>/dpad/up",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": "Gamepad;Gamepad-Face",
                     "action": "QuickSlot - 0",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -444,7 +464,7 @@
                     "path": "<Gamepad>/dpad/left",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": "Gamepad;Gamepad-Face",
                     "action": "QuickSlot - 1",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -466,7 +486,7 @@
                     "path": "<Gamepad>/dpad/right",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": "Gamepad;Gamepad-Face",
                     "action": "QuickSlot - 2",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -517,6 +537,17 @@
                 },
                 {
                     "name": "",
+                    "id": "b37764a8-9f49-49ee-b035-088994a5f610",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad-Face",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "ede1d15a-51b0-45ab-b7af-b355a68f9f9a",
                     "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
@@ -533,6 +564,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Keyboard",
+                    "action": "Atk_Slash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "de712825-e746-48c2-be0a-e912f29cfa3b",
+                    "path": "<Gamepad>/buttonWest",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad-Face",
                     "action": "Atk_Slash",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -565,7 +607,7 @@
                     "path": "<Gamepad>/rightStick",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": "Gamepad;Gamepad-Face",
                     "action": "Look",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -620,7 +662,7 @@
                     "path": "<Gamepad>/rightTrigger",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": "Gamepad;Gamepad-Face",
                     "action": "UseSecondary",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -642,7 +684,7 @@
                     "path": "<Gamepad>/dpad/down",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": "Gamepad;Gamepad-Face",
                     "action": "QuickSlot - 3",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -655,6 +697,17 @@
                     "processors": "",
                     "groups": "Keyboard",
                     "action": "QuickSlot - 3",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "132058b1-db93-4170-b91e-bc6632be8a7c",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad-Face",
+                    "action": "DodgeJump",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -1121,6 +1174,17 @@
                 },
                 {
                     "devicePath": "<Mouse>",
+                    "isOptional": false,
+                    "isOR": false
+                }
+            ]
+        },
+        {
+            "name": "Gamepad-Face",
+            "bindingGroup": "Gamepad-Face",
+            "devices": [
+                {
+                    "devicePath": "<Gamepad>",
                     "isOptional": false,
                     "isOR": false
                 }
