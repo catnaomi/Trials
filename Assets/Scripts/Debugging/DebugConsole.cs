@@ -60,7 +60,7 @@ public class DebugConsole : MonoBehaviour
         {
             ToggleOpen();
         }
-        if (open && EventSystem.current.currentSelectedGameObject != input.gameObject)
+        if (open && EventSystem.current != null && EventSystem.current.currentSelectedGameObject != input.gameObject)
         {
             EventSystem.current.SetSelectedGameObject(input.gameObject);
             input.ActivateInputField();

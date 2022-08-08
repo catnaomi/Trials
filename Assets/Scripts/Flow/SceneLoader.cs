@@ -31,15 +31,22 @@ public class SceneLoader : MonoBehaviour
     [Header("Disable These GameObjects While Loading")]
     public GameObject[] objectsToDisable;
     public static SceneLoader instance;
-
+    bool loadingFromLoadScreen;
     public UnityEvent OnFinishLoad;
     public UnityEvent OnActiveSceneChange;
     private void Awake()
     {
-        instance = this;
-        isAfterFirstLoad = false;
-        shouldSetPlayerPosition = true;
-        DontDestroyOnLoad(this);
+        if (instance == null)
+        {
+            instance = this;
+            isAfterFirstLoad = false;
+            shouldSetPlayerPosition = true;
+            DontDestroyOnLoad(this);
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
     }
     // Start is called before the first frame update
     void Start()
@@ -68,6 +75,13 @@ public class SceneLoader : MonoBehaviour
         isLoadingComplete = false;
         isPreloadingComplete = false;
         didSceneLoadFail = false;
+
+        if (loadingFromLoadScreen)
+        {
+            yield return new WaitForSecondsRealtime(1f);
+            //loadingFromLoadScreen = false;
+        }
+
         if (primarySceneToLoad == "")
         {
             didSceneLoadFail = true;
@@ -78,7 +92,15 @@ public class SceneLoader : MonoBehaviour
         
         // create scene loading objects
 
-        List<SceneLoadingData> sceneLoadingDatas = new List<SceneLoadingData>();
+        if (sceneLoadingDatas != null)
+        {
+            sceneLoadingDatas.Clear();
+        }
+        else
+        {
+            sceneLoadingDatas = new List<SceneLoadingData>();
+        }
+        
         SceneLoadingData primarySceneData = new SceneLoadingData()
         {
             name = primarySceneToLoad,
@@ -92,14 +114,29 @@ public class SceneLoader : MonoBehaviour
 
         if (shouldLoadInitScene)
         {
-            SceneManager.LoadScene(initSceneName, LoadSceneMode.Single);
+            SceneLoadingData initSceneData = new SceneLoadingData()
+            {
+                name = "_InitScene",
+            };
+            sceneLoadingDatas.Add(initSceneData);
+            initSceneData.loadOperation = SceneManager.LoadSceneAsync(initSceneName, LoadSceneMode.Additive);
+            initSceneData.loadOperation.allowSceneActivation = allowSceneActivation;
+            if (allowSceneActivation)
+            {
+                yield return initSceneData.loadOperation;
+            }
         }
 
         if (!primarySceneData.isAlreadyLoaded || shouldReloadScenes)
         {
             sceneLoadingDatas.Add(primarySceneData);
             primarySceneData.loadOperation = SceneManager.LoadSceneAsync(primarySceneToLoad, LoadSceneMode.Additive);
-            yield return primarySceneData.loadOperation;
+            primarySceneData.loadOperation.allowSceneActivation = allowSceneActivation;
+            if (allowSceneActivation)
+            {
+                yield return primarySceneData.loadOperation;
+            }
+            
         }
 
 
@@ -124,12 +161,66 @@ public class SceneLoader : MonoBehaviour
             {
                 sceneLoadingDatas.Add(sceneData);
                 sceneData.loadOperation = SceneManager.LoadSceneAsync(secondarySceneName, LoadSceneMode.Additive);
-                yield return sceneData.loadOperation;
+                sceneData.loadOperation.allowSceneActivation = allowSceneActivation;
+                if (allowSceneActivation)
+                {
+                    yield return sceneData.loadOperation;
+                }
+                
             }
 
             
 
         }
+
+        if (!allowSceneActivation)
+        {
+            bool notFinished = true;
+            while (notFinished)
+            {
+                notFinished = false;
+                foreach (SceneLoadingData data in sceneLoadingDatas)
+                {
+                    if (data.loadOperation.progress < 0.9f)
+                    {
+                        notFinished = true;
+                    }
+                    else
+                    {
+                        data.isPreloadCompleted = true;
+                    }
+                }
+                totalLoading = GetSceneLoadingProgress();
+                yield return new WaitForSecondsRealtime(0.5f);
+            }
+
+            if (loadingFromLoadScreen)
+            {
+                yield return new WaitForSecondsRealtime(1f);
+                loadingFromLoadScreen = false;
+            }
+            foreach (SceneLoadingData data in sceneLoadingDatas)
+            {
+                data.isComplete = true;
+                data.loadOperation.allowSceneActivation = true;
+            }
+        }
+
+        bool allComplete = false;
+        while (!allComplete)
+        {
+            allComplete = true;
+            foreach (SceneLoadingData data in sceneLoadingDatas)
+            {
+                if (!data.loadOperation.isDone)
+                {
+                    allComplete = false;
+                }
+            }
+            yield return null;
+        }
+        
+        SceneLoader.SetActiveScene(primarySceneToLoad);
         isLoading = false;
         OnFinishLoad.Invoke();
         
@@ -303,14 +394,16 @@ public class SceneLoader : MonoBehaviour
     }
     public void ReloadCurrentScene()
     {
-        primarySceneToLoad = SceneManager.GetActiveScene().name;
+        
         isAfterFirstLoad = false;
-        allowSceneActivation = true;
+        allowSceneActivation = false;
         loadOnStart = false;
         shouldLoadInitScene = true;
         shouldReloadScenes = true;
         shouldSetPlayerPosition = true;
-        LoadScenes();
+        LoadWithProgressBar(SceneManager.GetActiveScene().name);
+        //LoadScenes();
+
     }
 
     public static void LoadSceneSingle(string sceneName)
@@ -336,6 +429,48 @@ public class SceneLoader : MonoBehaviour
         player.transform.SetPositionAndRotation(playerPosition, playerRotation);
     }
 
+    public float GetSceneLoadingProgress()
+    {
+        if (isLoadingComplete)
+        {
+            return 1f;
+        }
+        else if (isLoading)
+        {
+            float progress = 0f;
+            float max = 0f;
+            if (sceneLoadingDatas == null)
+            {
+                return 0f;
+            }
+            foreach (SceneLoadingData data in sceneLoadingDatas)
+            {
+                max += 1f;
+                if (data.isComplete)
+                {
+                    progress += 1f;
+                }
+                else
+                {
+                    progress += data.loadOperation.progress;
+                }
+               
+            }
+            if (max != 0f)
+            {
+                return progress / max;
+            }
+            else
+            {
+                return 0f;
+            }
+        }
+        else
+        {
+            return 0f;
+        }
+    }
+
     public static bool ShouldRespawnPlayer()
     {
         if (instance != null)
@@ -357,6 +492,23 @@ public class SceneLoader : MonoBehaviour
         instance.StartCoroutine(instance.LoadScenesRoutine());
     }
 
+    public static void LoadWithProgressBar(string primary, params string[] secondaries)
+    {
+        if (instance.isLoading) return;
+        instance.primarySceneToLoad = primary;
+        instance.secondaryScenesToLoad = secondaries;
+        instance.allowSceneActivation = false;
+        instance.loadingFromLoadScreen = true;
+        instance.shouldSetPlayerPosition = true;
+        instance.StartCoroutine(instance.LoadingBarScene());
+    } 
+
+    IEnumerator LoadingBarScene()
+    {
+        yield return SceneManager.LoadSceneAsync("_LoadScene", LoadSceneMode.Single);
+        yield return StartCoroutine(instance.LoadScenesRoutine());
+        SceneManager.UnloadSceneAsync("_LoadScene");
+    }
     public static AsyncOperation LoadSceneAdditively(string scene)
     {
         return SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);

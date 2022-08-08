@@ -42,6 +42,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float rewindDistanceThreshold = 2f;
     public float rewingTimeoutDuration = 3f;
     bool rewindingToSafePoint;
+    bool spawned;
     [Header("Movement")]
     public float walkSpeedMax = 5f;
     public AnimationCurve walkSpeedCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
@@ -402,6 +403,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
 
         bowBend = new AnimatedFloat(animancer, "_BowBend");
+
+        
     }
 
 
@@ -409,6 +412,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public override void ActorPostUpdate()
     {
         if (dead) return;
+        if (!spawned)
+        {
+            TryFindSpawnPoint();
+        }
         instatemove = (animancer.States.Current == state.move);
         isGrounded = GetGrounded(out RaycastHit rayHit, out RaycastHit sphereHit);
         moveSmoothed = Vector2.MoveTowards(moveSmoothed, move, Time.deltaTime);
@@ -1676,9 +1683,20 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void WarpTo(Vector3 position)
     {
         CharacterController cc = this.GetComponent<CharacterController>();
+        Vector3 delta = position - this.transform.position;
         cc.enabled = false;
         this.transform.position = position;
         cc.enabled = true;
+        if (vcam.free != null)
+            vcam.free.OnTargetObjectWarped(vcam.free.Follow, delta);
+        /*if (vcam.target != null)
+            vcam.target.OnTargetObjectWarped(vcam.target.Follow, delta);*/
+        if (vcam.aim != null)
+            vcam.aim.OnTargetObjectWarped(vcam.aim.Follow, delta);
+        if (vcam.climb != null)
+            vcam.climb.OnTargetObjectWarped(vcam.climb.Follow, delta);
+        if (vcam.dialogue != null)
+            vcam.dialogue.OnTargetObjectWarped(vcam.dialogue.Follow, delta);
         ResetOnMove();
     }
 
@@ -1796,6 +1814,29 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             lastSafePoint = hit.position;
         }
+    }
+    
+    public void TryFindSpawnPoint()
+    {
+        foreach (PlayerPositioner spawnPoint in GameObject.FindObjectsOfType<PlayerPositioner>())
+        {
+            if (spawnPoint.gameObject.activeInHierarchy && spawnPoint.gameObject.scene == UnityEngine.SceneManagement.SceneManager.GetActiveScene())
+            {
+                spawnPoint.SpawnPlayer(this);
+                spawned = true;
+                return;
+            }
+        }
+    }
+
+    public bool HasBeenSpawned()
+    {
+        return spawned;
+    }   
+    
+    public void SetSpawned()
+    {
+        spawned = true;
     }
     #endregion
 

@@ -290,6 +290,7 @@ public class TimeTravelController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (playerInput == null) return;
         playerInput.actions["UsePower"].performed -= UsePowerInput;
 
         playerInput.actions["UsePower"].canceled -= CancelPowerInput;

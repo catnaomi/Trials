@@ -186,7 +186,7 @@ public static class DebugReflectionMethods
     {
         try
         {
-            SceneLoader.LoadSceneSingle(sceneName);
+            SceneLoader.LoadWithProgressBar(sceneName);
         }
         catch (Exception ex)
         {
