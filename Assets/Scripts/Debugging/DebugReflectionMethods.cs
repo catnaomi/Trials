@@ -335,6 +335,19 @@ public static class DebugReflectionMethods
         Quit();
     }
 
+    public static void PortalSwap()
+    {
+        try
+        {
+            PortalManager.instance.Swap();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
+
     /*
     public static void Template()
     {
