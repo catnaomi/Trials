@@ -66,6 +66,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float fallBufferTime = 0.25f;
     public float hardLandingTime = 2f;
     public float softLandingTime = 1f;
+    public float friction = 1f;
     [Space(5)]
     public float rollSpeed = 5f;
     public float jumpVel = 10f;
@@ -426,6 +427,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Vector3 stickDirection = Vector3.zero;
         Vector3 lookDirection = this.transform.forward;
         Vector3 moveDirection = Vector3.zero;
+        bool applyMove = false;
         float grav = gravity;
         slopeAngle = -1f;
         groundNormal = Vector3.up;
@@ -541,7 +543,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     lookDirection = stickDirection.normalized;
                     moveDirection = stickDirection.normalized;
-                    xzVel = xzVel.magnitude * stickDirection.normalized;
+                    //xzVel = xzVel.magnitude * stickDirection.normalized;
                 }
                 state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
             }
@@ -645,6 +647,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             */
             animancer.Layers[0].ApplyAnimatorIK = true;
+            applyMove = true;
         }
         #endregion
 
@@ -738,6 +741,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }
             }
             animancer.Layers[0].ApplyAnimatorIK = true;
+            applyMove = true;
         }
         #endregion
 
@@ -760,7 +764,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     lookDirection = stickDirection.normalized;
                     moveDirection = stickDirection.normalized;
-                    xzVel = xzVel.magnitude * stickDirection.normalized;
+                    //xzVel = xzVel.magnitude * stickDirection.normalized;
                 }
                 state.jump = animancer.Play(runJumpAnim);
             }
@@ -809,6 +813,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 slash = false;
             }
             animancer.Layers[0].ApplyAnimatorIK = false;
+            applyMove = true;
         }
         #endregion
 
@@ -828,7 +833,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     lookDirection = stickDirection.normalized;
                     moveDirection = stickDirection.normalized;
-                    xzVel = xzVel.magnitude * stickDirection.normalized;
+                    //xzVel = xzVel.magnitude * stickDirection.normalized;
                 }
                 
                 state.jump = animancer.Play(runJumpAnim);
@@ -880,6 +885,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 slash = false;
             }
             animancer.Layers[0].ApplyAnimatorIK = false;
+            applyMove = true;
         }
         #endregion
 
@@ -895,7 +901,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     lookDirection = stickDirection.normalized;
                     moveDirection = stickDirection.normalized;
-                    xzVel = xzVel.magnitude * stickDirection.normalized;
+                    //xzVel = xzVel.magnitude * stickDirection.normalized;
                 }
                 state.jump = animancer.Play(runJumpAnim);
             }
@@ -920,6 +926,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 slash = false;
             }
             animancer.Layers[0].ApplyAnimatorIK = false;
+            applyMove = true;
         }
         #endregion
 
@@ -1128,6 +1135,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 slash = false;
                 thrust = false;
             }
+            applyMove = true;
             animancer.Layers[0].ApplyAnimatorIK = false;
         }
         #endregion
@@ -1199,6 +1207,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
 
             animancer.Layers[0].ApplyAnimatorIK = (speed < 0.1f);
+            applyMove = true;
         }
         #endregion
 
@@ -1272,6 +1281,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 this.gameObject.SendMessage("SplashBig");
             }
             animancer.Layers[0].ApplyAnimatorIK = true;
+            applyMove = isGrounded;
         }
         #endregion
 
@@ -1400,6 +1410,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }
             }
             animancer.Layers[0].ApplyAnimatorIK = true;
+            applyMove = true;
         }
         #endregion
 
@@ -1469,33 +1480,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             animancer.Layers[HumanoidAnimLayers.UpperBody].Speed = 1f;
         }
 
-        if (isGrounded)
-        {
-            if (yVel <= 0)
-            {
-                yVel = 0f;
-            }
-            else
-            {
-                yVel -= grav * Time.deltaTime;
-            }
-            airTime = 0f;
-            landTime += Time.deltaTime;
-            if (landTime > 1f)
-            {
-                landTime = 1f;
-            }
-        }
-        else
-        {
-            if (!sliding) yVel -= grav * Time.deltaTime;
-            if (yVel < -terminalVel)
-            {
-                yVel = -terminalVel;
-            }
-            airTime += Time.deltaTime;
-            lastAirTime = airTime;
-        }
+        
 
         this.transform.rotation = Quaternion.LookRotation(lookDirection);
         Vector3 downwardsVelocity = this.transform.up * yVel;
@@ -1526,34 +1511,20 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         Vector3 finalMov = (moveDirection * speed + downwardsVelocity);
 
-        if (cc.enabled)
-        {
-            if (animancer.States.Current != state.swim && (!isGrounded || yVel > 0 || animancer.States.Current == state.jump))
-            {
-                /*
-                if (Physics.SphereCast(this.transform.position, cc.radius, Vector3.down, out RaycastHit sphereHit, 1f, LayerMask.GetMask("Terrain")))
-                {
-                    Vector3 dir = -(this.transform.position - sphereHit.point);
-                    dir.Scale(new Vector3(1f, 0f, 1f));
-                    cc.Move(dir.normalized * 10f);
-                    Debug.Log("slide");
-                }*/
-                cc.Move((xzVel + downwardsVelocity) * Time.deltaTime);
-            }
-            else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only")) && yVel <= 0 && animancer.States.Current != state.swim)
-            {
-                Vector3 temp = Vector3.Cross(hit.normal, finalMov);
-                cc.Move((Vector3.Cross(temp, hit.normal) + gravity * Vector3.down) * Time.deltaTime);
-            }
-            else
-            {
-                cc.Move(finalMov * Time.deltaTime);
-            }
-        }
+        
+        
+        /*
         if (animancer.States.Current == state.move || animancer.States.Current == state.sprint || animancer.States.Current == state.dash)
         {
-            xzVel = finalMov;
-            xzVel.y = 0;
+            //xzVel = finalMov;
+            //xzVel.y = 0;
+            
+        }
+        */
+
+        if (applyMove)
+        {
+            xzVel = Vector3.Lerp(xzVel, moveDirection * speed, friction);
         }
         if (IsAiming() && inventory.IsRangedDrawn() && camState == CameraState.Aim)
         {
@@ -1654,6 +1625,67 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (IsAiming() && inventory.IsRangedDrawn() && camState == CameraState.Aim)
         {
             inventory.GetRangedWeapon().moveset.aimAttack.OnUpdate(this);
+        }
+    }
+
+    void FixedUpdate()
+    {
+
+        if (isGrounded)
+        {
+            if (yVel <= 0)
+            {
+                yVel = 0f;
+            }
+            else
+            {
+                yVel -= gravity * Time.deltaTime;
+            }
+            airTime = 0f;
+            landTime += Time.deltaTime;
+            if (landTime > 1f)
+            {
+                landTime = 1f;
+            }
+        }
+        else
+        {
+            if (!sliding) yVel -= gravity * Time.deltaTime;
+            if (yVel < -terminalVel)
+            {
+                yVel = -terminalVel;
+            }
+            airTime += Time.deltaTime;
+            lastAirTime = airTime;
+        }
+
+        Vector3 velocity = xzVel;
+        velocity.y = yVel;
+
+
+        if (cc.enabled)
+        {
+            if (animancer.States.Current != state.swim && (!isGrounded || yVel > 0 || animancer.States.Current == state.jump))
+            {
+                /*
+                if (Physics.SphereCast(this.transform.position, cc.radius, Vector3.down, out RaycastHit sphereHit, 1f, LayerMask.GetMask("Terrain")))
+                {
+                    Vector3 dir = -(this.transform.position - sphereHit.point);
+                    dir.Scale(new Vector3(1f, 0f, 1f));
+                    cc.Move(dir.normalized * 10f);
+                    Debug.Log("slide");
+                }*/
+                cc.Move(velocity * Time.fixedDeltaTime);
+            }
+            else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only")) && yVel <= 0 && animancer.States.Current != state.swim)
+            {
+                Vector3 temp = Vector3.Cross(hit.normal,velocity);
+                cc.Move((Vector3.Cross(temp, hit.normal) + gravity * Vector3.down) * Time.deltaTime);
+            }
+            else
+            {
+                cc.Move(velocity * Time.fixedDeltaTime);
+            }
         }
     }
 
