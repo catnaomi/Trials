@@ -29,6 +29,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     CameraState prevCamState;
     [SerializeField]
     public VirtualCameras vcam;
+    CinemachineFreeLook free_freeLook;
     GameObject consumableModel;
     [Header("Interaction & Dialogue")]
     public bool isMenuOpen;
@@ -74,6 +75,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float waterFriction = 1f;
     [Space(5)]
     public float rollSpeed = 5f;
+    public float dodgeJumpVel = 5f;
     public float jumpVel = 10f;
     [Space(5)]
     public bool isGrounded;
@@ -85,6 +87,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool dashed;
     bool jump;
     bool blocking;
+    bool targeting;
     bool aiming;
     public bool sliding;
     bool wasSlidingIK;
@@ -109,6 +112,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool sprinting;
     public bool shouldDodge;
     public bool secondary;
+    public Vector2 dodgeDirection;
     [Header("Carrying Settings")]
     public Carryable carryable;
     public bool isCarrying;
@@ -144,6 +148,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool plunge;
     bool hold;
     bool isUsingShield;
+    bool shouldRecenter;
     ClipTransition plungeEnd;
     float cancelTime;
     public float blockSpeed = 2.5f;
@@ -169,6 +174,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     float holdAttackMin;
     [Header("Animancer")]
     public MixerTransition2DAsset moveAnim;
+    public MixerTransition2DAsset strafeAnim;
     public AnimationClip idleAnim;
     public ClipTransition dashAnim;
     public ClipTransition sprintAnim;
@@ -177,7 +183,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public ClipTransition fallAnim;
     public ClipTransition landSoftAnim;
     public ClipTransition landHardAnim;
+    [Space(10)]
     public ClipTransition rollAnim;
+    public ClipTransition dodgeJumpForward;
+    public ClipTransition dodgeJumpBack;
+    public ClipTransition dodgeJumpLeft;
+    public ClipTransition dodgeJumpRight;
+    [Space(5)]
     public ClipTransition standJumpAnim;
     public ClipTransition runJumpAnim;
     public ClipTransition backflipAnim;
@@ -224,6 +236,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     private System.Action _OnFinishClimb;
     private System.Action _MoveOnEnd;
     private System.Action _AttackEnd;
+
     private System.Action _StopUpperLayer;
     [Header("Carry Anims")]
     public ClipTransition pickUpAnim;
@@ -297,6 +310,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         state = new AnimState();
         state.move = (MixerState)animancer.States.GetOrCreate(moveAnim);
         state.attack = animancer.States.GetOrCreate(rollAnim);
+        state.block = animancer.States.GetOrCreate(strafeAnim);
         animancer.Play(state.move);
 
         SetupInputListeners();
@@ -568,16 +582,20 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }
             }
             EquippableWeapon blockWeapon = inventory.GetBlockWeapon();
-            if (blocking && blockWeapon != null)
+            if (blocking)
             {
                 //((MixerState)state.block).ChildStates[0].Clip = blockAnimStart.Clip;
 
-                int itemSlot = inventory.GetItemEquipType(blockWeapon);
-                if ((itemSlot == Inventory.MainType && !inventory.IsMainDrawn()) || (itemSlot == Inventory.OffType && !inventory.IsOffDrawn()))
+                if (blockWeapon != null)
                 {
-                    inventory.SetDrawn(inventory.GetItemEquipType(blockWeapon), true);
-                    UpdateFromMoveset();
+                    int itemSlot = inventory.GetItemEquipType(blockWeapon);
+                    if ((itemSlot == Inventory.MainType && !inventory.IsMainDrawn()) || (itemSlot == Inventory.OffType && !inventory.IsOffDrawn()))
+                    {
+                        inventory.SetDrawn(inventory.GetItemEquipType(blockWeapon), true);
+                        UpdateFromMoveset();
+                    }
                 }
+                
                 animancer.Play(state.block, 0.25f);
                 /*
                 animancer.Layers[HumanoidAnimLayers.UpperBody].Play(blockAnimStart, 0f);
@@ -666,8 +684,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * blockSpeed, walkAccelReal * Time.deltaTime);
             if (camState == CameraState.Free)
             {
-                lookDirection = this.transform.forward;
+
                 moveDirection = stickDirection;
+                if (targeting && look.magnitude > 0.01f)
+                {
+                    lookDirection = Camera.main.transform.forward;
+                    lookDirection.y = 0f;
+                }
+                else if (!targeting && stickDirection.magnitude > 0)
+                {
+                    lookDirection = stickDirection;
+                }
+                else
+                {
+                    lookDirection = this.transform.forward;
+                }
+                
             }
             else if (camState == CameraState.Lock)
             {
@@ -689,27 +721,81 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 state.fall = animancer.Play(fallAnim);
                 stopBlock = true;
             }
-            /*
+            
             if (jump)
             {
+                float y = Vector3.Dot(stickDirection, this.transform.forward);
+                float x = Vector3.Dot(stickDirection, this.transform.right);
+                bool north = y > 0.25f && Mathf.Abs(y) > Mathf.Abs(x);
+                bool south = y < 0.25f && Mathf.Abs(y) > Mathf.Abs(x);
+                bool east = x > 0.25f && Mathf.Abs(x) > Mathf.Abs(y);
+                bool west = x < 0.25f && Mathf.Abs(x) > Mathf.Abs(y);
+
                 jump = false;
-                state.jump = animancer.Play(backflipAnim);
-                moveDirection = this.transform.forward;
-                speed = -blockSpeed;
+               
+                if (north)
+                {
+                    state.jump = animancer.Play(runJumpAnim);
+                    //dodgeDirection = this.transform.forward;
+                    moveDirection = this.transform.forward;
+                }
+                else if (south)
+                {
+                    state.roll = animancer.Play(dodgeJumpBack);
+                    state.roll.Events.OnEnd = _OnDodgeEnd;
+                    lookDirection = Quaternion.FromToRotation(-this.transform.forward, stickDirection) * this.transform.forward;
+                    moveDirection = stickDirection;
+                    dodgeDirection = new Vector2(0, -1);
+                    ApplyDodgeJump();
+                }
+                else if (east)
+                {
+                    state.roll = animancer.Play(dodgeJumpRight);
+                    state.roll.Events.OnEnd = _OnDodgeEnd;
+                    lookDirection = Quaternion.FromToRotation(this.transform.right, stickDirection) * this.transform.forward;
+                    moveDirection = stickDirection;
+                    dodgeDirection = new Vector2(1 , 0);
+                    ApplyDodgeJump();
+                }
+                else if (west)
+                {
+                    state.roll = animancer.Play(dodgeJumpLeft);
+                    state.roll.Events.OnEnd = _OnDodgeEnd;
+                    lookDirection = Quaternion.FromToRotation(-this.transform.right, stickDirection) * this.transform.forward;
+                    moveDirection = stickDirection;
+                    dodgeDirection = new Vector2(-1, 0);
+                    ApplyDodgeJump();
+                }
+                else
+                {
+                    state.jump = animancer.Play(standJumpAnim);
+                }
+                
+                //state.jump = animancer.Play(backflipAnim);
+                //moveDirection = this.transform.forward;
+                //speed = -blockSpeed;
                 stopBlock = true;
             }
-            */
+            
             if (attack)
             {
-                if (slash)
+                if (!inventory.IsMainDrawn())
                 {
-                    BlockSlash();
-                    attackDecelReal = attackDecel;
+                    inventory.SetDrawn(true, true);
+                    UpdateFromMoveset();
                 }
-                else if (thrust)
+                if (inventory.IsMainDrawn())
                 {
-                    BlockThrust();
-                    attackDecelReal = attackDecel;
+                    if (slash)
+                    {
+                        BlockSlash();
+                        attackDecelReal = attackDecel;
+                    }
+                    else if (thrust)
+                    {
+                        BlockThrust();
+                        attackDecelReal = attackDecel;
+                    }
                 }
                 attack = false;
                 slash = false;
@@ -741,7 +827,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 stopBlock = true;
                 animancer.Play(state.move, 0.25f);
             }
-            if (stopBlock)
+            if (stopBlock && blockAnim != null)
             {
                 if (animancer.Layers[HumanoidAnimLayers.UpperBody].IsPlayingClip(blockAnim.Clip) || animancer.Layers[HumanoidAnimLayers.UpperBody].IsPlayingClip(blockAnimStart.Clip))
                 {
@@ -1117,8 +1203,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             shouldDodge = false;
             HitboxActive(0);
             speed = rollSpeed;
-            moveDirection = this.transform.forward;
-            DisableCloth();
+            if (GetCombatTarget() != null)
+            {
+                targetDirection = GetCombatTarget().transform.position - this.transform.position;
+                targetDirection.y = 0f;
+                lookDirection = targetDirection.normalized;
+            }
+            else
+            {
+                lookDirection = this.transform.forward;
+            }
+            moveDirection = this.transform.forward * dodgeDirection.y + this.transform.right * dodgeDirection.x;
+            //DisableCloth();
+            /*
             if (attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
             {
                 if (!inventory.IsMainDrawn())
@@ -1148,6 +1245,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 slash = false;
                 thrust = false;
             }
+            */
             applyMove = true;
             animancer.Layers[0].ApplyAnimatorIK = false;
         }
@@ -2034,6 +2132,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (vcam.aim != null) vcam.aim.m_Priority = (camState == CameraState.Aim) ? 10 : 1;//.SetActive(camState == CameraState.Aim);
             if (vcam.dialogue != null) vcam.dialogue.m_Priority = (camState == CameraState.Dialogue) ? 10 : 1;//.gameObject.SetActive(camState == CameraState.D);
         }
+
         prevCamState = camState;
     }
 
@@ -2227,6 +2326,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         blocking = blocking && IsBlockHeld();
         sprinting = sprinting && IsSprintHeld();
         secondary = secondary && IsSecondaryHeld();
+        targeting = IsTargetHeld();
         switch (buffer.PollInput(inputBufferTimeoutTime))
         {
             case InputBuffer.Inputs.Dodge:
@@ -2315,6 +2415,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void ApplyJump()
     {
         yVel = jumpVel;
+    }
+
+    public void ApplyDodgeJump()
+    {
+        yVel = dodgeJumpVel;
     }
 
     public void OnMove(InputValue value)
@@ -2500,6 +2605,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 blocking = true;
             }
+            else if (IsBlockHeld())
+            {
+                blocking = true;
+            }
             else
             {
                 blocking = false;
@@ -2665,23 +2774,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             bilayerMove = null;
         }
 
-        MixerTransition2DAsset blockingMoveAnim = moveAnim;
+        MixerTransition2DAsset blockingMoveAnim = strafeAnim;
         ClipTransition guardBreak = null;
-        if (inventory.IsOffEquipped() && inventory.GetOffWeapon().moveset.overridesBlock )
+        EquippableWeapon blockWeapon = inventory.GetBlockWeapon();
+        if (blockWeapon != null)
         {
-            blockingMoveAnim = inventory.GetOffWeapon().moveset.blockMove;
-            blockAnim = inventory.GetOffWeapon().moveset.blockAnim;
-            blockAnimStart = inventory.GetOffWeapon().moveset.blockAnimStart;
-            blockStagger = inventory.GetOffWeapon().moveset.blockStagger;
-            guardBreak = inventory.GetOffWeapon().moveset.guardBreak;
-        }
-        else if (inventory.IsMainEquipped() && inventory.GetMainWeapon().moveset.overridesBlock)
-        {
-            blockingMoveAnim = inventory.GetMainWeapon().moveset.blockMove;
-            blockAnim = inventory.GetMainWeapon().moveset.blockAnim;
-            blockAnimStart = inventory.GetMainWeapon().moveset.blockAnimStart;
-            blockStagger = inventory.GetMainWeapon().moveset.blockStagger;
-            guardBreak = inventory.GetMainWeapon().moveset.guardBreak;
+            blockingMoveAnim = blockWeapon.moveset.blockMove;
+            blockAnim = blockWeapon.moveset.blockAnim;
+            blockAnimStart = blockWeapon.moveset.blockAnimStart;
+            blockStagger = blockWeapon.moveset.blockStagger;
+            guardBreak = blockWeapon.moveset.guardBreak;
         }
 
         if (inventory.IsOffEquipped())
@@ -3215,7 +3317,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         System.Action _BlockAttackEnd = () => {
             if (blocking)
             {
-                animancer.Layers[HumanoidAnimLayers.UpperBody].Play(blockAnim, 0.25f);
+                //animancer.Layers[HumanoidAnimLayers.UpperBody].Play(blockAnim, 0.25f);
                 animancer.Play(state.block, 0.25f);
             }
             else
@@ -3242,7 +3344,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         System.Action _BlockAttackEnd = () => {
             if (blocking)
             {
-                animancer.Layers[HumanoidAnimLayers.UpperBody].Play(blockAnim, 0.25f);
+                //animancer.Layers[HumanoidAnimLayers.UpperBody].Play(blockAnim, 0.25f);
                 animancer.Play(state.block, 0.25f);
             }
             else
@@ -3664,6 +3766,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+
+    void _OnDodgeEnd()
+    {
+        if (!GetGrounded() && airTime > 0.1f)
+        {
+            state.fall = animancer.Play(fallAnim);
+        }
+        else if (blocking)
+        {
+            animancer.Play(state.block, 0.5f);
+        }
+        else
+        {
+            animancer.Play(state.move, 0.5f);
+        }
+    }
     #endregion
 
     #region IK

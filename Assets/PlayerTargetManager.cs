@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class PlayerTargetManager : MonoBehaviour
 {
@@ -72,7 +73,7 @@ public class PlayerTargetManager : MonoBehaviour
     [Space(5)]
     [SerializeField, ReadOnly] float botHeight;
     [SerializeField, ReadOnly] float botRadius;
-    
+    public UnityEvent OnRecenter;
     // Start is called before the first frame update
     void Start()
     {
@@ -209,14 +210,21 @@ public class PlayerTargetManager : MonoBehaviour
         {
             if (!lockedOn && targets.Count > 0)
             {
-                lockedOn = true;
+                if (!targetHeldLastFrame)
+                {
+                    lockedOn = true;
+                }
                 //SetTarget(targets[0]);
                 //UpdateDirections();
             }
             else if (targets.Count <= 0)
             {
                 lockedOn = false;
-                Recenter();
+                if (!targetHeldLastFrame)
+                {
+                    Recenter();
+                }
+                
             }
 
             if (!targetHeldLastFrame)
@@ -369,7 +377,7 @@ public class PlayerTargetManager : MonoBehaviour
 
     public void Recenter()
     {
-
+        OnRecenter.Invoke();
     }
     void ToggleTarget()
     {
