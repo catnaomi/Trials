@@ -51,6 +51,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float walkAccel = 25f;
     public float walkTurnSpeed = 1080f;
     [Space(5)]
+    public float strafeSpeed = 2.5f;
+    [Space(5)]
     public float airAccel = 1f;
     public float airTurnSpeed = 45f;
     public float hardLandAccel = 2.5f;
@@ -99,8 +101,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool aimAtkLockout;
     public float headPointSpeed = 25f;
     public PhysicMaterial lastPhysicsMaterial;
-    [Space(5)]
-    public float strafeSpeed = 2.5f;
     [Space(5)]
     public float attackDecel = 25f;
     public float dashAttackDecel = 10f;
@@ -234,9 +234,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     [Header("Movesets")]
     public Moveset runtimeMoveset;
     public Moveset runtimeOffMoveset;
-    [Header("Targeting")]
-    public UnityEvent toggleTarget;
-    public UnityEvent changeTarget;
     [Header("Controls")]
     public float inputBufferTimeoutTime;
     [SerializeField]InputBuffer buffer;
@@ -429,7 +426,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         camRight.Scale(new Vector3(1f, 0f, 1f));
         Vector3 stickDirection = Vector3.zero;
         Vector3 lookDirection = this.transform.forward;
-        Vector3 moveDirection = Vector3.zero;
+        moveDirection = Vector3.zero;
         bool applyMove = false;
         
         slopeAngle = -1f;
@@ -2354,6 +2351,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (!CanPlayerInput()) return false;
         return this.GetComponent<PlayerInput>().actions["Atk_Thrust"].IsPressed();
     }
+
+    public bool IsTargetHeld()
+    {
+        return this.GetComponent<PlayerInput>().actions["Target"].IsPressed();
+    }
     
     void BlockStart()
     {
@@ -2416,14 +2418,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void OnTarget(InputValue value)
     {
         if (!CanPlayerInput()) return;
-        toggleTarget.Invoke();
+        //toggleTarget.Invoke();
     }
-
+    
+    /*
     public void OnChangeTarget(InputValue value)
     {
         if (value.Get<Vector2>().magnitude > 0.9f) changeTarget.Invoke();
     }
-
+    */
     public void OnAtk_Slash(InputValue value)
     {
         if (!CanPlayerInput()) return;
@@ -2448,7 +2451,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else if (camState == CameraState.Lock)
         {
-            return Vector2.ClampMagnitude(move,0.5f);
+            float x = Vector3.Dot(moveDirection.normalized, this.transform.right) * (speed / strafeSpeed);
+            float y = Vector3.Dot(moveDirection.normalized, this.transform.forward) * (speed / strafeSpeed);
+            return new Vector2(x, y);
         }
         return Vector2.zero;
     }

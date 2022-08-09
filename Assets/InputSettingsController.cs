@@ -15,6 +15,8 @@ public class InputSettingsController : MonoBehaviour
     public PlayerActor.VirtualCameras mouseVcams;
     public PlayerActor.VirtualCameras gamepadVcams;
 
+    public float fov;
+
     Vector2 free_speedsMouse;
     Vector2 dialogue_speedsMouse;
 
@@ -55,6 +57,7 @@ public class InputSettingsController : MonoBehaviour
             TimeTravelController.time.OnSlowTimeStop.AddListener(OnStopSlowTime);
         }
 
+        fov = Camera.main.fieldOfView;
 
     }
 
@@ -122,6 +125,17 @@ public class InputSettingsController : MonoBehaviour
         ((CinemachineFreeLook)vcam.aim).m_YAxis.m_MaxSpeed = speeds.y * multiplier;
     } 
 
+    public void ChangeVerticalFOV(float f)
+    {
+        fov = f;
+        Camera.main.fieldOfView = fov;
+    }
+
+    public void ChangeHorizontalFOV(float f)
+    {
+        fov = Camera.HorizontalToVerticalFieldOfView(f, Camera.main.aspect);
+        Camera.main.fieldOfView = fov;
+    }
     public void OnStartSlowTime()
     {
         AdjustAimCameraSpeed(true);

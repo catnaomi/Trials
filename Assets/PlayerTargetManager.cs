@@ -3,6 +3,7 @@ using CustomUtilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class PlayerTargetManager : MonoBehaviour
@@ -38,9 +39,40 @@ public class PlayerTargetManager : MonoBehaviour
     public Vector3 uiOffset;
     public bool billboard = true;
     public float targetDelay;
-
     float invalidTime;
     public float invalidExpiryTime = 1f;
+    bool targetHeldLastFrame;
+    [Header("Press To Change Target Settings")]
+    public float maxChangeTargetDelay = 2f;
+    public int changeTargetIndexOffset = 0;
+    public float changeTargetResetDelay = 3f;
+    float targetPressedClock;
+    float targetReleasedClock;
+    [Header("Free Look Control Settings")]
+    public bool handleCamera;
+    CinemachineFreeLook freeLook;
+    public float freeLookMinDistance = 1f;
+    public float freeLookDistanceOffset = 0f;
+    public float freeLookDistanceMultiplier = 1f;
+    public float freeLookMaxDistance = 25f;
+    [Space(5)]
+    public float botRigHeightMult = .3f;
+    public float midRigHeightMult = .5f;
+    public float topRigHeightMult = .7f;
+    [Space(5)]
+    public float radiusHeightMult = 1f;
+    [Space(10)]
+    [SerializeField, ReadOnly] float radius;
+    [Space(5)]
+    [SerializeField, ReadOnly] float topHeight;
+    [SerializeField, ReadOnly] float topRadius;
+    [Space(5)]
+    [SerializeField, ReadOnly] float midHeight;
+    [SerializeField, ReadOnly] float midRadius;
+    [Space(5)]
+    [SerializeField, ReadOnly] float botHeight;
+    [SerializeField, ReadOnly] float botRadius;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -55,8 +87,8 @@ public class PlayerTargetManager : MonoBehaviour
         StartCoroutine(UpdateTargets());
         lockedOn = false;
 
-        player.toggleTarget.AddListener(ToggleTarget);
-        player.changeTarget.AddListener(SwitchTargets);
+        //player.toggleTarget.AddListener(ToggleTarget);
+        //player.changeTarget.AddListener(SwitchTargets);
 
         if (handleUI)
         {
@@ -67,6 +99,7 @@ public class PlayerTargetManager : MonoBehaviour
             rightGraphic = GameObject.Instantiate(rightGraphic);
         }
         invalidTime = invalidExpiryTime;
+        freeLook = player.vcam.target.GetComponent<CinemachineFreeLook>();
     }
 
     IEnumerator UpdateTargets()
@@ -96,7 +129,11 @@ public class PlayerTargetManager : MonoBehaviour
 
                 Vector3 vpp = Camera.main.WorldToViewportPoint(target.transform.position);
                 bool onScreen = (Mathf.Abs(vpp.x) <= 1f) && (Mathf.Abs(vpp.y) <= 1f) && (vpp.z >= 0);
-                bool invalid = !onScreen || ((!playerInRange || playerTerrainBlocked) && (!camInRange || camTerrainBlocked));
+                bool invalid = false;
+                if (target != PlayerActor.player.GetCombatTarget())
+                {
+                    invalid = !onScreen || ((!playerInRange || playerTerrainBlocked) && (!camInRange || camTerrainBlocked));
+                }
 
                 if (target.transform.root.TryGetComponent<Actor>(out Actor actor))
                 {
@@ -115,7 +152,7 @@ public class PlayerTargetManager : MonoBehaviour
                 //Debug.Log(string.Format("object:{0}, pterr:{1}, prang:{2}, cterr:{3}, crang:{4}, invalid:{5}", target.name, playerTerrainBlocked, (int)playerDist, camTerrainBlocked, (int)camDist, invalid));
                 if (invalid)
                 {
-                    invalidTargets.Add(currentTarget);
+                    invalidTargets.Add(target);
                 }
                 else
                 {
@@ -126,6 +163,14 @@ public class PlayerTargetManager : MonoBehaviour
             if (targets.Count > 0)
             {
                 targets.Sort((a,b) => {
+                    if (a == PlayerActor.player.GetCombatTarget())
+                    {
+                        return -1;
+                    }
+                    else if (b == PlayerActor.player.GetCombatTarget())
+                    {
+                        return 1;
+                    }
                     return (int)Mathf.Sign(Vector3.Distance(player.transform.position, b.transform.position) - Vector3.Distance(player.transform.position, a.transform.position));
                     /*
                     Vector3 aDist = Camera.main.WorldToViewportPoint(a.transform.position);
@@ -157,57 +202,79 @@ public class PlayerTargetManager : MonoBehaviour
     void Update()
     {
         bool shouldExpire = false;
-        if (false)//Input.GetButtonDown("Target"))
+        bool targetDown = false;
+        bool targetUp = false;
+        bool targetHeld = PlayerActor.player.IsTargetHeld();
+        if (targetHeld)
         {
-            Debug.Log("target?");
             if (!lockedOn && targets.Count > 0)
             {
                 lockedOn = true;
-                SetTarget(targets[0]);
-                UpdateDirections();
+                //SetTarget(targets[0]);
+                //UpdateDirections();
+            }
+            else if (targets.Count <= 0)
+            {
+                lockedOn = false;
+                Recenter();
+            }
+
+            if (!targetHeldLastFrame)
+            {
+                targetDown = true;
+            }
+        }
+        else
+        {
+            if (targetHeldLastFrame)
+            {
+                targetUp = true;
+            }
+            if (player.IsInDialogue())
+            {
+                lockedOn = true;
             }
             else
             {
                 lockedOn = false;
-                SetTarget(null);
             }
+            
         }
 
-        if (player.IsInDialogue())
+        if (!lockedOn || targetDown)
         {
-            if (currentTarget != player.GetCombatTarget())
+            if (targetDown && targetReleasedClock < maxChangeTargetDelay)
             {
-                currentTarget = player.GetCombatTarget();
-                if (cmtg.m_Targets.Length > 1)
-                {
-                    cmtg.m_Targets[1].target = currentTarget.transform;
-                }
-                else
-                {
-                    cmtg.AddMember(currentTarget.transform, 1f, 2f);
-                }
+                changeTargetIndexOffset++;
+            }
+            else if (!lockedOn && targetReleasedClock > changeTargetResetDelay)
+            {
+                changeTargetIndexOffset = 0;
+            }
+            if (targets.Count > 0)
+            {
+                SetTarget(targets[changeTargetIndexOffset % targets.Count]);
             }
         }
-        else if (currentTarget != null && player.GetCombatTarget() != currentTarget)
+        
+        if (lockedOn)
         {
-            if (cmtg.m_Targets.Length > 1)
+            if (targetDown && !player.IsInDialogue())
             {
-                cmtg.m_Targets[1].target = currentTarget.transform;
+                player.SetCombatTarget(currentTarget);
             }
-            else
+            else if (player.GetCombatTarget() != currentTarget)
             {
-                cmtg.AddMember(currentTarget.transform, 1f, 2f);
+                SetTarget(player.GetCombatTarget());
             }
-
-            //cmtg.AddMember(currentTarget.transform, 1f, 2f);
-            player.SetCombatTarget(currentTarget);
-        }
-        else if (currentTarget == null && player.GetCombatTarget() != null)
+        } 
+        else
         {
             player.SetCombatTarget(null);
-            lockedOn = false;
+          
         }
-        else if (currentTarget != null && currentTarget == player.GetCombatTarget() && !IsValidTarget(currentTarget))
+
+        if (currentTarget == player.GetCombatTarget() && !IsValidTarget(currentTarget))
         {    
             shouldExpire = true;
         }
@@ -220,15 +287,64 @@ public class PlayerTargetManager : MonoBehaviour
             }
             else
             {
-                player.SetCombatTarget(null);
-                currentTarget = null;
-                lockedOn = false;
+                if (targets.Count > 0)
+                {
+                    changeTargetIndexOffset = 0;
+                    SetTarget(targets[changeTargetIndexOffset % targets.Count]);
+                    player.SetCombatTarget(currentTarget);
+                }
+                else
+                {
+                    player.SetCombatTarget(null);
+                    currentTarget = null;
+                    lockedOn = false;
+                }       
             }
         }
         else
         {
             invalidTime = invalidExpiryTime;
         }
+
+        if (cmtg.m_Targets.Length > 1)
+        {
+            cmtg.m_Targets[1].target = currentTarget != null ? currentTarget.transform : null;
+        }
+        else
+        {
+            cmtg.AddMember(currentTarget != null ? currentTarget.transform : null, 1f, 2f);
+        }
+
+        if (handleCamera && lockedOn && cmtg.m_Targets.Length > 1)
+        {
+            this.transform.rotation = Quaternion.LookRotation(PlayerActor.player.transform.forward);
+            UpdateFreeLook();
+            
+        }
+
+        if (targetHeld)
+        {
+            if (targetDown)
+            {
+                targetPressedClock = 0f;
+            }
+            else if (targetPressedClock < 60f)
+            {
+                targetPressedClock += Time.deltaTime;
+            }
+        }
+        else
+        {
+            if (targetUp)
+            {
+                targetReleasedClock = 0f;
+            }
+            else if (targetReleasedClock < 60f)
+            {
+                targetReleasedClock += Time.deltaTime;
+            }
+        }
+        targetHeldLastFrame = targetHeld;
     }
 
     private void UpdateDirections()
@@ -251,6 +367,10 @@ public class PlayerTargetManager : MonoBehaviour
         rightTarget = directionToTarget[AxisUtilities.AxisDirection.Right];
     }
 
+    public void Recenter()
+    {
+
+    }
     void ToggleTarget()
     {
         //Debug.Log("target?");
@@ -283,6 +403,7 @@ public class PlayerTargetManager : MonoBehaviour
 
     public bool IsValidTarget(GameObject target)
     {
+        if (target == null) return false;
         if (target.transform.root.TryGetComponent<Actor>(out Actor actor))
         {
             if (!actor.IsAlive())
@@ -311,6 +432,34 @@ public class PlayerTargetManager : MonoBehaviour
         return !invalid;
     }
 
+    void UpdateFreeLook()
+    {
+        radius = Mathf.Clamp((cmtg.Sphere.radius * freeLookDistanceMultiplier) + freeLookDistanceOffset, freeLookMinDistance, freeLookMaxDistance);
+
+        topHeight = radius * topRigHeightMult;
+        topRadius = RadiusWithY(radius + (radius * (radiusHeightMult * topRigHeightMult)), topHeight);
+
+        midHeight = radius * midRigHeightMult;
+        midRadius = RadiusWithY(radius + (radius * (radiusHeightMult * midRigHeightMult)), midHeight);
+
+        botHeight = radius * botRigHeightMult;
+        botRadius = RadiusWithY(radius + (radius * (radiusHeightMult * botRigHeightMult)), botHeight);
+
+        freeLook.m_Orbits[0].m_Height = topHeight;
+        freeLook.m_Orbits[0].m_Radius = topRadius;
+
+        freeLook.m_Orbits[1].m_Height = midHeight;
+        freeLook.m_Orbits[1].m_Radius = midRadius;
+
+        freeLook.m_Orbits[2].m_Height = botHeight;
+        freeLook.m_Orbits[2].m_Radius = botRadius;
+    }
+
+    float RadiusWithY(float r, float y)
+    {
+        if (Mathf.Abs(y) > Mathf.Abs(r)) return r; // making sure we don't accidentally get NaNs, that should only be happening when editing values in inspector anyway
+        return Mathf.Sqrt(Mathf.Pow(r,2) - Mathf.Pow(y,2));
+    }
     void SetTarget(GameObject t)
     {
         currentTarget = t;
@@ -363,5 +512,13 @@ public class PlayerTargetManager : MonoBehaviour
             Gizmos.DrawRay(ray);
         }
         */
+
+        if (cmtg == null) return;
+        Gizmos.color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+        Gizmos.DrawSphere(cmtg.transform.position, radius);
+        Handles.color = Color.red;
+        Handles.DrawWireDisc(cmtg.transform.position + Vector3.up * topHeight, Vector3.up, topRadius);
+        Handles.DrawWireDisc(cmtg.transform.position + Vector3.up * midHeight, Vector3.up, midRadius);
+        Handles.DrawWireDisc(cmtg.transform.position + Vector3.up * botHeight, Vector3.up, botRadius);
     }
 }
