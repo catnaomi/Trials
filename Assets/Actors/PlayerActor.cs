@@ -66,6 +66,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float fallBufferTime = 0.25f;
     public float hardLandingTime = 2f;
     public float softLandingTime = 1f;
+    public float softLandingTransitionTime = 0.05f;
     public float friction = 1f;
     public float groundFriction = 1f;
     public float waterFriction = 1f;
@@ -945,7 +946,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             //speed = 0f;
             sliding = false;
-            airTime += Time.deltaTime;
+            //airTime += Time.deltaTime;
             if (isGrounded && yVel <= 0)
             {
                 if (lastAirTime >= hardLandingTime)
@@ -968,10 +969,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     AnimancerState land = animancer.Play(landSoftAnim);
                     //AnimancerState land = state.move.ChildStates[0];
                     //land.Clip = landSoftAnim;
+
+                    //animancer.Layers[HumanoidAnimLayers.Flinch].Play(landSoftAnim)
+                    //    .Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
                     walkAccelReal = softLandAccel;
                     //land.Events.OnEnd = _OnLandEnd;
                     speed = 0f;
-                    animancer.Play(state.move, 0.05f);
+
+                    land.Events.OnEnd = () => { animancer.Play(state.move, softLandingTransitionTime); };
+                    //animancer.Play(state.move, softLandingTransitionTime);
                 }
                 else
                 {
@@ -1476,8 +1482,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
         }
         #endregion
-        
-        
+        #region ALL OTHERS
+        else
+        {
+            applyMove = GetGrounded();
+        }
+        #endregion
         #endregion
 
         if (TimeTravelController.time != null && TimeTravelController.time.IsSlowingTime())
@@ -1651,10 +1661,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             else
             {
-                yVel -= gravity * Time.deltaTime;
+                yVel -= gravity * Time.fixedDeltaTime;
             }
             airTime = 0f;
-            landTime += Time.deltaTime;
+            landTime += Time.fixedDeltaTime;
             if (landTime > 1f)
             {
                 landTime = 1f;
@@ -1662,12 +1672,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else
         {
-            if (!sliding) yVel -= gravity * Time.deltaTime;
+            if (!sliding) yVel -= gravity * Time.fixedDeltaTime;
             if (yVel < -terminalVel)
             {
                 yVel = -terminalVel;
             }
-            airTime += Time.deltaTime;
+            airTime += Time.fixedDeltaTime;
             lastAirTime = airTime;
         }
 
@@ -1692,7 +1702,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only")) && yVel <= 0 && animancer.States.Current != state.swim)
             {
                 Vector3 temp = Vector3.Cross(hit.normal,velocity);
-                cc.Move((Vector3.Cross(temp, hit.normal) + gravity * Vector3.down) * Time.deltaTime);
+                cc.Move((Vector3.Cross(temp, hit.normal) + gravity * Vector3.down) * Time.fixedDeltaTime);
             }
             else
             {
