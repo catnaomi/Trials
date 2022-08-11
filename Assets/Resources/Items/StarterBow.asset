@@ -32,12 +32,16 @@ MonoBehaviour:
   MainHandEquipSlot: 0
   OffHandEquipSlot: 5
   RangedEquipSlot: 5
-  stance:
-    stanceStyle: 0
-    rightGrip: 0
-    leftGrip: 0
-    twohandGrip: 0
-    blockStyle: 0
+  primaryStance:
+    blendStance: {fileID: 0}
+    blendMask: {fileID: 0}
+    blendWeight: 0
+    additive: 0
+  secondaryStance:
+    blendStance: {fileID: 11400000, guid: 23b83df7c91f70444b6c51d21c1d5722, type: 2}
+    blendMask: {fileID: 31900000, guid: 01957c7e22092ff428e708bd7a81f844, type: 2}
+    blendWeight: 1
+    additive: 0
   moveset: {fileID: 11400000, guid: bc549c059af4b0045b4e4f50b648e75d, type: 2}
   size: 1
   AttackSpeed: 0

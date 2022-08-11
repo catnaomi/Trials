@@ -169,7 +169,7 @@ public class CraftableWeapon : BladeWeapon
 
     public void SetProperties()
     {
-        this.stance = new StanceHandler();
+        this.primaryStance = new StanceHandler();
 
         if (hilt != null)
         {

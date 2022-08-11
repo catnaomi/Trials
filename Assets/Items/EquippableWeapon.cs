@@ -22,7 +22,8 @@ public class EquippableWeapon : Equippable, IGeneratesModel
     public Inventory.EquipSlot OffHandEquipSlot;
     public Inventory.EquipSlot RangedEquipSlot;
     [Header("Stance & Moveset Information")]
-    public StanceHandler stance;
+    public StanceHandler primaryStance;
+    public StanceHandler secondaryStance;
     public Moveset moveset;
     [Header("Stats")]
     public Size size;

@@ -219,6 +219,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     MixerTransition2DAsset aimAnim;
     [Space(5)]
     [ReadOnly] public BilayerMixer2DAsset bilayerMove;
+    [Space(10)]
+    public StanceHandler primaryStance;
+    [Space(5)]
+    public StanceHandler secondaryStance;
     [Header("Damage Anims")]
     public DamageAnims damageAnim;
     HumanoidDamageHandler damageHandler;
@@ -226,7 +230,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     ClipTransition blockAnimStart;
     ClipTransition blockAnim;
     ClipTransition blockStagger;
-    PlayerActor movementController;
     AnimState state;
     public AimAttack.AimState astate;
 
@@ -274,6 +277,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState carry;
         public AnimancerState resurrect;
         public AnimancerState consume;
+        public MixerState<Vector2> primaryStance;
+        public MixerState<Vector2> secondaryStance;
     }
 
     
@@ -304,7 +309,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         base.ActorStart();
         cc = this.GetComponent<CharacterController>();
         defaultRadius = cc.radius;
-        movementController = this.GetComponent<PlayerActor>();
         animancer = this.GetComponent<AnimancerComponent>();
         interactables = new List<Interactable>();
 
@@ -1601,14 +1605,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         this.transform.rotation = Quaternion.LookRotation(lookDirection);
         Vector3 downwardsVelocity = this.transform.up * yVel;
-        if (state.move is CartesianMixerState cartesian)
-        {
-            cartesian.Parameter = movementController.GetMovementVector();
-        }
-        else if (state.move is DirectionalMixerState directional)
-        {
-            directional.Parameter = movementController.GetMovementVector();
-        }
+
+        ((MixerState<Vector2>)state.move).Parameter = GetMovementVector();
         if (bilayerMove != null)
         {
             animancer.Layers[HumanoidAnimLayers.BilayerBlend].Weight = (IsMoving()) ? Mathf.Min(state.move.Weight, bilayerMove.weight) : 0f;
@@ -1736,6 +1734,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             Destroy(consumableModel);
         }
 
+        HandleIdleBlends();
     }
 
     private void LateUpdate()
@@ -2394,6 +2393,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void OnJump(InputValue value)
     {
         if (!CanPlayerInput()) return;
+        InputJump();
+        
+    }
+
+    public void InputJump()
+    {
         if (IsClimbing() && currentClimb != null && currentClimb is Ledge)
         {
             ledgeSnap = false;
@@ -2410,9 +2415,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             //jump = true;
             buffer.SetInput(InputBuffer.Inputs.Jump, Time.time);
         }
-        
     }
-
     public void ApplyJump()
     {
         yVel = jumpVel;
@@ -2753,7 +2756,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             Moveset moveset = inventory.GetMainWeapon().moveset;
             if (moveset.moveAnim != null)
             {
-                movementAnim = moveset.moveAnim;
+                //movementAnim = moveset.moveAnim;
             }
         }
         bool moving = false;
@@ -2804,6 +2807,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         state.block = (MixerState)animancer.States.GetOrCreate(blockingMoveAnim);
         damageHandler.SetBlockClip(blockStagger);
         damageHandler.SetGuardBreakClip(guardBreak);
+
+        primaryStance = (inventory.IsMainEquipped()) ? inventory.GetMainWeapon().primaryStance : null;
+        secondaryStance = (inventory.IsOffEquipped()) ? inventory.GetOffWeapon().secondaryStance : null;
+        ApplyIdleBlends();
 
         ClipTransition sprintingAnim = sprintAnim;
         if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.overridesSprint)
@@ -3970,6 +3977,75 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         
     }
+    
+
+    public void ApplyIdleBlends()
+    {
+        AnimancerLayer primaryLayer = animancer.Layers[HumanoidAnimLayers.Open2];
+        AnimancerLayer secondaryLayer = animancer.Layers[HumanoidAnimLayers.Open1];
+
+        primaryLayer.Weight = 0f;
+
+        if (primaryStance != null && primaryStance.blendWeight > 0f)
+        {
+            state.primaryStance = (MixerState<Vector2>)primaryLayer.Play(primaryStance.blendStance);
+            primaryLayer.SetMask(primaryStance.blendMask);
+            primaryLayer.IsAdditive = primaryStance.additive;    
+        }
+        else if (primaryLayer.IsAnyStatePlaying())
+        {
+            primaryLayer.Stop();
+        }
+
+        secondaryLayer.Weight = 0f;
+
+        if (secondaryStance != null && secondaryStance.blendWeight > 0f)
+        {
+            state.secondaryStance = (MixerState<Vector2>)secondaryLayer.Play(secondaryStance.blendStance);
+            secondaryLayer.SetMask(secondaryStance.blendMask);
+            secondaryLayer.IsAdditive = secondaryStance.additive;
+        }
+        else if (secondaryLayer.IsAnyStatePlaying())
+        {
+            secondaryLayer.Stop();
+        }
+    }
+    public void HandleIdleBlends()
+    {
+        AnimancerLayer primaryLayer = animancer.Layers[HumanoidAnimLayers.Open2];
+        AnimancerLayer secondaryLayer = animancer.Layers[HumanoidAnimLayers.Open1];
+
+        float primaryWeight = 0f;
+        float secondaryWeight = 0f;
+
+        if (animancer.States.Current == state.move || (animancer.States.Current == state.block && !IsBlocking()))
+        {
+            float stateWeight = 1f;
+            if (animancer.States.Current == state.move)
+            {
+                stateWeight = state.move.Weight;
+            }
+            else if (animancer.States.Current == state.block)
+            {
+                stateWeight = state.block.Weight;
+            }
+            if (inventory.IsMainDrawn() && primaryStance != null && primaryStance.blendWeight > 0f)
+            {
+                primaryWeight = primaryStance.blendWeight * stateWeight;
+                state.primaryStance.Parameter = GetMovementVector();
+                state.primaryStance.NormalizedTime = animancer.States.Current.NormalizedTime;
+            }
+            if (inventory.IsOffDrawn() && secondaryStance != null && secondaryStance.blendWeight > 0f)
+            {
+                secondaryWeight = secondaryStance.blendWeight * stateWeight;
+                state.secondaryStance.Parameter = GetMovementVector();
+                state.secondaryStance.NormalizedTime = animancer.States.Current.NormalizedTime;
+            }
+        }
+
+        primaryLayer.Weight = primaryWeight;
+        secondaryLayer.Weight = secondaryWeight;
+    }
     #endregion
 
     #region State Checks
@@ -4132,7 +4208,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else
         {
-            InputSheathe();
+            InputJump();
+            //InputSheathe();
         }
     }
 
