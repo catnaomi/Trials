@@ -5472,8 +5472,9 @@ MonoBehaviour:
   friction: 1
   groundFriction: 0
   waterFriction: 1
-  rollSpeed: 6
+  rollSpeed: 2
   dodgeJumpVel: 5
+  dodgeJumpSpeed: 5
   jumpVel: 6
   isGrounded: 0
   airTime: 0
@@ -5618,18 +5619,20 @@ MonoBehaviour:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: -203655887218126122, guid: 9ee84c79c073a7447987cc22e8f96d23, type: 3}
-    _Speed: 1.5
-    _NormalizedStartTime: 0.3333333
+    _Clip: {fileID: -4109577812215046036, guid: 281e73996154eed4e9f4c707e2b9db07,
+      type: 3}
+    _Speed: 2
+    _NormalizedStartTime: 0.111111104
   dodgeJumpRight:
     _FadeDuration: 0.25
     _Events:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: 1179230378732187947, guid: 53cff8ebe7fe90c44bb87ddca7da0640, type: 3}
-    _Speed: 1.5
-    _NormalizedStartTime: 0.3333333
+    _Clip: {fileID: -3444389082324607714, guid: 281e73996154eed4e9f4c707e2b9db07,
+      type: 3}
+    _Speed: 2
+    _NormalizedStartTime: 0.111111104
   standJumpAnim:
     _FadeDuration: 0.25
     _Events:
@@ -11564,7 +11567,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 462353258}
-  m_LocalRotation: {x: 1.2327317e-15, y: 0.7992548, z: -1.6393999e-15, w: 0.60099244}
+  m_LocalRotation: {x: 0.00598481, y: 0.9654095, z: 0.022246353, w: -0.25971863}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -13827,8 +13830,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
-  m_LocalRotation: {x: -1.6394e-15, y: -0.6009923, z: -1.2327315e-15, w: 0.79925483}
-  m_LocalPosition: {x: 10.233263, y: 1.0439843, z: -39.040924}
+  m_LocalRotation: {x: 0.022246355, y: 0.25971863, z: -0.00598481, w: 0.9654095}
+  m_LocalPosition: {x: 33.095352, y: 1.3806261, z: 6.5637827}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -15028,7 +15031,7 @@ MonoBehaviour:
     GateFit: 2
     m_SensorSize: {x: 1.5996056, y: 1}
   m_Transitions:
-    m_BlendHint: 1
+    m_BlendHint: 3
     m_InheritPosition: 1
     m_OnCameraLive:
       m_PersistentCalls:
@@ -17822,7 +17825,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1478947013}
-  m_LocalRotation: {x: 0.044256795, y: 0.00000021606684, z: 0.00000003585592, w: -0.9990202}
+  m_LocalRotation: {x: 0.044256784, y: 0.00000017881393, z: 0.000000029336661, w: -0.9990203}
   m_LocalPosition: {x: 0.000000028851446, y: -7.4183504e-10, z: -0.0000019367071}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -19139,8 +19142,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1646069603}
-  m_LocalRotation: {x: -0.004280537, y: -0.9956862, z: -0.0613296, w: -0.06949453}
-  m_LocalPosition: {x: 5.657973, y: -15.422277, z: -28.00615}
+  m_LocalRotation: {x: 0.37966484, y: -0.07545184, z: 0.020692024, w: 0.92181}
+  m_LocalPosition: {x: 0.46798837, y: -15.938178, z: 5.0432386}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -20464,8 +20467,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925080555}
-  m_LocalRotation: {x: 0, y: -0.6009922, z: -0, w: 0.7992549}
-  m_LocalPosition: {x: 10.233263, y: 1.0439843, z: -39.040924}
+  m_LocalRotation: {x: 0.022246381, y: 0.25971887, z: -0.0059848228, w: 0.9654095}
+  m_LocalPosition: {x: 33.095352, y: 1.3806261, z: 6.5637827}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -22530,6 +22533,7 @@ MonoBehaviour:
   waterFriction: 1
   rollSpeed: 1.5
   dodgeJumpVel: 5
+  dodgeJumpSpeed: 5
   jumpVel: 4
   isGrounded: 0
   airTime: 0

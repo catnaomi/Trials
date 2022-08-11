@@ -76,6 +76,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     [Space(5)]
     public float rollSpeed = 5f;
     public float dodgeJumpVel = 5f;
+    public float dodgeJumpSpeed = 5f;
     public float jumpVel = 10f;
     [Space(5)]
     public bool isGrounded;
@@ -1202,7 +1203,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             shouldDodge = false;
             HitboxActive(0);
-            speed = rollSpeed;
+            speed = Mathf.Abs(dodgeDirection.x) * rollSpeed + Mathf.Abs(dodgeDirection.y) * dodgeJumpSpeed;
             if (GetCombatTarget() != null)
             {
                 targetDirection = GetCombatTarget().transform.position - this.transform.position;
@@ -2420,6 +2421,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void ApplyDodgeJump()
     {
         yVel = dodgeJumpVel;
+        DisableCloth();
     }
 
     public void OnMove(InputValue value)
