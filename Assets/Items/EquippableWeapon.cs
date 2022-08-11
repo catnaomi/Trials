@@ -67,6 +67,8 @@ public class EquippableWeapon : Equippable, IGeneratesModel
         // do nothing
     }
 
+    
+
     public virtual float GetAttackSpeed(bool twoHand)
     {
         return AttackSpeed;

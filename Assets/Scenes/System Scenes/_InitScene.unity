@@ -3048,7 +3048,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7785088, y: 1}
+    m_SensorSize: {x: 1.7777778, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -5515,7 +5515,9 @@ MonoBehaviour:
   wadingPercent: 0
   attack: 0
   blockSpeed: 5
-  aimCancelTime: 0.5
+  horizontalAimSpeed: 90
+  aimSpeed: 5
+  aimCancelTime: 1
   aimTime: 0
   aimStartTime: 0.25
   secondaryStyle: 0
@@ -5855,8 +5857,6 @@ MonoBehaviour:
     _Clip: {fileID: -203655887218126122, guid: e348e2431bcc27543a499eafb787c3a9, type: 3}
     _Speed: 1
     _NormalizedStartTime: 0
-  horizontalAimSpeed: 90
-  aimSpeed: 2.5
   bilayerMove: {fileID: 0}
   primaryStance:
     blendStance: {fileID: 0}
@@ -6358,7 +6358,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7785088, y: 1}
+    m_SensorSize: {x: 1.7777778, y: 1}
   m_Transitions:
     m_BlendHint: 2
     m_InheritPosition: 1
@@ -11480,7 +11480,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7785088, y: 1}
+    m_SensorSize: {x: 1.7777778, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -11577,7 +11577,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 462353258}
-  m_LocalRotation: {x: 0.09877416, y: 0.06928398, z: -0.0068939924, w: 0.9926711}
+  m_LocalRotation: {x: 0.00598481, y: 0.9654095, z: 0.022246353, w: -0.25971863}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -13840,8 +13840,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
-  m_LocalRotation: {x: 0.0068939924, y: 0.9926711, z: 0.09877414, w: -0.06928398}
-  m_LocalPosition: {x: 1.4485421, y: 0.7344596, z: -30.403393}
+  m_LocalRotation: {x: 0.022246355, y: 0.25971863, z: -0.00598481, w: 0.9654095}
+  m_LocalPosition: {x: 33.095352, y: 1.3806261, z: 6.5637827}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14686,17 +14686,17 @@ PrefabInstance:
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.0000076293945
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 438.75592
+      value: 427.68582
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 8.990875
+      value: 8.898224
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
@@ -17819,7 +17819,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7785088, y: 1}
+    m_SensorSize: {x: 1.7777778, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -17835,7 +17835,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1478947013}
-  m_LocalRotation: {x: 0.044256814, y: 0.00000013411045, z: 0.00000002188608, w: -0.9990203}
+  m_LocalRotation: {x: 0.044256795, y: 0.00000021606684, z: 0.00000003585592, w: -0.9990202}
   m_LocalPosition: {x: 0.000000028851446, y: -7.4183504e-10, z: -0.0000019367071}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -19152,8 +19152,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1646069603}
-  m_LocalRotation: {x: 0.37966484, y: -0.07545306, z: 0.020692365, w: 0.9218098}
-  m_LocalPosition: {x: 0.46799612, y: -15.938179, z: 5.04324}
+  m_LocalRotation: {x: 0.37966475, y: -0.075455174, z: 0.020692945, w: 0.9218097}
+  m_LocalPosition: {x: 0.4680091, y: -15.938179, z: 5.0432415}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -19197,7 +19197,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7785088, y: 1}
+    m_SensorSize: {x: 1.7777778, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -19594,7 +19594,7 @@ MonoBehaviour:
   m_YAxis:
     Value: 0
     m_SpeedMode: 0
-    m_MaxSpeed: 1
+    m_MaxSpeed: 0.5
     m_AccelTime: 0
     m_DecelTime: 0
     m_InputAxisName: 
@@ -19646,12 +19646,12 @@ MonoBehaviour:
   m_BindingMode: 4
   m_SplineCurvature: 0.2
   m_Orbits:
-  - m_Height: 1.25
-    m_Radius: 1.5
+  - m_Height: 1.75
+    m_Radius: 0.9682
   - m_Height: 0
     m_Radius: 2
-  - m_Height: -1.25
-    m_Radius: 1.5
+  - m_Height: -1.5
+    m_Radius: 1.322
   m_LegacyHeadingBias: 3.4028235e+38
   m_Rigs:
   - {fileID: 185817827}
@@ -20477,8 +20477,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925080555}
-  m_LocalRotation: {x: -0.00689402, y: -0.99267113, z: -0.098774344, w: 0.069284126}
-  m_LocalPosition: {x: 1.4485421, y: 0.7344596, z: -30.403393}
+  m_LocalRotation: {x: 0.022246381, y: 0.25971887, z: -0.0059848228, w: 0.9654095}
+  m_LocalPosition: {x: 33.095352, y: 1.3806261, z: 6.5637827}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -20765,7 +20765,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7785088, y: 1}
+    m_SensorSize: {x: 1.7777778, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
@@ -22584,6 +22584,8 @@ MonoBehaviour:
   wadingPercent: 0
   attack: 0
   blockSpeed: 2.5
+  horizontalAimSpeed: 90
+  aimSpeed: 2.5
   aimCancelTime: 0.5
   aimTime: 0
   aimStartTime: 0.25
@@ -22921,8 +22923,6 @@ MonoBehaviour:
     _Clip: {fileID: -203655887218126122, guid: e348e2431bcc27543a499eafb787c3a9, type: 3}
     _Speed: 1
     _NormalizedStartTime: 0
-  horizontalAimSpeed: 90
-  aimSpeed: 2.5
   bilayerMove: {fileID: 0}
   primaryStance:
     blendStance: {fileID: 0}

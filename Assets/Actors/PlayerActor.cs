@@ -158,11 +158,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool isSheathing;
     string test1;
     bool resurrecting;
+    [Space(5)]
+    public float horizontalAimSpeed = 90f;
+    public float aimSpeed = 2.5f;
+    Vector3 aimForwardVector;
     public float aimCancelTime = 2f;
     public float aimTime;
     public float aimStartTime = 0.25f;
+    Vector3 lastLaunchVector;
+    public Vector3 smoothLaunchVector = Vector3.forward;
+    public float launchVectorSmoothSpeed = 120f;
     public Moveset.SecondaryStyle secondaryStyle;
     Vector2 camAimSpeeds;
+    
     [Range(-1f,1f)]
     public float thrustIKValue;
     public float thrustIKWeight;
@@ -212,10 +220,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public ClipTransition resurrectFaceDown;
     [Space(5)]
     public AnimatedFloat bowBend;
-    [Space(5)]
-    public float horizontalAimSpeed = 90f;
-    public float aimSpeed = 2.5f;
-    Vector3 aimForwardVector;
     MixerTransition2DAsset aimAnim;
     [Space(5)]
     [ReadOnly] public BilayerMixer2DAsset bilayerMove;
@@ -631,30 +635,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             else if (attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
             {
-                if (!inventory.IsMainDrawn())
-                {
-                    inventory.SetDrawn(true, true);
-                    UpdateFromMoveset();
-                }
-                if (inventory.IsMainDrawn())
-                {
-                    if (slash)
-                    {
-                        MainSlash();
-
-                    }
-                    else if (thrust)
-                    {
-                        MainThrust();
-                    }
-                }
-                //else if (inventory.IsMainEquipped() && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
-                //{
-                //    TriggerSheath(true, inventory.GetMainWeapon().MainHandEquipSlot, true);
-                //}
-                attack = false;
-                slash = false;
-                thrust = false;
+                BasicAttack();
             }
             else if (!animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying() && !blocking)
             {
@@ -1411,6 +1392,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             aimForwardVector = Quaternion.AngleAxis(look.x * horizontalAimSpeed * Time.deltaTime, Vector3.up) * aimForwardVector;
 
             bool turn = false;
+            bool endAim = false;
 
             if (camState == CameraState.Free)
             {
@@ -1505,26 +1487,32 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     lookDirection = transform.forward;
                 }
-                animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+                //animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
                 inventory.SetDrawn(Inventory.RangedType, false);
                 state.roll = animancer.Play(rollAnim);
+                endAim = true;
+            }
+            if (attack)
+            {
+                
+                BasicAttack();
+                if (inventory.IsMainEquipped()) endAim = true;
             }
             if (!aiming)
             {
                 if (aimTimer <= 0f)
                 {
-                    animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-                    if (inventory.IsRangedEquipped())
-                    {
-                        //TriggerSheath(false, inventory.GetRangedWeapon().RangedEquipSlot, Inventory.RangedType);
-                    }
-                    
+                    endAim = true;
                     animancer.Play(state.move);
                 }
-                else
+                else if (stickDirection.magnitude > 0)
                 {
                     aimTimer -= Time.deltaTime;
                 }
+            }
+            if (endAim)
+            {
+                animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
             }
             animancer.Layers[0].ApplyAnimatorIK = true;
             applyMove = true;
@@ -1705,6 +1693,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             externalSourceClock = 0f;
         }
+
+        smoothLaunchVector = new Vector3(lastLaunchVector.x, 0, lastLaunchVector.z);
+        smoothLaunchVector = Vector3.RotateTowards(smoothLaunchVector, lastLaunchVector, launchVectorSmoothSpeed * Mathf.Deg2Rad * Time.deltaTime, 1f);
         HandleCinemachine();
 
         if (lastSafePoint == Vector3.zero || safePointClock <= 0f)
@@ -2112,13 +2103,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             camState = CameraState.Dialogue;
         }
-        else if (IsAimHeld())//(IsAiming() && aiming)
-        {
-            camState = CameraState.Aim;
-        }
         else if (GetCombatTarget() != null)
         {
             camState = CameraState.Lock;
+        }
+        else if (IsAiming())
+        {
+            camState = CameraState.Aim;
         }
         else
         {
@@ -2327,6 +2318,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         sprinting = sprinting && IsSprintHeld();
         secondary = secondary && IsSecondaryHeld();
         targeting = IsTargetHeld();
+        //aiming = IsAimHeld();
         switch (buffer.PollInput(inputBufferTimeoutTime))
         {
             case InputBuffer.Inputs.Dodge:
@@ -3614,6 +3606,32 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+    public void BasicAttack()
+    {
+        if (attack)
+        {
+            if (!inventory.IsMainDrawn() & inventory.IsMainEquipped())
+            {
+                inventory.SetDrawn(true, true);
+                UpdateFromMoveset();
+            }
+            if (inventory.IsMainDrawn())
+            {
+                if (slash)
+                {
+                    MainSlash();
+                }
+                else if (thrust)
+                {
+                    MainThrust();
+                }
+            }
+            attack = false;
+            slash = false;
+            thrust = false;
+        }
+    }
+
     public override void DeactivateHitboxes()
     {
         HitboxActive(0);
@@ -3831,11 +3849,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             if (Vector3.Distance(target.transform.position, origin) > 2)
             {
-                return (target.transform.position - origin).normalized;
+                lastLaunchVector = (target.transform.position - origin).normalized;
+                return lastLaunchVector;
             }
             else
             {
-                return this.transform.forward;
+                lastLaunchVector = this.transform.forward;
+                return lastLaunchVector;
             }
         }
         else if (IsAiming())
@@ -3848,15 +3868,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 
             }
             Debug.DrawLine(origin, aimPos, Color.red);
-            return (aimPos - origin).normalized;
+            lastLaunchVector = (aimPos - origin).normalized;
+            return lastLaunchVector;
         }
         else
         {
-            return this.transform.forward;
+            lastLaunchVector = this.transform.forward;
+            return lastLaunchVector;
         }
     }
-
-
     public override bool ShouldCalcFireStrength()
     {
         return true;
@@ -4071,8 +4091,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public bool IsAiming()
     {
-        return IsAimHeld();
-        //return animancer.States.Current == state.aim && (state.aim != state.move || aiming);
+        //return IsAimHeld();
+        return animancer.States.Current == state.aim;// && (state.aim != state.move || aiming);
     }
 
     public override bool IsFalling()

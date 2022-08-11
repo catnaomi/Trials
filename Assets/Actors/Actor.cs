@@ -313,6 +313,11 @@ public class Actor : MonoBehaviour
         return this.transform.forward;
     }
 
+    public virtual float GetLaunchVectorSmoothDistance()
+    {
+        return 10f;
+    }
+
     public virtual void DeactivateHitboxes()
     {
         Debug.LogWarning("DeactivateHitboxes not implemented!");

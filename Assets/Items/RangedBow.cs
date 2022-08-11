@@ -28,7 +28,10 @@ public class RangedBow : RangedWeapon, IHitboxHandler
 
     AnimancerComponent animancer;
     LinearMixerState bowBendState;
+    BowStringHandler bowString;
     LineRenderer line;
+    Transform mount1;
+    Transform mount2;
     bool nocked;
     /*
     public bool HandleInput(out InputAction action)
@@ -114,8 +117,23 @@ public class RangedBow : RangedWeapon, IHitboxHandler
         }
         else
         {
-            Vector3 lineCenter = (nocked) ? line.transform.InverseTransformPoint(positionReference.MainHand.transform.position) : Vector3.zero;
-            line.SetPosition(1, lineCenter);
+            if (!line.useWorldSpace)
+            {
+                Vector3 lineCenter = (nocked) ? line.transform.InverseTransformPoint(positionReference.MainHand.transform.position) : Vector3.zero;
+                line.SetPosition(1, lineCenter);
+            }
+            else if (bowString != null)
+            {
+                bowString.hand = positionReference.MainHand.transform;
+                bowString.nocked = nocked;
+            }
+            else
+            {
+                //line.SetPosition(0, mount1.position);
+                //line.SetPosition(2, mount2.position);
+                //line.SetPosition(1, (nocked) ? positionReference.MainHand.transform.position : (mount1.position + mount2.position) * 0.5f);
+            }
+            
         }
         if (actor is PlayerActor player && animancer != null)
         {
@@ -276,6 +294,9 @@ public class RangedBow : RangedWeapon, IHitboxHandler
         deadArrow.SetActive(false);
         GameObject obj = base.GenerateModel();
         line = model.GetComponentInChildren<LineRenderer>();
+        bowString = model.GetComponentInChildren<BowStringHandler>();
+        //mount1 = model.transform.FindRecursively("bowTop");
+        //mount2 = model.transform.FindRecursively("bowBottom");
         return obj;
     }
 
