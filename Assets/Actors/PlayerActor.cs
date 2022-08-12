@@ -4238,6 +4238,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         state.dialogue = animancer.States.GetOrCreate("dialogue", idleAnim);
         animancer.Play(state.dialogue);
+        xzVel = Vector3.zero;
     }
 
     public void StopDialogue()

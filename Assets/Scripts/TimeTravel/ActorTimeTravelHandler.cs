@@ -103,7 +103,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public virtual TimeTravelData SaveTimeState()
     {
-        if (isRewinding || isFrozen) return null;
+        if (isRewinding || isFrozen || actor == null) return null;
         ActorTimeTravelData data;
         if (actor is PlayerActor)
         {
