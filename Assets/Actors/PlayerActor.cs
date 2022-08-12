@@ -1607,10 +1607,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             linearSwim.Parameter = speed / swimSpeed;
         }
-        if (blocking && state.block is DirectionalMixerState blockDirectional)
+        if (blocking)
         {
-            blockDirectional.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
-            blockDirectional.ParameterY = Vector3.Dot(moveDirection, this.transform.forward) * (speed / walkSpeedMax);
+            float x = Vector3.Dot(moveDirection, this.transform.right) * (speed / blockSpeed);
+            float y = Vector3.Dot(moveDirection, this.transform.forward) * (speed / blockSpeed);
+            ((MixerState<Vector2>)state.block).Parameter = new Vector2(x, y);
         }
         Vector3 finalMov = (moveDirection * speed + downwardsVelocity);
 
