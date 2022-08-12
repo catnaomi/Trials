@@ -82,6 +82,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool isGrounded;
     public float airTime = 0f;
     public float groundBias = 0f;
+    public float jumpBuffer = 1f;
+    bool didJump;
     float lastAirTime;
     float landTime = 0f;
     float speed;
@@ -442,6 +444,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         instatemove = (animancer.States.Current == state.move);
         isGrounded = GetGrounded(out RaycastHit rayHit, out RaycastHit sphereHit);
+        if (isGrounded)
+        {
+            didJump = false;
+        }
         moveSmoothed = Vector2.MoveTowards(moveSmoothed, move, Time.deltaTime);
         Vector3 camForward = Camera.main.transform.forward;
         camForward.Scale(new Vector3(1f, 0f, 1f));
@@ -537,12 +543,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }
                 moveDirection = stickDirection;
             }
-
-            if (!isGrounded && lastAirTime > fallBufferTime)
+            if (jump)
+            {
+                jump = false;
+                if (stickDirection.magnitude > 0)
+                {
+                    lookDirection = stickDirection.normalized;
+                    moveDirection = stickDirection.normalized;
+                    //xzVel = xzVel.magnitude * stickDirection.normalized;
+                }
+                state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+            }
+            else if (!isGrounded && lastAirTime > fallBufferTime)
             {
                 state.fall = animancer.Play(fallAnim);
             }
-            if (sprinting && move.magnitude >= 0.5f && landTime >= 1f)
+            else if (sprinting && move.magnitude >= 0.5f && landTime >= 1f)
             {
                 if (!dashed)
                 {
@@ -555,7 +571,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }
 
             }
-            if (shouldDodge && isCarrying)
+            else if (shouldDodge && isCarrying)
             {
                 StartDrop();
                 shouldDodge = false;
@@ -567,18 +583,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 state.roll = animancer.Play(rollAnim);
                 animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
             }
-            if (jump)
-            {
-                jump = false;
-                if (stickDirection.magnitude > 0)
-                {
-                    lookDirection = stickDirection.normalized;
-                    moveDirection = stickDirection.normalized;
-                    //xzVel = xzVel.magnitude * stickDirection.normalized;
-                }
-                state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
-            }
-            if (CheckWater())
+            else if (CheckWater())
             {
                 state.swim = animancer.Play(swimStart, 0.25f);
                 this.gameObject.SendMessage("SplashBig");
@@ -1111,6 +1116,21 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     
 
             }
+            if (jump)
+            {
+                jump = false;
+                if (airTime < jumpBuffer && !didJump)
+                {
+                    if (stickDirection.magnitude > 0)
+                    {
+                        lookDirection = stickDirection.normalized;
+                        moveDirection = stickDirection.normalized;
+                        //xzVel = xzVel.magnitude * stickDirection.normalized;
+                    }
+                    state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+                }
+                
+            }
             if (ledgeSnap)
             {
                 if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
@@ -1241,6 +1261,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else if (animancer.States.Current == state.jump)
         {
             jump = false;
+            didJump = true;
             //speed = 0f;
             //speed = sprintSpeed;
             moveDirection = this.transform.forward;
@@ -2403,7 +2424,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             StopCoroutine("ClimbLockout");
             allowClimb = true;
         }
-        else if (GetGrounded())
+        else if (GetGrounded() || airTime < jumpBuffer)
         {
             //jump = true;
             buffer.SetInput(InputBuffer.Inputs.Jump, Time.time);
