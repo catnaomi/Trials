@@ -97,7 +97,15 @@ public class SinkingPlatformController : MonoBehaviour
         {
             rigidbody.isKinematic = false;
             rigidbody.useGravity = true;
-            this.gameObject.SetActive(false);
+            if (this.gameObject == platform.gameObject)
+            {
+                enabled = false;
+            }
+            else
+            {
+                this.gameObject.SetActive(false);
+            }
+            
             //rigidbody.Sleep();
             rigidbody.AddForceAtPosition(additDetachForce, PlayerActor.player.transform.position, ForceMode.Impulse);
             if (destroyOnDetachDelay > 0f)

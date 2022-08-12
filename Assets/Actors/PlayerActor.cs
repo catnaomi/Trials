@@ -107,6 +107,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool aimAtkLockout;
     public float headPointSpeed = 25f;
     public PhysicMaterial lastPhysicsMaterial;
+    public bool lastGroundWasStatic;
     [Space(5)]
     public float attackDecel = 25f;
     public float dashAttackDecel = 10f;
@@ -1722,7 +1723,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         if (lastSafePoint == Vector3.zero || safePointClock <= 0f)
         {
-            if (dead || resurrecting || (!IsMoving() && animancer.States.Current != state.sprint) || this.GetComponent<ActorTimeTravelHandler>().IsRewinding())
+            if (!lastGroundWasStatic || dead || resurrecting || (!IsMoving() && animancer.States.Current != state.sprint) || this.GetComponent<ActorTimeTravelHandler>().IsRewinding())
             {
                 safePointClock = 0.25f;
             }
@@ -4317,6 +4318,7 @@ public bool GetGrounded()
         if (didHit)
         {
             lastPhysicsMaterial = rayHit.collider.sharedMaterial;
+            lastGroundWasStatic = rayHit.transform.gameObject.isStatic;
         }
         Color clr = didSphereHit ? Color.magenta : Color.yellow;
         Debug.DrawLine(bottom, bottom + Vector3.down * CAST_DISTANCE, didHit ? Color.red : Color.cyan);

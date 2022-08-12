@@ -7,6 +7,7 @@ public class PendulumRigidbody : MonoBehaviour
     public float speed = 1f;
     public float angle = 30f;
     public float pendulumHeight = 10f;
+    public float offset = 0;
     public Rigidbody rigidbody;
     RigidbodyTimeTravelHandler timeTravelHandler;
     bool usingTimeTravel;
@@ -23,7 +24,7 @@ public class PendulumRigidbody : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        float rotAngle = Mathf.Sin(GetFixedTime() * speed) * angle;
+        float rotAngle = Mathf.Sin((GetFixedTime() + offset) * speed) * angle;
 
         Vector3 dir = Quaternion.AngleAxis(rotAngle, this.transform.forward) * (Vector3.up * pendulumHeight);
 
