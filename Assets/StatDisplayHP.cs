@@ -76,8 +76,8 @@ public class StatDisplayHP : MonoBehaviour
     {
         if (actor != null)
         {
-            healthyHealth = Mathf.CeilToInt(actor.attributes.health.current / 10f);
-            maxHealth = Mathf.CeilToInt(actor.attributes.health.max / 10f);
+            healthyHealth = Mathf.FloorToInt(actor.attributes.health.current);
+            maxHealth = Mathf.FloorToInt(actor.attributes.health.max);
         }
         UpdateHearts();
     }

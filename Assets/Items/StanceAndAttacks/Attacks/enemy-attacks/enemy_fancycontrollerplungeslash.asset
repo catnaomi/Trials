@@ -28,9 +28,8 @@ MonoBehaviour:
     _Speed: 1
     _NormalizedStartTime: 0
   attackData:
-    healthDamage: 25
-    staminaDamage: 25
-    types: 0a000000
+    healthDamage: 1
+    types: 0
     critData:
       criticalMultiplier: 1
       alwaysCritical: 0
@@ -48,6 +47,7 @@ MonoBehaviour:
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 1
+    stagger: 1
     staggers:
       onHit: 2
       onArmorHit: 1
@@ -82,5 +82,4 @@ MonoBehaviour:
       _Callbacks: []
       _Names: []
     _Controller: {fileID: 9100000, guid: 326c4d694329fe541978c917acd94229, type: 2}
-    _NormalizedStartTime: 0
-    _KeepStateOnStop: 0
+    _ActionsOnStop: 

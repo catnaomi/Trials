@@ -28,9 +28,8 @@ MonoBehaviour:
     _Speed: 1
     _NormalizedStartTime: 0
   attackData:
-    healthDamage: 10
-    staminaDamage: 25
-    types: 0a000000
+    healthDamage: 1
+    types: 0
     critData:
       criticalMultiplier: 1
       alwaysCritical: 0
@@ -42,16 +41,19 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 1
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
+    cannotAutoFlinch: 0
     stunTime: 1
+    stagger: 1
     staggers:
       onHit: 3
       onArmorHit: 1
       onCritical: 4
       onKill: 5
-      onInjure: 7
+      onCounterHit: 0
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
     hitboxSource: {fileID: 0}
@@ -70,3 +72,6 @@ MonoBehaviour:
     hitClip: {fileID: 0}
   staminaCost: 0
   exitTime: -1
+  cancelStartTime: 0
+  mainHandAngleAdjust: 0
+  offHandAngleAdjust: 0

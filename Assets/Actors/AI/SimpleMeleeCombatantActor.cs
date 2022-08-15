@@ -84,7 +84,7 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
         Draw.Events.OnEnd = _MoveOnEnd;
         Sheath.Events.OnEnd = _MoveOnEnd;
         Dodge.Events.OnEnd = _MoveOnEnd;
-        damageHandler = new SingleWeaknessDamageHandler(this, damageAnims, animancer);
+        damageHandler = new SimplifiedDamageHandler(this, damageAnims, animancer);
         //damageHandler.SetEndAction(_MoveOnEnd);
         
         damageHandler.SetEndAction(() =>

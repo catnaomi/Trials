@@ -5,12 +5,12 @@ using UnityEngine;
 
 
 // unfinished: pending new ice golem animations and mesh
-public class SingleWeaknessDamageHandler : HumanoidDamageHandler
+public class SimplifiedDamageHandler : HumanoidDamageHandler
 {
 
     ClipTransition customDeathAnim;
 
-    public SingleWeaknessDamageHandler(Actor actor, DamageAnims anims, AnimancerComponent animancer) : base(actor, anims, animancer)
+    public SimplifiedDamageHandler(Actor actor, DamageAnims anims, AnimancerComponent animancer) : base(actor, anims, animancer)
     {
         this.actor = actor;
         this.damageAnims = anims;
@@ -50,17 +50,11 @@ public class SingleWeaknessDamageHandler : HumanoidDamageHandler
         
         normalDamageAmount = DamageKnockback.GetTotalMinusResistances(normalDamageAmount, damage.GetTypes(), dr);
 
-        float simplifiedDamageAmount = 0f;
-        if ((normalDamageAmount > 0 || isCrit) && (!actor.IsDodging()))
-        {
-            simplifiedDamageAmount = 10f;
-        }
+        bool willKill = normalDamageAmount >= actor.attributes.health.current || isCrit;
+        bool tink = normalDamageAmount <= 0f;
+        bool weak = (dr.weaknesses & damage.GetTypes()) != 0;
 
-        bool willKill = simplifiedDamageAmount >= actor.attributes.health.current || isCrit;
-        bool tink = simplifiedDamageAmount <= 0f;
-
-
-        actor.attributes.ReduceHealth(simplifiedDamageAmount);
+        actor.attributes.ReduceHealth(normalDamageAmount);
 
         if (damage.hitboxSource != null)
         {
@@ -113,56 +107,77 @@ public class SingleWeaknessDamageHandler : HumanoidDamageHandler
             damage.OnBlock.Invoke();
             actor.OnBlock.Invoke();
         }
-        else if (tink)
-        {
-            if (damage.bouncesOffBlock && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
-            {
-                damageable.Recoil();
-            }
-            damage.OnBlock.Invoke();
-            actor.OnBlock.Invoke();
-        }
         else if (!willKill)
         {
-            DamageKnockback.StaggerType stagger = DamageKnockback.StaggerType.StaggerLarge;
 
-            Vector3 dir = (damage.source.transform.position - actor.transform.position).normalized;
-            float xdot = Vector3.Dot(actor.transform.right, dir);
-            float ydot = Vector3.Dot(actor.transform.forward, dir);
+            
+           
 
-            isFacingUp = ydot > 0f;
 
-            DirectionalMixerState state = (DirectionalMixerState)animancer.Play(damageAnims.staggerLarge);
-            state.Time = 0f;
-            state.ParameterX = xdot;
-            state.ParameterY = ydot;
-            state.Events.OnEnd = _OnEnd;
-            CheckFallContinuous(state, willKill);
-            hurt = state;
+            DamageKnockback.StaggerType stagger = DamageKnockback.StaggerType.None;
 
-            animancer.Layers[HumanoidAnimLayers.BilayerBlend].Stop();
+            if (weak && damage.stagger == DamageKnockback.StaggerStrength.Light)
+            {
+                stagger = damageAnims.lightWeak;
+            }
+            else if (!weak && damage.stagger == DamageKnockback.StaggerStrength.Light)
+            {
+                stagger = damageAnims.lightNeutral;
+            }
+            else if (weak && damage.stagger == DamageKnockback.StaggerStrength.Heavy)
+            {
+                stagger = damageAnims.heavyWeak;
+            }
+            else if (!weak && damage.stagger == DamageKnockback.StaggerStrength.Heavy)
+            {
+                stagger = damageAnims.heavyNeutral;
+            }
 
-            damage.OnHit.Invoke();
-            actor.OnHurt.Invoke();
+            ProcessStaggerType(damage, stagger, hitFromBehind, willKill, isCrit);
+            //return;
+            if (tink)
+            {
+                if (!damage.isRanged && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+                {
+                    damageable.Recoil();
+                }
+                damage.OnBlock.Invoke();
+                actor.OnBlock.Invoke();
+            }
+            else
+            {
+                damage.OnHit.Invoke();
+                actor.OnHurt.Invoke();
+            }
         }
         else if (willKill)
         {
-            /*
-            DamageKnockback.StaggerType stagger = DamageKnockback.StaggerType.SpinDeath;
 
-            AnimancerState state = animancer.Play(damageAnims.spinDeath);
+            DamageKnockback.StaggerType stagger = DamageKnockback.StaggerType.None;
 
-            state.Events.OnEnd = actor.Die;
-            hurt = state;
+            if (weak)
+            {
+                stagger = damageAnims.deathWeak;
+            }
+            else
+            {
+                stagger = damageAnims.deathNeutral;
+            }
 
-            damage.OnHit.Invoke();
-            actor.OnHurt.Invoke();
-            */
+            if (stagger == DamageKnockback.StaggerType.None)
+            {
+                damage.OnHit.Invoke();
+                actor.OnHurt.Invoke();
+                actor.Die();
+            }
+            else
+            {
+                ProcessStaggerType(damage, stagger, hitFromBehind, willKill, isCrit);
+                hurt.Events.OnEnd = actor.Die;
+                damage.OnHit.Invoke();
+                actor.OnHurt.Invoke();
 
-            damage.OnHit.Invoke();
-            actor.OnHurt.Invoke();
-            actor.Die();
-
+            }
         }
     }
 }

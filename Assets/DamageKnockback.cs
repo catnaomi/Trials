@@ -93,10 +93,8 @@ public class DamageKnockback
 
     public enum StaggerStrength
     {
-        Flinch,
-        Normal,
+        Light,
         Heavy,
-        Special
     }
 
     //public bool breaksArmor;
@@ -147,7 +145,7 @@ public class DamageKnockback
         DamageKnockback damage = new DamageKnockback();
         damage.healthDamage = 1f;
         damage.kbForce = Vector3.up;
-        damage.stagger = StaggerStrength.Normal;
+        damage.stagger = StaggerStrength.Light;
 
         damage.types = DamageType.Standard_SlashPierce;
 

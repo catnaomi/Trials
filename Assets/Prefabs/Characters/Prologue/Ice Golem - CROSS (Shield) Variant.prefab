@@ -86,17 +86,17 @@ PrefabInstance:
     - target: {fileID: 4013956763830427713, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
       propertyPath: health.max
-      value: 10
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4013956763830427713, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
       propertyPath: health.current
-      value: 10
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4013956763830427713, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
       propertyPath: health.baseValue
-      value: 10
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4013956763830427767, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
@@ -205,8 +205,7 @@ MonoBehaviour:
   yVel: 0
   currentDamage:
     healthDamage: 0
-    staminaDamage: 0
-    types: 
+    types: 0
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -224,6 +223,7 @@ MonoBehaviour:
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 0
       onArmorHit: 0

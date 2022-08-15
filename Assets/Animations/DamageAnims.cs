@@ -5,6 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "DamageAnimations", menuName = "ScriptableObjects/Animancer/Create Damage Animations Asset", order = 1)]
 public class DamageAnims : ScriptableObject
 {
+    [Header("Damage Animations By Type")]
     public ClipTransition flinch;
     public MixerTransition2D staggerSmall;
     public MixerTransition2D staggerLarge;
@@ -20,6 +21,7 @@ public class DamageAnims : ScriptableObject
     public AvatarMask flinchMask;
     
     [Space(20)]
+    [Header("Prone Animations")]
     public ClipTransition knockdownFaceUp;
     public ClipTransition fallFaceUp;
     public ClipTransition proneFaceUp;
@@ -34,7 +36,13 @@ public class DamageAnims : ScriptableObject
     public ClipTransition deadFaceDown;
     public ClipTransition landFaceDown;
 
-
+    [Header("Resistance-Based Stagger Types")]
+    public DamageKnockback.StaggerType lightNeutral;
+    public DamageKnockback.StaggerType heavyNeutral;
+    public DamageKnockback.StaggerType deathNeutral;
+    public DamageKnockback.StaggerType lightWeak;
+    public DamageKnockback.StaggerType heavyWeak;
+    public DamageKnockback.StaggerType deathWeak;
 
     public ClipTransition GetClipFromStaggerType(DamageKnockback.StaggerType type)
     {

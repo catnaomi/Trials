@@ -28,9 +28,8 @@ MonoBehaviour:
     _Speed: 1
     _NormalizedStartTime: 0
   attackData:
-    healthDamage: 25
-    staminaDamage: 25
-    types: 0a000000
+    healthDamage: 1
+    types: 0
     critData:
       criticalMultiplier: 1.25
       alwaysCritical: 0
@@ -42,11 +41,13 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 1
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 1
+    stagger: 1
     staggers:
       onHit: 2
       onArmorHit: 1
@@ -106,9 +107,8 @@ MonoBehaviour:
   lastAttackTime: -100
   currentIndex: 0
   damages:
-  - healthDamage: 25
-    staminaDamage: 25
-    types: 0a000000
+  - healthDamage: 1
+    types: 0
     critData:
       criticalMultiplier: 1
       alwaysCritical: 0
@@ -120,11 +120,13 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 1
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 3
       onArmorHit: 1
@@ -147,9 +149,8 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}
-  - healthDamage: 25
-    staminaDamage: 25
-    types: 0a000000
+  - healthDamage: 1
+    types: 0
     critData:
       criticalMultiplier: 1
       alwaysCritical: 0
@@ -161,11 +162,13 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 1
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 2
       onArmorHit: 1
@@ -188,9 +191,8 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}
-  - healthDamage: 50
-    staminaDamage: 250
-    types: 0a000000
+  - healthDamage: 1
+    types: 0
     critData:
       criticalMultiplier: 1
       alwaysCritical: 0
@@ -202,11 +204,13 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 1
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 1
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 3
       onArmorHit: 1

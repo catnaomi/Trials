@@ -113,17 +113,17 @@ PrefabInstance:
     - target: {fileID: 8622797609942491639, guid: 884f1ae2ae5a0fb42a0aaeeedfbf7890,
         type: 3}
       propertyPath: health.max
-      value: 10
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8622797609942491639, guid: 884f1ae2ae5a0fb42a0aaeeedfbf7890,
         type: 3}
       propertyPath: health.current
-      value: 10
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8622797609942491639, guid: 884f1ae2ae5a0fb42a0aaeeedfbf7890,
         type: 3}
       propertyPath: health.baseValue
-      value: 10
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8622797609942491636, guid: 884f1ae2ae5a0fb42a0aaeeedfbf7890, type: 3}
@@ -205,8 +205,7 @@ MonoBehaviour:
   yVel: 0
   currentDamage:
     healthDamage: 0
-    staminaDamage: 0
-    types: 
+    types: 0
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -224,6 +223,7 @@ MonoBehaviour:
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 0
       onArmorHit: 0
@@ -246,6 +246,7 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
+  currentConsumable: {fileID: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   timeTravelStates: []
@@ -265,6 +266,7 @@ MonoBehaviour:
   strafeDelay: 2
   strafeDirection: 0
   jumpAdjustSpeed: 3
+  turningDelay: 1
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: b3c749a2726bf1b4e9d06eb7464f533c, type: 2}
   moveAnim: {fileID: 11400000, guid: 1ba12adde69307242ba46ca1ac0fd989, type: 2}

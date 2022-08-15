@@ -3189,8 +3189,7 @@ MonoBehaviour:
   yVel: 0
   currentDamage:
     healthDamage: 0
-    staminaDamage: 0
-    types: 
+    types: 0
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -3208,6 +3207,7 @@ MonoBehaviour:
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 0
       onArmorHit: 0
@@ -3268,7 +3268,7 @@ MonoBehaviour:
   FarAttackRotationSpeed: 360
   InFarAttackRange: 0
   OffMeshAttack: {fileID: 0}
-  damageAnims: {fileID: 11400000, guid: 9d9b14e5de6ad3d449aa822da5bc08b9, type: 2}
+  damageAnims: {fileID: 11400000, guid: 221ae51d23f379f4a9d8bc53390ce0e9, type: 2}
   deathParticle: {fileID: 2759190588825693265, guid: b6cc573424a44724382c8510edfd3239,
     type: 3}
   clock: 0
@@ -3291,9 +3291,9 @@ MonoBehaviour:
   smoothedHealth: 0
   healthRecoveryClock: 0
   health:
-    baseValue: 30
-    current: 30
-    max: 30
+    baseValue: 3
+    current: 3
+    max: 3
   healthRecoveryRate:
     baseValue: 0
     current: 0
@@ -3312,15 +3312,14 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   resistances:
-  - type: 1
-    ratio: 1
-    flat: 0
-  - type: 2
-    ratio: 0
-    flat: 0
-  - type: 3
-    ratio: 1
-    flat: 0
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 4
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 0
+    neutralFlat: 0
   effects: []
 --- !u!195 &8622797609942491638
 NavMeshAgent:
@@ -3472,7 +3471,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f58f79a4e4e3c64e8a9b1f1d0aa785e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layer: 6
+  layer: 7
   idle:
     _FadeDuration: 0.25
     _Events:

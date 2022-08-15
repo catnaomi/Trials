@@ -145,13 +145,10 @@ public class ActorAttributes : MonoBehaviour
     }
     public void ReduceHealth(float damage)
     {
-        if (damage > 0)
+        float floorDamage = Mathf.Floor(damage);
+        if (floorDamage > 0)
         {
-            ReduceAttribute(health, damage);
-            if (usesHearts)
-            {
-                health.current = Mathf.Ceil(health.current / 10f) * 10f;
-            }
+            ReduceAttribute(health, floorDamage);
             OnHealthChange.Invoke();
             OnHealthLoss.Invoke();
         }
@@ -160,13 +157,10 @@ public class ActorAttributes : MonoBehaviour
 
     public void RecoverHealth(float recovery)
     {
-        if (recovery > 0)
+        float floorRecovery = Mathf.Floor(recovery);
+        if (floorRecovery > 0)
         {
-            RecoverAttributeToMax(health, recovery, health.max);
-            if (usesHearts)
-            {
-                health.current = Mathf.Ceil(health.current / 10f) * 10f;
-            }
+            RecoverAttributeToMax(health, floorRecovery, health.max);
             OnHealthGain.Invoke();
             OnHealthChange.Invoke();
         }
