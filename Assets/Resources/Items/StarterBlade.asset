@@ -49,9 +49,14 @@ MonoBehaviour:
   usesAmmunition: 0
   ammunitionReference: {fileID: 0}
   blockResistances:
-  - type: 4
-    ratio: 1
-    flat: 10
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -59,10 +64,10 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   model: {fileID: 0}
-  baseDamage: 100
+  baseDamage: 1
   heartsDamage: 3
   width: 0.1
   length: 1
   slashModifier: 1
   thrustModifier: 1
-  elements: 
+  elements: 1024

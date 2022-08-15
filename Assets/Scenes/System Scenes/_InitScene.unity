@@ -3065,7 +3065,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 247212858}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -9.809436, y: 44.56823, z: 68.84575}
+  m_LocalPosition: {x: -9.809436, y: 44.56823, z: 68.845764}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5350,8 +5350,7 @@ MonoBehaviour:
   yVel: 0
   currentDamage:
     healthDamage: 0
-    staminaDamage: 0
-    types: 
+    types: 0
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -5369,6 +5368,7 @@ MonoBehaviour:
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 0
       onArmorHit: 0
@@ -5969,7 +5969,15 @@ MonoBehaviour:
   OnHealthChange:
     m_PersistentCalls:
       m_Calls: []
-  resistances: []
+  resistances:
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
   effects: []
 --- !u!114 &307703072
 MonoBehaviour:
@@ -17839,7 +17847,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1478947013}
-  m_LocalRotation: {x: 0.04425688, y: 0.0000000074505797, z: 4.6566123e-10, w: -0.99902016}
+  m_LocalRotation: {x: 0.04425686, y: 0.000000014901159, z: 0.0000000013969838, w: -0.99902016}
   m_LocalPosition: {x: -0.00000011805349, y: 0.000000002032314, z: -0.000000016434722}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -19156,8 +19164,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1646069603}
-  m_LocalRotation: {x: -0.04356824, y: -0.86540574, z: 0.49577928, w: -0.0581178}
-  m_LocalPosition: {x: 9.087788, y: -24.795755, z: -65.70529}
+  m_LocalRotation: {x: -0.04356807, y: -0.86540574, z: 0.49577928, w: -0.05811757}
+  m_LocalPosition: {x: 9.087789, y: -24.795755, z: -65.70529}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -22183,7 +22191,15 @@ MonoBehaviour:
   OnHealthChange:
     m_PersistentCalls:
       m_Calls: []
-  resistances: []
+  resistances:
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
   effects: []
 --- !u!114 &2757355003389657204
 MonoBehaviour:
@@ -22432,8 +22448,7 @@ MonoBehaviour:
   yVel: 0
   currentDamage:
     healthDamage: 0
-    staminaDamage: 0
-    types: 
+    types: 0
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -22451,6 +22466,7 @@ MonoBehaviour:
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 0
       onArmorHit: 0

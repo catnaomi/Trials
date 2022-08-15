@@ -49,12 +49,14 @@ MonoBehaviour:
   usesAmmunition: 0
   ammunitionReference: {fileID: 0}
   blockResistances:
-  - type: 4
-    ratio: 1
-    flat: 30
-  - type: 0
-    ratio: 0
-    flat: 0
+    strengths: 14
+    strengthMultiplier: 0
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -67,8 +69,7 @@ MonoBehaviour:
   bashCost: 20
   bashDamage:
     healthDamage: 0
-    staminaDamage: 20
-    types: 
+    types: 0
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -86,6 +87,7 @@ MonoBehaviour:
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 0
       onArmorHit: 0

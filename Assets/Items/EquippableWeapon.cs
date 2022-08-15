@@ -32,7 +32,7 @@ public class EquippableWeapon : Equippable, IGeneratesModel
     [Header("Ammunition")]
     public bool usesAmmunition;
     public Item ammunitionReference;
-    public DamageResistance[] blockResistances;
+    public DamageResistance blockResistances;
 
     public UnityEvent OnEquip = new UnityEvent();
     public UnityEvent OnUnequip = new UnityEvent();
@@ -120,7 +120,7 @@ public class EquippableWeapon : Equippable, IGeneratesModel
         return model;
     }
 
-    public virtual DamageResistance[] GetBlockResistance()
+    public virtual DamageResistance GetBlockResistance()
     {
         return blockResistances;
     }

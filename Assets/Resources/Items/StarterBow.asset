@@ -49,7 +49,15 @@ MonoBehaviour:
   usesAmmunition: 1
   ammunitionReference: {fileID: 11400000, guid: d16790a012b3df64fba58b934c0a61e7,
     type: 2}
-  blockResistances: []
+  blockResistances:
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -63,9 +71,8 @@ MonoBehaviour:
   deadArrowPrefab: {fileID: 919132149155446097, guid: 1be7bf8fb01023a43a86800e120ba0e4,
     type: 3}
   damageKnockback:
-    healthDamage: 10
-    staminaDamage: 0
-    types: 02000000
+    healthDamage: 1
+    types: 4
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -83,6 +90,7 @@ MonoBehaviour:
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 1
       onArmorHit: 1

@@ -33,7 +33,7 @@ public class ActorAttributes : MonoBehaviour
     public UnityEvent OnHealthGain;
     public UnityEvent OnHealthChange;
     [Header("Resistances & Weaknesses")]
-    public List<DamageResistance> resistances;
+    public DamageResistance resistances;
 
     public List<EffectDuration> effects;
 

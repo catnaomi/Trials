@@ -385,9 +385,9 @@ public class HumanoidActor : Actor
         AdjustDefendingPosition(damageKnockback.source);
 
         //  implement resistances
-        float totalDamage = DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.GetTypes(), this.attributes.resistances);
+        //float totalDamage = DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.GetTypes(), this.attributes.resistances);
 
-        bool willKill = attributes.HasHealthRemaining() && (totalDamage >= attributes.health.current);
+        bool willKill = true;// attributes.HasHealthRemaining() && (totalDamage >= attributes.health.current);
 
         if (this.IsDodging() || isInvulnerable)
         {
@@ -432,21 +432,21 @@ public class HumanoidActor : Actor
             {
                 if (!animator.GetBool("Helpless"))
                 {
-                    ProcessStagger(damageKnockback.staggers.onKill, damageKnockback);
+                    //ProcessStagger(damageKnockback.staggers.onKill, damageKnockback);
                 }
                 Die();
             }
             else if (IsArmored() && !damageKnockback.breaksArmor)
             {
-                ProcessStagger(damageKnockback.staggers.onArmorHit, damageKnockback);
+                //ProcessStagger(damageKnockback.staggers.onArmorHit, damageKnockback);
             }
             else if (IsCritVulnerable())
             {
-                ProcessStagger(damageKnockback.staggers.onCritical, damageKnockback);
+                //ProcessStagger(damageKnockback.staggers.onCritical, damageKnockback);
             }
             else
             {
-                ProcessStagger(damageKnockback.staggers.onHit, damageKnockback);
+                //ProcessStagger(damageKnockback.staggers.onHit, damageKnockback);
             }
             if (ShouldHelpless())
             {
@@ -537,9 +537,9 @@ public class HumanoidActor : Actor
     public bool Damage(DamageKnockback damageKnockback, bool isCritical)
     {
         // account for resistances
-        float critMult = (isCritical) ? damageKnockback.critData.criticalMultiplier : 1f;
-        float totalDamage = (!isCritical) ? DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.GetTypes(), this.attributes.resistances) : this.attributes.health.max;
-
+        //float critMult = (isCritical) ? damageKnockback.critData.criticalMultiplier : 1f;
+        //float totalDamage = (!isCritical) ? DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.GetTypes(), this.attributes.resistances) : this.attributes.health.max;
+        /*
         lastDamageTaken = totalDamage;
         OnHurt.Invoke();
 
@@ -554,7 +554,7 @@ public class HumanoidActor : Actor
         {
             attributes.ReduceAttribute(attributes.health, totalDamage);
         }
-        
+        */
         
 
         return true;

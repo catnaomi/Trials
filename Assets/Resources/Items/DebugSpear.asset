@@ -32,18 +32,31 @@ MonoBehaviour:
   MainHandEquipSlot: 3
   OffHandEquipSlot: 4
   RangedEquipSlot: 0
-  stance:
-    stanceStyle: 13
-    rightGrip: 12
-    leftGrip: 13
-    twohandGrip: 12
-    blockStyle: 2
+  primaryStance:
+    blendStance: {fileID: 0}
+    blendMask: {fileID: 0}
+    blendWeight: 0
+    additive: 0
+  secondaryStance:
+    blendStance: {fileID: 0}
+    blendMask: {fileID: 0}
+    blendWeight: 0
+    additive: 0
   moveset: {fileID: 11400000, guid: 09225fbd253c1c748b0342a574005435, type: 2}
+  size: 0
   AttackSpeed: 1
   weight: 5
   usesAmmunition: 0
   ammunitionReference: {fileID: 0}
-  blockResistances: []
+  blockResistances:
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -51,10 +64,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   model: {fileID: 0}
-  baseDamage: 150
-  heartsDamage: 2.5
+  baseDamage: 1
   width: 0.2
   length: 1.5
   slashModifier: 0.5
   thrustModifier: 1.5
-  elements: 0a000000
+  elements: 1024

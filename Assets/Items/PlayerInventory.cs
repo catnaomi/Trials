@@ -909,7 +909,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             return null;
         }
     }
-    public DamageResistance[] GetBlockResistance()
+    public DamageResistance GetBlockResistance()
     {
         if (GetBlockWeapon() != null)
         {
@@ -917,7 +917,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
         else
         {
-            return new DamageResistance[0];
+            return new DamageResistance();
         }
     }
 

@@ -50,7 +50,7 @@ public class WeaponStatBlock : MonoBehaviour
         stat_PierceMod.statValue = weapon.GetPiercingModifier();
         stat_Durability.statValue = weapon.GetDurability();
 
-        stat_Elements.SetElements(weapon.GetElements().ToArray());
+        //stat_Elements.SetElements(weapon.GetElements().ToArray());
         UpdateDisplay();
     }
 

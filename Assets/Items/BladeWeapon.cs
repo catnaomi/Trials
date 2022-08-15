@@ -8,7 +8,6 @@ using CustomUtilities;
 public class BladeWeapon : EquippableWeapon, IHitboxHandler
 {
     public float baseDamage;
-    public float heartsDamage;
     public float width = 1f;
     public float length = 1.5f;
     //public float weight = 1f;
@@ -26,7 +25,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
 
     protected Transform top;
     protected Transform bottom;
-    public List<DamageType> elements;
+    public DamageType elements;
 
     DamageKnockback lastDK;
     public override void EquipWeapon(Actor actor)
@@ -341,46 +340,13 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     {
         return baseDamage;
     }
-    public virtual float GetModifiedDamage(bool slashing)
-    {
-        if (slashing)
-        {
-            return this.baseDamage * this.GetSlashingModifier();
-        }
-        else // piercing
-        {
-            return this.baseDamage * this.GetPiercingModifier();
-        }
-    }
 
-    public virtual float GetModifiedHeartsDamage(bool slashing)
-    {
-        if (slashing)
-        {
-            return this.heartsDamage * this.GetSlashingModifier();
-        }
-        else // piercing
-        {
-            return this.heartsDamage * this.GetPiercingModifier();
-        }
-    }
-    public DamageType[] GetModifiedDamageTypes(bool slashing)
-    {
-        DamageType[] types = new DamageType[this.elements.Count + 1];
-        for (int i = 0; i < this.elements.Count; i++)
-        {
-            types[i] = this.elements[i];
-        }
-        types[this.elements.Count] = (slashing) ? DamageType.Slashing : DamageType.Piercing;
-        return types;
-    }
-    
     public virtual float GetBasePoiseDamage()
     {
         return 25f + 5f * GetWeight();
     }
 
-    public virtual List<DamageType> GetElements()
+    public virtual DamageType GetElements()
     {
         return elements;
     }
@@ -682,12 +648,19 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         if (actor is IAttacker attacker)
         {
             DamageKnockback damage = attacker.GetCurrentDamage();
-            if (damage == null || attacker == null)
+            if (damage.isSlash)
             {
-                bool b = false;
+                damage.healthDamage *= this.baseDamage * slashModifier;
             }
-            damage.healthDamage = 100 * (damage.healthDamage / 100f) * (this.GetBaseDamage() / 100f);
-            damage.AddTypes(this.elements.ToArray());
+            else if (damage.isThrust)
+            {
+                damage.healthDamage *= this.baseDamage * thrustModifier;
+            }
+            else
+            {
+                damage.healthDamage *= this.baseDamage;
+            }
+            damage.AddTypes(this.elements);
             return damage;
         }
         return new DamageKnockback();

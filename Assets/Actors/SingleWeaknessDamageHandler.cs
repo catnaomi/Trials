@@ -36,18 +36,18 @@ public class SingleWeaknessDamageHandler : HumanoidDamageHandler
         float normalDamageAmount = damage.GetDamageAmount(isCrit);
         bool hitFromBehind = !(Vector3.Dot(-actor.transform.forward, (damage.source.transform.position - actor.transform.position).normalized) <= 0f);
 
-        List<DamageResistance> dr = new List<DamageResistance>();
-
+        DamageResistance dr = new DamageResistance();
+        
         if (actor.GetResistances() != null)
         {
-            dr.AddRange(actor.GetResistances());
+            dr = DamageResistance.Add(dr, actor.GetResistances());
         }
         bool blockSuccess = (actor.IsBlocking() && !hitFromBehind && !damage.unblockable);
         if (blockSuccess && actor.GetBlockResistance() != null)
         {
-            dr.AddRange(actor.GetBlockResistance());
+            dr = DamageResistance.Add(dr, actor.GetBlockResistance());
         }
-
+        
         normalDamageAmount = DamageKnockback.GetTotalMinusResistances(normalDamageAmount, damage.GetTypes(), dr);
 
         float simplifiedDamageAmount = 0f;

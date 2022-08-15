@@ -269,11 +269,12 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
         return animancer.States.Current == navstate.fall || animancer.States.Current == damageHandler.fall;
     }
 
-    public override List<DamageResistance> GetBlockResistance()
+    public override DamageResistance GetBlockResistance()
     {
-        List<DamageResistance> dr = new List<DamageResistance>();
-        dr.AddRange(inventory.GetBlockResistance());
-        return dr;
+        //List<DamageResistance> dr = new List<DamageResistance>();
+        //dr.AddRange(inventory.GetBlockResistance());
+        //return inventory.GetBlockResistance();
+        return null;
     }
 
     public override void ProcessDamageKnockback(DamageKnockback damageKnockback)

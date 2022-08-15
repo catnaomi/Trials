@@ -208,13 +208,13 @@ public class CraftableWeapon : BladeWeapon
         statChanges["SlashingModifier"] = 0f;
         statChanges["PiercingModfier"] = 0f;
 
-        if (this.elements == null)
+        if (this.elements == 0)
         {
-            this.elements = new List<DamageType>();
+            //this.elements = new List<DamageType>();
         }
         else
         {
-            this.elements.Clear();
+            this.elements = 0;
         }
         
         foreach (WeaponComponent component in GetAllComponents())
@@ -227,10 +227,7 @@ public class CraftableWeapon : BladeWeapon
                 }
                 foreach (DamageType type in bsm.GetAddedElements())
                 {
-                    if (!this.elements.Contains(type))
-                    {
-                        this.elements.Add(type);
-                    }
+                    this.elements |= type;
                 }
             }
         }

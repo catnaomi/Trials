@@ -32,18 +32,31 @@ MonoBehaviour:
   MainHandEquipSlot: 2
   OffHandEquipSlot: 2
   RangedEquipSlot: 2
-  stance:
-    stanceStyle: 0
-    rightGrip: 0
-    leftGrip: 0
-    twohandGrip: 0
-    blockStyle: 0
+  primaryStance:
+    blendStance: {fileID: 0}
+    blendMask: {fileID: 0}
+    blendWeight: 0
+    additive: 0
+  secondaryStance:
+    blendStance: {fileID: 0}
+    blendMask: {fileID: 0}
+    blendWeight: 0
+    additive: 0
   moveset: {fileID: 0}
+  size: 0
   AttackSpeed: 0
   weight: 0
   usesAmmunition: 0
   ammunitionReference: {fileID: 0}
-  blockResistances: []
+  blockResistances:
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -51,13 +64,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   model: {fileID: 0}
-  baseDamage: 100
-  heartsDamage: 0
+  baseDamage: 1
   width: 1
   length: 1.5
   slashModifier: 1
   thrustModifier: 1
-  elements: 
+  elements: 0
   primaryWeapon: {fileID: 0}
   arrowPrefab: {fileID: 4805927410726168974, guid: 1be0e19a8c8967c4eb39716d4edc5885,
     type: 3}
@@ -65,8 +77,7 @@ MonoBehaviour:
     type: 3}
   bowDamageKnockback:
     healthDamage: 10
-    staminaDamage: 0
-    types: 0200000008000000
+    types: 1792
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -78,11 +89,13 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 0
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 0
       onArmorHit: 0

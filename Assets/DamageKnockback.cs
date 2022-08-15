@@ -8,8 +8,7 @@ using UnityEngine.Events;
 public class DamageKnockback
 {
     public float healthDamage;
-    public float staminaDamage;
-    [SerializeField]private DamageType[] types;
+    [SerializeField]private DamageType types;
     [Space(5)]
     public CriticalData critData;
     [Space(5)]
@@ -24,6 +23,7 @@ public class DamageKnockback
     public bool canDamageSelf;
     public bool cannotAutoFlinch;
     public float stunTime;
+    public StaggerStrength stagger;
     public StaggerData staggers;
     [Space(10)]
     public FXData fxData;
@@ -91,6 +91,14 @@ public class DamageKnockback
         FallDamage,       // 10
     }
 
+    public enum StaggerStrength
+    {
+        Flinch,
+        Normal,
+        Heavy,
+        Special
+    }
+
     //public bool breaksArmor;
 
     public AudioClip hitClip;
@@ -102,9 +110,8 @@ public class DamageKnockback
 
     public DamageKnockback(DamageKnockback damageKnockback)
     {
-        this.staminaDamage = damageKnockback.staminaDamage;
         this.kbForce = damageKnockback.kbForce.normalized * damageKnockback.kbForce.magnitude;
-        this.staggers = damageKnockback.staggers;
+        this.stagger = damageKnockback.stagger;
         this.hitClip = damageKnockback.hitClip;
         this.breaksArmor = damageKnockback.breaksArmor;
         this.kbRadial = damageKnockback.kbRadial;
@@ -138,12 +145,11 @@ public class DamageKnockback
     public static DamageKnockback GetDefaultDamage()
     {
         DamageKnockback damage = new DamageKnockback();
-        damage.healthDamage = 25f;
-        damage.staminaDamage = 25f;
+        damage.healthDamage = 1f;
         damage.kbForce = Vector3.up;
-        damage.staggers = StandardStaggerData;
+        damage.stagger = StaggerStrength.Normal;
 
-        damage.types = new DamageType[1] { DamageType.Standard_SlashPierce };
+        damage.types = DamageType.Standard_SlashPierce;
 
         damage.critData = StandardCritData;
 
@@ -175,79 +181,63 @@ public class DamageKnockback
         criticalExtensionTime = 0.25f,
     };
 
-    public static float GetTotalMinusResistances(float damage, DamageType[] typeArray, List<DamageResistance> resists)
+    public static float GetTotalMinusResistances(float damage, DamageType types, DamageResistance resistance)
     {
 
         float total = damage;
         float ratio = 1f;
         float flat = 0f;
-        if (typeArray == null || typeArray.Length <= 0) return total;
-        List<DamageType> types = new List<DamageType>();
-        types.AddRange(typeArray);
-        foreach (DamageResistance resist in resists)
+        bool neutral = true;
+        if (types == 0) return total;
+        if ((types & resistance.weaknesses) != 0)
         {
-            //if (types.Contains(resist.type)) {
-            if (DamageResistContains(resist.type, types))
-            {
-                ratio *= (1f - resist.ratio);
-                flat += resist.flat;
-            }
+            ratio *= resistance.weaknessMultiplier;
+            flat += resistance.weaknessFlat;
+            neutral = false;
+        }
+        if ((types & resistance.strengths) != 0)
+        {
+            ratio *= resistance.strengthMultiplier;
+            flat += resistance.strengthsFlat;
+            neutral = false;
+        }
+        if (neutral)
+        {
+            ratio *= resistance.neutralMultiplier;
+            flat += resistance.neutralFlat;
         }
         total *= ratio;
         total -= flat;
         return total;
     }
-
-    public static bool DamageResistContains(DamageType defendedType, List<DamageType> attackTypes)
+    public void AddTypes(DamageType newtypes)
     {
-        switch (defendedType)
-        {
-            case DamageType.All:
-                return true;
-            case DamageType.Earth:
-                return attackTypes.Contains(defendedType) || attackTypes.Contains(DamageType.Slashing) || attackTypes.Contains(DamageType.Piercing) || attackTypes.Contains(DamageType.Blunt);
-            default:
-                return attackTypes.Contains(defendedType);
-        }
+        types |= newtypes;
     }
-
 
     public void AddTypes(DamageType[] newtypes)
     {
-        List<DamageType> dtypes = new List<DamageType>();
-        dtypes.AddRange(this.types);
         foreach (DamageType type in newtypes)
         {
-            if (!dtypes.Contains(type))
-            {
-                dtypes.Add(type);
-            }
+            types |= type;
         }
-        types = dtypes.ToArray();
     }
 
-    public DamageType[] GetTypes()
+    public DamageType GetTypes()
     {
-        List<DamageType> dtypes = new List<DamageType>();
-        foreach (DamageType type in this.types)
+        DamageType dtypes = types;
+        if (types.HasFlag(DamageType.Standard_SlashPierce))
         {
-            if (type == DamageType.Standard_SlashPierce)
+            if (isSlash)
             {
-                if (isSlash)
-                {
-                    dtypes.Add(DamageType.Slashing);
-                }
-                else if (isThrust)
-                {
-                    dtypes.Add(DamageType.Piercing);
-                }
+                return types | DamageType.Slashing;
             }
-            else
+            else if (isThrust)
             {
-                dtypes.Add(type);
+                return types | DamageType.Piercing;
             }
         }
-        return dtypes.ToArray();
+        return types;
     }
 
     public float GetDamageAmount()
@@ -262,9 +252,40 @@ public class DamageKnockback
 }
 
 [Serializable]
-public struct DamageResistance
+public class DamageResistance
 {
-    public DamageType type;
-    public float ratio; // percentage value reduciton
-    public float flat; // flat value reduction
+    public DamageType strengths;
+    public float strengthMultiplier = 1f;
+    public float strengthsFlat = 0f;
+    [Space(10)]
+    public DamageType weaknesses;
+    public float weaknessMultiplier = 1f;
+    public float weaknessFlat = 0f;
+    [Space(10)]
+    public float neutralMultiplier = 1f;
+    public float neutralFlat = 0f;
+
+    public static DamageResistance Add(DamageResistance dr1, DamageResistance dr2)
+    {
+        DamageResistance dr = new DamageResistance();
+        dr.strengths = dr1.strengths | dr2.strengths;
+        dr.strengthMultiplier = dr1.strengthMultiplier * dr2.strengthMultiplier;
+        dr.strengthsFlat = dr1.strengthsFlat + dr2.strengthsFlat;
+
+        dr.weaknesses = dr1.weaknesses | dr2.weaknesses;
+        dr.weaknessMultiplier = dr1.weaknessMultiplier * dr2.weaknessMultiplier;
+        dr.weaknessFlat = dr1.weaknessFlat + dr2.weaknessFlat;
+
+        dr.neutralMultiplier = dr1.neutralMultiplier * dr2.neutralMultiplier;
+        dr.neutralFlat = dr1.neutralFlat + dr2.neutralFlat;
+
+        return dr;
+    }
+
+    public DamageResistance()
+    {
+        strengthMultiplier = 1f;
+        weaknessMultiplier = 1f;
+        neutralMultiplier = 1f;
+    }
 }

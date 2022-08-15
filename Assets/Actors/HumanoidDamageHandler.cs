@@ -105,18 +105,18 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
         bool hitFromBehind = !(Vector3.Dot(-actor.transform.forward, (damage.source.transform.position - actor.transform.position).normalized) <= 0f);
 
-        List <DamageResistance> dr = new List<DamageResistance>();
+        DamageResistance dr = new DamageResistance();
 
         if (actor.GetResistances() != null)
         {
-            dr.AddRange(actor.GetResistances());
+            dr = DamageResistance.Add(dr, actor.GetResistances());
         }
         bool blockSuccess = (actor.IsBlocking() && !hitFromBehind && !damage.unblockable);
         if (blockSuccess && actor.GetBlockResistance() != null)
         {
-            dr.AddRange(actor.GetBlockResistance());
+            dr = DamageResistance.Add(dr, actor.GetBlockResistance());
         }
-        
+
         Debug.Log("damage before resistances = " + damageAmount);
         damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.GetTypes(), dr);
         Debug.Log("damage after resistances = " + damageAmount);

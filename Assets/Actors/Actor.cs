@@ -299,12 +299,12 @@ public class Actor : MonoBehaviour
         return false;
     }
 
-    public virtual List<DamageResistance> GetResistances()
+    public virtual DamageResistance GetResistances()
     {
         return attributes.resistances;
     }
 
-    public virtual List<DamageResistance> GetBlockResistance()
+    public virtual DamageResistance GetBlockResistance()
     {
         return null;
     }

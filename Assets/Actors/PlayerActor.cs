@@ -3754,11 +3754,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         return currentConsumable;
     }
-    public override List<DamageResistance> GetBlockResistance()
+    
+    public override DamageResistance GetBlockResistance()
     {
-        List<DamageResistance> dr = new List<DamageResistance>();
-        dr.AddRange(inventory.GetBlockResistance());
-        return dr;
+        return inventory.GetBlockResistance();
     }
 
     public override void ProcessDamageKnockback(DamageKnockback damageKnockback)
