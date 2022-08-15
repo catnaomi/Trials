@@ -1136,12 +1136,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
                 {
-                    animancer.Play(ledgeStart);
-
+                    //animancer.Play(ledgeStart);
+                    state.climb = (DirectionalMixerState)animancer.Play(ledgeHang);
                 }
                 else if (currentClimb.TryGetComponent<Ladder>(out Ladder ladder))
                 {
                     state.climb = animancer.Play(ladderClimb);
+ 
                 }
                 SnapToLedge();
                 StartCoroutine(DelayedSnapToLedge());
@@ -1274,6 +1275,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * airTurnSpeed * Time.deltaTime, 1f).normalized;
             }
 
+            /*
+            if (ledgeSnap && currentClimb is Ledge && currentClimb.transform.position.y > this.transform.position.y)
+            {
+                if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
+                {
+                    animancer.Play(ledgeStart);
+
+                }
+                SnapToLedge();
+                StartCoroutine(DelayedSnapToLedge());
+            }
+            */
             animancer.Layers[0].ApplyAnimatorIK = true;
         }
         #endregion
@@ -1281,6 +1294,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         #region climb
         else if (animancer.States.Current == state.climb)
         {
+            lookDirection = currentClimb.GetClimbHeading();
             if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
             {
                 ((DirectionalMixerState)state.climb).ParameterX = move.x;
@@ -1665,7 +1679,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         if (isGrounded && !IsFalling() && !IsClimbing())
         {
-            UnsnapLedge();   
+            //UnsnapLedge();   
         }
         if (IsHurt() && IsFalling())
         {
@@ -2013,6 +2027,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+    public void UnsetClimb(ClimbDetector climb)
+    {
+        if (currentClimb == climb)
+        {
+            ledgeSnap = false;
+        }
+    }
+
     public void SetLadder(Ladder ladder)
     {
         if (allowClimb)
@@ -2032,6 +2054,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         cc.enabled = true;
     }
+
+    public void StartLedge()
+    {
+        state.climb = (DirectionalMixerState)animancer.Play(ledgeHang);
+    }
+
 
     public void SnapToCurrentLedge()
     {

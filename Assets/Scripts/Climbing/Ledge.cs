@@ -32,13 +32,16 @@ public class Ledge : ClimbDetector
             player.SetLedge(this);
             inUse = true;
         }
-        else if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor playermov))
-        {
-            playermov.SetLedge(this);
-            inUse = true;
-        }
     }
 
+    private void OnTriggerExit(Collider other)
+    {
+        if(other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor player))
+        {
+            player.UnsetClimb(this);
+            inUse = false;
+        }
+    }
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
@@ -54,6 +57,7 @@ public class Ledge : ClimbDetector
     {
         return snap.transform.position + snap.transform.right * -snapPoint * (GetLength() - climberWidth) * 0.5f;
     }
+
 
     public Vector3 GetSnapPointDot(float climberWidth, Vector3 climberPosition, PlayerActor player, int dir)
     {
