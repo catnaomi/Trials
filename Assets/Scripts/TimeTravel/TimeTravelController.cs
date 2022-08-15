@@ -108,8 +108,12 @@ public class TimeTravelController : MonoBehaviour
         fullscreenMaterial.SetFloat("_CircleScreenRadius", screenSpaceRadius);
         */
         Vector3 movementDelta = Vector3.zero;
-        if (PlayerActor.player != null) 
+        if (PlayerActor.player != null)
+        {
             movementDelta = lastPosition - PlayerActor.player.transform.position;
+            movementDelta.y = 0f;
+        }
+            
 
         if (isRewinding)
         {

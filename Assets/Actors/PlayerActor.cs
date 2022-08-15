@@ -1907,13 +1907,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public override void OnFallOffMap()
     {
         
-        if (attributes.health.current > 30f || attributes.lives > 0f)
+        if (attributes.health.current > 10f || attributes.lives > 0f)
         {
             ResetToSafePoint();
         }
         else
         {
-            this.attributes.ReduceHealth(30f);
+            this.attributes.ReduceHealth(10f);
             Die();
         }
     }
@@ -1956,7 +1956,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         yield return new WaitWhile(() => { return timeTravelHandler.IsRewinding(); });
         this.attributes.health.current = health;
-        this.attributes.ReduceHealth(30f);
+        this.attributes.ReduceHealth(10f);
         WarpTo(lastSafePoint);
         state.resurrect = animancer.Play(resurrectFaceUp);
         state.resurrect.Events.OnEnd = _MoveOnEnd;
