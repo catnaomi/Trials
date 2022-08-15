@@ -8,6 +8,7 @@ public class MovingPlatformController : MonoBehaviour
     public bool attached;
     public Transform platform;
     public Rigidbody rigidbody;
+    public float maxDistance = 5f;
     ParentConstraint constraint;
     Transform pseudoPlayer;
 
@@ -38,6 +39,13 @@ public class MovingPlatformController : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (attached && Vector3.Distance(transform.position, PlayerActor.player.transform.position) > maxDistance)
+        {
+            attached = false;
+        }
+    }
     private void FixedUpdate()
     {
         velocity = rigidbody.velocity;
@@ -75,5 +83,11 @@ public class MovingPlatformController : MonoBehaviour
     public void Exit()
     {
         attached = false;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, maxDistance);
     }
 }

@@ -82,4 +82,22 @@ public class Ledge : ClimbDetector
         
         return GetSnapPoint(climberWidth);
     }
+
+    private void OnValidate()
+    {
+        if (linkedLeft && left != null)
+        {
+            if (!left.linkedRight || left.right != this)
+            {
+                Debug.LogWarning(string.Format("{0} not properly linked to {1}", this, left));
+            }
+        }
+        if (linkedRight && right != null)
+        {
+            if (!right.linkedLeft || right.left != this)
+            {
+                Debug.LogWarning(string.Format("{0} not properly linked to {1}", this, right));
+            }
+        }
+    }
 }
