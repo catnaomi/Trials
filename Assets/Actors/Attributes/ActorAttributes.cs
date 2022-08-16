@@ -7,8 +7,8 @@ using UnityEngine.Events;
 
 public class ActorAttributes : MonoBehaviour
 {
-    private readonly float SMOOTHING_DELAY = 1.5f;
-    private readonly float SMOOTHING_MAX_DELTA = 10f;
+    private readonly float SMOOTHING_DELAY = 1f;
+    private readonly float SMOOTHING_MAX_DELTA = 0.5f;
 
     private readonly float EFFECT_UPDATE_FREQUENCY = 1f; // how often to update effects, in seconds.
 
@@ -44,7 +44,7 @@ public class ActorAttributes : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        smoothedHealth = NumberUtilities.TimeDelayedSmoothDelta(smoothedHealth, health.current, healthSmoothClock + SMOOTHING_DELAY, health.max / SMOOTHING_MAX_DELTA, Time.time);
+        smoothedHealth = NumberUtilities.TimeDelayedSmoothDelta(smoothedHealth, health.current, healthSmoothClock + SMOOTHING_DELAY, health.max * SMOOTHING_MAX_DELTA, Time.time);
 
         if (health.current < healthLast)
         {

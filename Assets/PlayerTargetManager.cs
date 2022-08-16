@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
+using System.Linq;
 
 public class PlayerTargetManager : MonoBehaviour
 {
@@ -49,6 +50,9 @@ public class PlayerTargetManager : MonoBehaviour
     public float changeTargetResetDelay = 3f;
     float targetPressedClock;
     float targetReleasedClock;
+    public float targetChangeSpeed = 10f;
+    public float targetChangeMaxDistance = 25f;
+    public Transform targetAim;
     [Header("Free Look Control Settings")]
     public bool handleCamera;
     CinemachineFreeLook freeLook;
@@ -74,6 +78,7 @@ public class PlayerTargetManager : MonoBehaviour
     [SerializeField, ReadOnly] float botHeight;
     [SerializeField, ReadOnly] float botRadius;
     public UnityEvent OnRecenter;
+    public UnityEvent OnTargetUpdate;
     // Start is called before the first frame update
     void Start()
     {
@@ -101,6 +106,7 @@ public class PlayerTargetManager : MonoBehaviour
         }
         invalidTime = invalidExpiryTime;
         freeLook = player.vcam.target.GetComponent<CinemachineFreeLook>();
+        targetAim.position = Vector3.zero;
     }
 
     IEnumerator UpdateTargets()
@@ -109,8 +115,9 @@ public class PlayerTargetManager : MonoBehaviour
         {
             GameObject[] allLockTargets = GameObject.FindGameObjectsWithTag("LockTarget");
 
-            targets.Clear();
+            //targets.Clear();
 
+            List<GameObject> validTargets = new List<GameObject>();
             List<GameObject> invalidTargets = new List<GameObject>();
 
             rays = new List<Ray>();
@@ -157,13 +164,25 @@ public class PlayerTargetManager : MonoBehaviour
                 }
                 else
                 {
-                    targets.Add(target);
+                    validTargets.Add(target);
                 }
             }
 
-            if (targets.Count > 0)
+            List<GameObject> targetsToDelete = new List<GameObject>();
+            foreach (GameObject workingTarget in targets)
+            {
+                if (!validTargets.Contains(workingTarget))
+                {
+                    targetsToDelete.Add(workingTarget);
+                }
+            }
+            targets = targets.Except(targetsToDelete).ToList();
+
+            targets = targets.Union(validTargets).ToList();
+            if (targets.Count > 0 && !(lockedOn || targetReleasedClock < changeTargetResetDelay))
             {
                 targets.Sort((a,b) => {
+                    /*
                     if (a == PlayerActor.player.GetCombatTarget())
                     {
                         return -1;
@@ -172,7 +191,16 @@ public class PlayerTargetManager : MonoBehaviour
                     {
                         return 1;
                     }
-                    return (int)Mathf.Sign(Vector3.Distance(player.transform.position, b.transform.position) - Vector3.Distance(player.transform.position, a.transform.position));
+                    else if (a == currentTarget && (lockedOn || targetReleasedClock < changeTargetResetDelay))
+                    {
+                        return -1;
+                    }
+                    else if (b == currentTarget && (lockedOn || targetReleasedClock < changeTargetResetDelay))
+                    {
+                        return 1;
+                    }
+                    */
+                    return (int)Mathf.Sign(Vector3.Distance(player.transform.position, a.transform.position) - Vector3.Distance(player.transform.position, b.transform.position));
                     /*
                     Vector3 aDist = Camera.main.WorldToViewportPoint(a.transform.position);
                     Vector3 bDist = Camera.main.WorldToViewportPoint(b.transform.position);
@@ -195,6 +223,7 @@ public class PlayerTargetManager : MonoBehaviour
                     }*/
                 });
             }
+            OnTargetUpdate.Invoke();
             yield return new WaitForSecondsRealtime(targetDelay);
         }
     }
@@ -249,11 +278,14 @@ public class PlayerTargetManager : MonoBehaviour
             
         }
 
+
         if (!lockedOn || targetDown)
         {
+            
             if (targetDown && targetReleasedClock < maxChangeTargetDelay)
             {
                 changeTargetIndexOffset++;
+               
             }
             else if (!lockedOn && targetReleasedClock > changeTargetResetDelay)
             {
@@ -314,6 +346,7 @@ public class PlayerTargetManager : MonoBehaviour
             invalidTime = invalidExpiryTime;
         }
 
+        /*
         if (cmtg.m_Targets.Length > 1)
         {
             cmtg.m_Targets[1].target = currentTarget != null ? currentTarget.transform : null;
@@ -322,7 +355,26 @@ public class PlayerTargetManager : MonoBehaviour
         {
             cmtg.AddMember(currentTarget != null ? currentTarget.transform : null, 1f, 2f);
         }
+        */
 
+        if (currentTarget != null)
+        {
+            if (targetAim.position.magnitude < 0.01f || Vector3.Distance(targetAim.position, currentTarget.transform.position) > targetChangeMaxDistance)
+            {
+                targetAim.position = currentTarget.transform.position;
+            }
+            else
+            {
+                targetAim.position = Vector3.MoveTowards(targetAim.position, currentTarget.transform.position, targetChangeSpeed * Time.deltaTime);
+            }
+        }
+        else
+        {
+            if (targetReleasedClock >= changeTargetResetDelay)
+            {
+                targetAim.position = Vector3.zero;
+            }
+        }
         if (handleCamera && lockedOn && cmtg.m_Targets.Length > 1)
         {
             this.transform.rotation = Quaternion.LookRotation(PlayerActor.player.transform.forward);
