@@ -2,7 +2,9 @@ using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public static class DebugReflectionMethods
@@ -340,6 +342,26 @@ public static class DebugReflectionMethods
         try
         {
             PortalManager.instance.Swap();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
+    public static void MessageObject(string objName, string methodName)
+    {
+        try
+        {
+            GameObject obj = GameObject.Find(objName);
+            if (obj == null)
+            {
+                Debug.LogError("Could not find object " + objName);
+                return;
+            }
+
+            obj.SendMessage(methodName, SendMessageOptions.RequireReceiver);
+
         }
         catch (Exception ex)
         {

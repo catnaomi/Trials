@@ -25,7 +25,7 @@ public class ActorAttributes : MonoBehaviour
     public AttributeValue healthRecoveryRate;
     public bool usesHearts = false;
     public bool spareable = false;
-
+    public bool isInvulnerable = false;
     public int lives;
     public int maxLives;
 
