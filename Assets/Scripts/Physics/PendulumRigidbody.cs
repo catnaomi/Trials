@@ -9,6 +9,8 @@ public class PendulumRigidbody : MonoBehaviour
     public float pendulumHeight = 10f;
     public float offset = 0;
     public Rigidbody rigidbody;
+    public bool maintainRotation = false;
+    Quaternion initRotation;
     RigidbodyTimeTravelHandler timeTravelHandler;
     bool usingTimeTravel;
     Vector3 anchorPosition;
@@ -29,7 +31,11 @@ public class PendulumRigidbody : MonoBehaviour
         Vector3 dir = Quaternion.AngleAxis(rotAngle, this.transform.forward) * (Vector3.up * pendulumHeight);
 
         rigidbody.MovePosition(anchorPosition + -dir);
-        rigidbody.MoveRotation(Quaternion.LookRotation(this.transform.forward, Quaternion.AngleAxis(rotAngle, this.transform.forward) * Vector3.up));
+        if (!maintainRotation)
+        {
+            rigidbody.MoveRotation(Quaternion.LookRotation(this.transform.forward, Quaternion.AngleAxis(rotAngle, this.transform.forward) * Vector3.up));
+        }
+        
     }
 
     float GetFixedDeltaTime()
