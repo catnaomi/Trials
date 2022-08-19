@@ -95,12 +95,9 @@ public class Hitbox : MonoBehaviour
 
             //hitActors.AddRange();
 
-
-            int terrainLayer = LayerMask.NameToLayer("Terrain");
-
-            foreach (Collider hitCollider in Physics.OverlapSphere(end, radius, LayerMask.GetMask("Actors", "Terrain")))
+            foreach (Collider hitCollider in Physics.OverlapSphere(end, radius, LayerMask.GetMask("Actors", "Terrain", "Terrain_World1Only", "Terrain_World2Only")))
             {
-                if (hitCollider.gameObject.layer == terrainLayer)
+                if (IsColliderTerrain(hitCollider))
                 {
                     if (!didHitTerrain)
                     {
@@ -127,11 +124,11 @@ public class Hitbox : MonoBehaviour
                 // cast
                 didCast = true;
 
-                RaycastHit[] hits = Physics.SphereCastAll(start, radius, end - start, dist, LayerMask.GetMask("Actors", "Terrain", "PhysicsObjects"));
+                RaycastHit[] hits = Physics.SphereCastAll(start, radius, end - start, dist, LayerMask.GetMask("Actors", "Terrain", "Terrain_World1Only", "Terrain_World2Only"));
 
                 foreach (RaycastHit hit in hits)
                 {
-                    if (hit.collider.gameObject.layer == terrainLayer)
+                    if (IsColliderTerrain(hit.collider))
                     {
                         if (!didHitTerrain)
                         {
@@ -177,6 +174,11 @@ public class Hitbox : MonoBehaviour
             });
         }
         UpdatePosition();
+    }
+
+    bool IsColliderTerrain(Collider c)
+    {
+        return LayerMask.LayerToName(c.gameObject.layer).ToLower().Contains("terrain");
     }
     public void SetActive(bool active)
     {
