@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class ActivateAITrigger : MonoBehaviour
 {
@@ -8,6 +9,9 @@ public class ActivateAITrigger : MonoBehaviour
 
     public bool shouldAttackImmediately = false;
     public InputAttack attack;
+
+    public UnityEvent OnTrigger;
+    bool triggered;
     public void OnTriggerEnter(Collider other)
     {
         if (PlayerActor.player == null) return;
@@ -21,6 +25,11 @@ public class ActivateAITrigger : MonoBehaviour
                     attack.ProcessHumanoidAction(actor, actor.MoveOnEnd);
                 }
                 actor.actionsEnabled = true;
+                if (!triggered)
+                {
+                    triggered = true;
+                    OnTrigger.Invoke();
+                }
             }
         }
     }
