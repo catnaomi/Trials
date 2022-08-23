@@ -24,7 +24,15 @@ public class BlendAttack : InputAttack
         actor.animancer.Layers[HumanoidAnimLayers.BilayerBlend].SetMask(mask);
         actor.animancer.Layers[HumanoidAnimLayers.BilayerBlend].Weight = blendWeight;
         actor.animancer.Layers[HumanoidAnimLayers.BilayerBlend].Play(blend);
-        if (fadeOutTime == 0)
+        if (exitTime > 0)
+        {
+            actor.StartCoroutine(EndAfterTime(actor.animancer, state, () =>
+            {
+                actor.animancer.Layers[HumanoidAnimLayers.BilayerBlend].Stop();
+                endEvent();
+            }));
+        }
+        else if (fadeOutTime == 0)
         {
             state.Events.OnEnd = () =>
             {
@@ -56,5 +64,18 @@ public class BlendAttack : InputAttack
         }
         animancer.Layers[HumanoidAnimLayers.BilayerBlend].Stop();
         
+    }
+
+    IEnumerator EndAfterTime(AnimancerComponent animancer, AnimancerState state, Action endEvent) {
+        float clock = 0f;
+        while (clock < exitTime && animancer.States.Current == state)
+        {
+            yield return null;
+            clock += Time.deltaTime;
+        }
+        if (animancer.States.Current == state)
+        {
+            endEvent();
+        }
     }
 }

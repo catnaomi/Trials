@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a0fe6349197c8d4b94796907753fff6, type: 3}
+  m_Name: icegolem_bodyspinslash
+  m_EditorClassIdentifier: 
+  desc: 
+  attackId: 0
+  isBlockOK: 0
+  isSprintOK: 0
+  isFallingOK: 0
+  isParryOK: 0
+  anim:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes:
+      - 1.4
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: 7b69ca1e991f4ee45b7ec439405734eb, type: 3}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  attackData:
+    healthDamage: 1
+    types: 0
+    critData:
+      criticalMultiplier: 1
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0.25
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 0
+    isSlash: 1
+    isRanged: 0
+    bouncesOffBlock: 1
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    stunTime: 1
+    stagger: 1
+    staggers:
+      onHit: 2
+      onArmorHit: 1
+      onCritical: 4
+      onKill: 7
+      onCounterHit: 1
+    kbForce: {x: 0, y: 1, z: 0}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    hitClip: {fileID: 0}
+  staminaCost: 0
+  exitTime: 3
+  cancelStartTime: 0
+  mainHandAngleAdjust: 0
+  offHandAngleAdjust: 0
+  blend:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes:
+      - 0.94485295
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: 8bd62de719142154c91b6fbc716171db, type: 2}
+    _Speed: 2
+    _NormalizedStartTime: 0
+  mask: {fileID: 31900000, guid: 74da9ab124865d3498afd76d28f9bb59, type: 2}
+  blendWeight: 1
+  fadeOutTime: 0

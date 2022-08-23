@@ -34,8 +34,15 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     
     public float LowHealthThreshold = 50f;
     public bool isLowHealth;
+
     bool isHitboxActive;
-    
+    public InputAttack bodySpin;
+    public bool bodySpinning;
+    float bodySpinAngle;
+    public float bodySpinAccel = 90f;
+    public float bodySpinMaxSpeed = 360f;
+    float bodySpinSpeed = 0f;
+    public float bodySpinAngleDown = 30f;
     protected CombatState cstate;
     protected struct CombatState
     {
@@ -43,6 +50,7 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
         public AnimancerState approach;
         public AnimancerState dodge;
         public AnimancerState sheathe;
+        public AnimancerState spinAttack;
     }
 
     System.Action _MoveOnEnd;
@@ -110,7 +118,7 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
 
                 InSightRange = realdist <= SightRange;
                 InCloseAttackRange = realdist <= CloseAttackRange && nav.hasPath;//navdist <= CloseAttackRange && nav.hasPath;
-                InFarAttackRange = realdist <= CloseAttackRange && nav.hasPath;//navdist <= FarAttackRange && nav.hasPath;
+                InFarAttackRange = realdist <= FarAttackRange && nav.hasPath;//navdist <= FarAttackRange && nav.hasPath;
 
                 if (InSightRange)
                 {
@@ -153,14 +161,54 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
         }
     }
 
+    void LateUpdate()
+    {
+        if (bodySpinning)
+        {
+            positionReference.Spine.localRotation = Quaternion.Euler(bodySpinAngleDown, bodySpinAngle, 0f);
+            bodySpinAngle += bodySpinSpeed * Time.deltaTime;
+            bodySpinAngle %= 360f;
+            bodySpinSpeed += bodySpinAccel * Time.deltaTime;
+            if (bodySpinSpeed > bodySpinMaxSpeed)
+            {
+                bodySpinSpeed = bodySpinMaxSpeed;
+            }
+        }
+    }
     public void StartFarAttack()
     {
+        if (FarAttack == null) return;
         RealignToTarget();
         cstate.attack = FarAttack.ProcessHumanoidAction(this, _MoveOnEnd);
         OnAttack.Invoke();
     }
+
+    public void StartSpinAttack()
+    {
+        if (bodySpin == null) return;
+        cstate.spinAttack = cstate.attack = bodySpin.ProcessHumanoidAction(this, () =>
+        {
+            _MoveOnEnd();
+            bodySpinning = false;
+            HitboxActive(0);
+            DeactivateHitboxes();
+        });
+        bodySpinning = true;
+        bodySpinSpeed = 90f;
+        OnHurt.AddListener(StopSpin);
+        OnAttack.Invoke();
+    }
+
+    public void StopSpin()
+    {
+        bodySpinning = false;
+        animancer.Layers[HumanoidAnimLayers.BilayerBlend].Stop();
+        DeactivateHitboxes();
+        //HitboxActive(0);
+    }
     public void StartCloseAttack()
     {
+        if (CloseAttack == null) return;
         RealignToTarget();
         cstate.attack = CloseAttack.ProcessHumanoidAction(this, _MoveOnEnd);
         OnAttack.Invoke();
@@ -237,6 +285,10 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
 
     }
 
+    public override void DeactivateHitboxes()
+    {
+        HitboxActive(0);
+    }
     public override bool IsHitboxActive()
     {
         return isHitboxActive;
@@ -336,7 +388,10 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
 
     public void Recoil()
     {
+        StopSpin();
+        HitboxActive(0);
         ((IDamageable)damageHandler).Recoil();
+        
     }
 
     public void StartCritVulnerability(float time)
