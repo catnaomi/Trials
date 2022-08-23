@@ -95,7 +95,7 @@ public class Hitbox : MonoBehaviour
 
             //hitActors.AddRange();
 
-            foreach (Collider hitCollider in Physics.OverlapSphere(end, radius, LayerMask.GetMask("Actors", "Terrain", "Terrain_World1Only", "Terrain_World2Only")))
+            foreach (Collider hitCollider in Physics.OverlapSphere(end, radius, LayerMask.GetMask("Actors") | MaskReference.Terrain))
             {
                 if (IsColliderTerrain(hitCollider))
                 {
@@ -124,7 +124,7 @@ public class Hitbox : MonoBehaviour
                 // cast
                 didCast = true;
 
-                RaycastHit[] hits = Physics.SphereCastAll(start, radius, end - start, dist, LayerMask.GetMask("Actors", "Terrain", "Terrain_World1Only", "Terrain_World2Only"));
+                RaycastHit[] hits = Physics.SphereCastAll(start, radius, end - start, dist, LayerMask.GetMask("Actors") | MaskReference.Terrain);
 
                 foreach (RaycastHit hit in hits)
                 {

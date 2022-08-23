@@ -82,6 +82,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool isGrounded;
     public float airTime = 0f;
     public float groundBias = 0f;
+    bool withinBias;
+    float biasHeight;
     public float jumpBuffer = 1f;
     bool didJump;
     float lastAirTime;
@@ -1807,6 +1809,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Vector3 velocity = xzVel;
         velocity.y = yVel;
 
+        if (withinBias)
+        {
+            cc.Move(Vector3.up * (biasHeight - this.transform.position.y));
+        }
 
         if (cc.enabled)
         {
@@ -1822,7 +1828,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }*/
                 cc.Move(velocity * Time.fixedDeltaTime);
             }
-            else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only")) && yVel <= 0 && animancer.States.Current != state.swim)
+            else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, MaskReference.Terrain) && yVel <= 0 && animancer.States.Current != state.swim)
             {
                 Vector3 temp = Vector3.Cross(hit.normal,velocity);
                 cc.Move((Vector3.Cross(temp, hit.normal) + gravity * Vector3.down) * Time.fixedDeltaTime);
@@ -2732,7 +2738,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             swimCollider = waterHit.collider;
             waterHeight = swimCollider.bounds.center.y + swimCollider.bounds.extents.y;
-            if (Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit wadingHit, 10f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only")))
+            if (Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit wadingHit, 10f, MaskReference.Terrain))
             {
                 wading = (waterHeight - wadingHit.point.y) <= wadingHeight;
                 if (wading)
@@ -3871,7 +3877,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             point = this.GetCombatTarget().transform.position;
         }
-        else if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, dist, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only")))
+        else if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, dist, MaskReference.Terrain))
         {
             point = hit.point;
         }
@@ -3912,7 +3918,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             Vector3 aimPos = Camera.main.transform.position + Camera.main.transform.forward * 100f;
 
-            if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, 100f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only", "Actors", "Default", "Wall", "World1Only", "World2Only")) && !hit.transform.IsChildOf(this.transform.root))
+            if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, 100f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only", "Actors", "Default", "Wall", "World1Only", "World2Only", "Terrain_Invisible")) && !hit.transform.IsChildOf(this.transform.root))
             {
                 aimPos = hit.point;
                 
@@ -4329,8 +4335,8 @@ public bool GetGrounded()
         Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down + Vector3.up * groundBias;
         Vector3 top = c.bounds.center + Vector3.up * c.bounds.extents.y;
         
-        bool didHit = Physics.Raycast(bottom, Vector3.down, out rayHit, CAST_DISTANCE, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
-        bool didSphereHit = Physics.SphereCast(top, cc.radius, Vector3.down, out sphereHit, c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius), LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
+        bool didHit = Physics.Raycast(c.bounds.center, Vector3.down, out rayHit, c.bounds.extents.y + CAST_DISTANCE, MaskReference.Terrain);
+        bool didSphereHit = Physics.SphereCast(top, cc.radius, Vector3.down, out sphereHit, c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius), MaskReference.Terrain);
         
         float slopeAngle = -1f;
         if (didHit)
@@ -4347,8 +4353,18 @@ public bool GetGrounded()
             lastPhysicsMaterial = rayHit.collider.sharedMaterial;
             lastGroundWasStatic = rayHit.transform.gameObject.isStatic;
         }
+
+        if (didHit && rayHit.point.y > this.transform.position.y && rayHit.point.y - this.transform.position.y < groundBias)
+        {
+            withinBias = true;
+            biasHeight = rayHit.point.y;
+        }
+        else
+        {
+            withinBias = false;
+        }
         Color clr = didSphereHit ? Color.magenta : Color.yellow;
-        Debug.DrawLine(bottom, bottom + Vector3.down * CAST_DISTANCE, didHit ? Color.red : Color.cyan);
+        
 
         Debug.DrawRay(top, this.transform.forward * cc.radius * RADIUS_MULT, clr);
         Debug.DrawRay(top, -this.transform.forward * cc.radius * RADIUS_MULT, clr);
@@ -4364,6 +4380,8 @@ public bool GetGrounded()
         Debug.DrawRay(top + Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), -this.transform.forward * cc.radius * RADIUS_MULT, clr);
         Debug.DrawRay(top + Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), this.transform.right * cc.radius * RADIUS_MULT, clr);
         Debug.DrawRay(top + Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), -this.transform.right * cc.radius * RADIUS_MULT, clr);
+
+        Debug.DrawRay(c.bounds.center, Vector3.down * (c.bounds.extents.y + CAST_DISTANCE), didHit ? Color.red : Color.cyan);
         return (didHit && slopeOK);// || cc.isGrounded;
     }
 

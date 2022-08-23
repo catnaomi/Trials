@@ -1999,7 +1999,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         //_MoveOnEnd();
         Vector3 origin = this.transform.position + Vector3.up * 0.5f;
         float dist = 5f;
-        bool isBackToWall = Physics.SphereCast(origin, 0.25f, -this.transform.forward, out RaycastHit hit, dist, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
+        bool isBackToWall = Physics.SphereCast(origin, 0.25f, -this.transform.forward, out RaycastHit hit, dist, MaskReference.Terrain);
         ignoreRoot = false;
         if (Vector3.Distance(this.transform.position, CombatTarget.transform.position) < 10f)
         {

@@ -458,7 +458,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
         Collider c = this.GetComponent<Collider>();
         Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down * 0.9f;
         Vector3 top = c.bounds.center + c.bounds.extents.y * Vector3.up;
-        bool hit = Physics.Raycast(top, Vector3.down, out hitInfo, c.bounds.extents.y * 2f + 0.5f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
+        bool hit = Physics.Raycast(top, Vector3.down, out hitInfo, c.bounds.extents.y * 2f + 0.5f, MaskReference.Terrain);
         Debug.DrawLine(top, bottom + Vector3.down * 0.2f, hit ? Color.green : Color.red);
         return hit;
     }
@@ -497,7 +497,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
         if (!ignoreRoot) transform.rotation = animancer.Animator.rootRotation;
         position.y = nav.nextPosition.y;
         Vector3 dir = position - this.transform.position;
-        if (!ignoreRoot && ((animancer.States.Current != navstate.idle && !IsFalling()) || !Physics.SphereCast(this.transform.position + (Vector3.up * positionReference.eyeHeight), 0.25f, dir, out RaycastHit hit, dir.magnitude, LayerMask.GetMask("Terrain"))))
+        if (!ignoreRoot && ((animancer.States.Current != navstate.idle && !IsFalling()) || !Physics.SphereCast(this.transform.position + (Vector3.up * positionReference.eyeHeight), 0.25f, dir, out RaycastHit hit, dir.magnitude, MaskReference.Terrain)))
         {
             cc.enabled = false;
             transform.position = position;
@@ -581,8 +581,8 @@ public class NavigatingHumanoidActor : Actor, INavigates
         Vector3 pointLeft = this.transform.position + this.transform.right * -MAX_DISTANCE;
         Vector3 pointRight = this.transform.position + this.transform.right * MAX_DISTANCE;
 
-        bool rayLeft = Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, -this.transform.right, out RaycastHit hitLeft, MAX_DISTANCE, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
-        bool rayRight = Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, this.transform.right, out RaycastHit hitRight, MAX_DISTANCE, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only"));
+        bool rayLeft = Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, -this.transform.right, out RaycastHit hitLeft, MAX_DISTANCE, MaskReference.Terrain);
+        bool rayRight = Physics.SphereCast(this.transform.position + Vector3.up, 0.25f, this.transform.right, out RaycastHit hitRight, MAX_DISTANCE, MaskReference.Terrain);
 
         if (rayLeft && !rayRight)
         {

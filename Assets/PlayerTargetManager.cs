@@ -477,8 +477,8 @@ public class PlayerTargetManager : MonoBehaviour
         Ray pRay = new Ray(player.positionReference.Spine.position, (target.transform.position - player.positionReference.Spine.position));
         Ray cRay = new Ray(cam.transform.position, (target.transform.position - cam.transform.position));
 
-        bool playerTerrainBlocked = Physics.Raycast(pRay, playerDist, LayerMask.GetMask("Terrain"));
-        bool camTerrainBlocked = Physics.Raycast(cRay, camDist, LayerMask.GetMask("Terrain"));
+        bool playerTerrainBlocked = Physics.Raycast(pRay, playerDist, MaskReference.Terrain);
+        bool camTerrainBlocked = Physics.Raycast(cRay, camDist, MaskReference.Terrain);
 
         bool playerInRange = playerDist < maxPlayerDistance;
         bool camInRange = camDist < maxCamDistance;

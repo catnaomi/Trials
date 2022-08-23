@@ -65,7 +65,11 @@ public class DoorPlayableInteract : Interactable
             //player.transform.position = refTransform.position;
             player.transform.rotation = refTransform.rotation;
             player.SetExternalSourceState(state);
-            state.Events.OnEnd = player.PlayMove;
+            state.Events.OnEnd = () =>
+            {
+                player.GetComponent<CharacterController>().enabled = true;
+                player.PlayMove();
+            }; 
             OpenDoor();
         }
         else

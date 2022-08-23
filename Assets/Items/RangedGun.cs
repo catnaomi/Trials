@@ -96,7 +96,7 @@ public class RangedGun : RangedWeapon, IHitboxHandler
         launchVector += Vector3.up * accuracyVector.y;
         launchVector += holder.transform.right * accuracyVector.x;
 
-        RaycastHit[] hits = Physics.RaycastAll(muzzle.transform.position, launchVector, maxDistance, LayerMask.GetMask("Default", "Terrain", "Actors"));
+        RaycastHit[] hits = Physics.RaycastAll(muzzle.transform.position, launchVector, maxDistance, LayerMask.GetMask("Default", "Terrain", "Actors") | MaskReference.Terrain);
         RaycastHit hit = new RaycastHit();
         float leadingDist = Mathf.Infinity;
         Vector3 endPoint = muzzle.transform.position + launchVector.normalized * maxDistance;
