@@ -5,6 +5,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 329219908793913371, guid: ea99e2751c174e0418ca382e5dc17e08,
@@ -15,7 +16,7 @@ PrefabInstance:
     - target: {fileID: 6934999084977914064, guid: ea99e2751c174e0418ca382e5dc17e08,
         type: 3}
       propertyPath: m_Name
-      value: Ice Golem - Ranged
+      value: Ice Golem - CIRCLE (Ranged) Variant
       objectReference: {fileID: 0}
     - target: {fileID: 7743306516172954218, guid: ea99e2751c174e0418ca382e5dc17e08,
         type: 3}
@@ -126,17 +127,17 @@ PrefabInstance:
     - target: {fileID: 8622797609942491639, guid: ea99e2751c174e0418ca382e5dc17e08,
         type: 3}
       propertyPath: health.max
-      value: 10
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8622797609942491639, guid: ea99e2751c174e0418ca382e5dc17e08,
         type: 3}
       propertyPath: health.current
-      value: 10
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8622797609942491639, guid: ea99e2751c174e0418ca382e5dc17e08,
         type: 3}
       propertyPath: health.baseValue
-      value: 10
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8622797609942491639, guid: ea99e2751c174e0418ca382e5dc17e08,
         type: 3}
@@ -150,6 +151,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8622797609942491636, guid: ea99e2751c174e0418ca382e5dc17e08, type: 3}
+    m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: ea99e2751c174e0418ca382e5dc17e08, type: 3}
 --- !u!1 &6630192746648179778 stripped
 GameObject:
@@ -215,8 +217,7 @@ MonoBehaviour:
   yVel: 0
   currentDamage:
     healthDamage: 0
-    staminaDamage: 0
-    types: 
+    types: 0
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -228,11 +229,13 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 0
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 0
       onArmorHit: 0
@@ -255,6 +258,7 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
+  currentConsumable: {fileID: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   timeTravelStates: []
@@ -271,7 +275,10 @@ MonoBehaviour:
   destination: {x: 0, y: 0, z: 0}
   followingTarget: 0
   airTime: 0
+  strafeDelay: 2
+  strafeDirection: 0
   jumpAdjustSpeed: 3
+  turningDelay: 1
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: 331c97ad83e88ee47b5662bebd05f08a, type: 2}
   moveAnim: {fileID: 11400000, guid: 291049966dc955c43a0a585337e51011, type: 2}
@@ -279,14 +286,12 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  MinEngageRange: 3.5
-  MaxEngageRange: 25
   SightRange: 25
   InSightRange: 0
   RangedAttack: {fileID: 11400000, guid: 794ac4c94cb46424d94b4e1cc928a192, type: 2}
   RangedAttackRange: 25
   InRangedAttackRange: 0
-  damageAnims: {fileID: 11400000, guid: 9d9b14e5de6ad3d449aa822da5bc08b9, type: 2}
+  damageAnims: {fileID: 11400000, guid: 221ae51d23f379f4a9d8bc53390ce0e9, type: 2}
   deathParticle: {fileID: 2759190588825693265, guid: b6cc573424a44724382c8510edfd3239,
     type: 3}
   clock: 0

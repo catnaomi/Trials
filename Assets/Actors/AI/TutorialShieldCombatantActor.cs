@@ -112,12 +112,19 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
                 float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
                 InSightRange = realdist <= SightRange;
-                InCloseAttackRange = navdist <= CloseAttackRange && nav.hasPath;
+                InCloseAttackRange = realdist <= CloseAttackRange && nav.hasPath;//navdist <= CloseAttackRange && nav.hasPath;
  
 
                 if (InSightRange)
                 {
-                    SetDestination(CombatTarget);
+                    if (!IsStrafing())
+                    {
+                        SetDestination(CombatTarget);
+                    }
+                    else
+                    {
+                        SetStrafeDestination(CheckStrafe());
+                    }
                     ResumeNavigation();
                 }
                 else
@@ -274,7 +281,7 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
         //List<DamageResistance> dr = new List<DamageResistance>();
         //dr.AddRange(inventory.GetBlockResistance());
         //return inventory.GetBlockResistance();
-        return null;
+        return inventory.GetBlockResistance();
     }
 
     public override void ProcessDamageKnockback(DamageKnockback damageKnockback)

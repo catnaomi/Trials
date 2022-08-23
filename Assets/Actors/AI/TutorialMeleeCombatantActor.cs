@@ -109,12 +109,19 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
                 float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
                 InSightRange = realdist <= SightRange;
-                InCloseAttackRange = navdist <= CloseAttackRange && nav.hasPath;
-                InFarAttackRange = navdist <= FarAttackRange && nav.hasPath;
+                InCloseAttackRange = realdist <= CloseAttackRange && nav.hasPath;//navdist <= CloseAttackRange && nav.hasPath;
+                InFarAttackRange = realdist <= CloseAttackRange && nav.hasPath;//navdist <= FarAttackRange && nav.hasPath;
 
                 if (InSightRange)
                 {
-                    SetDestination(CombatTarget);
+                    if (!IsStrafing())
+                    {
+                        SetDestination(CombatTarget);
+                    }
+                    else
+                    {
+                        SetStrafeDestination(CheckStrafe());
+                    }
                     ResumeNavigation();
                 }
                 else

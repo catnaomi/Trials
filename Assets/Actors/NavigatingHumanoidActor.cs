@@ -38,6 +38,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
     protected float lastAirTime;
     protected float landTime = 0f;
     float idleTime = 0f;
+    float strafeClock = 0f;
     public float strafeDelay = 2f;
     public int strafeDirection = 0;
     Vector3 lastPosition;
@@ -172,7 +173,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
             {
                 followingTarget = false;
             }
-            else
+            else if (!IsStrafing())
             {
                 destination = CombatTarget.transform.position;
             }
@@ -269,19 +270,25 @@ public class NavigatingHumanoidActor : Actor, INavigates
         {
             nav.enabled = true;
             ignoreRoot = false;
-            nav.isStopped = true;
+            nav.isStopped = false;
 
             if (idleTime > strafeDelay)
             {
                 idleTime = 0f;
                 strafeDirection = CheckStrafe();
+                SetStrafeDestination(strafeDirection);
+            }
+            if (strafeClock > updateSpeed)
+            {
+                SetStrafeDestination(strafeDirection);
+                strafeClock = 0f;
             }
 
-            float xmov = Mathf.Sign(strafeDirection);
-            
+            float xmov;// = Mathf.Sign(strafeDirection);
+            float ymov;
             if (inBufferRange && strafeDirection != 0)
             {
-                moveDirection = this.transform.right * xmov;
+                moveDirection = nav.desiredVelocity.normalized;//this.transform.right * xmov;
                 Vector3 dir = (CombatTarget.transform.position - this.transform.position);
                 dir.y = 0f;
                 dir.Normalize();
@@ -289,14 +296,19 @@ public class NavigatingHumanoidActor : Actor, INavigates
 
                 this.transform.rotation = Quaternion.LookRotation(lookDirection);
 
+                xmov = Vector3.Dot(moveDirection, this.transform.right);
+                ymov = Vector3.Dot(moveDirection, this.transform.forward);
+
                 navstate.strafe.ParameterX = xmov;
+                navstate.strafe.ParameterY = ymov;
             }
             else
             {
                 animancer.Play(navstate.move);
             }
 
-            
+            strafeClock += Time.deltaTime;
+            idleTime += Time.deltaTime;
         }
 
         if (animancer.States.Current == navstate.fall)
@@ -647,6 +659,19 @@ public class NavigatingHumanoidActor : Actor, INavigates
             }
         }
     }
+
+    public void SetStrafeDestination(int direction)
+    {
+        if (direction != 0)
+        {
+            Vector3 samplePosition = CombatTarget.transform.position + (Quaternion.Euler(0f, direction * 60f, 0f) * (this.transform.position - CombatTarget.transform.position));
+            Debug.DrawLine(CombatTarget.transform.position, samplePosition, Color.green, 3f);
+            if (NavMesh.SamplePosition(samplePosition, out NavMeshHit hit, 2f, 1))
+            {
+                SetDestination(hit.position);
+            }
+        }
+    }
     public void MoveOnEnd()
     {
         if (animancer == null) return;
@@ -698,6 +723,11 @@ public class NavigatingHumanoidActor : Actor, INavigates
     public override bool IsFalling()
     {
         return animancer.States.Current == navstate.fall;
+    }
+
+    public virtual bool IsStrafing()
+    {
+        return animancer.States.Current == navstate.strafe;
     }
     public bool CanMove()
     {
