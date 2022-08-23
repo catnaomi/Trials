@@ -52,6 +52,8 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
         OnHurt.AddListener(() => {
             HitboxActive(0);
         });
+
+        animancer.Play(navstate.idle);
     }
 
     void Awake()
@@ -61,7 +63,7 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
 
     public override void ActorPostUpdate()
     {
-        base.ActorPostUpdate();
+        //base.ActorPostUpdate();
         
         if (clock > -1)
         {
@@ -130,11 +132,13 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
         {
             RangedAttack.OnUpdate(this);
             Vector3 lookDirection;
-            if (destination != Vector3.zero)
+            Vector3 targetPosition = CombatTarget != null ? CombatTarget.transform.position : Vector3.zero;
+            if (targetPosition != Vector3.zero)
             {
-                lookDirection = (destination - this.transform.position).normalized;
+                lookDirection = (targetPosition - this.transform.position).normalized;
                 lookDirection.y = 0f;
-                angle = Mathf.MoveTowards(angle, Vector3.SignedAngle(this.transform.forward, lookDirection, Vector3.up), nav.angularSpeed * Time.deltaTime);
+                //angle = Mathf.MoveTowards(angle, Vector3.SignedAngle(this.transform.forward, lookDirection, Vector3.up), nav.angularSpeed * Time.deltaTime);
+                angle = Vector3.SignedAngle(this.transform.forward, lookDirection, Vector3.up);
             }
             else
             {
@@ -296,6 +300,10 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
         damageHandler.TakeDamage(damageKnockback);
     }
 
+    void FixedUpdate()
+    {
+        // do nothing
+    }
     public void BeingAttacked()
     {
         if (CombatTarget != null && currentDistance < bufferRange && CanAct())
