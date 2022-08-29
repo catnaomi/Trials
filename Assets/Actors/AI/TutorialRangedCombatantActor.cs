@@ -14,11 +14,14 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
     public AimAttack RangedAttack;
     public float RangedAttackRange = 25f;
     public bool InRangedAttackRange;
+    public float RangedAttackDelay = 5f;
     [Space(5)]
     public DamageAnims damageAnims;
     HumanoidDamageHandler damageHandler;
     [Space(5)]
     public GameObject deathParticle;
+    public ParticleSystem aimParticle;
+    public ParticleSystem fireParticle;
     [Space(10)]
     public float clock;
     public float ActionDelayMinimum = 2f;
@@ -154,6 +157,8 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
         animancer.Play(navstate.idle);
         animancer.Layers[HumanoidAnimLayers.UpperBody].Play(RangedAttack.GetStartClip());
         aiming = true;
+        aimParticle.Play();
+        clock = RangedAttackDelay;
     }
     public void StartRangedAttack()
     {
@@ -162,6 +167,8 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
         cstate.attack.Events.OnEnd = _MoveOnEnd;
         aiming = false;
         OnAttack.Invoke();
+        aimParticle.Stop();
+        fireParticle.Play();
     }
 
     private void OnAnimatorIK(int layerIndex)
