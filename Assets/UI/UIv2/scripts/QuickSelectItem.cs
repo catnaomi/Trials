@@ -187,8 +187,12 @@ public class QuickSelectItem : MonoBehaviour
         {
             frameImage.sprite = consumableBorder;
             highlight.sprite = consumableHighlight;
+        } 
+        if (awaitingInput)
+        {
+            frameImage.color = awaitInputColor;
         }
-        if (vizData.isEquipped)
+        else if (vizData.isEquipped)
         {
             primaryIndicator.sprite = (vizData.isPrimary) ? primary : secondary;
             frameImage.color = equippedColor;
@@ -268,6 +272,10 @@ public class QuickSelectItem : MonoBehaviour
             }
             
         }
+        else if (awaitingInput)
+        {
+            frameImage.color = highlight.color = Color.Lerp(awaitInputColor, defaultColor, Mathf.Sin(Mathf.Cos(Time.time * 4f) / 2f + 0.5f));
+        }
         else
         {
             highlight.color = Color.clear;
@@ -341,6 +349,11 @@ public class QuickSelectItem : MonoBehaviour
         }
     }
 
+    public void InitInventory(InventoryUI2 inventoryMenu)
+    {
+        inventoryMenu.OnQuickSlotEquipStart.AddListener(AwaitInput);
+        inventoryMenu.OnQuickSlotEquipEnd.AddListener(EndAwait);
+    }
     public void AwaitInput()
     {
         awaitingInput = true;

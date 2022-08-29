@@ -42,7 +42,7 @@ public class InventoryUI2 : MonoBehaviour
     GameObject lastSelected;
     Item selectedItem;
     int lastCount;
-    [ReadOnly] public EquippableWeapon quickSlotItem;
+    [ReadOnly] public Equippable quickSlotItem;
 
     public Item.ItemType[] filterType;
     void Awake()
@@ -60,9 +60,12 @@ public class InventoryUI2 : MonoBehaviour
         if (source != null)
         {
             inventory = source.GetComponent<IInventory>();
-            
         }
         initialized = false;
+        quickSlot0.InitInventory(this);
+        quickSlot1.InitInventory(this);
+        quickSlot2.InitInventory(this);
+        quickSlot3.InitInventory(this);
     }
 
     private void Update()
@@ -221,7 +224,7 @@ public class InventoryUI2 : MonoBehaviour
     }
     public void StartQuickSlotEquip(Item item)
     {
-        if (item != null && item is EquippableWeapon weapon)
+        if (item != null && item is Equippable weapon)
         {
             quickSlotItem = weapon;
             OnQuickSlotEquipStart.Invoke();
