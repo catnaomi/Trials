@@ -7,10 +7,12 @@ public class ItemPickupUI : MonoBehaviour
     public GameObject itemPickupPrefab;
     public Transform itemPickupParent;
     bool initialized;
+    AudioSource audioSource;
     // Start is called before the first frame update
     void Start()
     {
         initialized = false;
+        audioSource = this.GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -19,7 +21,7 @@ public class ItemPickupUI : MonoBehaviour
         if (!initialized && PlayerActor.player != null)
         {
             PlayerActor.player.inventory.OnAddItem.AddListener(OnNewItem);
-            //initialized = true;
+            initialized = true;
         }
     }
 
@@ -29,5 +31,6 @@ public class ItemPickupUI : MonoBehaviour
         ItemPickupDisplay display = uiObj.GetComponent<ItemPickupDisplay>();
         uiObj.SetActive(true);
         display.SetItem(item);
+        audioSource.Play();
     }
 }
