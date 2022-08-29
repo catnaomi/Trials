@@ -18,19 +18,19 @@ public static class DebugReflectionMethods
             Item bow = ScriptableObject.Instantiate(Resources.Load<Item>("Items/StarterBow"));
             Item bottle = ScriptableObject.Instantiate(Resources.Load<Item>("Items/DebugBottle"));
 
-            PlayerActor.player.inventory.AddItem(sword);
+            PlayerActor.player.inventory.Add(sword);
             PlayerActor.player.inventory.EquipToSlot((Equippable)sword, 0);
             Debug.Log("Added and equipped + " + sword.ToString());
 
-            PlayerActor.player.inventory.AddItem(shield);
+            PlayerActor.player.inventory.Add(shield);
             PlayerActor.player.inventory.EquipToSlot((Equippable)shield, 1);
             Debug.Log("Added and equipped + " + shield.ToString());
 
-            PlayerActor.player.inventory.AddItem(bow);
+            PlayerActor.player.inventory.Add(bow);
             PlayerActor.player.inventory.EquipToSlot((Equippable)bow, 2);
             Debug.Log("Added and equipped + " + bow.ToString());
 
-            PlayerActor.player.inventory.AddItem(bottle);
+            PlayerActor.player.inventory.Add(bottle);
             PlayerActor.player.inventory.EquipToSlot((Equippable)bottle, 3);
             Debug.Log("Added and equipped + " + bottle.ToString());
         }

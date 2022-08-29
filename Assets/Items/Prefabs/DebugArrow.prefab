@@ -337,8 +337,7 @@ MonoBehaviour:
   hitbox: {fileID: 0}
   damageKnockback:
     healthDamage: 25
-    staminaDamage: 0
-    types: 02000000
+    types: 2000000
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -350,11 +349,13 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 0
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 1
       onArmorHit: 1
@@ -377,8 +378,9 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
-  interactable: {fileID: 3029168984229030273}
+  interactable: {fileID: 5248911429078872315}
   prefabRef: {fileID: 0}
+  initForce: {x: 0, y: 0, z: 0}
 --- !u!114 &3463198421341249673
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -530,7 +532,7 @@ FixedJoint:
   m_ConnectedMassScale: 1
 --- !u!96 &3134411469255192724
 TrailRenderer:
-  serializedVersion: 2
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -631,11 +633,14 @@ TrailRenderer:
     numCapVertices: 0
     alignment: 0
     textureMode: 0
+    textureScale: {x: 1, y: 1}
     shadowBias: 0.5
     generateLightingData: 0
   m_MinVertexDistance: 0.1
+  m_MaskInteraction: 0
   m_Autodestruct: 0
   m_Emitting: 1
+  m_ApplyActiveColorSpace: 0
 --- !u!1 &5248911429078872315
 GameObject:
   m_ObjectHideFlags: 0
@@ -646,7 +651,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6322876916550015646}
   - component: {fileID: 74589775805465020}
-  - component: {fileID: 3029168984229030273}
+  - component: {fileID: 6623376104406259863}
   m_Layer: 14
   m_Name: InteractToPickup
   m_TagString: Untagged
@@ -682,7 +687,7 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 2
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &3029168984229030273
+--- !u!114 &6623376104406259863
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -691,18 +696,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 5248911429078872315}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1e6f3966411ed444aa5ea22233d6a87, type: 3}
+  m_Script: {fileID: 11500000, guid: 80ea99206903483439bed83a882581ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionNode: {fileID: 74589775805465020}
-  canInteract: 1
-  interactIcon: {fileID: 0}
-  interactIconHeight: 1
-  OnInteract:
-    m_PersistentCalls:
-      m_Calls: []
   item: {fileID: 11400000, guid: d16790a012b3df64fba58b934c0a61e7, type: 2}
-  destroyOnInteract: 1
   rootObject: {fileID: 4805927410726168974}
 --- !u!1 &6812980472275888273
 GameObject:
@@ -924,6 +921,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 2
     m_TransformParent: {fileID: 394710091460050924}
     m_Modifications:
     - target: {fileID: 1764492463394143537, guid: 88ceda3ecde31fa4fa9c4af1d99cd54c,
@@ -992,6 +990,7 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: 88ceda3ecde31fa4fa9c4af1d99cd54c, type: 3}
 --- !u!4 &7241805908636431829 stripped
 Transform:

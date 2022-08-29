@@ -43,7 +43,7 @@ public class Inventory : MonoBehaviour, IInventory
         return contents.Contains(item);
     }
 
-    public bool Add(Item item)
+    public virtual bool Add(Item item)
     {
         if (item == null) return false;
         if (item.MaxStackSize > 1)

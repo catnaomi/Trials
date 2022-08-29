@@ -38,7 +38,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
     public bool weaponChanged;
 
-
+    public PassItemEvent OnAddItem;
     void Awake()
     {
         this.player = GetComponent<PlayerActor>();
@@ -48,7 +48,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             if (item != null)
             {
                 Item newItem = ScriptableObject.Instantiate(item);
-                AddItem(newItem);
+                Add(newItem);
             }
         }
         OnChange.AddListener(() => { lastChanged = Time.time; });
@@ -57,7 +57,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         if (Slot0Equippable != null)
         {
             Equippable slot0 = Instantiate(Slot0Equippable);
-            AddItem(slot0);
+            Add(slot0);
             Slot0Equippable = slot0;
 
         }
@@ -65,21 +65,21 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         if (Slot1Equippable != null)
         {
             Equippable slot1 = Instantiate(Slot1Equippable);
-            AddItem(slot1);
+            Add(slot1);
             Slot1Equippable = slot1;
         }
 
         if (Slot2Equippable != null)
         {
             Equippable slot2 = Instantiate(Slot2Equippable);
-            AddItem(slot2);
+            Add(slot2);
             Slot2Equippable = slot2;
         }
 
         if (Slot3Equippable != null)
         {
             Equippable slot3 = Instantiate(Slot3Equippable);
-            AddItem(slot3);
+            Add(slot3);
             Slot3Equippable = slot3;
         }
     }
@@ -125,14 +125,10 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     {
         FixedUpdateWeapon();
     }
-    public void AddItem(Item item)
+    public override bool Add(Item item)
     {
-        if (item != null)
-        {
-            item.holder = player;
-            contents.Add(item);
-            OnChange.Invoke();
-        }
+        OnAddItem.Invoke(item);
+        return base.Add(item);
     }
 
     public bool RemoveItem(Item item)

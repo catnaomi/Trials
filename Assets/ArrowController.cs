@@ -10,7 +10,7 @@ public class ArrowController : Projectile
     public Rigidbody feather;
     public Hitbox hitbox;
     public DamageKnockback damageKnockback;
-    public Interactable interactable;
+    public GameObject interactable;
     public GameObject prefabRef;
     bool launched;
     
@@ -131,7 +131,7 @@ public class ArrowController : Projectile
 
     public void EnablePickup()
     {
-        interactable.gameObject.SetActive(true);
+        interactable.SetActive(true);
     }
     /*
     private void DisabledUpdate()
