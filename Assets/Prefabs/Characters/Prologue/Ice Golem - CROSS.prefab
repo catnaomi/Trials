@@ -1215,13 +1215,15 @@ MonoBehaviour:
   OnHealthChange:
     m_PersistentCalls:
       m_Calls: []
-  lastDamageTaken: 0
+  lastDamageAmountTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
   xzVel: {x: 0, y: 0, z: 0}
   yVel: 0
+  hitParticlePosition: {x: 0, y: 0, z: 0}
+  hitParticleDirection: {x: 0, y: 0, z: 0}
   currentDamage:
     healthDamage: 0
     types: 0
@@ -1251,6 +1253,7 @@ MonoBehaviour:
       onCounterHit: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
+    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -1471,6 +1474,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animSounds: {fileID: 11400000, guid: aea093d2a4dacd446b7cbe83d8da0de3, type: 2}
+  fxMaterial: 6
   footSourceLight: {fileID: 4013956763830427769}
   footSourceHeavy: {fileID: 4013956763830427769}
   footstepDelay: 0.25

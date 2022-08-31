@@ -87,7 +87,7 @@ public class ArrowController : Projectile
         }
         else if (hitbox.victims.Count > 0)
         {
-            FXController.CreateFX(FXController.FX.FX_BleedPoint, feather.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
+            //FXController.CreateFX(FXController.FX.FX_BleedPoint, feather.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
             Destroy(tip.gameObject);
             allowInteract = false;
         }

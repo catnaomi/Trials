@@ -15,9 +15,7 @@ public class FXController : MonoBehaviour
     public GameObject fx_thrust;
     public GameObject fx_dizzy;
     public GameObject fx_warn;
-    [Space(5)]
-    public GameObject fx_bleedSword;
-    public GameObject fx_bleedPoint;
+    
     [Space(5)]
     public GameObject fx_gunTrail;
     [Space(5)]
@@ -43,6 +41,13 @@ public class FXController : MonoBehaviour
     public float hitImpulseMagnitude = 0.2f;
     public float critImpulseMagnitude = 0.4f;
     public float blockImpulseMagnitude = 0.5f;
+
+    [Header("Slash & Thrust By Material")]
+    public GameObject fx_bleedSword;
+    public GameObject fx_bleedPoint;
+    [Space(10)]
+    public GameObject fx_iceSlash;
+    public GameObject fx_icePoint;
     public enum FX {
         FX_Block,
         FX_Hit,
@@ -59,7 +64,9 @@ public class FXController : MonoBehaviour
         Wood,
         Stone,
         Dirt,
-        Glass
+        Glass,
+
+        Ice,
     }
     public static Dictionary<FX, GameObject> fxDictionary;
     public static Dictionary<string, AudioClip> clipDictionary;
@@ -351,16 +358,34 @@ public class FXController : MonoBehaviour
         }
     }
 
-    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCrit, FXMaterial hurtMaterial)
+    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCrit, FXMaterial hurtMaterial, AudioClip soundOverride)
     {
         EnsureSingleton();
-        GameObject newFX = GameObject.Instantiate(isSlash ? main.fx_bleedSword : main.fx_bleedPoint);
+        GameObject particlePrefab = main.fx_bleedSword;
+        if (hurtMaterial == FXMaterial.Ice)
+        {
+            particlePrefab = (isSlash ? main.fx_iceSlash : main.fx_icePoint);
+        }
+        else
+        {
+            particlePrefab = (isSlash ? main.fx_bleedSword : main.fx_bleedPoint);
+        }
+        GameObject newFX = GameObject.Instantiate(particlePrefab);
         newFX.transform.position = position;
         newFX.transform.rotation = Quaternion.LookRotation(direction);
-        if (isCrit)
+        if (soundOverride != null)
+        {
+            AudioSource source = newFX.GetComponentInChildren<AudioSource>();
+            source.clip = soundOverride;
+            source.Play();
+        }
+        else if (isCrit)
         {
             AudioClip clip = GetSwordCriticalSoundFromFXMaterial(hurtMaterial);
-            newFX.GetComponentInChildren<AudioSource>().clip = clip;
+            AudioSource source = newFX.GetComponentInChildren<AudioSource>();
+
+            source.clip = clip;
+            source.Play();
         }
         return newFX;
     }
