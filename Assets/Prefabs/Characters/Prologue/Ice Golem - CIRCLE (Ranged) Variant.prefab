@@ -207,6 +207,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 096978934be39564a8fc9f85b0a1a33d,
         type: 2}
+    - target: {fileID: 8622797609942491598, guid: ea99e2751c174e0418ca382e5dc17e08,
+        type: 3}
+      propertyPath: animSounds
+      value: 
+      objectReference: {fileID: 11400000, guid: edbbaaff614671e469cad550ee657299,
+        type: 2}
+    - target: {fileID: 8622797609942491599, guid: ea99e2751c174e0418ca382e5dc17e08,
+        type: 3}
+      propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 8622797609942491638, guid: ea99e2751c174e0418ca382e5dc17e08,
         type: 3}
       propertyPath: m_Speed
@@ -315,13 +326,15 @@ MonoBehaviour:
   OnHealthChange:
     m_PersistentCalls:
       m_Calls: []
-  lastDamageTaken: 0
+  lastDamageAmountTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
   xzVel: {x: 0, y: 0, z: 0}
   yVel: 0
+  hitParticlePosition: {x: 0, y: 0, z: 0}
+  hitParticleDirection: {x: 0, y: 0, z: 0}
   currentDamage:
     healthDamage: 0
     types: 0
@@ -351,6 +364,7 @@ MonoBehaviour:
       onCounterHit: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
+    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
