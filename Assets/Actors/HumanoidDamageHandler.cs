@@ -10,6 +10,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     protected DamageAnims damageAnims;
     protected AnimancerComponent animancer;
 
+    public DamageKnockback lastDamageTaken;
     public float lastDamage;
     public float damageTaken;
 
@@ -20,7 +21,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
     public float unfreezeDamageDelay = 0.25f;
     public Queue<DamageKnockback> timeStopDamages;
-    bool inFrozenRoutine;
+    protected bool inFrozenRoutine;
 
     public AnimancerState hurt;
     public AnimancerState block;
@@ -88,6 +89,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     {
         if (!actor.IsAlive() || IsInInvulnClip()) return;
         bool isCrit = IsCritVulnerable() || damage.critData.alwaysCritical;
+        damage.didCrit = isCrit;
         float damageAmount = damage.GetDamageAmount(isCrit);
         if (actor.IsTimeStopped())
         {
@@ -100,6 +102,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             return;
         }
         lastDamage = damage.healthDamage;
+        lastDamageTaken = damage;
         damageTaken += lastDamage;
 
         //lastHitbox = damage.hitboxSource.GetComponent<Hitbox>();
@@ -128,25 +131,33 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         bool isCounterhit = actor.IsAttacking();
         if (!actor.IsDodging()) actor.attributes.ReduceHealth(damageAmount);
 
+        Vector3 contactPosition = damage.originPoint;
+        Vector3 contactDirection = actor.transform.right;
         if (damage.hitboxSource != null)
         {
-            Vector3 contactPosition = actor.GetComponent<Collider>().ClosestPoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
-
+            contactPosition = actor.GetComponent<Collider>().ClosestPoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
+            contactDirection = damage.hitboxSource.GetComponent<Hitbox>().GetDeltaPosition().normalized;
             if (damage.source.TryGetComponent<Actor>(out Actor sourceActor))
             {
+
                 sourceActor.lastContactPoint = contactPosition;
                 sourceActor.SetLastBlockpoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
+                if (blockSuccess)
+                {
+                    contactPosition = sourceActor.GetBlockpoint(contactPosition); 
+                }
             }
         }
         else if (damage.originPoint != Vector3.zero)
         {
-            Vector3 contactPosition = actor.GetComponent<Collider>().ClosestPoint(damage.originPoint);
+            contactPosition = actor.GetComponent<Collider>().ClosestPoint(damage.originPoint);
             if (damage.source.TryGetComponent<Actor>(out Actor sourceActor))
             {
                 sourceActor.lastContactPoint = contactPosition;
                 sourceActor.SetLastBlockpoint(damage.originPoint);
             }
         }
+        actor.GetComponent<IDamageable>().SetHitParticlePosition(contactPosition, contactDirection);
 
         if (actor.IsDodging())
         {
@@ -514,7 +525,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         inCritCoroutine = false;
     }
 
-    IEnumerator FrozenRoutine()
+    protected IEnumerator FrozenRoutine()
     {
         inFrozenRoutine = true;
         yield return new WaitWhile(actor.IsTimeStopped);
@@ -633,5 +644,15 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     public HumanoidDamageHandler GetDamageHandler()
     {
         return this;
+    }
+
+    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public DamageKnockback GetLastTakenDamage()
+    {
+        return lastDamageTaken;
     }
 }

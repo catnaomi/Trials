@@ -31,7 +31,7 @@ public class DamageKnockback
     public Vector3 kbForce;
     public bool kbRadial;
     [Space(5)]
-
+    public bool didCrit;
     
     [ReadOnly]
     public GameObject hitboxSource;

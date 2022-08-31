@@ -236,7 +236,7 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
         if (inventory.IsRangedEquipped()) inventory.SetDrawn(2, false);
     }
 
-    public DamageKnockback GetCurrentDamage()
+    public DamageKnockback GetLastDamage()
     {
         return currentDamage;
     }
@@ -334,5 +334,15 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
         
         actionsEnabled = false;
         */
+    }
+
+    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
+    {
+        SetHitParticleVectors(position, direction);
+    }
+
+    public DamageKnockback GetLastTakenDamage()
+    {
+        return ((IDamageable)damageHandler).GetLastTakenDamage();
     }
 }

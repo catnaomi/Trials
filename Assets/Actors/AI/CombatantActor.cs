@@ -113,7 +113,7 @@ public class CombatantActor : NavigatingHumanoidActor, IAttacker
         if (inventory.IsRangedEquipped()) inventory.SetDrawn(2, false);
     }
 
-    public DamageKnockback GetCurrentDamage()
+    public DamageKnockback GetLastDamage()
     {
         return currentDamage;
     }

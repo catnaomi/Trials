@@ -11,6 +11,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
     public UnityEvent OnBreak;
     public UnityEvent OnFail;
     public bool recoilOnFail = true;
+    DamageKnockback lastDamage;
     public void Recoil()
     {
         
@@ -23,6 +24,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
 
     public void TakeDamage(DamageKnockback damage)
     {
+        lastDamage = damage;
         if (damage.GetTypes().HasType(brokenByElements))
         {
             BreakObject();
@@ -49,5 +51,15 @@ public class BreakableObject : MonoBehaviour, IDamageable
         }
         OnBreak.Invoke();
         Destroy(this.gameObject, 0.01f);
+    }
+
+    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public DamageKnockback GetLastTakenDamage()
+    {
+        return lastDamage;
     }
 }

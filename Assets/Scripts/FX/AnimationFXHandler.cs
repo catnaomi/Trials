@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using CustomUtilities;
 #if (UNITY_EDITOR)
 using UnityEditor;
 #endif
@@ -9,6 +10,7 @@ using UnityEditor;
 public class AnimationFXHandler : MonoBehaviour
 {
     public AnimationFXSounds animSounds;
+    public FXController.FXMaterial fxMaterial;
     [Header("Footsteps")]
     public AudioSource footSourceLight;
     public AudioSource footSourceHeavy;
@@ -39,6 +41,8 @@ public class AnimationFXHandler : MonoBehaviour
     void Start()
     {
         actor = this.GetComponent<Actor>();
+        actor.OnHurt.AddListener(ShowHitParticle);
+        actor.OnBlock.AddListener(ShowBlockParticle);
     }
 
     #region Footsteps
@@ -224,6 +228,45 @@ public class AnimationFXHandler : MonoBehaviour
     }
     #endregion
 
+    #region Hit Particles
+
+    public void ShowHitParticle()
+    {
+        DamageKnockback damage = actor.GetComponent<IDamageable>().GetLastTakenDamage();
+        if (damage != null)
+        {
+            bool isCrit = damage.didCrit;
+            bool isSlash = damage.isSlash;
+            bool isThrust = damage.isThrust || (damage.isRanged && damage.GetTypes().HasType(DamageType.Piercing));
+
+            if (isSlash || isThrust)
+            {
+                FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, isSlash, isCrit, fxMaterial);
+                FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, false);
+            }
+        }
+       
+    }
+
+    public void ShowBlockParticle()
+    {
+        DamageKnockback damage = actor.GetComponent<IDamageable>().GetLastTakenDamage();
+        if (damage != null)
+        {
+            bool isCrit = damage.didCrit;
+            bool isSlash = damage.isSlash;
+            bool isThrust = damage.isThrust || (damage.isRanged && damage.GetTypes().HasType(DamageType.Piercing));
+
+            if (isSlash || isThrust)
+            {
+                AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
+                FXController.CreateSpark(actor.hitParticlePosition, actor.hitParticleDirection, clip);
+                FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
+            }
+        }
+    }
+
+    #endregion
     #region Terrain Handling
 
     public AudioClip GetFootStepFromTerrain(string materialName, bool isLeft)

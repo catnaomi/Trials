@@ -117,7 +117,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         if (active)
         {
             DamageKnockback dk = this.GetDamageFromAttack(holder);
-            SetUpDamageListeners(dk);
+            //SetUpDamageListeners(dk);
             dk.kbForce = DamageKnockback.GetKnockbackRelativeToTransform(dk.kbForce * baseDamage, holder.transform);
             dk.originPoint = GetModel().transform.position;
             slashFX.transform.position = holder.transform.position;
@@ -159,9 +159,10 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         //SetTrailColor(dk.healthDamage.GetHighestType(DamageType.Slashing, DamageType.Piercing));
         this.active = active;
     }
-
+    /*
     public void SetUpDamageListeners(DamageKnockback dk)
     {
+        return;
         if (lastDK != null)
         {
             lastDK.OnHit.RemoveListener(DamageOnHit);
@@ -231,6 +232,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         thrustFX.SetContactPoint(holder.lastContactPoint);
         thrustFX.Block(holder.lastBlockPoint);
     }
+    */
 
     public override void FlashWarning()
     {
@@ -647,7 +649,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     {
         if (actor is IAttacker attacker)
         {
-            DamageKnockback damage = attacker.GetCurrentDamage();
+            DamageKnockback damage = attacker.GetLastDamage();
             if (damage.isSlash)
             {
                 damage.healthDamage *= this.baseDamage * slashModifier;

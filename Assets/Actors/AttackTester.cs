@@ -26,7 +26,7 @@ public class AttackTester : NavigatingHumanoidActor, IAttacker
             attack.ProcessHumanoidAction(this, () => { animancer.Play(navstate.move); });
         }
     }
-    public DamageKnockback GetCurrentDamage()
+    public DamageKnockback GetLastDamage()
     {
         return currentDamage;
     }

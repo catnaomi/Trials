@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Cinemachine;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,6 +22,8 @@ public class FXController : MonoBehaviour
     public GameObject fx_gunTrail;
     [Space(5)]
     public GameObject fx_spiral;
+    [Space(5)]
+   
     private static float fixedDeltaTime;
     private static float hitpauseLength;
 
@@ -34,6 +37,12 @@ public class FXController : MonoBehaviour
     public Color trueColor2;
     public Color fireColor;
     public Color fireColor2;
+
+    [Header("Screen Shake")]
+    public CinemachineImpulseSource impulse;
+    public float hitImpulseMagnitude = 0.2f;
+    public float critImpulseMagnitude = 0.4f;
+    public float blockImpulseMagnitude = 0.5f;
     public enum FX {
         FX_Block,
         FX_Hit,
@@ -113,12 +122,12 @@ public class FXController : MonoBehaviour
 
         main = this;
     }
-    public static void CreateFX(FX name, Vector3 position, Quaternion rotation, float duration)
+    public static GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration)
     {
-        CreateFX(name, position, rotation, duration, null);
+        return CreateFX(name, position, rotation, duration, null);
     }
 
-    public static void CreateFX(FX name, Vector3 position, Quaternion rotation, float duration, AudioClip audioClipOverwrite)
+    public static GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration, AudioClip audioClipOverwrite)
     {
         EnsureSingleton();
         GameObject newFX = GameObject.Instantiate(fxDictionary[name], position, rotation);
@@ -134,6 +143,7 @@ public class FXController : MonoBehaviour
         }
 
         GameObject.Destroy(newFX, duration);
+        return newFX;
     }
 
     public static GameObject CreateSwordSlash()
@@ -185,6 +195,13 @@ public class FXController : MonoBehaviour
 
         return newFX;
     }
+
+    public static void CreateSpark(Vector3 position, Vector3 direction, AudioClip soundOverride)
+    {
+        EnsureSingleton();
+        CreateFX(FXController.FX.FX_Sparks, position, Quaternion.LookRotation(-direction), 1f, soundOverride);
+    }
+
     public static void Hitpause(float duration)
     {
         hitpauseLength = duration;
@@ -301,6 +318,26 @@ public class FXController : MonoBehaviour
         }
     }
 
+    public static void ImpulseScreenShake(Vector3 force)
+    {
+        EnsureSingleton();
+        main.impulse.GenerateImpulseWithVelocity(force);
+    }
+
+    public static void DamageScreenShake(Vector3 direction, bool isCrit, bool isBlock)
+    {
+        EnsureSingleton();
+        float mag = main.hitImpulseMagnitude;
+        if (isCrit)
+        {
+            mag = main.critImpulseMagnitude;
+        }
+        else if (isBlock)
+        {
+            mag = main.blockImpulseMagnitude;
+        }
+        ImpulseScreenShake(direction * mag);
+    }
 
     public static void EnsureSingleton()
     {
@@ -312,5 +349,19 @@ public class FXController : MonoBehaviour
                 fx.Init();
             }
         }
+    }
+
+    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCrit, FXMaterial hurtMaterial)
+    {
+        EnsureSingleton();
+        GameObject newFX = GameObject.Instantiate(isSlash ? main.fx_bleedSword : main.fx_bleedPoint);
+        newFX.transform.position = position;
+        newFX.transform.rotation = Quaternion.LookRotation(direction);
+        if (isCrit)
+        {
+            AudioClip clip = GetSwordCriticalSoundFromFXMaterial(hurtMaterial);
+            newFX.GetComponentInChildren<AudioSource>().clip = clip;
+        }
+        return newFX;
     }
 }

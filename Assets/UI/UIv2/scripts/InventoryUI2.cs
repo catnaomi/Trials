@@ -166,6 +166,7 @@ public class InventoryUI2 : MonoBehaviour
             }
             
         });
+        /*
         for (int j = 0; j < items.Count; j++)
         {
             Selectable b = items[j].button;
@@ -206,6 +207,7 @@ public class InventoryUI2 : MonoBehaviour
             b.navigation = nav;
 
         }
+        */
         lastCount = inventory.GetCount();
         ((RectTransform)viewport.transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Ceil((float)count / (float)columns) * itemHeight);
         if (items.Count > 0 && usingQuickslots)

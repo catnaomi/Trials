@@ -33,8 +33,22 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
 
         if (!actor.IsAlive()) return;
         bool isCrit = IsCritVulnerable();
+        damage.didCrit = isCrit;
         float normalDamageAmount = damage.GetDamageAmount(isCrit);
+        if (actor.IsTimeStopped())
+        {
+            if (!inFrozenRoutine)
+            {
+                actor.StartCoroutine(FrozenRoutine());
+            }
+            timeStopDamages.Enqueue(damage);
+            TimeTravelController.time.TimeStopDamage(normalDamageAmount);
+            return;
+        }
         bool hitFromBehind = !(Vector3.Dot(-actor.transform.forward, (damage.source.transform.position - actor.transform.position).normalized) <= 0f);
+
+        lastDamageTaken = damage;
+
 
         DamageResistance dr = new DamageResistance();
         
@@ -102,6 +116,7 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
                 hurt = state;
                 actor.OnHurt.Invoke();
                 damage.OnCrit.Invoke();
+                damage.didCrit = true;
                 StartCritVulnerability(clip.MaximumDuration / clip.Speed);
             }
             damage.OnBlock.Invoke();

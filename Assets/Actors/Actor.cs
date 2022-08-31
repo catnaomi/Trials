@@ -33,7 +33,7 @@ public class Actor : MonoBehaviour
     [HideInInspector]public UnityEvent OnHealthGain;
     [HideInInspector]public UnityEvent OnHealthChange;
 
-    public float lastDamageTaken;
+    public float lastDamageAmountTaken;
     private  int mercyId; //hitbox
 
     public Vector3 moveDirection;
@@ -44,6 +44,10 @@ public class Actor : MonoBehaviour
     public Vector3 xzVel;
     public float yVel;
 
+    [HideInInspector]
+    public Vector3 hitParticlePosition;
+    [HideInInspector]
+    public Vector3 hitParticleDirection;
     protected bool dead;
     // targets
 
@@ -156,6 +160,17 @@ public class Actor : MonoBehaviour
     public virtual void SetLastBlockpoint(Vector3 point)
     {
         lastBlockPoint = point;
+    }
+
+    public virtual Vector3 GetBlockpoint(Vector3 hitPoint)
+    {
+        return hitPoint;
+    }
+
+    public virtual void SetHitParticleVectors(Vector3 position, Vector3 direction)
+    {
+        hitParticlePosition = position;
+        hitParticleDirection = direction;
     }
 
     public virtual IInventory GetInventory()

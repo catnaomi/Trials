@@ -24,6 +24,7 @@ public class Hitbox : MonoBehaviour
 
     public UnityEvent OnHitWall;
 
+    public Vector3 deltaPosition;
     public struct HitboxHistoryInfo
     {
         public Vector3 start;
@@ -157,6 +158,7 @@ public class Hitbox : MonoBehaviour
                     if (hitActor != null && !victims.Contains(hitActor))
                     {
                         victims.Add(hitActor);
+                        hitActor.SetHitParticlePosition(collider.ClosestPoint(end), (end-start).normalized);
                         hitActor.TakeDamage(this.damageKnockback);
                         didHit = true;
                         OnHitActor.Invoke();
@@ -172,7 +174,8 @@ public class Hitbox : MonoBehaviour
                 didCast = didCast,
                 didHit = didHit,
             });
-        }
+            deltaPosition = end - start;
+        }    
         UpdatePosition();
     }
 
@@ -287,6 +290,11 @@ public class Hitbox : MonoBehaviour
             CreateMidpoints(start, mid, hitboxes, length / 2f, radius, parent, damageKnockback, source);
             CreateMidpoints(mid, end, hitboxes, length / 2f, radius, parent, damageKnockback, source);
         }
+    }
+
+    public Vector3 GetDeltaPosition()
+    {
+        return deltaPosition;
     }
     private void OnDrawGizmos()
     {

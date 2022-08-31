@@ -1590,7 +1590,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         if (inventory.IsRangedEquipped()) inventory.SetDrawn(2, false);
     } 
 
-    public DamageKnockback GetCurrentDamage()
+    public DamageKnockback GetLastDamage()
     {
         return currentDamage;
     }
@@ -1719,7 +1719,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             //animancer.Animator.SetLookAtWeight(1f);
         }
     }
-
+    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
+    {
+        SetHitParticleVectors(position, direction);
+    }
     #region Damage Handling
 
     public virtual void TakeDamage(DamageKnockback damage)
@@ -2063,6 +2066,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 _MoveOnEnd();
             }
         }
+    }
+
+    public DamageKnockback GetLastTakenDamage()
+    {
+        return ((IDamageable)damageHandler).GetLastTakenDamage();
     }
     #endregion
 }

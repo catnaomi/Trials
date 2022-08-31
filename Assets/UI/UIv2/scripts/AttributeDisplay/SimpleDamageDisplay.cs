@@ -33,11 +33,11 @@ public class SimpleDamageDisplay : MonoBehaviour
         {
             if (timer > fadeDelay + fadeDuration)
             {
-                damage = actor.lastDamageTaken;
+                damage = actor.lastDamageAmountTaken;
             }
             else
             {
-                damage += actor.lastDamageTaken;
+                damage += actor.lastDamageAmountTaken;
             }
             timer = 0f;
             damageThisFrame = true;

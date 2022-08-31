@@ -3751,9 +3751,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
     
-    public DamageKnockback GetCurrentDamage()
+    public DamageKnockback GetLastDamage()
     {
         return currentDamage;
+    }
+
+    public DamageKnockback GetLastTakenDamage()
+    {
+        return ((IDamageable)damageHandler).GetLastTakenDamage();
+    }
+
+    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
+    {
+        SetHitParticleVectors(position, direction);
     }
 
     public Consumable GetCurrentConsumable()

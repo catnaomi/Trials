@@ -189,6 +189,8 @@ public class CombatDummy : Actor, IDamageable
         damageHandler.Recoil();
     }
 
+    
+
     public void StartCritVulnerability(float time)
     {
         ((IDamageable)damageHandler).StartCritVulnerability(time);
@@ -196,5 +198,15 @@ public class CombatDummy : Actor, IDamageable
     public override bool IsBlocking ()
     {
         return isBlocking && animancer.States.Current != damageHandler.hurt;
+    }
+
+    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
+    {
+        SetHitParticleVectors(position, direction);
+    }
+
+    public DamageKnockback GetLastTakenDamage()
+    {
+        return ((IDamageable)damageHandler).GetLastTakenDamage();
     }
 }

@@ -49,7 +49,6 @@ public class MeshSwordSlash : MonoBehaviour
     bool nextIsCrit;
     List<Vector3> lineVertices;
     [Header("Other FX")]
-    public CinemachineImpulseSource impulse;
     [Range(0f,1f)]
     public float hitVolume = 0.5f;
     [Range(0f, 1f)]
@@ -57,10 +56,6 @@ public class MeshSwordSlash : MonoBehaviour
     public float impulseMag = 0.2f;
     public float impulseCritMag = 0.4f;
     public float impulseBlockMult = 0.5f;
-    [Header("Colors")]
-    public Material linemat_block;
-    public Material linemat_blood;
-    public UnityEvent OnBleed;
 
     [ReadOnly] public bool slashing = false;
     int slashFrames = 0;
@@ -101,7 +96,6 @@ public class MeshSwordSlash : MonoBehaviour
         topPoints.Clear();
         bottomPoints.Clear();
         mesh.Clear();
-        StopBleeding();
     }
 
     public void EndSlash()
@@ -159,16 +153,6 @@ public class MeshSwordSlash : MonoBehaviour
             {
                 lineTimer = 0f;
             }
-            if (bloodTimer > 0)
-            {
-                bloodTimer -= Time.deltaTime;
-            }
-            else
-            {
-                bloodTimer = 0f;
-                if (bleeding) StopBleeding();
-            }
-
             float alpha = fadeoutTimer / fadeoutTime;
             block.SetColor("_BaseColor", new Color(color.r, color.g, color.b, alpha));
             renderer.SetPropertyBlock(block);
@@ -185,20 +169,6 @@ public class MeshSwordSlash : MonoBehaviour
             contactPoint = points[contactIndex].position;
             //contactDir = Vector3.ProjectOnPlane(points[contactIndex].tangent.normalized, Camera.main.transform.forward).normalized;
             contactDir = points[contactIndex].tangent.normalized;
-        }
-        if (bleeding)
-        {
-            bloodlineRenderer.transform.position = contactPoint;
-            bloodlineRenderer.transform.rotation = Quaternion.LookRotation(contactDir);
-        }
-        else
-        {
-            if (bloodlineRenderer.positionCount < bloodlinePoints.Length)
-            {
-                Debug.Log("reset");
-                bloodlineRenderer.positionCount = bloodlinePoints.Length;
-                bloodlineRenderer.SetPositions(bloodlinePoints);
-            }
         }
     }
     IEnumerator UpdateAtFPS()
@@ -327,22 +297,10 @@ public class MeshSwordSlash : MonoBehaviour
                 count = 0;
             }
             lineRenderer.positionCount = count;
-            
-            if (bleeding)
-            {
-                if (bloodTimer <= (bloodFadeTime))
-                {
-                    int bcount = Mathf.FloorToInt(bloodlinePoints.Length * (bloodTimer / bloodFadeTime));
-                    if (bcount < 0)
-                    {
-                        bcount = 0;
-                    }
-                     bloodlineRenderer.positionCount = bcount;
-                }
-            }
         }
     }
-    Vector3[] bloodlinePoints = { 0.75f * Vector3.forward, 0.5f * Vector3.forward, 0.25f * Vector3.forward, Vector3.zero, -0.25f * Vector3.forward, -0.5f * Vector3.forward, -0.75f * Vector3.forward };
+    
+    /*
     public void Bleed()
     {
         bool isCrit = IsNextCrit();
@@ -369,12 +327,8 @@ public class MeshSwordSlash : MonoBehaviour
         bloodlineRenderer.gameObject.SetActive(false);
         bleeding = false;
     }
-    
-    public void Shake(float force)
-    {
-        impulse.GenerateImpulseWithVelocity(contactDir.normalized * force);
-    }
-
+    */
+    /*
     public void Block(Vector3 point)
     {
         bool isCrit = IsNextCrit();
@@ -431,7 +385,7 @@ public class MeshSwordSlash : MonoBehaviour
             }
         }
         contactPoint = leadingPoint;
-        */
+        
     }
 
     public void SetNextCrit(bool crit)
@@ -445,4 +399,5 @@ public class MeshSwordSlash : MonoBehaviour
         nextIsCrit = false;
         return crit;
     }
+    */
 }

@@ -17,11 +17,15 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
     [Tooltip("Base Damage is multiplied by force!")]
     public DamageKnockback damage = DamageKnockback.GetDefaultDamage();
     DamageKnockback lastDamage;
+    DamageKnockback lastDamageTaken;
     public float minimumForceForDamage = 10f;
     public float forceMultiplier = 0.001f;
     public float maximumTimeStopMagnitude = 100f;
     public float soundMinMagnitude = 500f;
     public float soundMaxMagnitude = 2000f;
+
+    public Vector3 hitParticlePosition;
+    public Vector3 hitParticleDirection;
     // Use this for initialization
     void Start()
     {
@@ -78,11 +82,15 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
             }
         }
     }
-    public DamageKnockback GetCurrentDamage()
+    public DamageKnockback GetLastDamage()
     {
         return lastDamage;
     }
 
+    public DamageKnockback GetLastTakenDamage()
+    {
+        return lastDamageTaken;
+    }
     public void Recoil()
     {
         // do nothing
@@ -90,6 +98,7 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
 
     public void TakeDamage(DamageKnockback damage)
     {
+        lastDamageTaken = damage;
         if (damage.kbForce != Vector3.zero)
         {
             if (!hasTimeTravelHandler || !timeTravelHandler.IsFrozen())
@@ -114,5 +123,10 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
     public void StartCritVulnerability(float time)
     {
         // do nothing
+    }
+
+    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
+    {
+        
     }
 }
