@@ -8,7 +8,7 @@ public class SimpleCrosshair : MonoBehaviour
 
     private void OnGUI()
     {
-        if (PlayerActor.player == null)
+        if (PlayerActor.player == null || !PlayerActor.player.gameObject.activeInHierarchy)
         {
             image.enabled = false;
             return;

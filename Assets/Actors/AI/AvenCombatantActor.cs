@@ -129,9 +129,9 @@ public class AvenCombatantActor : CombatantActor
         Vector3 dir = position - this.transform.position;
         if (!ignoreRoot && ((animancer.States.Current != navstate.idle && !IsFalling()) || !Physics.SphereCast(this.transform.position + (Vector3.up * positionReference.eyeHeight), 0.25f, dir, out RaycastHit hit, dir.magnitude, MaskReference.Terrain)))
         {
-            cc.enabled = false;
-            transform.position = position;
-            cc.enabled = true;
+            //cc.enabled = false;
+            cc.Move(position-transform.position);
+            //cc.enabled = true;
         }
         //animatorVelocity = animancer.Animator.velocity;
 
