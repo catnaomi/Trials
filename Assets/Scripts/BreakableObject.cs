@@ -55,7 +55,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
 
     public void SetHitParticlePosition(Vector3 position, Vector3 direction)
     {
-        throw new System.NotImplementedException();
+        //throw new System.NotImplementedException();
     }
 
     public DamageKnockback GetLastTakenDamage()
