@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using TMPro;
 using TMPro.EditorUtilities;
+using UnityEngine.TextCore;
 
 
 // adds a menu item to append a string to all sprites in the asset
@@ -12,7 +13,7 @@ public class AppendToTMPAsset : TMP_SpriteAssetEditor
 {
     string append = "";
     float bx = 0f;
-    float by = 0f;
+    float by = 128;
     float ad = 128;
     TMP_SpriteAsset asset;
     public override void OnInspectorGUI()
@@ -31,7 +32,7 @@ public class AppendToTMPAsset : TMP_SpriteAssetEditor
         bx = EditorGUILayout.FloatField("BX:", bx);
         by = EditorGUILayout.FloatField("BY:", by);
         ad = EditorGUILayout.FloatField("AD:", ad);
-        if (GUILayout.Button("Set Sprite Offset Values"))
+        if (GUILayout.Button("Set Glyph Offset Values"))
         {
             ApplyOffsetValues();
         }
@@ -47,9 +48,13 @@ public class AppendToTMPAsset : TMP_SpriteAssetEditor
 
     public void ApplyOffsetValues()
     {
-        foreach (TMP_SpriteCharacter sprite in asset.spriteCharacterTable)
+        foreach (TMP_SpriteGlyph glyph in asset.spriteGlyphTable)
         {
-            
+            GlyphMetrics metrics = glyph.metrics;
+            metrics.horizontalBearingX = bx;
+            metrics.horizontalBearingY = by;
+            metrics.horizontalAdvance = ad;
+            glyph.metrics = metrics;
         }
     }
 }
