@@ -8,11 +8,13 @@ public class ItemPickupUI : MonoBehaviour
     public Transform itemPickupParent;
     bool initialized;
     AudioSource audioSource;
+    Dictionary<string, ItemPickupDisplay> activeDisplayMap;
     // Start is called before the first frame update
     void Start()
     {
         initialized = false;
         audioSource = this.GetComponent<AudioSource>();
+        activeDisplayMap = new Dictionary<string, ItemPickupDisplay>();
     }
 
     // Update is called once per frame
@@ -27,10 +29,20 @@ public class ItemPickupUI : MonoBehaviour
 
     public void OnNewItem(Item item)
     {
-        GameObject uiObj = Instantiate(itemPickupPrefab, itemPickupParent);
-        ItemPickupDisplay display = uiObj.GetComponent<ItemPickupDisplay>();
-        uiObj.SetActive(true);
-        display.SetItem(item);
-        audioSource.Play();
+        if (activeDisplayMap.TryGetValue(item.invID, out ItemPickupDisplay activeDisplay) && activeDisplayMap[item.invID] != null && item.MaxStackSize > 0)
+        {
+            activeDisplay.IncreaseNumberDisplay(item.Quantity);
+            audioSource.Play();
+        }
+        else
+        {
+            GameObject uiObj = Instantiate(itemPickupPrefab, itemPickupParent);
+            ItemPickupDisplay display = uiObj.GetComponent<ItemPickupDisplay>();
+            uiObj.SetActive(true);
+            display.SetItem(item);
+            activeDisplayMap[item.invID] = display;
+            audioSource.Play();
+        }
+        
     }
 }

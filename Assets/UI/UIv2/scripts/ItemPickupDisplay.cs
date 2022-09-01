@@ -49,4 +49,13 @@ public class ItemPickupDisplay : MonoBehaviour
         itemDisplay.SetItem(item);
         itemNameText.text = item.GetName();
     }
+
+    public void IncreaseNumberDisplay(int amount)
+    {
+        itemDisplay.number.text = (int.Parse(itemDisplay.number.text) + amount).ToString();
+        if (clock < timeToExpire - fadeInTime)
+        {
+            clock = timeToExpire - fadeInTime;
+        }
+    }
 }

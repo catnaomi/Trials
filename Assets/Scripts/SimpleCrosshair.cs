@@ -14,7 +14,7 @@ public class SimpleCrosshair : MonoBehaviour
             return;
         }
 
-        if (PlayerActor.player.IsAiming() && PlayerActor.player.GetCombatTarget() == null)
+        if (PlayerActor.player.IsAiming() && PlayerActor.player.GetCombatTarget() == null && !PlayerActor.player.IsInDialogue())
         {
             image.enabled = true;
         }
