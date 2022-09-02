@@ -370,7 +370,7 @@ public class PlayerTargetManager : MonoBehaviour
         }
         else
         {
-            if (targetReleasedClock >= changeTargetResetDelay)
+            if (!lockedOn && targetReleasedClock >= changeTargetResetDelay)
             {
                 targetAim.position = Vector3.zero;
             }
@@ -392,6 +392,7 @@ public class PlayerTargetManager : MonoBehaviour
             {
                 targetPressedClock += Time.deltaTime;
             }
+            targetReleasedClock = 0f;
         }
         else
         {
@@ -403,6 +404,7 @@ public class PlayerTargetManager : MonoBehaviour
             {
                 targetReleasedClock += Time.deltaTime;
             }
+            targetPressedClock = 0f;
         }
         targetHeldLastFrame = targetHeld;
     }

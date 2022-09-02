@@ -106,6 +106,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     Vector3 headPoint;
     Vector3 smoothedHeadPoint;
     Vector3 ccHitNormal;
+    Vector3 warpDelta;
     bool aimAtkLockout;
     public float headPointSpeed = 25f;
     public PhysicMaterial lastPhysicsMaterial;
@@ -1773,6 +1774,21 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             inventory.GetRangedWeapon().moveset.aimAttack.OnUpdate(this);
         }
+        if (warpDelta.magnitude > 0.01f)
+        {
+            if (vcam.free != null)
+                vcam.free.OnTargetObjectWarped(vcam.free.LookAt, warpDelta);
+            /*if (vcam.target != null)
+                vcam.target.OnTargetObjectWarped(vcam.target.Follow, delta);*/
+            if (vcam.aim != null)
+                vcam.aim.OnTargetObjectWarped(vcam.aim.LookAt, warpDelta);
+            if (vcam.climb != null)
+                vcam.climb.OnTargetObjectWarped(vcam.climb.LookAt, warpDelta);
+            if (vcam.dialogue != null)
+                vcam.dialogue.OnTargetObjectWarped(vcam.dialogue.LookAt, warpDelta);
+
+            warpDelta = Vector3.zero;
+        }
     }
 
     void FixedUpdate()
@@ -1870,16 +1886,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         cc.enabled = false;
         this.transform.position = position;
         cc.enabled = true;
-        if (vcam.free != null)
-            vcam.free.OnTargetObjectWarped(vcam.free.Follow, delta);
-        /*if (vcam.target != null)
-            vcam.target.OnTargetObjectWarped(vcam.target.Follow, delta);*/
-        if (vcam.aim != null)
-            vcam.aim.OnTargetObjectWarped(vcam.aim.Follow, delta);
-        if (vcam.climb != null)
-            vcam.climb.OnTargetObjectWarped(vcam.climb.Follow, delta);
-        if (vcam.dialogue != null)
-            vcam.dialogue.OnTargetObjectWarped(vcam.dialogue.Follow, delta);
         ResetOnMove();
     }
 

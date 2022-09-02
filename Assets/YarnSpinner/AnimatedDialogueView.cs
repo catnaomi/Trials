@@ -342,7 +342,7 @@ public class AnimatedDialogueView : DialogueViewBase
                         lineFinished = true;
                     }
                 }
-                if (!activeTextBox.textInfo.characterInfo[i].isVisible)
+                if (i >= activeTextBox.textInfo.characterInfo.Length || !activeTextBox.textInfo.characterInfo[i].isVisible)
                 {
                     continue;
                 }
