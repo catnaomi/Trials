@@ -19,6 +19,7 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
     DamageKnockback lastDamage;
     DamageKnockback lastDamageTaken;
     public float minimumForceForDamage = 10f;
+    public bool damagesSelf;
     public float forceMultiplier = 0.001f;
     public float maximumTimeStopMagnitude = 100f;
     public float soundMinMagnitude = 500f;
@@ -55,7 +56,6 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
             if (force.magnitude >= minimumForceForDamage)
             {
                 DamageKnockback damage = new DamageKnockback(this.damage);
-                damage.healthDamage *= force.magnitude * forceMultiplier;
                 damage.originPoint = collision.GetContact(0).point;
                 damage.source = this.gameObject;
                 damageable.TakeDamage(damage);
@@ -65,6 +65,13 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
                 }
                 lastDamage = damage;
             }        
+        }
+        if (damagesSelf && force.magnitude >= minimumForceForDamage)
+        {
+            DamageKnockback selfDamage = new DamageKnockback(this.damage);
+            selfDamage.originPoint = collision.GetContact(0).point;
+            selfDamage.source = this.gameObject;
+            this.GetComponent<IDamageable>().TakeDamage(selfDamage);
         }
         if (hasAudio && force.magnitude > soundMinMagnitude)
         {

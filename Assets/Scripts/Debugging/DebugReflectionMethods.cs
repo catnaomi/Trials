@@ -294,17 +294,26 @@ public static class DebugReflectionMethods
     {
         try
         {
-            GameObject obj = GameObject.Find(actorName);
-            if (obj == null)
+            Actor actor = null;
+            if (actorName.ToLower() == "player")
             {
-                Debug.LogError("Could not find object " + actorName);
-                return;
+                actor = PlayerActor.player;
             }
-            Actor actor = obj.GetComponent<Actor>();
-            if (actor == null)
+            else
             {
-                Debug.LogError("Object " + obj + " lacks an actor component");
-                return;
+                GameObject obj = GameObject.Find(actorName);
+                if (obj == null)
+                {
+                    Debug.LogError("Could not find object " + actorName);
+                    return;
+                }
+                actor = obj.GetComponent<Actor>();
+                if (actor == null)
+                {
+                    Debug.LogError("Object " + obj + " lacks an actor component");
+                    return;
+                }
+                
             }
             if (!float.TryParse(number, out float health))
             {

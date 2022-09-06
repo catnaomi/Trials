@@ -48,6 +48,8 @@ public class FXController : MonoBehaviour
     [Space(10)]
     public GameObject fx_iceSlash;
     public GameObject fx_icePoint;
+
+    ParticleSystem healParticle;
     public enum FX {
         FX_Block,
         FX_Hit,
@@ -125,6 +127,10 @@ public class FXController : MonoBehaviour
             { "sword_bleed",  Resources.Load<AudioClip>("Sounds/Effects/sword-bleed1") },
         };
 
+        if (PlayerActor.player != null)
+        {
+            healParticle = PlayerActor.player.transform.Find("_healparticle").GetComponent<ParticleSystem>();
+        }
         fixedDeltaTime = Time.fixedDeltaTime;
 
         main = this;
@@ -388,5 +394,23 @@ public class FXController : MonoBehaviour
             source.Play();
         }
         return newFX;
+    }
+
+    void ShowPlayerHealParticleInstance()
+    {
+        if (healParticle != null)
+        {
+            healParticle.Play();
+            AudioSource audioSource = healParticle.GetComponent<AudioSource>();
+            if (audioSource != null)
+            {
+                audioSource.PlayOneShot(audioSource.clip);
+            }
+        }
+    }
+
+    public static void ShowPlayerHealParticle()
+    {
+        main.ShowPlayerHealParticleInstance();
     }
 }
