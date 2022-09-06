@@ -1882,7 +1882,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void WarpTo(Vector3 position)
     {
         CharacterController cc = this.GetComponent<CharacterController>();
-        Vector3 delta = position - this.transform.position;
+        //warpDelta = position - this.transform.position;
         cc.enabled = false;
         this.transform.position = position;
         cc.enabled = true;

@@ -29,7 +29,7 @@ public class AvenCombatantActor : CombatantActor
         public AnimancerState rising;
         public AnimancerState swoop;
     }
-    private void Update()
+    public override void ActorPostUpdate()
     {
         
         base.ActorPostUpdate();
