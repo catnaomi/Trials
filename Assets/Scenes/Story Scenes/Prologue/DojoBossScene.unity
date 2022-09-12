@@ -6888,13 +6888,15 @@ MonoBehaviour:
   OnHealthChange:
     m_PersistentCalls:
       m_Calls: []
-  lastDamageTaken: 0
+  lastDamageAmountTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
   xzVel: {x: 0, y: 0, z: 0}
   yVel: 0
+  hitParticlePosition: {x: 0, y: 0, z: 0}
+  hitParticleDirection: {x: 0, y: 0, z: 0}
   currentDamage:
     healthDamage: 0
     types: 0
@@ -6924,6 +6926,7 @@ MonoBehaviour:
       onCounterHit: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
+    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -7508,6 +7511,7 @@ MonoBehaviour:
     neutralMultiplier: 1
     neutralFlat: 0
   effects: []
+  journalEntry: {fileID: 0}
 --- !u!195 &315540952
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -7746,6 +7750,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animSounds: {fileID: 11400000, guid: aea093d2a4dacd446b7cbe83d8da0de3, type: 2}
+  fxMaterial: 0
   footSourceLight: {fileID: 315540959}
   footSourceHeavy: {fileID: 315540959}
   footstepDelay: 0.25
@@ -59522,6 +59527,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animSounds: {fileID: 11400000, guid: aea093d2a4dacd446b7cbe83d8da0de3, type: 2}
+  fxMaterial: 0
   footSourceLight: {fileID: 1546689599}
   footSourceHeavy: {fileID: 1546689599}
   footstepDelay: 0.25
@@ -59614,13 +59620,15 @@ MonoBehaviour:
   OnHealthChange:
     m_PersistentCalls:
       m_Calls: []
-  lastDamageTaken: 0
+  lastDamageAmountTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
   xzVel: {x: 0, y: 0, z: 0}
   yVel: 0
+  hitParticlePosition: {x: 0, y: 0, z: 0}
+  hitParticleDirection: {x: 0, y: 0, z: 0}
   currentDamage:
     healthDamage: 0
     types: 0
@@ -59650,6 +59658,7 @@ MonoBehaviour:
       onCounterHit: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
+    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -60236,6 +60245,7 @@ MonoBehaviour:
     neutralMultiplier: 1
     neutralFlat: 0
   effects: []
+  journalEntry: {fileID: 11400000, guid: 87da647e60bf28046a72efa536c4e8a7, type: 2}
 --- !u!195 &1546689596
 NavMeshAgent:
   m_ObjectHideFlags: 0

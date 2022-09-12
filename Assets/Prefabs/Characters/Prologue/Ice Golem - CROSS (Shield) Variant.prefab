@@ -90,6 +90,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4013956763830427713, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
+      propertyPath: journalEntry
+      value: 
+      objectReference: {fileID: 11400000, guid: cf771a75d15d774498107912e7e845e8,
+        type: 2}
+    - target: {fileID: 4013956763830427713, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
       propertyPath: health.current
       value: 1
       objectReference: {fileID: 0}
@@ -196,13 +202,15 @@ MonoBehaviour:
   OnHealthChange:
     m_PersistentCalls:
       m_Calls: []
-  lastDamageTaken: 0
+  lastDamageAmountTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
   xzVel: {x: 0, y: 0, z: 0}
   yVel: 0
+  hitParticlePosition: {x: 0, y: 0, z: 0}
+  hitParticleDirection: {x: 0, y: 0, z: 0}
   currentDamage:
     healthDamage: 0
     types: 0
@@ -232,6 +240,7 @@ MonoBehaviour:
       onCounterHit: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
+    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}

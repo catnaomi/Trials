@@ -28,7 +28,7 @@ public class JournalController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        knownEntries = new List<string>(); // TODO: load this from save file
+        //knownEntries = new List<string>(); // TODO: load this from save file
         targetManager = FindObjectOfType<PlayerTargetManager>();
         if (targetManager != null)
         {
