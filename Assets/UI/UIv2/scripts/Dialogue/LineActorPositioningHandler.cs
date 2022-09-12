@@ -30,7 +30,7 @@ public class LineActorPositioningHandler : MonoBehaviour
         height = dialogueParent.rect.height;
         centerPoint = dialogueParent.localPosition;
 
-        dialogueRunner.onNodeStart.AddListener((n) => { MenuController.menu.OpenMenu(MenuController.Dialogue); });
+        dialogueRunner.onNodeStart.AddListener((n) => { MenuController.menu.OpenDialogue(); });
     }
     public void SetSpeaker(GameObject speak, Transform mount)
     {

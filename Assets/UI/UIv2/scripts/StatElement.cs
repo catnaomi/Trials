@@ -33,12 +33,12 @@ public class StatElement : MonoBehaviour
         else if (type == DamageType.Slashing)
         {
             image.sprite = slash;
-            text.text = "Slashing";
+            text.text = "Slash";
         }
         else if (type == DamageType.Piercing)
         {
             image.sprite = pierce;
-            text.text = "Piercing";
+            text.text = "Pierce";
         }
         else if (type == DamageType.Blunt)
         {
@@ -68,7 +68,7 @@ public class StatElement : MonoBehaviour
         else if (type == DamageType.Air)
         {
             image.sprite = air;
-            text.text = "Air";
+            text.text = "Wind";
         }
         else if (type == DamageType.Piercing)
         {

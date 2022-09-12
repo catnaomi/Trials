@@ -20,7 +20,7 @@ public class YarnPlayer : MonoBehaviour
        {
             if (MenuController.menu != null)
             {
-                MenuController.menu.OpenMenu(MenuController.Dialogue);
+                MenuController.menu.OpenDialogue();
             }
             runner = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
 

@@ -36,6 +36,8 @@ public class ActorAttributes : MonoBehaviour
     public DamageResistance resistances;
 
     public List<EffectDuration> effects;
+    [Header("Journal Entry")]
+    public JournalEntry journalEntry;
 
     private void Start()
     {
