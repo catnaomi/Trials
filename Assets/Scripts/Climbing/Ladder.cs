@@ -44,8 +44,12 @@ public class Ladder : ClimbDetector
     {
         if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor player))
         {
-            player.UnsetClimb(this);
-            inUse = false;
+            if (!player.IsClimbing())
+            {
+                player.UnsetClimb(this);
+                inUse = false;
+            }
+            
         }
     }
     private void OnDrawGizmosSelected()

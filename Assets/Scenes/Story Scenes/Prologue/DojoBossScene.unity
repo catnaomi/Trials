@@ -7490,6 +7490,7 @@ MonoBehaviour:
   usesHearts: 0
   spareable: 0
   isInvulnerable: 0
+  diesOnCrit: 0
   lives: 0
   maxLives: 0
   OnHealthLoss:
@@ -60042,7 +60043,7 @@ MonoBehaviour:
   - {fileID: 2100611645}
   - {fileID: 1433297573}
   SummonTime: 5
-  damageAnims: {fileID: 11400000, guid: 9d9b14e5de6ad3d449aa822da5bc08b9, type: 2}
+  damageAnims: {fileID: 11400000, guid: 73dfd6ab495774e4bb891d8851ea366b, type: 2}
   PillarHit:
     _FadeDuration: 0.01
     _Events:
@@ -60214,9 +60215,9 @@ MonoBehaviour:
   smoothedHealth: 0
   healthRecoveryClock: 0
   health:
-    baseValue: 1000
-    current: 1000
-    max: 1000
+    baseValue: 60
+    current: 60
+    max: 60
   healthRecoveryRate:
     baseValue: 0
     current: 0
@@ -60224,6 +60225,7 @@ MonoBehaviour:
   usesHearts: 0
   spareable: 0
   isInvulnerable: 0
+  diesOnCrit: 0
   lives: 0
   maxLives: 0
   OnHealthLoss:
@@ -60469,34 +60471,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adad52925ae2a3646ac5b6c48e4d9bb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layer: 6
+  layer: 2
   delta: {x: 0, y: 0}
   smoothedDelta: {x: 0, y: 0}
   smoothSpeed: 1
   multiplier: 1
-  mixer:
-    _FadeDuration: 0.25
-    _Events:
-      _NormalizedTimes: []
-      _Callbacks: []
-      _Names: []
-    _Speed: 1
-    _Animations:
-    - {fileID: 2697833952796847862, guid: 517789e6cc6831346ac509deb8cba3dc, type: 3}
-    - {fileID: -2422577796043174027, guid: 517789e6cc6831346ac509deb8cba3dc, type: 3}
-    - {fileID: -4574986293493665827, guid: 517789e6cc6831346ac509deb8cba3dc, type: 3}
-    - {fileID: -7886434502353490315, guid: 517789e6cc6831346ac509deb8cba3dc, type: 3}
-    - {fileID: 1445178363780936128, guid: 517789e6cc6831346ac509deb8cba3dc, type: 3}
-    _Speeds: []
-    _SynchronizeChildren: 
-    _Thresholds:
-    - {x: 0, y: 0}
-    - {x: 0, y: 1}
-    - {x: 0, y: -1}
-    - {x: -1, y: 0}
-    - {x: 1, y: 0}
-    _DefaultParameter: {x: 0, y: 0}
-    _Type: 0
+  mixer: {fileID: 11400000, guid: 85b6e73d0ecc9fa44bcc08ba7fc9e149, type: 2}
   minSpeed: 1
   maxSpeed: 5
   teleportDistance: 10

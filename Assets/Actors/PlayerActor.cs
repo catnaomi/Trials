@@ -550,6 +550,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (jump)
             {
                 jump = false;
+                buffer.ClearInput(InputBuffer.Inputs.Jump);
                 if (stickDirection.magnitude > 0)
                 {
                     lookDirection = stickDirection.normalized;
@@ -637,8 +638,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             if (attack && isCarrying)
             {
-                StartThrow();
                 attack = false;
+                if (slash)
+                {
+                    slash = false;
+                    StartThrow();
+                    buffer.ClearInput(InputBuffer.Inputs.Slash);
+                }
+                if (thrust)
+                {
+                    thrust = false;
+                    StartDrop();
+                    buffer.ClearInput(InputBuffer.Inputs.Thrust);
+                }
                 slash = false;
                 thrust = false;
             }
@@ -3206,7 +3218,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     IEnumerator DelayAllowingCollision(Carryable carryable)
     {
         yield return new WaitForSeconds(0.5f);
-        if (!((isCarrying || animancer.States.Current == state.carry) && this.carryable == carryable))
+        if (!((isCarrying || animancer.States.Current == state.carry) && this.carryable == carryable && carryable != null))
         {
             Physics.IgnoreCollision(this.GetComponent<Collider>(), carryable.GetComponent<Collider>(), false);
         }
@@ -4303,6 +4315,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             InputJump();
             //InputSheathe();
         }
+        buffer.ClearInput(InputBuffer.Inputs.Jump);
     }
 
     public void StartDialogue()

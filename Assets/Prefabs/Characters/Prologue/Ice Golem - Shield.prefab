@@ -5,6 +5,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
+    serializedVersion: 2
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 329219908793913371, guid: ea99e2751c174e0418ca382e5dc17e08,
@@ -168,6 +169,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8622797609942491636, guid: ea99e2751c174e0418ca382e5dc17e08, type: 3}
+    m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: ea99e2751c174e0418ca382e5dc17e08, type: 3}
 --- !u!1 &6545781334093019915 stripped
 GameObject:
@@ -224,17 +226,18 @@ MonoBehaviour:
   OnHealthChange:
     m_PersistentCalls:
       m_Calls: []
-  lastDamageTaken: 0
+  lastDamageAmountTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
   xzVel: {x: 0, y: 0, z: 0}
   yVel: 0
+  hitParticlePosition: {x: 0, y: 0, z: 0}
+  hitParticleDirection: {x: 0, y: 0, z: 0}
   currentDamage:
     healthDamage: 0
-    staminaDamage: 0
-    types: 
+    types: 0
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -246,11 +249,13 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 0
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 0
       onArmorHit: 0
@@ -259,6 +264,7 @@ MonoBehaviour:
       onCounterHit: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
+    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -273,6 +279,7 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
+  currentConsumable: {fileID: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   timeTravelStates: []
@@ -289,7 +296,10 @@ MonoBehaviour:
   destination: {x: 0, y: 0, z: 0}
   followingTarget: 0
   airTime: 0
+  strafeDelay: 2
+  strafeDirection: 0
   jumpAdjustSpeed: 3
+  turningDelay: 1
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: b3c749a2726bf1b4e9d06eb7464f533c, type: 2}
   moveAnim: {fileID: 11400000, guid: 1ba12adde69307242ba46ca1ac0fd989, type: 2}
@@ -297,8 +307,6 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  MinEngageRange: 3.5
-  MaxEngageRange: 10
   SightRange: 15
   InSightRange: 0
   CloseAttack: {fileID: 11400000, guid: 64e0b0cfee048ec479610a3517eb546a, type: 2}

@@ -64,9 +64,9 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
         
         normalDamageAmount = DamageKnockback.GetTotalMinusResistances(normalDamageAmount, damage.GetTypes(), dr);
 
-        bool willKill = normalDamageAmount >= actor.attributes.health.current || isCrit;
+        bool willKill = normalDamageAmount >= actor.attributes.health.current || (isCrit && actor.attributes.diesOnCrit);
         bool tink = normalDamageAmount <= 0f;
-        bool weak = (dr.weaknesses & damage.GetTypes()) != 0;
+        bool weak = isCrit || (dr.weaknesses & damage.GetTypes()) != 0;
 
         actor.attributes.ReduceHealth(normalDamageAmount);
 
@@ -124,10 +124,6 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
         }
         else if (!willKill)
         {
-
-            
-           
-
 
             DamageKnockback.StaggerType stagger = DamageKnockback.StaggerType.None;
 

@@ -393,6 +393,7 @@ public class FXController : MonoBehaviour
             source.clip = clip;
             source.Play();
         }
+        Destroy(newFX, 10f);
         return newFX;
     }
 

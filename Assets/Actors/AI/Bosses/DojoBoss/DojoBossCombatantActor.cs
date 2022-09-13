@@ -170,7 +170,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     [Header("Enumerated States")]
     public WeaponState weaponState;
     public UnityEvent OnWeaponTransform;
-    CharacterController cc;
+    
     Vector3 lastTargetPos;
     Vector3 targetSpeed;
     
@@ -237,7 +237,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             animancer.Play(navstate.move, 0.1f);
         };
 
-        damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
+        damageHandler = new SimplifiedDamageHandler(this, damageAnims, animancer);
         damageHandler.SetEndAction(TakeDefensiveAction);
 
         cc = this.GetComponent<CharacterController>();
@@ -1794,7 +1794,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             this.OnBlock.Invoke();
             StartCritVulnerability(clip.MaximumDuration / clip.Speed);
         }
-        else if (!willKill)
+        else
+        {
+            damageHandler.TakeDamage(damage);
+        }
+        /*else if (!willKill)
         {
             animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
 
@@ -1849,7 +1853,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         else if (willKill)
         {
             damageHandler.TakeDamage(damage);
-        }
+        }*/
         DeactivateHitboxes();
     }
 

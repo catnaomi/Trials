@@ -276,6 +276,11 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     protected void ProcessStaggerType(DamageKnockback damage, DamageKnockback.StaggerType stagger, bool hitFromBehind, bool willKill, bool isCrit)
     {
         bool isFlinch = (stagger == DamageKnockback.StaggerType.Flinch);
+
+        if (!isFlinch)
+        {
+            animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+        }
         if (stagger == DamageKnockback.StaggerType.Flinch)
         {
             AnimancerState state = animancer.Layers[HumanoidAnimLayers.Flinch].Play(damageAnims.flinch);

@@ -852,17 +852,18 @@ MonoBehaviour:
   OnHealthChange:
     m_PersistentCalls:
       m_Calls: []
-  lastDamageTaken: 0
+  lastDamageAmountTaken: 0
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
   xzVel: {x: 0, y: 0, z: 0}
   yVel: 0
+  hitParticlePosition: {x: 0, y: 0, z: 0}
+  hitParticleDirection: {x: 0, y: 0, z: 0}
   currentDamage:
     healthDamage: 0
-    staminaDamage: 0
-    types: 
+    types: 0
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -874,11 +875,13 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 0
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 0
       onArmorHit: 0
@@ -887,6 +890,7 @@ MonoBehaviour:
       onCounterHit: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
+    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -901,6 +905,7 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
+  currentConsumable: {fileID: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
   timeTravelStates: []
@@ -920,6 +925,7 @@ MonoBehaviour:
   strafeDelay: 2
   strafeDirection: 0
   jumpAdjustSpeed: 3
+  turningDelay: 1
   navAnims: {fileID: 11400000, guid: 134596875aff39f4ca9974c255b8812d, type: 2}
   idleAnim: {fileID: 11400000, guid: ebd0e8a8970150e4198eed744433e702, type: 2}
   moveAnim: {fileID: 11400000, guid: 28683461edb485a4784728197d84066c, type: 2}
@@ -945,6 +951,11 @@ MonoBehaviour:
   ActionDelayMaximum: 5
   LowHealthThreshold: 50
   isLowHealth: 0
+  bodySpin: {fileID: 0}
+  bodySpinning: 0
+  bodySpinAccel: 90
+  bodySpinMaxSpeed: 360
+  bodySpinAngleDown: 30
 --- !u!114 &603506078
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -969,6 +980,8 @@ MonoBehaviour:
     max: 0
   usesHearts: 0
   spareable: 0
+  isInvulnerable: 0
+  diesOnCrit: 1
   lives: 0
   maxLives: 0
   OnHealthLoss:
@@ -980,8 +993,17 @@ MonoBehaviour:
   OnHealthChange:
     m_PersistentCalls:
       m_Calls: []
-  resistances: []
+  resistances:
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
   effects: []
+  journalEntry: {fileID: 0}
 --- !u!195 &603506079
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1091,6 +1113,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animSounds: {fileID: 11400000, guid: aea093d2a4dacd446b7cbe83d8da0de3, type: 2}
+  fxMaterial: 0
   footSourceLight: {fileID: 603506086}
   footSourceHeavy: {fileID: 603506086}
   footstepDelay: 0.25
@@ -1103,6 +1126,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnDashDust:
+    m_PersistentCalls:
+      m_Calls: []
+  StartSpiral:
+    m_PersistentCalls:
+      m_Calls: []
+  EndSpiral:
     m_PersistentCalls:
       m_Calls: []
   OnArrowDraw:
@@ -1134,6 +1163,12 @@ MonoBehaviour:
   timeRemaining: []
   timeTravelStates: []
   timeTravelController: {fileID: 0}
+  OnFreeze:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnfreeze:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1701364141175377732
 GameObject:
   m_ObjectHideFlags: 0

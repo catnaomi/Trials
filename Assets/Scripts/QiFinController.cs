@@ -12,12 +12,13 @@ public class QiFinController : MonoBehaviour
     public Vector2 smoothedDelta;
     public float smoothSpeed = 1f;
     public float multiplier = 1f;
-    public MixerTransition2D mixer;
+    public MixerTransition2DAsset mixer;
     public float minSpeed = 1f;
     public float maxSpeed = 5f;
     public float teleportDistance = 10f;
     MixerState<Vector2> state;
     Vector3 lastPosition;
+    bool initialized;
     // Start is called before the first frame update
     void Start()
     {
@@ -26,14 +27,18 @@ public class QiFinController : MonoBehaviour
         animancer.Layers[layer].IsAdditive = true;
         animancer.Layers[layer].Weight = 1f;
 
-        state = (MixerState<Vector2>)animancer.Layers[layer].Play(mixer);
+        
         lastPosition = this.transform.position;
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        if (!initialized)
+        {
+            state = (MixerState<Vector2>)animancer.Layers[layer].Play(mixer);
+            initialized = true;
+        }
         Vector3 rawDelta = (lastPosition - this.transform.position) * multiplier;
         delta.x = Vector3.Dot(rawDelta, this.transform.right);
         delta.y = Vector3.Dot(rawDelta, this.transform.up);

@@ -130,6 +130,8 @@ public class DamageKnockback
 
         this.hitMaterial = damageKnockback.hitMaterial;
 
+        this.staggers = damageKnockback.staggers;
+
         this.OnHit = damageKnockback.OnHit ?? new UnityEvent();
         this.OnCrit = damageKnockback.OnCrit ?? new UnityEvent();
         this.OnBlock = damageKnockback.OnBlock ?? new UnityEvent();

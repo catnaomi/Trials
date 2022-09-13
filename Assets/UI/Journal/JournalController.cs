@@ -57,7 +57,7 @@ public class JournalController : MonoBehaviour
         if (targetManager.currentTarget != null && Vector3.Distance(targetManager.currentTarget.transform.position, PlayerActor.player.transform.position) < maxAutoJournalDistance && targetManager.currentTarget.transform.root.TryGetComponent<ActorAttributes>(out ActorAttributes attributes))
         {
             hoveredEntry = attributes.journalEntry;
-            if (!knownEntries.Contains(hoveredEntry.name))
+            if (hoveredEntry != null && !knownEntries.Contains(hoveredEntry.name))
             {
                 hoveredIsNew = true;
             }
