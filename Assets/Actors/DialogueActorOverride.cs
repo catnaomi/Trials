@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Yarn;
 using Yarn.Unity;
 
 public class DialogueActorOverride : Interactable
@@ -20,7 +21,16 @@ public class DialogueActorOverride : Interactable
         player.SheatheAll();
         player.SetCombatTarget(lookAtTarget);
         player.StartDialogue();
-        this.GetComponent<YarnPlayer>().Play();
+        try
+        {
+            this.GetComponent<YarnPlayer>().Play();
+        }
+        catch (DialogueException ex)
+        {
+            Debug.LogError(ex);
+            player.StopDialogue();
+            return;
+        }
         
         /*try
         {

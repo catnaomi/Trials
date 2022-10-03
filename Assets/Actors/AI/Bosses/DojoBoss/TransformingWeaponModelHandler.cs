@@ -33,9 +33,11 @@ public class TransformingWeaponModelHandler : MonoBehaviour
             if (bow != null) bow.SetActive(state == DojoBossCombatantActor.WeaponState.Bow);
             if (hammer != null) hammer.SetActive(state == DojoBossCombatantActor.WeaponState.Hammer);
             if (dao2x != null) dao2x.SetActive(state == DojoBossCombatantActor.WeaponState.Daox2);
-            if (quarterstaff != null) quarterstaff.SetActive(state == DojoBossCombatantActor.WeaponState.Quarterstaff);
             if (magicstaff != null) magicstaff.SetActive(state == DojoBossCombatantActor.WeaponState.MagicStaff);
             if (spear != null) spear.SetActive(state == DojoBossCombatantActor.WeaponState.Spear);
+
+            if (quarterstaff != null) quarterstaff.SetActive(state != DojoBossCombatantActor.WeaponState.None && state != DojoBossCombatantActor.WeaponState.Bow && state != DojoBossCombatantActor.WeaponState.Daox2);
+
 
             currentstate = state;
         }
@@ -43,6 +45,8 @@ public class TransformingWeaponModelHandler : MonoBehaviour
 
     public GameObject GetCurrentModel()
     {
+        //return this.gameObject;
+        
         switch (state)
         {
             default:
@@ -66,5 +70,6 @@ public class TransformingWeaponModelHandler : MonoBehaviour
             case DojoBossCombatantActor.WeaponState.Daox2:
                 return dao2x;
         }
+        
     }
 }

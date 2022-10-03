@@ -24,10 +24,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
      * summon
      */
     [Header("Combatant Settings")]
-    public InputAttack MeleeCombo1; // 1h slash -> 2h slash -> stab
-    public float MeleeCombo1StartDistance = 10f;
-    public InputAttack MeleeCombo2; // 3x stab left hand - > slash R -(transform to gs)> slash R
-    public InputAttack MeleeComboApproach; // (jump into position) walk slash 1h -> 2h slash -> stab
+    public InputAttack SlashAttack; 
+    public InputAttack ThrustAttack;
     [Space(10)]
     public InputAttack Plunge;
     public ClipTransition PlungeJump;
@@ -65,6 +63,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public InputAttack CircleParryFollowup;
     [Space(5)]
     public UnityEvent ParrySuccess;
+    bool wasLastParrySuccess;
+    bool lastParryWasCircle;
+    bool wasLastParryIgnored;
+    [SerializeField,ReadOnly]float timeSinceLastParry = 0f;
+    public float MinTimeBetweenParries = 10f;
     public float MaxParryTime = 30f;
     float parryTime;
     float parryStrafeTime;
@@ -129,9 +132,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public float ActionDelayMinimum = 2f;
     public float ActionDelayMaximum = 5f;
     
-    public float LowHealthThreshold = 50f;
+    public float LowHealthThreshold = 0.5f;
     public bool isLowHealth;
     bool isHitboxActive;
+    public ClipTransition transformAnimReference;
     [Header("Map Information")]
     public Transform pillar1;
     public Transform pillar2;
@@ -161,6 +165,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     List<NavigatingHumanoidActor> spawnedEnemies;
     List<NavigatingHumanoidActor> recentlySpawned;
     public int spawnLimit = 3;
+    public float MinTimeBetweenSummons = 10f;
+    [SerializeField, ReadOnly] float timeSinceLastSummon;
     [SerializeField, ReadOnly] bool pillar1Occupied;
     [SerializeField, ReadOnly] bool pillar2Occupied;
     [SerializeField, ReadOnly] bool pillar3Occupied;
@@ -317,13 +323,15 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 float r = Random.value;
 
                 bool inCloseRange = navdist < 10f;
-                bool lowHealth = attributes.health.current <= attributes.health.max * 0.5f;
-                bool shouldPillarShoot = lowHealth && r > 0.5f;
+                isLowHealth = attributes.health.current <= attributes.health.max * 0.5f;
+                bool shouldPillarShoot = isLowHealth && r > 0.5f;
                 CrouchAction pillarTarget = CrouchAction.Plunge;
-                bool shouldPillarJump = (timeSincePillar >= pillarJumpDelay) && TryGetAvailablePillar(out pillarTarget, shouldPillarShoot);
+                bool isPillarAvailable = TryGetAvailablePillar(out pillarTarget, shouldPillarShoot);
+                bool shouldPillarJump = (timeSincePillar >= pillarJumpDelay) && isPillarAvailable;
                 bool shouldJumpDown = (timeOnPillar >= pillarStayDelay);
-                bool canSummon = lowHealth && spawnedEnemies.Count < spawnLimit;
-                if (!lowHealth)
+                bool canSummon = isLowHealth && timeSinceLastSummon >= MinTimeBetweenSummons && spawnedEnemies.Count < spawnLimit;
+                bool shouldParry = ShouldParry(out bool shouldCircleParry);
+                if (!isLowHealth)
                 {
                     bufferRange = 8f;
                     closeRange = 4f;
@@ -337,6 +345,99 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 if (aiming)
                 {
                     StartRangedAttack();
+                }
+                else if (onPillar)
+                {
+                    if (isLowHealth)
+                    {
+                        if (canSummon)
+                        {
+                            StartSummon();
+                        }
+                        else
+                        {
+                            StartAiming();
+                        }
+                    }
+                    else if (shouldJumpDown)
+                    {
+                        if (r < 0.4f)
+                        {
+                            StartCrouch(CrouchAction.Plunge);
+                        }
+                        else if (r < 0.8f)
+                        {
+                            StartCrouch(CrouchAction.JumpTo_Center);
+                        }
+                        else
+                        {
+                            if (isPillarAvailable)
+                            {
+                                timeOnPillar = 0f;
+                                StartCrouch(pillarTarget);
+                            }
+                            else
+                            {
+                                StartCrouch(CrouchAction.JumpTo_Center);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        StartAiming();
+                    }
+                }
+                else if (shouldPillarJump)
+                {
+                    StartCrouch(pillarTarget);
+                }
+                else if (!inCloseRange)
+                {
+                    if (this.isLowHealth && canSummon)
+                    {
+                        StartSummon();
+                    }
+                    else
+                    {
+                        if (r < 0.4f)
+                        {
+                            StartAiming();
+                        }
+                        else // TODO: ground slam attack
+                        {
+                            StartCrouch(CrouchAction.Plunge);
+                        }
+                    }
+                }
+                else if (shouldParry && !wasLastParryIgnored)
+                {
+                    if (shouldCircleParry)
+                    {
+                        StartCircleParry();
+                    }
+                    else
+                    {
+                        StartCrossParry();
+                    }
+                }
+                else
+                {
+                    wasLastParryIgnored = false;
+                    if (r > 0.5f)
+                    {
+                        StartSlash();
+                    }
+                    else
+                    {
+                        StartThrust();
+                    } 
+                }
+                
+
+                /*
+                if (aiming)
+                {
+                    StartRangedAttack();
                     /*
                     if (r < 0.5f)
                     {
@@ -346,7 +447,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                     {
                         StartRangedAttackMulti();
                     }
-                    */
+                    *
                 }
                 else if (shouldPillarJump)
                 {
@@ -366,11 +467,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                         }
                         else if (r < 0.8f && navdist < 2f)
                         {
-                            StartMeleeCombo2();
+                            //StartMeleeCombo2();
                         }
                         else if (r < 0.9f && navdist < 6f)
                         {
-                            StartMeleeCombo1();
+                            //StartMeleeCombo1();
                         }
                         else
                         {
@@ -417,86 +518,86 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                         StartCrouch(crouchAction);
                     }
                 }
-                
-                //StartMeleeCombo1();
-
-                //StartMeleeCombo2();
-
-                //StartCrouch();
-
-                /*
-                CrouchAction action = CrouchAction.Plunge;
-                int r = Random.Range(1, 10);
-                if (r == 1)
-                {
-                    action = CrouchAction.JumpTo_Pillar1;
-                }
-                else if (r == 2)
-                {
-                    action = CrouchAction.JumpTo_Pillar2;
-                }
-                else if (r == 3)
-                {
-                    action = CrouchAction.JumpTo_Pillar3;
-                }
                 */
-                //StartCrouch(actionAfterCrouch);
-                /*
-                if (!onPillar)
-                {
-                    StartCrouch(CrouchAction.JumpShot_Pillar1);
-                }
-                else if (Random.value < 0.5f)
-                {
-                    StartCrouch(CrouchAction.JumpTo_Center);
-                }
-                else
-                {
-                    StartCrouch(CrouchAction.Plunge);
-                }
-                */
-                /*
-                if (!aiming)
-                {
-                    StartAiming();
-                }
-                else
-                {
-                    if (aimTime > 1f) StartRangedAttack();
-                }*/
-                //StartRangedAttackMulti();
-                /*
-                if (!aiming)
-                {
-                    StartAiming();
-                }
-                else
-                {
-                    if (aimTime > 1f) StartRangedAttackMulti();
-                }
-                /*
-                /*
-                if (!onPillar)
-                {
-                    DodgeJump(pillar.position);
-                    onPillar = true;
-                }
-                else
-                {
-                    if (Random.value > 0.5f)
+                    //StartMeleeCombo1();
+
+                    //StartMeleeCombo2();
+
+                    //StartCrouch();
+
+                    /*
+                    CrouchAction action = CrouchAction.Plunge;
+                    int r = Random.Range(1, 10);
+                    if (r == 1)
                     {
-                        DodgeJump(new Vector3(-1.49f, -1060.6f, -122.42f));
-                        onPillar = false;
+                        action = CrouchAction.JumpTo_Pillar1;
+                    }
+                    else if (r == 2)
+                    {
+                        action = CrouchAction.JumpTo_Pillar2;
+                    }
+                    else if (r == 3)
+                    {
+                        action = CrouchAction.JumpTo_Pillar3;
+                    }
+                    */
+                    //StartCrouch(actionAfterCrouch);
+                    /*
+                    if (!onPillar)
+                    {
+                        StartCrouch(CrouchAction.JumpShot_Pillar1);
+                    }
+                    else if (Random.value < 0.5f)
+                    {
+                        StartCrouch(CrouchAction.JumpTo_Center);
                     }
                     else
+                    {
+                        StartCrouch(CrouchAction.Plunge);
+                    }
+                    */
+                    /*
+                    if (!aiming)
+                    {
+                        StartAiming();
+                    }
+                    else
+                    {
+                        if (aimTime > 1f) StartRangedAttack();
+                    }*/
+                    //StartRangedAttackMulti();
+                    /*
+                    if (!aiming)
+                    {
+                        StartAiming();
+                    }
+                    else
+                    {
+                        if (aimTime > 1f) StartRangedAttackMulti();
+                    }
+                    /*
+                    /*
+                    if (!onPillar)
                     {
                         DodgeJump(pillar.position);
                         onPillar = true;
                     }
+                    else
+                    {
+                        if (Random.value > 0.5f)
+                        {
+                            DodgeJump(new Vector3(-1.49f, -1060.6f, -122.42f));
+                            onPillar = false;
+                        }
+                        else
+                        {
+                            DodgeJump(pillar.position);
+                            onPillar = true;
+                        }
+                    }
+                    */
                 }
-                */
             }
-        }
         if (animancer.States.Current == cstate.jump)
         {
             float t = cstate.jump.NormalizedTime;
@@ -585,6 +686,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 }
                 circleParrying = false;
                 crossParrying = false;
+                wasLastParryIgnored = true;
             }
         }
         else if (animancer.States.Current != cstate.attack)
@@ -692,6 +794,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             {
                 summonParticle.Play();
             }
+            timeSinceLastSummon = 0f;
         }
         else
         {
@@ -699,10 +802,15 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             {
                 summonParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             }
+            timeSinceLastSummon += Time.deltaTime;
         }
         if (pillarStunned)
         {
             ProcessPillarStun();
+        }
+        if (!circleParrying && !crossParrying)
+        {
+            timeSinceLastParry += Time.deltaTime;
         }
         if (onPillar)
         {
@@ -733,6 +841,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         */
     }
 
+    /*
     public void StartMeleeCombo1()
     {
         RealignToTarget();
@@ -804,6 +913,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
         DodgeJumpThen(pos, _Then, 2f);
     }
+    */
 
     // basic attack template
     /*
@@ -815,10 +925,24 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     }
     */
 
-    public void StartMeleeCombo2()
+    /*public void StartMeleeCombo2()
     {
         RealignToTarget();
         cstate.attack = MeleeCombo2.ProcessHumanoidAction(this, _MoveOnEnd);
+        OnAttack.Invoke();
+    }*/
+
+    public void StartSlash()
+    {
+        RealignToTarget();
+        cstate.attack = SlashAttack.ProcessHumanoidAction(this, _MoveOnEnd);
+        OnAttack.Invoke();
+    }
+
+    public void StartThrust()
+    {
+        RealignToTarget();
+        cstate.attack = ThrustAttack.ProcessHumanoidAction(this, _MoveOnEnd);
         OnAttack.Invoke();
     }
 
@@ -831,6 +955,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         cstate.attack = state;
         crossParrying = true;
         parryTime = 0f;
+        timeSinceLastParry = 0f;
+        wasLastParryIgnored = false;
+        wasLastParrySuccess = false;
+        lastParryWasCircle = false;
         //crossParticle.Play();
     }
 
@@ -853,6 +981,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         cstate.attack = state;
         circleParrying = true;
         parryTime = 0f;
+        timeSinceLastParry = 0f;
+        wasLastParryIgnored = false;
+        wasLastParrySuccess = false;
+        lastParryWasCircle = true;
         //circleParticle.Play();
     }
 
@@ -1858,9 +1990,36 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     }
 
 
+    public bool ShouldParry(out bool shouldCircleParry)
+    {
+        if (wasLastParrySuccess)
+        {
+            shouldCircleParry = lastParryWasCircle;
+            return true;
+        }
+        else if (timeSinceLastParry > MinTimeBetweenParries)
+        {
+            float r = Random.value;
+            if (r > 0.5f)
+            {
+                shouldCircleParry = true;
+            }
+            else
+            {
+                shouldCircleParry = false;
+            }
+            return true;
+        }
+        else
+        {
+            shouldCircleParry = false;
+            return false;
+        }
+    }
     public void CrossParryComplete(DamageKnockback damage)
     {
         ParrySuccess.Invoke();
+        wasLastParrySuccess = true;
         OnBlock.Invoke();
         damage.OnBlock.Invoke();
         Actor actor = damage.source.GetComponent<Actor>();
@@ -1894,6 +2053,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public void CircleParryComplete(DamageKnockback damage)
     {
         ParrySuccess.Invoke();
+        wasLastParrySuccess = true;
         OnBlock.Invoke();
         damage.OnBlock.Invoke();
         Actor actor = damage.source.GetComponent<Actor>();

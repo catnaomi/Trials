@@ -15,10 +15,13 @@ public class ControllerAttack : InputAttack
 
     public override AnimancerState ProcessHumanoidAction(NavigatingHumanoidActor actor, Action endEvent)
     {
-
-        AnimancerState state = actor.animancer.Play(this.GetController());
+        ControllerState state = (ControllerState)actor.animancer.States.GetOrCreate(this.GetController());
+        state.Stop();
+        state.ApplyActionsOnStop();
+        state.Play(0);
+        actor.animancer.Play(state);
         actor.SetCurrentDamage(this.GetDamage());
-        state.Events.OnEnd = endEvent;
+        //state.Events.OnEnd = endEvent;
         return state;
     }
 }
