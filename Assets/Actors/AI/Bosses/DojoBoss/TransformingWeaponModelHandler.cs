@@ -16,6 +16,9 @@ public class TransformingWeaponModelHandler : MonoBehaviour
     [Space(20)]
     public DojoBossCombatantActor.WeaponState state;
     DojoBossCombatantActor.WeaponState currentstate;
+    [Space(20)]
+    public ParticleSystem entryParticle;
+    public ParticleSystem exitParticle;
     // Start is called before the first frame update
     void Start()
     {
@@ -39,6 +42,14 @@ public class TransformingWeaponModelHandler : MonoBehaviour
             if (quarterstaff != null) quarterstaff.SetActive(state != DojoBossCombatantActor.WeaponState.None && state != DojoBossCombatantActor.WeaponState.Bow && state != DojoBossCombatantActor.WeaponState.Daox2);
 
 
+            if (state == DojoBossCombatantActor.WeaponState.None || state == DojoBossCombatantActor.WeaponState.Quarterstaff)
+            {
+                exitParticle.Play();
+            }
+            else
+            {
+                entryParticle.Play();
+            }
             currentstate = state;
         }
     }
