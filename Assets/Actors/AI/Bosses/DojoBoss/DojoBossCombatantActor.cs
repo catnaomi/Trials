@@ -6,9 +6,33 @@ using UnityEngine.AI;
 using System.Collections.Generic;
 using CustomUtilities;
 
+public class BehaviorNode
+{
+    public delegate bool ProcessCallback();
+
+    public ProcessCallback OnProcess;
+    public List<BehaviorNode> children;
+}
+
+public class BehaviorTreeController 
+{
+    BehaviorNode Root;
+    BehaviorNode Current;
+    public void Update()
+    {
+        Root.OnProcess();
+    }
+}
+
 [RequireComponent(typeof(HumanoidNPCInventory))]
 public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamageable
 {
+    public void RootBehavior()
+    {
+        Debug.Log("Hello, world!");
+    }
+    BehaviorNode BehaviorTree;
+
     HumanoidNPCInventory inventory;
     /*
      * attacks:
@@ -267,6 +291,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         recentlySpawned = new List<NavigatingHumanoidActor>();
 
         BossHealthIndicator.SetTarget(this.gameObject);
+
+
+
+
+        BehaviorTree.OnProcess = this.RootBehavior;
     }
 
     void Awake()
@@ -822,23 +851,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             timeSincePillar += Time.deltaTime;
             timeOnPillar = 0f;
         }
-        /*
-        if (recentlySpawned.Count > 1)
-        {
-            foreach (NavigatingHumanoidActor spawnedActor in recentlySpawned)
-            {
-                if (spawnedActor == null) continue;
-                spawnedActor.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
-                {
-                    spawnedActor.shouldNavigate = true;
-                    spawnedActor.actionsEnabled = true;
-                    spawnedActor.PlayIdle();
-                };
-            }
-            recentlySpawned.Clear();    
-
-        }
-        */
     }
 
     /*
