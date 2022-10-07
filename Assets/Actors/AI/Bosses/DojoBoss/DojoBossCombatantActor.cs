@@ -6,6 +6,8 @@ using UnityEngine.AI;
 using System.Collections.Generic;
 using CustomUtilities;
 
+// Goal:
+// 
 public class BehaviorNode
 {
     public delegate bool ProcessCallback();
@@ -21,6 +23,64 @@ public class BehaviorTreeController
     public void Update()
     {
         Root.OnProcess();
+    }
+}
+
+public class Timer 
+{
+    public enum TimerBehavior 
+    {
+        Once,
+        Repeat
+    }
+
+    float time;
+    float accumulated;
+    TimerBehavior behavior;
+
+    public Timer(float time, TimerBehavior behavior) 
+    {
+        this.time = time;
+        this.accumulated = 0;
+        this.behavior = behavior;
+    }
+
+    public Timer(TimerBehavior behavior) 
+    {
+        this.time = 0;
+        this.accumulated = 0;
+        this.behavior = behavior;
+    }
+
+
+    public float GetTime() 
+    {
+        return this.time;
+    }
+
+    public void SetTime(float time) 
+    {
+        this.time = time;
+        this.accumulated = 0;
+    }
+
+    public bool Update() 
+    {
+        this.accumulated += Time.deltaTime;
+        if (this.behavior == TimerBehavior.Repeat) 
+        {
+            Reset()
+        }
+    }
+
+    public void Ready() 
+    {
+        return this.accumulated >= this.time;
+    }
+
+    public void Reset() 
+    {
+        accumulated = 0;
     }
 }
 
@@ -152,7 +212,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public float knockdownMoveSpeed;
     public float knockdownMoveTime;
     [Space(10)]
-    public float clock;
     public float ActionDelayMinimum = 2f;
     public float ActionDelayMaximum = 5f;
     
@@ -259,6 +318,132 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     }
     System.Action _MoveOnEnd;
+
+    Timer ActionTimer(TimerBehavior.Once);
+
+    public void CheckForNextAction() {
+        if (!ActionTimer.Ready()) return;
+        if (!CanAct()) return;
+        if (CombatTarget == null) return;
+
+        ActionTimer.SetTime(Random.Range(ActionDelayMinimum, ActionDelayMaximum));
+        float navdist = GetDistanceToTarget();
+        float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
+
+        float r = Random.value;
+
+        bool inCloseRange = navdist < 10f;
+        isLowHealth = attributes.health.current <= attributes.health.max * 0.5f;
+        bool shouldPillarShoot = isLowHealth && r > 0.5f;
+        CrouchAction pillarTarget = CrouchAction.Plunge;
+        bool isPillarAvailable = TryGetAvailablePillar(out pillarTarget, shouldPillarShoot);
+        bool shouldPillarJump = (timeSincePillar >= pillarJumpDelay) && isPillarAvailable;
+        bool shouldJumpDown = (timeOnPillar >= pillarStayDelay);
+        bool canSummon = isLowHealth && timeSinceLastSummon >= MinTimeBetweenSummons && spawnedEnemies.Count < spawnLimit;
+        bool shouldParry = ShouldParry(out bool shouldCircleParry);
+        if (!isLowHealth)
+        {
+            bufferRange = 8f;
+            closeRange = 4f;
+        }
+        else
+        {
+            bufferRange = 12f;
+            closeRange = 8f;
+        }
+
+        if (aiming)
+        {
+            StartRangedAttack();
+        }
+        else if (onPillar)
+        {
+            if (isLowHealth)
+            {
+                if (canSummon)
+                {
+                    StartSummon();
+                }
+                else
+                {
+                    StartAiming();
+                }
+            }
+            else if (shouldJumpDown)
+            {
+                if (r < 0.4f)
+                {
+                    StartCrouch(CrouchAction.Plunge);
+                }
+                else if (r < 0.8f)
+                {
+                    StartCrouch(CrouchAction.JumpTo_Center);
+                }
+                else
+                {
+                    if (isPillarAvailable)
+                    {
+                        timeOnPillar = 0f;
+                        StartCrouch(pillarTarget);
+                    }
+                    else
+                    {
+                        StartCrouch(CrouchAction.JumpTo_Center);
+                    }
+                }
+            }
+            else
+            {
+                StartAiming();
+            }
+        }
+        else if (shouldPillarJump)
+        {
+            StartCrouch(pillarTarget);
+        }
+        else if (!inCloseRange)
+        {
+            if (this.isLowHealth && canSummon)
+            {
+                StartSummon();
+            }
+            else
+            {
+                if (r < 0.4f)
+                {
+                    StartAiming();
+                }
+                else // TODO: ground slam attack
+                {
+                    StartCrouch(CrouchAction.Plunge);
+                }
+            }
+        }
+        else if (shouldParry && !wasLastParryIgnored)
+        {
+            if (shouldCircleParry)
+            {
+                StartCircleParry();
+            }
+            else
+            {
+                StartCrossParry();
+            }
+        }
+        else
+        {
+            wasLastParryIgnored = false;
+            if (r > 0.5f)
+            {
+                StartSlash();
+            }
+            else
+            {
+                StartThrust();
+            } 
+        }
+    }
+
     public override void ActorStart()
     {
         base.ActorStart();
@@ -292,8 +477,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
         BossHealthIndicator.SetTarget(this.gameObject);
 
-
-
+        float ActionDelayAverage = (ActionDelayMinimum + ActionDelayMaximum) / 2;
+        ActionTimer.SetTime(ActionDelayAverage);
 
         BehaviorTree.OnProcess = this.RootBehavior;
     }
@@ -306,14 +491,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public override void ActorPostUpdate()
     {
         base.ActorPostUpdate();
+        ActionTimer.Update(); // @spader where the fuck is dt
 
         
-        if (clock > -1)
-        {
-            clock -= Time.deltaTime;
-        }
-        bool shouldAct = (clock <= 0f);
-
         if (CombatTarget == null)
         {
             if (DetermineCombatTarget(out GameObject target))
@@ -341,292 +521,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             inventory.SetDrawn(false, true);
         }
-        if (shouldAct && CanAct())
-        {
-            clock = Random.Range(ActionDelayMinimum, ActionDelayMaximum);
-            if (CombatTarget != null)
-            {
-                float navdist = GetDistanceToTarget();
-                float realdist = Vector3.Distance(this.transform.position, GetCombatTarget().transform.position);
 
-                float r = Random.value;
+        // 
+        CheckForNextAction();
 
-                bool inCloseRange = navdist < 10f;
-                isLowHealth = attributes.health.current <= attributes.health.max * 0.5f;
-                bool shouldPillarShoot = isLowHealth && r > 0.5f;
-                CrouchAction pillarTarget = CrouchAction.Plunge;
-                bool isPillarAvailable = TryGetAvailablePillar(out pillarTarget, shouldPillarShoot);
-                bool shouldPillarJump = (timeSincePillar >= pillarJumpDelay) && isPillarAvailable;
-                bool shouldJumpDown = (timeOnPillar >= pillarStayDelay);
-                bool canSummon = isLowHealth && timeSinceLastSummon >= MinTimeBetweenSummons && spawnedEnemies.Count < spawnLimit;
-                bool shouldParry = ShouldParry(out bool shouldCircleParry);
-                if (!isLowHealth)
-                {
-                    bufferRange = 8f;
-                    closeRange = 4f;
-                }
-                else
-                {
-                    bufferRange = 12f;
-                    closeRange = 8f;
-                }
-
-                if (aiming)
-                {
-                    StartRangedAttack();
-                }
-                else if (onPillar)
-                {
-                    if (isLowHealth)
-                    {
-                        if (canSummon)
-                        {
-                            StartSummon();
-                        }
-                        else
-                        {
-                            StartAiming();
-                        }
-                    }
-                    else if (shouldJumpDown)
-                    {
-                        if (r < 0.4f)
-                        {
-                            StartCrouch(CrouchAction.Plunge);
-                        }
-                        else if (r < 0.8f)
-                        {
-                            StartCrouch(CrouchAction.JumpTo_Center);
-                        }
-                        else
-                        {
-                            if (isPillarAvailable)
-                            {
-                                timeOnPillar = 0f;
-                                StartCrouch(pillarTarget);
-                            }
-                            else
-                            {
-                                StartCrouch(CrouchAction.JumpTo_Center);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        StartAiming();
-                    }
-                }
-                else if (shouldPillarJump)
-                {
-                    StartCrouch(pillarTarget);
-                }
-                else if (!inCloseRange)
-                {
-                    if (this.isLowHealth && canSummon)
-                    {
-                        StartSummon();
-                    }
-                    else
-                    {
-                        if (r < 0.4f)
-                        {
-                            StartAiming();
-                        }
-                        else // TODO: ground slam attack
-                        {
-                            StartCrouch(CrouchAction.Plunge);
-                        }
-                    }
-                }
-                else if (shouldParry && !wasLastParryIgnored)
-                {
-                    if (shouldCircleParry)
-                    {
-                        StartCircleParry();
-                    }
-                    else
-                    {
-                        StartCrossParry();
-                    }
-                }
-                else
-                {
-                    wasLastParryIgnored = false;
-                    if (r > 0.5f)
-                    {
-                        StartSlash();
-                    }
-                    else
-                    {
-                        StartThrust();
-                    } 
-                }
-                
-
-                /*
-                if (aiming)
-                {
-                    StartRangedAttack();
-                    /*
-                    if (r < 0.5f)
-                    {
-                        StartRangedAttack();
-                    }
-                    else
-                    {
-                        StartRangedAttackMulti();
-                    }
-                    *
-                }
-                else if (shouldPillarJump)
-                {
-                    StartCrouch(pillarTarget);
-                }
-                else if (!onPillar)
-                {
-                   if (inCloseRange)
-                   {
-                        if (r < 0.35f)
-                        {
-                            StartCircleParry();
-                        }
-                        else if (r < 0.7f)
-                        {
-                            StartCrossParry();
-                        }
-                        else if (r < 0.8f && navdist < 2f)
-                        {
-                            //StartMeleeCombo2();
-                        }
-                        else if (r < 0.9f && navdist < 6f)
-                        {
-                            //StartMeleeCombo1();
-                        }
-                        else
-                        {
-                            strafeDirection = CheckStrafe();
-                            if (strafeDirection != 0)
-                            {
-                                animancer.Play(navstate.strafe);
-                            }
-                        }
-                    } // not close range
-                    else if (r < 0.3f)
-                    {
-                        StartCrouch(CrouchAction.Plunge);
-                    }
-                    else if (r < 0.6f && canSummon)
-                    {
-                        StartSummon();
-                    }
-                    else if (r < 0.7f)
-                    {
-                        StartAiming();
-                    }
-                }
-                else
-                {
-                    if (shouldJumpDown && r < 0.3f)
-                    {
-                        StartCrouch(CrouchAction.Plunge);
-                    }
-                    else if (shouldJumpDown)
-                    {
-                        StartCrouch(CrouchAction.JumpTo_Center);
-                    }
-                    else if (r < 0.6f && lowHealth)
-                    {
-                        StartSummon();
-                    }
-                    else if (r < 0.7f)
-                    {
-                        StartAiming();
-                    }
-                    else if (r < 0.85f && TryGetAvailablePillar(out CrouchAction crouchAction, true))
-                    {
-                        StartCrouch(crouchAction);
-                    }
-                }
-                */
-                    //StartMeleeCombo1();
-
-                    //StartMeleeCombo2();
-
-                    //StartCrouch();
-
-                    /*
-                    CrouchAction action = CrouchAction.Plunge;
-                    int r = Random.Range(1, 10);
-                    if (r == 1)
-                    {
-                        action = CrouchAction.JumpTo_Pillar1;
-                    }
-                    else if (r == 2)
-                    {
-                        action = CrouchAction.JumpTo_Pillar2;
-                    }
-                    else if (r == 3)
-                    {
-                        action = CrouchAction.JumpTo_Pillar3;
-                    }
-                    */
-                    //StartCrouch(actionAfterCrouch);
-                    /*
-                    if (!onPillar)
-                    {
-                        StartCrouch(CrouchAction.JumpShot_Pillar1);
-                    }
-                    else if (Random.value < 0.5f)
-                    {
-                        StartCrouch(CrouchAction.JumpTo_Center);
-                    }
-                    else
-                    {
-                        StartCrouch(CrouchAction.Plunge);
-                    }
-                    */
-                    /*
-                    if (!aiming)
-                    {
-                        StartAiming();
-                    }
-                    else
-                    {
-                        if (aimTime > 1f) StartRangedAttack();
-                    }*/
-                    //StartRangedAttackMulti();
-                    /*
-                    if (!aiming)
-                    {
-                        StartAiming();
-                    }
-                    else
-                    {
-                        if (aimTime > 1f) StartRangedAttackMulti();
-                    }
-                    /*
-                    /*
-                    if (!onPillar)
-                    {
-                        DodgeJump(pillar.position);
-                        onPillar = true;
-                    }
-                    else
-                    {
-                        if (Random.value > 0.5f)
-                        {
-                            DodgeJump(new Vector3(-1.49f, -1060.6f, -122.42f));
-                            onPillar = false;
-                        }
-                        else
-                        {
-                            DodgeJump(pillar.position);
-                            onPillar = true;
-                        }
-                    }
-                    */
-                }
-            }
         if (animancer.States.Current == cstate.jump)
         {
             float t = cstate.jump.NormalizedTime;
@@ -709,10 +607,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             {
                 parryTime = 0f;
                 animancer.Play(navstate.move);
-                if (clock < 2f)
+
+                if (ActionTimer.GetTime() < 2f) 
                 {
-                    clock = 2f;
+                    ActionTimer.SetTime(2f);
                 }
+
                 circleParrying = false;
                 crossParrying = false;
                 wasLastParryIgnored = true;
@@ -1201,7 +1101,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         OnWeaponTransform.Invoke();
         cstate.ranged_idle = animancer.Play(RangedAttack.GetMovement());
         animancer.Layers[HumanoidAnimLayers.UpperBody].Play(RangedAttack.GetStartClip());
-        clock = aimTime;
+        ActionTimer.SetTime(aimTime);
         aiming = true;
         aimParticle.Play();
     }
