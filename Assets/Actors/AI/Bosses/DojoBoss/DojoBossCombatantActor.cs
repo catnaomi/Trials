@@ -247,7 +247,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     Vector3 lastTargetPos;
     Vector3 targetSpeed;
     
-    protected CombatState cstate;
+    protected CombatState combatState;
 
     [Header("Particles")]
     public ParticleSystem summonParticle;
@@ -373,14 +373,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 Boss.closeRange = 8f;
             }
 
-            if (!Boss.aiming)
-            {
-                Boss.SetState(Boss.BossStates.Aim);
-            }
-            else
-            {
-                Boss.SetState(Boss.BossStates.RangedAttack);
-            }
+            Boss.SetState(Boss.BossStates.Aim);
 
             return;
 
@@ -514,7 +507,13 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         public override void Enter()
         {
             AimTimer.Reset();
-            Boss.StartAiming();
+            Boss.weaponState = DojoBossCombatantActor.WeaponState.Bow;
+            Boss.OnWeaponTransform.Invoke();
+            Boss.combatState.ranged_idle = Boss.animancer.Play(Boss.RangedAttack.GetMovement());
+            Boss.animancer.Layers[HumanoidAnimLayers.UpperBody].Play(Boss.RangedAttack.GetStartClip());
+            Boss.animancer.Play(Boss.navstate.move);
+            Boss.aimParticle.Play();
+            Boss.animancer.Layers[0].ApplyAnimatorIK = true;
         }
 
         public override void Update()
@@ -536,7 +535,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
         public override void Enter()
         {
-            Boss.StartRangedAttack();
+            Boss.animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+            Boss.combatState.attack = Boss.animancer.Play(Boss.RangedAttack.GetFireClip(), 0f);
+            Boss.combatState.attack.Events.OnEnd = Boss._MoveOnEnd;
+            Boss.OnAttack.Invoke();
+            Boss.aimParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            Boss.fireParticle.Play();
         }
 
         public override void Update()
@@ -609,24 +613,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public override void ActorPostUpdate()
     {
-        if (CombatTarget == null)
-        {
-            if (DetermineCombatTarget(out GameObject target))
-            {
-                CombatTarget = target;
-
-                StartNavigationToTarget(target);
-
-                if (target.TryGetComponent<Actor>(out Actor actor))
-                {
-                    actor.OnAttack.AddListener(BeingAttacked);
-                }
-            }
-        }
-        else if (CombatTarget.tag == "Corpse")
-        {
-            CombatTarget = null;
-        }
+        UpdateCombatTarget();
 
         //base.ActorPostUpdate();
 
@@ -641,9 +628,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
         BossStates.Current.Update();
 
-        if (animancer.States.Current == cstate.jump)
+        if (animancer.States.Current == combatState.jump)
         {
-            float t = cstate.jump.NormalizedTime;
+            float t = combatState.jump.NormalizedTime;
             cc.enabled = false;
             shouldNavigate = false;
 
@@ -663,7 +650,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 }
             }
         }
-        if (animancer.States.Current == cstate.attack)
+        if (animancer.States.Current == combatState.attack)
         {
             if (!IsHitboxActive())
             {
@@ -676,7 +663,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 HitboxActive(0);
             }
         }
-        if (animancer.States.Current == cstate.parry_cross || animancer.States.Current == cstate.parry_circle)
+        if (animancer.States.Current == combatState.parry_cross || animancer.States.Current == combatState.parry_circle)
         {
             bool inBufferRange = currentDistance <= bufferRange;
 
@@ -707,11 +694,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
                 if (crossParrying)
                 {
-                    cstate.parry_cross.ParameterX = xmov;
+                    combatState.parry_cross.ParameterX = xmov;
                 }
                 else if (circleParrying)
                 {
-                    cstate.parry_circle.ParameterX = xmov;
+                    combatState.parry_circle.ParameterX = xmov;
                 }
                 parryOutOfBoundsTime = 0f;
             }
@@ -735,7 +722,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 wasLastParryIgnored = true;
             }
         }
-        else if (animancer.States.Current != cstate.attack)
+        else if (animancer.States.Current != combatState.attack)
         {
             if (circleParrying || crossParrying)
             {
@@ -762,22 +749,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             crossParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         }
 
-        if (animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying() && !aiming && animancer.States.Current != cstate.parry_circle && animancer.States.Current != cstate.parry_cross)
-        {
-            animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-        }
-        else if ((aiming || animancer.States.Current == cstate.ranged_idle) && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
-        {
-            aiming = false;
-            if (animancer.States.Current == cstate.ranged_idle)
-            {
-                animancer.Play(navstate.move);
-            }
-        }
-        else if (!crouching && (animancer.IsPlayingClip(CrouchDown.Clip) || animancer.IsPlayingClip(Crouch.Clip)))
-        {
-            //animancer.Play(navstate.move);
-        }
         if (Vector3.Distance(CombatTarget.transform.position, this.transform.position) < 10f)
         {
             //animancer.Layers[0].ApplyAnimatorIK = true;
@@ -787,6 +758,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             //animancer.Layers[0].ApplyAnimatorIK = false;
         }
+
         if (plunging)
         {
             ProcessPlunge();
@@ -795,15 +767,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             ProcessCrouch();
         }
-        if (aiming)
-        {
-            animancer.Layers[0].ApplyAnimatorIK = true;
-        }
-        else if (aimParticle.isPlaying)
-        {
-            aimParticle.Stop();
-        }
-        if (animancer.States.Current == cstate.ranged_idle && cstate.ranged_idle is MixerState mix && mix.ChildStates[0] is LinearMixerState rangedIdle)
+
+        if (animancer.States.Current == combatState.ranged_idle && combatState.ranged_idle is MixerState mix && mix.ChildStates[0] is LinearMixerState rangedIdle)
         {
             //Vector3 lookDirection = transform.forward;
             //nav.enabled = true;
@@ -867,6 +832,27 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             timeSincePillar += Time.deltaTime;
             timeOnPillar = 0f;
+        }
+    }
+
+    public void UpdateCombatTarget()
+    {
+        // If we've already got the combat target, just make sure the player isn't dead.
+        if (CombatTarget)
+        {
+            if (CombatTarget.tag == "Corpse")   CombatTarget = null; 
+            return;
+        }
+
+        if (DetermineCombatTarget(out GameObject target))
+        {
+            CombatTarget = target;
+            SetDestination(target);
+
+            if (target.TryGetComponent<Actor>(out Actor actor))
+            {
+                actor.OnAttack.AddListener(BeingAttacked);
+            }
         }
     }
 
@@ -964,14 +950,14 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public void StartSlash()
     {
         RealignToTarget();
-        cstate.attack = SlashAttack.ProcessHumanoidAction(this, _MoveOnEnd);
+        combatState.attack = SlashAttack.ProcessHumanoidAction(this, _MoveOnEnd);
         OnAttack.Invoke();
     }
 
     public void StartThrust()
     {
         RealignToTarget();
-        cstate.attack = ThrustAttack.ProcessHumanoidAction(this, _MoveOnEnd);
+        combatState.attack = ThrustAttack.ProcessHumanoidAction(this, _MoveOnEnd);
         OnAttack.Invoke();
     }
 
@@ -981,7 +967,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         AnimancerState state = animancer.Play(IntoCrossParry);
         
         state.Events.OnEnd = PlayCrossParry;
-        cstate.attack = state;
+        combatState.attack = state;
         crossParrying = true;
         parryTime = 0f;
         timeSinceLastParry = 0f;
@@ -993,7 +979,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public void PlayCrossParry()
     {
-        cstate.parry_cross = (DirectionalMixerState)animancer.Play(CrossParryMove);
+        combatState.parry_cross = (DirectionalMixerState)animancer.Play(CrossParryMove);
         animancer.Layers[HumanoidAnimLayers.UpperBody].Play(CrossParry);
         animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
         crossParrying = true;
@@ -1007,7 +993,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         AnimancerState state = animancer.Play(IntoCircleParry);
         
         state.Events.OnEnd = PlayCircleParry;
-        cstate.attack = state;
+        combatState.attack = state;
         circleParrying = true;
         parryTime = 0f;
         timeSinceLastParry = 0f;
@@ -1019,7 +1005,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public void PlayCircleParry()
     {
-        cstate.parry_circle = (DirectionalMixerState)animancer.Play(CircleParryMove);
+        combatState.parry_circle = (DirectionalMixerState)animancer.Play(CircleParryMove);
         animancer.Layers[HumanoidAnimLayers.UpperBody].Play(CircleParry);
         animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
         circleParrying = true;
@@ -1057,8 +1043,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
 
         plungeClock = PlungeTime;
-        cstate.plunge_rise = animancer.Play(PlungeJump);
-        cstate.plunge_rise.Events.OnEnd = null;
+        combatState.plunge_rise = animancer.Play(PlungeJump);
+        combatState.plunge_rise.Events.OnEnd = null;
         plungeStart = this.transform.position;
         OnAttack.Invoke();
         plunging = true;
@@ -1158,16 +1144,16 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
         else if (t >= AttackPoint)
         {
-            if (animancer.States.Current == cstate.plunge_fall)
+            if (animancer.States.Current == combatState.plunge_fall)
             {
-                cstate.plunge_attack = Plunge.ProcessHumanoidAction(this, EndPlunge);
+                combatState.plunge_attack = Plunge.ProcessHumanoidAction(this, EndPlunge);
             }
         }
         else if (t >= DescentPoint)
         {
-            if (animancer.States.Current == cstate.plunge_rise)
+            if (animancer.States.Current == combatState.plunge_rise)
             {
-                cstate.plunge_fall = animancer.Play(PlungeFall);//Plunge.ProcessHumanoidAttack(this, EndPlunge);
+                combatState.plunge_fall = animancer.Play(PlungeFall);//Plunge.ProcessHumanoidAttack(this, EndPlunge);
             }
         }
 
@@ -1194,7 +1180,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         AnimancerState jump = animancer.Play(JumpDodge);
         jump.Events.OnEnd = endingAction;
         jump.Speed *= speed;
-        cstate.jump = jump;
+        combatState.jump = jump;
         endJumpPosition = position;
         startJumpPosition = this.transform.position;
         nav.enabled = false;
@@ -1211,22 +1197,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public void StartAiming()
     {
-        weaponState = DojoBossCombatantActor.WeaponState.Bow;
-        OnWeaponTransform.Invoke();
-        cstate.ranged_idle = animancer.Play(RangedAttack.GetMovement());
-        animancer.Layers[HumanoidAnimLayers.UpperBody].Play(RangedAttack.GetStartClip());
-        aiming = true;
-        aimParticle.Play();
     }
     public void StartRangedAttack()
     {
-        animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-        cstate.attack = animancer.Play(RangedAttack.GetFireClip(), 0f);
-        cstate.attack.Events.OnEnd = _MoveOnEnd;
-        aiming = false;
-        OnAttack.Invoke();
-        aimParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-        fireParticle.Play();
     }
 
     public void StartRangedAttackMulti()
@@ -1235,8 +1208,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         weaponState = DojoBossCombatantActor.WeaponState.Bow;
         OnWeaponTransform.Invoke();
         animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-        cstate.attack = animancer.Play(RangedAttackMulti.GetFireClip(), 0f);
-        cstate.attack.Events.OnEnd = QuickRangedEnd;
+        combatState.attack = animancer.Play(RangedAttackMulti.GetFireClip(), 0f);
+        combatState.attack.Events.OnEnd = QuickRangedEnd;
         OnAttack.Invoke();
     }
 
@@ -1250,7 +1223,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             land.Events.OnEnd = _MoveOnEnd;
             nav.enabled = true;
         };
-        cstate.jump = jump;
+        combatState.jump = jump;
         endJumpPosition = position;
         startJumpPosition = this.transform.position;
         nav.enabled = false;
@@ -1280,10 +1253,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public void StartSummon()
     {
-        cstate.summon = animancer.Play(SummonStart);
-        cstate.summon.Events.OnEnd = () =>
+        combatState.summon = animancer.Play(SummonStart);
+        combatState.summon.Events.OnEnd = () =>
         {
-            cstate.summon = animancer.Play(SummonHold);
+            combatState.summon = animancer.Play(SummonHold);
             summoning = true;
         };
         summonClock = SummonTime;
@@ -1300,8 +1273,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
         if (t >= 1f)
         {
-            cstate.summon = animancer.Play(SummonEnd);
-            cstate.summon.Events.OnEnd = _MoveOnEnd;
+            combatState.summon = animancer.Play(SummonEnd);
+            combatState.summon.Events.OnEnd = _MoveOnEnd;
             summoning = false;
         }
 
@@ -1769,12 +1742,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     }
     public override bool IsDodging()
     {
-        return animancer.States.Current == cstate.jump || animancer.States.Current == cstate.dodge;
+        return animancer.States.Current == combatState.jump || animancer.States.Current == combatState.dodge;
     }
 
     public override bool IsAttacking()
     {
-        return animancer.States.Current == cstate.attack || animancer.States.Current == cstate.plunge_attack;
+        return animancer.States.Current == combatState.attack || animancer.States.Current == combatState.plunge_attack;
     }
 
     public override bool IsFalling()
@@ -2065,7 +2038,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         hit.Events.OnEnd = () =>
         {
             RealignToTarget();
-            cstate.attack = CrossParryFollowup.ProcessHumanoidAction(this, _MoveOnEnd);
+            combatState.attack = CrossParryFollowup.ProcessHumanoidAction(this, _MoveOnEnd);
             if (otherAnimancer != null)
             {
                 otherAnimancer.States.Current.Speed = otherSpeed;
@@ -2094,7 +2067,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         actor.DeactivateHitboxes();
 
         animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-        cstate.attack = CircleParryFollowup.ProcessHumanoidAction(this, () => { });
+        combatState.attack = CircleParryFollowup.ProcessHumanoidAction(this, () => { });
         OnHitboxActive.AddListener(End);
         void End()
         {
@@ -2120,9 +2093,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         pillarStunned = true;
         aiming = false;
         RealignToTargetWithOffset(90f);
-        cstate.hurt = animancer.Play(PillarHit);
-        cstate.hurt.NormalizedTime = 0f;
-        damageHandler.SetCritVulnState(cstate.hurt, 10f);
+        combatState.hurt = animancer.Play(PillarHit);
+        combatState.hurt.NormalizedTime = 0f;
+        damageHandler.SetCritVulnState(combatState.hurt, 10f);
 
         Vector3 adjust = this.transform.forward * pillarFallAdjustVector.z + this.transform.right * pillarFallAdjustVector.x + this.transform.up * pillarFallAdjustVector.y;
         StartCoroutine(MoveForDuration(adjust, pillarFallAdjustTime));
@@ -2144,12 +2117,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 onPillar = false;
                 pillarFallAirborne = false;
                 nav.enabled = true;
-                cstate.hurt = animancer.Play(PillarFallLand);
-                damageHandler.SetCritVulnState(cstate.hurt, 10f);
-                cstate.hurt.Events.OnEnd = () =>
+                combatState.hurt = animancer.Play(PillarFallLand);
+                damageHandler.SetCritVulnState(combatState.hurt, 10f);
+                combatState.hurt.Events.OnEnd = () =>
                 {
-                    cstate.hurt = animancer.Play(PillarKneel);
-                    damageHandler.SetCritVulnState(cstate.hurt, 10f);
+                    combatState.hurt = animancer.Play(PillarKneel);
+                    damageHandler.SetCritVulnState(combatState.hurt, 10f);
                 };
             }
         }
@@ -2197,19 +2170,19 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             if (!isBackToWall)
             {
-                cstate.dodge = animancer.Play(DodgeBack);
+                combatState.dodge = animancer.Play(DodgeBack);
                 jumpParticle.Play();
                 StartCoroutine(MoveForDuration(-this.transform.forward * 5f, 0.75f));
-                cstate.dodge.Events.OnEnd = AfterDodge;
+                combatState.dodge.Events.OnEnd = AfterDodge;
                 Debug.DrawRay(origin, -this.transform.forward * dist, Color.magenta, 5f);
             }
             else
             {
                 int side = CheckStrafe();
-                cstate.dodge = animancer.Play((side < 0) ? DodgeLeft : DodgeRight);
+                combatState.dodge = animancer.Play((side < 0) ? DodgeLeft : DodgeRight);
                 jumpParticle.Play();
                 StartCoroutine(MoveForDuration(this.transform.right * ((side < 0) ? -1 : 1) * 5f, 0.75f));
-                cstate.dodge.Events.OnEnd = AfterDodge;
+                combatState.dodge.Events.OnEnd = AfterDodge;
                 Debug.DrawRay(origin, -this.transform.forward * dist, (side < 0) ? Color.blue : Color.red, 5f);
             }
         }
