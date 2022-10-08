@@ -1,10 +1,10 @@
-﻿using UnityEngine;
-using System.Collections;
-using Animancer;
-using UnityEngine.Events;
-using UnityEngine.AI;
-using System.Collections.Generic;
+﻿using Animancer;
 using CustomUtilities;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.Events;
 
 public class Timer 
 {
@@ -16,12 +16,14 @@ public class Timer
 
     float time;
     float accumulated;
+    bool enabled;
     TimerBehavior behavior;
 
     public Timer(float time, TimerBehavior behavior) 
     {
         this.time = time;
         this.accumulated = 0;
+        this.enabled = true;
         this.behavior = behavior;
     }
 
@@ -52,11 +54,16 @@ public class Timer
 
     public void Update() 
     {
+        if (!this.enabled) return;
+
         this.accumulated += Time.deltaTime;
 
-        if (this.accumulated >= this.time && this.behavior == TimerBehavior.Repeat) 
+        if (this.accumulated >= this.time)
         {
-            Reset();
+            if (this.behavior == TimerBehavior.Repeat)
+            {
+                Reset();
+            }
         }
     }
 
@@ -69,9 +76,66 @@ public class Timer
     {
         accumulated = 0;
     }
+
+    public void Enable()
+    {
+        this.enabled = true;
+    }
+
+    public void Disable()
+    {
+        this.enabled = false;
+    }
 }
 
+public class Pillar
+{
+    public Transform Transform;
+    public bool Available;
+}
 
+public class PillarInfo
+{
+    List<Pillar> Pillars;
+
+    public PillarInfo()
+    {
+        Pillars = new List<Pillar>();
+    }
+
+    public void AddPillar(Transform Transform)
+    {
+        Pillar Pillar = new Pillar();
+        Pillar.Transform = Transform;
+        Pillar.Available = true;
+        Pillars.Add(Pillar);
+    }
+
+    public Pillar GetNextAndMarkUsed()
+    {
+        foreach(Pillar Pillar in Pillars)
+        {
+            if (Pillar.Available)
+            {
+                Pillar.Available = false;
+                return Pillar;
+            }
+        }
+
+        return null;
+    }
+
+    public void MarkPillarUnused(Pillar Pillar)
+    {
+        foreach (Pillar OtherPillar in Pillars)
+        {
+            if (OtherPillar == Pillar)
+            {
+                Pillar.Available = true;
+            }
+        }
+    }
+}
 
 [RequireComponent(typeof(HumanoidNPCInventory))]
 public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamageable
@@ -335,15 +399,19 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public class StateIdle : State
     {
         public Timer IdleTimer;
+        public float PillarDelay = 30f;
+        public float LastPillarTime;
 
         public StateIdle(DojoBossCombatantActor Boss) : base(Boss)
         {
+            //bool shouldPillarJump = (Boss.timeSincePillar >= Boss.pillarJumpDelay) && isPillarAvailable;
             IdleTimer = new Timer(2f, Timer.TimerBehavior.Once);
         }
 
         public override void Enter()
         {
             IdleTimer.Reset();
+            IdleTimer.SetTime(Random.Range(Boss.ActionDelayMinimum, Boss.ActionDelayMaximum));
         }
 
         public override void Update()
@@ -354,26 +422,14 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             if (!Boss.CanAct()) return;
             if (Boss.CombatTarget == null) return;
 
-            IdleTimer.SetTime(Random.Range(Boss.ActionDelayMinimum, Boss.ActionDelayMaximum));
-            float navdist = Boss.GetDistanceToTarget();
-            float realdist = Vector3.Distance(Boss.transform.position, Boss.GetCombatTarget().transform.position);
+            UpdateRanges();
 
-            float r = Random.value;
-
-            bool inCloseRange = navdist < 10f;
-            Boss.isLowHealth = Boss.attributes.health.current <= Boss.attributes.health.max * 0.5f;
-            if (!Boss.isLowHealth)
+            float PillarDelta = LastPillarTime - Time.time;
+            if (PillarDelta > PillarDelay)
             {
-                Boss.bufferRange = 8f;
-                Boss.closeRange = 4f;
             }
-            else
-            {
-                Boss.bufferRange = 12f;
-                Boss.closeRange = 8f;
-            }
+            Boss.SetState(Boss.BossStates.JumpToPillar);
 
-            Boss.SetState(Boss.BossStates.Aim);
 
             return;
 
@@ -492,6 +548,21 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             //    }
             //}
         }
+
+        public void UpdateRanges()
+        {
+            Boss.isLowHealth = Boss.attributes.health.current <= Boss.attributes.health.max * 0.5f;
+            if (Boss.isLowHealth)
+            {
+                Boss.bufferRange = 12f;
+                Boss.closeRange = 8f;
+            }
+            else
+            {
+                Boss.bufferRange = 8f;
+                Boss.closeRange = 4f;
+            }
+        }
     }
 
     public class StateAim : State
@@ -511,7 +582,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             Boss.OnWeaponTransform.Invoke();
             Boss.combatState.ranged_idle = Boss.animancer.Play(Boss.RangedAttack.GetMovement());
             Boss.animancer.Layers[HumanoidAnimLayers.UpperBody].Play(Boss.RangedAttack.GetStartClip());
-            Boss.animancer.Play(Boss.navstate.move);
             Boss.aimParticle.Play();
             Boss.animancer.Layers[0].ApplyAnimatorIK = true;
         }
@@ -528,25 +598,160 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public class StateRangedAttack : State
     {
+        State NextState;
+        Timer FireTimer;
+
         public StateRangedAttack(DojoBossCombatantActor Boss) : base(Boss)
         {
-
+            FireTimer = new Timer(Boss.RangedAttack.GetFireClip().Length, Timer.TimerBehavior.Once);
         }
 
         public override void Enter()
         {
             Boss.animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-            Boss.combatState.attack = Boss.animancer.Play(Boss.RangedAttack.GetFireClip(), 0f);
+            AnimancerState FireAnimation = Boss.combatState.attack = Boss.animancer.Play(Boss.RangedAttack.GetFireClip(), 0f);
+
+            FireTimer.Reset();
+
             Boss.combatState.attack.Events.OnEnd = Boss._MoveOnEnd;
             Boss.OnAttack.Invoke();
+
             Boss.aimParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             Boss.fireParticle.Play();
         }
 
         public override void Update()
         {
-            Boss.SetState(Boss.BossStates.Idle);
+            FireTimer.Update();
+            if (FireTimer.Ready())
+            {
+                Boss.SetState(NextState);
+            }
         }
+
+        public void SetNextState(State State)
+        {
+            NextState = State;
+        }
+    }
+
+    public class StateOnPillar : State
+    {
+        public StateOnPillar(DojoBossCombatantActor Boss) : base(Boss)
+        {
+
+        }
+
+        public override void Enter()
+        {
+            Boss.BossStates.RangedAttack.SetNextState(Boss.BossStates.OnPillar);
+            Boss.SetState(Boss.BossStates.Aim);
+        }
+    }
+
+    public class StateJumpToPillar : State
+    {
+        Timer CrouchTimer;
+
+        public StateJumpToPillar(DojoBossCombatantActor Boss) : base(Boss)
+        {
+            CrouchTimer = new Timer(1f, Timer.TimerBehavior.Once);
+        }
+
+        public override void Enter()
+        {
+            Boss.StartCrouch();
+            CrouchTimer.Reset();
+        }
+
+        public override void Update()
+        {
+            CrouchTimer.Update();
+            if (CrouchTimer.Ready())
+            {
+                // Find pillar and setup navigation to it
+                Pillar TargetPillar = Boss.PillarInfo.GetNextAndMarkUsed();
+
+                // Set up and switch to the jump state
+                Boss.BossStates.Jump.SetNextState(Boss.BossStates.OnPillar);
+                Boss.BossStates.Jump.SetTargetPosition(TargetPillar.Transform.position);
+                Boss.SetState(Boss.BossStates.Jump);
+            }
+        }
+    }
+
+    public class StateJump : State
+    {
+        State NextState;
+        AnimancerState JumpAnimation;
+        Vector3 StartPosition;
+        Vector3 TargetPosition;
+
+        AnimationCurve HorizontalCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+        AnimationCurve VerticalCurve = AnimationCurve.Constant(0f, 1f, 0f);
+
+        public StateJump(DojoBossCombatantActor Boss) : base(Boss)
+        {
+
+        }
+
+        public void SetNextState(State State)
+        {
+            NextState = State;
+        }
+
+        public void SetTargetPosition(Vector3 Position)
+        {
+            TargetPosition = Position;
+        }
+
+        public override void Enter()
+        {
+            // Start the animation
+            JumpAnimation = Boss.animancer.Play(Boss.JumpDodge);
+            JumpAnimation.Events.OnEnd = () =>
+            {
+                Boss.animancer.Play(Boss.JumpLand);
+            };
+            Boss.jumpParticle.Play();
+
+            // Mark current position 
+            StartPosition = Boss.transform.position;
+            Boss.nav.enabled = false;
+        }
+
+        public override void Update()
+        {
+            Boss.cc.enabled = false;
+            Boss.shouldNavigate = false;
+
+            // Find thenext position
+            Vector3 NextPosition = Vector3.Lerp(
+                StartPosition,
+                TargetPosition,
+                HorizontalCurve.Evaluate(JumpAnimation.NormalizedTime));
+            Vector3 VerticalOffset = Vector3.up * VerticalCurve.Evaluate(JumpAnimation.NormalizedTime);
+            NextPosition += VerticalOffset;
+            Boss.transform.position = NextPosition;
+
+            Boss.cc.enabled = true;
+            Boss.yVel = 0f;
+
+            Vector3 Distance = NextPosition - TargetPosition;
+            if (Distance.magnitude < 1f)
+            {
+                Boss.SetState(NextState);
+            }
+        }
+
+    }
+
+    private void SetState(State State)
+    {
+        if (State == null) State = BossStates.Idle;
+        BossStates.Current.Exit();
+        BossStates.Current = State;
+        BossStates.Current.Enter();
     }
 
     public struct States
@@ -555,16 +760,15 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         public StateIdle Idle;
         public StateAim Aim;
         public StateRangedAttack RangedAttack;
+        public StateOnPillar OnPillar;
+        public StateJumpToPillar JumpToPillar;
+        public StateJump Jump;
     }
+
+    // @spader: New fields
     States BossStates;
-
-
-    private void SetState(State state)
-    {
-        BossStates.Current.Exit();
-        BossStates.Current = state;
-        BossStates.Current.Enter();
-    }
+    PillarInfo PillarInfo;
+     
 
     public override void ActorStart()
     {
@@ -603,7 +807,16 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         BossStates.Idle         = new StateIdle(this);
         BossStates.Aim          = new StateAim(this);
         BossStates.RangedAttack = new StateRangedAttack(this);
-        BossStates.Current      = BossStates.Idle;
+        BossStates.OnPillar     = new StateOnPillar(this);
+        BossStates.JumpToPillar = new StateJumpToPillar(this);
+        BossStates.Jump         = new StateJump(this);
+        BossStates.Current = BossStates.Idle;
+
+        // Pillars
+        PillarInfo = new PillarInfo();
+        PillarInfo.AddPillar(pillar1);
+        PillarInfo.AddPillar(pillar2);
+        PillarInfo.AddPillar(pillar3);
     }
 
     void Awake()
@@ -768,22 +981,27 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             ProcessCrouch();
         }
 
-        if (animancer.States.Current == combatState.ranged_idle && combatState.ranged_idle is MixerState mix && mix.ChildStates[0] is LinearMixerState rangedIdle)
+        if (BossStates.Current == BossStates.Aim)
         {
-            //Vector3 lookDirection = transform.forward;
-            //nav.enabled = true;
-            //nav.isStopped = true;
-            //if (destination != Vector3.zero)
-            //{
-            //    lookDirection = (destination - this.transform.position).normalized;
-            //    lookDirection.y = 0f;
-            //    angle = Mathf.MoveTowards(angle, Vector3.SignedAngle(this.transform.forward, lookDirection, Vector3.up), nav.angularSpeed * Time.deltaTime);
-            //}
-            //else
-            //{
-            //    angle = 0f;
-            //}
-            //rangedIdle.Parameter = angle;
+            animancer.Layers[0].ApplyAnimatorIK = true;
+        }
+
+        if (combatState.ranged_idle is MixerState mix && mix.ChildStates[0] is LinearMixerState rangedIdle)
+        {
+            Vector3 lookDirection = transform.forward;
+            nav.enabled = true;
+            nav.isStopped = true;
+            if (destination != Vector3.zero)
+            {
+                lookDirection = (destination - this.transform.position).normalized;
+                lookDirection.y = 0f;
+                angle = Mathf.MoveTowards(angle, Vector3.SignedAngle(this.transform.forward, lookDirection, Vector3.up), nav.angularSpeed * Time.deltaTime);
+            }
+            else
+            {
+                angle = 0f;
+            }
+            rangedIdle.Parameter = angle;
         }
         if (CombatTarget != null)
         {
@@ -1019,7 +1237,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         crouching = true;
         actionAfterCrouch = action;
     }
-	
+    public void StartCrouch()
+    {
+        RealignToTarget();
+        animancer.Play(CrouchDown).Events.OnEnd = () => { animancer.Play(Crouch); };
+    }
+
     public void StartPlungeAttack()
     {
         Vector3 position = GetProjectedPosition(PlungeTime);
@@ -1510,6 +1733,14 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         return CombatTarget.transform.position + targetSpeed * timeOut;
     }
 
+    public Transform GetFirstAvailablePillar()
+    {
+        if (!pillar1Occupied) return pillar1;
+        if (!pillar2Occupied) return pillar2;
+        if (!pillar3Occupied) return pillar3;
+        return null;
+    }
+
     public bool TryGetAvailablePillar(out CrouchAction crouchAction, bool shoot)
     {
         crouchAction = CrouchAction.JumpTo_Center;
@@ -1839,15 +2070,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     private void OnAnimatorIK(int layerIndex)
     {
-        if (aiming)
-        {
-            RangedAttack.OnIK(animancer.Animator);
-        }
-        else
-        {
-            //animancer.Animator.SetLookAtPosition(CombatTarget.transform.position + Vector3.up);
-            //animancer.Animator.SetLookAtWeight(1f);
-        }
+        RangedAttack.OnIK(animancer.Animator);
     }
     public void SetHitParticlePosition(Vector3 position, Vector3 direction)
     {
