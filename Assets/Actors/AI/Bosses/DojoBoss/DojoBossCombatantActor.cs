@@ -430,9 +430,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
             UpdateRanges();
 
-            float GroundedTime = Time.time - GroundedStartTime;
-            if (GroundedTime > PillarDelay)
-            {
+            //float GroundedTime = Time.time - GroundedStartTime;
+            //if (GroundedTime > PillarDelay)
+            //{
                 // Find the pillar we want to go to
                 Pillar TargetPillar = Boss.PillarInfo.GetNextAndMarkUsed();
 
@@ -444,14 +444,15 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 // Enter the first jumping state
                 Boss.SetState(Boss.BossStates.JumpSquat);
                 Grounded = false;
-            }
-            else
-            {
-                // Tell the RangedAttack state to come back here when it's done.
-                Boss.BossStates.RangedAttack.SetNextState(Boss.BossStates.Idle);
+            //}
+            //else
+            //{
 
-                Boss.SetState(Boss.BossStates.Aim);
-            }
+            //    // Tell the RangedAttack state to come back here when it's done.
+            //    Boss.BossStates.RangedAttack.SetNextState(Boss.BossStates.Idle);
+
+            //    Boss.SetState(Boss.BossStates.Aim);
+            //}
 
 
             return;
@@ -761,8 +762,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
         public override void Update()
         {
-            Boss.cc.enabled = false;
             Boss.shouldNavigate = false;
+            Boss.nav.enabled = false;
 
             // Find thenext position
             Vector3 NextPosition = Vector3.Lerp(
@@ -773,7 +774,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             NextPosition += VerticalOffset;
             Boss.transform.position = NextPosition;
 
-            Boss.cc.enabled = true;
             Boss.yVel = 0f;
 
             Vector3 Distance = NextPosition - TargetPosition;
