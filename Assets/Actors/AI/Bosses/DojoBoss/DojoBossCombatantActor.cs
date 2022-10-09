@@ -399,7 +399,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public class StateIdle : State
     {
         Timer IdleTimer;
-        float PillarDelay = 10f;
+        float PillarDelay = 2f;
         float GroundedStartTime;
         bool Grounded;
 
@@ -662,7 +662,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         bool OnPillar = false;
         float TimeStart = 0f;
-        const float MaxTimeOnPillar = 10f;
+        const float MaxTimeOnPillar = 2f;
         Pillar CurrentPillar;
 
         public StateOnPillar(DojoBossCombatantActor Boss) : base(Boss)
@@ -739,9 +739,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         Vector3 StartPosition;
         Vector3 TargetPosition;
 
-        AnimationCurve HorizontalCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
-        AnimationCurve VerticalCurve = AnimationCurve.Constant(0f, 1f, 0f);
-
         public StateJump(DojoBossCombatantActor Boss) : base(Boss)
         {
 
@@ -771,8 +768,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             Vector3 NextPosition = Vector3.Lerp(
                 StartPosition,
                 TargetPosition,
-                HorizontalCurve.Evaluate(JumpAnimation.NormalizedTime));
-            Vector3 VerticalOffset = Vector3.up * VerticalCurve.Evaluate(JumpAnimation.NormalizedTime);
+                Boss.jumpHorizCurve.Evaluate(JumpAnimation.NormalizedTime));
+            Vector3 VerticalOffset = Vector3.up * Boss.jumpVertCurve.Evaluate(JumpAnimation.NormalizedTime);
             NextPosition += VerticalOffset;
             Boss.transform.position = NextPosition;
 
@@ -817,8 +814,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     }
 
     // @spader: New fields
-    States BossStates;
-    PillarInfo PillarInfo;
+    public States BossStates;
+    public PillarInfo PillarInfo;
      
 
     public override void ActorStart()
