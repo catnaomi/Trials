@@ -398,9 +398,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public class StateIdle : State
     {
-        public Timer IdleTimer;
-        public float PillarDelay = 30f;
-        public float LastPillarTime;
+        Timer IdleTimer;
+        float PillarDelay = 10f;
+        float GroundedStartTime;
+        bool Grounded;
 
         public StateIdle(DojoBossCombatantActor Boss) : base(Boss)
         {
@@ -412,6 +413,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             IdleTimer.Reset();
             IdleTimer.SetTime(Random.Range(Boss.ActionDelayMinimum, Boss.ActionDelayMaximum));
+
+            if (!Grounded)
+            {
+                GroundedStartTime = Time.time;
+            }
+            Grounded = true;
         }
 
         public override void Update()
@@ -419,16 +426,32 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             IdleTimer.Update();
 
             if (!IdleTimer.Ready()) return;
-            if (!Boss.CanAct()) return;
             if (Boss.CombatTarget == null) return;
 
             UpdateRanges();
 
-            float PillarDelta = LastPillarTime - Time.time;
-            if (PillarDelta > PillarDelay)
+            float GroundedTime = Time.time - GroundedStartTime;
+            if (GroundedTime > PillarDelay)
             {
+                // Find the pillar we want to go to
+                Pillar TargetPillar = Boss.PillarInfo.GetNextAndMarkUsed();
+
+                // Set up the later states in the chain
+                Boss.BossStates.OnPillar.SetPillar(TargetPillar);
+                Boss.BossStates.Jump.SetTargetPosition(TargetPillar.Transform.position);
+                Boss.BossStates.Jump.SetNextState(Boss.BossStates.OnPillar);
+
+                // Enter the first jumping state
+                Boss.SetState(Boss.BossStates.JumpSquat);
+                Grounded = false;
             }
-            Boss.SetState(Boss.BossStates.JumpToPillar);
+            else
+            {
+                // Tell the RangedAttack state to come back here when it's done.
+                Boss.BossStates.RangedAttack.SetNextState(Boss.BossStates.Idle);
+
+                Boss.SetState(Boss.BossStates.Aim);
+            }
 
 
             return;
@@ -637,6 +660,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public class StateOnPillar : State
     {
+        bool OnPillar = false;
+        float TimeStart = 0f;
+        const float MaxTimeOnPillar = 10f;
+        Pillar CurrentPillar;
+
         public StateOnPillar(DojoBossCombatantActor Boss) : base(Boss)
         {
 
@@ -644,16 +672,44 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
         public override void Enter()
         {
-            Boss.BossStates.RangedAttack.SetNextState(Boss.BossStates.OnPillar);
-            Boss.SetState(Boss.BossStates.Aim);
+            // Accumulate time on the pillar. If we're not already on the pillar, mark our start time.
+            if (!OnPillar)
+            {
+                TimeStart = Time.time;
+                OnPillar = true;
+            }
+            float TimeOnPillar = Time.time - TimeStart;
+            
+            // If we've been on the pillar long enough, jump down and clean up our state
+            if (TimeOnPillar > MaxTimeOnPillar)
+            {
+                Boss.PillarInfo.MarkPillarUnused(CurrentPillar);
+                OnPillar = false;
+
+                Boss.BossStates.Jump.SetTargetPosition(Boss.center.position);
+                Boss.BossStates.Jump.SetNextState(Boss.BossStates.Idle);
+                Boss.SetState(Boss.BossStates.Jump);
+            }
+            // If we're on the pillar, shoot an arrow.
+            else
+            {
+                Boss.BossStates.RangedAttack.SetNextState(Boss.BossStates.OnPillar);
+                Boss.SetState(Boss.BossStates.Aim);
+            }
+        }
+
+        public void SetPillar(Pillar Pillar)
+        {
+            CurrentPillar = Pillar;
         }
     }
 
-    public class StateJumpToPillar : State
+    public class StateJumpSquat : State
     {
         Timer CrouchTimer;
+        Vector3 TargetPosition;
 
-        public StateJumpToPillar(DojoBossCombatantActor Boss) : base(Boss)
+        public StateJumpSquat(DojoBossCombatantActor Boss) : base(Boss)
         {
             CrouchTimer = new Timer(1f, Timer.TimerBehavior.Once);
         }
@@ -669,19 +725,15 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             CrouchTimer.Update();
             if (CrouchTimer.Ready())
             {
-                // Find pillar and setup navigation to it
-                Pillar TargetPillar = Boss.PillarInfo.GetNextAndMarkUsed();
-
-                // Set up and switch to the jump state
-                Boss.BossStates.Jump.SetNextState(Boss.BossStates.OnPillar);
-                Boss.BossStates.Jump.SetTargetPosition(TargetPillar.Transform.position);
                 Boss.SetState(Boss.BossStates.Jump);
             }
         }
+
     }
 
     public class StateJump : State
     {
+        Timer CrouchTimer;
         State NextState;
         AnimancerState JumpAnimation;
         Vector3 StartPosition;
@@ -693,16 +745,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         public StateJump(DojoBossCombatantActor Boss) : base(Boss)
         {
 
-        }
-
-        public void SetNextState(State State)
-        {
-            NextState = State;
-        }
-
-        public void SetTargetPosition(Vector3 Position)
-        {
-            TargetPosition = Position;
         }
 
         public override void Enter()
@@ -744,6 +786,15 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             }
         }
 
+        public void SetNextState(State State)
+        {
+            NextState = State;
+        }
+
+        public void SetTargetPosition(Vector3 Position)
+        {
+            TargetPosition = Position;
+        }
     }
 
     private void SetState(State State)
@@ -761,7 +812,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         public StateAim Aim;
         public StateRangedAttack RangedAttack;
         public StateOnPillar OnPillar;
-        public StateJumpToPillar JumpToPillar;
+        public StateJumpSquat JumpSquat;
         public StateJump Jump;
     }
 
@@ -808,7 +859,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         BossStates.Aim          = new StateAim(this);
         BossStates.RangedAttack = new StateRangedAttack(this);
         BossStates.OnPillar     = new StateOnPillar(this);
-        BossStates.JumpToPillar = new StateJumpToPillar(this);
+        BossStates.JumpSquat    = new StateJumpSquat(this);
         BossStates.Jump         = new StateJump(this);
         BossStates.Current = BossStates.Idle;
 
