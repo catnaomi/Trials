@@ -430,9 +430,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
             UpdateRanges();
 
-            //float GroundedTime = Time.time - GroundedStartTime;
-            //if (GroundedTime > PillarDelay)
-            //{
+            float GroundedTime = Time.time - GroundedStartTime;
+            if (GroundedTime > PillarDelay)
+            {
                 // Find the pillar we want to go to
                 Pillar TargetPillar = Boss.PillarInfo.GetNextAndMarkUsed();
 
@@ -444,133 +444,17 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 // Enter the first jumping state
                 Boss.SetState(Boss.BossStates.JumpSquat);
                 Grounded = false;
-            //}
-            //else
-            //{
+            }
+            else
+            {
+                // Tell the RangedAttack state to come back here when it's done.
+                Boss.BossStates.RangedAttack.SetNextState(Boss.BossStates.Idle);
 
-            //    // Tell the RangedAttack state to come back here when it's done.
-            //    Boss.BossStates.RangedAttack.SetNextState(Boss.BossStates.Idle);
-
-            //    Boss.SetState(Boss.BossStates.Aim);
-            //}
+                Boss.SetState(Boss.BossStates.Aim);
+            }
 
 
             return;
-
-            //bool shouldPillarShoot = Boss.isLowHealth && r > 0.5f;
-            //CrouchAction pillarTarget = CrouchAction.Plunge;
-            //bool isPillarAvailable = Boss.TryGetAvailablePillar(out pillarTarget, shouldPillarShoot);
-            //bool shouldPillarJump = (Boss.timeSincePillar >= Boss.pillarJumpDelay) && isPillarAvailable;
-            //bool shouldJumpDown = (Boss.timeOnPillar >= Boss.pillarStayDelay);
-            //bool canSummon = isLowHealth && timeSinceLastSummon >= MinTimeBetweenSummons && spawnedEnemies.Count < spawnLimit;
-            //bool shouldParry = ShouldParry(out bool shouldCircleParry);
-
-            //if (aiming)
-            //{
-            //    StartRangedAttack();
-            //}
-            //else if (onPillar)
-            //{
-            //    if (isLowHealth)
-            //    {
-            //        if (canSummon)
-            //        {
-            //            StartSummon();
-            //        }
-            //        else
-            //        {
-            //            StartAiming();
-            //        }
-            //    }
-            //    else if (shouldJumpDown)
-            //    {
-            //        if (r < 0.4f)
-            //        {
-            //            StartCrouch(CrouchAction.Plunge);
-            //        }
-            //        else if (r < 0.8f)
-            //        {
-            //            StartCrouch(CrouchAction.JumpTo_Center);
-            //        }
-            //        else
-            //        {
-            //            if (isPillarAvailable)
-            //            {
-            //                timeOnPillar = 0f;
-            //                StartCrouch(pillarTarget);
-            //            }
-            //            else
-            //            {
-            //                StartCrouch(CrouchAction.JumpTo_Center);
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        StartAiming();
-            //    }
-            //}
-            //else if (shouldPillarJump)
-            //{
-            //    StartCrouch(pillarTarget);
-            //}
-            //else if (!inCloseRange)
-            //{
-            //    if (this.isLowHealth && canSummon)
-            //    {
-            //        StartSummon();
-            //    }
-            //    else
-            //    {
-            //        if (r < 0.4f)
-            //        {
-            //            StartAiming();
-            //        }
-            //        else // TODO: ground slam attack
-            //        {
-            //            StartCrouch(CrouchAction.Plunge);
-            //        }
-            //    }
-            //}
-            //else if (shouldParry && !wasLastParryIgnored)
-            //{
-            //    if (shouldCircleParry)
-            //    {
-            //        StartCircleParry();
-            //    }
-            //    else
-            //    {
-            //            StartCrossParry();
-            //        }
-            //    }
-            //    else
-            //    {
-            //        wasLastParryIgnored = false;
-            //        if (r > 0.5f)
-            //        {
-            //            StartSlash();
-            //        }
-            //        else
-            //        {
-            //            StartThrust();
-            //        }
-            //    }
-            //}        //            StartCrossParry();
-            //        }
-            //    }
-            //    else
-            //    {
-            //        wasLastParryIgnored = false;
-            //        if (r > 0.5f)
-            //        {
-            //            StartSlash();
-            //        }
-            //        else
-            //        {
-            //            StartThrust();
-            //        }
-            //    }
-            //}
         }
 
         public void UpdateRanges()
