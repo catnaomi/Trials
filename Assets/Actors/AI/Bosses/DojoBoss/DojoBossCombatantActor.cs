@@ -6,6 +6,27 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 
+public static class Constants
+{
+    public const float MaxTimeGrounded = 2f;
+    public const float MaxTimePillar = 2f;
+    public const float SummonCooldown = 10f;
+    public const int   CountSpawns = 2;
+}
+
+enum SpawnedEnemy
+{
+    GroundedMelee,
+    GroundedShield,
+    PillarArcher
+}
+
+public enum SpawnPointKind
+{
+    Grounded,
+    Pillar
+};
+
 public class Timer 
 {
     public enum TimerBehavior 
@@ -27,13 +48,13 @@ public class Timer
         this.behavior = behavior;
     }
 
-    public Timer(TimerBehavior behavior) 
+    public Timer(float time) : this(time, Timer.TimerBehavior.Once)
     {
-        this.time = 0;
-        this.accumulated = 0;
-        this.behavior = behavior;
     }
 
+    public Timer(TimerBehavior behavior) : this(0f, behavior)
+    {
+    }
 
     public float GetTime() 
     {
@@ -88,54 +109,97 @@ public class Timer
     }
 }
 
-public class Pillar
+public class SpawnPoint
 {
     public Transform Transform;
     public bool Available;
+
+    public SpawnPointKind Kind;
 }
 
-public class PillarInfo
+public class SpawnPointInfo
 {
-    List<Pillar> Pillars;
+    List<SpawnPoint> SpawnPoints;
 
-    public PillarInfo()
+    public SpawnPointInfo()
     {
-        Pillars = new List<Pillar>();
+        SpawnPoints = new List<SpawnPoint>();
     }
 
-    public void AddPillar(Transform Transform)
+    public void AddSpawnPoint(Transform Transform, SpawnPointKind Kind)
     {
-        Pillar Pillar = new Pillar();
-        Pillar.Transform = Transform;
-        Pillar.Available = true;
-        Pillars.Add(Pillar);
+        SpawnPoint SpawnPoint = new SpawnPoint();
+        SpawnPoint.Transform = Transform;
+        SpawnPoint.Available = true;
+        SpawnPoint.Kind = Kind;
+        SpawnPoints.Add(SpawnPoint);
     }
 
-    public Pillar GetNextAndMarkUsed()
+    public SpawnPoint GetNextAndMarkUsed(SpawnPointKind Kind)
     {
-        foreach(Pillar Pillar in Pillars)
+        foreach(SpawnPoint SpawnPoint in SpawnPoints)
         {
-            if (Pillar.Available)
+            if (SpawnPoint.Kind != Kind) continue;
+
+            if (SpawnPoint.Available)
             {
-                Pillar.Available = false;
-                return Pillar;
+                MarkUsed(SpawnPoint);
+                return SpawnPoint;
             }
         }
 
         return null;
     }
 
-    public void MarkPillarUnused(Pillar Pillar)
+    public void MarkUnused(SpawnPoint SpawnPoint)
     {
-        foreach (Pillar OtherPillar in Pillars)
+        foreach (SpawnPoint OtherSpawnPoint in SpawnPoints)
         {
-            if (OtherPillar == Pillar)
+            if (OtherSpawnPoint == SpawnPoint)
             {
-                Pillar.Available = true;
+                SpawnPoint.Available = true;
             }
         }
     }
+
+    public void MarkAllUnused(SpawnPointKind Kind)
+    {
+        foreach (SpawnPoint SpawnPoint in SpawnPoints)
+        {
+            if (SpawnPoint.Kind == Kind)
+            {
+                SpawnPoint.Available = true;
+            }
+        }
+    }
+
+    public void MarkUsed(SpawnPoint SpawnPoint)
+    {
+        SpawnPoint.Available = false;
+    }
+
+    public SpawnPoint GetClosestSpawnPoint(Vector3 Position, SpawnPointKind Kind)
+    {
+        SpawnPoint Closest = null;
+        float MinDistance = float.PositiveInfinity;
+
+        foreach (SpawnPoint SpawnPoint in SpawnPoints)
+        {
+            if (SpawnPoint.Kind != Kind) continue;
+            if (!SpawnPoint.Available) continue;
+
+            float Distance = Vector3.Distance(Position, SpawnPoint.Transform.position);
+            if (Distance < MinDistance)
+            {
+                MinDistance = Distance;
+                Closest = SpawnPoint;
+            }
+        }
+
+        return Closest;
+    }
 }
+
 
 [RequireComponent(typeof(HumanoidNPCInventory))]
 public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamageable
@@ -230,9 +294,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public ClipTransition SummonEnd;
     public ClipTransition SpawnAnim;
     public FlyToTargetThenEmitSecondary[] SummonBalls;
-    bool summoning;
     public float SummonTime;
-    float summonClock;
     [Space(5)]
     public DamageAnims damageAnims;
     HumanoidDamageHandler damageHandler;
@@ -368,13 +430,46 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     System.Action _MoveOnEnd;
     #endregion
 
+    #region States
+    // The blackboard is used in state transitions. It has two purposes:
+    // 1. Data that's shared across different states
+    // 2. Code that a state needs to run even when that state is not active (e.g. updating a timer)
+    public class StateBlackboard
+    {
+        public bool IsGrounded = true;
+        public Timer GroundedTimer;
+        public Timer PillarTimer;
+        public Timer SummonTimer;
+
+        public StateBlackboard()
+        {
+            GroundedTimer = new Timer(Constants.MaxTimeGrounded, Timer.TimerBehavior.Once);
+            GroundedTimer.Enable(); // We start grounded
+
+            PillarTimer = new Timer(Constants.MaxTimePillar, Timer.TimerBehavior.Once);
+            PillarTimer.Disable();
+            
+            SummonTimer = new Timer(Constants.SummonCooldown, Timer.TimerBehavior.Once);
+            SummonTimer.Enable();
+        }
+
+        public void Update()
+        {
+            GroundedTimer.Update();
+            PillarTimer.Update();
+            SummonTimer.Update();
+        }
+    }
+
     public class State
     {
         public DojoBossCombatantActor Boss;
+        public StateBlackboard Blackboard;
 
         public State(DojoBossCombatantActor Boss)
         {
             this.Boss = Boss;
+            this.Blackboard = Boss.Blackboard;
         }
 
         public virtual void Enter()
@@ -394,16 +489,25 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             this.Boss = boss;
         }
+
+        public State GetNextIdleState()
+        {
+            if (Blackboard.IsGrounded)
+            {
+                return Boss.BossStates.IdleGrounded;
+            }
+            else
+            {
+                return Boss.BossStates.IdlePillar;
+            }
+        }
     }
 
-    public class StateIdle : State
+    public class StateIdleGrounded : State
     {
         Timer IdleTimer;
-        float PillarDelay = 2f;
-        float GroundedStartTime;
-        bool Grounded;
 
-        public StateIdle(DojoBossCombatantActor Boss) : base(Boss)
+        public StateIdleGrounded(DojoBossCombatantActor Boss) : base(Boss)
         {
             //bool shouldPillarJump = (Boss.timeSincePillar >= Boss.pillarJumpDelay) && isPillarAvailable;
             IdleTimer = new Timer(2f, Timer.TimerBehavior.Once);
@@ -414,11 +518,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             IdleTimer.Reset();
             IdleTimer.SetTime(Random.Range(Boss.ActionDelayMinimum, Boss.ActionDelayMaximum));
 
-            if (!Grounded)
+            if (!Blackboard.IsGrounded)
             {
-                GroundedStartTime = Time.time;
+                Blackboard.IsGrounded = true;
+                Blackboard.GroundedTimer.Reset();
+                Blackboard.GroundedTimer.Enable();
             }
-            Grounded = true;
         }
 
         public override void Update()
@@ -430,26 +535,21 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
             UpdateRanges();
 
-            float GroundedTime = Time.time - GroundedStartTime;
-            if (GroundedTime > PillarDelay)
+            if (Blackboard.GroundedTimer.Ready())
             {
                 // Find the pillar we want to go to
-                Pillar TargetPillar = Boss.PillarInfo.GetNextAndMarkUsed();
-
-                // Set up the later states in the chain
-                Boss.BossStates.OnPillar.SetPillar(TargetPillar);
+                SpawnPoint TargetPillar = Boss.SpawnPointInfo.GetNextAndMarkUsed(SpawnPointKind.Pillar);
+                Boss.BossStates.IdlePillar.SetPillar(TargetPillar);
                 Boss.BossStates.Jump.SetTargetPosition(TargetPillar.Transform.position);
-                Boss.BossStates.Jump.SetNextState(Boss.BossStates.OnPillar);
 
-                // Enter the first jumping state
+                Blackboard.IsGrounded = false;
+                Blackboard.GroundedTimer.Reset();
+                Blackboard.GroundedTimer.Disable();
+
                 Boss.SetState(Boss.BossStates.JumpSquat);
-                Grounded = false;
             }
             else
             {
-                // Tell the RangedAttack state to come back here when it's done.
-                Boss.BossStates.RangedAttack.SetNextState(Boss.BossStates.Idle);
-
                 Boss.SetState(Boss.BossStates.Aim);
             }
 
@@ -459,7 +559,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
         public void UpdateRanges()
         {
-            Boss.isLowHealth = Boss.attributes.health.current <= Boss.attributes.health.max * 0.5f;
             if (Boss.isLowHealth)
             {
                 Boss.bufferRange = 12f;
@@ -506,7 +605,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public class StateRangedAttack : State
     {
-        State NextState;
         Timer FireTimer;
 
         public StateRangedAttack(DojoBossCombatantActor Boss) : base(Boss)
@@ -523,7 +621,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
             Boss.combatState.attack.Events.OnEnd = Boss._MoveOnEnd;
             Boss.OnAttack.Invoke();
-
             Boss.aimParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             Boss.fireParticle.Play();
         }
@@ -533,57 +630,58 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             FireTimer.Update();
             if (FireTimer.Ready())
             {
-                Boss.SetState(NextState);
+                Boss.SetState(GetNextIdleState());
             }
-        }
-
-        public void SetNextState(State State)
-        {
-            NextState = State;
         }
     }
 
-    public class StateOnPillar : State
+    public class StateIdlePillar : State
     {
-        bool OnPillar = false;
-        float TimeStart = 0f;
-        const float MaxTimeOnPillar = 2f;
-        Pillar CurrentPillar;
+        SpawnPoint CurrentPillar;
 
-        public StateOnPillar(DojoBossCombatantActor Boss) : base(Boss)
+        public StateIdlePillar(DojoBossCombatantActor Boss) : base(Boss)
         {
 
         }
 
         public override void Enter()
         {
-            // Accumulate time on the pillar. If we're not already on the pillar, mark our start time.
-            if (!OnPillar)
+            // If we're not already on the pillar, set up tracking for our pillar time
+            if (Blackboard.IsGrounded)
             {
-                TimeStart = Time.time;
-                OnPillar = true;
+                Blackboard.IsGrounded = false;
+                Blackboard.PillarTimer.Reset();
+                Blackboard.PillarTimer.Enable();
             }
-            float TimeOnPillar = Time.time - TimeStart;
             
-            // If we've been on the pillar long enough, jump down and clean up our state
-            if (TimeOnPillar > MaxTimeOnPillar)
+            // We should return to the ground
+            if (Blackboard.PillarTimer.Ready())
             {
-                Boss.PillarInfo.MarkPillarUnused(CurrentPillar);
-                OnPillar = false;
+                Blackboard.IsGrounded = true;
+                Blackboard.PillarTimer.Reset();
+                Blackboard.PillarTimer.Disable();
+
+                Boss.SpawnPointInfo.MarkUnused(CurrentPillar);
 
                 Boss.BossStates.Jump.SetTargetPosition(Boss.center.position);
-                Boss.BossStates.Jump.SetNextState(Boss.BossStates.Idle);
+                Boss.BossStates.Jump.SetNextState(Boss.BossStates.IdleGrounded);
                 Boss.SetState(Boss.BossStates.Jump);
             }
-            // If we're on the pillar, shoot an arrow.
+            // We should stay on the pillar
             else
             {
-                Boss.BossStates.RangedAttack.SetNextState(Boss.BossStates.OnPillar);
-                Boss.SetState(Boss.BossStates.Aim);
+                if (Boss.CanSummon())
+                {
+                    Boss.SetState(Boss.BossStates.Summon);
+                }
+                else
+                {
+                    Boss.SetState(Boss.BossStates.Aim);
+                }
             }
         }
 
-        public void SetPillar(Pillar Pillar)
+        public void SetPillar(SpawnPoint Pillar)
         {
             CurrentPillar = Pillar;
         }
@@ -663,7 +761,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             Vector3 Distance = NextPosition - TargetPosition;
             if (Distance.magnitude < 1f)
             {
-                Boss.SetState(NextState);
+                Boss.SetState(GetNextIdleState());
             }
         }
 
@@ -678,9 +776,100 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
     }
 
+    public class StateSummon : State
+    {
+        Timer SummonTimer;
+
+        public StateSummon(DojoBossCombatantActor Boss) : base(Boss)
+        {
+            SummonTimer = new Timer(Boss.SummonTime);
+        }
+
+        public override void Enter()
+        {
+            SummonTimer.Reset();
+
+            // Play animations
+            // @spader Is there a better way to chain animations together? I see this a lot.
+            AnimancerState SummonAnimation = Boss.animancer.Play(Boss.SummonStart);
+            SummonAnimation.Events.OnEnd = () =>
+            {
+                Boss.animancer.Play(Boss.SummonHold);
+            };
+
+            Boss.summonParticle.Play();
+        }
+
+        public override void Update()
+        {
+            SummonTimer.Update();
+            if (SummonTimer.Ready())
+            {
+                SummonTimer.Reset();
+                AnimancerState SummonEndAnimation = Boss.animancer.Play(Boss.SummonEnd);
+                SummonEndAnimation.Events.OnEnd = Boss._MoveOnEnd;
+
+                Boss.summonParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+
+                InstantiateDummies();
+
+                Boss.SetState(GetNextIdleState());
+            }
+        }
+
+        void InstantiateDummies()
+        {
+            // Instantiate
+            //SpawnPointKind SpawnPointKind = Blackboard.IsGrounded ? SpawnPointKind.Grounded : SpawnPointKind.Pillar;
+            SpawnPointKind SpawnPointKind = SpawnPointKind.Grounded;
+            GameObject DummyKind = Blackboard.IsGrounded ? Boss.archerDummy : Boss.slashDummy;
+            Vector3 Midpoint = (Boss.transform.position + Boss.CombatTarget.transform.position) * 0.5f;
+
+            for (int i = 0; i < Constants.CountSpawns; i++)
+            {
+                SpawnPoint SpawnPoint = Boss.SpawnPointInfo.GetClosestSpawnPoint(Midpoint, SpawnPointKind);
+                Boss.SpawnPointInfo.MarkUsed(SpawnPoint);
+
+                Vector3 PlayerToDummy = SpawnPoint.Transform.position - Boss.CombatTarget.transform.position;
+                Vector3 DummyToPlayer = -1 * PlayerToDummy;
+                DummyToPlayer.Normalize();
+
+                GameObject DummyObject = Instantiate(
+                    DummyKind,
+                    SpawnPoint.Transform.position,
+                    Quaternion.LookRotation(DummyToPlayer)
+                );
+                NavigatingHumanoidActor Dummy = DummyObject.GetComponent<NavigatingHumanoidActor>();
+                AnimancerComponent DummyAnimancer = DummyObject.GetComponent<AnimancerComponent>();
+
+                Boss.Dummies.Add(Dummy);
+
+                AnimancerState SpawnAnimation = DummyAnimancer.Play(Boss.SpawnAnim);
+                SpawnAnimation.Events.OnEnd = () => {
+                    Dummy.shouldNavigate = true;
+                    Dummy.actionsEnabled = true;
+                    Dummy.PlayIdle();
+                };
+
+                Dummy.OnDie.AddListener(() =>
+                {
+                    Boss.SpawnPointInfo.MarkUnused(SpawnPoint);
+                    Boss.Dummies.Remove(Dummy);
+                });
+
+                Boss.SummonBalls[i].Fly(Boss.summonParticle.transform.position, SpawnPoint.Transform.position);
+            }
+
+            // Spawning ground entities doesn't "occupy" the spawn point. We just mark them used when creating
+            // so we choose different spawn points. Clear that.
+            Boss.SpawnPointInfo.MarkAllUnused(SpawnPointKind.Grounded);
+        }
+    }
+
     private void SetState(State State)
     {
-        if (State == null) State = BossStates.Idle;
+        if (State == null) State = BossStates.IdleGrounded;
+        Debug.Log(State.GetType().Name);
         BossStates.Current.Exit();
         BossStates.Current = State;
         BossStates.Current.Enter();
@@ -689,18 +878,21 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public struct States
     {
         public State Current;
-        public StateIdle Idle;
+        public StateIdleGrounded IdleGrounded;
         public StateAim Aim;
         public StateRangedAttack RangedAttack;
-        public StateOnPillar OnPillar;
+        public StateIdlePillar IdlePillar;
         public StateJumpSquat JumpSquat;
         public StateJump Jump;
+        public StateSummon Summon;
     }
+    #endregion
 
     // @spader: New fields
     public States BossStates;
-    public PillarInfo PillarInfo;
-     
+    public SpawnPointInfo SpawnPointInfo;
+    public StateBlackboard Blackboard;
+    public List<NavigatingHumanoidActor> Dummies;
 
     public override void ActorStart()
     {
@@ -736,19 +928,25 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         BossHealthIndicator.SetTarget(this.gameObject);
 
         // States
-        BossStates.Idle         = new StateIdle(this);
+        Blackboard = new StateBlackboard();
+
+        BossStates.IdleGrounded         = new StateIdleGrounded(this);
         BossStates.Aim          = new StateAim(this);
         BossStates.RangedAttack = new StateRangedAttack(this);
-        BossStates.OnPillar     = new StateOnPillar(this);
+        BossStates.IdlePillar     = new StateIdlePillar(this);
         BossStates.JumpSquat    = new StateJumpSquat(this);
         BossStates.Jump         = new StateJump(this);
-        BossStates.Current = BossStates.Idle;
+        BossStates.Summon       = new StateSummon(this);
+        BossStates.Current = BossStates.IdleGrounded;
 
         // Pillars
-        PillarInfo = new PillarInfo();
-        PillarInfo.AddPillar(pillar1);
-        PillarInfo.AddPillar(pillar2);
-        PillarInfo.AddPillar(pillar3);
+        SpawnPointInfo = new SpawnPointInfo();
+        SpawnPointInfo.AddSpawnPoint(pillar1, SpawnPointKind.Pillar);
+        SpawnPointInfo.AddSpawnPoint(pillar2, SpawnPointKind.Pillar);
+        SpawnPointInfo.AddSpawnPoint(pillar3, SpawnPointKind.Pillar);
+        SpawnPointInfo.AddSpawnPoint(spawn1, SpawnPointKind.Grounded);
+        SpawnPointInfo.AddSpawnPoint(spawn2, SpawnPointKind.Grounded);
+        SpawnPointInfo.AddSpawnPoint(spawn3, SpawnPointKind.Grounded);
     }
 
     void Awake()
@@ -771,6 +969,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             inventory.SetDrawn(false, true);
         }
 
+        Blackboard.Update();
         BossStates.Current.Update();
 
         if (animancer.States.Current == combatState.jump)
@@ -948,23 +1147,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             }
             lastTargetPos = CombatTarget.transform.position;
         }
-        if (summoning)
-        {
-            ProcessSummon();
-            if (summonParticle != null && !summonParticle.isEmitting)
-            {
-                summonParticle.Play();
-            }
-            timeSinceLastSummon = 0f;
-        }
-        else
-        {
-            if (summonParticle != null && summonParticle.isEmitting)
-            {
-                summonParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-            }
-            timeSinceLastSummon += Time.deltaTime;
-        }
+
         if (pillarStunned)
         {
             ProcessPillarStun();
@@ -983,6 +1166,15 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             timeSincePillar += Time.deltaTime;
             timeOnPillar = 0f;
         }
+    }
+
+    public bool CanSummon()
+    {
+        return Blackboard.SummonTimer.Ready() && Dummies.Count < 2;
+    }
+    public bool IsLowHealth()
+    {
+        return attributes.health.current <= attributes.health.max * 0.5f;
     }
 
     public void UpdateCombatTarget()
@@ -1404,36 +1596,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         aiming = false;
         _MoveOnEnd();
-    }
-
-    public void StartSummon()
-    {
-        combatState.summon = animancer.Play(SummonStart);
-        combatState.summon.Events.OnEnd = () =>
-        {
-            combatState.summon = animancer.Play(SummonHold);
-            summoning = true;
-        };
-        summonClock = SummonTime;
-    }
-
-    public void ProcessSummon()
-    {
-        if (!animancer.IsPlayingClip(SummonHold.Clip))
-        {
-            summoning = false;
-            return;
-        }
-        float t = 1f - Mathf.Clamp01(summonClock / SummonTime);
-
-        if (t >= 1f)
-        {
-            combatState.summon = animancer.Play(SummonEnd);
-            combatState.summon.Events.OnEnd = _MoveOnEnd;
-            summoning = false;
-        }
-
-        summonClock -= Time.deltaTime;
     }
 
     public void InstantiateSummons()

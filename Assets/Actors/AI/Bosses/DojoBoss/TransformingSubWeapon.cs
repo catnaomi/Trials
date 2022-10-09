@@ -52,7 +52,7 @@ public class TransformingSubWeapon : BladeWeapon
         }
         if (active && canFire)
         {
-            Debug.Log("bow fire!!!");
+            //Debug.Log("bow fire!!!");
             Fire();
             canFire = false;
         }
@@ -156,7 +156,7 @@ public class TransformingSubWeapon : BladeWeapon
 
             Vector3 aimAssist = Vector3.zero;// Vector3.Lerp(Vector3.zero, new Vector3(0, 0.05f, 0), dist / 20f);
 
-            Debug.Log("aim assist: " + aimAssist.y * 100f);
+            //Debug.Log("aim assist: " + aimAssist.y * 100f);
 
             if (holder.GetCombatTarget().TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference hpr))
             {

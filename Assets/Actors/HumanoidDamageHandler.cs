@@ -121,9 +121,9 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             dr = DamageResistance.Add(dr, actor.GetBlockResistance());
         }
 
-        Debug.Log("damage before resistances = " + damageAmount);
+        //Debug.Log("damage before resistances = " + damageAmount);
         damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.GetTypes(), dr);
-        Debug.Log("damage after resistances = " + damageAmount);
+        //Debug.Log("damage after resistances = " + damageAmount);
 
         bool isArmored = actor.IsArmored() && !damage.breaksArmor;
         bool willInjure = actor.attributes.spareable && actor.attributes.HasHealthRemaining() && damageAmount >= actor.attributes.health.current;
