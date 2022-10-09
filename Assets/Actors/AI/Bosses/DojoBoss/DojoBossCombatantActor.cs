@@ -6,26 +6,6 @@ using UnityEngine.AI;
 using System.Collections.Generic;
 using CustomUtilities;
 
-// Goal:
-// 
-public class BehaviorNode
-{
-    public delegate bool ProcessCallback();
-
-    public ProcessCallback OnProcess;
-    public List<BehaviorNode> children;
-}
-
-public class BehaviorTreeController 
-{
-    BehaviorNode Root;
-    BehaviorNode Current;
-    public void Update()
-    {
-        Root.OnProcess();
-    }
-}
-
 public class Timer 
 {
     public enum TimerBehavior 
@@ -64,16 +44,23 @@ public class Timer
         this.accumulated = 0;
     }
 
-    public bool Update() 
+    public void SetBehavior(TimerBehavior behavior)
+    {
+        this.behavior = behavior;
+    }
+
+
+    public void Update() 
     {
         this.accumulated += Time.deltaTime;
-        if (this.behavior == TimerBehavior.Repeat) 
+
+        if (this.accumulated >= this.time && this.behavior == TimerBehavior.Repeat) 
         {
-            Reset()
+            Reset();
         }
     }
 
-    public void Ready() 
+    public bool Ready() 
     {
         return this.accumulated >= this.time;
     }
@@ -84,15 +71,12 @@ public class Timer
     }
 }
 
+
+
 [RequireComponent(typeof(HumanoidNPCInventory))]
 public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamageable
 {
-    public void RootBehavior()
-    {
-        Debug.Log("Hello, world!");
-    }
-    BehaviorNode BehaviorTree;
-
+    #region shit
     HumanoidNPCInventory inventory;
     /*
      * attacks:
@@ -318,8 +302,87 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     }
     System.Action _MoveOnEnd;
+    #endregion
 
-    Timer ActionTimer(TimerBehavior.Once);
+    public class State
+    {
+        public DojoBossCombatantActor Boss;
+
+        public virtual void Enter()
+        {
+
+        }
+        public virtual void Update()
+        {
+
+        }
+        public virtual void Exit()
+        {
+
+        }
+
+        public void SetBoss(DojoBossCombatantActor boss)
+        {
+            this.Boss = boss;
+        }
+    }
+
+    public class StateIdle : State
+    {
+        public override void Update()
+        {
+            Boss.CheckForNextAction();
+        }
+    }
+
+    public class StateAim : State
+    {
+        public Timer AimTimer;
+        float AimTime = 2f;
+
+        public override void Enter()
+        {
+            AimTimer = new Timer(AimTime, Timer.TimerBehavior.Once);
+            Boss.StartAiming();
+        }
+
+        public override void Update()
+        {
+            AimTimer.Update();
+            if (AimTimer.Ready())
+            {
+                Boss.SetState(Boss.BossStates.RangedAttack);
+            }
+        }
+    }
+
+    public class StateRangedAttack : State
+    {
+        public override void Enter()
+        {
+            Boss.StartRangedAttack();
+        }
+
+    }
+
+    public struct States
+    {
+        public State Current;
+        public StateIdle Idle;
+        public StateAim Aim;
+        public StateRangedAttack RangedAttack;
+    }
+    States BossStates;
+
+    Timer ActionTimer;
+
+
+    private void SetState(State state)
+    {
+        BossStates.Current.Exit();
+        BossStates.Current = state;
+        BossStates.Current.Enter();
+    }
 
     public void CheckForNextAction() {
         if (!ActionTimer.Ready()) return;
@@ -351,6 +414,16 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             bufferRange = 12f;
             closeRange = 8f;
         }
+
+        if (!aiming)
+        {
+            StartAiming();
+        } else
+        {
+            StartRangedAttack();
+        }
+
+        return;
 
         if (aiming)
         {
@@ -477,10 +550,20 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
         BossHealthIndicator.SetTarget(this.gameObject);
 
-        float ActionDelayAverage = (ActionDelayMinimum + ActionDelayMaximum) / 2;
-        ActionTimer.SetTime(ActionDelayAverage);
+        // Timer
+        ActionTimer = new Timer(ActionDelayMinimum, Timer.TimerBehavior.Once);
 
-        BehaviorTree.OnProcess = this.RootBehavior;
+        // States
+        BossStates.Idle = new StateIdle();
+        BossStates.Idle.SetBoss(this);
+
+        BossStates.Aim = new StateAim();
+        BossStates.Aim.SetBoss(this);
+
+        BossStates.RangedAttack = new StateRangedAttack();
+        BossStates.RangedAttack.SetBoss(this);
+
+        BossStates.Current = BossStates.Idle;
     }
 
     void Awake()
@@ -490,10 +573,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public override void ActorPostUpdate()
     {
-        base.ActorPostUpdate();
-        ActionTimer.Update(); // @spader where the fuck is dt
-
-        
         if (CombatTarget == null)
         {
             if (DetermineCombatTarget(out GameObject target))
@@ -513,6 +592,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             CombatTarget = null;
         }
 
+        base.ActorPostUpdate();
+        ActionTimer.Update(); // @spader where the fuck is dt
+
+        
+
+
         if (inventory.IsMainEquipped() && !inventory.IsMainDrawn())
         {
             inventory.SetDrawn(true, true);
@@ -522,8 +607,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             inventory.SetDrawn(false, true);
         }
 
-        // 
-        CheckForNextAction();
+        BossStates.Current.Update();
 
         if (animancer.States.Current == cstate.jump)
         {
@@ -907,6 +991,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
         circleParrying = true;
     }
+	
     public void StartCrouch(CrouchAction action)
     {
         RealignToTarget();
@@ -915,6 +1000,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         crouching = true;
         actionAfterCrouch = action;
     }
+	
     public void StartPlungeAttack()
     {
         Vector3 position = GetProjectedPosition(PlungeTime);
@@ -1002,9 +1088,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public void ProcessPlunge()
     {
-
-        
-
         float t = 1f - Mathf.Clamp01(plungeClock/PlungeTime);
         nav.enabled = false;
 
@@ -1057,8 +1140,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
 
         plungeClock -= Time.deltaTime;
-
-        
     }
 
     void EndPlunge()
