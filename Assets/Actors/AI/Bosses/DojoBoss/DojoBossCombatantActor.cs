@@ -8,13 +8,14 @@ using UnityEngine.Events;
 
 public static class Constants
 {
-    public const float MaxTimeGrounded = 2f;
+    public const float MaxTimeGrounded = 10f;
     public const float MaxTimePillar = 2f;
+    public const float TimeIdleGrounded = 2f;
     public const float SummonCooldown = 10f;
     public const int   CountSpawns = 2;
 }
 
-enum SpawnedEnemy
+public enum SpawnedEnemy
 {
     GroundedMelee,
     GroundedShield,
@@ -27,6 +28,22 @@ public enum SpawnPointKind
     Pillar
 };
 
+public enum RandomGroundedAttack
+{
+    ShootArrow,
+    GroundSlam,
+    HammerJump,
+    Count
+}
+
+public enum RandomPillarAction
+{
+    HammerJump,
+    ReturnToGround,
+    JumpToNewPillar,
+    Count
+}
+
 public class Timer 
 {
     public enum TimerBehavior 
@@ -35,17 +52,17 @@ public class Timer
         Repeat
     }
 
-    float time;
-    float accumulated;
-    bool enabled;
-    TimerBehavior behavior;
+    public float Time;
+    public float Accumulated;
+    public bool Enabled;
+    public TimerBehavior Behavior;
 
     public Timer(float time, TimerBehavior behavior) 
     {
-        this.time = time;
-        this.accumulated = 0;
-        this.enabled = true;
-        this.behavior = behavior;
+        this.Time = time;
+        this.Accumulated = 0;
+        this.Enabled = true;
+        this.Behavior = behavior;
     }
 
     public Timer(float time) : this(time, Timer.TimerBehavior.Once)
@@ -58,30 +75,30 @@ public class Timer
 
     public float GetTime() 
     {
-        return this.time;
+        return this.Time;
     }
 
     public void SetTime(float time) 
     {
-        this.time = time;
-        this.accumulated = 0;
+        this.Time = time;
+        this.Accumulated = 0;
     }
 
     public void SetBehavior(TimerBehavior behavior)
     {
-        this.behavior = behavior;
+        this.Behavior = behavior;
     }
 
 
     public void Update() 
     {
-        if (!this.enabled) return;
+        if (!this.Enabled) return;
 
-        this.accumulated += Time.deltaTime;
+        this.Accumulated += UnityEngine.Time.deltaTime;
 
-        if (this.accumulated >= this.time)
+        if (this.Accumulated >= this.Time)
         {
-            if (this.behavior == TimerBehavior.Repeat)
+            if (this.Behavior == TimerBehavior.Repeat)
             {
                 Reset();
             }
@@ -90,22 +107,27 @@ public class Timer
 
     public bool Ready() 
     {
-        return this.accumulated >= this.time;
+        return this.Accumulated >= this.Time;
     }
 
     public void Reset() 
     {
-        accumulated = 0;
+        Accumulated = 0;
     }
 
     public void Enable()
     {
-        this.enabled = true;
+        this.Enabled = true;
     }
 
     public void Disable()
     {
-        this.enabled = false;
+        this.Enabled = false;
+    }
+
+    public float GetPercentDone()
+    {
+        return Mathf.Clamp01(Accumulated / Time);
     }
 }
 
@@ -198,6 +220,20 @@ public class SpawnPointInfo
 
         return Closest;
     }
+
+    public int CountAvailable(SpawnPointKind Kind)
+    {
+        int Count = 0;
+        foreach (SpawnPoint SpawnPoint in SpawnPoints)
+        {
+            if (SpawnPoint.Kind != Kind) continue;
+            if (!SpawnPoint.Available) continue;
+
+            Count++;
+        }
+
+        return Count;
+    }
 }
 
 
@@ -235,10 +271,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public float DescentPoint = 0.75f;
     public float AttackPoint = 0.9f;
     public float PlungeTime = 5f;
-    float plungeClock;
-    bool plunging;
-    Vector3 plungeTarget;
-    Vector3 plungeStart;
     [Space(10)]
     public ClipTransition CrouchDown;
     public ClipTransition Crouch;
@@ -459,6 +491,29 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             PillarTimer.Update();
             SummonTimer.Update();
         }
+
+        public void GroundedStart()
+        {
+            IsGrounded = true;
+
+            GroundedTimer.Reset();
+            GroundedTimer.Enable();
+
+            PillarTimer.Reset();
+            PillarTimer.Disable();
+
+        }
+
+        public void PillarStart()
+        {
+            IsGrounded = false;
+
+            GroundedTimer.Reset();
+            GroundedTimer.Disable();
+
+            PillarTimer.Reset();
+            PillarTimer.Enable();
+        }
     }
 
     public class State
@@ -501,6 +556,19 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 return Boss.BossStates.IdlePillar;
             }
         }
+
+        public State GetOppositeIdleState()
+        {
+            if (Blackboard.IsGrounded)
+            {
+                return Boss.BossStates.IdlePillar;
+            }
+            else
+            {
+                return Boss.BossStates.IdleGrounded;
+            }
+        }
+
     }
 
     public class StateIdleGrounded : State
@@ -510,7 +578,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         public StateIdleGrounded(DojoBossCombatantActor Boss) : base(Boss)
         {
             //bool shouldPillarJump = (Boss.timeSincePillar >= Boss.pillarJumpDelay) && isPillarAvailable;
-            IdleTimer = new Timer(2f, Timer.TimerBehavior.Once);
+            IdleTimer = new Timer(Constants.TimeIdleGrounded, Timer.TimerBehavior.Once);
         }
 
         public override void Enter()
@@ -520,9 +588,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
             if (!Blackboard.IsGrounded)
             {
-                Blackboard.IsGrounded = true;
-                Blackboard.GroundedTimer.Reset();
-                Blackboard.GroundedTimer.Enable();
+                Blackboard.GroundedStart();
             }
         }
 
@@ -533,7 +599,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             if (!IdleTimer.Ready()) return;
             if (Boss.CombatTarget == null) return;
 
-            UpdateRanges();
+            Boss.UpdateRanges();
 
             if (Blackboard.GroundedTimer.Ready())
             {
@@ -542,32 +608,52 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                 Boss.BossStates.IdlePillar.SetPillar(TargetPillar);
                 Boss.BossStates.Jump.SetTargetPosition(TargetPillar.Transform.position);
 
-                Blackboard.IsGrounded = false;
-                Blackboard.GroundedTimer.Reset();
-                Blackboard.GroundedTimer.Disable();
-
                 Boss.SetState(Boss.BossStates.JumpSquat);
             }
             else
             {
-                Boss.SetState(Boss.BossStates.Aim);
+                if (Boss.IsCloseRange())
+                {
+
+                }
+                else
+                {
+                    if (Boss.IsLowHealth())
+                    {
+                        if (Boss.CanSummon())
+                        {
+                            Boss.SetState(Boss.BossStates.Summon);
+                        }
+                        else
+                        {
+                            ChooseRandomAttack();
+                        }
+                    }
+                    else
+                    {
+                        ChooseRandomAttack();
+                    }
+                }
             }
 
 
             return;
         }
 
-        public void UpdateRanges()
+        void ChooseRandomAttack()
         {
-            if (Boss.isLowHealth)
+            RandomGroundedAttack Attack = (RandomGroundedAttack)Random.Range(0, (int)RandomGroundedAttack.Count);
+            if (Attack == RandomGroundedAttack.ShootArrow)
             {
-                Boss.bufferRange = 12f;
-                Boss.closeRange = 8f;
+                Boss.SetState(Boss.BossStates.Aim);
             }
-            else
+            else if (Attack == RandomGroundedAttack.GroundSlam)
             {
-                Boss.bufferRange = 8f;
-                Boss.closeRange = 4f;
+                return;
+            }
+            else if (Attack == RandomGroundedAttack.HammerJump)
+            {
+                Boss.SetState(Boss.BossStates.PlungeAttack);
             }
         }
     }
@@ -649,23 +735,13 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             // If we're not already on the pillar, set up tracking for our pillar time
             if (Blackboard.IsGrounded)
             {
-                Blackboard.IsGrounded = false;
-                Blackboard.PillarTimer.Reset();
-                Blackboard.PillarTimer.Enable();
+                Blackboard.PillarStart();
             }
             
             // We should return to the ground
             if (Blackboard.PillarTimer.Ready())
             {
-                Blackboard.IsGrounded = true;
-                Blackboard.PillarTimer.Reset();
-                Blackboard.PillarTimer.Disable();
-
-                Boss.SpawnPointInfo.MarkUnused(CurrentPillar);
-
-                Boss.BossStates.Jump.SetTargetPosition(Boss.center.position);
-                Boss.BossStates.Jump.SetNextState(Boss.BossStates.IdleGrounded);
-                Boss.SetState(Boss.BossStates.Jump);
+                ChooseRandomAction();
             }
             // We should stay on the pillar
             else
@@ -685,12 +761,39 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         {
             CurrentPillar = Pillar;
         }
+
+        public void ChooseRandomAction()
+        {
+            RandomPillarAction Attack = (RandomPillarAction)Random.Range(0, (int)RandomPillarAction.Count);
+            if (Attack == RandomPillarAction.ReturnToGround)
+            {
+                Boss.SpawnPointInfo.MarkUnused(CurrentPillar);
+                Boss.BossStates.Jump.SetTargetPosition(Boss.center.position);
+                Boss.SetState(Boss.BossStates.Jump);
+            }
+            else if (Attack == RandomPillarAction.HammerJump)
+            {
+                Boss.SpawnPointInfo.MarkUnused(CurrentPillar);
+                Boss.SetState(Boss.BossStates.PlungeAttack);
+            }
+            else
+            {
+                if (Boss.SpawnPointInfo.CountAvailable(SpawnPointKind.Pillar) > 0)
+                {
+                    SpawnPoint TargetPillar = Boss.SpawnPointInfo.GetNextAndMarkUsed(SpawnPointKind.Pillar);
+                    Boss.SpawnPointInfo.MarkUnused(CurrentPillar);
+                    SetPillar(TargetPillar);
+                    Boss.BossStates.Jump.SetTargetPosition(TargetPillar.Transform.position);
+                    Boss.SetState(Boss.BossStates.JumpSquat);
+                }
+                return;
+            }
+        }
     }
 
     public class StateJumpSquat : State
     {
         Timer CrouchTimer;
-        Vector3 TargetPosition;
 
         public StateJumpSquat(DojoBossCombatantActor Boss) : base(Boss)
         {
@@ -716,8 +819,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
 
     public class StateJump : State
     {
-        Timer CrouchTimer;
-        State NextState;
         AnimancerState JumpAnimation;
         Vector3 StartPosition;
         Vector3 TargetPosition;
@@ -761,13 +862,9 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             Vector3 Distance = NextPosition - TargetPosition;
             if (Distance.magnitude < 1f)
             {
-                Boss.SetState(GetNextIdleState());
+                // If we're currently grounded, the jump brings us to a pillar. Vice-versa.
+                Boss.SetState(GetOppositeIdleState());
             }
-        }
-
-        public void SetNextState(State State)
-        {
-            NextState = State;
         }
 
         public void SetTargetPosition(Vector3 Position)
@@ -820,9 +917,8 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         void InstantiateDummies()
         {
             // Instantiate
-            //SpawnPointKind SpawnPointKind = Blackboard.IsGrounded ? SpawnPointKind.Grounded : SpawnPointKind.Pillar;
-            SpawnPointKind SpawnPointKind = SpawnPointKind.Grounded;
-            GameObject DummyKind = Blackboard.IsGrounded ? Boss.archerDummy : Boss.slashDummy;
+            SpawnPointKind SpawnPointKind = Blackboard.IsGrounded ? SpawnPointKind.Grounded : SpawnPointKind.Pillar;
+            GameObject DummyKind = Blackboard.IsGrounded ? Boss.slashDummy : Boss.archerDummy;
             Vector3 Midpoint = (Boss.transform.position + Boss.CombatTarget.transform.position) * 0.5f;
 
             for (int i = 0; i < Constants.CountSpawns; i++)
@@ -866,13 +962,168 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
     }
 
-    private void SetState(State State)
+    public class StatePlungeAttack : State
     {
-        if (State == null) State = BossStates.IdleGrounded;
-        Debug.Log(State.GetType().Name);
-        BossStates.Current.Exit();
-        BossStates.Current = State;
-        BossStates.Current.Enter();
+        Timer CrouchTimer;
+        Timer PlungeTimer;
+
+        Vector3 StartPosition;
+        Vector3 TargetPosition;
+
+        enum PlungeState
+        {
+            Crouch,
+            Rise,
+            Descend,
+            Attack
+        };
+        PlungeState State;
+
+        public StatePlungeAttack(DojoBossCombatantActor Boss) : base(Boss)
+        {
+            CrouchTimer = new Timer(Boss.CrouchTime);
+            PlungeTimer = new Timer(Boss.PlungeTime);
+        }
+
+        public override void Enter()
+        {
+            CrouchTimer.Reset();
+            PlungeTimer.Reset();
+
+            State = PlungeState.Crouch;
+            Boss.StartCrouch();
+        }
+
+        public override void Update()
+        {
+            if (State == PlungeState.Crouch)
+            {
+                CrouchTimer.Update();
+                if (CrouchTimer.Ready())
+                {
+                    // Find the target of the plunge attack
+                    Vector3 ProjectedPosition = GetProjectedPosition();
+                    Vector3 PlayerPosition = Boss.CombatTarget.transform.position;
+                    Vector3 BossPosition = Boss.transform.position;
+                    Vector3 Offset = BossPosition - PlayerPosition;
+                    Offset.y = 0f;
+                    Offset.Normalize();
+                    Offset *= 1.5f;
+
+                    // @spader What does all the offset stuff do?
+                    //Vector3 NaiveTarget = BossPosition + Vector3.ClampMagnitude(ProjectedPosition + Offset - BossPosition, 1.5f);
+
+                    // Check that the target is inside the NavMesh
+                    float Tolerance = 10f;
+                    bool IsInsideNavMesh = NavMesh.SamplePosition(
+                        ProjectedPosition,
+                        out NavMeshHit Hit,
+                        Vector3.Distance(PlayerPosition, BossPosition) + Tolerance,
+                        NavMesh.AllAreas);
+
+                    if (IsInsideNavMesh)
+                    {
+                        StartPosition = BossPosition;
+                        TargetPosition = Hit.position;
+                    }
+                    else
+                    {
+                        Boss._MoveOnEnd();
+                        Boss.SetState(Boss.BossStates.IdleGrounded);
+                    }
+
+                    // Look at the target
+                    Vector3 LookDirection = TargetPosition - BossPosition;
+                    LookDirection.y = 0f;
+                    Boss.transform.rotation = Quaternion.LookRotation(LookDirection, Vector3.up);
+
+                    // Play animations
+                    AnimancerState PlungeJump = Boss.animancer.Play(Boss.PlungeJump);
+                    PlungeJump.Events.OnEnd = null;
+
+                    Boss.OnAttack.Invoke();
+                    Boss.jumpParticle.Play();
+
+                    Boss.nav.enabled = false;
+
+                    State = PlungeState.Rise;
+                }
+            }
+            else if (State == PlungeState.Rise)
+            {
+                PlungeTimer.Update();
+                float T = PlungeTimer.GetPercentDone();
+
+                LerpPosition(T);
+
+                if (T >= Boss.DescentPoint)
+                {
+                    Boss.animancer.Play(Boss.PlungeFall);
+                    State = PlungeState.Descend;
+                }
+            }
+            else if (State == PlungeState.Descend)
+            {
+                PlungeTimer.Update();
+                float T = PlungeTimer.GetPercentDone();
+
+                LerpPosition(T);
+
+                if (T >= Boss.AttackPoint)
+                {
+                    // @spader What is _MoveOnEnd()? If I call it here, the hammer animation plays.
+                    // If I call it below, in PlungeState.Attack, it does not play. Also, I see this get
+                    // called in lots of places, so I know it's not specific to this animation.
+                    Boss.Plunge.ProcessHumanoidAction(Boss, () => { 
+                        Boss._MoveOnEnd();
+                    });
+
+                    State = PlungeState.Attack;
+                }
+            }
+            else if (State == PlungeState.Attack)
+            {
+                PlungeTimer.Update();
+                float T = PlungeTimer.GetPercentDone();
+
+                LerpPosition(T);
+
+                if (T >= 1f)
+                {
+                    Boss.transform.position = TargetPosition;
+                    Boss.nav.enabled = true;
+                    //Boss._MoveOnEnd();
+                    Boss.SetState(Boss.BossStates.IdleGrounded);
+                }
+            }
+        }
+
+        Vector3 GetProjectedPosition()
+        {
+            Vector3 PlayerPosition = Boss.CombatTarget.transform.position;
+            Vector3 PlayerSpeed = Boss.targetSpeed;
+            Vector3 ProjectedPosition = PlayerPosition + (PlayerSpeed * Boss.PlungeTime);
+            Debug.DrawLine(PlayerPosition, ProjectedPosition, Color.blue, 5f);
+            return ProjectedPosition;
+
+        }
+
+        void LerpPosition(float T)
+        {
+            Vector3 Position;
+            if (Blackboard.IsGrounded)
+            {
+                Position = Vector3.Lerp(StartPosition, TargetPosition, Boss.horizPlungeCurve.Evaluate(T));
+                Position.y = Mathf.Lerp(StartPosition.y, Boss.PlungeJumpHeight, Boss.heightPlungeCurve.Evaluate(T));
+            }
+            else
+            {
+                Position = Vector3.Lerp(StartPosition, TargetPosition, Boss.horizPlungePillarCurve.Evaluate(T));
+                Position.y = Mathf.Lerp(TargetPosition.y, StartPosition.y, Boss.heightPlungePillarCurve.Evaluate(T));
+            }
+
+            Boss.transform.position = Position;
+        }
     }
 
     public struct States
@@ -885,6 +1136,16 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         public StateJumpSquat JumpSquat;
         public StateJump Jump;
         public StateSummon Summon;
+        public StatePlungeAttack PlungeAttack;
+    }
+
+    private void SetState(State State)
+    {
+        if (State == null) State = BossStates.IdleGrounded;
+        Debug.Log(State.GetType().Name);
+        BossStates.Current.Exit();
+        BossStates.Current = State;
+        BossStates.Current.Enter();
     }
     #endregion
 
@@ -910,7 +1171,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         OnHurt.AddListener(() => {
             HitboxActive(0);
             crouching = false;
-            plunging = false;
             aiming = false;
             pillarStunned = false;
             parryTime = 0f;
@@ -930,13 +1190,14 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         // States
         Blackboard = new StateBlackboard();
 
-        BossStates.IdleGrounded         = new StateIdleGrounded(this);
+        BossStates.IdleGrounded = new StateIdleGrounded(this);
         BossStates.Aim          = new StateAim(this);
         BossStates.RangedAttack = new StateRangedAttack(this);
-        BossStates.IdlePillar     = new StateIdlePillar(this);
+        BossStates.IdlePillar   = new StateIdlePillar(this);
         BossStates.JumpSquat    = new StateJumpSquat(this);
         BossStates.Jump         = new StateJump(this);
         BossStates.Summon       = new StateSummon(this);
+        BossStates.PlungeAttack = new StatePlungeAttack(this);
         BossStates.Current = BossStates.IdleGrounded;
 
         // Pillars
@@ -958,7 +1219,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         UpdateCombatTarget();
 
-        //base.ActorPostUpdate();
+        base.ActorPostUpdate();
 
         if (inventory.IsMainEquipped() && !inventory.IsMainDrawn())
         {
@@ -972,28 +1233,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         Blackboard.Update();
         BossStates.Current.Update();
 
-        if (animancer.States.Current == combatState.jump)
-        {
-            float t = combatState.jump.NormalizedTime;
-            cc.enabled = false;
-            shouldNavigate = false;
-
-            Vector3 targetPosition = Vector3.Lerp(startJumpPosition, endJumpPosition, jumpHorizCurve.Evaluate(t)) + Vector3.up * jumpVertCurve.Evaluate(t) * jumpVertMult;
-
-            this.transform.position = targetPosition;
-
-            cc.enabled = true;
-            yVel = 0f;
-
-            if (aiming)
-            {
-                RealignToTarget();
-                if (t > JumpShotTime)
-                {
-                    JumpShotFire();
-                }
-            }
-        }
         if (animancer.States.Current == combatState.attack)
         {
             if (!IsHitboxActive())
@@ -1103,15 +1342,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             //animancer.Layers[0].ApplyAnimatorIK = false;
         }
 
-        if (plunging)
-        {
-            ProcessPlunge();
-        }
-        else if (crouching)
-        {
-            ProcessCrouch();
-        }
-
         if (BossStates.Current == BossStates.Aim)
         {
             animancer.Layers[0].ApplyAnimatorIK = true;
@@ -1168,15 +1398,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
     }
 
-    public bool CanSummon()
-    {
-        return Blackboard.SummonTimer.Ready() && Dummies.Count < 2;
-    }
-    public bool IsLowHealth()
-    {
-        return attributes.health.current <= attributes.health.max * 0.5f;
-    }
-
     public void UpdateCombatTarget()
     {
         // If we've already got the combat target, just make sure the player isn't dead.
@@ -1198,97 +1419,35 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
     }
 
-    /*
-    public void StartMeleeCombo1()
+    public void UpdateRanges()
     {
-        RealignToTarget();
-        //cstate.attack = CloseAttack.ProcessHumanoidAttack(this, _MoveOnEnd);
-        nav.enabled = true;
-        ignoreRoot = false;
-        Vector3 pos = Vector3.zero;
-
-        Vector3 centerPoint = CombatTarget.transform.position + (center.position - CombatTarget.transform.position).normalized * MeleeCombo1StartDistance;
-        bool centerOnNav = NavMesh.SamplePosition(centerPoint, out NavMeshHit hit, 10f, 0);
-        if (centerOnNav)
+        if (isLowHealth)
         {
-            centerPoint = hit.position;
-        }
-        
-        Vector3 farPoint = this.transform.position + (this.transform.position - CombatTarget.transform.position).normalized * MeleeCombo1StartDistance;
-        bool farOnNav = NavMesh.SamplePosition(farPoint, out NavMeshHit hit2, 10f, 0);
-        if (farOnNav)
-        {
-            farPoint = hit.position;
-        }
-
-        float centerDist = Vector3.Distance(CombatTarget.transform.position, centerPoint);
-        float farDist = Vector3.Distance(CombatTarget.transform.position, farPoint);
-
-        if (centerOnNav && !farOnNav)
-        {
-            pos = centerPoint;
-        }
-        else if (farOnNav && !centerOnNav)
-        {
-            pos = farPoint;
-        }
-        else if (!farOnNav && !centerOnNav)
-        {
-            return;
-        }
-        else if (centerDist < MeleeCombo1StartDistance && farDist >= MeleeCombo1StartDistance)
-        {
-            pos = farPoint;
-        }
-        else if (farDist < MeleeCombo1StartDistance && centerDist >= MeleeCombo1StartDistance)
-        {
-            pos = centerPoint;
-        }
-        else if (farDist < MeleeCombo1StartDistance && centerDist < MeleeCombo1StartDistance)
-        {
-            if (centerDist > farDist)
-            {
-                pos = centerPoint;
-            }
-            else
-            {
-                pos = farPoint;
-            }
+            bufferRange = 12f;
+            closeRange = 8f;
         }
         else
         {
-            pos = centerPoint;
+            bufferRange = 8f;
+            closeRange = 4f;
         }
-
-        void _Then()
-        {
-            RealignToTarget();
-            nav.enabled = true;
-            cstate.attack = MeleeCombo1.ProcessHumanoidAction(this, () => { });
-            OnAttack.Invoke();
-        }
-
-        DodgeJumpThen(pos, _Then, 2f);
     }
-    */
 
-    // basic attack template
-    /*
-    public void StartFarAttack()
+    public bool IsCloseRange()
     {
-        RealignToTarget();
-        cstate.attack = FarAttack.ProcessHumanoidAttack(this, _MoveOnEnd);
-        OnAttack.Invoke();
+        return GetDistanceToTarget() < closeRange;
     }
-    */
-
-    /*public void StartMeleeCombo2()
+    public bool CanSummon()
     {
-        RealignToTarget();
-        cstate.attack = MeleeCombo2.ProcessHumanoidAction(this, _MoveOnEnd);
-        OnAttack.Invoke();
-    }*/
+        return Blackboard.SummonTimer.Ready() && Dummies.Count == 0;
+    }
+    public bool IsLowHealth()
+    {
+        return true;
+        return attributes.health.current <= attributes.health.max * 0.5f;
+    }
 
+  
     public void StartSlash()
     {
         RealignToTarget();
@@ -1353,49 +1512,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         circleParrying = true;
     }
 	
-    public void StartCrouch(CrouchAction action)
-    {
-        RealignToTarget();
-        crouchClock = CrouchTime;
-        animancer.Play(CrouchDown).Events.OnEnd = () => { animancer.Play(Crouch); };
-        crouching = true;
-        actionAfterCrouch = action;
-    }
     public void StartCrouch()
     {
         RealignToTarget();
         animancer.Play(CrouchDown).Events.OnEnd = () => { animancer.Play(Crouch); };
-    }
-
-    public void StartPlungeAttack()
-    {
-        Vector3 position = GetProjectedPosition(PlungeTime);
-        Vector3 offset = (this.transform.position - CombatTarget.transform.position);
-        offset.y = 0f;
-        offset = offset.normalized * 1.5f;
-        plungeTarget = CombatTarget.transform.position + Vector3.ClampMagnitude((position + offset) - CombatTarget.transform.position, 1.5f);
-
-        if (NavMesh.SamplePosition(plungeTarget, out NavMeshHit hit, Vector3.Distance(CombatTarget.transform.position, position) + 10f, NavMesh.AllAreas))
-        {
-            plungeTarget = hit.position;
-        }
-        else
-        {
-            _MoveOnEnd(); // cancel attack if destination isn't on mesh
-            return;
-        }
-
-        Vector3 dir = plungeTarget - this.transform.position;
-        dir.y = 0f;
-        this.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
-
-        plungeClock = PlungeTime;
-        combatState.plunge_rise = animancer.Play(PlungeJump);
-        combatState.plunge_rise.Events.OnEnd = null;
-        plungeStart = this.transform.position;
-        OnAttack.Invoke();
-        plunging = true;
-        jumpParticle.Play();
     }
 
     public void ProcessCrouch()
@@ -1406,9 +1526,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             crouching = false;
             switch (actionAfterCrouch)
             {
-                case CrouchAction.Plunge:
-                    StartPlungeAttack();
-                    return;
                 case CrouchAction.JumpTo_Center:
                     onPillar = false;
                     DodgeJump(center.position);
@@ -1452,71 +1569,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
     }
 
-    public void ProcessPlunge()
-    {
-        float t = 1f - Mathf.Clamp01(plungeClock/PlungeTime);
-        nav.enabled = false;
-
-        Vector3 pos;
-
-        if (!onPillar)
-        {
-            pos = Vector3.Lerp(plungeStart, plungeTarget, horizPlungeCurve.Evaluate(t));
-        }
-        else
-        {
-            pos = Vector3.Lerp(plungeStart, plungeTarget, horizPlungePillarCurve.Evaluate(t));
-        }
-
-        float vert = 0f;
-        if (!onPillar)
-        {
-            vert = Mathf.Lerp(plungeStart.y, PlungeJumpHeight, heightPlungeCurve.Evaluate(t));
-        }
-        else
-        {
-            vert = Mathf.Lerp(plungeTarget.y, plungeStart.y, heightPlungePillarCurve.Evaluate(t));
-        }
-       
-
-        pos.y = vert;
-
-        this.transform.position = pos;
-
-        
-        if (t >= 1f)
-        {
-            this.transform.position = plungeTarget;
-            //EndPlunge();
-        }
-        else if (t >= AttackPoint)
-        {
-            if (animancer.States.Current == combatState.plunge_fall)
-            {
-                combatState.plunge_attack = Plunge.ProcessHumanoidAction(this, EndPlunge);
-            }
-        }
-        else if (t >= DescentPoint)
-        {
-            if (animancer.States.Current == combatState.plunge_rise)
-            {
-                combatState.plunge_fall = animancer.Play(PlungeFall);//Plunge.ProcessHumanoidAttack(this, EndPlunge);
-            }
-        }
-
-
-        plungeClock -= Time.deltaTime;
-    }
-
-    void EndPlunge()
-    {
-        nav.enabled = true;
-        plunging = false;
-        onPillar = false;
-        _MoveOnEnd();
-    }
-
-
     public void DodgeJump(Vector3 position)
     {
         DodgeJumpThen(position, JumpEnd, 1f);
@@ -1540,13 +1592,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         AnimancerState land = animancer.Play(JumpLand);
         land.Events.OnEnd = _MoveOnEnd;
         nav.enabled = true;
-    }
-
-    public void StartAiming()
-    {
-    }
-    public void StartRangedAttack()
-    {
     }
 
     public void StartRangedAttackMulti()
@@ -1598,282 +1643,12 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         _MoveOnEnd();
     }
 
-    public void InstantiateSummons()
-    {
-        if (spawnedEnemies.Count >= spawnLimit) return;
-
-        int type = (spawnedEnemies.Count < 2) ? Random.Range(1, 4) : Random.Range(2, 4); // don't spawn doubles if there's no space
-
-        Vector3 midpoint = (this.transform.position + CombatTarget.transform.position) * 0.5f;
-        if (type == 1) // stab and slash dummies
-        {
-            List<Transform> availableTransforms = new List<Transform>();
-            if (!spawn1Occupied)
-            {
-                availableTransforms.Add(spawn1);
-            }
-            if (!spawn2Occupied)
-            {
-                availableTransforms.Add(spawn2);
-            }
-            if (!spawn3Occupied)
-            {
-                availableTransforms.Add(spawn3);
-            }
-
-            availableTransforms = (List<Transform>)AxisUtilities.GetSortedTransformsByDistances(midpoint, availableTransforms);
-
-            Vector3 pos1 = availableTransforms[0].position;
-            Vector3 pos2 = availableTransforms[1].position;
-
-            GameObject actor1Obj = Instantiate(slashDummy, pos1, Quaternion.LookRotation(-(pos1 - CombatTarget.transform.position).normalized));
-            NavigatingHumanoidActor actor1 = actor1Obj.GetComponent<NavigatingHumanoidActor>();
-
-
-            actor1Obj.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
-            {
-                actor1.shouldNavigate = true;
-                actor1.actionsEnabled = true;
-                actor1.PlayIdle();
-            };
-            //recentlySpawned.Add(actor1);
-            spawnedEnemies.Add(actor1);
-            if (availableTransforms[0] == spawn1)
-            {
-                spawn1Occupied = true;
-                actor1.OnDie.AddListener(() => {
-                    spawn1Occupied = false;
-                    spawnedEnemies.Remove(actor1);
-                });
-            }
-            else if (availableTransforms[0] == spawn2)
-            {
-                spawn2Occupied = true;
-                actor1.OnDie.AddListener(() => {
-                    spawn2Occupied = false;
-                    spawnedEnemies.Remove(actor1);
-                });
-            }
-            else if (availableTransforms[0] == spawn3)
-            {
-                spawn3Occupied = true;
-                actor1.OnDie.AddListener(() => {
-                    spawn3Occupied = false;
-                    spawnedEnemies.Remove(actor1);
-                });
-            }
-
-            GameObject actor2Obj = Instantiate(stabDummy, pos2, Quaternion.LookRotation(-(pos2 - CombatTarget.transform.position).normalized));
-            NavigatingHumanoidActor actor2 = actor2Obj.GetComponent<NavigatingHumanoidActor>();
-
-            actor2Obj.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
-            {
-                actor2.shouldNavigate = true;
-                actor2.actionsEnabled = true;
-                actor2.PlayIdle();
-            };
-
-            spawnedEnemies.Add(actor2);
-            if (availableTransforms[1] == spawn1)
-            {
-                spawn1Occupied = true;
-                actor2.OnDie.AddListener(() => {
-                    spawn1Occupied = false;
-                    spawnedEnemies.Remove(actor2);
-                });
-            }
-            else if (availableTransforms[1] == spawn2)
-            {
-                spawn2Occupied = true;
-                actor2.OnDie.AddListener(() => {
-                    spawn2Occupied = false;
-                    spawnedEnemies.Remove(actor2);
-                });
-            }
-            else if (availableTransforms[1] == spawn3)
-            {
-                spawn3Occupied = true;
-                actor2.OnDie.AddListener(() => {
-                    spawn3Occupied = false;
-                    spawnedEnemies.Remove(actor2);
-                });
-            }
-
-            SummonBalls[0].Fly(summonParticle.transform.position, pos1);
-            SummonBalls[1].Fly(summonParticle.transform.position, pos2);
-        }
-        else if (type == 2) // shield dummy
-        {
-            List<Transform> availableTransforms = new List<Transform>();
-            if (!spawn1Occupied)
-            {
-                availableTransforms.Add(spawn1);
-            }
-            if (!spawn2Occupied)
-            {
-                availableTransforms.Add(spawn2);
-            }
-            if (!spawn3Occupied)
-            {
-                availableTransforms.Add(spawn3);
-            }
-
-            availableTransforms = (List<Transform>)AxisUtilities.GetSortedTransformsByDistances(midpoint, availableTransforms);
-
-            Vector3 pos1 = availableTransforms[0].position;
-
-            GameObject actor1Obj = Instantiate(shieldDummy, pos1, Quaternion.LookRotation(-(pos1 - CombatTarget.transform.position).normalized));
-            NavigatingHumanoidActor actor1 = actor1Obj.GetComponent<NavigatingHumanoidActor>();
-
-            actor1Obj.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
-            {
-                actor1.shouldNavigate = true;
-                actor1.actionsEnabled = true;
-                actor1.PlayIdle();
-            };
-
-            spawnedEnemies.Add(actor1);
-            if (availableTransforms[0] == spawn1)
-            {
-                spawn1Occupied = true;
-                actor1.OnDie.AddListener(() => {
-                    spawn1Occupied = false;
-                    spawnedEnemies.Remove(actor1);
-                });
-            }
-            else if (availableTransforms[0] == spawn2)
-            {
-                spawn2Occupied = true;
-                actor1.OnDie.AddListener(() => {
-                    spawn2Occupied = false;
-                    spawnedEnemies.Remove(actor1);
-                });
-            }
-            else if (availableTransforms[0] == spawn3)
-            {
-                spawn3Occupied = true;
-                actor1.OnDie.AddListener(() => {
-                    spawn3Occupied = false;
-                    spawnedEnemies.Remove(actor1);
-                });
-            }
-            SummonBalls[0].Fly(summonParticle.transform.position, pos1);
-            //SummonBalls[1].Fly(summonParticle.transform.position, pos2);
-        }
-        else if (type == 3) // archer dummy
-        {
-            List<Transform> availableTransforms = new List<Transform>();
-            if (!pillar1Occupied && (!onPillar || currentPillar != 1))
-            {
-                availableTransforms.Add(pillar1);
-            }
-            if (!pillar2Occupied && (!onPillar || currentPillar != 2))
-            {
-                availableTransforms.Add(pillar2);
-            }
-            if (!pillar3Occupied && (!onPillar || currentPillar != 3))
-            {
-                availableTransforms.Add(pillar3);
-            }
-
-            availableTransforms = (List<Transform>)AxisUtilities.GetSortedTransformsByDistances(this.transform.position, availableTransforms);
-
-            Vector3 pos1 = availableTransforms[0].position;
-
-            GameObject actor1Obj = Instantiate(archerDummy, pos1, Quaternion.LookRotation(-(pos1 - CombatTarget.transform.position).normalized));
-            NavigatingHumanoidActor actor1 = actor1Obj.GetComponent<NavigatingHumanoidActor>();
-
-            actor1Obj.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
-            {
-                actor1.shouldNavigate = true;
-                actor1.actionsEnabled = true;
-                actor1.PlayIdle();
-            };
-
-            spawnedEnemies.Add(actor1);
-            if (availableTransforms[0] == pillar1)
-            {
-                pillar1Occupied = true;
-                actor1.OnDie.AddListener(() => {
-                    pillar1Occupied = false;
-                    spawnedEnemies.Remove(actor1);
-                });
-            }
-            else if (availableTransforms[0] == pillar2)
-            {
-                pillar2Occupied = true;
-                actor1.OnDie.AddListener(() => {
-                    pillar2Occupied = false;
-                    spawnedEnemies.Remove(actor1);
-                });
-            }
-            else if (availableTransforms[0] == pillar3)
-            {
-                pillar3Occupied = true;
-                actor1.OnDie.AddListener(() => {
-                    pillar3Occupied = false;
-                    spawnedEnemies.Remove(actor1);
-                });
-            }
-            SummonBalls[0].Fly(summonParticle.transform.position, pos1);
-            //SummonBalls[1].Fly(summonParticle.transform.position, pos2);
-        }
-    }
-
-
     public Vector3 GetProjectedPosition(float timeOut)
     {
         Debug.DrawLine(CombatTarget.transform.position, CombatTarget.transform.position + targetSpeed * timeOut, Color.blue, 5f);
         return CombatTarget.transform.position + targetSpeed * timeOut;
     }
 
-    public Transform GetFirstAvailablePillar()
-    {
-        if (!pillar1Occupied) return pillar1;
-        if (!pillar2Occupied) return pillar2;
-        if (!pillar3Occupied) return pillar3;
-        return null;
-    }
-
-    public bool TryGetAvailablePillar(out CrouchAction crouchAction, bool shoot)
-    {
-        crouchAction = CrouchAction.JumpTo_Center;
-
-        if (pillar1Occupied && pillar2Occupied && pillar3Occupied) return false;
-
-        List<Transform> availableTransforms = new List<Transform>();
-        if (!pillar1Occupied && (!onPillar || currentPillar != 1))
-        {
-            availableTransforms.Add(pillar1);
-        }
-        if (!pillar2Occupied && (!onPillar || currentPillar != 2))
-        {
-            availableTransforms.Add(pillar2);
-        }
-        if (!pillar3Occupied && (!onPillar || currentPillar != 3))
-        {
-            availableTransforms.Add(pillar3);
-        }
-
-        if (availableTransforms.Count <= 0) return false;
-
-        availableTransforms = (List<Transform>)AxisUtilities.GetSortedTransformsByDistances(this.transform.position, availableTransforms);
-
-        if (availableTransforms[0] == pillar1)
-        {
-            crouchAction = (!shoot) ? CrouchAction.JumpTo_Pillar1 : CrouchAction.JumpShot_Pillar1;
-
-        }
-        else if (availableTransforms[0] == pillar2)
-        {
-            crouchAction = (!shoot) ? CrouchAction.JumpTo_Pillar2 : CrouchAction.JumpShot_Pillar2;
-        }
-        else if (availableTransforms[0] == pillar3)
-        {
-            crouchAction = (!shoot) ? CrouchAction.JumpTo_Pillar3 : CrouchAction.JumpShot_Pillar3;
-        }
-        return true;
-    }
     /*
    * triggered by animation:
    * 0 = deactivate hitboxes
@@ -2509,43 +2284,43 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
     }
 
-    void AfterDodge()
-    {
-        float r = Random.value;
-        if (Vector3.Distance(this.transform.position, CombatTarget.transform.position) < 6f)
-        {
-            if (timeSincePillar > pillarJumpDelay && TryGetAvailablePillar(out CrouchAction crouchAction, false))
-            {
-                StartCrouch(crouchAction);
-            }
-            else if (r < 0.3f)
-            {
-                StartCrossParry();
-            }
-            else if (r < 0.6f) {
-                StartCircleParry();
-            }
-            else if (r < 0.9f && Vector3.Distance(this.transform.position, center.position) > 10f)
-            {
-                StartCrouch(CrouchAction.JumpTo_Center);
-            }
-            else
-            {
-                _MoveOnEnd();
-            }
-        }
-        else
-        {
-            if (r < 0.5f)
-            {
-                StartAiming();
-            }
-            else
-            {
-                _MoveOnEnd();
-            }
-        }
-    }
+    //void AfterDodge()
+    //{
+    //    float r = Random.value;
+    //    if (Vector3.Distance(this.transform.position, CombatTarget.transform.position) < 6f)
+    //    {
+    //        if (timeSincePillar > pillarJumpDelay && TryGetAvailablePillar(out CrouchAction crouchAction, false))
+    //        {
+    //            StartCrouch(crouchAction);
+    //        }
+    //        else if (r < 0.3f)
+    //        {
+    //            StartCrossParry();
+    //        }
+    //        else if (r < 0.6f) {
+    //            StartCircleParry();
+    //        }
+    //        else if (r < 0.9f && Vector3.Distance(this.transform.position, center.position) > 10f)
+    //        {
+    //            StartCrouch(CrouchAction.JumpTo_Center);
+    //        }
+    //        else
+    //        {
+    //            _MoveOnEnd();
+    //        }
+    //    }
+    //    else
+    //    {
+    //        if (r < 0.5f)
+    //        {
+    //            StartAiming();
+    //        }
+    //        else
+    //        {
+    //            _MoveOnEnd();
+    //        }
+    //    }
+    //}
 
     public DamageKnockback GetLastTakenDamage()
     {
