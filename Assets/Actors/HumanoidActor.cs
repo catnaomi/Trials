@@ -842,8 +842,10 @@ public class HumanoidActor : Actor
     {
         EquippableWeapon mainWeapon = inventory.GetMainWeapon();
         EquippableWeapon offHandWeapon = inventory.GetOffWeapon();
+        EquippableWeapon rangedWeapon = inventory.GetRangedWeapon();
         bool main = (mainWeapon != null && mainWeapon is IHitboxHandler);
         bool off = (offHandWeapon != null && offHandWeapon is IHitboxHandler);
+        bool ranged = (rangedWeapon != null && rangedWeapon is IHitboxHandler);
         if (active == 0)
         {
             if (main)
@@ -856,7 +858,7 @@ public class HumanoidActor : Actor
             }
             isHitboxActive = false;
         }
-        else if (active == 1 && !shouldForceLeft)
+        else if (active == 1)
         {
             if (main)
             {
@@ -865,7 +867,7 @@ public class HumanoidActor : Actor
             isHitboxActive = true;
             OnHitboxActive.Invoke();
         }
-        else if (active == 2 || (active == 1 && shouldForceLeft))
+        else if (active == 2)
         {
             if (off)
             {
@@ -887,7 +889,15 @@ public class HumanoidActor : Actor
             isHitboxActive = true;
             OnHitboxActive.Invoke();
         }
-        
+        else if (active == 4)
+        {
+            if (ranged)
+            {
+                ((IHitboxHandler)rangedWeapon).HitboxActive(true);
+            }
+            isHitboxActive = true;
+            OnHitboxActive.Invoke();
+        }
     }
 
     // rotates the main weapon model around the upwards axis of the main hand mount

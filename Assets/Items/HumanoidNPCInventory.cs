@@ -6,6 +6,13 @@ using UnityEngine.Events;
 
 public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
 {
+    public enum WeaponSlot
+    {
+        Main = Inventory.MainType,
+        Off = Inventory.OffType,
+        Ranged = Inventory.RangedType
+    };
+
     Actor actor;
     HumanoidPositionReference positionReference;
 
@@ -523,11 +530,17 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
         SetDrawn((main) ? 0 : 1, drawn);
     }
 
+    public void SetDrawn(WeaponSlot Slot, bool Drawn)
+    {
+        // @spader This should be the main function; just forward to the (int, bool) one for compatibility
+        SetDrawn((int)Slot, Drawn);
+    }
+
     public void SetDrawn(int type, bool drawn)
     {
         switch (type)
         {
-            case Inventory.MainType: // main
+            case Inventory.MainType: // main // thanks for the comment cat i was stuck here
                 if (IsMainEquipped())
                 {
                     MainIsDrawn = drawn;
