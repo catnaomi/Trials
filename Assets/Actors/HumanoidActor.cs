@@ -45,8 +45,6 @@ public class HumanoidActor : Actor
 
     public UnityEvent OnSheathe;
     public UnityEvent OnOffhandAttack;
-    public UnityEvent OnAttack;
-    public UnityEvent OnBlock;
     public UnityEvent OnDodge;
     public UnityEvent OnInjure;
     public UnityEvent OnHitboxActive;

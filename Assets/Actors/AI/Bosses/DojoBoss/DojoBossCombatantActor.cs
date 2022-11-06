@@ -238,13 +238,13 @@ public class SpawnPointInfo
     }
 }
 
-public struct MixerState
+public struct QiMixerState
 {
     public LinearMixerState Idle;
     public DirectionalMixerState Move;
 }
 
-public struct MixerAssets
+public struct QiMixerAssets
 {
     public LinearMixerTransitionAsset Idle;
     public MixerTransition2DAsset Move;
@@ -692,8 +692,8 @@ public class DojoBossCombatantActor : HumanoidActor
             AimTimer.Reset();
             Boss.weaponState = DojoBossCombatantActor.WeaponState.Bow;
             Boss.OnWeaponTransform.Invoke();
-            Boss.Animancer.Play(Boss.RangedAttack.GetMovement());
-            Boss.Animancer.Layers[HumanoidAnimLayers.UpperBody].Play(Boss.RangedAttack.GetStartClip());
+            Boss.animancer.Play(Boss.RangedAttack.GetMovement());
+            Boss.animancer.Layers[HumanoidAnimLayers.UpperBody].Play(Boss.RangedAttack.GetStartClip());
             Boss.aimParticle.Play();
             Boss.ApplyAnimatorIK();
 
@@ -721,8 +721,8 @@ public class DojoBossCombatantActor : HumanoidActor
 
         public override void Enter()
         {
-            Boss.Animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-            AnimancerState FireAnimation = Boss.combatState.attack = Boss.Animancer.Play(Boss.RangedAttack.GetFireClip(), 0f);
+            Boss.animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+            AnimancerState FireAnimation = Boss.combatState.attack = Boss.animancer.Play(Boss.RangedAttack.GetFireClip(), 0f);
 
             FireTimer.Reset();
 
@@ -852,10 +852,10 @@ public class DojoBossCombatantActor : HumanoidActor
         public override void Enter()
         {
             // Start the animation
-            JumpAnimation = Boss.Animancer.Play(Boss.JumpDodge);
+            JumpAnimation = Boss.animancer.Play(Boss.JumpDodge);
             JumpAnimation.Events.OnEnd = () =>
             {
-                Boss.Animancer.Play(Boss.JumpLand);
+                Boss.animancer.Play(Boss.JumpLand);
             };
             Boss.jumpParticle.Play();
 
@@ -1025,11 +1025,11 @@ public class DojoBossCombatantActor : HumanoidActor
 
                     // Check that the target is inside the NavMesh
                     float Tolerance = 10f;
-                    bool IsInsideNavMesh = NavMesh.SamplePosition(
+                    bool IsInsideNavMesh = UnityEngine.AI.NavMesh.SamplePosition(
                         ProjectedPosition,
                         out NavMeshHit Hit,
                         Vector3.Distance(PlayerPosition, BossPosition) + Tolerance,
-                        NavMesh.AllAreas);
+                        UnityEngine.AI.NavMesh.AllAreas);
 
                     if (IsInsideNavMesh)
                     {
@@ -1049,7 +1049,7 @@ public class DojoBossCombatantActor : HumanoidActor
 
                     // Play animations
                     Boss.PlayClip(Boss.PlungeJump);
-                    AnimancerState PlungeJump = Boss.Animancer.Play(Boss.PlungeJump);
+                    AnimancerState PlungeJump = Boss.animancer.Play(Boss.PlungeJump);
                     PlungeJump.Events.OnEnd = null;
 
                     Boss.OnAttack.Invoke();
@@ -1160,6 +1160,8 @@ public class DojoBossCombatantActor : HumanoidActor
     public ClipTransition JumpDown;
     public ClipTransition FallAnim;
     public ClipTransition LandAnim;
+    public QiMixerState MixerState;
+    public QiMixerAssets MixerAssets;
 
     public NavMeshAgent NavMesh;
 
@@ -1172,11 +1174,10 @@ public class DojoBossCombatantActor : HumanoidActor
         base.ActorStart();
         _MoveOnEnd = () =>
         {
-            Animancer.Play(navstate.move, 0.1f);
+            animancer.Play(MixerState.Move, 0.1f);
         };
 
-        damageHandler = new SimplifiedDamageHandler(this, damageAnims, Animancer);
-        damageHandler.SetEndAction(TakeDefensiveAction);
+        damageHandler = new SimplifiedDamageHandler(this, damageAnims, animancer);
 
         cc = this.GetComponent<CharacterController>();
         // @spader Used to realign to target on hitbox active
@@ -1186,13 +1187,13 @@ public class DojoBossCombatantActor : HumanoidActor
             aiming = false;
             pillarStunned = false;
             parryTime = 0f;
-            Animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+            animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
         });
 
         //animancer.Layers[HumanoidAnimLayers.UpperBody].SetMask(GetComponent<HumanoidPositionReference>().upperBodyMask);
-        Animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
+        animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
 
-        Animancer.Play(navstate.idle);
+        animancer.Play(MixerState.Move);
         initRot = this.GetComponent<HumanoidPositionReference>().MainHand.transform.localRotation;
 
         recentlySpawned = new List<NavigatingHumanoidActor>();
@@ -1239,7 +1240,7 @@ public class DojoBossCombatantActor : HumanoidActor
 
         if (BossStates.Current == BossStates.Aim)
         {
-            Animancer.Layers[0].ApplyAnimatorIK = true;
+            animancer.Layers[0].ApplyAnimatorIK = true;
         }
     }
         
@@ -1292,12 +1293,12 @@ public class DojoBossCombatantActor : HumanoidActor
 
     public void ApplyAnimatorIK()
     {
-        Animancer.Layers[0].ApplyAnimatorIK = true;
+        animancer.Layers[0].ApplyAnimatorIK = true;
     }
 
     public void PlayClip(ClipTransition Clip, System.Action OnEnd = null)
     {
-        AnimancerState ClipState = Animancer.Play(Clip);
+        AnimancerState ClipState = animancer.Play(Clip);
         ClipState.Events.OnEnd = OnEnd;
     }
 
@@ -1328,29 +1329,33 @@ public class DojoBossCombatantActor : HumanoidActor
         FallAnim = RuntimeNavAnims.fallAnim;
         LandAnim = RuntimeNavAnims.landAnim;
 
-        NavMesh = GetComponent<NavMeshAgent>();
-        Animancer = GetComponent<AnimancerComponent>();
+        // Copy inspector fields into our struct and initialize
+        MixerAssets.Move = MoveAnim;
+        MixerAssets.Idle = IdleAnim;
+
+        MixerState.Move = (DirectionalMixerState)animancer.States.GetOrCreate(MoveAnim);
+        MixerState.Move.Key = "move";
+        MixerState.Idle = (LinearMixerState)animancer.States.GetOrCreate(IdleAnim);
+
+        // Cache components
+        animancer = GetComponent<AnimancerComponent>();
         cc = GetComponent<CharacterController>();
-        nav.updatePosition = false;
 
-        nav.updateRotation = false;
-
-        nav.angularSpeed = angleSpeed;
-        nav.autoTraverseOffMeshLink = false;
+        NavMesh = GetComponent<NavMeshAgent>();
+        NavMesh.updatePosition = false;
+        NavMesh.updateRotation = false;
+        NavMesh.angularSpeed = 180f;
+        NavMesh.autoTraverseOffMeshLink = false;
 
         positionReference = GetComponent<HumanoidPositionReference>();
-        navstate.move = (DirectionalMixerState)Animancer.States.GetOrCreate(moveAnim);
-        navstate.move.Key = "move";
-        navstate.idle = (LinearMixerState)Animancer.States.GetOrCreate(idleAnim);
-        navstate.strafe = (DirectionalMixerState)Animancer.States.GetOrCreate(moveAnim);
-        navstate.strafe.Key = "strafe";
-        Animancer.Layers[HumanoidAnimLayers.UpperBody].SetMask(positionReference.upperBodyMask);
-        Animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = true;
-        Animancer.Layers[HumanoidAnimLayers.UpperBody].Weight = 1f;
-
+        animancer.Layers[HumanoidAnimLayers.UpperBody].SetMask(positionReference.upperBodyMask);
+        animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = true;
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Weight = 1f;
     }
-
-
+    public void StartCrouch()
+    {
+        PlayClip(CrouchDown, () => { PlayClip(Crouch); });
+    }
 
     // old
 
