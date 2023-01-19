@@ -6,7 +6,10 @@ public class EventSceneLoader : MonoBehaviour
 {
     public void LoadScene(string toLoad)
     {
-        SceneLoader.LoadSceneAdditively(toLoad);
+        if (!SceneLoader.IsSceneLoaded(toLoad))
+        {
+            SceneLoader.LoadSceneAdditively(toLoad);
+        }
     }
 
     public void UnloadScene(string toUnload)

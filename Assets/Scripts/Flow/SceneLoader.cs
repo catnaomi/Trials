@@ -575,8 +575,47 @@ public class SceneLoader : MonoBehaviour
 
     public static bool IsSceneLoaded(string scene)
     {
-        return SceneManager.GetSceneByName(scene) != null;
+#if UNITY_EDITOR
+        return ifScene_CurrentlyLoaded_inEditor(scene);
+#else
+        return isScene_CurrentlyLoaded(scene);
+#endif
+        //return SceneManager.GetSceneByName(scene) != null;
     }
+
+#if UNITY_EDITOR
+    static bool ifScene_CurrentlyLoaded_inEditor(string sceneName_no_extention)
+    {
+        for (int i = 0; i < UnityEditor.SceneManagement.EditorSceneManager.sceneCount; ++i)
+        {
+            var scene = UnityEditor.SceneManagement.EditorSceneManager.GetSceneAt(i);
+
+            if (scene.name == sceneName_no_extention)
+            {
+                return true;//the scene is already loaded
+            }
+        }
+        //scene not currently loaded in the $$anonymous$$erarchy:
+        return false;
+    }
+#endif
+
+
+    static bool isScene_CurrentlyLoaded(string sceneName_no_extention)
+    {
+        for (int i = 0; i < SceneManager.sceneCount; ++i)
+        {
+            Scene scene = SceneManager.GetSceneAt(i);
+            if (scene.name == sceneName_no_extention)
+            {
+                //the scene is already loaded
+                return true;
+            }
+        }
+
+        return false;//scene not currently loaded in the $$anonymous$$erarchy
+    }
+
 
     public static UnityEvent GetOnActiveSceneChange()
     {
