@@ -29,7 +29,7 @@ public class CreateStair : MonoBehaviour
     {
         Debug.Log("Creating " + stairCount + " stair(s).");
         GameObject baseStair = Instantiate(this.gameObject,this.transform.parent);
-        Destroy(baseStair.GetComponent<CreateStair>());
+        DestroyImmediate(baseStair.GetComponent<CreateStair>());
         baseStair.transform.position = this.transform.position;
         baseStair.transform.rotation = this.transform.rotation;
         baseStair.name = "Stair 0";
