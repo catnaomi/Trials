@@ -1,5 +1,67 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4645955123792096970
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8227396204287937975}
+  m_Layer: 0
+  m_Name: Dojo.Roof3_start
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8227396204287937975
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4645955123792096970}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0.030000014, z: 0}
+  m_LocalScale: {x: 0.005914035, y: 0.005914035, z: 0.005914035}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8759085301415309598}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+--- !u!1 &9066239254221460898
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7194632949262348379}
+  m_Layer: 0
+  m_Name: Dojo.Roof3_end
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7194632949262348379
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9066239254221460898}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: -0.030000214, z: 0}
+  m_LocalScale: {x: 0.005914035, y: 0.005914035, z: 0.005914035}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 8759085301415309598}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!1001 &9080449621100664565
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21,7 +83,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: c138e3ffb20b9f84e882a9b055e9ccfd,
         type: 3}
       propertyPath: m_RootOrder
-      value: 0
+      value: -1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c138e3ffb20b9f84e882a9b055e9ccfd,
         type: 3}
@@ -189,7 +251,15 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: c138e3ffb20b9f84e882a9b055e9ccfd,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8227396204287937975}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: c138e3ffb20b9f84e882a9b055e9ccfd,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7194632949262348379}
   m_SourcePrefab: {fileID: 100100000, guid: c138e3ffb20b9f84e882a9b055e9ccfd, type: 3}
 --- !u!1 &2036265672183238259 stripped
 GameObject:
@@ -343,6 +413,12 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.02000002, y: 0.02000001, z: 0.020000001}
   m_Center: {x: -0.0000000070019563, y: 0.000000006945122, z: 0.01}
+--- !u!4 &8759085301415309598 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c138e3ffb20b9f84e882a9b055e9ccfd,
+    type: 3}
+  m_PrefabInstance: {fileID: 9080449621100664565}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8869645761531832616 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 365762448536272861, guid: c138e3ffb20b9f84e882a9b055e9ccfd,
