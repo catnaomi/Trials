@@ -24,6 +24,7 @@ public class PortalManager : MonoBehaviour
         Shader.SetGlobalTexture("_TimeCrackTexture", rt);
         Camera.main.cullingMask = !this.inWorld2 ? this.GetWorld1Mask() : this.GetWorld2Mask();
         Camera.main.cullingMask |= portalObjectMask;
+        WindowManager.instance.ScreenSizeChangeEventDelayed += UpdateTextureSizeToScreenSize;
     }
 
     private void Update()
@@ -59,5 +60,13 @@ public class PortalManager : MonoBehaviour
     public RenderTexture GetPortalTex()
     {
         return rt;
+    }
+
+    void UpdateTextureSizeToScreenSize(int width, int height)
+    {
+        RenderTexture rtOld = rt;
+        Destroy(rtOld);
+        rt = new RenderTexture(width, height, 24);
+        Shader.SetGlobalTexture("_TimeCrackTexture", rt);
     }
 }
