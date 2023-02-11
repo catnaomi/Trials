@@ -29,6 +29,8 @@ public class PortalCamera : MonoBehaviour
         if (updateTex)
         {
             camera.targetTexture = manager.GetPortalTex();
+            updateTex = false;
+            Debug.Log("updated portal camera texture");
         }
     }
     void FlagTextureNeedsUpdate(int width, int height)
