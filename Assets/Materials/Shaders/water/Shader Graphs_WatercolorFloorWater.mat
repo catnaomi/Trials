@@ -27,6 +27,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ALPHAPREMULTIPLY_ON
+  - _RECEIVE_SHADOWS_OFF
   - _SURFACE_TYPE_TRANSPARENT
   m_InvalidKeywords: []
   m_LightmapFlags: 2
@@ -43,6 +44,10 @@ Material:
     m_TexEnvs:
     - _MainNormal:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ReflectionMap:
+        m_Texture: {fileID: 8400000, guid: 0b996e009dd8c1347b95436af798f778, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SecondNormal:
@@ -63,43 +68,49 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Alpha: 1
     - _AlphaClip: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _CastShadows: 1
     - _Cull: 2
-    - _Depth: 0.5
+    - _Depth: 0
     - _DepthCutoffStep: 0.98
     - _DepthNoiseMult: 0.04
-    - _Displacement: 0
+    - _Displacement: 1
     - _DisplacementEdge1: 0
     - _DisplacementEdge2: 0.12
     - _DstBlend: 10
+    - _Float: 0
     - _FoamEdge1: -2.17
     - _FoamEdge2: 4.54
     - _FoamEdgeVariation: 0.1
-    - _FoamMaxDist: 250
-    - _FoamMinDist: 50
+    - _FoamMaxDist: 50
+    - _FoamMinDist: 25
     - _FoamWhiteEdge: 0.995
     - _Metallic: 0
-    - _NoiseMult: 3
-    - _NormalStrength: 1
+    - _NoiseMult: 1
+    - _NormalStrength: 0.25
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _ReceiveShadows: 1
-    - _Smoothness: 0
+    - _ReceiveShadows: 0
+    - _ReflectionNoiseMult: 0.01
+    - _ReflectionNoiseScale: 25
+    - _ReflectionStrength: 0.243
+    - _Smoothness: 1
     - _SrcBlend: 1
-    - _Strength: 2
+    - _Strength: 0.12
     - _Surface: 1
     - _WorkflowMode: 1
     - _ZTest: 4
     - _ZWrite: 0
     - _ZWriteControl: 0
     m_Colors:
-    - _DeepColor: {r: 0.40473726, g: 0.73053193, b: 0.7607843, a: 1}
+    - _DeepColor: {r: 0, g: 0.015686275, b: 0.015686275, a: 1}
     - _DisplacementSpeed: {r: 0.1, g: 0.1, b: 0, a: 0}
-    - _FoamColor: {r: 1, g: 1, b: 1, a: 0.42352942}
-    - _RippleSpeedX: {r: 2, g: -1, b: 0, a: 0}
-    - _RippleSpeedY: {r: 1, g: 1, b: 0, a: 0}
-    - _ShallowColor: {r: 0.023761682, g: 0.104551405, b: 0.113000005, a: 0.7176471}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 0.34117648}
+    - _ReflectionNoiseSpeed: {r: 0.1, g: 0.1, b: 0, a: 0}
+    - _RippleSpeedX: {r: 0.4, g: -0.2, b: 0, a: 0}
+    - _RippleSpeedY: {r: 0.2, g: 0.2, b: 0, a: 0}
+    - _ShallowColor: {r: 2, g: 2, b: 2, a: 1}
   m_BuildTextureStacks: []
