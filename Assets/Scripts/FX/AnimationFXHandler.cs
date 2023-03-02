@@ -28,6 +28,8 @@ public class AnimationFXHandler : MonoBehaviour
     [Header("Events")]
     public UnityEvent OnDust;
     public UnityEvent OnDashDust;
+    public UnityEvent OnStepL;
+    public UnityEvent OnStepR;
     [Header("Spiral")]
     public UnityEvent StartSpiral;
     public UnityEvent EndSpiral;
@@ -58,6 +60,7 @@ public class AnimationFXHandler : MonoBehaviour
             stepLTime = Time.time;
         }
         if (actor != null && actor.ShouldDustOnStep()) OnDust.Invoke();
+        OnStepL.Invoke();
     }
 
     public void StepL()
@@ -76,6 +79,7 @@ public class AnimationFXHandler : MonoBehaviour
             stepRTime = Time.time;
         }
         if (actor != null && actor.ShouldDustOnStep()) OnDust.Invoke();
+        OnStepR.Invoke();
     }
 
     public void StepR()

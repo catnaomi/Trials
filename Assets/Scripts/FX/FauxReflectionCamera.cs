@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[ExecuteAlways]
 public class FauxReflectionCamera : MonoBehaviour
 {
     [Header("Camera Settings")]
