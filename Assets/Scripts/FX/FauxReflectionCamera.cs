@@ -6,6 +6,7 @@ using UnityEngine;
 public class FauxReflectionCamera : MonoBehaviour
 {
     [Header("Camera Settings")]
+    public Camera cam;
     public float mirrorHeight = 0f;
     Plane plane;
     [Header("Rendering Settings")]
@@ -23,7 +24,7 @@ public class FauxReflectionCamera : MonoBehaviour
         {
             r.SetPropertyBlock(block);
         }
-        this.GetComponent<Camera>().targetTexture = rt;
+        cam.targetTexture = rt;
     }
 
     // Update is called once per frame
@@ -35,6 +36,7 @@ public class FauxReflectionCamera : MonoBehaviour
         Vector3 reflectedHeading = Quaternion.AngleAxis(180f, planeProject) * mainHeading;
 
         this.transform.rotation = Quaternion.LookRotation(reflectedHeading);
+
 
         float dist = Camera.main.transform.position.y - mirrorHeight;
         this.transform.position = Camera.main.transform.position - (Vector3.up * dist * 2f);
