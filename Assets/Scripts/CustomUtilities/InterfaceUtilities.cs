@@ -112,6 +112,21 @@ namespace CustomUtilities
             }
         }
 
+        public static void FindAllRecursively(this Transform transform, string name, List<Transform> list)
+        {
+            if (transform.name.ToLower().Contains(name.ToLower()))
+            {
+                list.Add(transform);
+            }
+            else
+            {
+                foreach (Transform child in transform)
+                {
+                    child.FindAllRecursively(name, list);
+                }
+            }
+        }
+
         // src: https://stackoverflow.com/a/5796793 
         public static string SplitCamelCase(this string str)
         {
