@@ -16,7 +16,7 @@ public class FauxReflectionCamera : MonoBehaviour
     void Start()
     {
         plane = new Plane(Vector3.up, new Vector3(0, mirrorHeight, 0));
-        rt = new RenderTexture(1024, 576, 24);
+        rt = new RenderTexture(Screen.width, Screen.height, 24);//new RenderTexture(1024, 576, 24);
         block = new MaterialPropertyBlock();
         block.SetTexture("_ReflectionMap", rt);
         foreach(Renderer r in reflectedRenderers)
