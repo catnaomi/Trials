@@ -24,4 +24,13 @@ public class OpaqueWhenApproachedShaderHelper : MonoBehaviour
             renderer.SetPropertyBlock(block);
         }
     }
+
+    private void OnDisable()
+    {
+        if (block != null && renderer != null)
+        {
+            block.SetVector("_PlayerPosition", Vector3.zero); ;
+            renderer.SetPropertyBlock(block);
+        }
+    }
 }

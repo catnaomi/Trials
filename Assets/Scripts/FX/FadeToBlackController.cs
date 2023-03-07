@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FadeToBlackController : MonoBehaviour
 {
@@ -11,7 +12,9 @@ public class FadeToBlackController : MonoBehaviour
     public bool FadeInOnStart;
     public AnimationCurve fadeInCurve = AnimationCurve.Linear(1f, 1f, 0f, 0f);
     public AnimationCurve fadeOutCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+
     CanvasGroup group;
+    public Image fadeGraphic;
 
     private void Awake()
     {
@@ -27,25 +30,27 @@ public class FadeToBlackController : MonoBehaviour
 
     public static void FadeIn(float duration)
     {
-        FadeIn(duration, null);
+        FadeIn(duration, null, Color.black);
     }
-    public static void FadeIn(float duration, System.Action callback)
+    public static void FadeIn(float duration, System.Action callback, Color color)
     {
         if (instance != null)
         {
+            instance.fadeGraphic.color = color;
             instance.StartCoroutine(instance.FadeInCoroutine(duration, callback));
         }
     }
 
     public static void FadeOut(float duration)
     {
-        FadeOut(duration, null);
+        FadeOut(duration, null, Color.black);
     }
 
-    public static void FadeOut(float duration, System.Action callback)
+    public static void FadeOut(float duration, System.Action callback, Color color)
     {
         if (instance != null)
         {
+            instance.fadeGraphic.color = color;
             instance.StartCoroutine(instance.FadeOutCoroutine(duration, callback));
         }
     }
