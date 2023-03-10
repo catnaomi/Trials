@@ -30,7 +30,7 @@ public class FauxReflectionCamera : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (Camera.main == null) return;
         Vector3 mainHeading = Camera.main.transform.forward;
         Vector3 planeProject = Vector3.ProjectOnPlane(mainHeading, Vector3.up);
         Vector3 reflectedHeading = Quaternion.AngleAxis(180f, planeProject) * mainHeading;

@@ -341,7 +341,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
                     bufferRange = 12f;
                     closeRange = 8f;
                 }
-
                 if (aiming)
                 {
                     StartRangedAttack();
@@ -731,15 +730,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         else if (!crouching && (animancer.IsPlayingClip(CrouchDown.Clip) || animancer.IsPlayingClip(Crouch.Clip)))
         {
             //animancer.Play(navstate.move);
-        }
-        if (Vector3.Distance(CombatTarget.transform.position, this.transform.position) < 10f)
-        {
-            //animancer.Layers[0].ApplyAnimatorIK = true;
-            //animancer.Animator.SetLookAtPosition(headPoint);
-        }
-        else
-        {
-            //animancer.Layers[0].ApplyAnimatorIK = false;
         }
         if (plunging)
         {

@@ -4,10 +4,20 @@ using UnityEngine;
 
 public class TempAddPlayerInventoryOnStart : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    bool hasAdded;
+
+    private void Start()
     {
-        DebugReflectionMethods.AddPlayerItems();
+        hasAdded = false;
+    }
+
+    private void Update()
+    {
+        if (PlayerActor.player != null && !hasAdded)
+        {
+            hasAdded = true;
+            DebugReflectionMethods.AddPlayerItems();
+        }
     }
 
 }

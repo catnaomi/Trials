@@ -5,19 +5,28 @@ using UnityEngine;
 public class PlayerPositioner : MonoBehaviour
 {
     public Transform spawnPoint;
+    bool hasSpawned;
     // Start is called before the first frame update
     void Start()
     {
         
-        PlayerActor player = FindObjectOfType<PlayerActor>();
         
-        /*if (player != null && SceneLoader.ShouldRespawnPlayer() && this.gameObject.scene == UnityEngine.SceneManagement.SceneManager.GetActiveScene())
+        hasSpawned = false;
+    }
+
+    void Update()
+    {
+        if (!hasSpawned)
         {
-            SpawnPlayer(player);
-        }*/
-        if (!player.HasBeenSpawned())
-        {
-            SpawnPlayer(player);
+            PlayerActor player = FindObjectOfType<PlayerActor>();
+            if (player != null)
+            {
+                hasSpawned = true;
+                if (!player.HasBeenSpawned())
+                {
+                    SpawnPlayer(player);
+                }
+            }
         }
     }
 
