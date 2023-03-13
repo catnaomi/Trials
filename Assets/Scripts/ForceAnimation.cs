@@ -78,6 +78,6 @@ public class ForceAnimation : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (animancer.IsPlayableInitialized) animancer.Stop();
+        if (animancer != null && animancer.IsPlayableInitialized) animancer.Stop();
     }
 }

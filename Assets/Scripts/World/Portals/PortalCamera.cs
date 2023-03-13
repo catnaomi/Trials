@@ -32,6 +32,7 @@ public class PortalCamera : MonoBehaviour
             updateTex = false;
             Debug.Log("updated portal camera texture");
         }
+        camera.fieldOfView = Camera.main.fieldOfView;
     }
     void FlagTextureNeedsUpdate(int width, int height)
     {

@@ -578,9 +578,11 @@ public class PlayerTargetManager : MonoBehaviour
         if (cmtg == null) return;
         Gizmos.color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
         Gizmos.DrawSphere(cmtg.transform.position, radius);
+#if UNITY_EDITOR
         Handles.color = Color.red;
         Handles.DrawWireDisc(cmtg.transform.position + Vector3.up * topHeight, Vector3.up, topRadius);
         Handles.DrawWireDisc(cmtg.transform.position + Vector3.up * midHeight, Vector3.up, midRadius);
         Handles.DrawWireDisc(cmtg.transform.position + Vector3.up * botHeight, Vector3.up, botRadius);
+#endif
     }
 }
