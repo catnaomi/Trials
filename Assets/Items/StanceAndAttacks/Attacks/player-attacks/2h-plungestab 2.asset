@@ -1,0 +1,97 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa2d590f34d2ef34b9c920ad7702f2a0, type: 3}
+  m_Name: 2h-plungestab 2
+  m_EditorClassIdentifier: 
+  desc: 2h Plunging Slash
+  attackId: 0
+  isBlockOK: 0
+  isSprintOK: 0
+  isFallingOK: 0
+  isParryOK: 0
+  anim:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: d0bb7bd0b85e8294a98def5eda7a4ae9, type: 2}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  attackData:
+    healthDamage: 1
+    types: 0
+    critData:
+      criticalMultiplier: 1
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0.25
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 1
+    isSlash: 0
+    isRanged: 0
+    bouncesOffBlock: 0
+    breaksBlock: 1
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    stunTime: 1
+    stagger: 1
+    staggers:
+      onHit: 4
+      onArmorHit: 1
+      onCritical: 5
+      onKill: 5
+      onCounterHit: 4
+    kbForce: {x: 0, y: 2.5, z: 10}
+    kbRadial: 0
+    didCrit: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    hitClip: {fileID: 0}
+  staminaCost: 0
+  exitTime: -1
+  cancelStartTime: 0
+  mainHandAngleAdjust: 180
+  offHandAngleAdjust: 0
+  loop:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: 0e7b34ea5c714f942b53ea7cab7ff242, type: 2}
+    _Speed: 0.01
+    _NormalizedStartTime: 0
+  end:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes:
+      - 0.57586837
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: fa497037b7101674ab878745d0ef4f60, type: 2}
+    _Speed: 1
+    _NormalizedStartTime: 0

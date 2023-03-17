@@ -78,6 +78,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float dodgeJumpVel = 5f;
     public float dodgeJumpSpeed = 5f;
     public float jumpVel = 10f;
+    public float attackJumpVel = 10f;
     [Space(5)]
     public bool isGrounded;
     public float airTime = 0f;
@@ -2494,6 +2495,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         DisableCloth();
     }
 
+    public void ApplyAttackJump()
+    {
+        yVel = attackJumpVel;
+    }
+
     public void OnMove(InputValue value)
     {
         move = value.Get<Vector2>();
@@ -3471,8 +3477,23 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             attackDecelReal = 0f;
             plungeEnd = phase.GetEndPhaseClip();
             plungeEnd.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
+            plunge = true;
         }
-        plunge = true;
+        else
+        {
+            state.jump = state.attack = GetMoveset().plungeSlash.ProcessPlayerAction(this, out cancelTime, () =>
+            {
+                if (IsGrounded())
+                {
+                    _AttackEnd();
+                }
+                else
+                {
+                    animancer.Play(state.fall, 0.5f);
+                }
+            });
+        }
+        //plunge = true;
         SetCurrentDamage(GetMoveset().plungeSlash.GetDamage());
         OnAttack.Invoke();
     }

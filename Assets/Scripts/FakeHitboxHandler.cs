@@ -79,4 +79,19 @@ public class FakeHitboxHandler : MonoBehaviour
     {
 
     }
+
+    public void ApplyJump()
+    {
+
+    }
+
+    public void ApplyAttackJump()
+    {
+
+    }
+
+    public void RotateMainWeapon(float degree)
+    {
+
+    }
 }
