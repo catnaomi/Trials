@@ -94,4 +94,14 @@ public class FakeHitboxHandler : MonoBehaviour
     {
 
     }
+
+    public void IncreaseJumpDrag()
+    {
+
+    }
+
+    public void SetYVel(float velocity)
+    {
+
+    }
 }

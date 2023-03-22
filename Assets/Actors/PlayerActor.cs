@@ -83,10 +83,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool isGrounded;
     public float airTime = 0f;
     public float groundBias = 0f;
+    bool isCaughtOnEdge;
     bool withinBias;
     float biasHeight;
     public float jumpBuffer = 1f;
     bool didJump;
+    bool didAirJump;
     float lastAirTime;
     float landTime = 0f;
     float speed;
@@ -452,6 +454,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (isGrounded)
         {
             didJump = false;
+            if (IsMoving())
+            {
+                didAirJump = false;
+            } 
         }
         moveSmoothed = Vector2.MoveTowards(moveSmoothed, move, Time.deltaTime);
         Vector3 camForward = Camera.main.transform.forward;
@@ -477,6 +483,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             groundNormal = sphereHit.normal;
             groundPoint = sphereHit.point;
         }
+        isCaughtOnEdge = (rayHit.collider != null || sphereHit.collider != null);
         stickDirection = camForward * move.y + camRight * move.x;
 
         PollInputs();
@@ -682,6 +689,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             */
             animancer.Layers[0].ApplyAnimatorIK = true;
             applyMove = true;
+            plunge = false;
         }
         #endregion
 
@@ -1079,7 +1087,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             else
             {
-                if (!isGrounded && (rayHit.collider != null || sphereHit.collider != null))
+                if (!isGrounded && isCaughtOnEdge)
                 {
                     //Physics.Raycast(bottom, Vector3.down, out groundRayHit, 0.2f, LayerMask.GetMask("Terrain"));
                     Vector3 dir = Vector3.forward;
@@ -1385,12 +1393,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     CancelThrust();
                 }
             }
-            if (plunge && isGrounded)
+            if (plunge && (isGrounded || (!isGrounded && isCaughtOnEdge)))
             {
                 state.attack = animancer.Play(plungeEnd);
                 plunge = false;
                 xzVel = Vector3.zero;
                 speed = 0f;
+            }
+            else if (plunge && !isGrounded)
+            {
+                if ((rayHit.collider != null || sphereHit.collider != null))
+                {
+                    state.attack = animancer.Play(plungeEnd);
+                    plunge = false;
+                    xzVel = Vector3.zero;
+                    speed = 0f;
+                }
             }
             else if (hold)
             {
@@ -1920,10 +1938,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         lastAirTime = 0f;
         xzVel = Vector3.zero;
         yVel = 0f;
+        plunge = false;
         headPoint = Vector3.zero;
         GetHeadPoint();
         smoothedHeadPoint = headPoint;
         player.walkAccelReal = walkAccel;
+        if (mainWeaponAngle != 0f)
+        {
+            StartCoroutine("GradualResetMainRotation");
+        }
+        if (offWeaponAngle != 0f)
+        {
+            StartCoroutine("GradualResetOffRotation");
+        }
         Cloth cloth = player.GetComponentInChildren<Cloth>();
         if (cloth != null)
         cloth.ClearTransformMotion();
@@ -2500,6 +2527,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         yVel = attackJumpVel;
     }
 
+    public void IncreaseJumpDrag()
+    {
+        StartCoroutine(DecelXZVel(0.25f));
+    }
+
+    public void SetYVel(float velocity)
+    {
+        yVel = velocity;
+    }
+
     public void OnMove(InputValue value)
     {
         move = value.Get<Vector2>();
@@ -3045,9 +3082,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     IEnumerator GradualResetMainRotation()
     {
         float angle;
-        while (mainWeaponAngle != 0f)
+        while (mainWeaponAngle != 0f && !IsAttacking())
         {
-            angle = Mathf.MoveTowards(mainWeaponAngle, 0f, 45f * Time.deltaTime);
+            angle = Mathf.MoveTowards(mainWeaponAngle, 0f, 360f * Time.deltaTime);
             RotateMainWeapon(angle);
             yield return null;
         }
@@ -3056,9 +3093,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     IEnumerator GradualResetOffRotation()
     {
         float angle;
-        while (offWeaponAngle != 0f)
+        while (offWeaponAngle != 0f && !IsAttacking())
         {
-            angle = Mathf.MoveTowards(offWeaponAngle, 0f, 45f * Time.deltaTime);
+            angle = Mathf.MoveTowards(offWeaponAngle, 0f, 360f * Time.deltaTime);
             RotateOffWeapon(angle);
             yield return null;
         }
@@ -3481,6 +3518,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else
         {
+            if (didAirJump) return;
             state.jump = state.attack = GetMoveset().plungeSlash.ProcessPlayerAction(this, out cancelTime, () =>
             {
                 if (IsGrounded())
@@ -3492,6 +3530,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     animancer.Play(state.fall, 0.5f);
                 }
             });
+            didAirJump = true;
         }
         //plunge = true;
         SetCurrentDamage(GetMoveset().plungeSlash.GetDamage());
@@ -3508,7 +3547,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             
             attackDecelReal = 0f;
             plungeEnd = phase.GetEndPhaseClip();
-            plungeEnd.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
+            plungeEnd.Events.OnEnd = _AttackEnd;// = () => { animancer.Play(state.move, 0.5f); };
         }
         plunge = true;
         SetCurrentDamage(GetMoveset().plungeThrust.GetDamage());
@@ -4206,6 +4245,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return animancer.States.Current == state.fall || animancer.States.Current == damageHandler.fall;
     }
 
+    public void IsCaughtOnEdge()
+    {
+
+    }
     public bool IsHurt()
     {
         if (animancer == null) return false;
