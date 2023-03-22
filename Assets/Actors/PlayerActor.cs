@@ -253,6 +253,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     private System.Action _OnFinishClimb;
     private System.Action _MoveOnEnd;
     private System.Action _AttackEnd;
+    private System.Action _OnHurtEnd;
 
     private System.Action _StopUpperLayer;
     [Header("Carry Anims")]
@@ -370,8 +371,20 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             animancer.Play(state.move, 0.1f);
         };
 
+        _OnHurtEnd = () =>
+        {
+            _MoveOnEnd();
+            if (mainWeaponAngle != 0f)
+            {
+                StartCoroutine("GradualResetMainRotation");
+            }
+            if (offWeaponAngle != 0f)
+            {
+                StartCoroutine("GradualResetOffRotation");
+            }
+        };
         damageHandler = new HumanoidDamageHandler(this, damageAnim, animancer);
-        damageHandler.SetEndAction(_MoveOnEnd);
+        damageHandler.SetEndAction(_OnHurtEnd);
         damageHandler.SetBlockEndAction(() => { animancer.Play(state.block, 0.5f); });
 
         buffer = new InputBuffer();

@@ -2970,7 +2970,7 @@ Animator:
   m_Avatar: {fileID: 9000000, guid: b36a3a42569079f4a9f3fd1d2410416a, type: 3}
   m_Controller: {fileID: 0}
   m_CullingMode: 1
-  m_UpdateMode: 0
+  m_UpdateMode: 1
   m_ApplyRootMotion: 1
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
@@ -3263,11 +3263,11 @@ MonoBehaviour:
       m_Calls: []
   SightRange: 15
   InSightRange: 0
-  CloseAttack: {fileID: 11400000, guid: 70f7755717551254ca1f8d109c882372, type: 2}
-  CloseAttackRange: 1.5
+  CloseAttack: {fileID: 11400000, guid: d956e30ff890ac44792be01272aadb44, type: 2}
+  CloseAttackRange: 3
   InCloseAttackRange: 0
-  FarAttack: {fileID: 11400000, guid: 411a4e43ed81fad4c9f35bed45bec53d, type: 2}
-  FarAttackRange: 5
+  FarAttack: {fileID: 11400000, guid: a9d17b9f02addda46a9545d888acaa3a, type: 2}
+  FarAttackRange: 10
   FarAttackRotationSpeed: 360
   InFarAttackRange: 0
   OffMeshAttack: {fileID: 0}
@@ -3454,6 +3454,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnDashDust:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStepL:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStepR:
     m_PersistentCalls:
       m_Calls: []
   StartSpiral:

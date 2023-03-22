@@ -104,4 +104,11 @@ public class FakeHitboxHandler : MonoBehaviour
     {
 
     }
+
+    public void Shockwave(int active)
+    {
+
+    }
+
+    public void RealignToTarget() { }
 }

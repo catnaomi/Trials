@@ -99,7 +99,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
         navstate.strafe = (DirectionalMixerState)animancer.States.GetOrCreate(moveAnim);
         navstate.strafe.Key = "strafe";
         animancer.Layers[HumanoidAnimLayers.UpperBody].SetMask(positionReference.upperBodyMask);
-        animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = true;
+        animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = false;
         animancer.Layers[HumanoidAnimLayers.UpperBody].Weight = 1f;
 
 

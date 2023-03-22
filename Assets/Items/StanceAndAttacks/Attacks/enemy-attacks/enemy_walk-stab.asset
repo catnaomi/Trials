@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a0fe6349197c8d4b94796907753fff6, type: 3}
-  m_Name: icegolem_bodyspinslash_start
+  m_Script: {fileID: 11500000, guid: 9a6f27a4c77dc804388a7677a7e0f44e, type: 3}
+  m_Name: enemy_walk-stab
   m_EditorClassIdentifier: 
   desc: 
   attackId: 0
@@ -21,16 +21,15 @@ MonoBehaviour:
   anim:
     _FadeDuration: 0.25
     _Events:
-      _NormalizedTimes:
-      - 1.4
+      _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: 7400000, guid: f8c2d6a0ce3bc2d40b090cd67dd23862, type: 3}
+    _Clip: {fileID: 7400000, guid: ad1741597184d494dae7aabc5fbdab3f, type: 2}
     _Speed: 1
-    _NormalizedStartTime: 0
+    _NormalizedStartTime: NaN
   attackData:
-    healthDamage: 1
-    types: 1026
+    healthDamage: 3
+    types: 1024
     critData:
       criticalMultiplier: 1
       alwaysCritical: 0
@@ -40,21 +39,21 @@ MonoBehaviour:
     breaksArmor: 0
     unblockable: 0
     disarm: 0
-    isThrust: 0
-    isSlash: 1
+    isThrust: 1
+    isSlash: 0
     isRanged: 0
     bouncesOffBlock: 1
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 1
-    stagger: 1
+    stagger: 0
     staggers:
       onHit: 2
-      onArmorHit: 1
-      onCritical: 4
-      onKill: 7
-      onCounterHit: 1
+      onArmorHit: 2
+      onCritical: 2
+      onKill: 5
+      onCounterHit: 2
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
     didCrit: 0
@@ -73,20 +72,27 @@ MonoBehaviour:
         m_Calls: []
     hitClip: {fileID: 0}
   staminaCost: 0
-  exitTime: 3
+  exitTime: -1
   cancelStartTime: 0
   mainHandAngleAdjust: 0
   offHandAngleAdjust: 0
-  blend:
+  walk:
     _FadeDuration: 0.25
     _Events:
       _NormalizedTimes:
-      - 0.94485295
+      - 1
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: 7400000, guid: 8bd62de719142154c91b6fbc716171db, type: 2}
-    _Speed: 2
-    _NormalizedStartTime: 0
-  mask: {fileID: 31900000, guid: 74da9ab124865d3498afd76d28f9bb59, type: 2}
-  blendWeight: 1
-  fadeOutTime: 0
+    _Clip: {fileID: 7400016, guid: f7ba5795a3008954b8c1a56525e85e03, type: 3}
+    _Speed: 1
+    _NormalizedStartTime: NaN
+  upperBodyPose:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: 80a7f01f2154ca447b33ac887e2ecec9, type: 2}
+    _Speed: 1
+    _NormalizedStartTime: NaN
+  transitionTime: 0.25
