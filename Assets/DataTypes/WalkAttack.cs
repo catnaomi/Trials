@@ -25,7 +25,7 @@ public class WalkAttack : InputAttack
         AnimancerState walkState = actor.animancer.Play(this.GetWalkClip());
         actor.animancer.Layers[HumanoidAnimLayers.UpperBody].Play(this.GetUpperBodyClip());
         float walkLength = walkState.Length;
-        walkState.Events.OnEnd = () =>
+        System.Action walkEndEvent = () =>
         {
             actor.SetCurrentDamage(this.GetDamage());
             actor.animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
@@ -35,6 +35,17 @@ public class WalkAttack : InputAttack
                 endEvent();
             };
         };
+        walkState.Events.OnEnd = walkEndEvent;
+        actor.StartCoroutine(FallbackCoroutine(actor, walkState, walkEndEvent, walkLength));
         return walkState;
+    }
+
+    IEnumerator FallbackCoroutine(NavigatingHumanoidActor actor, AnimancerState walkState, Action walkEndEvent, float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        if (actor.animancer.States.Current == walkState)
+        {
+            walkEndEvent();
+        }
     }
 }
