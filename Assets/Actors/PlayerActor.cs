@@ -756,9 +756,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 float y = Vector3.Dot(stickDirection, this.transform.forward);
                 float x = Vector3.Dot(stickDirection, this.transform.right);
                 bool north = y > 0.25f && Mathf.Abs(y) > Mathf.Abs(x);
-                bool south = y < 0.25f && Mathf.Abs(y) > Mathf.Abs(x);
-                bool east = x > 0.25f && Mathf.Abs(x) > Mathf.Abs(y);
-                bool west = x < 0.25f && Mathf.Abs(x) > Mathf.Abs(y);
+                bool south = false;// y < 0.25f && Mathf.Abs(y) > Mathf.Abs(x);
+                bool east = false;// x > 0.25f && Mathf.Abs(x) > Mathf.Abs(y);
+                bool west = false;// x < 0.25f && Mathf.Abs(x) > Mathf.Abs(y);
 
                 jump = false;
                
@@ -830,6 +830,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 slash = false;
                 thrust = false;
                 stopBlock = true;
+            }
+            else if (aiming)
+            {
+                Aim();
             }
             if (CheckWater())
             {
@@ -1469,6 +1473,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         #region aim
         else if (animancer.States.Current == state.aim)
         {
+            // TODO: Add Jumping while Aiming
             speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * aimSpeed, walkAccelReal * Time.deltaTime);
             moveDirection = stickDirection;
 
@@ -1548,7 +1553,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 Debug.LogError(ex);
             }
-           
             if (inventory.IsRangedEquipped())
             {
                 IRangedWeapon rwep = (IRangedWeapon)inventory.GetRangedWeapon();
