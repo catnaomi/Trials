@@ -20,14 +20,17 @@ public static class DebugReflectionMethods
 
             PlayerActor.player.inventory.Add(sword);
             PlayerActor.player.inventory.EquipToSlot((Equippable)sword, 0);
+            PlayerActor.player.inventory.EquipMainWeapon((EquippableWeapon)sword);
             Debug.Log("Added and equipped + " + sword.ToString());
 
             PlayerActor.player.inventory.Add(shield);
             PlayerActor.player.inventory.EquipToSlot((Equippable)shield, 1);
+            PlayerActor.player.inventory.EquipOffHandWeapon((EquippableWeapon)shield);
             Debug.Log("Added and equipped + " + shield.ToString());
 
             PlayerActor.player.inventory.Add(bow);
             PlayerActor.player.inventory.EquipToSlot((Equippable)bow, 2);
+            PlayerActor.player.inventory.EquipRangedWeapon((RangedWeapon)bow);
             Debug.Log("Added and equipped + " + bow.ToString());
 
             PlayerActor.player.inventory.Add(bottle);

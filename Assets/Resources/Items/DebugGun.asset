@@ -27,24 +27,36 @@ MonoBehaviour:
   EquippableRanged: 1
   OneHanded: 1
   TwoHanded: 0
-  ParentLeftAsMain: 0
-  ParentRightAsOff: 0
+  ParentLeft: 1
   MainHandEquipSlot: 0
   OffHandEquipSlot: 2
   RangedEquipSlot: 2
-  stance:
-    stanceStyle: 0
-    rightGrip: 0
-    leftGrip: 0
-    twohandGrip: 0
-    blockStyle: 0
+  primaryStance:
+    blendStance: {fileID: 0}
+    blendMask: {fileID: 0}
+    blendWeight: 0
+    additive: 0
+  secondaryStance:
+    blendStance: {fileID: 0}
+    blendMask: {fileID: 0}
+    blendWeight: 0
+    additive: 0
   moveset: {fileID: 11400000, guid: d913401d66fceb04da5dbb25875b41df, type: 2}
+  size: 0
   AttackSpeed: 0
   weight: 0
   usesAmmunition: 1
   ammunitionReference: {fileID: 11400000, guid: 8812dd27cc7b52840aff3853a6c4eff7,
     type: 2}
-  blockResistances: []
+  blockResistances:
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -59,8 +71,7 @@ MonoBehaviour:
     type: 3}
   damageKnockback:
     healthDamage: 10
-    staminaDamage: 0
-    types: 
+    types: 0
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -72,11 +83,13 @@ MonoBehaviour:
     disarm: 0
     isThrust: 0
     isSlash: 0
+    isRanged: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 2
       onArmorHit: 1
@@ -85,6 +98,7 @@ MonoBehaviour:
       onCounterHit: 2
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
+    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -103,5 +117,6 @@ MonoBehaviour:
   fireStrengthMult: 100
   fireStrengthMin: 25
   drawTime: 1
+  bowBend: {fileID: 0}
   arrowCount: 4
   arrowLength: 1

@@ -177,7 +177,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     Vector3 lastLaunchVector;
     public Vector3 smoothLaunchVector = Vector3.forward;
     public float launchVectorSmoothSpeed = 120f;
-    public Moveset.SecondaryStyle secondaryStyle;
     Vector2 camAimSpeeds;
     
     [Range(-1f,1f)]
@@ -500,7 +499,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         stickDirection = camForward * move.y + camRight * move.x;
 
         PollInputs();
-        ProcessSecondary();
+        ProcessBlock();
+        ProcessRanged();
         //aiming = IsAimHeld();
         if (aiming)
         {
@@ -2288,12 +2288,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         inputs.actions["UseSecondary"].started += (context) =>
         {
-            SecondaryStart();
+            RangedStart();
         };
 
         inputs.actions["UseSecondary"].canceled += (context) =>
         {
-            SecondaryEnd();
+            RangedEnd();
         };
 
         inputs.actions["Atk_Slash"].performed += (context) =>
@@ -2375,7 +2375,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             ThrustHold,
             Slash,
             SlashHold,
-            SecondaryStart,
+            RangedStart,
         }
 
         public Inputs lastInput;
@@ -2432,7 +2432,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         thrust = false;
         blocking = blocking && IsBlockHeld();
         sprinting = sprinting && IsSprintHeld();
-        secondary = secondary && IsSecondaryHeld();
+        secondary = secondary && IsRangedHeld();
         targeting = IsTargetHeld();
         //aiming = IsAimHeld();
         switch (buffer.PollInput(inputBufferTimeoutTime))
@@ -2468,7 +2468,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             case InputBuffer.Inputs.BlockStart:
                 blocking = true;
                 break;
-            case InputBuffer.Inputs.SecondaryStart:
+            case InputBuffer.Inputs.RangedStart:
                 secondary = true;
                 break;
 
@@ -2624,21 +2624,21 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return this.GetComponent<PlayerInput>().actions["Sprint"].IsPressed();
     }
 
-    void SecondaryStart()
+    void RangedStart()
     {
         if (!CanPlayerInput()) return;
         //sprinting = true;
-        buffer.SetInput(InputBuffer.Inputs.SecondaryStart, Time.time);
+        buffer.SetInput(InputBuffer.Inputs.RangedStart, Time.time);
     }
 
-    void SecondaryEnd()
+    void RangedEnd()
     {
         if (!CanPlayerInput()) return;
         //sprinting = true;
         secondary = false;
     }
 
-    public bool IsSecondaryHeld()
+    public bool IsRangedHeld()
     {
         return this.GetComponent<PlayerInput>().actions["UseSecondary"].IsPressed();
     }
@@ -2725,34 +2725,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         buffer.ClearAll();
     }
 
-    public void ProcessSecondary()
+    public void ProcessBlock()
     {
-        if (secondaryStyle == Moveset.SecondaryStyle.Block)
-        {
-            if (secondary && IsSecondaryHeld())
-            {
-                blocking = true;
-            }
-            else if (IsBlockHeld())
-            {
-                blocking = true;
-            }
-            else
-            {
-                blocking = false;
-            }
-        }
-        else if (secondaryStyle == Moveset.SecondaryStyle.RangedAttack)
-        {
-            if (secondary && IsSecondaryHeld())
-            {
-                aiming = true;
-            }
-            else
-            {
-                aiming = false;
-            }
-        }
+        blocking = (IsBlockHeld());
+    }
+
+    public void ProcessRanged()
+    {
+        aiming = (IsRangedHeld());
     }
     void OnControlsChanged()
     {
@@ -2912,19 +2892,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             blockAnimStart = blockWeapon.moveset.blockAnimStart;
             blockStagger = blockWeapon.moveset.blockStagger;
             guardBreak = blockWeapon.moveset.guardBreak;
-        }
-
-        if (inventory.IsOffEquipped())
-        {
-            secondaryStyle = inventory.GetOffWeapon().moveset.secondaryStyle;
-        }
-        else if (inventory.IsMainEquipped())
-        {
-            secondaryStyle = inventory.GetMainWeapon().moveset.secondaryStyle;
-        }
-        else
-        {
-            secondaryStyle = Moveset.SecondaryStyle.None;
         }
 
         state.block = (MixerState)animancer.States.GetOrCreate(blockingMoveAnim);
@@ -3162,6 +3129,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             });
             
         }
+    }
+
+    public bool CanBlock()
+    {
+        return inventory.IsOffEquipped() && inventory.GetOffWeapon() is OffHandShield;
+    }
+
+    public bool CanRanged()
+    {
+        return inventory.IsRangedEquipped() && inventory.GetRangedWeapon() is RangedWeapon;
     }
     #endregion
 
@@ -4304,7 +4281,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public override bool IsBlocking()
     {
         if (animancer == null) return false;
-        return secondaryStyle == Moveset.SecondaryStyle.Block && (animancer.States.Current == state.block || animancer.States.Current == damageHandler.block);
+        return CanBlock() && (animancer.States.Current == state.block || animancer.States.Current == damageHandler.block);
     }
    
     public bool IsInDialogue()

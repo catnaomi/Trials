@@ -15,8 +15,7 @@ public class EquippableWeapon : Equippable, IGeneratesModel
     public bool OneHanded = true; 
     public bool TwoHanded = true;
     [Space(5)]
-    public bool ParentLeftAsMain = false;
-    public bool ParentRightAsOff = false;
+    public bool ParentLeft = false;
     [Header("Slot Information")]
     public Inventory.EquipSlot MainHandEquipSlot;
     public Inventory.EquipSlot OffHandEquipSlot;

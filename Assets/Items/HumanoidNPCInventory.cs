@@ -348,11 +348,11 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
         if (IsMainEquipped())
         {
             GameObject parent;
-            if (IsMainDrawn() && !MainWeapon.ParentLeftAsMain)
+            if (IsMainDrawn() && !MainWeapon.ParentLeft)
             {
                 parent = positionReference.MainHand;
             }
-            else if (IsMainDrawn() && MainWeapon.ParentLeftAsMain)
+            else if (IsMainDrawn() && MainWeapon.ParentLeft)
             {
                 parent = positionReference.OffHand;
             }
@@ -368,11 +368,11 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
         if (IsOffEquipped())
         {
             GameObject parent;
-            if (IsOffDrawn() && OffWeapon.ParentRightAsOff)
+            if (IsOffDrawn() && !OffWeapon.ParentLeft)
             {
                 parent = positionReference.MainHand;
             }
-            else if (IsOffDrawn() && !OffWeapon.ParentRightAsOff)
+            else if (IsOffDrawn() && OffWeapon.ParentLeft)
             {
                 parent = positionReference.OffHand;
             }
@@ -388,11 +388,11 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
         if (IsRangedEquipped())
         {
             GameObject parent;
-            if (IsRangedDrawn() && !RangedWeapon.ParentLeftAsMain)
+            if (IsRangedDrawn() && !RangedWeapon.ParentLeft)
             {
                 parent = positionReference.MainHand;
             }
-            else if (IsRangedDrawn() && RangedWeapon.ParentLeftAsMain)
+            else if (IsRangedDrawn() && RangedWeapon.ParentLeft)
             {
                 parent = positionReference.OffHand;
             }
