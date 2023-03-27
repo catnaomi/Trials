@@ -1880,7 +1880,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
         else if (crossParrying && !damage.isSlash)
         {
-            if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+            if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable) && !damage.cannotRecoil)
             {
                 damageable.StartCritVulnerability(3f);
                 damageable.Recoil();
@@ -1892,7 +1892,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
         }
         else if (circleParrying && !damage.isThrust)
         {
-            if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+            if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable) && !damage.cannotRecoil)
             {
                 damageable.StartCritVulnerability(3f);
                 damageable.Recoil();
@@ -2225,6 +2225,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public DamageKnockback GetLastTakenDamage()
     {
         return ((IDamageable)damageHandler).GetLastTakenDamage();
+    }
+
+    public GameObject GetGameObject()
+    {
+        return ((IDamageable)damageHandler).GetGameObject();
     }
     #endregion
 }

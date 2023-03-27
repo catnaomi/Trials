@@ -95,10 +95,10 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         {
             if (!inFrozenRoutine)
             {
-                actor.StartCoroutine(FrozenRoutine());
+                //actor.StartCoroutine(FrozenRoutine());
             }
-            timeStopDamages.Enqueue(damage);
-            TimeTravelController.time.TimeStopDamage(damageAmount);
+            //timeStopDamages.Enqueue(damage);
+            TimeTravelController.time.TimeStopDamage(damage, this, damageAmount);
             return;
         }
         lastDamage = damage.healthDamage;
@@ -129,7 +129,22 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         bool willInjure = actor.attributes.spareable && actor.attributes.HasHealthRemaining() && damageAmount >= actor.attributes.health.current;
         bool willKill = (!willInjure) && damageAmount >= actor.attributes.health.current;
         bool isCounterhit = actor.IsAttacking();
-        if (!actor.IsDodging()) actor.attributes.ReduceHealth(damageAmount);
+
+        if (!actor.IsDodging())
+        {
+            if (willKill && damage.cannotKill)
+            {
+                actor.attributes.SetHealth(1f);
+                willKill = false;
+            }
+            else
+            {
+                actor.attributes.ReduceHealth(damageAmount);
+            }
+        }
+        
+
+
 
         Vector3 contactPosition = damage.originPoint;
         Vector3 contactDirection = actor.transform.right;
@@ -186,7 +201,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                         state.Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
                     }
                 }
-                if (damage.bouncesOffBlock && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+                if (damage.bouncesOffBlock && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable) && !damage.cannotRecoil)
                 {
                     damageable.Recoil();
                 }
@@ -659,5 +674,10 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     public DamageKnockback GetLastTakenDamage()
     {
         return lastDamageTaken;
+    }
+
+    public GameObject GetGameObject()
+    {
+        return actor.gameObject;
     }
 }

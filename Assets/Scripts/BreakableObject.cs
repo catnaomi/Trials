@@ -39,7 +39,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
         if (recoilOnFail)
         {
             
-            if (!damage.isRanged && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+            if (!damage.isRanged && !damage.cannotRecoil && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
             {
                 damageable.Recoil();   
             }
@@ -93,5 +93,10 @@ public class BreakableObject : MonoBehaviour, IDamageable
     public DamageKnockback GetLastTakenDamage()
     {
         return lastDamage;
+    }
+
+    public GameObject GetGameObject()
+    {
+        return this.gameObject;
     }
 }

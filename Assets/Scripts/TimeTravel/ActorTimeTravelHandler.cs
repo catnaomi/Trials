@@ -14,7 +14,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public float[] timeRemaining;
     public List<TimeTravelData> timeTravelStates;
     public TimeTravelController timeTravelController;
-    int imageIndex;
+    protected int imageIndex;
     bool isRewinding;
     protected Actor actor;
     float lastHealth;
@@ -28,6 +28,11 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public UnityEvent OnFreeze;
     public UnityEvent OnUnfreeze;
     void Start()
+    {
+        Initialize();   
+    }
+
+    public virtual void Initialize()
     {
         actor = this.GetComponent<Actor>();
         animancer = this.GetComponent<AnimancerComponent>();
@@ -186,16 +191,8 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
         if (useAfterimages && lastData != null && lastData is ActorTimeTravelData actorLastData && isRewinding)
         {
-            AnimancerComponent afterimage = afterimages[imageIndex];
-            afterimage.gameObject.SetActive(true);
-            afterimage.transform.position = actorLastData.position;
-            afterimage.transform.rotation = actorLastData.rotation;
-            AnimancerState imageState = afterimage.Play(actorLastData.animationClip);
-            imageState.Speed = 0f;
-            imageState.NormalizedTime = actorLastData.animancerNormalizedTime;
-            timeRemaining[imageIndex] = fadeTime;
-            imageIndex++;
-            imageIndex %= afterimages.Length;
+            AnimancerComponent afterimage = GetNextAfterImage(fadeTime);
+            AnimancerState imageState = CreateAfterimageFromTimeState(afterimage, actorLastData);
         }
         
         if (actor is PlayerActor player)
@@ -205,6 +202,18 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         }
 
         lastData = data;
+    }
+
+    public AnimancerState CreateAfterimageFromTimeState(AnimancerComponent afterimage, ActorTimeTravelData timeTravelData)
+    {
+        afterimage.gameObject.SetActive(true);
+        afterimage.transform.position = timeTravelData.position;
+        afterimage.transform.rotation = timeTravelData.rotation;
+        AnimancerState imageState = afterimage.Play(timeTravelData.animationClip);
+        imageState.Speed = 0f;
+        imageState.NormalizedTime = timeTravelData.animancerNormalizedTime;
+        imageState.Events.Clear();
+        return imageState;
     }
     public virtual void StartRewind()
     {
@@ -298,6 +307,19 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         return afterimagePrefab;
     }
 
+    public AnimancerComponent GetNextAfterImage(float fadeTime)
+    {
+        AnimancerComponent animancerComponent = afterimages[imageIndex];
+        timeRemaining[imageIndex] = fadeTime;
+        imageIndex++;
+        imageIndex %= afterimages.Length;
+        return animancerComponent;
+    }
+
+    public AnimancerComponent GetNextAfterImage()
+    {
+        return GetNextAfterImage(fadeTime);
+    }
     public bool IsFrozen()
     {
         return isFrozen;

@@ -2791,7 +2791,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 185817825}
   m_LocalRotation: {x: -0.11926517, y: 0.12181036, z: -0.0147452, w: 0.9852516}
-  m_LocalPosition: {x: -0.00070542126, y: 1.2949014, z: -1.0163238}
+  m_LocalPosition: {x: -0.0007054152, y: 1.2949014, z: -1.0163238}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3260,7 +3260,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 247212858}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.2956123, y: -873.73956, z: 492.55762}
+  m_LocalPosition: {x: -4.295163, y: -873.74036, z: 492.56036}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5655,6 +5655,8 @@ MonoBehaviour:
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
     stunTime: 0
     stagger: 0
     staggers:
@@ -5765,7 +5767,7 @@ MonoBehaviour:
   dodgeJumpVel: 5
   dodgeJumpSpeed: 5
   jumpVel: 6
-  attackJumpVel: 10
+  attackJumpVel: 7
   isGrounded: 0
   airTime: 0
   groundBias: 0.1
@@ -6375,6 +6377,7 @@ MonoBehaviour:
   OnUnfreeze:
     m_PersistentCalls:
       m_Calls: []
+  unfreezeDamageDelay: 0.25
 --- !u!1 &314391783
 GameObject:
   m_ObjectHideFlags: 0
@@ -11924,7 +11927,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 420413097}
-  m_LocalRotation: {x: -0.006938829, y: 0.99846375, z: -0.051676236, w: 0.018753797}
+  m_LocalRotation: {x: -0.006938814, y: 0.99846375, z: -0.05167623, w: 0.018753737}
   m_LocalPosition: {x: -0.0000014699228, y: 0.00000021095684, z: 0.0000010783305}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -12004,7 +12007,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 462353258}
-  m_LocalRotation: {x: -0.07712678, y: 0.8886121, z: -0.42194432, w: -0.16242854}
+  m_LocalRotation: {x: 0.12817186, y: 0.65407085, z: -0.113786615, w: 0.73676044}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -14790,7 +14793,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 5000
-  field of view: 39.411854
+  field of view: 40
   orthographic: 0
   orthographic size: 10
   m_Depth: -1
@@ -14815,8 +14818,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
-  m_LocalRotation: {x: -0.42194426, y: 0.1624285, z: 0.07712673, w: 0.88861215}
-  m_LocalPosition: {x: 0, y: -0.090026855, z: -1.322}
+  m_LocalRotation: {x: -0.11378663, y: -0.73676044, z: -0.12817186, w: 0.65407085}
+  m_LocalPosition: {x: 4.6658516, y: 0.10028735, z: 0.55676824}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -18396,6 +18399,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  OnTimeStopEnd:
+    m_PersistentCalls:
+      m_Calls: []
   globalFreeze: 1
   timeStopObject: {fileID: 325787362}
   timeStopOrigin: {x: 0, y: 0, z: 0}
@@ -21027,7 +21033,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1646069603}
-  m_LocalRotation: {x: 0.5987846, y: -0.05681345, z: 0.032571234, w: 0.79822826}
+  m_LocalRotation: {x: 0.5987846, y: -0.056813408, z: 0.03257121, w: 0.7982282}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -27464,8 +27470,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925080555}
-  m_LocalRotation: {x: -0.4219445, y: 0.16242848, z: 0.0771268, w: 0.88861203}
-  m_LocalPosition: {x: 0, y: -0.090026855, z: -1.322}
+  m_LocalRotation: {x: -0.11378668, y: -0.7367603, z: -0.1281719, w: 0.6540709}
+  m_LocalPosition: {x: 4.6658516, y: 0.10028735, z: 0.55676824}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -29797,6 +29803,8 @@ MonoBehaviour:
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
     stunTime: 0
     stagger: 0
     staggers:

@@ -464,4 +464,9 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     {
         return ((IDamageable)damageHandler).GetLastTakenDamage();
     }
+
+    public GameObject GetGameObject()
+    {
+        return ((IDamageable)damageHandler).GetGameObject();
+    }
 }

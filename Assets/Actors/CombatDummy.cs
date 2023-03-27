@@ -209,4 +209,9 @@ public class CombatDummy : Actor, IDamageable
     {
         return ((IDamageable)damageHandler).GetLastTakenDamage();
     }
+
+    public GameObject GetGameObject()
+    {
+        return ((IDamageable)damageHandler).GetGameObject();
+    }
 }

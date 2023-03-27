@@ -39,10 +39,10 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
         {
             if (!inFrozenRoutine)
             {
-                actor.StartCoroutine(FrozenRoutine());
+                //actor.StartCoroutine(FrozenRoutine());
             }
-            timeStopDamages.Enqueue(damage);
-            TimeTravelController.time.TimeStopDamage(normalDamageAmount);
+            //timeStopDamages.Enqueue(damage);
+            TimeTravelController.time.TimeStopDamage(damage, this, normalDamageAmount);
             return;
         }
         bool hitFromBehind = !(Vector3.Dot(-actor.transform.forward, (damage.source.transform.position - actor.transform.position).normalized) <= 0f);
@@ -68,7 +68,16 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
         bool tink = normalDamageAmount <= 0f;
         bool weak = isCrit || (dr.weaknesses & damage.GetTypes()) != 0;
 
-        actor.attributes.ReduceHealth(normalDamageAmount);
+        if (willKill && damage.cannotKill)
+        {
+            actor.attributes.SetHealth(1f);
+            willKill = false;
+        }
+        else
+        {
+            actor.attributes.ReduceHealth(normalDamageAmount);
+        }
+        
 
         if (damage.hitboxSource != null)
         {
@@ -102,7 +111,7 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
                         state.Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
                     }
                 }
-                if (damage.bouncesOffBlock && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+                if (damage.bouncesOffBlock && !damage.cannotRecoil && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
                 {
                     damageable.Recoil();
                 }
@@ -148,7 +157,7 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
             //return;
             if (tink)
             {
-                if (!damage.isRanged && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+                if (!damage.isRanged && !damage.cannotRecoil && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
                 {
                     damageable.Recoil();
                 }

@@ -5,6 +5,9 @@ public class FadeMaterial : MonoBehaviour
 {
     public Material material;
     public bool startDisabled = true;
+    public float fadeTime = 3f;
+    [Range(0,1)]
+    public float lifetime;
     MaterialPropertyBlock block;
 
     private void Start()
@@ -12,10 +15,7 @@ public class FadeMaterial : MonoBehaviour
         if (block == null)
         {
             block = new MaterialPropertyBlock();
-            foreach (Renderer renderer in this.GetComponentsInChildren<Renderer>())
-            {
-                renderer.SetPropertyBlock(block);
-            }
+            ApplyBlockToRenderers();
         }
         this.gameObject.SetActive(false);
     }
@@ -23,15 +23,29 @@ public class FadeMaterial : MonoBehaviour
     {
         if (block != null)
         {
-            block.SetFloat("_creationTime", Time.time);
-            foreach (Renderer renderer in this.GetComponentsInChildren<Renderer>())
-            {
-                renderer.SetPropertyBlock(block);
-            }
+            block.SetFloat("_Lifetime", Time.time);
+            ApplyBlockToRenderers();
         }
-
+        lifetime = 1f;
     }
 
+    private void Update()
+    {
+        block.SetFloat("_Lifetime", lifetime);
+        if (fadeTime > 0)
+        lifetime -= Time.deltaTime / fadeTime;
+        lifetime = Mathf.Clamp01(lifetime);
+        ApplyBlockToRenderers();
+    }
+
+    void ApplyBlockToRenderers()
+    {
+        if (block == null) return;
+        foreach (Renderer renderer in this.GetComponentsInChildren<Renderer>())
+        {
+            renderer.SetPropertyBlock(block);
+        }
+    }
     // Update is called once per frame
     void OnEnable()
     {

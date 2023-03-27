@@ -1,4 +1,5 @@
 ﻿using Animancer;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -27,6 +28,8 @@ public class TimeTravelController : MonoBehaviour
     PlayerInput playerInput;
     [Header("Time Stop Settings")]
     public UnityEvent OnTimeStopStart;
+    public UnityEvent OnTimeStopEnd;
+    public EventHandler<DamageKnockback> OnTimeStopDamageEvent;
     public bool globalFreeze;
     public GameObject timeStopObject;
     public Vector3 timeStopOrigin;
@@ -469,6 +472,7 @@ public class TimeTravelController : MonoBehaviour
         freeze = false;
         ignoreLimits = false;
         StopPostProcessing();
+        OnTimeStopEnd.Invoke();
     }
 
     IEnumerator FreezeRoutine()
@@ -598,9 +602,10 @@ public class TimeTravelController : MonoBehaviour
         StartRecord();
     }
 
-    public void TimeStopDamage(float damage)
+    public void TimeStopDamage(DamageKnockback damage, IDamageable target, float totalDamage)
     {
-        meter.current -= damage * timeStopDamageCostRatio;
+        meter.current -= totalDamage * timeStopDamageCostRatio;
+        OnTimeStopDamageEvent.Invoke(target, damage);
         OnTimeStopHit.Invoke();
     }
 
@@ -688,8 +693,11 @@ public class TimeTravelController : MonoBehaviour
             return Time.fixedDeltaTime;
         }
     }
+
     private void OnApplicationQuit()
     {
         magicVignette.SetFloat("_Weight", 0f);
     }
+
+
 }

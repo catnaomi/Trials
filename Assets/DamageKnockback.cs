@@ -22,6 +22,8 @@ public class DamageKnockback
     public bool breaksBlock;
     public bool canDamageSelf;
     public bool cannotAutoFlinch;
+    public bool cannotRecoil;
+    public bool cannotKill;
     public float stunTime;
     public StaggerStrength stagger;
     public StaggerData staggers;
@@ -122,6 +124,8 @@ public class DamageKnockback
         this.isThrust = damageKnockback.isThrust;
         this.isRanged = damageKnockback.isRanged;
         this.bouncesOffBlock = damageKnockback.bouncesOffBlock;
+        this.cannotRecoil = damageKnockback.cannotRecoil;
+        this.cannotKill = damageKnockback.cannotKill;
         
         this.breaksBlock = damageKnockback.breaksBlock;
         this.canDamageSelf = damageKnockback.canDamageSelf;

@@ -136,4 +136,9 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
     {
         
     }
+
+    public GameObject GetGameObject()
+    {
+        return rigidbody.gameObject;
+    }
 }

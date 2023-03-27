@@ -4562,4 +4562,9 @@ public bool GetGrounded()
     {
         Debug.Log("wall hit");
     }
+
+    public GameObject GetGameObject()
+    {
+        return ((IDamageable)damageHandler).GetGameObject();
+    }
 }

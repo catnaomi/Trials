@@ -372,4 +372,9 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
     {
         return ((IDamageable)damageHandler).GetLastTakenDamage();
     }
+
+    public GameObject GetGameObject()
+    {
+        return ((IDamageable)damageHandler).GetGameObject();
+    }
 }

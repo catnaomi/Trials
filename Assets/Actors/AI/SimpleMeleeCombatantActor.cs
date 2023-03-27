@@ -469,4 +469,9 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
     {
         return ((IDamageable)damageHandler).GetLastTakenDamage();
     }
+
+    public GameObject GetGameObject()
+    {
+        return ((IDamageable)damageHandler).GetGameObject();
+    }
 }
