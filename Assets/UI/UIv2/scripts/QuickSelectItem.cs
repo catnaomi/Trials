@@ -12,7 +12,12 @@ public class QuickSelectItem : MonoBehaviour
     public Item item;
     public TMP_Text number;
     public Image primaryIndicator;
-    public int slot; // 0 = up, 1 = left, 2 = right, 3 = down
+    /* 
+     * 0 = up, 1 = left, 2 = right, 3 = down
+     * 9 = ranged, 10 = main, 11 = shield/off (10 + slottype)
+     */
+    public int slot;
+                        
 
     public Color defaultColor = new Color(1f, 1f, 1f, 0f);
     public Color equippedColor = new Color(1f, 1f, 1f, 0.5f);
@@ -96,12 +101,21 @@ public class QuickSelectItem : MonoBehaviour
             case 3:
                 SetItem(inventory.Slot3Equippable);
                 break;
+            case 10 + Inventory.RangedType:
+                SetItem(inventory.RangedWeapon);
+                break;
+            case 10 + Inventory.MainType:
+                SetItem(inventory.MainWeapon);
+                break;
+            case 10 + Inventory.OffType:
+                SetItem(inventory.OffWeapon);
+                break;
         }
         if (item != null)
         {
             vizData.isEmpty = false;
 
-            if (item == inventory.GetMainWeapon() || item == inventory.GetOffWeapon())
+            if (item == inventory.GetMainWeapon() || item == inventory.GetOffWeapon() || item == inventory.GetRangedWeapon())
             {
                 
 

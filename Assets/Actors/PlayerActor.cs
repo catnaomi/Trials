@@ -1300,6 +1300,171 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         #endregion
 
+        #region aim
+        else if (animancer.States.Current == state.aim)
+        {
+            // TODO: Add Jumping while Aiming
+            speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * aimSpeed, walkAccelReal * Time.deltaTime);
+            moveDirection = stickDirection;
+
+            aimForwardVector = Quaternion.AngleAxis(look.x * horizontalAimSpeed * Time.deltaTime, Vector3.up) * aimForwardVector;
+
+            bool turn = false;
+            bool endAim = false;
+
+            if (camState == CameraState.Free)
+            {
+                if (move.magnitude > 0f)
+                {
+                    lookDirection = stickDirection;
+                }
+                else
+                {
+                    lookDirection = this.transform.forward;
+                }
+            }
+            else if (camState == CameraState.Lock)
+            {
+                if (GetCombatTarget() != null)
+                {
+                    lookDirection = GetCombatTarget().transform.position - this.transform.position;
+                    lookDirection.y = 0f;
+
+                }
+                else
+                {
+                    lookDirection = this.transform.forward;
+                }
+            }
+            else if (camState == CameraState.Aim)
+            {
+                lookDirection = Camera.main.transform.forward;
+                lookDirection.y = 0;
+            }
+
+            try
+            {
+                if (state.aim is DirectionalMixerState aimDir)
+                {
+                    if (camState == CameraState.Free)
+                    {
+                        aimDir.ParameterX = 0f;
+                        aimDir.ParameterY = move.magnitude * (speed / walkSpeedMax);
+                    }
+                    else if (camState == CameraState.Lock)
+                    {
+                        aimDir.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
+                        aimDir.ParameterY = Vector3.Dot(moveDirection, this.transform.forward) * (speed / walkSpeedMax);
+                    }
+                    else if (camState == CameraState.Aim)
+                    {
+                        aimDir.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
+                        aimDir.ParameterY = Vector3.Dot(moveDirection, this.transform.forward) * (speed / walkSpeedMax);
+                        if (aimDir.ChildStates[0] is LinearMixerState aimTurn)
+                        {
+                            if (turn)
+                            {
+                                float angle = Vector3.SignedAngle(lookDirection, aimForwardVector, Vector3.up);
+                                aimTurn.Parameter = Mathf.Clamp(angle, -10f, 10f);
+                                if (Mathf.Abs(angle) > 10f)
+                                {
+                                    lookDirection = Vector3.RotateTowards(lookDirection, aimForwardVector, (Mathf.Abs(angle) - 10f) * Mathf.Deg2Rad, 1f);
+                                }
+                            }
+                            else
+                            {
+                                aimTurn.Parameter = 0f;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Debug.LogError(ex);
+            }
+            if (inventory.IsRangedEquipped())
+            {
+                IRangedWeapon rwep = (IRangedWeapon)inventory.GetRangedWeapon();
+                bool anyPlaying = animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying();
+
+                inventory.GetRangedWeapon().moveset.aimAttack.ProcessAimAttack(this, aiming, slash || thrust, IsAttackHeld());
+            }
+            if (jump && animancer.States.Current != astate.jump)
+            {
+                jump = false;
+                  
+                if (IsGrounded())
+                {
+                    AnimancerState jumpState;
+                    if (inventory.IsRangedEquipped())
+                    {
+                        jumpState = animancer.Play(inventory.GetRangedWeapon().moveset.aimAttack.GetJumpClip());
+                    }
+                    else
+                    {
+                        jumpState = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+                    }
+                    jumpState.NormalizedTime = 0f;
+                    jumpState.Events.OnEnd = () =>
+                    {
+                        Aim();
+                    };
+                    state.aim = astate.jump = jumpState;
+                    moveDirection = this.transform.forward;
+                }
+                
+            }
+            else if (IsGrounded() && animancer.States.Current == astate.jump && airTime > 0.5f)
+            {
+                Aim();
+            }
+            if (shouldDodge)
+            {
+                shouldDodge = false;
+                attack = false;
+                thrust = false;
+                slash = false;
+                if (stickDirection.magnitude > 0)
+                {
+                    lookDirection = stickDirection.normalized;
+                }
+                else
+                {
+                    lookDirection = transform.forward;
+                }
+                //animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+                inventory.SetDrawn(Inventory.RangedType, false);
+                state.roll = animancer.Play(rollAnim);
+                endAim = true;
+            }
+            if (attack)
+            {
+
+                BasicAttack();
+                if (inventory.IsMainEquipped()) endAim = true;
+            }
+            if (!aiming)
+            {
+                if (aimTimer <= 0f)
+                {
+                    endAim = true;
+                    animancer.Play(state.move);
+                }
+                else if (stickDirection.magnitude > 0)
+                {
+                    aimTimer -= Time.deltaTime;
+                }
+            }
+            if (endAim)
+            {
+                animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+            }
+            animancer.Layers[0].ApplyAnimatorIK = true;
+            applyMove = true;
+        }
+        #endregion
+
         #region jump
         else if (animancer.States.Current == state.jump)
         {
@@ -1467,142 +1632,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             animancer.Layers[0].ApplyAnimatorIK = true;
             applyMove = isGrounded;
-        }
-        #endregion
-
-        #region aim
-        else if (animancer.States.Current == state.aim)
-        {
-            // TODO: Add Jumping while Aiming
-            speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * aimSpeed, walkAccelReal * Time.deltaTime);
-            moveDirection = stickDirection;
-
-            aimForwardVector = Quaternion.AngleAxis(look.x * horizontalAimSpeed * Time.deltaTime, Vector3.up) * aimForwardVector;
-
-            bool turn = false;
-            bool endAim = false;
-
-            if (camState == CameraState.Free)
-            {
-                if (move.magnitude > 0f)
-                {
-                    lookDirection = stickDirection;
-                }
-                else
-                {
-                    lookDirection = this.transform.forward;
-                }
-            }
-            else if (camState == CameraState.Lock)
-            {
-                if (GetCombatTarget() != null)
-                {
-                    lookDirection = GetCombatTarget().transform.position - this.transform.position;
-                    lookDirection.y = 0f;
-
-                }
-                else
-                {
-                    lookDirection = this.transform.forward;
-                }
-            }
-            else if (camState == CameraState.Aim)
-            {
-                lookDirection = Camera.main.transform.forward;
-                lookDirection.y = 0;
-            }
-
-            try
-            {
-                if (state.aim is DirectionalMixerState aimDir)
-                {
-                    if (camState == CameraState.Free)
-                    {
-                        aimDir.ParameterX = 0f;
-                        aimDir.ParameterY = move.magnitude * (speed / walkSpeedMax);
-                    }
-                    else if (camState == CameraState.Lock)
-                    {
-                        aimDir.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
-                        aimDir.ParameterY = Vector3.Dot(moveDirection, this.transform.forward) * (speed / walkSpeedMax);
-                    }
-                    else if (camState == CameraState.Aim)
-                    {
-                        aimDir.ParameterX = Vector3.Dot(moveDirection, this.transform.right) * (speed / walkSpeedMax);
-                        aimDir.ParameterY = Vector3.Dot(moveDirection, this.transform.forward) * (speed / walkSpeedMax);
-                        if (aimDir.ChildStates[0] is LinearMixerState aimTurn)
-                        {
-                            if (turn)
-                            {
-                                float angle = Vector3.SignedAngle(lookDirection, aimForwardVector, Vector3.up);
-                                aimTurn.Parameter = Mathf.Clamp(angle, -10f, 10f);
-                                if (Mathf.Abs(angle) > 10f)
-                                {
-                                    lookDirection = Vector3.RotateTowards(lookDirection, aimForwardVector, (Mathf.Abs(angle) - 10f) * Mathf.Deg2Rad, 1f);
-                                }
-                            }
-                            else
-                            {
-                                aimTurn.Parameter = 0f;
-                            }
-                        }
-                    }
-                }
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                Debug.LogError(ex);
-            }
-            if (inventory.IsRangedEquipped())
-            {
-                IRangedWeapon rwep = (IRangedWeapon)inventory.GetRangedWeapon();
-                bool anyPlaying = animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying();
-                
-                inventory.GetRangedWeapon().moveset.aimAttack.ProcessAimAttack(this, aiming, slash || thrust, IsAttackHeld());
-            }
-            if (shouldDodge)
-            {
-                shouldDodge = false;
-                attack = false;
-                thrust = false;
-                slash = false;
-                if (stickDirection.magnitude > 0)
-                {
-                    lookDirection = stickDirection.normalized;
-                }
-                else
-                {
-                    lookDirection = transform.forward;
-                }
-                //animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-                inventory.SetDrawn(Inventory.RangedType, false);
-                state.roll = animancer.Play(rollAnim);
-                endAim = true;
-            }
-            if (attack)
-            {
-                
-                BasicAttack();
-                if (inventory.IsMainEquipped()) endAim = true;
-            }
-            if (!aiming)
-            {
-                if (aimTimer <= 0f)
-                {
-                    endAim = true;
-                    animancer.Play(state.move);
-                }
-                else if (stickDirection.magnitude > 0)
-                {
-                    aimTimer -= Time.deltaTime;
-                }
-            }
-            if (endAim)
-            {
-                animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-            }
-            animancer.Layers[0].ApplyAnimatorIK = true;
-            applyMove = true;
         }
         #endregion
 
@@ -2775,7 +2804,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         if (IsMoving() && CanPlayerInput())
         {
-            inventory.UnequipOnSlot(slot);
+            //inventory.UnequipOnSlot(slot);
             
         }
         InventoryUI2.invUI.FlareSlot(slot);
@@ -2902,9 +2931,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         damageHandler.SetBlockClip(blockStagger);
         damageHandler.SetGuardBreakClip(guardBreak);
 
-        primaryStance = (inventory.IsMainEquipped()) ? inventory.GetMainWeapon().primaryStance : null;
-        secondaryStance = (inventory.IsOffEquipped()) ? inventory.GetOffWeapon().secondaryStance : null;
-        ApplyIdleBlends();
+        UpdateStances();
+        
 
         ClipTransition sprintingAnim = sprintAnim;
         if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.overridesSprint)
@@ -2940,6 +2968,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+    public void UpdateStances()
+    {
+        primaryStance = (inventory.TryGetRightHandedWeapon(out EquippableWeapon rweapon)) ? rweapon.primaryStance : null;
+        secondaryStance = (inventory.TryGetLeftHandedWeapon(out EquippableWeapon lweapon)) ? lweapon.secondaryStance : null;
+        ApplyIdleBlends();
+    }
 
 
     public AnimancerState TriggerSheath(bool draw, Inventory.EquipSlot slot, int targetSlot)
@@ -4187,13 +4221,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 stateWeight = state.block.Weight;
             }
-            if (inventory.IsMainDrawn() && primaryStance != null && primaryStance.blendWeight > 0f)
+            if (inventory.HasRightHandedWeapon() && primaryStance != null && primaryStance.blendWeight > 0f)
             {
                 primaryWeight = primaryStance.blendWeight * stateWeight;
                 state.primaryStance.Parameter = GetMovementVector();
                 state.primaryStance.NormalizedTime = animancer.States.Current.NormalizedTime;
             }
-            if (inventory.IsOffDrawn() && secondaryStance != null && secondaryStance.blendWeight > 0f)
+            if (inventory.HasLeftHandedWeapon() && secondaryStance != null && secondaryStance.blendWeight > 0f)
             {
                 secondaryWeight = secondaryStance.blendWeight * stateWeight;
                 state.secondaryStance.Parameter = GetMovementVector();

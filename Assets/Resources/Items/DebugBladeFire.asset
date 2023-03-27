@@ -16,31 +16,46 @@ MonoBehaviour:
   itemDesc: a weapon of choice for hot developers
   holder: {fileID: 0}
   MaxStackSize: 1
+  Quantity: 1
   invID: 102
   prefab: {fileID: 1804189005472518104, guid: f251dc646a8b5dc4ea23a4ea09af7651, type: 3}
   displayImage: {fileID: 21300000, guid: db06b6c4cc451d749a12788835a5bc2a, type: 3}
   displayColor: {r: 1, g: 0, b: 0, a: 1}
   isEquipped: 0
   EquippableMain: 1
-  EquippableOff: 1
+  EquippableOff: 0
   EquippableRanged: 0
   OneHanded: 1
   TwoHanded: 1
-  ParentLeftAsMain: 0
-  ParentRightAsOff: 0
+  ParentLeft: 0
   MainHandEquipSlot: 1
   OffHandEquipSlot: 2
   RangedEquipSlot: 0
-  stance:
-    stanceStyle: 0
-    rightGrip: 0
-    leftGrip: 0
-    twohandGrip: 0
-    blockStyle: 0
+  primaryStance:
+    blendStance: {fileID: 0}
+    blendMask: {fileID: 0}
+    blendWeight: 0
+    additive: 0
+  secondaryStance:
+    blendStance: {fileID: 0}
+    blendMask: {fileID: 0}
+    blendWeight: 0
+    additive: 0
   moveset: {fileID: 0}
+  size: 0
   AttackSpeed: 1
   weight: 3
-  blockResistances: []
+  usesAmmunition: 0
+  ammunitionReference: {fileID: 0}
+  blockResistances:
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -49,7 +64,8 @@ MonoBehaviour:
       m_Calls: []
   model: {fileID: 0}
   baseDamage: 0
-  heartsDamage: 0
   width: 0.25
   length: 1.25
-  elements: 07000000
+  slashModifier: 1
+  thrustModifier: 1
+  elements: 7000000

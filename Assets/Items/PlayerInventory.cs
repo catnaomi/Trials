@@ -359,7 +359,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
         if (draw)
         {
-            this.player.TriggerSheath(true, RangedWeapon.RangedEquipSlot, true);
+            this.player.TriggerSheath(true, RangedWeapon.RangedEquipSlot, Inventory.RangedType);
         }
 
         OnChange.Invoke();
@@ -642,6 +642,77 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         return null;
     }
 
+    public bool TryGetRightHandedWeapon(out EquippableWeapon weapon)
+    {
+        weapon = null;
+        if (IsMainDrawn())
+        {
+            weapon = GetMainWeapon();
+            if (!weapon.ParentLeft || weapon.TwoHandOnly())
+            {
+                return true;
+            }
+        }
+        if (IsOffDrawn())
+        {
+            weapon = GetOffWeapon();
+            if (!weapon.ParentLeft || weapon.TwoHandOnly())
+            {
+                return true;
+            }
+        }
+        if (IsRangedDrawn())
+        {
+            weapon = GetRangedWeapon();
+            if (!weapon.ParentLeft || weapon.TwoHandOnly())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool HasRightHandedWeapon()
+    {
+        return TryGetRightHandedWeapon(out EquippableWeapon weapon);
+    }
+
+    public bool TryGetLeftHandedWeapon(out EquippableWeapon weapon)
+    {
+        weapon = null;
+        if (IsMainDrawn())
+        {
+            weapon = GetMainWeapon();
+            if (weapon.ParentLeft || weapon.TwoHandOnly())
+            {
+                return true;
+            }
+        }
+        if (IsOffDrawn())
+        {
+            weapon = GetOffWeapon();
+            if (weapon.ParentLeft || weapon.TwoHandOnly())
+            {
+                return true;
+            }
+        }
+        if (IsRangedDrawn())
+        {
+            weapon = GetRangedWeapon();
+            if (weapon.ParentLeft || weapon.TwoHandOnly())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool HasLeftHandedWeapon()
+    {
+        return TryGetLeftHandedWeapon(out EquippableWeapon weapon);
+    }
+
+
     public void SetDrawn(int type, bool drawn)
     {
         switch (type)
@@ -824,6 +895,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     }
 
 
+    /*
     public void InputOnSlot(int slot)
     {
         if (InventoryUI2.invUI.awaitingQuickSlotEquipInput)
@@ -922,6 +994,65 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                         }
                         EquipOffHandWeapon(weapon);
                     }
+                }
+            }
+            else if (consumable != null)
+            {
+                player.StartUsingConsumable(consumable);
+            }
+        }
+    }
+    */
+
+    public void InputOnSlot(int slot)
+    {
+        if (InventoryUI2.invUI.awaitingQuickSlotEquipInput)
+        {
+            Item item = InventoryUI2.invUI.quickSlotItem;
+            if (item != null && item is EquippableWeapon weapon)
+            {
+                EquipToSlot(weapon, slot);
+                OnChange.Invoke();
+            }
+            InventoryUI2.invUI.EndQuickSlotEquip();
+        }
+        else
+        {
+            Equippable item = FindItemFromSlot(slot);
+            EquippableWeapon weapon = item as EquippableWeapon;
+            Consumable consumable = item as Consumable;
+
+            if (weapon != null)
+            {
+                if (weapon.EquippableMain)
+                {
+                    EquippableWeapon currentMain = GetMainWeapon();
+                    if (currentMain != null)
+                    {
+                        UnequipMainWeapon();
+                        EquipToSlot(currentMain, slot);
+                    }
+                    EquipMainWeapon(weapon, true);
+                }
+                else if (weapon.EquippableOff)
+                {
+                    EquippableWeapon currentOff = GetOffWeapon();
+                    if (currentOff != null)
+                    {
+                        UnequipOffHandWeapon();
+                        EquipToSlot(currentOff, slot);
+                    }
+                    EquipOffHandWeapon(weapon, true);
+                }
+                else if (weapon.EquippableRanged)
+                {
+                    EquippableWeapon currentRanged = GetRangedWeapon();
+                    if (currentRanged != null)
+                    {
+                        UnequipRangedWeapon();
+                        EquipToSlot(currentRanged, slot);
+                    }
+                    EquipRangedWeapon((RangedWeapon)weapon, true);
                 }
             }
             else if (consumable != null)

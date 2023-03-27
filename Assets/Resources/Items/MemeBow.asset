@@ -23,28 +23,40 @@ MonoBehaviour:
   displayColor: {r: 1, g: 1, b: 1, a: 1}
   isEquipped: 0
   EquippableMain: 0
-  EquippableOff: 1
+  EquippableOff: 0
   EquippableRanged: 1
   OneHanded: 0
   TwoHanded: 1
-  ParentLeftAsMain: 1
-  ParentRightAsOff: 0
+  ParentLeft: 0
   MainHandEquipSlot: 0
   OffHandEquipSlot: 5
   RangedEquipSlot: 5
-  stance:
-    stanceStyle: 0
-    rightGrip: 0
-    leftGrip: 0
-    twohandGrip: 0
-    blockStyle: 0
+  primaryStance:
+    blendStance: {fileID: 0}
+    blendMask: {fileID: 0}
+    blendWeight: 0
+    additive: 0
+  secondaryStance:
+    blendStance: {fileID: 0}
+    blendMask: {fileID: 0}
+    blendWeight: 0
+    additive: 0
   moveset: {fileID: 11400000, guid: bc549c059af4b0045b4e4f50b648e75d, type: 2}
+  size: 0
   AttackSpeed: 0
   weight: 0
   usesAmmunition: 1
   ammunitionReference: {fileID: 11400000, guid: d16790a012b3df64fba58b934c0a61e7,
     type: 2}
-  blockResistances: []
+  blockResistances:
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -59,8 +71,7 @@ MonoBehaviour:
     type: 3}
   damageKnockback:
     healthDamage: 1000
-    staminaDamage: 0
-    types: 00000000
+    types: 0
     critData:
       criticalMultiplier: 0
       alwaysCritical: 0
@@ -78,6 +89,7 @@ MonoBehaviour:
     canDamageSelf: 0
     cannotAutoFlinch: 0
     stunTime: 0
+    stagger: 0
     staggers:
       onHit: 3
       onArmorHit: 3
@@ -86,6 +98,7 @@ MonoBehaviour:
       onCounterHit: 4
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
+    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}

@@ -9,6 +9,7 @@ public class AimAttack : InputAction
     [SerializeField] protected ClipTransition start;
     [SerializeField] protected ClipTransition hold;
     [SerializeField] protected ClipTransition fire;
+    [SerializeField] protected ClipTransition jump;
     [SerializeField] protected MixerTransition2DAsset moveAnim;
     [SerializeField] protected IKHandler IKHandler;
 
@@ -19,6 +20,7 @@ public class AimAttack : InputAction
         public AnimancerState start;
         public AnimancerState hold;
         public AnimancerState fire;
+        public AnimancerState jump;
     }
     public virtual ClipTransition GetIdleClip()
     {
@@ -35,6 +37,11 @@ public class AimAttack : InputAction
     public virtual ClipTransition GetFireClip()
     {
         return fire;
+    }
+
+    public virtual ClipTransition GetJumpClip()
+    {
+        return jump;
     }
     public virtual MixerTransition2DAsset GetMovement()
     {
