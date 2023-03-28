@@ -15,7 +15,8 @@ public class FXController : MonoBehaviour
     public GameObject fx_thrust;
     public GameObject fx_dizzy;
     public GameObject fx_warn;
-    
+    public GameObject fx_miragia;
+    public GameObject fx_miragia_sound;
     [Space(5)]
     public GameObject fx_gunTrail;
     [Space(5)]
@@ -213,6 +214,23 @@ public class FXController : MonoBehaviour
     {
         EnsureSingleton();
         CreateFX(FXController.FX.FX_Sparks, position, Quaternion.LookRotation(-direction), 1f, soundOverride);
+    }
+    public static GameObject CreateMiragiaParticleSingle(Vector3 position)
+    {
+        EnsureSingleton();
+        GameObject newFX = GameObject.Instantiate(main.fx_miragia);
+        newFX.transform.position = position;
+
+        return newFX;
+    }
+
+    public static GameObject CreateMiragiaParticleSingleSound(Vector3 position)
+    {
+        EnsureSingleton();
+        GameObject newFX = GameObject.Instantiate(main.fx_miragia_sound);
+        newFX.transform.position = position;
+
+        return newFX;
     }
 
     public static void Hitpause(float duration)

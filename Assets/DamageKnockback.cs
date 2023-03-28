@@ -136,6 +136,10 @@ public class DamageKnockback
 
         this.staggers = damageKnockback.staggers;
 
+        this.originPoint = damageKnockback.originPoint;
+        this.hitboxSource = damageKnockback.hitboxSource;
+        this.source = damageKnockback.source;
+
         this.OnHit = damageKnockback.OnHit ?? new UnityEvent();
         this.OnCrit = damageKnockback.OnCrit ?? new UnityEvent();
         this.OnBlock = damageKnockback.OnBlock ?? new UnityEvent();

@@ -58,6 +58,13 @@ public class PlayerTimeTravelHandler : ActorTimeTravelHandler
             target = sender as IDamageable,
             targetPosition = (sender as IDamageable).GetGameObject().transform.position
         };
+        Vector3 contactPoint = damage.originPoint;
+        GameObject targetObject = pair.target.GetGameObject();
+        if (targetObject.TryGetComponent<Collider>(out Collider c))
+        {
+            contactPoint = c.ClosestPoint(damage.originPoint);
+        }
+        FXController.CreateMiragiaParticleSingleSound(contactPoint);
         afterImageData.Add(pair);
     }
 
@@ -146,7 +153,7 @@ public class PlayerTimeTravelHandler : ActorTimeTravelHandler
             
 
 
-            AnimancerComponent afterImage = GetNextAfterImage(unfreezeDamageDelay + 1f);
+            AnimancerComponent afterImage = GetNextAfterImage(fadeTime);
             AnimancerState afterimageState = CreateAfterimageFromTimeState(afterImage, timeStateDamagePair.data);
             afterImage.transform.position = timeStateDamagePair.target.GetGameObject().transform.position + offset;
             afterImage.transform.LookAt(targetObject.transform.position, Vector3.up);
