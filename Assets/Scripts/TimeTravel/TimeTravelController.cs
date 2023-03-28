@@ -46,20 +46,25 @@ public class TimeTravelController : MonoBehaviour
     public UnityEvent OnSlowTimeStart;
     public UnityEvent OnSlowTimeStop;
     [Header("Meter Settings")]
+    public AttributeValue charges = new AttributeValue(7, 7, 7);
     public AttributeValue meter = new AttributeValue(60f, 60f, 60f);
     public float timePowerRecoveryRate;
     public float timeStopDrainRate;
     public float rewindDrainRate;
     public float timePowerCooldown = 5f;
-    public float timePowerClock = 0f;
+    [SerializeField, ReadOnly] public float timePowerClock = 0f;
     public float timeStopDamageCostRatio = 1f;
     public float timeAimSlowDrainRate = 5f;
     public float timeStopMovementCostRatio = 1f;
     public float timeStopHitboxActivationCost = 10f;
+    public float timeChargeRecoveryTime = 60f;
+    [SerializeField, ReadOnly] float timeChargeClock = 0f;
     Vector3 lastPosition;
     public UnityEvent OnCooldownFail;
     public UnityEvent OnCooldownComplete;
     public UnityEvent OnMeterFail;
+    public UnityEvent OnChargeSpent;
+    public UnityEvent OnChargeRecovered;
     [Header("Shader Settings")]
     public Material magicVignette;
     public float magicVignetteStrength;
@@ -129,12 +134,17 @@ public class TimeTravelController : MonoBehaviour
             if (meter.current <= 0f)
             {
                 meter.current = 0f;
-                if (!ignoreLimits)
+                if (charges.current > 0)
                 {
+                    ConsumeChargeAndResetMeter();
+                }
+                else
+                {
+                    meter.current = 0f;
                     CancelRewind();
                     OnMeterFail.Invoke();
                 }
-                    
+
             }
         }
         else if (freeze)
@@ -152,11 +162,18 @@ public class TimeTravelController : MonoBehaviour
             
             if (meter.current <= 0f)
             {
-                meter.current = 0f;
                 if (!ignoreLimits)
                 {
-                    StopFreeze();
-                    OnMeterFail.Invoke();
+                    if (charges.current > 0)
+                    {
+                        ConsumeChargeAndResetMeter();
+                    }
+                    else
+                    {
+                        meter.current = 0f;
+                        StopFreeze();
+                        OnMeterFail.Invoke();
+                    }  
                 }
             }
         }
@@ -169,19 +186,27 @@ public class TimeTravelController : MonoBehaviour
             
             if (meter.current < 0f)
             {
-                if (!ignoreLimits)
+                if (charges.current > 0)
+                {
+                    ConsumeChargeAndResetMeter();
+                }
+                else
                 {
                     meter.current = 0f;
                     StopSlowTime();
+                    OnMeterFail.Invoke();
                 }
             }
         }
-        else
+        else // not using powers
         {
+            
+            /*
             if (meter.current < 0f)
             {
                 meter.current = 0f;
             }
+
             if (meter.current < meter.max)
             {
                 meter.current += time.timePowerRecoveryRate * Time.deltaTime;
@@ -190,14 +215,29 @@ public class TimeTravelController : MonoBehaviour
             {
                 meter.current = meter.max;
             }
-            if (timePowerClock > 0f)
+            */
+            //meter.current = meter.max;
+            if (charges.current < charges.max)
             {
-                timePowerClock -= Time.deltaTime;
-                if (timePowerClock <= 0f)
+                if (timePowerClock > 0f)
                 {
-                    OnCooldownComplete.Invoke();
+                    timePowerClock -= Time.deltaTime;
+                    if (timePowerClock <= 0f)
+                    {
+                        RecoverCharge();
+                        OnCooldownComplete.Invoke();
+                        if (charges.current < charges.max)
+                        {
+                            timePowerClock = timePowerCooldown;
+                        }
+                    }
                 }
             }
+            else
+            {
+                timePowerClock = timePowerCooldown;
+            }
+            
         }
         bool slow = PlayerActor.player.ShouldSlowTime();
         if (slow && !isSlowing)
@@ -242,6 +282,7 @@ public class TimeTravelController : MonoBehaviour
                 return;
             }
 
+            /*
             GameObject target = PlayerActor.player.GetCombatTarget();
             if (target == null)
             {
@@ -255,12 +296,9 @@ public class TimeTravelController : MonoBehaviour
             {
                 StartCoroutine(OpenBubbleRoutine());
                 StartFreeze();
-            }
-            else
-            {
-                AddAllToFreeze();
-                StartFreeze();
-            }
+            }*/
+            AddAllToFreeze();
+            StartFreeze();
         }
         else if (!freeze && recording && !isRewinding && c.interaction is HoldInteraction)
         {
@@ -277,6 +315,23 @@ public class TimeTravelController : MonoBehaviour
         }
     }
 
+    void ConsumeChargeAndResetMeter()
+    {
+        charges.current--;
+        meter.current = meter.max;
+        OnChargeSpent.Invoke();
+    }
+
+    void RecoverCharge()
+    {
+        charges.current++;
+        OnChargeRecovered.Invoke();
+    }
+
+    public bool IsAnyPowerActive()
+    {
+        return IsFreezing() || IsRewinding() || IsSlowingTime();
+    }
     void CancelPowerInput(UnityEngine.InputSystem.InputAction.CallbackContext c)
     {
         if (!ShouldAllowInput()) return;
@@ -460,6 +515,8 @@ public class TimeTravelController : MonoBehaviour
     public void StartFreeze()
     {
         freeze = true;
+        meter.current = meter.max;
+        charges.current--;
         //StartCoroutine(OpenBubbleRoutine());
         StartCoroutine(FreezeRoutine());
         StartPostProcessing();
@@ -653,7 +710,8 @@ public class TimeTravelController : MonoBehaviour
     }
     public bool CanStartPower()
     {
-        return meter.current >= 0f && timePowerClock <= 0f;
+        return charges.current > 0;
+        //return meter.current >= 0f && timePowerClock <= 0f;
     }
 
     public bool IsRewinding()

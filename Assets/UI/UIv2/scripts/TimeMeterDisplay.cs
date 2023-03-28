@@ -1,15 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class TimeMeterDisplay : MonoBehaviour
 {
     public CanvasGroup canvasGroup;
+    public CanvasGroup barGroup;
     public Animator animator;
     public Image meter;
     public Image cooldown;
     public Image spent;
+    [Space(5)]
+    public TMP_Text chargesCurrent;
+    public TMP_Text chargesMax;
+
     [Header("Values")]
     public float meterValue;
     public float meterMax;
@@ -27,6 +33,7 @@ public class TimeMeterDisplay : MonoBehaviour
     float lastMeter;
     float fadeT = 0f;
     float fadeClock;
+    float meterClock;
     TimeTravelController timeController;
     // Start is called before the first frame update
     void Start()
@@ -107,8 +114,33 @@ public class TimeMeterDisplay : MonoBehaviour
             fadeClock = 0f;
             fadeT = Mathf.MoveTowards(fadeT, 1f, Time.deltaTime / fadeinTime);
         }
+        if (!timeController.IsAnyPowerActive())
+        {
+            if (meterClock > 0f)
+            {
+                meterClock -= Time.deltaTime;
+            }
+            else
+            {
+                meterClock = 0f;
+            }
+        }
+        else
+        {
+            meterClock = fadeoutTime;
+        }
 
+        
+
+        
+    }
+
+    private void OnGUI()
+    {
+        chargesCurrent.text = timeController.charges.current.ToString("F0");
+        chargesMax.text = timeController.charges.max.ToString("F0");
         canvasGroup.alpha = fadeCurve.Evaluate(fadeT);
+        barGroup.alpha = Mathf.Clamp01((meterClock) / (fadeoutTime - fadeoutDelay));
     }
 
     public void CooldownComplete()

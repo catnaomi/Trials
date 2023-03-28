@@ -3243,7 +3243,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7823529, y: 1}
+    m_SensorSize: {x: 1.7783133, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -3260,7 +3260,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 247212858}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.2951403, y: -873.74054, z: 492.56076}
+  m_LocalPosition: {x: -4.2949047, y: -873.7407, z: 492.56165}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -11911,7 +11911,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7823529, y: 1}
+    m_SensorSize: {x: 1.7783133, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -12635,7 +12635,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -837.6, y: 355.8}
+  m_AnchoredPosition: {x: -837.6, y: 244.8}
   m_SizeDelta: {x: 100, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &565611491
@@ -15910,17 +15910,17 @@ PrefabInstance:
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.0000076293945
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 1174.075
+      value: 241.15448
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 15.139709
+      value: 7.3384705
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
@@ -18442,6 +18442,10 @@ MonoBehaviour:
   OnSlowTimeStop:
     m_PersistentCalls:
       m_Calls: []
+  charges:
+    baseValue: 1
+    current: 1
+    max: 1
   meter:
     baseValue: 100
     current: 100
@@ -18449,12 +18453,14 @@ MonoBehaviour:
   timePowerRecoveryRate: 5
   timeStopDrainRate: 0
   rewindDrainRate: 16.666666
-  timePowerCooldown: 5
+  timePowerCooldown: 60
   timePowerClock: 0
-  timeStopDamageCostRatio: 0.5
+  timeStopDamageCostRatio: 15
   timeAimSlowDrainRate: 20
-  timeStopMovementCostRatio: 100
-  timeStopHitboxActivationCost: 10
+  timeStopMovementCostRatio: 250
+  timeStopHitboxActivationCost: 15
+  timeChargeRecoveryTime: 60
+  timeChargeClock: 0
   OnCooldownFail:
     m_PersistentCalls:
       m_Calls: []
@@ -18462,6 +18468,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnMeterFail:
+    m_PersistentCalls:
+      m_Calls: []
+  OnChargeSpent:
+    m_PersistentCalls:
+      m_Calls: []
+  OnChargeRecovered:
     m_PersistentCalls:
       m_Calls: []
   magicVignette: {fileID: 2100000, guid: 55a41ba4be6d47c4d853230b7017b379, type: 2}
@@ -19673,7 +19685,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7823529, y: 1}
+    m_SensorSize: {x: 1.7783133, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -21033,7 +21045,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1646069603}
-  m_LocalRotation: {x: 0.5987846, y: -0.05681345, z: 0.032571234, w: 0.79822826}
+  m_LocalRotation: {x: 0.5987846, y: -0.056813408, z: 0.03257121, w: 0.7982282}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -21078,7 +21090,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7823529, y: 1}
+    m_SensorSize: {x: 1.7783133, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -27777,7 +27789,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7823529, y: 1}
+    m_SensorSize: {x: 1.7783133, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
