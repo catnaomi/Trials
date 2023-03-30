@@ -48,7 +48,9 @@ public class TimeTravelController : MonoBehaviour
     [Header("Meter Settings")]
     public AttributeValue charges = new AttributeValue(7, 7, 7);
     public AttributeValue meter = new AttributeValue(60f, 60f, 60f);
-    public float timePowerRecoveryRate;
+    public float timeChargeRecoveryRate = 1f;
+    public float timeChargeQuickRecoveryRate = 3f;
+    [SerializeField, ReadOnly] public bool isQuickRecharging;
     public float timeStopDrainRate;
     public float rewindDrainRate;
     public float timePowerCooldown = 5f;
@@ -57,14 +59,15 @@ public class TimeTravelController : MonoBehaviour
     public float timeAimSlowDrainRate = 5f;
     public float timeStopMovementCostRatio = 1f;
     public float timeStopHitboxActivationCost = 10f;
-    public float timeChargeRecoveryTime = 60f;
-    [SerializeField, ReadOnly] float timeChargeClock = 0f;
+
     Vector3 lastPosition;
     public UnityEvent OnCooldownFail;
     public UnityEvent OnCooldownComplete;
     public UnityEvent OnMeterFail;
     public UnityEvent OnChargeSpent;
     public UnityEvent OnChargeRecovered;
+    public UnityEvent OnQuickChargeStart;
+    public UnityEvent OnQuickChargeEnd;
     [Header("Shader Settings")]
     public Material magicVignette;
     public float magicVignetteStrength;
@@ -221,7 +224,7 @@ public class TimeTravelController : MonoBehaviour
             {
                 if (timePowerClock > 0f)
                 {
-                    timePowerClock -= Time.deltaTime;
+                    timePowerClock -= Time.deltaTime * (isQuickRecharging ? timeChargeQuickRecoveryRate : timeChargeRecoveryRate);
                     if (timePowerClock <= 0f)
                     {
                         RecoverCharge();
@@ -315,19 +318,26 @@ public class TimeTravelController : MonoBehaviour
         }
     }
 
-    void ConsumeChargeAndResetMeter()
+    public void ConsumeChargeAndResetMeter()
     {
         charges.current--;
         meter.current = meter.max;
         OnChargeSpent.Invoke();
     }
 
-    void RecoverCharge()
+    public void RecoverCharge()
     {
-        charges.current++;
+        if (charges.current < charges.max)
+        {
+            charges.current++;
+        }
         OnChargeRecovered.Invoke();
     }
 
+    public void ToggleQuickRecharge(bool isOn)
+    {
+        isQuickRecharging = isOn;
+    }
     public bool IsAnyPowerActive()
     {
         return IsFreezing() || IsRewinding() || IsSlowingTime();
