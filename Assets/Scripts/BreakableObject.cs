@@ -12,6 +12,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
     public UnityEvent OnFail;
     public bool recoilOnFail = true;
     DamageKnockback lastDamage;
+    bool hasBeenBroken;
     [Header("Drop Item")]
     public Item[] drops;
     public GameObject dropPrefab;
@@ -49,6 +50,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
 
     public void BreakObject()
     {
+        if (hasBeenBroken) return;
         if (particlePrefab != null)
         {
             GameObject particle = Instantiate(particlePrefab);
@@ -58,6 +60,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
         DropItems();
         OnBreak.Invoke();
         Destroy(this.gameObject, 0.01f);
+        hasBeenBroken = true;
     }
 
     public void DropItems()

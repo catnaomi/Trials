@@ -21,12 +21,13 @@ public class Ledge : ClimbDetector
     void Awake()
     {
         ledge = this.GetComponent<Rigidbody>();
-        collider = ledge.GetComponent<Collider>();
+        collider = this.GetComponent<Collider>();
 
     }
 
     private void OnTriggerEnter(Collider other)
     {
+        if (isDisabled) return;
         if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor player))
         {
             player.SetLedge(this);
@@ -38,8 +39,12 @@ public class Ledge : ClimbDetector
     {
         if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor player))
         {
-            player.UnsetClimb(this);
-            inUse = false;
+            if (!player.IsClimbing())
+            {
+                player.UnsetClimb(this);
+                inUse = false;
+            }
+            //inUse = false;
         }
     }
     private void OnDrawGizmosSelected()

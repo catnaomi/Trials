@@ -381,6 +381,22 @@ public static class DebugReflectionMethods
         }
     }
 
+    public static void ToggleInfiniteResources()
+    {
+        try
+        {
+            if (TimeTravelController.time == null)
+            {
+                Debug.LogError("Time Travel Controller not present in scene");
+                return;
+            }
+            TimeTravelController.time.ToggleInfiniteResources();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
 
     /*
     public static void Template()

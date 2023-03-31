@@ -1502,7 +1502,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else if (animancer.States.Current == state.climb)
         {
             lookDirection = currentClimb.GetClimbHeading();
-            if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
+            if (currentClimb == null || ledgeSnap == false)
+            {
+                StopClimbing();
+            }
+            else if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
             {
                 ((DirectionalMixerState)state.climb).ParameterX = move.x;
             }
@@ -1516,10 +1520,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
                     ledgeSnap = false;
                     animancer.Play(ladderClimbUp);
-                    StartCoroutine("ClimbLockout");
+                    StartClimbLockout();
 
                 }
             }
+            
             yVel = 0f;
             animancer.Layers[0].ApplyAnimatorIK = false;
         }
@@ -1528,6 +1533,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         #region swim
         else if (animancer.States.Current == state.swim)
         {
+            Debug.DrawRay(this.transform.position, Vector3.down * wadingHeightIn, Color.cyan, 0.1f);
             applyMove = true;
             if (CheckWater())
             {
@@ -1538,7 +1544,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }
                 moveDirection = stickDirection;
             }
-            else if (Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit wadingHit, Mathf.Max(wadingHeightIn, wadingHeightOut), MaskReference.Terrain))
+            else if (Physics.Raycast(this.transform.position, Vector3.down, out RaycastHit wadingHit, wadingHeightIn, MaskReference.Terrain))
             {
                 AnimancerState land = animancer.Play(swimEnd);
                 walkAccelReal = hardLandAccel;
@@ -2167,6 +2173,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
 
 
+    public void StopClimbing()
+    {
+        ledgeSnap = false;
+        state.fall = animancer.Play(fallAnim, 1f);
+        cc.enabled = true;
+        airTime = 0f;
+        cc.Move(Vector3.down * 0.5f);
+        yVel = 0f;
+        xzVel = Vector3.zero;
+        StartClimbLockout();
+    }
+
     public void SnapToCurrentLedge()
     {
         SnapToLedge();
@@ -2232,6 +2250,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+    public void StartClimbLockout()
+    {
+        StartCoroutine("ClimbLockout");
+    }
     IEnumerator ClimbLockout()
     {
         allowClimb = false;
@@ -2519,6 +2541,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void OnDodge(InputValue value)
     {
+        return;
         if (!CanPlayerInput()) return;
         if (IsClimbing())
         {
@@ -2529,7 +2552,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             cc.Move(Vector3.down * 0.5f);
             yVel = 0f;
             xzVel = Vector3.zero;
-            StartCoroutine("ClimbLockout");
+            StartClimbLockout();
         }
         else
         {
@@ -2552,7 +2575,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             ledgeSnap = false;
             animancer.Play(ledgeClimb);
-            StartCoroutine("ClimbLockout");
+            StartClimbLockout();
         }
         else if (!GetGrounded() && !allowClimb)
         {
@@ -2704,7 +2727,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void OnAtk_Slash(InputValue value)
     {
         if (!CanPlayerInput()) return;
-        buffer.SetInput(InputBuffer.Inputs.Slash, Time.time);
+        if (IsClimbing())
+        {
+            StopClimbing();
+        }
+        else
+        {
+            buffer.SetInput(InputBuffer.Inputs.Slash, Time.time);
+        }
+        
         //attack = true;
         //slash = true;
     }
@@ -2712,7 +2743,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void OnAtk_Thrust(InputValue value)
     {
         if (!CanPlayerInput()) return;
-        buffer.SetInput(InputBuffer.Inputs.Thrust, Time.time);
+        if (IsClimbing())
+        {
+            StopClimbing();
+        }
+        else
+        {
+            buffer.SetInput(InputBuffer.Inputs.Thrust, Time.time);
+        }
         //attack = true;
         //thrust = true;
     }

@@ -22,12 +22,13 @@ public class Ladder : ClimbDetector
     void Awake()
     {
         ladder = this.GetComponent<Rigidbody>();
-        collider = ladder.GetComponent<Collider>();
+        collider = this.GetComponent<Collider>();
 
     }
 
     private void OnTriggerEnter(Collider other)
     {
+        if (isDisabled) return;
         if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor player))
         {
             player.SetLadder(this);

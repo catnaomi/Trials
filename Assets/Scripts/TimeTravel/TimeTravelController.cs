@@ -74,6 +74,7 @@ public class TimeTravelController : MonoBehaviour
     public Renderer bubbleInner;
     MaterialPropertyBlock block;
     bool ignoreLimits;
+    bool infiniteResources;
     private void Awake()
     {
         time = this;
@@ -253,6 +254,12 @@ public class TimeTravelController : MonoBehaviour
         else if (!slow && isSlowing)
         {
             StopSlowTime();
+        }
+
+        if (infiniteResources)
+        {
+            meter.current = meter.max;
+            charges.current = charges.max;
         }
 
         bool isAnyPowerOn = freeze || isSlowing || isRewinding;
@@ -707,6 +714,11 @@ public class TimeTravelController : MonoBehaviour
     public void IgnoreLimits()
     {
         ignoreLimits = true;
+    }
+
+    public void ToggleInfiniteResources()
+    {
+        infiniteResources = !infiniteResources;
     }
     IEnumerator SlowTimeRoutine()
     {
