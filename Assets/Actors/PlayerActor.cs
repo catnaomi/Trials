@@ -149,6 +149,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float wadingHeightOut = 0.6f;
     float waterHeight;
     public float wadingSpeed = 3f;
+    public float waterDismountSpeed = 5f;
     public bool wading;
     public float wadingPercent;
     [Header("Combat")]
@@ -1527,6 +1528,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         #region swim
         else if (animancer.States.Current == state.swim)
         {
+            applyMove = true;
             if (CheckWater())
             {
                 speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * swimSpeed, swimAccel * Time.deltaTime);
@@ -1536,17 +1538,23 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }
                 moveDirection = stickDirection;
             }
-            else
+            else if (Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit wadingHit, Mathf.Max(wadingHeightIn, wadingHeightOut), MaskReference.Terrain))
             {
-                //AnimancerState land = state.move.ChildStates[0];
                 AnimancerState land = animancer.Play(swimEnd);
                 walkAccelReal = hardLandAccel;
                 speed = 0f;
                 sprinting = false;
             }
+            else
+            {
+                //AnimancerState land = state.move.ChildStates[0];
+                animancer.Play(state.fall);
+                xzVel = lookDirection * waterDismountSpeed;
+                applyMove = false;
+                SetYVel(0f);
+            }
 
             animancer.Layers[0].ApplyAnimatorIK = (speed < 0.1f);
-            applyMove = true;
             friction = waterFriction;
         }
         #endregion
