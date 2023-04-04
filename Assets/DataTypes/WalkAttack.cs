@@ -24,12 +24,13 @@ public class WalkAttack : InputAttack
         
         AnimancerState walkState = actor.animancer.Play(this.GetWalkClip());
         actor.animancer.Layers[HumanoidAnimLayers.UpperBody].Play(this.GetUpperBodyClip());
+        actor.animancer.Layers[HumanoidAnimLayers.UpperBody].Weight = 1f;
         float walkLength = walkState.Length;
         System.Action walkEndEvent = () =>
         {
             actor.SetCurrentDamage(this.GetDamage());
-            actor.animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-            AnimancerState attackState = actor.animancer.Play(this.GetClip(), transitionTime);
+            actor.animancer.Layers[HumanoidAnimLayers.UpperBody].StartFade(0f, transitionTime);
+            AnimancerState attackState = actor.animancer.Play(this.GetClip(), 0f);
             attackState.Events.OnEnd = () =>
             {
                 endEvent();
