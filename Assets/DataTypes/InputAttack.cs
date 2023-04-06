@@ -68,6 +68,10 @@ public class InputAttack : InputAction
 
     public override AnimancerState ProcessHumanoidAction(NavigatingHumanoidActor actor, System.Action endEvent)
     {
+        return ProcessGenericAction(actor, endEvent);
+    }
+    public override AnimancerState ProcessGenericAction(Actor actor, System.Action endEvent)
+    {
         AnimancerState state = actor.animancer.Play(this.GetClip());
         actor.SetCurrentDamage(this.GetDamage());
         state.Events.OnEnd = endEvent;
@@ -78,7 +82,6 @@ public class InputAttack : InputAction
     {
         
         AnimancerState state = player.animancer.Play(this.GetClip());
-        cancelTime = this.GetExitTime();
         player.SetCurrentDamage(this.GetDamage());
         cancelTime = this.GetExitTime();
         state.Events.OnEnd = endEvent;

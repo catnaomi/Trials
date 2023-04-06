@@ -270,7 +270,7 @@ public class Actor : MonoBehaviour
 
     public virtual bool IsGrounded()
     {
-        return Physics.Raycast(this.transform.position, -this.transform.up, 2f, LayerMask.GetMask("Default, Terrain"));
+        return Physics.Raycast(this.transform.position, -this.transform.up, 2f, MaskReference.Terrain);
     }
     public virtual bool IsTimeStopped()
     {

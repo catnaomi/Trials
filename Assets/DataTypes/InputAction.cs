@@ -18,6 +18,10 @@ public class InputAction : ScriptableObject
         return null;
     }
 
+    public virtual AnimancerState ProcessGenericAction(Actor actor, Action endEvent)
+    {
+        return null;
+    }
     public virtual AnimancerState ProcessPlayerAction(PlayerActor player, out float cancelTime, System.Action endEvent)
     {
 
