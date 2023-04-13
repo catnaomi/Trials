@@ -35,6 +35,7 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public float hitboxRadius;
     [SerializeField, ReadOnly] Hitbox hitbox;
     public UnityEvent OnHitboxActive;
+    public UnityEvent OnBiteActive;
     public InputAttack rollAttack;
     public InputAttack biteAttack;
     public InputAttack carryBiteAttack;
@@ -510,6 +511,10 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
             hitbox.SetDamage(GetLastDamage());
             hitbox.SetActive(true);
             OnHitboxActive.Invoke();
+            if (IsJumping())
+            {
+                OnBiteActive.Invoke();
+            }
         }
         else
         {
