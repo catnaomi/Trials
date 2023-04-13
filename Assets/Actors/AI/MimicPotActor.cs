@@ -11,6 +11,7 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     [HideInInspector]
     public NavMeshAgent nav;
     CharacterController cc;
+    Collider collider;
 
     public GameObject currentTarget;
     
@@ -24,6 +25,11 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public float corneredTime = 2f;
     public float retaliationTime = 3f;
     float corneredClock;
+    [Header("Carryable")]
+    public bool isCarried;
+    public MimicCarryable carryable;
+    public Interactable carryInteract;
+    bool thrown;
     [Header("Combat")]
     public Transform hitboxMount;
     public float hitboxRadius;
@@ -31,6 +37,7 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public UnityEvent OnHitboxActive;
     public InputAttack rollAttack;
     public InputAttack biteAttack;
+    public InputAttack carryBiteAttack;
     public InputAttack standAttack;
     [Header("Animancer")]
     public ClipTransition idleAnim;
@@ -48,6 +55,8 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public ClipTransition standAttackAnim;
     public ClipTransition rollAttackAnim;
     public ClipTransition biteAttackAnim;
+    [Space(20)]
+    public ClipTransition carryWiggleAnim;
     MimicPotAnimState state;
 
     DamageKnockback lastDamageTaken;
@@ -70,6 +79,7 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
         nav.autoTraverseOffMeshLink = false;
         animancer = GetComponent<AnimancerComponent>();
         cc = GetComponent<CharacterController>();
+        collider = GetComponent<SphereCollider>();
         state = new MimicPotAnimState();
         state.hidden = animancer.States.GetOrCreate(hidingAnim);
         state.move = (LinearMixerState)animancer.States.GetOrCreate(moveAnim);
@@ -78,6 +88,9 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
         hitbox = Hitbox.CreateHitbox(hitboxMount.position, hitboxRadius, hitboxMount, new DamageKnockback(), this.gameObject);
         hitbox.SetActive(false);
 
+        carryable.OnStartCarry.AddListener(StartCarry);
+        carryable.OnStopCarry.AddListener(StopCarry);
+        carryable.OnThrow.AddListener(OnCarryThrow);
         StartCoroutine(UpdateDestination());
     }
 
@@ -91,6 +104,11 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
             nav.updateRotation = false;
             nav.isStopped = true;
             nav.nextPosition = this.transform.position;
+            if (thrown)
+            {
+                thrown = false;
+                EndHide();
+            }
         }
         else if (animancer.States.Current == state.move)
         {
@@ -120,8 +138,6 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
                 {
                     float r = Random.value;
 
-                    StartStandingAttack();
-                    /*
                     if (r > 0.9f)
                     {
                         // do nothing
@@ -142,7 +158,7 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
                         // stand attack
                         StartStandingAttack();
                     }
-                    */
+                    
                 }
             }
         }
@@ -159,6 +175,32 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
         {
             corneredClock = 0f;
         }
+
+        if (isCarried)
+        {
+
+            this.collider.enabled = false;
+            cc.enabled = false;
+            if (!IsJumping() && carryable.carryPosition != Vector3.zero)
+            {
+                this.transform.position = carryable.carryPosition;
+                nav.isStopped = true;
+                nav.nextPosition = this.transform.position;
+            }
+
+        }
+        else
+        {
+            cc.enabled = true;
+            this.collider.enabled = true;
+        }
+
+        if (animancer.States.Current == state.attack)
+        {
+            nav.updateRotation = false;
+        }
+
+        carryInteract.canInteract = (animancer.States.Current == state.hidden) && !isCarried;
     }
     public void StartHide()
     {
@@ -166,6 +208,15 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
         startHideState.Events.OnEnd = () =>
         {
             animancer.Play(state.hidden);
+        };
+    }
+
+    public void EndHide()
+    {
+        AnimancerState endHide = animancer.Play(endHideAnim);
+        endHide.Events.OnEnd = () =>
+        {
+            animancer.Play(state.move);
         };
     }
 
@@ -177,13 +228,24 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
 
     public void StartBiteAttack()
     {
-        this.transform.LookAt(currentTarget.transform, Vector3.up);
+        
         state.jump = animancer.Play(hopAnim);
+        this.transform.LookAt(currentTarget.transform, Vector3.up);
         state.jump.Events.OnEnd = () =>
             {
-                transform.LookAt(currentTarget.transform.position + (Vector3.up * 0.5f));
-                state.jump = state.attack = biteAttack.ProcessGenericAction(this, _MoveOnEnd);
+                Vector3 targetPosition = currentTarget.transform.position;// + (Vector3.up * 0.5f);
+                transform.rotation = Quaternion.LookRotation(targetPosition - this.transform.position);
+                state.jump = state.attack = biteAttack.ProcessGenericAction(this, _OnBiteEnd);
             };
+    }
+
+    public void StartCarryBite()
+    {
+        state.jump = state.attack = carryBiteAttack.ProcessGenericAction(this, _OnBiteEnd);
+        if (currentTarget.TryGetComponent<IDamageable>(out IDamageable damageable))
+        {
+            damageable.Recoil();
+        }
     }
 
     public void StartStandingAttack()
@@ -192,6 +254,38 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
         state.attack = standAttack.ProcessGenericAction(this, _MoveOnEnd);
     }
 
+    public void StartCarryAttack()
+    {
+        thrown = false;
+        AnimancerState warning = animancer.Play(carryWiggleAnim);
+        warning.Events.OnEnd = () => {
+            if (isCarried && !thrown)
+            {
+                StartCarryBite();
+            }
+            else
+            {
+                animancer.Play(state.hidden);
+                isCarried = false;
+            }
+        };
+    }
+
+    public void OnCarryThrow()
+    {
+        thrown = true;
+    }
+
+    public void StartCarry()
+    {
+        isCarried = true;
+        currentTarget = PlayerActor.player.gameObject;
+        StartCarryAttack();
+    }
+    public void StopCarry()
+    {
+        isCarried = false;
+    }
     public bool CalculateRunningAwayDestination(Vector3 runningFromPosition)
     {
         Vector3 direction = (runningFromPosition - this.transform.position).normalized;
@@ -259,37 +353,34 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
         else if (animancer.States.Current != state.hurt)
         {
             state.hurt = animancer.Play(hurtAnim);
-            state.hurt.Events.OnEnd = _UnhideOnEnd;
+            state.hurt.Events.OnEnd = EndHide;
         }
         damage.OnHit.Invoke();
         OnHurt.Invoke();
     }
 
-    void _UnhideOnEnd()
-    {
-        AnimancerState endHide = animancer.Play(endHideAnim);
-        endHide.Events.OnEnd = () =>
-        {
-            animancer.Play(state.move);
-        };
-    }
-
     void _MoveOnEnd()
     {
         animancer.Play(state.move);
+        isCarried = false;
     }
 
     void _OnBiteEnd()
     {
         Vector3 forward = this.transform.forward;
         forward = Vector3.ProjectOnPlane(forward, Vector3.up);
-        this.transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
-        _UnhideOnEnd();
+        //this.transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+        if (PlayerActor.player.isCarrying && PlayerActor.player.carryable == carryable)
+        {
+            PlayerActor.player.StopCarrying();
+        }
+        _MoveOnEnd();
+        //_UnhideOnEnd();
     }
     public void Recoil()
     {
         state.hurt = animancer.Play(hurtAnim);
-        state.hurt.Events.OnEnd = _UnhideOnEnd;
+        state.hurt.Events.OnEnd = EndHide;
     }
 
     public void StartCritVulnerability(float time)
@@ -349,7 +440,7 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
             Vector3 groundY = new Vector3(this.transform.position.x, hitCheck1.point.y, this.transform.position.z);
             this.transform.position = Vector3.MoveTowards(this.transform.position, groundY, 0.2f * Time.fixedDeltaTime);
         }
-        else if (IsJumping())
+        else if (IsJumping() || isCarried)
         {
             yVel = 0f;
         }
@@ -377,7 +468,7 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
         if (animancer == null || animancer.Animator == null || nav == null) return;
         Vector3 position = animancer.Animator.rootPosition + yVel * Vector3.up;
         transform.rotation = animancer.Animator.rootRotation;
-        if (!IsJumping())
+        if (!IsJumping() && !isCarried)
         {
             position.y = nav.nextPosition.y;
         }
@@ -385,7 +476,14 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
         Vector3 dir = position - this.transform.position;
         if (!Physics.SphereCast(this.transform.position + (Vector3.up), 0.25f, dir, out RaycastHit hit, dir.magnitude, MaskReference.Terrain))
         {
-            cc.Move(position - transform.position);
+            if (cc.enabled)
+            {
+                cc.Move(position - transform.position);
+            }
+            else
+            {
+                this.transform.position = position;
+            }
         }
         //animatorVelocity = animancer.Animator.velocity;
 
@@ -423,5 +521,4 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     {
         return animancer.States.Current == state.jump;
     }
-    
 }

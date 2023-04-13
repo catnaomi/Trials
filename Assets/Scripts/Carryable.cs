@@ -17,6 +17,7 @@ public class Carryable : MonoBehaviour
 
     public UnityEvent OnStopCarry;
     public UnityEvent OnStartCarry;
+    public UnityEvent OnThrow;
     // Start is called before the first frame update
     void Start()
     {
@@ -54,6 +55,7 @@ public class Carryable : MonoBehaviour
     public void Throw(Vector3 force)
     {
         StopCarry();
+        OnThrow.Invoke();
         if (rigidbody != null)
         {
             rigidbody.isKinematic = false;
@@ -83,7 +85,7 @@ public class Carryable : MonoBehaviour
             rigidbody.angularVelocity = Vector3.zero;
         }
     }
-    public void SetCarryPosition(Vector3 position)
+    public virtual void SetCarryPosition(Vector3 position)
     {
         this.transform.position = position;
         this.transform.rotation = Quaternion.LookRotation(player.transform.forward);
