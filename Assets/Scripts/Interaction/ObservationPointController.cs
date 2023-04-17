@@ -20,7 +20,7 @@ public class ObservationPointController : MonoBehaviour
         renderer = this.GetComponent<Renderer>();
         collider = this.GetComponent<Collider>();
         block = new MaterialPropertyBlock();
-        block.SetColor("_BaseColor", Color.white);
+        block.SetFloat("_Highlighted", 0f);
         renderer.SetPropertyBlock(block);
     }
 
@@ -57,7 +57,7 @@ public class ObservationPointController : MonoBehaviour
                 MarkObservationHighlight();
             }
         }
-        block.SetColor("_BaseColor", highlighted ? Color.green : Color.white);
+        block.SetFloat("_Highlighted", highlighted ? 1f : 0f);
         renderer.SetPropertyBlock(block);
     }
 
