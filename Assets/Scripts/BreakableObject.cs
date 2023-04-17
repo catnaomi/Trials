@@ -72,9 +72,12 @@ public class BreakableObject : MonoBehaviour, IDamageable
             LooseItem loose = LooseItem.CreateLooseItem(item);
             droppedObjects.Add(loose.gameObject);
         }
-        for (int i = 0; i < dropPrefabAmount; i++)
+        if (dropPrefab != null)
         {
-            droppedObjects.Add(Instantiate(dropPrefab));
+            for (int i = 0; i < dropPrefabAmount; i++)
+            {
+                droppedObjects.Add(Instantiate(dropPrefab));
+            }
         }
 
         foreach (GameObject droppedObject in droppedObjects)

@@ -623,7 +623,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }
             }
             EquippableWeapon blockWeapon = inventory.GetBlockWeapon();
-            if (blocking)
+            if (blocking && !isCarrying)
             {
                 //((MixerState)state.block).ChildStates[0].Clip = blockAnimStart.Clip;
 
@@ -3245,7 +3245,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void CarryWithAnimation(Carryable c)
     {
         carryable = c;
-        Physics.IgnoreCollision(this.GetComponent<Collider>(), c.GetComponent<Collider>());
+        Collider carryCollider = c.GetComponent<Collider>();
+        Collider[] colliders = GetColliders();
+        foreach (Collider collider in colliders)
+        {
+            Physics.IgnoreCollision(carryCollider, collider);
+        }
+        //Physics.IgnoreCollision(this.GetComponent<Collider>(), carryCollider);
         StartCoroutine("StartCarryRoutine");
         isDropping = false;
     }
@@ -3334,12 +3340,26 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     IEnumerator DelayAllowingCollision(Carryable carryable)
     {
+        Collider[] colliders = GetColliders();
         yield return new WaitForSeconds(0.5f);
         if (!((isCarrying || animancer.States.Current == state.carry) && this.carryable == carryable && carryable != null))
         {
-            Physics.IgnoreCollision(this.GetComponent<Collider>(), carryable.GetComponent<Collider>(), false);
+            Collider carryCollider = carryable.GetComponent<Collider>();
+            foreach (Collider collider in colliders)
+            {
+                Physics.IgnoreCollision(carryCollider, collider, false);
+            }
         }
         
+    }
+
+    Collider[] GetColliders()
+    {
+        List<Collider> colliders = new List<Collider>();
+        colliders.Add(cc);
+        colliders.Add(this.GetComponent<Collider>());
+        colliders.AddRange(this.GetComponentsInChildren<Collider>());
+        return colliders.ToArray();
     }
     #endregion
 

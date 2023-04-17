@@ -45,6 +45,10 @@ public class TimeTravelController : MonoBehaviour
     bool isSlowing;
     public UnityEvent OnSlowTimeStart;
     public UnityEvent OnSlowTimeStop;
+    [Header("Observation Point Settings")]
+    public bool isObserving;
+    public bool observationHighlighted;
+    public ObservationPointController currentObservationPoint;
     [Header("Meter Settings")]
     public AttributeValue charges = new AttributeValue(7, 7, 7);
     public AttributeValue meter = new AttributeValue(60f, 60f, 60f);
@@ -280,7 +284,16 @@ public class TimeTravelController : MonoBehaviour
     {
         if (!ShouldAllowInput()) return;
         if (ignoreLimits) return;
-        if (isSlowing)
+
+        if (observationHighlighted && !isObserving)
+        {
+            StartObservation();
+        }
+        else if (isObserving)
+        {
+            StopObservation();
+        }
+        else if (isSlowing)
         {
             // do nothing
         }
@@ -774,6 +787,35 @@ public class TimeTravelController : MonoBehaviour
         }
     }
 
+    public void MarkObservationPoint(bool isHighlighted, ObservationPointController point)
+    {
+        if (!isHighlighted)
+        {
+            if (currentObservationPoint == point)
+            {
+                observationHighlighted = false;
+            }
+        }
+        else
+        {
+            observationHighlighted = true;
+            currentObservationPoint = point;
+        }
+    }
+
+    public void StartObservation()
+    {
+        isObserving = true;
+        currentObservationPoint.StartObserve();
+        Debug.Log("observe!");
+    }
+
+    public void StopObservation()
+    {
+        isObserving = false;
+        currentObservationPoint.StopObserve();
+        Debug.Log("stop observe!");
+    }
     private void OnApplicationQuit()
     {
         magicVignette.SetFloat("_Weight", 0f);

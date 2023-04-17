@@ -21,17 +21,22 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public Vector3 destination;
     public float minimumRunDistance = 1f;
     public float corneredTargetDistance = 5f;
+    public float safeDistance = 10f;
     public bool isCornered;
+    public bool isSafeDistance;
     public float corneredTime = 2f;
     public float retaliationTime = 3f;
+    public float targetDistance;
     float corneredClock;
     [Header("Carryable")]
     public bool isCarried;
     public MimicCarryable carryable;
     public Interactable carryInteract;
     bool thrown;
+    public float throwYVelocity = 10f;
     [Header("Combat")]
     public Transform hitboxMount;
+    public GameObject targetObject;
     public float hitboxRadius;
     [SerializeField, ReadOnly] Hitbox hitbox;
     public UnityEvent OnHitboxActive;
@@ -58,6 +63,7 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public ClipTransition biteAttackAnim;
     [Space(20)]
     public ClipTransition carryWiggleAnim;
+    public ClipTransition thrownAnim;
     MimicPotAnimState state;
 
     DamageKnockback lastDamageTaken;
@@ -98,6 +104,12 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public override void ActorPostUpdate()
     {
         base.ActorPostUpdate();
+
+        if (currentTarget != null)
+        {
+            targetDistance = Vector3.Distance(this.transform.position, currentTarget.transform.position);
+        }
+
         if (animancer.States.Current == state.hidden)
         { //hiding
             // do nothing
@@ -119,7 +131,14 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
             nav.isStopped = false;
             if (corneredClock > corneredTime)
             {
-                state.cornered = animancer.Play(idleAnim);
+                if (isSafeDistance)
+                {
+                    StartHide();
+                }
+                else
+                {
+                    state.cornered = animancer.Play(idleAnim);
+                }       
             }
         }
         else if (animancer.States.Current == state.cornered)
@@ -168,7 +187,7 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
             nav.isStopped = true;
             nav.nextPosition = this.transform.position;
         }
-        if (isCornered)
+        if (isCornered || isSafeDistance)
         {
             corneredClock += Time.deltaTime;
         }
@@ -201,7 +220,16 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
             nav.updateRotation = false;
         }
 
-        carryInteract.canInteract = (animancer.States.Current == state.hidden) && !isCarried;
+        if ((targetObject.activeSelf && IsHidden()) || isCarried)
+        {
+            targetObject.SetActive(false);
+        }
+        else if ((!targetObject.activeSelf && !IsHidden()) && !isCarried)
+        {
+            targetObject.SetActive(true);
+        }
+
+        carryInteract.canInteract = IsHidden() && !isCarried;
     }
     public void StartHide()
     {
@@ -275,6 +303,11 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public void OnCarryThrow()
     {
         thrown = true;
+        this.transform.rotation = Quaternion.LookRotation((this.transform.position - currentTarget.transform.position).normalized, Vector3.up);
+        AnimancerState throwState = animancer.Play(thrownAnim);
+        yVel = -throwYVelocity;
+        state.jump = throwState;
+        throwState.Events.OnEnd = _MoveOnEnd;
     }
 
     public void StartCarry()
@@ -418,7 +451,9 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
             {
                 bool canFindDestination = CalculateRunningAwayDestination(currentTarget.transform.position);
                 bool withinCorneredRange = Vector3.Distance(currentTarget.transform.position, this.transform.position) < corneredTargetDistance;
+                bool withinSafeRange = Vector3.Distance(currentTarget.transform.position, this.transform.position) >= safeDistance;
                 isCornered = withinCorneredRange && !canFindDestination;
+                isSafeDistance = withinSafeRange;
             }
             if (nav.enabled) nav.SetDestination(destination);
         }
@@ -525,5 +560,10 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public bool IsJumping()
     {
         return animancer.States.Current == state.jump;
+    }
+
+    public bool IsHidden()
+    {
+        return animancer.States.Current == state.hidden;
     }
 }

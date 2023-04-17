@@ -41,6 +41,7 @@ Transform:
   - {fileID: 2518472827099815300}
   - {fileID: 2518472825582256597}
   - {fileID: 2518472826034117488}
+  - {fileID: 264425101939846733}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -323,14 +324,19 @@ MonoBehaviour:
   destination: {x: 0, y: 0, z: 0}
   minimumRunDistance: 0.1
   corneredTargetDistance: 5
+  safeDistance: 10
   isCornered: 0
+  isSafeDistance: 0
   corneredTime: 1
   retaliationTime: 2
+  targetDistance: 0
   isCarried: 0
   carryable: {fileID: 2518472825582256598}
   carryInteract: {fileID: 2518472825582256599}
+  throwYVelocity: 10
   hitboxMount: {fileID: 2518472826034117488}
-  hitboxRadius: 1.25
+  targetObject: {fileID: 5946915081367553734}
+  hitboxRadius: 1
   hitbox: {fileID: 0}
   OnHitboxActive:
     m_PersistentCalls:
@@ -477,6 +483,15 @@ MonoBehaviour:
       _Callbacks: []
       _Names: []
     _Clip: {fileID: 7400000, guid: caccba4768f870c46a77cf3424182f48, type: 2}
+    _Speed: 1
+    _NormalizedStartTime: NaN
+  thrownAnim:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: ef1915cc8fa99cf4fa65d12e8ebfc72b, type: 2}
     _Speed: 1
     _NormalizedStartTime: NaN
 --- !u!1 &2518472825564833364
@@ -13222,6 +13237,37 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &5946915081367553734
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 264425101939846733}
+  m_Layer: 10
+  m_Name: _targetObject
+  m_TagString: LockTarget
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &264425101939846733
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5946915081367553734}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.516, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1926681102263642144}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1926681103324048472
 PrefabInstance:
   m_ObjectHideFlags: 0
