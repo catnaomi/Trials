@@ -208,7 +208,7 @@ public class TimeTravelController : MonoBehaviour
         }
         else // not using powers
         {
-            
+
             /*
             if (meter.current < 0f)
             {
@@ -225,7 +225,7 @@ public class TimeTravelController : MonoBehaviour
             }
             */
             //meter.current = meter.max;
-            if (charges.current < charges.max)
+            if (charges.current < charges.max || (isQuickRecharging && (charges.current < charges.max + 1)))
             {
                 if (timePowerClock > 0f)
                 {
@@ -234,7 +234,7 @@ public class TimeTravelController : MonoBehaviour
                     {
                         RecoverCharge();
                         OnCooldownComplete.Invoke();
-                        if (charges.current < charges.max)
+                        if (charges.current < charges.max || (isQuickRecharging && (charges.current < charges.max + 1)))
                         {
                             timePowerClock = timePowerCooldown;
                         }
@@ -347,7 +347,7 @@ public class TimeTravelController : MonoBehaviour
 
     public void RecoverCharge()
     {
-        if (charges.current < charges.max)
+        if (charges.current < charges.max || (isQuickRecharging && (charges.current < charges.max + 1)))
         {
             charges.current++;
         }
