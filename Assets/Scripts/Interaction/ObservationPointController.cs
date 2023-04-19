@@ -14,6 +14,8 @@ public class ObservationPointController : MonoBehaviour
     public CinemachineVirtualCamera vcam;
     public UnityEvent OnStartHighlight;
     public UnityEvent OnEndHighlight;
+    public UnityEvent OnStartObserve;
+    public UnityEvent OnEndObserve;
     // Start is called before the first frame update
     void Start()
     {
@@ -69,10 +71,12 @@ public class ObservationPointController : MonoBehaviour
     public void StartObserve()
     {
         vcam.Priority = 11;
+        OnStartObserve.Invoke();
     }
 
     public void StopObserve()
     {
         vcam.Priority = -1;
+        OnEndObserve.Invoke();
     }
 }

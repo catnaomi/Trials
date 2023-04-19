@@ -1,12 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 public class KillPlane : MonoBehaviour
 {
     public float interval = 0.1f;
     public bool ignorePlayer = false;
+    public UnityEvent OnKillPlayer;
     Plane plane;
     Bounds bounds;
     // Start is called before the first frame update
@@ -34,6 +36,10 @@ public class KillPlane : MonoBehaviour
                 if (!plane.GetSide(actor.transform.position) && IsWithinPlane(actor.transform.position))
                 {
                     actor.OnFallOffMap();
+                    if (actor is PlayerActor)
+                    {
+                        OnKillPlayer.Invoke();
+                    }
                     Debug.Log("killplaned: " + actor);
                 }
                 //yield return null;

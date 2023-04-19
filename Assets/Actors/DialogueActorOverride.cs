@@ -19,7 +19,10 @@ public class DialogueActorOverride : Interactable
     {
         if (talking) return;
         player.SheatheAll();
-        player.SetCombatTarget(lookAtTarget);
+        if (lookAtTarget != null)
+        {
+            player.SetCombatTarget(lookAtTarget);
+        } 
         player.StartDialogue();
         try
         {

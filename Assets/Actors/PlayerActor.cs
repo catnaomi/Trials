@@ -31,6 +31,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public VirtualCameras vcam;
     CinemachineFreeLook free_freeLook;
     GameObject consumableModel;
+    public bool shouldLookAtCamera;
+    public float[] headPointWeights = { 1f, 0.1f, 1f, 0f, 0.7f };
     [Header("Interaction & Dialogue")]
     public bool isMenuOpen;
     List<Interactable> interactables;
@@ -4055,7 +4057,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         float dist = 10f;
         Vector3 point = Vector3.zero;
-        if (this.GetCombatTarget() != null)
+        if (shouldLookAtCamera)
+        {
+            point = Camera.main.transform.position;
+        }
+        else if (this.GetCombatTarget() != null)
         {
             point = this.GetCombatTarget().transform.position;
         }
@@ -4079,6 +4085,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Debug.DrawLine(positionReference.Head.position, headPoint, Color.magenta);
     }
 
+    public void LookAtCamera(bool isOn)
+    {
+        shouldLookAtCamera = isOn;
+    }
     public override Vector3 GetLaunchVector(Vector3 origin)
     {
 
@@ -4169,9 +4179,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             GetHeadPoint();
             animancer.Animator.SetLookAtPosition(headPoint);
-            if (IsAiming() || this.GetCombatTarget() != null)
+            if (IsAiming() || this.GetCombatTarget() != null || shouldLookAtCamera)
             {
-                animancer.Animator.SetLookAtWeight(1f, 0.1f, 1f, 0f, 0.7f);
+                animancer.Animator.SetLookAtWeight(headPointWeights[0], headPointWeights[1], headPointWeights[2], headPointWeights[3], headPointWeights[4]);
             }
             else
             {

@@ -22,24 +22,29 @@ public class YarnPlayer : MonoBehaviour
             {
                 MenuController.menu.OpenDialogue();
             }
-            runner = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
-
-            if (runner.IsDialogueRunning && closeAlreadyRunningDialogue)
-            {
-                runner.Stop();
-            }
-            runner.SetProject(yarnProject);
-            runner.StartDialogue(nodes[index]);
-            runner.onDialogueComplete.AddListener(CallFinish);
-            if (loopThroughNodes)
-            {
-                index++;
-                index %= nodes.Length;
-            }
+            StartCoroutine(PlayRoutine());
             
        }
     }
 
+    IEnumerator PlayRoutine()
+    {
+        runner = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
+
+        if (runner.IsDialogueRunning && closeAlreadyRunningDialogue)
+        {
+            runner.Stop();
+            yield return new WaitWhile(() => runner.IsDialogueRunning);
+        }
+        runner.SetProject(yarnProject);
+        runner.StartDialogue(nodes[index]);
+        runner.onDialogueComplete.AddListener(CallFinish);
+        if (loopThroughNodes)
+        {
+            index++;
+            index %= nodes.Length;
+        }
+    }
     void CallFinish()
     {
         OnFinish.Invoke();

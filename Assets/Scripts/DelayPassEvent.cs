@@ -10,6 +10,8 @@ public class DelayPassEvent : MonoBehaviour
     public UnityEvent OnDelayComplete;
     public bool usingTimeTravel = true;
     public int repeatEventsRequired = 0;
+    public int limitTriggerAmount = -1;
+    [SerializeField, ReadOnly] int timesTriggered = 0;
     [SerializeField, ReadOnly] int eventsPassed;
     // Update is called once per frame
     void Update()
@@ -33,6 +35,7 @@ public class DelayPassEvent : MonoBehaviour
 
     public void DelayEvent()
     {
+        if ((limitTriggerAmount > 0) && (timesTriggered >= limitTriggerAmount)) return;
         if (repeatEventsRequired > 0)
         {
             eventsPassed++;
@@ -41,6 +44,8 @@ public class DelayPassEvent : MonoBehaviour
                 return;
             }
         }
+
         clock = delay;
+        timesTriggered++;
     }
 }

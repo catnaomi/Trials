@@ -14,9 +14,9 @@ Mun: Oh, uh, you're awake. Good morning, er, evening maybe.
         Mun: But my name is Mun. I'm a friend.
     -> Antiquity: Where am I?
         Mun: That's a hard question to answer. It’s- uh,  complicated, and I don’t want to confuse you.
-        Mun: You’ll understand in due time, I hope. Let me just say that you'll figure it out in time.
+        Mun: You’ll understand in due time, I hope.
         Mun: I'm Mun, by the way. I'm a friend.
-    -> Antiquity: "..."
+    -> Antiquity: ...
         Mun: Ah- stony as ever, friend. I’m relieved, you know, I was worried that I’d have to explain... this.
         Mun: Well, uh, I'm Mun. A friend.
 Mun: This is a place I used to frequent. It's an island near home.
@@ -45,24 +45,33 @@ title: prologue_intro_falling2
 ---
 Mun: I can still feel that! #small
 ===
+title: prologue_intro_falling3
+---
+Mun: Please, friend. Careful. #small
+===
 title: prologue_timestop_explanation
 ---
+<<set $prologue_timestop_didExplain to true>>
 Mun: So you, my friend, have the ability to stop time.
 Mun: With your help, we can use it to take on plenty of challenges and foes that would be too difficult otherwise.
 Mun: We'll need it ahead to traverse the swinging bridges and unstable islands.
 Mun: But be warned, you have a limited amount of <style="Concept">charges</style> for your time abilities.
 Mun: I can pray for you at <style="Concept">shrines</style> or collect <style="Item">shards</style> to restore your charges.
+===
+title: prologue_timestop_after
+---
 Mun: Let's use your power to cross these platforms. #small
 ===
 title: prologue_timestop_trigger
 ---
 Mun: Hang on a second. I need to tell you about something.
 Mun: Uh, don't be alarmed, okay? It might sound a bit outlandish.
+<<jump prologue_timestop_explanation>>
 ===
 title: prologue_timestop_early
 ---
 Mun: Ah! I was wondering if you'd be able to do that in your state. Never should've doubted you, really.
-<<jump prologue_timestopexplanation>>
+<<jump prologue_timestop_explanation>>
 ===
 title: prologue_observationnode
 ---
@@ -70,6 +79,7 @@ Mun: Oh, where are you going? #small
 ===
 title: prologue_observationnode_return
 ---
+<<set $prologue_observation_didExplain to true>>
 Mun: Ah, you found a good vantage point. Finding those will be helpful for scouting out areas.
 Mun: Don't take too long though, I might get bored!
 Mun: Um... That was a joke, in case that wasn't clear.
