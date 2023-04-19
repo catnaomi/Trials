@@ -10,8 +10,9 @@ public class YarnTimelineBehaviour : PlayableBehaviour
     public YarnProject yarnProject;
     public string node;
     public bool pauseOnStart;
+    public bool zeroSpeedOnStart;
     bool started;
-    bool paused;
+    double speed;
     DialogueRunner runner;
     PlayableDirector director;
     public override void ProcessFrame(Playable playable, FrameData info, object playerData)
@@ -40,13 +41,28 @@ public class YarnTimelineBehaviour : PlayableBehaviour
 
     void OnNodeStart(string node)
     {
-        if (pauseOnStart) director.Pause();
+        if (pauseOnStart)
+        {
+            director.Pause();
+        }
+        else if (zeroSpeedOnStart)
+        {
+            speed = director.playableGraph.GetRootPlayable(0).GetSpeed();
+            director.playableGraph.GetRootPlayable(0).SetSpeed(0);
+        }
     }
 
     void OnDialogueComplete()
     {
         runner.onDialogueComplete.RemoveListener(OnDialogueComplete);
         runner.onNodeStart.RemoveListener(OnNodeStart);
-        if (pauseOnStart) director.Resume();
+        if (pauseOnStart)
+        {
+            director.Resume();
+        }
+        else if (zeroSpeedOnStart)
+        {
+            director.playableGraph.GetRootPlayable(0).SetSpeed(speed);
+        }
     }
 }

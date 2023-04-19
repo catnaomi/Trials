@@ -9,6 +9,7 @@ public class YarnTimelineAsset : PlayableAsset
     public YarnProject yarnProject;
     public string node;
     public bool pauseOnStart;
+    public bool zeroSpeedOnStart;
 
     public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
     {
@@ -26,7 +27,7 @@ public class YarnTimelineAsset : PlayableAsset
         }
         
         yarnTimelineBehaviour.pauseOnStart = pauseOnStart;
-
+        yarnTimelineBehaviour.zeroSpeedOnStart = zeroSpeedOnStart;
         return playable;
     }
 }

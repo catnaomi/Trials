@@ -1,0 +1,101 @@
+title: annie_opening
+tags: 
+position: -399,-93
+---
+<<set $prologue_AnnieAmbush to 0>>
+// 0 = event incomplete
+// 1 = normal hit
+// 2 = timestop hit
+// 3 = normal miss
+// 4 = timestop miss
+Annie: Hey Mun! You left <style="Item">your sword</style> just in the ground over here!
+Annie: You never do that, you always take good care of your stuff!
+Annie: Not sure what the deal is, but it sounds like you need a reminder to do better. Get ready!
+===
+title: annie_hit
+position: -182,-221
+---
+Annie: Mun! Are you okay?
+Annie: You never get hit by my attacks like that, what gives? You're not hurt are you? You rusty or something?
+Annie: Hey, I’m sorry. For once I’m glad you weren’t taking care of <style="Item">your sword</style>– it seems so blunt now.
+<<set $prologue_AnnieAmbush to 1>>
+<<jump annie_sword>>
+===
+title: annie_timemiss
+position: -200,10
+---
+Annie: Whoa! How'd you move so fast?
+Annie: I knew you were quick but, when'd you get so good? It's like the light flickered and you were gone...
+Annie: Ugh, probably wouldn’t have been able to hit you with <style="Item">this heavy thing</style> anyway.
+<<set $prologue_AnnieAmbush to 3>>
+<<jump annie_sword>>
+===
+title: annie_missnormal
+position: -200,-106
+---
+Annie: Ugh! I missed!
+Annie: I blame <style="Item">this clunky thing</style> you call it a sword– it’s so… heavy.
+Annie: Besides, you usually know better than to leave it lying around. Someone could get hurt, you know!
+<<set $prologue_AnnieAmbush to 4>>
+<<jump annie_sword>>
+===
+title: annie_timehit
+position: -200,10
+---
+Annie: Aha! Got you!
+Annie: You were moving so fast, but I think I’ve managed to figure you out!
+Annie: You’re not hurt or anything, are you? I don’t think <style="Item">this blunt old thing</style> could manage to make a cut anyhow.
+<<set $prologue_AnnieAmbush to 2>>
+<<jump annie_sword>>
+===
+title: annie_sword
+position: 12,-113
+---
+Mun: Annie, please give me my sword back.
+Annie: Ha! Fine, take it, loser.
+===
+title: annie_postdialogue2
+---
+Mun: Please stop doing this, Annie.
+Annie: No can do! Have you tried being less fun to ambush?
+===
+title: annie_postdialogue
+---
+Annie: Blademistress Qi is waiting for you, by the way. You probably don't wanna keep her waiting.
+Mun: Right, thank you Annie.
+===
+title: annie_muntip
+---
+Mun: Try using your powers! #small
+===
+title: annie_journaltutorial
+---
+Mun: Now that we have a second– that brash little aven’s Annie.
+Mun: I keep a journal on things, if you wanted to know anything about her.
+Mun: If you’re ever curious about anything, you can always stop time and ask. I’m sure I’ll have something written down.
+===
+title: barry_opening
+---
+Barry: Oh, hey Mun! How are ya?
+<<if $prologue_AnnieAmbush >= 3>>
+    Barry: Saw you dodge another one of Annie’s ambushes. I could never move like you do.
+<<else>>
+    Barry: Oh, you’re hurt! I-I know you can handle yourself fine, but–
+<<endif>>
+Barry: But here. I made some <style="Item">soup!</style> Should keep you going between Qi’s uh– lessons.
+<<set $prologue_GotSoup to 1>>
+===
+title: barry_postsoup
+---
+Mun: Hey, thanks Barry. I've always loved your soups.
+Barry: O-oh! I'm glad you like them! You can keep <style="Item">the bottle</style> by the way.
+Barry: It's glass and shold be easy to wash and reuse.
+===
+title: barry_postsoup2
+---
+Barry: Oh, I almost forgot, Blademistress Qi is looking for you! You should head inside.
+===
+title: barry_doorwarning
+---
+Barry: Oh! Mun! Before you head in, come down here for a sec! I have something for you!
+===
