@@ -161,7 +161,7 @@ public class TimeTravelController : MonoBehaviour
             {
                 meter.current -= timeStopDrainRate * Time.deltaTime;
 
-                meter.current -= movementDelta.magnitude * timeStopMovementCostRatio * Time.deltaTime;
+                meter.current -= movementDelta.magnitude * timeStopMovementCostRatio; // movement delta is already scaled by delta time, so don't scale it again!
             }
             
 
