@@ -114,12 +114,22 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public void StartRewind()
     {
+        if (this.rigidbody == null)
+        {
+            Deregister();
+            return;
+        }
         isRewinding = true;
         rigidbody.isKinematic = true;
     }
 
     public void StopFreeze()
     {
+        if (this.rigidbody == null)
+        {
+            Deregister();
+            return;
+        }
         isFrozen = false;
         LoadTimeState(lastData);
     }
@@ -162,8 +172,12 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         return fixedTime;
     }
 
-    void OnDestroy()
+    public void Deregister()
     {
         TimeTravelController.time.DeregisterAffectee(this);
+    }
+    void OnDestroy()
+    {
+        Deregister();
     }
 }

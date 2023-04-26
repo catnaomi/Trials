@@ -44,6 +44,15 @@ public class KillPlane : MonoBehaviour
                 }
                 //yield return null;
             }
+            BreakableObject[] breakableObjects = FindObjectsOfType<BreakableObject>();
+            foreach (BreakableObject breakable in breakableObjects)
+            {
+                if (!plane.GetSide(breakable.transform.position) && IsWithinPlane(breakable.transform.position))
+                {
+                    breakable.BreakObject();
+                    Debug.Log("killplaned: " + breakable);
+                }
+            }
         }
     }
 

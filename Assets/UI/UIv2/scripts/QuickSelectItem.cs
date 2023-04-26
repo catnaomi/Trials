@@ -32,10 +32,11 @@ public class QuickSelectItem : MonoBehaviour
     public Image highlight;
 
     public float flashTime = 1f;
+    public bool updateNextFrame = false;
     [Header("VizData")]
     public bool useVizData;
     public ItemVizData vizData;
-    public bool forceUpdate;
+    public bool forceUpdateViz;
     public bool forceFlash;
     [Header("Sprite Reference")]
     public Sprite itemBorder;
@@ -70,7 +71,7 @@ public class QuickSelectItem : MonoBehaviour
 
         if (PlayerActor.player != null)
         {
-            PlayerActor.player.GetComponent<Inventory>().OnChange.AddListener(UpdateSlots);
+            PlayerActor.player.GetComponent<Inventory>().OnChange.AddListener(MarkShouldUpdate);
             UpdateSlots();
         }
 
@@ -82,6 +83,10 @@ public class QuickSelectItem : MonoBehaviour
     {
         if (PlayerActor.player == null) return;
         UpdateSlots();
+    }
+    void MarkShouldUpdate()
+    {
+        updateNextFrame = true;
     }
     public void UpdateSlots()
     {
@@ -189,6 +194,7 @@ public class QuickSelectItem : MonoBehaviour
         UpdateFromVizdata();
     }
 
+
     public void UpdateFromVizdata()
     {
         primaryIndicator.enabled = vizData.isEquipped;
@@ -255,9 +261,14 @@ public class QuickSelectItem : MonoBehaviour
 
     private void Update()
     {
-        if (forceUpdate)
+        if (updateNextFrame)
         {
-            forceUpdate = false;
+            updateNextFrame = false;
+            UpdateSlots();
+        }
+        if (forceUpdateViz)
+        {
+            forceUpdateViz = false;
             UpdateFromVizdata();
         }
         if (forceFlash)

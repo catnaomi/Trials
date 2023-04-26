@@ -17,12 +17,18 @@ public class DialogueActorOverride : Interactable
     bool wasNavigating;
     public override void Interact(PlayerActor player)
     {
+        StartDialogue();
+    }
+
+    public void StartDialogue()
+    {
         if (talking) return;
+        player = PlayerActor.player;
         player.SheatheAll();
         if (lookAtTarget != null)
         {
             player.SetCombatTarget(lookAtTarget);
-        } 
+        }
         player.StartDialogue();
         try
         {
@@ -34,7 +40,7 @@ public class DialogueActorOverride : Interactable
             player.StopDialogue();
             return;
         }
-        
+
         /*try
         {
             
@@ -44,7 +50,7 @@ public class DialogueActorOverride : Interactable
             Debug.LogError(ex);
             return;
         }*/
-        
+
         dialogue = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
         dialogue.onDialogueComplete.AddListener(StopDialogue);
         LineActorPositioningHandler line = dialogue.GetComponent<LineActorPositioningHandler>();

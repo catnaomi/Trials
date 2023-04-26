@@ -2781,6 +2781,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void InputSheathe()
     {
+        /*
         if (!animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
         {
             if (inventory.IsOffDrawn() && inventory.IsOffEquipped())
@@ -2795,7 +2796,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 TriggerSheath(true, inventory.GetMainWeapon().MainHandEquipSlot, true);
             }
-        }
+        }*/
+        SheatheAll();
     }
 
     public void ResetInputs()
@@ -3344,7 +3346,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         Collider[] colliders = GetColliders();
         yield return new WaitForSeconds(0.5f);
-        if (!((isCarrying || animancer.States.Current == state.carry) && this.carryable == carryable && carryable != null))
+        if (!((isCarrying || animancer.States.Current == state.carry) && carryable != null && this.carryable == carryable))
         {
             Collider carryCollider = carryable.GetComponent<Collider>();
             foreach (Collider collider in colliders)
@@ -4418,6 +4420,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         animancer.Play(state.move);
     }
+    
+    public bool IsSafe()
+    {
+        return (GetGrounded() && lastGroundWasStatic) &&
+            !dead &&
+            !resurrecting &&
+            IsMoving() &&
+            !IsInDialogue() &&
+            !this.GetComponent<ActorTimeTravelHandler>().IsRewinding();
+    }
     #endregion
 
     #region INTERACTION
@@ -4480,10 +4492,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else
         {
-            InputJump();
-            //InputSheathe();
+            InputSheathe();
         }
-        buffer.ClearInput(InputBuffer.Inputs.Jump);
     }
 
     public void StartDialogue()

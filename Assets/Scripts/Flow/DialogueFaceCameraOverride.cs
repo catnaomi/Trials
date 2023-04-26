@@ -11,7 +11,26 @@ public class DialogueFaceCameraOverride : MonoBehaviour
     Vector3 lastDestination;
     GameObject lastDestinationTarget;
     bool wasNavigating;
+    public bool waitForSafe;
     public void StartDialogue()
+    {
+        if (waitForSafe)
+        {
+            StartCoroutine(CheckSafe());
+        }
+        else
+        {
+            StartDialogueSuccess();
+        }
+    }
+
+    IEnumerator CheckSafe()
+    {
+        yield return new WaitUntil(PlayerActor.player.IsSafe);
+        StartDialogueSuccess();
+    }
+
+    void StartDialogueSuccess()
     {
         PlayerActor player = PlayerActor.player;
         if (talking) return;

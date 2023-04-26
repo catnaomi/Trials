@@ -193,7 +193,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
 
         OnChange.Invoke();
-        weaponChanged = true;
+        MarkChanged();
     }
     public void EquipMainWeapon(EquippableWeapon weapon)
     {
@@ -252,7 +252,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
 
         OnChange.Invoke();
-        weaponChanged = true;
+        MarkChanged();
     }
 
     public void EquipOffHandWeapon(EquippableWeapon weapon)
@@ -279,7 +279,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         PositionWeapon();
 
         OnChange.Invoke();
-        weaponChanged = true;
+        MarkChanged();
         
     }
 
@@ -302,7 +302,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         PositionWeapon();
 
         OnChange.Invoke();
-        weaponChanged = true;
+        MarkChanged();
     }
 
     public void EquipRangedWeapon(RangedWeapon weapon)
@@ -363,7 +363,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
 
         OnChange.Invoke();
-        weaponChanged = true;
+        MarkChanged();
     }
 
     public void UnequipRangedWeapon()
@@ -393,7 +393,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         PositionWeapon();
 
         OnChange.Invoke();
-        weaponChanged = true;
+        MarkChanged();
     }
 
     public void GenerateMainModel()
@@ -483,7 +483,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             OffIsDrawn = (GetOffWeapon() != null && prioritySlot == Inventory.OffType);
             RangedIsDrawn = (GetRangedWeapon() != null && prioritySlot == Inventory.RangedType);
             PositionWeapon();
-            weaponChanged = true;
+            MarkChanged();
         }   
     }
     
@@ -738,7 +738,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
         ValidateHandedness(type);
         PositionWeapon();
-        weaponChanged = true;
+        MarkChanged();
     }
 
     public void SetDrawn(bool main, bool drawn)
@@ -1032,6 +1032,10 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                         UnequipMainWeapon();
                         EquipToSlot(currentMain, slot);
                     }
+                    else
+                    {
+                        EquipToSlot(null, slot);
+                    }
                     EquipMainWeapon(weapon, true);
                 }
                 else if (weapon.EquippableOff)
@@ -1042,6 +1046,10 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                         UnequipOffHandWeapon();
                         EquipToSlot(currentOff, slot);
                     }
+                    else
+                    {
+                        EquipToSlot(null, slot);
+                    }
                     EquipOffHandWeapon(weapon, true);
                 }
                 else if (weapon.EquippableRanged)
@@ -1051,6 +1059,10 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                     {
                         UnequipRangedWeapon();
                         EquipToSlot(currentRanged, slot);
+                    }
+                    else
+                    {
+                        EquipToSlot(null, slot);
                     }
                     EquipRangedWeapon((RangedWeapon)weapon, true);
                 }
@@ -1210,6 +1222,10 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
     }
 
+    public void MarkChanged()
+    {
+        weaponChanged = true;
+    }
     public bool CheckWeaponChanged()
     {
         if (weaponChanged)
