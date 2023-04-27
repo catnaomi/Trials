@@ -25,6 +25,7 @@ public class AnimationFXHandler : MonoBehaviour
     [Header("Combat")]
     public AudioSource combatWhiffSource;
     public AudioSource combatHitSource;
+    public Vector3 parryPosition = Vector3.forward;
     [Header("Events")]
     public UnityEvent OnDust;
     public UnityEvent OnDashDust;
@@ -45,6 +46,11 @@ public class AnimationFXHandler : MonoBehaviour
         actor = this.GetComponent<Actor>();
         actor.OnHurt.AddListener(ShowHitParticle);
         actor.OnBlock.AddListener(ShowBlockParticle);
+        if (actor is PlayerActor player)
+        {
+            player.OnParryStart.AddListener(ParryStart);
+            player.OnParrySuccess.AddListener(ParrySuccess);
+        }
     }
 
     #region Footsteps
@@ -229,6 +235,31 @@ public class AnimationFXHandler : MonoBehaviour
     {
         combatWhiffSource.Stop();
         combatHitSource.PlayOneShot(animSounds.chargeStart);
+    }
+
+    public void ParryStart()
+    {
+        if (actor is PlayerActor player)
+        {
+            Vector3 position = actor.transform.position +
+                actor.transform.right * parryPosition.x +
+                actor.transform.up * parryPosition.y +
+                actor.transform.forward * parryPosition.z;
+            Vector3 rotation = actor.transform.forward;
+            if (player.IsParrySlash())
+            {
+                FXController.CreateCross(position, rotation);
+            }
+            else if (player.IsParryThrust())
+            {
+                FXController.CreateCircle(position, rotation);
+            }
+        }
+    }
+
+    public void ParrySuccess()
+    {
+        // TODO: fancy parry success particle
     }
     #endregion
 

@@ -22,7 +22,9 @@ public class FXController : MonoBehaviour
     [Space(5)]
     public GameObject fx_spiral;
     [Space(5)]
-   
+    public GameObject fx_circle;
+    public GameObject fx_cross;
+
     private static float fixedDeltaTime;
     private static float hitpauseLength;
 
@@ -215,6 +217,23 @@ public class FXController : MonoBehaviour
         EnsureSingleton();
         CreateFX(FXController.FX.FX_Sparks, position, Quaternion.LookRotation(-direction), 1f, soundOverride);
     }
+
+    public static void CreateCross(Vector3 position, Vector3 direction)
+    {
+        EnsureSingleton();
+        GameObject newFX = GameObject.Instantiate(main.fx_cross);
+        newFX.transform.position = position;
+        newFX.transform.rotation = Quaternion.LookRotation(direction);
+    }
+
+    public static void CreateCircle(Vector3 position, Vector3 direction)
+    {
+        EnsureSingleton();
+        GameObject newFX = GameObject.Instantiate(main.fx_circle);
+        newFX.transform.position = position;
+        newFX.transform.rotation = Quaternion.LookRotation(direction);
+    }
+
     public static GameObject CreateMiragiaParticleSingle(Vector3 position)
     {
         EnsureSingleton();

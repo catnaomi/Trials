@@ -106,6 +106,7 @@ public class TimeTravelController : MonoBehaviour
         {
             lastPosition = PlayerActor.player.transform.position;
             PlayerActor.player.OnHitboxActive.AddListener(TimeStopHitboxActivation);
+            PlayerActor.player.OnParrySuccess.AddListener(RecoverCharge);
         }
         
     }

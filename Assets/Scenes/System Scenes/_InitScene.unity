@@ -3242,7 +3242,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.775, y: 1}
+    m_SensorSize: {x: 1.7785349, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -3259,7 +3259,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 247212858}
   m_LocalRotation: {x: -0.085440286, y: 0.9411326, z: 0.032369543, w: 0.32545596}
-  m_LocalPosition: {x: -8.16704, y: 0.82776725, z: 3.648634}
+  m_LocalPosition: {x: -0.000015422704, y: 0.0000014496472, z: 0.00000611868}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5333,6 +5333,7 @@ MonoBehaviour:
   waterSource: {fileID: 2757355004405072315}
   combatWhiffSource: {fileID: 2757355002936959162}
   combatHitSource: {fileID: 2757355003981329580}
+  parryPosition: {x: 0, y: 1, z: 1}
   OnDust:
     m_PersistentCalls:
       m_Calls:
@@ -5650,6 +5651,7 @@ MonoBehaviour:
     isThrust: 0
     isSlash: 0
     isRanged: 0
+    isParry: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
@@ -5829,6 +5831,12 @@ MonoBehaviour:
   thrustIKAdjustSpeed: 5
   thrustInitialHeight: 1
   thrustIKHeightRange: 1
+  OnParryStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnParrySuccess:
+    m_PersistentCalls:
+      m_Calls: []
   moveAnim: {fileID: 11400000, guid: 1501bcdeed2561947b6564d8f43bd572, type: 2}
   strafeAnim: {fileID: 11400000, guid: 0c3789dccdc4c26499bb40b2851b3b3c, type: 2}
   idleAnim: {fileID: -203655887218126122, guid: ca0d06912a66be14fa9cbe844b6e05e9,
@@ -11918,7 +11926,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.775, y: 1}
+    m_SensorSize: {x: 1.7785349, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -11934,8 +11942,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 420413097}
-  m_LocalRotation: {x: -0.09134602, y: 0.9403882, z: 0.049482904, w: 0.323848}
-  m_LocalPosition: {x: -8.16704, y: 0.82776725, z: 3.648634}
+  m_LocalRotation: {x: -0.088162035, y: 0.9408287, z: 0.04024762, w: 0.3247292}
+  m_LocalPosition: {x: -0.0000028842232, y: 0.00000019512967, z: 0.0000008591446}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -12014,7 +12022,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 462353258}
-  m_LocalRotation: {x: -0.079533495, y: -0.6937717, z: -0.07754334, w: 0.71157736}
+  m_LocalRotation: {x: 0.15396573, y: 0.43283707, z: -0.0752993, w: 0.8850292}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -14800,7 +14808,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 5000
-  field of view: 35.993816
+  field of view: 40
   orthographic: 0
   orthographic size: 10
   m_Depth: -1
@@ -14825,8 +14833,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
-  m_LocalRotation: {x: 0.07762299, y: 0.71156865, z: -0.07945584, w: 0.69378066}
-  m_LocalPosition: {x: 19.03336, y: -75.10659, z: 14.804632}
+  m_LocalRotation: {x: 0.07529932, y: 0.8850292, z: 0.15396574, w: -0.43283716}
+  m_LocalPosition: {x: 3.7090433, y: 0.10028735, z: 2.884988}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -15922,12 +15930,12 @@ PrefabInstance:
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 715.85034
+      value: 340.87225
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 11.307953
+      value: 8.172333
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
@@ -19707,7 +19715,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.775, y: 1}
+    m_SensorSize: {x: 1.7785349, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -19723,8 +19731,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1478947013}
-  m_LocalRotation: {x: 0.097206086, y: -0.93933564, z: -0.06653478, w: -0.3221376}
-  m_LocalPosition: {x: -8.167038, y: 0.827767, z: 3.648633}
+  m_LocalRotation: {x: 0.09403862, y: -0.9399436, z: -0.05730904, w: -0.32307643}
+  m_LocalPosition: {x: -0.0000028842232, y: 0.00000019512967, z: 0.0000008591446}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -21067,7 +21075,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1646069603}
-  m_LocalRotation: {x: 0.5987846, y: -0.05681345, z: 0.032571234, w: 0.79822826}
+  m_LocalRotation: {x: 0.5987846, y: -0.056813344, z: 0.032571174, w: 0.79822826}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -21112,7 +21120,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.775, y: 1}
+    m_SensorSize: {x: 1.7785349, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -27509,8 +27517,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925080555}
-  m_LocalRotation: {x: 0.07762304, y: 0.7115686, z: -0.07945595, w: 0.69378066}
-  m_LocalPosition: {x: 19.03336, y: -75.10659, z: 14.804632}
+  m_LocalRotation: {x: -0.07529933, y: -0.8850292, z: -0.15396579, w: 0.4328371}
+  m_LocalPosition: {x: 3.7090433, y: 0.10028735, z: 2.884988}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -27816,7 +27824,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.775, y: 1}
+    m_SensorSize: {x: 1.7785349, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
@@ -27898,7 +27906,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1970674484}
   m_LocalRotation: {x: 0.07762299, y: 0.71156865, z: -0.07945584, w: 0.69378066}
-  m_LocalPosition: {x: 0, y: -0.090026855, z: -5}
+  m_LocalPosition: {x: 3.94667, y: -0.090026855, z: 3.0698204}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -28716,6 +28724,18 @@ PrefabInstance:
       objectReference: {fileID: 147474679}
     - target: {fileID: 127229780117923646, guid: 4adf97dfb83a5e44ead1fee2c1aaffb3,
         type: 3}
+      propertyPath: fx_cross
+      value: 
+      objectReference: {fileID: 4736466864280574198, guid: f09930e404e2de745ba6620fba7d2c26,
+        type: 3}
+    - target: {fileID: 127229780117923646, guid: 4adf97dfb83a5e44ead1fee2c1aaffb3,
+        type: 3}
+      propertyPath: fx_circle
+      value: 
+      objectReference: {fileID: 1608427804906487184, guid: f62ca190c7b3641449e8d4e5c2158f63,
+        type: 3}
+    - target: {fileID: 127229780117923646, guid: 4adf97dfb83a5e44ead1fee2c1aaffb3,
+        type: 3}
       propertyPath: fx_spiral
       value: 
       objectReference: {fileID: 5757117941461796208, guid: 0c0425bfa47e34c41aa4195cd5927700,
@@ -29457,6 +29477,7 @@ MonoBehaviour:
   waterSource: {fileID: 2757355004405072315}
   combatWhiffSource: {fileID: 2757355002936959162}
   combatHitSource: {fileID: 2757355003981329580}
+  parryPosition: {x: 0, y: 0, z: 1}
   OnDust:
     m_PersistentCalls:
       m_Calls:
@@ -29850,6 +29871,7 @@ MonoBehaviour:
     isThrust: 0
     isSlash: 0
     isRanged: 0
+    isParry: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
@@ -30020,6 +30042,12 @@ MonoBehaviour:
   thrustIKAdjustSpeed: 5
   thrustInitialHeight: 1
   thrustIKHeightRange: 1
+  OnParryStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnParrySuccess:
+    m_PersistentCalls:
+      m_Calls: []
   moveAnim: {fileID: 11400000, guid: dafdfce5704a7df45b3672c192d56bd2, type: 2}
   strafeAnim: {fileID: 0}
   idleAnim: {fileID: -203655887218126122, guid: ca0d06912a66be14fa9cbe844b6e05e9,
