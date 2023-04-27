@@ -47,6 +47,7 @@ public class KillPlane : MonoBehaviour
             BreakableObject[] breakableObjects = FindObjectsOfType<BreakableObject>();
             foreach (BreakableObject breakable in breakableObjects)
             {
+                if (breakable.gameObject.scene != this.gameObject.scene) continue;
                 if (!plane.GetSide(breakable.transform.position) && IsWithinPlane(breakable.transform.position))
                 {
                     breakable.BreakObject();
