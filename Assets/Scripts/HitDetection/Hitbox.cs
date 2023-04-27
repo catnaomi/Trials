@@ -158,7 +158,7 @@ public class Hitbox : MonoBehaviour
                     if (hitActor != null && !victims.Contains(hitActor))
                     {
                         victims.Add(hitActor);
-                        hitActor.SetHitParticlePosition(collider.ClosestPoint(end), (end-start).normalized);
+                        hitActor.SetHitParticleVectors(collider.ClosestPoint(end), (end-start).normalized);
                         hitActor.TakeDamage(this.damageKnockback);
                         didHit = true;
                         OnHitActor.Invoke();

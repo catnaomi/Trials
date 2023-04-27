@@ -11,8 +11,9 @@ public interface IDamageable
 
     public void StartCritVulnerability(float time);
 
-    public void SetHitParticlePosition(Vector3 position, Vector3 direction);
+    public void SetHitParticleVectors(Vector3 position, Vector3 direction);
 
+    public void GetParried();
     public DamageKnockback GetLastTakenDamage();
 
     public GameObject GetGameObject();

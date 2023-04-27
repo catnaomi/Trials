@@ -126,6 +126,7 @@ public class PlayTimelineWithActors : MonoBehaviour
         }
         
         playerRefTransform.gameObject.SetActive(false);
+        OnEnd.Invoke();
         if (destroyOnComplete)
         {
             Destroy(this.gameObject);
@@ -164,7 +165,6 @@ public class PlayTimelineWithActors : MonoBehaviour
                 director.SetGenericBinding(track, bindingIndex.obj);
             }
         }
-        OnEnd.Invoke();
     }
     List<PlayableBinding> GetBindings()
     {

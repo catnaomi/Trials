@@ -99,6 +99,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool blocking;
     bool targeting;
     bool aiming;
+    float parryTime;
     public bool sliding;
     bool wasSlidingIK;
     bool wasSlidingUpdate;
@@ -192,6 +193,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     float holdAttackClock;
     float holdAttackMin;
+    public UnityEvent OnParryStart;
+    public UnityEvent OnParrySuccess;
     [Header("Animancer")]
     public MixerTransition2DAsset moveAnim;
     public MixerTransition2DAsset strafeAnim;
@@ -285,6 +288,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState climb;
         public AnimancerState swim;
         public AnimancerState attack;
+        public AnimancerState parry;
         public AnimancerState holdAttack;
         public AnimancerState block;
         public AnimancerState aim;
@@ -548,7 +552,24 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 speedMax = walkSpeedMax;
             }
             speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * speedMax, walkAccelReal * Time.deltaTime);
-            if (camState == CameraState.Free || camState == CameraState.Aim)
+            if (camState == CameraState.Free)
+            {
+                if (targeting && look.magnitude > 0.01f)
+                {
+                    lookDirection = Camera.main.transform.forward;
+                    lookDirection.y = 0f;
+                }
+                else if (!targeting && stickDirection.magnitude > 0)
+                {
+                    lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * walkTurnSpeed * Time.deltaTime, 1f);
+                }
+                else
+                {
+                    lookDirection = this.transform.forward;
+                }
+                moveDirection = stickDirection;
+            }
+            else if (camState == CameraState.Aim)
             {
                 if (stickDirection.sqrMagnitude > 0)
                 {
@@ -2758,16 +2779,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public Vector2 GetMovementVector()
     {
-        if (camState == CameraState.Free || camState == CameraState.Aim)
-        {
-            return new Vector2(0f, speed / walkSpeedMax);
-            //return new Vector2(0f, move.magnitude);
-        }
-        else if (camState == CameraState.Lock)
+        if (camState == CameraState.Lock || targeting)
         {
             float x = Vector3.Dot(moveDirection.normalized, this.transform.right) * (speed / strafeSpeed);
             float y = Vector3.Dot(moveDirection.normalized, this.transform.forward) * (speed / strafeSpeed);
             return new Vector2(x, y);
+        }
+        else if (camState == CameraState.Free || camState == CameraState.Aim)
+        {
+            return new Vector2(0f, speed / walkSpeedMax);
+            //return new Vector2(0f, move.magnitude);
         }
         return Vector2.zero;
     }
@@ -3839,6 +3860,56 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+    public void ParryActive(float duration)
+    {
+        state.parry = state.attack;
+        parryTime = Time.time + duration;
+        OnParryStart.Invoke();
+    }
+
+    public bool ShouldParry(DamageKnockback incomingDamage)
+    {
+        if (animancer.States.Current == state.parry && Time.time <= parryTime)
+        {
+            if (incomingDamage.breaksBlock || incomingDamage.breaksArmor || incomingDamage.cannotRecoil)
+            {
+                return false;
+            }
+            else
+            {
+                DamageKnockback lastAttackDamage = GetLastDamage();
+                if (lastAttackDamage != null && lastAttackDamage.isParry)
+                {
+                    if (lastAttackDamage.isSlash)
+                    {
+                        return incomingDamage.isSlash; // slashing parry
+                    }
+                    else if (lastAttackDamage.isThrust)
+                    {
+                        return incomingDamage.isThrust; // thrusting parry
+                    }
+                    else
+                    {
+                        return true; // omni parry
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public bool IsParrySlash()
+    {
+        DamageKnockback lastAttackDamage = GetLastDamage();
+        return lastAttackDamage != null && lastAttackDamage.isParry && lastAttackDamage.isSlash;
+    }
+
+    public bool IsParryThrust()
+    {
+        DamageKnockback lastAttackDamage = GetLastDamage();
+        return lastAttackDamage != null && lastAttackDamage.isParry && lastAttackDamage.isThrust;
+    }
+
     public void BasicAttack()
     {
         if (attack)
@@ -3936,12 +4007,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         return ((IDamageable)damageHandler).GetLastTakenDamage();
     }
-
-    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
-    {
-        SetHitParticleVectors(position, direction);
-    }
-
     public Consumable GetCurrentConsumable()
     {
         return currentConsumable;
@@ -3966,7 +4031,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void TakeDamage(DamageKnockback damage)
     {
         HitboxActive(0);
-        damageHandler.TakeDamage(damage);
+        if (!ShouldParry(damage))
+        {
+            damageHandler.TakeDamage(damage);
+        }
+        else
+        {
+            if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageSource))
+            {
+                damageSource.GetParried();
+            }
+            OnParrySuccess.Invoke();
+        }
     }
 
     public void StartCritVulnerability(float time)
@@ -4420,7 +4496,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         animancer.Play(state.move);
     }
-    
     public bool IsSafe()
     {
         return (GetGrounded() && lastGroundWasStatic) &&
@@ -4652,5 +4727,10 @@ public bool GetGrounded()
     public GameObject GetGameObject()
     {
         return ((IDamageable)damageHandler).GetGameObject();
+    }
+
+    public void GetParried()
+    {
+        ((IDamageable)damageHandler).GetParried();
     }
 }

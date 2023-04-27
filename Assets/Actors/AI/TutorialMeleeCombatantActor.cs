@@ -455,11 +455,6 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
         }
     }
 
-    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
-    {
-        SetHitParticleVectors(position, direction);
-    }
-
     public DamageKnockback GetLastTakenDamage()
     {
         return ((IDamageable)damageHandler).GetLastTakenDamage();
@@ -468,5 +463,10 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     public GameObject GetGameObject()
     {
         return ((IDamageable)damageHandler).GetGameObject();
+    }
+
+    public void GetParried()
+    {
+        ((IDamageable)damageHandler).GetParried();
     }
 }

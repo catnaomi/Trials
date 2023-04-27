@@ -200,11 +200,6 @@ public class CombatDummy : Actor, IDamageable
         return isBlocking && animancer.States.Current != damageHandler.hurt;
     }
 
-    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
-    {
-        SetHitParticleVectors(position, direction);
-    }
-
     public DamageKnockback GetLastTakenDamage()
     {
         return ((IDamageable)damageHandler).GetLastTakenDamage();
@@ -213,5 +208,10 @@ public class CombatDummy : Actor, IDamageable
     public GameObject GetGameObject()
     {
         return ((IDamageable)damageHandler).GetGameObject();
+    }
+
+    public void GetParried()
+    {
+        ((IDamageable)damageHandler).GetParried();
     }
 }

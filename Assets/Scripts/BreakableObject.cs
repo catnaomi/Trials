@@ -91,7 +91,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
             }
         }
     }
-    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
+    public void SetHitParticleVectors(Vector3 position, Vector3 direction)
     {
         //throw new System.NotImplementedException();
     }
@@ -104,5 +104,10 @@ public class BreakableObject : MonoBehaviour, IDamageable
     public GameObject GetGameObject()
     {
         return this.gameObject;
+    }
+
+    public void GetParried()
+    {
+        throw new System.NotImplementedException();
     }
 }

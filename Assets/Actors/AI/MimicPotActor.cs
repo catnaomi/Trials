@@ -1,4 +1,5 @@
 using Animancer;
+using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -366,15 +367,30 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public void TakeDamage(DamageKnockback damage)
     {
         lastDamageTaken = damage;
-        float damageAmount = DamageKnockback.GetTotalMinusResistances(damage.GetDamageAmount(), damage.GetTypes(), this.attributes.resistances);
+        
         if (damage.source != null)
         {
             this.transform.LookAt(damage.source.transform, Vector3.up);
             currentTarget = damage.source;
         }
-        bool willKill = damageAmount > attributes.health.current;
-        attributes.ReduceHealth(damageAmount);
+        bool isCrit = (IsAttacking() && damage.GetTypes().HasType(DamageType.Piercing));
+        damage.didCrit = isCrit;
+        float damageAmount = DamageKnockback.GetTotalMinusResistances(damage.GetDamageAmount(isCrit), damage.GetTypes(), this.attributes.resistances);
+        bool willKill = damageAmount >= attributes.health.current || isCrit;
         
+        attributes.ReduceHealth(damageAmount);
+
+        if (damage.hitboxSource != null)
+        {
+            Vector3 contactPosition = this.GetComponent<Collider>().ClosestPoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
+
+            if (damage.source.TryGetComponent<Actor>(out Actor sourceActor))
+            {
+                sourceActor.lastContactPoint = contactPosition;
+                sourceActor.SetLastBlockpoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
+            }
+        }
+
 
         if (willKill)
         {
@@ -420,11 +436,6 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public void StartCritVulnerability(float time)
     {
         throw new System.NotImplementedException();
-    }
-
-    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
-    {
-        //throw new System.NotImplementedException();
     }
 
     public DamageKnockback GetLastTakenDamage()
@@ -565,5 +576,17 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public bool IsHidden()
     {
         return animancer.States.Current == state.hidden;
+    }
+
+    public override bool IsAttacking()
+    {
+        return animancer.States.Current == state.attack;
+    }
+
+    public void GetParried()
+    {
+        state.hurt = animancer.Play(hurtAnim);
+        state.hurt.Events.OnEnd = EndHide;
+        OnHurt.Invoke();
     }
 }

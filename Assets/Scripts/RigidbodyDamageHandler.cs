@@ -132,7 +132,7 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
         // do nothing
     }
 
-    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
+    public void SetHitParticleVectors(Vector3 position, Vector3 direction)
     {
         
     }
@@ -140,5 +140,10 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
     public GameObject GetGameObject()
     {
         return rigidbody.gameObject;
+    }
+
+    public void GetParried()
+    {
+        throw new System.NotImplementedException();
     }
 }

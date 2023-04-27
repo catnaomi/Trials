@@ -18,6 +18,7 @@ public class DamageKnockback
     public bool isThrust;
     public bool isSlash;
     public bool isRanged;
+    public bool isParry;
     public bool bouncesOffBlock;
     public bool breaksBlock;
     public bool canDamageSelf;
@@ -123,6 +124,7 @@ public class DamageKnockback
         this.isSlash = damageKnockback.isSlash;
         this.isThrust = damageKnockback.isThrust;
         this.isRanged = damageKnockback.isRanged;
+        this.isParry = damageKnockback.isParry;
         this.bouncesOffBlock = damageKnockback.bouncesOffBlock;
         this.cannotRecoil = damageKnockback.cannotRecoil;
         this.cannotKill = damageKnockback.cannotKill;

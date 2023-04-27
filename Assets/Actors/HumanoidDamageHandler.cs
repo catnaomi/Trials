@@ -126,6 +126,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         Debug.Log("damage after resistances = " + damageAmount);
 
         bool isArmored = actor.IsArmored() && !damage.breaksArmor;
+        
         bool willInjure = actor.attributes.spareable && actor.attributes.HasHealthRemaining() && damageAmount >= actor.attributes.health.current;
         bool willKill = (!willInjure) && damageAmount >= actor.attributes.health.current;
         bool isCounterhit = actor.IsAttacking();
@@ -172,7 +173,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 sourceActor.SetLastBlockpoint(damage.originPoint);
             }
         }
-        actor.GetComponent<IDamageable>().SetHitParticlePosition(contactPosition, contactDirection);
+        actor.GetComponent<IDamageable>().SetHitParticleVectors(contactPosition, contactDirection);
 
         if (actor.IsDodging())
         {
@@ -466,6 +467,20 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
         }
     }
+
+
+    public void GetParried()
+    {
+        animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
+        ClipTransition clip = guardBreak;
+        AnimancerState state = animancer.Play(clip);
+        state.Events.OnEnd = _OnEnd;
+        CheckFallContinuous(state, false);
+        hurt = state;
+        actor.OnHurt.Invoke();
+        StartCritVulnerability(clip.MaximumDuration / clip.Speed);
+    }
+
     public void AdjustDefendingPosition(GameObject attacker)
     {
         if (attacker == null || !attacker.TryGetComponent<Actor>(out Actor attackerActor))
@@ -666,7 +681,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         return this;
     }
 
-    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
+    public void SetHitParticleVectors(Vector3 position, Vector3 direction)
     {
         throw new System.NotImplementedException();
     }

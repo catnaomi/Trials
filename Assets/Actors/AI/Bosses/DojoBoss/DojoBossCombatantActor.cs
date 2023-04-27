@@ -1841,10 +1841,6 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
             //animancer.Animator.SetLookAtWeight(1f);
         }
     }
-    public void SetHitParticlePosition(Vector3 position, Vector3 direction)
-    {
-        SetHitParticleVectors(position, direction);
-    }
     #region Damage Handling
 
     public virtual void TakeDamage(DamageKnockback damage)
@@ -2230,6 +2226,11 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public GameObject GetGameObject()
     {
         return ((IDamageable)damageHandler).GetGameObject();
+    }
+
+    public void GetParried()
+    {
+        ((IDamageable)damageHandler).GetParried();
     }
     #endregion
 }
