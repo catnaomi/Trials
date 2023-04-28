@@ -44,6 +44,7 @@ public class PlayerTargetManager : MonoBehaviour
     float invalidTime;
     public float invalidExpiryTime = 1f;
     bool targetHeldLastFrame;
+    bool wasTargetBlock;
     [Header("Press To Change Target Settings")]
     public float maxChangeTargetDelay = 2f;
     public int changeTargetIndexOffset = 0;
@@ -235,6 +236,8 @@ public class PlayerTargetManager : MonoBehaviour
         bool targetDown = false;
         bool targetUp = false;
         bool targetHeld = PlayerActor.player.IsTargetHeld();
+        bool targetIsBlock = PlayerActor.player.IsTargetHeld() && PlayerActor.player.IsBlockHeld();
+        bool didSwitchTargetButtons = false;
         if (targetHeld)
         {
             if (!lockedOn && targets.Count > 0)
@@ -260,6 +263,9 @@ public class PlayerTargetManager : MonoBehaviour
             {
                 targetDown = true;
             }
+            didSwitchTargetButtons = targetIsBlock != wasTargetBlock;
+            wasTargetBlock = targetIsBlock;
+
         }
         else
         {
@@ -282,9 +288,9 @@ public class PlayerTargetManager : MonoBehaviour
         if (!lockedOn || targetDown)
         {
             
-            if (targetDown && targetReleasedClock < maxChangeTargetDelay)
+            if (targetDown && targetReleasedClock < maxChangeTargetDelay && !didSwitchTargetButtons)
             {
-                changeTargetIndexOffset++;
+                changeTargetIndexOffset++; // change targets
                
             }
             else if (!lockedOn && targetReleasedClock > changeTargetResetDelay)
