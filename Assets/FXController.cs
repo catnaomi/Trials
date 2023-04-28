@@ -17,6 +17,7 @@ public class FXController : MonoBehaviour
     public GameObject fx_warn;
     public GameObject fx_miragia;
     public GameObject fx_miragia_sound;
+    public GameObject fx_parry_success;
     [Space(5)]
     public GameObject fx_gunTrail;
     [Space(5)]
@@ -220,18 +221,17 @@ public class FXController : MonoBehaviour
 
     public static void CreateCross(Vector3 position, Vector3 direction)
     {
-        EnsureSingleton();
-        GameObject newFX = GameObject.Instantiate(main.fx_cross);
-        newFX.transform.position = position;
-        newFX.transform.rotation = Quaternion.LookRotation(direction);
+        CreateFromPrefab(main.fx_cross, position, direction);
     }
 
     public static void CreateCircle(Vector3 position, Vector3 direction)
     {
-        EnsureSingleton();
-        GameObject newFX = GameObject.Instantiate(main.fx_circle);
-        newFX.transform.position = position;
-        newFX.transform.rotation = Quaternion.LookRotation(direction);
+        CreateFromPrefab(main.fx_circle, position, direction);
+    }
+
+    public static void CreateParrySuccess(Vector3 position, Vector3 direction)
+    {
+        CreateFromPrefab(main.fx_parry_success, position, direction);
     }
 
     public static GameObject CreateMiragiaParticleSingle(Vector3 position)
@@ -260,6 +260,13 @@ public class FXController : MonoBehaviour
         main.StartCoroutine(coroutine);
     }
 
+    static void CreateFromPrefab(GameObject prefab, Vector3 position, Vector3 direction)
+    {
+        EnsureSingleton();
+        GameObject newFX = GameObject.Instantiate(prefab);
+        newFX.transform.position = position;
+        newFX.transform.rotation = Quaternion.LookRotation(direction);
+    }
     IEnumerator HitpauseCoroutine()
     {
         yield return new WaitForEndOfFrame();

@@ -28,7 +28,7 @@ MonoBehaviour:
     _Speed: 0.5
     _NormalizedStartTime: 0
   attackData:
-    healthDamage: 1
+    healthDamage: 2
     types: 0
     critData:
       criticalMultiplier: 1
@@ -42,10 +42,13 @@ MonoBehaviour:
     isThrust: 1
     isSlash: 0
     isRanged: 0
+    isParry: 0
     bouncesOffBlock: 1
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
     stunTime: 1
     stagger: 1
     staggers:
@@ -56,6 +59,7 @@ MonoBehaviour:
       onCounterHit: 3
     kbForce: {x: 0, y: 2.5, z: 10}
     kbRadial: 0
+    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}

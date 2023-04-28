@@ -198,6 +198,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     [Header("Animancer")]
     public MixerTransition2DAsset moveAnim;
     public MixerTransition2DAsset strafeAnim;
+    public MixerTransition2DAsset aimAnimDefault;
     public AnimationClip idleAnim;
     public ClipTransition dashAnim;
     public ClipTransition sprintAnim;
@@ -1721,6 +1722,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
                 Debug.DrawRay(this.transform.position, dir * 5f, Color.magenta);
             }
+            applyMove = isGrounded;
         }
         #endregion
         #region ALL OTHERS
@@ -3019,7 +3021,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else
         {
-            aimAnim = moveAnim;
+            aimAnim = aimAnimDefault;
         }
         if (inventory.IsMainEquipped())
         {

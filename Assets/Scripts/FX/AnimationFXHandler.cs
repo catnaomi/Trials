@@ -259,7 +259,15 @@ public class AnimationFXHandler : MonoBehaviour
 
     public void ParrySuccess()
     {
-        // TODO: fancy parry success particle
+        if (actor is PlayerActor player)
+        {
+            Vector3 position = actor.transform.position +
+                actor.transform.right * parryPosition.x +
+                actor.transform.up * parryPosition.y +
+                actor.transform.forward * parryPosition.z;
+            Vector3 rotation = actor.transform.forward;
+            FXController.CreateParrySuccess(position, rotation);
+        }
     }
     #endregion
 
