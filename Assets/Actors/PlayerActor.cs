@@ -4605,7 +4605,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
 #endregion
 
-public bool GetGrounded()
+    public bool GetGrounded()
     {
         return GetGrounded(out RaycastHit rhit, out RaycastHit shit);
     }
@@ -4724,6 +4724,7 @@ public bool GetGrounded()
     public void HitWall()
     {
         Debug.Log("wall hit");
+        Recoil();
     }
 
     public GameObject GetGameObject()

@@ -40,6 +40,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         hitboxes.OnHitTerrain.RemoveAllListeners();
         hitboxes.OnHitTerrain.AddListener(TerrainContact);
         hitboxes.OnHitWall.AddListener(WallContact);
+        hitboxes.OnHitHitbox.AddListener(ClashContact);
 
         top = InterfaceUtilities.FindRecursively(GetModel().transform, "_top");
         bottom = InterfaceUtilities.FindRecursively(GetModel().transform, "_bottom");
@@ -721,6 +722,28 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         return 5f + (5f * weight) + chargeCost;
     }
 
+    protected void ClashContact()
+    {
+        Hitbox contactBox = hitboxes.terrainContactBox;
+        Hitbox otherBox = contactBox.clashedHitbox;
+
+        DamageKnockback thisDamage = contactBox.damageKnockback;
+        DamageKnockback otherDamage = otherBox.damageKnockback;
+
+
+        if (thisDamage.isSlash && (otherDamage.isSlash || otherDamage.isThrust) && !otherDamage.cannotRecoil)
+        {
+            Vector3 contactPoint = ((contactBox.transform.position) + (otherBox.transform.position)) / 2f;
+            FXController.CreateFX(FXController.FX.FX_Sparks,
+                    contactPoint,
+                    Quaternion.identity,
+                    1f);
+            if (otherDamage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+            {
+                damageable.Recoil();
+            }
+        }
+    }
     protected void WallContact()
     {
         wall = true;
@@ -740,7 +763,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
 
         if (active && holder.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference))
         {
-            Vector3 contactPoint = contactBox.hitTerrain.ClosestPointOnBounds((positionReference.MainHand.transform.position + positionReference.MainHand.transform.forward * (length / 2f)));
+            Vector3 contactPoint = contactBox.hitTerrain.ClosestPoint((positionReference.MainHand.transform.position + positionReference.MainHand.transform.forward * (length / 2f)));
 
             FXController.CreateFX(FXController.FX.FX_Sparks,
                     contactPoint,

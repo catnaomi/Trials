@@ -5,6 +5,7 @@ using UnityEngine;
 /// </summary>
 public static class DrawArrow
 {
+    public static float duration = 1f;
     public static void ForGizmo(Vector3 pos, Vector3 direction, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f, float arrowPosition = 0.5f)
     {
         ForGizmo(pos, direction, Gizmos.color, arrowHeadLength, arrowHeadAngle, arrowPosition);
@@ -36,7 +37,7 @@ public static class DrawArrow
 
     public static void ForDebug(Vector3 pos, Vector3 direction, Color color, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f, float arrowPosition = 0.5f)
     {
-        Debug.DrawRay(pos, direction, color);
+        Debug.DrawRay(pos, direction, color, duration);
         DrawArrowEnd(false, pos, direction, color, arrowHeadLength, arrowHeadAngle, arrowPosition);
     }
     private static void DrawArrowEnd(bool gizmos, Vector3 pos, Vector3 direction, Color color, float arrowHeadLength = 0.25f, float arrowHeadAngle = 20.0f, float arrowPosition = 0.5f)
@@ -58,10 +59,10 @@ public static class DrawArrow
         }
         else
         {
-            Debug.DrawRay(arrowTip, right, color);
-            Debug.DrawRay(arrowTip, left, color);
-            Debug.DrawRay(arrowTip, up, color);
-            Debug.DrawRay(arrowTip, down, color);
+            Debug.DrawRay(arrowTip, right, color, duration);
+            Debug.DrawRay(arrowTip, left, color, duration);
+            Debug.DrawRay(arrowTip, up, color, duration);
+            Debug.DrawRay(arrowTip, down, color, duration);
         }
     }
 }

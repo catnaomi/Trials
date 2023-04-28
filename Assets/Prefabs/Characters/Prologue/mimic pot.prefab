@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 1926681102263642151}
   - component: {fileID: 572962275986234558}
   - component: {fileID: 2603341067847400480}
+  - component: {fileID: 1493109818905905890}
   m_Layer: 10
   m_Name: mimic pot
   m_TagString: Untagged
@@ -283,6 +284,7 @@ MonoBehaviour:
     isThrust: 0
     isSlash: 0
     isRanged: 0
+    isParry: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
@@ -615,6 +617,7 @@ MonoBehaviour:
   waterSource: {fileID: 0}
   combatWhiffSource: {fileID: 572962275986234558}
   combatHitSource: {fileID: 572962275986234558}
+  parryPosition: {x: 0, y: 0, z: 1}
   OnDust:
     m_PersistentCalls:
       m_Calls: []
@@ -640,6 +643,32 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnGunLoad:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &1493109818905905890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1926681102263642149}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2891b161e6427a14fb911707653b31e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animancer: {fileID: 0}
+  afterimagePrefab: {fileID: 0}
+  fadeTime: 3
+  afterimages: []
+  useAfterimages: 0
+  timeRemaining: []
+  timeTravelStates: []
+  timeTravelController: {fileID: 0}
+  OnFreeze:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnfreeze:
     m_PersistentCalls:
       m_Calls: []
 --- !u!1 &2518472825564833364

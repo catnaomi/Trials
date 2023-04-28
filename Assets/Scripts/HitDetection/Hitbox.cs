@@ -16,13 +16,16 @@ public class Hitbox : MonoBehaviour
     public bool isActive;
 
     public bool didHitTerrain;
+    public bool didHitHitbox;
     public UnityEvent OnHitTerrain;
     public Collider hitTerrain;
+    public Hitbox clashedHitbox;
 
     public UnityEvent OnHitActor;
     public UnityEvent OnHitAnything;
 
     public UnityEvent OnHitWall;
+    public UnityEvent OnHitHitbox;
 
     public Vector3 deltaPosition;
     public struct HitboxHistoryInfo
@@ -53,6 +56,11 @@ public class Hitbox : MonoBehaviour
         if (OnHitWall == null)
         {
             OnHitWall = new UnityEvent();
+        }
+
+        if (OnHitHitbox == null)
+        {
+            OnHitHitbox = new UnityEvent();
         }
 
 
@@ -96,12 +104,13 @@ public class Hitbox : MonoBehaviour
 
             //hitActors.AddRange();
 
-            foreach (Collider hitCollider in Physics.OverlapSphere(end, radius, LayerMask.GetMask("Actors") | MaskReference.Terrain))
+            foreach (Collider hitCollider in Physics.OverlapSphere(end, radius, LayerMask.GetMask("Actors") | MaskReference.Terrain | LayerMask.GetMask("Hitboxes")))
             {
                 if (IsColliderTerrain(hitCollider))
                 {
                     if (!didHitTerrain)
                     {
+
                         didHitTerrain = true;
                         hitTerrain = hitCollider;
                         if (hitTerrain.gameObject.tag == "WeaponCollision")
@@ -114,6 +123,16 @@ public class Hitbox : MonoBehaviour
                         
                     }
                 }
+                else if (IsColliderHitbox(hitCollider, out Hitbox other))
+                {
+                    if (!didHitHitbox && other != this && hitCollider.transform.root != this.transform.root && other.isActive)
+                    {
+                        didHitHitbox = true;
+                        clashedHitbox = other;
+                        OnHitHitbox.Invoke();
+                    }
+                    
+                }
                 else
                 {
                     hitActors.Add(hitCollider);
@@ -125,7 +144,7 @@ public class Hitbox : MonoBehaviour
                 // cast
                 didCast = true;
 
-                RaycastHit[] hits = Physics.SphereCastAll(start, radius, end - start, dist, LayerMask.GetMask("Actors") | MaskReference.Terrain);
+                RaycastHit[] hits = Physics.SphereCastAll(start, radius, end - start, dist, LayerMask.GetMask("Actors") | MaskReference.Terrain | LayerMask.GetMask("Hitboxes"));
 
                 foreach (RaycastHit hit in hits)
                 {
@@ -135,9 +154,24 @@ public class Hitbox : MonoBehaviour
                         {
                             didHitTerrain = true;
                             hitTerrain = hit.collider;
+
+                            if (hitTerrain.gameObject.tag == "WeaponCollision")
+                            {
+                                OnHitWall.Invoke();
+                            }
                             OnHitTerrain.Invoke();
                             OnHitAnything.Invoke();
                         }
+                    }
+                    else if (IsColliderHitbox(hit.collider, out Hitbox other))
+                    {
+                        if (!didHitHitbox && other != this && hit.collider.transform.root != this.transform.root && other.isActive)
+                        {
+                            didHitHitbox = true;
+                            clashedHitbox = other;
+                            OnHitHitbox.Invoke();
+                        }
+
                     }
                     else
                     {
@@ -183,6 +217,16 @@ public class Hitbox : MonoBehaviour
     {
         return LayerMask.LayerToName(c.gameObject.layer).ToLower().Contains("terrain");
     }
+
+    bool IsColliderHitbox(Collider c, out Hitbox other)
+    {
+        other = null;
+        if (LayerMask.LayerToName(c.gameObject.layer).ToLower().Contains("hitbox"))
+        {
+            return c.TryGetComponent<Hitbox>(out other);
+        }
+        return false;
+    }
     public void SetActive(bool active)
     {
         isActive = active;
@@ -197,6 +241,7 @@ public class Hitbox : MonoBehaviour
                 victims.Clear();
             }
             didHitTerrain = false;
+            didHitHitbox = false;
         }
     }
 

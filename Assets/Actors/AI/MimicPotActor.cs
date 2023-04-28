@@ -367,15 +367,20 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     public void TakeDamage(DamageKnockback damage)
     {
         lastDamageTaken = damage;
-        
+        bool isCrit = (IsAttacking() && damage.GetTypes().HasType(DamageType.Piercing));
+        damage.didCrit = isCrit;
+        float damageAmount = DamageKnockback.GetTotalMinusResistances(damage.GetDamageAmount(isCrit), damage.GetTypes(), this.attributes.resistances);
+        if (this.IsTimeStopped())
+        {
+            TimeTravelController.time.TimeStopDamage(damage, this, damageAmount);
+            return;
+        }
         if (damage.source != null)
         {
             this.transform.LookAt(damage.source.transform, Vector3.up);
             currentTarget = damage.source;
         }
-        bool isCrit = (IsAttacking() && damage.GetTypes().HasType(DamageType.Piercing));
-        damage.didCrit = isCrit;
-        float damageAmount = DamageKnockback.GetTotalMinusResistances(damage.GetDamageAmount(isCrit), damage.GetTypes(), this.attributes.resistances);
+       
         bool willKill = damageAmount >= attributes.health.current || isCrit;
         
         attributes.ReduceHealth(damageAmount);
