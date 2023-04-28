@@ -140,6 +140,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     
     bool allowClimb = true;
     bool allowLadderFinish = true;
+    bool railSnap;
     public Collider hangCollider;
     public float climbSpeed = 1f; 
     [Header("Swim Settings")]
@@ -223,6 +224,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public ClipTransition ledgeStart;
     public ClipTransition ladderClimb;
     public ClipTransition ladderClimbUp;
+    public MixerTransition2D railWalk;
     [Space(5)]
     public LinearMixerTransition swimAnim;
     public ClipTransition swimEnd;
@@ -1200,15 +1202,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             if (ledgeSnap)
             {
-                if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
+                if (currentClimb is Ledge ledge)
                 {
                     //animancer.Play(ledgeStart);
                     state.climb = (DirectionalMixerState)animancer.Play(ledgeHang);
                 }
-                else if (currentClimb.TryGetComponent<Ladder>(out Ladder ladder))
+                else if (currentClimb is Ladder ladder)
                 {
                     state.climb = animancer.Play(ladderClimb);
  
+                }
+                else if (currentClimb is Rail rail)
+                {
+                    state.climb = animancer.Play(railWalk);
                 }
                 SnapToLedge();
                 StartCoroutine(DelayedSnapToLedge());
@@ -1530,11 +1536,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 StopClimbing();
             }
-            else if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
+            else if (currentClimb is Ledge ledge)
             {
                 ((DirectionalMixerState)state.climb).ParameterX = move.x;
             }
-            else if (currentClimb.TryGetComponent<Ladder>(out Ladder ladder))
+            else if (currentClimb is Ladder ladder)
             {
                 state.climb.Speed = move.y * climbSpeed;
                 if (ladder.snapPoint <= -ladder.GetDismountPoint(cc.height) && move.y > 0 && allowLadderFinish)
@@ -1547,6 +1553,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     StartClimbLockout();
 
                 }
+            }
+            else if (currentClimb is Rail rail)
+            {
+                ((DirectionalMixerState)state.climb).ParameterX = move.x;
             }
             
             yVel = 0f;
@@ -2182,6 +2192,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             StartCoroutine(LadderFinishLockout());
         }
     }
+    
+    public void SetRail(Rail rail)
+    {
+        if (allowClimb)
+        {
+            currentClimb = rail;
+            ledgeSnap = true;
+        }
+    }
+
+
     public void UnsnapLedge()
     {
         ledgeSnap = false;
@@ -2220,7 +2241,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         if (ledgeSnap == true && currentClimb != null)
         {
-            if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
+            if (currentClimb is Ledge ledge)
             {
                 this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
                 int sign = 0;
@@ -2229,7 +2250,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 this.GetComponent<Collider>().enabled = false;
                 ledgeHanging = true;
             }
-            else if (currentClimb.TryGetComponent<Ladder>(out Ladder ladder))
+            else if (currentClimb is Ladder ladder)
             {
                 //descendClamp = (ladder.canDescend) ? -1 : 0;
                 //ascendClamp = (ladder.canAscend) ? 1 : 0;
@@ -2237,6 +2258,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 int sign = 0;
                 if (Mathf.Abs(move.y) > 0.1f) sign = (int)Mathf.Sign(move.y);
                 this.transform.position = ladder.GetSnapPointDot(cc.height/2f, this.transform.position, this, -sign);
+                this.GetComponent<Collider>().enabled = false;
+                ledgeHanging = true;
+            }
+            else if (currentClimb is Rail rail)
+            {
+                this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.right);
+                int sign = 0;
+                if (Mathf.Abs(move.x) > 0.1f) sign = (int)Mathf.Sign(move.x);
+                this.transform.position = rail.GetSnapPointDot(cc.radius * 2f, this.transform.position, this, -sign);
                 this.GetComponent<Collider>().enabled = false;
                 ledgeHanging = true;
             }
@@ -2299,7 +2329,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     #region CAMERA
     void HandleCinemachine()
     {
-        if (animancer.States.Current == state.climb)
+        if (animancer.States.Current == state.climb && currentClimb is not Rail)
         {
             camState = CameraState.Climb;
         }
