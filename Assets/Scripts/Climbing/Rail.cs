@@ -18,12 +18,15 @@ public class Rail : ClimbDetector
     [SerializeField, ReadOnly]
     private float dot;
 
+    [ReadOnly] public int facing = 1;
+
     public bool linkedLeft;
     public Rail left;
     public bool linkedRight;
     public Rail right;
     bool isLeftLinkValid;
     bool isRightLinkValid;
+    
     // Use this for initialization
     void Awake()
     {
@@ -32,6 +35,11 @@ public class Rail : ClimbDetector
         //ValidateLinks();
     }
 
+    public override void SetClimb()
+    {
+        PlayerActor.player.SetRail(this);
+        inUse = true;
+    }
     private void OnTriggerEnter(Collider other)
     {
         if (isDisabled) return;
@@ -68,6 +76,21 @@ public class Rail : ClimbDetector
     public override Vector3 GetClimbHeading()
     {
         return this.transform.right;
+    }
+
+    public override Vector3 GetClimbTangent()
+    {
+        return this.transform.right;
+    }
+
+    public override bool AllowAttacks()
+    {
+        return true;
+    }
+
+    public override bool AllowJumps()
+    {
+        return true;
     }
     public Vector3 GetSnapPoint(float climberWidth)
     {

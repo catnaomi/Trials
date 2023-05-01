@@ -26,6 +26,11 @@ public class Ladder : ClimbDetector
 
     }
 
+    public override void SetClimb()
+    {
+        PlayerActor.player.SetLadder(this);
+        inUse = true;
+    }
     private void OnTriggerEnter(Collider other)
     {
         if (isDisabled) return;

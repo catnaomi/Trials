@@ -1538,7 +1538,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             else if (currentClimb is Ledge ledge)
             {
-                ((DirectionalMixerState)state.climb).ParameterX = move.x;
+                //((DirectionalMixerState)state.climb).ParameterX = move.x;
+                float dot = Mathf.Clamp(Vector3.Dot(stickDirection, ledge.GetClimbTangent()), -1f, 1f);
+                ((DirectionalMixerState)state.climb).ParameterX = dot;
+                state.climb.Speed = Mathf.Abs(dot) * climbSpeed;
             }
             else if (currentClimb is Ladder ladder)
             {
@@ -1556,10 +1559,53 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             else if (currentClimb is Rail rail)
             {
-                ((DirectionalMixerState)state.climb).ParameterX = move.x;
+                float dot = Mathf.Clamp(Vector3.Dot(stickDirection, rail.GetClimbTangent()), -1f, 1f);
+                ((DirectionalMixerState)state.climb).ParameterX = dot;
+                state.climb.Speed = Mathf.Abs(dot) * climbSpeed;
+            }
+
+            if (currentClimb.AllowAttacks() && attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
+            {
+                BasicAttack();
+            }
+            if (jump && currentClimb.AllowJumps())
+            {
+                jump = false;
+                buffer.ClearInput(InputBuffer.Inputs.Jump);
+                if (stickDirection.magnitude > 0)
+                {
+                    lookDirection = stickDirection.normalized;
+                    moveDirection = stickDirection.normalized;
+                    //xzVel = xzVel.magnitude * stickDirection.normalized;
+                }
+                //StopClimbing();
+                ledgeSnap = false;
+                cc.enabled = true;
+                airTime = 0f;
+                xzVel = Vector3.zero;
+                state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+                currentClimb.CheckLedgeAfter(0.5f);
+                //StartClimbLockout();
+                /*
+                ClimbDetector climbRef = currentClimb;
+                
+                state.jump.Events.OnEnd = () =>
+                {
+                    if (climbRef.CheckPlayerCollision())
+                    {
+                        ledgeSnap = true;
+                        currentClimb = climbRef;
+                        SnapToLedge();
+                    }
+                    state.jump.Events.Clear();
+                };
+                */
+            }
+            else
+            {
+                yVel = 0f;
             }
             
-            yVel = 0f;
             animancer.Layers[0].ApplyAnimatorIK = false;
         }
         #endregion
@@ -2632,12 +2678,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             animancer.Play(ledgeClimb);
             StartClimbLockout();
         }
-        else if (!GetGrounded() && !allowClimb)
+        else if (!GetGrounded() && !allowClimb && (currentClimb == null && !currentClimb.AllowJumps()))
         {
             StopCoroutine("ClimbLockout");
             allowClimb = true;
         }
-        else if (GetGrounded() || airTime < jumpBuffer)
+        else if (GetGrounded() || airTime < jumpBuffer || (IsClimbing() && currentClimb.AllowJumps()))
         {
             //jump = true;
             buffer.SetInput(InputBuffer.Inputs.Jump, Time.time);
@@ -2782,7 +2828,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void OnAtk_Slash(InputValue value)
     {
         if (!CanPlayerInput()) return;
-        if (IsClimbing())
+        if (IsClimbing() && (currentClimb == null || !currentClimb.AllowAttacks()))
         {
             StopClimbing();
         }
@@ -2798,7 +2844,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void OnAtk_Thrust(InputValue value)
     {
         if (!CanPlayerInput()) return;
-        if (IsClimbing())
+        if (IsClimbing() && (currentClimb == null || !currentClimb.AllowAttacks()))
         {
             StopClimbing();
         }

@@ -28,6 +28,12 @@ public class Ledge : ClimbDetector
         ValidateLinks();
     }
 
+    public override void SetClimb()
+    {
+        PlayerActor.player.SetLedge(this);
+        inUse = true;
+    }
+
     private void OnTriggerEnter(Collider other)
     {
         if (isDisabled) return;
@@ -61,6 +67,10 @@ public class Ledge : ClimbDetector
         return length;
     }
 
+    public override Vector3 GetClimbTangent()
+    {
+        return this.transform.right;
+    }
     public Vector3 GetSnapPoint(float climberWidth)
     {
         return GetSnapPointForValue(climberWidth, this.snapPoint);

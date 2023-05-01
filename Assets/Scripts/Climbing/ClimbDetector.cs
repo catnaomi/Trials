@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Linq;
 
-public class ClimbDetector : MonoBehaviour
+public abstract class ClimbDetector : MonoBehaviour
 {
     public bool inUse;
     public bool isDisabled;
@@ -18,6 +19,10 @@ public class ClimbDetector : MonoBehaviour
         return this.transform.forward;
     }
 
+    public virtual Vector3 GetClimbTangent()
+    {
+        return this.transform.up;
+    }
     public void ForceDismount()
     {
         if (inUse)
@@ -28,6 +33,15 @@ public class ClimbDetector : MonoBehaviour
         }
     }
 
+    public virtual bool AllowAttacks()
+    {
+        return false;
+    }
+
+    public virtual bool AllowJumps()
+    {
+        return false;
+    }
     public void DisableClimb()
     {
         isDisabled = true;
@@ -36,5 +50,31 @@ public class ClimbDetector : MonoBehaviour
     public void EnableClimb()
     {
         isDisabled = false;
+    }
+
+    public virtual bool CheckPlayerCollision()
+    {
+        if (PlayerActor.player == null || collider == null)
+        {
+            return false;
+        }
+        return Physics.OverlapBox(collider.bounds.center, collider.bounds.extents)
+                .ToList()
+                .Contains(PlayerActor.player.GetComponent<Collider>());
+    }
+
+    public abstract void SetClimb();
+    public void CheckLedgeAfter(float delay)
+    {
+        StartCoroutine(CheckLedgeAfterRoutine(delay));
+    }
+
+    IEnumerator CheckLedgeAfterRoutine(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (CheckPlayerCollision())
+        {
+            SetClimb();
+        }
     }
 }
