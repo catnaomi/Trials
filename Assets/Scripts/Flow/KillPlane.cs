@@ -8,6 +8,7 @@ public class KillPlane : MonoBehaviour
 {
     public float interval = 0.1f;
     public bool ignorePlayer = false;
+    public bool ignoreObjects = true;
     public UnityEvent OnKillPlayer;
     Plane plane;
     Bounds bounds;
@@ -44,14 +45,17 @@ public class KillPlane : MonoBehaviour
                 }
                 //yield return null;
             }
-            BreakableObject[] breakableObjects = FindObjectsOfType<BreakableObject>();
-            foreach (BreakableObject breakable in breakableObjects)
+            if (!ignoreObjects)
             {
-                if (breakable.gameObject.scene != this.gameObject.scene) continue;
-                if (!plane.GetSide(breakable.transform.position) && IsWithinPlane(breakable.transform.position))
+                BreakableObject[] breakableObjects = FindObjectsOfType<BreakableObject>();
+                foreach (BreakableObject breakable in breakableObjects)
                 {
-                    breakable.BreakObject();
-                    Debug.Log("killplaned: " + breakable);
+                    if (breakable.gameObject.scene != this.gameObject.scene) continue;
+                    if (!plane.GetSide(breakable.transform.position) && IsWithinPlane(breakable.transform.position))
+                    {
+                        breakable.BreakObject();
+                        Debug.Log("killplaned: " + breakable);
+                    }
                 }
             }
         }

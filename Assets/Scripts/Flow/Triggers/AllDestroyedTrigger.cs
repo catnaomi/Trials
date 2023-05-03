@@ -41,4 +41,16 @@ public class AllDestroyedTrigger : MonoBehaviour
             yield return new WaitForSeconds(watchRefreshTime);
         }
     }
+
+    private void OnDrawGizmosSelected()
+    {
+        foreach(GameObject obj in watchList)
+        {
+            if (obj != null)
+            {
+                Gizmos.color = Color.red;
+                DrawArrow.ForGizmoTwoPoints(this.transform.position, obj.transform.position);
+            }
+        }
+    }
 }

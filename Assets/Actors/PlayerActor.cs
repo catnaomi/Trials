@@ -4577,6 +4577,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool IsSafe()
     {
         return (GetGrounded() && lastGroundWasStatic) &&
+            animancer.States.Current != damageHandler.hurt &&
             !dead &&
             !resurrecting &&
             IsMoving() &&
