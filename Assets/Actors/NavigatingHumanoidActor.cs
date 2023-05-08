@@ -539,7 +539,7 @@ public class NavigatingHumanoidActor : Actor, INavigates
         destination = target.transform.position;
         followingTarget = true;
     }
-    public void RealignToTarget()
+    public override void RealignToTarget()
     {
         if (destination != Vector3.zero)
         {
