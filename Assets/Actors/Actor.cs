@@ -221,6 +221,13 @@ public class Actor : MonoBehaviour
         }
     }
 
+    public virtual void RealignToTarget()
+    {
+        if (CombatTarget != null)
+        {
+            this.transform.LookAt(CombatTarget.transform, Vector3.up);
+        }
+    }
     public virtual void OnFallOffMap()
     {
         Die();

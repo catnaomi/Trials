@@ -97,4 +97,9 @@ public class InputAttack : InputAction
         }
         return state;
     }
+
+    public override void ProcessMecanimAction(Actor actor, Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        actor.SetCurrentDamage(this.GetDamage());
+    }
 }

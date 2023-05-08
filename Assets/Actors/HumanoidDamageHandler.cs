@@ -181,17 +181,17 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         }
         else if (blockSuccess && !willKill && !willInjure)
         {
-            
 
             if (!damage.breaksBlock)
             {
                 if (!actor.IsAttacking())
                 {
-                    if (animancer.States.Current != block || damage.cannotAutoFlinch)
+                    if (true)//animancer.States.Current != block || damage.cannotAutoFlinch)
                     {
                         ClipTransition clip = blockStagger;
                         animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
-                        block = animancer.Play(clip);
+                        block = animancer.Layers[HumanoidAnimLayers.Base].Play(clip);
+                        block.NormalizedTime = 0f;
                         block.Events.OnEnd = _OnBlockEnd;
 
                     }
@@ -226,6 +226,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
                 actor.transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
             }
+            AdjustDefendingPosition(damage.source, damage.repositionLength);
             damage.OnBlock.Invoke();
             actor.OnBlock.Invoke();
         }
@@ -463,7 +464,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
         if (!isFlinch)
         {
-            AdjustDefendingPosition(damage.source);
+            AdjustDefendingPosition(damage.source, damage.repositionLength);
             animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
         }
     }
@@ -483,14 +484,18 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
     public void AdjustDefendingPosition(GameObject attacker)
     {
+        AdjustDefendingPosition(attacker, 1.5f);
+    }
+    public void AdjustDefendingPosition(GameObject attacker, float length)
+    {
         if (attacker == null || !attacker.TryGetComponent<Actor>(out Actor attackerActor))
         {
             return;
         }
 
-        float MAX_ADJUST = 0.1f;
+        float MAX_ADJUST = 0.25f;
 
-        Vector3 targetPosition = attacker.transform.position + (attacker.transform.forward * 0.5f);
+        Vector3 targetPosition = attacker.transform.position + (attacker.transform.forward * length);
 
         Vector3 moveVector = Vector3.MoveTowards(actor.transform.position, targetPosition, MAX_ADJUST) - actor.transform.position;
 

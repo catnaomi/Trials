@@ -26,6 +26,7 @@ public class DamageKnockback
     public bool cannotRecoil;
     public bool cannotKill;
     public float stunTime;
+    public float repositionLength;
     public StaggerStrength stagger;
     public StaggerData staggers;
     [Space(10)]
@@ -128,7 +129,8 @@ public class DamageKnockback
         this.bouncesOffBlock = damageKnockback.bouncesOffBlock;
         this.cannotRecoil = damageKnockback.cannotRecoil;
         this.cannotKill = damageKnockback.cannotKill;
-        
+
+        this.repositionLength = damageKnockback.repositionLength;
         this.breaksBlock = damageKnockback.breaksBlock;
         this.canDamageSelf = damageKnockback.canDamageSelf;
 
@@ -164,7 +166,7 @@ public class DamageKnockback
         damage.critData = StandardCritData;
 
         damage.stunTime = 1f;
-
+        damage.repositionLength = 1f;
         return damage;
     }
 

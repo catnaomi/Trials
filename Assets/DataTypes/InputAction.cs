@@ -29,4 +29,9 @@ public class InputAction : ScriptableObject
         cancelTime = -1f;
         return null;
     }
+
+    public virtual void ProcessMecanimAction(Actor actor, Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
+    {
+        return;
+    }
 }

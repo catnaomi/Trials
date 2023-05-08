@@ -130,6 +130,7 @@ public class TransformingWeapon : BladeWeapon
         return new Bounds();
     }
 
+    /*
     public override float GetLength()
     {
         return stats[weaponState].length;
@@ -139,6 +140,7 @@ public class TransformingWeapon : BladeWeapon
     {
         return stats[weaponState].width;
     }
+    */
 
     public DojoBossCombatantActor.WeaponState GetWeaponState()
     {
