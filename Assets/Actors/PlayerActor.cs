@@ -33,6 +33,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     GameObject consumableModel;
     public bool shouldLookAtCamera;
     public float[] headPointWeights = { 1f, 0.1f, 1f, 0f, 0.7f };
+    Vector3 lastCameraForward = Vector3.forward;
+    Vector3 lastCameraRight = Vector3.right;
+    CinemachineBrain cinemachineBrain;
     [Header("Interaction & Dialogue")]
     public bool isMenuOpen;
     List<Interactable> interactables;
@@ -458,7 +461,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
 
         bowBend = new AnimatedFloat(animancer, "_BowBend");
-
+        cinemachineBrain = Camera.main.GetComponent<CinemachineBrain>();
         
     }
 
@@ -482,9 +485,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             } 
         }
         moveSmoothed = Vector2.MoveTowards(moveSmoothed, move, Time.deltaTime);
-        Vector3 camForward = Camera.main.transform.forward;
+        if (!cinemachineBrain.IsBlending)
+        {
+            lastCameraForward = Camera.main.transform.forward;
+            lastCameraRight = Camera.main.transform.right;
+        }
+        Vector3 camForward = lastCameraForward;
         camForward.Scale(new Vector3(1f, 0f, 1f));
-        Vector3 camRight = Camera.main.transform.right;
+        Vector3 camRight = lastCameraRight;
         camRight.Scale(new Vector3(1f, 0f, 1f));
         Vector3 stickDirection = Vector3.zero;
         Vector3 lookDirection = this.transform.forward;

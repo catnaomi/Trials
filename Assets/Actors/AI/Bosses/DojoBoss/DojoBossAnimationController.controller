@@ -313,7 +313,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Cross Parry
-  m_Speed: 0.01
+  m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: -1265643691444175219}
@@ -328,7 +328,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 609551bbd77018944846b9695bb01846, type: 2}
+  m_Motion: {fileID: 7400008, guid: 743906c385160ed4bb6d8f89255c0028, type: 3}
   m_Tag: PARRY_CROSS
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1002,7 +1002,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Circle Parry
-  m_Speed: 0.5
+  m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 2578714164389827946}
@@ -1017,7 +1017,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 74549ec6d6de87642be786ae2250b9ca, type: 2}
+  m_Motion: {fileID: 7400006, guid: 743906c385160ed4bb6d8f89255c0028, type: 3}
   m_Tag: PARRY_CIRCLE
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -1301,40 +1301,40 @@ AnimatorController:
   m_AnimatorParameters:
   - m_Name: Random
     m_Type: 1
-    m_DefaultFloat: 0
+    m_DefaultFloat: 0.4
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: InCloseRange
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: InMeleeRange
     m_Type: 4
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: NextParry
     m_Type: 3
     m_DefaultFloat: 0
     m_DefaultInt: 1
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: ParryHit
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   - m_Name: ParryFail
     m_Type: 9
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -1351,11 +1351,14 @@ AnimatorController:
   - serializedVersion: 5
     m_Name: Arms
     m_StateMachine: {fileID: -3364662280237786433}
-    m_Mask: {fileID: 31900000, guid: 01957c7e22092ff428e708bd7a81f844, type: 2}
+    m_Mask: {fileID: 31900000, guid: 74da9ab124865d3498afd76d28f9bb59, type: 2}
     m_Motions:
     - serializedVersion: 2
       m_State: {fileID: -2365587512571960815}
-      m_Motion: {fileID: 0}
+      m_Motion: {fileID: 7400000, guid: 74549ec6d6de87642be786ae2250b9ca, type: 2}
+    - serializedVersion: 2
+      m_State: {fileID: -6609379375980868784}
+      m_Motion: {fileID: 7400000, guid: 609551bbd77018944846b9695bb01846, type: 2}
     m_Behaviours: []
     m_BlendingMode: 0
     m_SyncedLayerIndex: 0

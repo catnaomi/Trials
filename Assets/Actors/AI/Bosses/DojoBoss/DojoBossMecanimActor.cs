@@ -61,6 +61,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             this.transform.LookAt(CombatTarget.transform, Vector3.up);
             shouldRealign = false;
         }
+        else if (IsParrying())
+        {
+            RotateTowardsTarget();
+        }
         if (randomClock <= 0f)
         {
             OnCycle();
@@ -101,6 +105,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         if (!IsParrying())
         {
 
+        }
+    }
+
+    public void RotateTowardsTarget()
+    {
+        if (CombatTarget != null)
+        {
+            this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, (CombatTarget.transform.position - this.transform.position).normalized, 360f * Time.deltaTime, Mathf.Infinity));
         }
     }
 
