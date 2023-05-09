@@ -36,7 +36,11 @@ public class Moveset : ScriptableObject
     public MixerTransition2DAsset blockMove; // off weapon > main weapon
     public ClipTransition blockAnim;
     public ClipTransition blockAnimStart;
+    [Space(10)]
     public ClipTransition blockStagger;
+    public ClipTransition blockStaggerLarge;
+    public ClipTransition blockStaggerHeavy;
+    public ClipTransition blockStaggerFlinch;
     public ClipTransition guardBreak;
     public bool overridesSprint;
     public ClipTransition sprintAnim; // main weapon only

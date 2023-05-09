@@ -19,7 +19,7 @@ public class TransformingWeapon : BladeWeapon
         
         if (holder is DojoBossCombatantActor dojoboss)
         {
-            dojoboss.OnWeaponTransform.AddListener(UpdateTransformWeapon);
+            //dojoboss.OnWeaponTransform.AddListener(UpdateTransformWeapon);
         }
 
         slashFX = FXController.CreateSwordSlash().GetComponent<MeshSwordSlash>();
@@ -29,13 +29,14 @@ public class TransformingWeapon : BladeWeapon
         thrustFX.pseudoParent = actor.transform;
 
 
-        handler = GetModel().GetComponent<TransformingWeaponModelHandler>();
+        //handler = GetModel().GetComponent<TransformingWeaponModelHandler>();
 
         GenerateHitboxes();
         hitboxes.OnHitTerrain.RemoveAllListeners();
         hitboxes.OnHitTerrain.AddListener(TerrainContact);
         hitboxes.OnHitWall.AddListener(WallContact);
 
+        /*
         subWeapon = ScriptableObject.Instantiate(subWeapon);
         
         subWeapon.prefab = this.prefab;
@@ -57,10 +58,10 @@ public class TransformingWeapon : BladeWeapon
         subHandler = subWeapon.GetModel().GetComponent<TransformingWeaponModelHandler>();
         UpdateTransformWeapon();
 
-        
+        */
         //slashMesh.transform.rotation = Quaternion.identity;
     }
-
+    /*
     public void UpdateTransformWeapon()
     {
         DojoBossCombatantActor.WeaponState oldState = weaponState;
@@ -106,7 +107,7 @@ public class TransformingWeapon : BladeWeapon
             subHandler.state = DojoBossCombatantActor.WeaponState.None;
         }
     }
-
+    */
     public override Bounds GetBlockBounds()
     {
         GameObject currentModel = handler.GetCurrentModel();
@@ -154,7 +155,8 @@ public class TransformingWeapon : BladeWeapon
         }
     }
 
-    protected override void GenerateHitboxes()
+    /*
+    public override void GenerateHitboxes()
     {
         if (hitboxes != null)
         {
@@ -185,6 +187,7 @@ public class TransformingWeapon : BladeWeapon
         }
 
     }
+    */
 
     Dictionary<DojoBossCombatantActor.WeaponState, WeaponStats> stats = new Dictionary<DojoBossCombatantActor.WeaponState, WeaponStats>()
     {

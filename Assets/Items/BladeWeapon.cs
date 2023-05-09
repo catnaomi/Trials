@@ -10,6 +10,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     public float baseDamage;
     public float width = 1f;
     public float length = 1.5f;
+    public bool doubleSided;
     //public float weight = 1f;
     [Space(10)]
     [SerializeField]public float slashModifier = 1f;
@@ -65,6 +66,37 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         //slashMesh.transform.rotation = Quaternion.identity;
     }
 
+    public void UpdateFXPoints()
+    {
+        Actor actor = GetHeldActor();
+        top = InterfaceUtilities.FindRecursively(GetModel().transform, "_top");
+        bottom = InterfaceUtilities.FindRecursively(GetModel().transform, "_bottom");
+
+        if (slashFX == null)
+        {
+            slashFX = FXController.CreateSwordSlash().GetComponent<MeshSwordSlash>();
+        }
+        slashFX.topPoint = top;
+        slashFX.bottomPoint = bottom;
+        slashFX.pseudoParent = actor.transform;
+        if (slashFX.gameObject.scene != actor.gameObject.scene)
+        {
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(slashFX.gameObject, actor.gameObject.scene);
+        }
+
+        if (thrustFX == null)
+        {
+            thrustFX = FXController.CreateSwordThrust().GetComponent<SpiralSwordThrust>();
+        }
+        thrustFX.topPoint = top;
+        thrustFX.bottomPoint = bottom;
+        thrustFX.pseudoParent = actor.transform;
+        if (thrustFX.gameObject.scene != actor.gameObject.scene)
+        {
+            UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(thrustFX.gameObject, actor.gameObject.scene);
+        }
+    }
+
     public override void UnequipWeapon(Actor actor)
     {
         base.UnequipWeapon(actor);
@@ -83,20 +115,35 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         return hitboxes;
     }
 
-    protected virtual void GenerateHitboxes()
+    public virtual void GenerateHitboxes()
     {
         if (hitboxes != null)
         {
             hitboxes.DestroyAll();
         }
-        hitboxes = Hitbox.CreateHitboxLine(
-            GetHand().transform.position,
+        if (!doubleSided)
+        {
+            hitboxes = Hitbox.CreateHitboxLine(
+                GetHand().transform.position,
+                GetHand().transform.forward,
+                GetLength(),
+                GetWidth(),
+                GetHand().transform,
+                new DamageKnockback(),
+                holder.gameObject);
+        }
+        else
+        {
+            hitboxes = Hitbox.CreateHitboxLine(
+            GetHand().transform.position + (-1f * GetLength() * GetHand().transform.forward),
             GetHand().transform.forward,
-            GetLength(),
+            GetLength() * 2f,
             GetWidth(),
             GetHand().transform,
             new DamageKnockback(),
             holder.gameObject);
+        }
+        
     }
 
     protected void DestroyHitboxes()

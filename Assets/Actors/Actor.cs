@@ -34,6 +34,7 @@ public class Actor : MonoBehaviour
     [HideInInspector]public UnityEvent OnHealthChange;
 
     public float lastDamageAmountTaken;
+    public DamageKnockback lastDamageTaken;
     private  int mercyId; //hitbox
 
     public Vector3 moveDirection;

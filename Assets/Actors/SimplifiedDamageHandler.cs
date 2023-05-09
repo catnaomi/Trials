@@ -15,7 +15,7 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
         this.actor = actor;
         this.damageAnims = anims;
         this.animancer = animancer;
-        blockStagger = damageAnims.blockStagger;
+        //blockStagger = damageAnims.blockStagger;
         guardBreak = damageAnims.guardBreak;
 
         totalCritTime = 0f;
@@ -98,15 +98,15 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
                 {
                     if (animancer.States.Current != block || damage.cannotAutoFlinch)
                     {
-                        ClipTransition clip = blockStagger;
+                        ClipTransition clip = damageAnims.GetClipFromBlockType(DamageKnockback.BlockStaggerType.BlockSmall);
                         animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
                         block = animancer.Play(clip);
-                        block.Events.OnEnd = _OnBlockEnd;
+                        block.Events.OnEnd = OnBlockEnd;
 
                     }
                     else
                     {
-                        ClipTransition clip = blockStagger;
+                        ClipTransition clip = damageAnims.GetClipFromBlockType(DamageKnockback.BlockStaggerType.Flinch);
                         AnimancerState state = animancer.Layers[HumanoidAnimLayers.Flinch].Play(clip);
                         state.Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
                     }
@@ -121,7 +121,7 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
                 animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
                 ClipTransition clip = guardBreak;
                 AnimancerState state = animancer.Play(clip);
-                state.Events.OnEnd = _OnEnd;
+                state.Events.OnEnd = OnEnd;
                 hurt = state;
                 actor.OnHurt.Invoke();
                 damage.OnCrit.Invoke();

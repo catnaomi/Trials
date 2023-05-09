@@ -463,7 +463,7 @@ public class HumanoidActor : Actor
     public void ProcessStagger(DamageKnockback.StaggerType type, DamageKnockback damageKnockback)
     {
         bool turn = false;
-        bool isBlock = type == DamageKnockback.StaggerType.BlockStagger || type == DamageKnockback.StaggerType.GuardBreak;
+        bool isBlock = false;// type == DamageKnockback.StaggerType.BlockStagger || type == DamageKnockback.StaggerType.GuardBreak;
         if (isBlock)
         {
             OnBlock.Invoke();
@@ -499,6 +499,7 @@ public class HumanoidActor : Actor
             AnimatorImpact(DamageKnockback.StaggerType.Flinch);
         }
 
+        /*
         if (type == DamageKnockback.StaggerType.BlockStagger)
         {
             if (damageKnockback.source != null && damageKnockback.source.TryGetComponent<HumanoidActor>(out HumanoidActor humanoid))
@@ -506,6 +507,7 @@ public class HumanoidActor : Actor
                 humanoid.BlockRecoil();
             }
         }
+        */
     }
 
     public void Disarm(DamageKnockback damageKnockback)
@@ -530,7 +532,7 @@ public class HumanoidActor : Actor
     {
         if (!IsArmored() && !IsAiming())
         {
-            AnimatorImpact(DamageKnockback.StaggerType.Recoil);
+            //AnimatorImpact(DamageKnockback.StaggerType.Recoil);
         }
     }
 
@@ -976,7 +978,7 @@ public class HumanoidActor : Actor
     {
         if (!IsArmored())
         {
-            AnimatorImpact(DamageKnockback.StaggerType.Recoil);
+            //AnimatorImpact(DamageKnockback.StaggerType.Recoil);
         }
     }
 

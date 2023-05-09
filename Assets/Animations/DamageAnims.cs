@@ -14,7 +14,11 @@ public class DamageAnims : ScriptableObject
     public ClipTransition fallOver;
     public ClipTransition spinDeath;
     public ClipTransition stun;
+    [Header("Block Animations By Type")]
     public ClipTransition blockStagger;
+    public ClipTransition blockStaggerLarge;
+    public ClipTransition blockStaggerHeavy;
+    public ClipTransition blockFlinch;
     public ClipTransition guardBreak;
     public ClipTransition recoil;
 
@@ -58,12 +62,14 @@ public class DamageAnims : ScriptableObject
                 return stun;
             case DamageKnockback.StaggerType.Crumple:
                 return crumple;
+                /*
             case DamageKnockback.StaggerType.BlockStagger:
                 return blockStagger;
             case DamageKnockback.StaggerType.GuardBreak:
                 return guardBreak;
             case DamageKnockback.StaggerType.Recoil:
                 return recoil;
+                */
         }
         return null;
     }
@@ -86,5 +92,23 @@ public class DamageAnims : ScriptableObject
         FallDamage,       // 10
     */
 
-
+    public ClipTransition GetClipFromBlockType(DamageKnockback.BlockStaggerType type)
+    {
+        switch (type)
+        {
+            case DamageKnockback.BlockStaggerType.Flinch:
+                return blockFlinch;
+            case DamageKnockback.BlockStaggerType.BlockSmall:
+                return blockStagger;
+            case DamageKnockback.BlockStaggerType.BlockLarge:
+                return blockStaggerLarge;
+            case DamageKnockback.BlockStaggerType.BlockHeavy:
+                return blockStaggerHeavy;
+            case DamageKnockback.BlockStaggerType.GuardBreak:
+                return guardBreak;
+            case DamageKnockback.BlockStaggerType.Recoil:
+                return recoil;
+        }
+        return null;
+    }
 }

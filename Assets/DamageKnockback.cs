@@ -58,6 +58,8 @@ public class DamageKnockback
         public StaggerType onCritical;
         public StaggerType onKill;
         public StaggerType onCounterHit;
+        [Space(5)]
+        public BlockStaggerType onBlock;
     }
 
     [Serializable]
@@ -87,14 +89,25 @@ public class DamageKnockback
         SpinDeath,           // 5
         Crumple,        // 6
         FallOver,
+        /*
         // on block
         BlockStagger,   // 7
         GuardBreak,     // 8
         Recoil,          // 9 shorter stun
 
         FallDamage,       // 10
+        */
     }
 
+    public enum BlockStaggerType
+    {
+        BlockSmall,
+        BlockLarge,
+        BlockHeavy,
+        Flinch,
+        GuardBreak,
+        Recoil
+    }
     public enum StaggerStrength
     {
         Light,
@@ -182,6 +195,7 @@ public class DamageKnockback
         onCritical = StaggerType.Stumble,
         onKill = StaggerType.Crumple,
         onCounterHit = StaggerType.StaggerSmall,
+        onBlock = BlockStaggerType.BlockSmall,
     };
 
     public static readonly CriticalData StandardCritData = new CriticalData()

@@ -28,18 +28,20 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     public AnimancerState fall;
     AnimancerState invuln;
     public Hitbox lastHitbox;
-    protected ClipTransition blockStagger;
+    //protected ClipTransition blockStagger;
     protected ClipTransition guardBreak;
 
     public bool isFacingUp;
 
+    int lastStagger = 0;
+    int lastBlockStagger = 0;
 
     protected System.Action _OnEnd;
     protected System.Action _OnBlockEnd;
     public void Recoil()
     {
         AnimancerState state = animancer.Play(damageAnims.recoil);
-        state.Events.OnEnd = _OnEnd;
+        state.Events.OnEnd = OnEnd;
         isFacingUp = true;
         CheckFallContinuous(state, false);
         hurt = state;
@@ -51,7 +53,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         this.actor = actor;
         this.damageAnims = anims;
         this.animancer = animancer;
-        blockStagger = damageAnims.blockStagger;
+        //blockStagger = damageAnims.blockStagger;
         guardBreak = damageAnims.guardBreak;
 
         totalCritTime = 0f;
@@ -75,10 +77,23 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         _OnBlockEnd = action;
     }
 
+    protected void OnEnd()
+    {
+        lastStagger = -1;
+        _OnEnd();
+    }
+
+    protected void OnBlockEnd()
+    {
+        lastBlockStagger = -1;
+        _OnBlockEnd();
+    }
+    /*
     public void SetBlockClip(ClipTransition clip)
     {
         blockStagger = clip;
     }
+    */
 
     public void SetGuardBreakClip(ClipTransition clip)
     {
@@ -186,21 +201,22 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             {
                 if (!actor.IsAttacking())
                 {
-                    if (true)//animancer.States.Current != block || damage.cannotAutoFlinch)
+                    if (damage.staggers.onBlock != DamageKnockback.BlockStaggerType.Flinch &&
+                        (animancer.States.Current != block || ((int)damage.staggers.onBlock >= lastBlockStagger)))
                     {
-                        ClipTransition clip = blockStagger;
+                        ClipTransition clip = damageAnims.GetClipFromBlockType(damage.staggers.onBlock);
                         animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
                         block = animancer.Layers[HumanoidAnimLayers.Base].Play(clip);
                         block.NormalizedTime = 0f;
-                        block.Events.OnEnd = _OnBlockEnd;
-
+                        block.Events.OnEnd = OnBlockEnd;
                     }
                     else
                     {
-                        ClipTransition clip = blockStagger;
+                        ClipTransition clip = damageAnims.GetClipFromBlockType(DamageKnockback.BlockStaggerType.Flinch);
                         AnimancerState state = animancer.Layers[HumanoidAnimLayers.Flinch].Play(clip);
                         state.Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
                     }
+                    lastBlockStagger = (int)damage.staggers.onBlock;
                 }
                 if (damage.bouncesOffBlock && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable) && !damage.cannotRecoil)
                 {
@@ -212,7 +228,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
                 ClipTransition clip = guardBreak;
                 AnimancerState state = animancer.Play(clip);
-                state.Events.OnEnd = _OnEnd;
+                state.Events.OnEnd = OnEnd;
                 CheckFallContinuous(state, willKill);
                 hurt = state;
                 actor.OnHurt.Invoke();
@@ -402,7 +418,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 state.Time = 0f;
                 state.ParameterX = xdot;
                 state.ParameterY = ydot;
-                state.Events.OnEnd = _OnEnd;
+                state.Events.OnEnd = OnEnd;
                 CheckFallContinuous(state, willKill);
                 hurt = state;
                 maxTime = state.RemainingDuration / state.Speed;
@@ -428,7 +444,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             state.Time = 0f;
             state.ParameterX = xdot;
             state.ParameterY = ydot;
-            state.Events.OnEnd = _OnEnd;
+            state.Events.OnEnd = OnEnd;
             CheckFallContinuous(state, willKill);
             hurt = state;
             maxTime = state.RemainingDuration / state.Speed;
@@ -437,7 +453,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         {
             ClipTransition clip = damageAnims.GetClipFromStaggerType(stagger);
             AnimancerState state = animancer.Play(clip);
-            state.Events.OnEnd = _OnEnd;
+            state.Events.OnEnd = OnEnd;
             CheckFallContinuous(state, willKill);
             hurt = state;
             actor.transform.rotation = Quaternion.LookRotation(-(actor.transform.position - damage.source.transform.position), Vector3.up);
@@ -475,7 +491,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
         ClipTransition clip = guardBreak;
         AnimancerState state = animancer.Play(clip);
-        state.Events.OnEnd = _OnEnd;
+        state.Events.OnEnd = OnEnd;
         CheckFallContinuous(state, false);
         hurt = state;
         actor.OnHurt.Invoke();
@@ -549,7 +565,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         AnimancerState state = animancer.Play((faceUp) ? damageAnims.getupFaceUp : damageAnims.getupFaceDown);
         SetInvulnClip(state);
         hurt = state;
-        hurt.Events.OnEnd = _OnEnd;
+        hurt.Events.OnEnd = OnEnd;
     }
     IEnumerator CriticalTimeOut()
     {

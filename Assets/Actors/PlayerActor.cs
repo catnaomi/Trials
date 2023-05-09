@@ -3077,7 +3077,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
 
         state.block = (MixerState)animancer.States.GetOrCreate(blockingMoveAnim);
-        damageHandler.SetBlockClip(blockStagger);
+        //damageHandler.SetBlockClip(blockStagger);
         damageHandler.SetGuardBreakClip(guardBreak);
 
         UpdateStances();
