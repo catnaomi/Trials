@@ -49,7 +49,7 @@ public class DamageKnockback
     public UnityEvent OnCrit;
     public UnityEvent OnBlock;
     
-    public static float MAX_CRITVULN_TIME = 3f;
+    public static float MAX_CRITVULN_TIME = 10f;
     [Serializable]
     public struct StaggerData
     {

@@ -451,6 +451,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 critTime -= Time.deltaTime;
             //}
         }
+        yield return new WaitForSeconds(1f);
+        if (critTime <= 0)
+        {
+            totalCritTime = 0f;
+        }
         inCritCoroutine = false;
     }
 
@@ -573,7 +578,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         IncrementParryIndex();
         SetParryValue();
-        StartCritVulnerability(3f);
+        StartCritVulnerability(5f);
         ParryHit = true;
     }
 }
