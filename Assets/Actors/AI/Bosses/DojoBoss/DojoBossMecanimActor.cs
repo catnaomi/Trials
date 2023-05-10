@@ -138,7 +138,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         if (CombatTarget != null)
         {
-            this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, (CombatTarget.transform.position - this.transform.position).normalized, 1080f * Time.deltaTime, Mathf.Infinity));
+            Vector3 dir = (CombatTarget.transform.position - this.transform.position);
+            dir.y = 0f;
+            this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, dir.normalized, 1080f * Time.deltaTime, Mathf.Infinity));
         }
     }
 
@@ -388,6 +390,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         else if ((crossParrying && damage.isSlash) || (circleParrying && damage.isThrust))
         {
             ParrySuccess(damage, circleParrying);
+
             this.OnHurt.Invoke();
             damage.OnCrit.Invoke();
             damage.OnBlock.Invoke();
@@ -405,9 +408,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 damage.stagger = DamageKnockback.StaggerStrength.Heavy;
                 IsDamageHeavy = true;
             }
-            if (IsCritVulnerable())
+            if (IsCritVulnerable() && IsDamageHeavy)
             {
                 OnDamage = true;
+                damage.OnCrit.Invoke();
+            }
+            else if (IsCritVulnerable())
+            {
+                OnFlinch = true;
                 damage.OnCrit.Invoke();
             }
             else
