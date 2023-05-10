@@ -18,12 +18,20 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public string[] parryPatterns;
     int parryCurrentIndex;
     int parrySequenceIndex;
+    bool inCritCoroutine;
+    float critTime;
+    float totalCritTime;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
     [ReadOnly, SerializeField] bool ParryHit;
     [ReadOnly, SerializeField] int NextParry;
     [ReadOnly, SerializeField] bool ParryFail;
+    [ReadOnly, SerializeField] bool OnDamage;
+    [ReadOnly, SerializeField] bool IsDamageHeavy;
+    [ReadOnly, SerializeField] float xDirection;
+    [ReadOnly, SerializeField] float yDirection;
+    [ReadOnly, SerializeField] bool OnFlinch;
     [Space(10)]
     public float closeRange = 5f;
     public float meleeRange = 1f;
@@ -98,6 +106,24 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             animator.SetTrigger("ParryFail");
             ParryFail = false;
         }
+        animator.SetBool("IsDamageHeavy", IsDamageHeavy);
+        if (OnDamage)
+        {
+            animator.SetTrigger("OnDamage");
+            OnDamage = false;
+        }
+        Vector3 dir = (CombatTarget.transform.position - this.transform.position).normalized;
+        xDirection = Vector3.Dot(this.transform.right, dir);
+        yDirection = Vector3.Dot(this.transform.forward, dir);
+
+        animator.SetFloat("xDirection", xDirection);
+        animator.SetFloat("yDirection", yDirection);
+
+        if (OnFlinch)
+        {
+            animator.SetTrigger("OnFlinch");
+            OnFlinch = false;
+        }
     }
 
     void OnCycle()
@@ -112,7 +138,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         if (CombatTarget != null)
         {
-            this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, (CombatTarget.transform.position - this.transform.position).normalized, 360f * Time.deltaTime, Mathf.Infinity));
+            this.transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(this.transform.forward, (CombatTarget.transform.position - this.transform.position).normalized, 1080f * Time.deltaTime, Mathf.Infinity));
         }
     }
 
@@ -317,12 +343,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         throw new System.NotImplementedException();
     }
 
-    public void StartCritVulnerability(float time)
-    {
-
-        //throw new System.NotImplementedException();
-    }
-
     public void TakeDamage(DamageKnockback damage)
     {
         if (!this.IsAlive()) return;
@@ -376,12 +396,70 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         else
         {
+            if (damage.stagger == DamageKnockback.StaggerStrength.Light)
+            {
+                IsDamageHeavy = false;
+            }
+            else
+            {
+                damage.stagger = DamageKnockback.StaggerStrength.Heavy;
+                IsDamageHeavy = true;
+            }
+            if (IsCritVulnerable())
+            {
+                OnDamage = true;
+                damage.OnCrit.Invoke();
+            }
+            else
+            {
+                OnFlinch = true;
+            }
+            this.OnHurt.Invoke();
+            damage.OnHit.Invoke();
             //damageHandler.TakeDamage(damage);
         }
         DeactivateHitboxes();
     }
 
 
+    public void StartCritVulnerability(float time)
+    {
+        if (totalCritTime >= DamageKnockback.MAX_CRITVULN_TIME) return;
+        critTime = time;
+        totalCritTime += time;
+        if (!inCritCoroutine)
+        {
+            StartCoroutine(CriticalTimeOut());
+        }
+        OnCritVulnerable.Invoke();
+    }
+
+    public void StopCritVulnerability()
+    {
+        critTime = -1f;
+        totalCritTime = 0f;
+    }
+
+    IEnumerator CriticalTimeOut()
+    {
+        inCritCoroutine = true;
+        while (critTime > 0)
+        {
+            yield return null;
+            //if (!actor.IsTimeStopped())
+            //{
+                critTime -= Time.deltaTime;
+            //}
+        }
+        inCritCoroutine = false;
+    }
+
+    public bool IsCritVulnerable()
+    {
+        bool isCritVuln = critTime > 0f;
+        if (!isCritVuln) totalCritTime = 0f;
+        return isCritVuln;
+    }
     public void SetParryValue()
     {
         string sequence = parryPatterns[parrySequenceIndex];
@@ -495,6 +573,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         IncrementParryIndex();
         SetParryValue();
+        StartCritVulnerability(3f);
         ParryHit = true;
     }
 }

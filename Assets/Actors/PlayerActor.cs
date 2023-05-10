@@ -1114,6 +1114,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     walkAccelReal = hardLandAccel;
                     speed = 0f;
                     sprinting = false;
+                    VerifyAccelerationAfterDelay();
                 }
                 else if (lastAirTime >= softLandingTime)
                 {
@@ -1129,6 +1130,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
                     land.Events.OnEnd = () => { animancer.Play(state.move, softLandingTransitionTime); };
                     //animancer.Play(state.move, softLandingTransitionTime);
+                    VerifyAccelerationAfterDelay();
                 }
                 else
                 {
@@ -2927,6 +2929,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     void OnControlsChanged()
     {
         onControlsChanged.Invoke();
+    }
+
+    public void VerifyAccelerationAfterDelay()
+    {
+        StartCoroutine(CheckAccelCoroutine());
+    }
+
+    IEnumerator CheckAccelCoroutine()
+    {
+        float delay = 5f;
+        float currentAccel = walkAccelReal;
+        yield return new WaitForSeconds(delay);
+        if (walkAccelReal == currentAccel && walkAccelReal < walkAccel)
+        {
+            walkAccelReal = walkAccel;
+        }
     }
     #region MENUS
 
