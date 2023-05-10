@@ -385,7 +385,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         _OnHurtEnd = () =>
         {
-            _MoveOnEnd();
+            bool blocked = CheckStartBlockAnim();
+            if (!blocked)
+            {
+                _MoveOnEnd();
+            }
             if (mainWeaponAngle != 0f)
             {
                 StartCoroutine("GradualResetMainRotation");
@@ -2777,6 +2781,27 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         blocking = false;
     }
 
+    public bool CheckStartBlockAnim()
+    {
+        EquippableWeapon blockWeapon = inventory.GetBlockWeapon();
+        if (blocking)
+        {
+            if (blockWeapon != null)
+            {
+                int itemSlot = inventory.GetItemEquipType(blockWeapon);
+                if ((itemSlot == Inventory.MainType && !inventory.IsMainDrawn()) || (itemSlot == Inventory.OffType && !inventory.IsOffDrawn()))
+                {
+                    inventory.SetDrawn(inventory.GetItemEquipType(blockWeapon), true);
+                    UpdateFromMoveset();
+                }
+            }
+
+            animancer.Play(state.block, 0.01f);
+            return true;
+        }
+        return false;
+        
+    }
     public bool IsBlockHeld()
     {
         return this.GetComponent<PlayerInput>().actions["Block"].IsPressed();
