@@ -2,69 +2,27 @@
 using System.Collections;
 
 [CreateAssetMenu(fileName = "Shield", menuName = "ScriptableObjects/CreateOffHandWeaponShield", order = 1)]
-public class OffHandShield : EquippableWeapon, IHitboxHandler
+public class OffHandShield : EquippableWeapon
 {
-    [Range(0.01f, 1f)]
-    public float reductionStrength;
+    [Header("Resistances")]
+    public DamageResistance blockResistance;
+    public bool hasTypedResistances;
+    public DamageResistance slashResistance;
+    public DamageResistance thrustResistance;
 
-    //public Damage BlockResistance;
-    public float blockPoiseDamage;
-
-    public float bashCost;
-    public DamageKnockback bashDamage;
-
-    [HideInInspector] Hitbox hitbox;
-
-    public void HitboxActive(bool active)
+    public override DamageResistance GetBlockResistance()
     {
-        if (hitbox == null)
+        if (hasTypedResistances && holder.IsBlockingSlash())
         {
-            return;
+            return slashResistance;
         }
-        hitbox.SetActive(active);
-        //bashDamage.kbForce = GetHeldActor().transform.forward;
-
-        if (active)
+        else if (hasTypedResistances && holder.IsBlockingThrust())
         {
-            holder.PlayAudioClip(FXController.clipDictionary["shield_bash"]);
-
-            //holder.attributes.ReduceAttribute(holder.attributes.stamina, bashCost);
+            return thrustResistance;
+        }
+        else
+        {
+            return blockResistance;
         }
     }
-
-    public override void EquipWeapon(Actor actor)
-    {
-        base.EquipWeapon(actor);
-
-        if (actor.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference) && actor.TryGetComponent<PlayerInventory>(out PlayerInventory inventory))
-        {
-            hitbox = Hitbox.CreateHitbox(
-            positionReference.OffHand.transform.position,
-            0.5f,
-            inventory.GetOffhandModel().transform,
-            bashDamage,
-            actor.gameObject);
-        }
-        //humanoidActor.blockType = ActionsLibrary.BlockType.Shield;
-
-        
-
-        //humanoidActor.attributes.AddEffect(effect);
-    }
-
-    public override void UnequipWeapon(Actor actor)
-    {
-        base.UnequipWeapon(actor);
-
-        //humanoidActor.blockType = ActionsLibrary.GetDefaultBlockType();
-
-        //humanoidActor.attributes.RemoveEffect(effect);
-    }
-
-    /*
-    public override Damage GetBlockResistance()
-    {
-        return BlockResistance;
-    }
-    */
 }

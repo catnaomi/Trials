@@ -32,10 +32,13 @@ public class Moveset : ScriptableObject
     public ClipTransition sheathe;
     public MixerTransition2DAsset moveAnim; // main weapon only
     public SecondaryStyle secondaryStyle;
+    [Space(10)]
     public bool overridesBlock;
     public MixerTransition2DAsset blockMove; // off weapon > main weapon
     public ClipTransition blockAnim;
     public ClipTransition blockAnimStart;
+    public bool hasTypedBlocks;
+    public LinearMixerTransition blockAnimsTyped;
     [Space(10)]
     public ClipTransition blockStagger;
     public ClipTransition blockStaggerLarge;

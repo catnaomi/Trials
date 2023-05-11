@@ -49,7 +49,10 @@ public class DamageKnockback
     public UnityEvent OnCrit;
     public UnityEvent OnBlock;
     
-    public static float MAX_CRITVULN_TIME = 10f;
+    public static float MAX_CRITVULN_TIME = 5f;
+    public static readonly int SLASH_INT = -1;
+    public static readonly int THRUST_INT = 1;
+
     [Serializable]
     public struct StaggerData
     {
@@ -234,6 +237,12 @@ public class DamageKnockback
         }
         total *= ratio;
         total -= flat;
+        total = Mathf.Floor(total);
+        if (total < resistance.minimumDamage)
+        {
+            total = resistance.minimumDamage;
+        }
+       
         return total;
     }
     public void AddTypes(DamageType newtypes)
@@ -290,6 +299,8 @@ public class DamageResistance
     [Space(10)]
     public float neutralMultiplier = 1f;
     public float neutralFlat = 0f;
+    [Space(10)]
+    public float minimumDamage = 0f;
 
     public static DamageResistance Add(DamageResistance dr1, DamageResistance dr2)
     {
@@ -305,6 +316,7 @@ public class DamageResistance
         dr.neutralMultiplier = dr1.neutralMultiplier * dr2.neutralMultiplier;
         dr.neutralFlat = dr1.neutralFlat + dr2.neutralFlat;
 
+        dr.minimumDamage = Mathf.Max(dr1.minimumDamage, dr2.minimumDamage);
         return dr;
     }
 

@@ -165,7 +165,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool thrust;
     bool plunge;
     bool hold;
-    bool isUsingShield;
+    bool hasTypedBlocks;
+    int lastTypedBlockParam;
+    public float blockShiftSpeed = 4f;
+    public UnityEvent OnBlockTypeChange;
     bool shouldRecenter;
     ClipTransition plungeEnd;
     float cancelTime;
@@ -198,6 +201,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     float holdAttackClock;
     float holdAttackMin;
     public UnityEvent OnParryStart;
+    public UnityEvent OnParryThrustStart;
+    public UnityEvent OnParrySlashStart;
     public UnityEvent OnParrySuccess;
     [Header("Animancer")]
     public MixerTransition2DAsset moveAnim;
@@ -249,10 +254,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public StanceHandler secondaryStance;
     [Header("Damage Anims")]
     public DamageAnims damageAnim;
+    public LinearMixerTransition dummyBlockTransition;
     HumanoidDamageHandler damageHandler;
     MixerTransition2D blockMove;
     ClipTransition blockAnimStart;
     ClipTransition blockAnim;
+    ClipTransition blockAnimSlash;
+    ClipTransition blockAnimThrust;
     ClipTransition blockStagger;
     AnimState state;
     public AimAttack.AimState astate;
@@ -305,6 +313,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState consume;
         public MixerState<Vector2> primaryStance;
         public MixerState<Vector2> secondaryStance;
+        public MixerState<float> upperBlock;
     }
 
     
@@ -784,6 +793,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 }
                 moveDirection = stickDirection;
             }
+
+            if (hasTypedBlocks)
+            {
+                if (animancer.Layers[HumanoidAnimLayers.UpperBody].CurrentState != state.upperBlock)
+                {
+                    animancer.Layers[HumanoidAnimLayers.UpperBody].Play(state.upperBlock);
+                }
+                int param = 0 + (IsSlashHeld() ? DamageKnockback.SLASH_INT : 0) + (IsThrustHeld() ? DamageKnockback.THRUST_INT : 0);
+                if (param != lastTypedBlockParam)
+                {
+                    lastTypedBlockParam = param;
+                    OnBlockTypeChange.Invoke();
+                }
+                state.upperBlock.Parameter = Mathf.MoveTowards(state.upperBlock.Parameter, (float)param, blockShiftSpeed * Time.deltaTime);
+            }
+
             if (!isGrounded && lastAirTime > fallBufferTime)
             {
                 state.fall = animancer.Play(fallAnim);
@@ -844,31 +869,34 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 //speed = -blockSpeed;
                 stopBlock = true;
             }
-            
+
             if (attack)
             {
-                if (!inventory.IsMainDrawn())
+                if (!hasTypedBlocks)
                 {
-                    inventory.SetDrawn(true, true);
-                    UpdateFromMoveset();
-                }
-                if (inventory.IsMainDrawn())
-                {
-                    if (slash)
+                    if (!inventory.IsMainDrawn())
                     {
-                        BlockSlash();
-                        attackDecelReal = attackDecel;
+                        inventory.SetDrawn(true, true);
+                        UpdateFromMoveset();
                     }
-                    else if (thrust)
+                    if (inventory.IsMainDrawn())
                     {
-                        BlockThrust();
-                        attackDecelReal = attackDecel;
+                        if (slash)
+                        {
+                            BlockSlash();
+                            attackDecelReal = attackDecel;
+                        }
+                        else if (thrust)
+                        {
+                            BlockThrust();
+                            attackDecelReal = attackDecel;
+                        }
                     }
-                }
+                    stopBlock = true;
+                }              
                 attack = false;
                 slash = false;
                 thrust = false;
-                stopBlock = true;
             }
             else if (aiming)
             {
@@ -901,7 +929,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             if (stopBlock && blockAnim != null)
             {
-                if (animancer.Layers[HumanoidAnimLayers.UpperBody].IsPlayingClip(blockAnim.Clip) || animancer.Layers[HumanoidAnimLayers.UpperBody].IsPlayingClip(blockAnimStart.Clip))
+                if (animancer.Layers[HumanoidAnimLayers.UpperBody].IsPlayingClip(blockAnim.Clip) || animancer.Layers[HumanoidAnimLayers.UpperBody].IsPlayingClip(blockAnimStart.Clip) || animancer.Layers[HumanoidAnimLayers.UpperBody].CurrentState == state.upperBlock)
                 {
                     animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
                 }
@@ -3124,7 +3152,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             blockAnim = blockWeapon.moveset.blockAnim;
             blockAnimStart = blockWeapon.moveset.blockAnimStart;
             blockStagger = blockWeapon.moveset.blockStagger;
+
             guardBreak = blockWeapon.moveset.guardBreak;
+
+            if (blockWeapon.moveset.hasTypedBlocks && blockWeapon.moveset.blockAnimsTyped != null)
+            {
+                state.upperBlock = (MixerState<float>)animancer.States.GetOrCreate(blockWeapon.moveset.blockAnimsTyped);
+                hasTypedBlocks = true;
+            }
+            else
+            {
+                hasTypedBlocks = false;
+            }
+            
         }
 
         state.block = (MixerState)animancer.States.GetOrCreate(blockingMoveAnim);
@@ -3989,6 +4029,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+
     public void ParryActive(float duration)
     {
         state.parry = state.attack;
@@ -3998,7 +4039,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public bool ShouldParry(DamageKnockback incomingDamage)
     {
-        if (animancer.States.Current == state.parry && Time.time <= parryTime)
+        if (IsParrying())
         {
             if (incomingDamage.breaksBlock || incomingDamage.breaksArmor || incomingDamage.cannotRecoil)
             {
@@ -4025,6 +4066,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
         }
         return false;
+    }
+
+    public bool IsParrying()
+    {
+        return (animancer.States.Current == state.parry || animancer.States.Current == state.block) && Time.time <= parryTime;
     }
 
     public bool IsParrySlash()
@@ -4604,7 +4650,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (animancer == null) return false;
         return CanBlock() && (animancer.States.Current == state.block || animancer.States.Current == damageHandler.block);
     }
-   
+
+    public override bool IsBlockingSlash()
+    {
+        return IsBlocking() && hasTypedBlocks && lastTypedBlockParam == DamageKnockback.SLASH_INT;
+    }
+
+    public override bool IsBlockingThrust()
+    {
+        return IsBlocking() && hasTypedBlocks && lastTypedBlockParam == DamageKnockback.THRUST_INT;
+    }
+
     public bool IsInDialogue()
     {
         if (animancer == null) return false;

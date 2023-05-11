@@ -1139,7 +1139,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     {
         if (GetBlockWeapon() != null)
         {
-            return GetBlockWeapon().blockResistances;
+            return GetBlockWeapon().GetBlockResistance();
         }
         else
         {

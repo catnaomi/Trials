@@ -611,7 +611,7 @@ public class HumanoidNPCInventory : Inventory, IInventory, IHumanoidInventory
     {
         if (GetBlockWeapon() != null)
         {
-            return GetBlockWeapon().blockResistances;
+            return GetBlockWeapon().GetBlockResistance();
         }
         else
         {

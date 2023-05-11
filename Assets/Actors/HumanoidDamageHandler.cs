@@ -131,6 +131,17 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             dr = DamageResistance.Add(dr, actor.GetResistances());
         }
         bool blockSuccess = (actor.IsBlocking() && !hitFromBehind && !damage.unblockable);
+        if (actor.IsTypedBlocking())
+        {
+            if (damage.isSlash && !actor.IsBlockingSlash())
+            {
+                blockSuccess = false;
+            }
+            else if (damage.isThrust && !actor.IsBlockingThrust())
+            {
+                blockSuccess = false;
+            }
+        }
         if (blockSuccess && actor.GetBlockResistance() != null)
         {
             dr = DamageResistance.Add(dr, actor.GetBlockResistance());

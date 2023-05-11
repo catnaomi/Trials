@@ -48,8 +48,10 @@ public class AnimationFXHandler : MonoBehaviour
         actor.OnBlock.AddListener(ShowBlockParticle);
         if (actor is PlayerActor player)
         {
-            player.OnParryStart.AddListener(ParryStart);
+            player.OnParrySlashStart.AddListener(ParrySlashStart);
+            player.OnParryThrustStart.AddListener(ParryThrustStart);
             player.OnParrySuccess.AddListener(ParrySuccess);
+            player.OnBlockTypeChange.AddListener(BlockSwitch);
         }
     }
 
@@ -237,24 +239,47 @@ public class AnimationFXHandler : MonoBehaviour
         combatHitSource.PlayOneShot(animSounds.chargeStart);
     }
 
-    public void ParryStart()
+    public void BlockSwitch()
     {
         if (actor is PlayerActor player)
         {
-            Vector3 position = actor.transform.position +
+            Vector3 position = player.inventory.GetBlockWeapon().model.transform.position;
+            Vector3 direction = Camera.main.transform.forward;
+            direction.y = 0f;
+            direction.Normalize();
+
+            if (player.IsBlockingSlash())
+            {
+                FXController.CreateCross(position, direction);
+                combatHitSource.PlayOneShot(animSounds.blockSwitch);
+            }
+            else if (player.IsBlockingThrust())
+            {
+                FXController.CreateCircle(position, direction);
+                combatHitSource.PlayOneShot(animSounds.blockSwitch);
+            }
+            
+        }
+    }
+
+    public void ParrySlashStart()
+    {
+        Vector3 position = actor.transform.position +
                 actor.transform.right * parryPosition.x +
                 actor.transform.up * parryPosition.y +
                 actor.transform.forward * parryPosition.z;
-            Vector3 rotation = actor.transform.forward;
-            if (player.IsParrySlash())
-            {
-                FXController.CreateCross(position, rotation);
-            }
-            else if (player.IsParryThrust())
-            {
-                FXController.CreateCircle(position, rotation);
-            }
-        }
+        Vector3 rotation = actor.transform.forward;
+        FXController.CreateCross(position, rotation);
+    }
+
+    public void ParryThrustStart()
+    {
+        Vector3 position = actor.transform.position +
+                actor.transform.right * parryPosition.x +
+                actor.transform.up * parryPosition.y +
+                actor.transform.forward * parryPosition.z;
+        Vector3 rotation = actor.transform.forward;
+        FXController.CreateCircle(position, rotation);
     }
 
     public void ParrySuccess()
