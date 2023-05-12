@@ -10,10 +10,16 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     Animator animator;
     DojoBossInventoryTransformingController inventory;
     bool isHitboxActive;
+    HumanoidPositionReference positionReference;
     [Header("Animation Curves & Values")]
     public AnimationCurve lanceExtensionCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     public Vector2 lanceExtensionMinMax = Vector2.up;
     public float lanceExtensionDuration = 1f;
+    [Header("Bow & Arrow")]
+    public GameObject arrowPrefab;
+    public GameObject homingArrowPrefab;
+    public Vector3 launchForce = Vector3.forward;
+    public DamageKnockback arrowDamage;
     [Header("Parries")]
     public string[] parryPatterns;
     int parryCurrentIndex;
@@ -47,6 +53,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         base.ActorStart();
         animator = this.GetComponent<Animator>();
         inventory = this.GetComponent<DojoBossInventoryTransformingController>();
+        positionReference = this.GetComponent<HumanoidPositionReference>();
         CombatTarget = PlayerActor.player.gameObject;
         OnHitboxActive.AddListener(RealignToTarget);
         SetParryValue();
@@ -229,6 +236,26 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         base.RealignToTarget();
         shouldRealign = true;
     }
+
+    public void FireHoming()
+    {
+        Vector3 launchVector = positionReference.MainHand.transform.up;
+
+        Vector3 groundPoint = CombatTarget.transform.position;
+        Vector3 origin = positionReference.MainHand.transform.position + positionReference.MainHand.transform.parent.up * 1f;
+
+        HomingGroundProjectileController arrow = HomingGroundProjectileController.Launch(homingArrowPrefab, origin, Quaternion.LookRotation(launchVector), launchForce, this.transform, arrowDamage, groundPoint);
+
+        Collider[] arrowColliders = arrow.GetComponentsInChildren<Collider>();
+        foreach (Collider actorCollider in this.transform.GetComponentsInChildren<Collider>())
+        {
+            foreach (Collider arrowCollider in arrowColliders)
+            {
+                Physics.IgnoreCollision(actorCollider, arrowCollider);
+            }
+        }
+    }
+
 
     /*
    * triggered by animation:
