@@ -7,6 +7,8 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using System.Linq;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Interactions;
 
 public class PlayerTargetManager : MonoBehaviour
 {
@@ -51,6 +53,8 @@ public class PlayerTargetManager : MonoBehaviour
     public float changeTargetResetDelay = 3f;
     float targetPressedClock;
     float targetReleasedClock;
+    bool lockOnRelease;
+    bool lockOnPress;
     public float targetChangeSpeed = 10f;
     public float targetChangeMaxDistance = 25f;
     public Transform targetAim;
@@ -94,6 +98,8 @@ public class PlayerTargetManager : MonoBehaviour
         StartCoroutine(UpdateTargets());
         lockedOn = false;
 
+        SetupInputListeners();
+
         //player.toggleTarget.AddListener(ToggleTarget);
         //player.changeTarget.AddListener(SwitchTargets);
 
@@ -108,6 +114,26 @@ public class PlayerTargetManager : MonoBehaviour
         invalidTime = invalidExpiryTime;
         freeLook = player.vcam.target.GetComponent<CinemachineFreeLook>();
         targetAim.position = Vector3.zero;
+    }
+
+    void SetupInputListeners()
+    {
+        PlayerInput inputs = player.GetComponent<PlayerInput>();
+
+        inputs.actions["Target"].started += OnLockOn;
+    }
+
+
+    private void OnLockOn(UnityEngine.InputSystem.InputAction.CallbackContext context)
+    {
+        if (context.interaction is TapInteraction)
+        {
+            lockOnPress = true;
+        }
+        else if (context.interaction is HoldInteraction)
+        {
+            lockOnRelease = true;
+        }
     }
 
     IEnumerator UpdateTargets()
@@ -180,7 +206,7 @@ public class PlayerTargetManager : MonoBehaviour
             targets = targets.Except(targetsToDelete).ToList();
 
             targets = targets.Union(validTargets).ToList();
-            if (targets.Count > 0 && !(lockedOn || targetReleasedClock < changeTargetResetDelay))
+            if (targets.Count > 0 && !(lockedOn))// || targetReleasedClock < changeTargetResetDelay))
             {
                 targets.Sort((a,b) => {
                     /*
@@ -223,16 +249,18 @@ public class PlayerTargetManager : MonoBehaviour
                         
                     }*/
                 });
+                changeTargetIndexOffset = 0;
             }
             OnTargetUpdate.Invoke();
             yield return new WaitForSecondsRealtime(targetDelay);
         }
     }
 
-    // Update is called once per frame
+
     void Update()
     {
-        bool shouldExpire = false;
+        /*
+       
         bool targetDown = false;
         bool targetUp = false;
         bool targetHeld = PlayerActor.player.IsTargetHeld();
@@ -303,6 +331,7 @@ public class PlayerTargetManager : MonoBehaviour
             }
         }
         
+        
         if (lockedOn)
         {
             if (targetDown && !player.IsInDialogue())
@@ -319,7 +348,57 @@ public class PlayerTargetManager : MonoBehaviour
             player.SetCombatTarget(null);
           
         }
+        *
+        *
+        */
+        if (lockOnPress)
+        {
+            if (lockedOn)
+            {
+                CycleTargets();
+            }
+            else
+            {
+                if (!lockedOn && targets.Count > 0)
+                {
+                    lockedOn = true;
+                }
+                else if (targets.Count <= 0)
+                {
+                    lockedOn = false;
+                    Recenter();
+                }
+            }
+        }
+        else if (lockOnRelease)
+        {
+            if (lockedOn)
+            {
+                lockedOn = false;
+            }     
+        }
+        
 
+        if (lockedOn)
+        {
+            if (lockOnPress && !player.IsInDialogue())
+            {
+                player.SetCombatTarget(currentTarget);
+            }
+            else if (player.GetCombatTarget() != currentTarget)
+            {
+                SetTarget(player.GetCombatTarget());
+            }
+        }
+        else
+        {
+            player.SetCombatTarget(null);
+
+        }
+        lockOnRelease = false;
+        lockOnPress = false;
+
+        bool shouldExpire = false;
         if (currentTarget == player.GetCombatTarget() && !IsValidTarget(currentTarget))
         {    
             shouldExpire = true;
@@ -388,6 +467,7 @@ public class PlayerTargetManager : MonoBehaviour
             
         }
 
+        /*
         if (targetHeld)
         {
             if (targetDown)
@@ -413,6 +493,7 @@ public class PlayerTargetManager : MonoBehaviour
             targetPressedClock = 0f;
         }
         targetHeldLastFrame = targetHeld;
+        */
     }
 
     private void UpdateDirections()
@@ -438,6 +519,15 @@ public class PlayerTargetManager : MonoBehaviour
     public void Recenter()
     {
         OnRecenter.Invoke();
+    }
+
+    void CycleTargets()
+    {
+        if (targets.Count > 0)
+        {
+            changeTargetIndexOffset++;
+            SetTarget(targets[changeTargetIndexOffset % targets.Count]);
+        }   
     }
     void ToggleTarget()
     {
