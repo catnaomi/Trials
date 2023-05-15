@@ -18,7 +18,20 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [Header("Bow & Arrow")]
     public GameObject arrowPrefab;
     public GameObject homingArrowPrefab;
-    public Vector3 launchForce = Vector3.forward;
+    public float bezierDuration;
+    public float straightArrowForce;
+    public float forceAssistDistanceRatio;
+    public float heightAssistDistanceRatio;
+    public float initialScatterHeightOffset = 1f;
+    public float scatterArrowDelay = 1f;
+    public int scatterArrowAmount = 10;
+    public float scatterArrowMinimumRadius = 1f;
+    public float scatterArrowMaximumRadius = 10f;
+    public float scatterArrowMinimumOtherDistance = 1f;
+    public float scatterArrowBezierDuration = 1f;
+    public float scattarArrowBezierAdditionalDelay = 0.1f;
+    [Tooltip("x: percentage along horizontal axis, y: height offset")]
+    public Vector2[] bowBezierDistanceRatios;
     public DamageKnockback arrowDamage;
     [Header("Parries")]
     public string[] parryPatterns;
@@ -57,6 +70,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         CombatTarget = PlayerActor.player.gameObject;
         OnHitboxActive.AddListener(RealignToTarget);
         SetParryValue();
+        arrowDamage.source = this.gameObject;
     }
 
     // Update is called once per frame
@@ -237,16 +251,142 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         shouldRealign = true;
     }
 
-    public void FireHoming()
-    {
-        Vector3 launchVector = positionReference.MainHand.transform.up;
 
-        Vector3 groundPoint = CombatTarget.transform.position;
+    public void BowFireStraight()
+    {
+        RealignToTarget();
         Vector3 origin = positionReference.MainHand.transform.position + positionReference.MainHand.transform.parent.up * 1f;
 
-        HomingGroundProjectileController arrow = HomingGroundProjectileController.Launch(homingArrowPrefab, origin, Quaternion.LookRotation(launchVector), launchForce, this.transform, arrowDamage, groundPoint);
+        Vector3 targetPosition = CombatTarget.transform.position + Vector3.up * 0.5f;
+        float dist = Vector3.Distance(targetPosition, origin);
+        Vector3 heightAssist = Vector3.up * dist * heightAssistDistanceRatio;
+        Vector3 launchVector = ((targetPosition + heightAssist) - origin).normalized;
 
-        Collider[] arrowColliders = arrow.GetComponentsInChildren<Collider>();
+        float force = straightArrowForce + dist * forceAssistDistanceRatio;
+        ArrowController arrow = ArrowController.Launch(arrowPrefab, origin, Quaternion.LookRotation(launchVector), launchVector * force, this.transform, arrowDamage);
+
+        ArrowAvoidColliders(arrow.gameObject);
+    }
+    public void BowFireHoming()
+    {
+        RealignToTarget();
+        Vector3 origin = positionReference.MainHand.transform.position + positionReference.MainHand.transform.parent.up * 1f;
+
+        Vector3[] controlPoints = new Vector3[bowBezierDistanceRatios.Length];
+
+        for (int i = 0; i < bowBezierDistanceRatios.Length; i++)
+        {
+            Vector3 targetPos = CombatTarget.transform.position;
+            targetPos.y = 0f;
+            Vector3 point = Vector3.Lerp(origin, targetPos, bowBezierDistanceRatios[i].x);
+            point.y += bowBezierDistanceRatios[i].y;
+            controlPoints[i] = point;
+        }
+
+
+
+
+        BezierProjectileController arrow = BezierProjectileController.Launch(homingArrowPrefab, origin, bezierDuration, this.transform, arrowDamage, controlPoints);
+
+        ArrowAvoidColliders(arrow.gameObject);
+    }
+
+    public void BowFireScatter()
+    {
+        RealignToTarget();
+        Vector3 origin = positionReference.MainHand.transform.position + positionReference.MainHand.transform.parent.up * 1f;
+
+        Vector3 launchVector = (CombatTarget.transform.position - origin).normalized + Vector3.up * initialScatterHeightOffset;
+
+        ArrowController arrow = ArrowController.Launch(arrowPrefab, origin, Quaternion.LookRotation(launchVector), launchVector * straightArrowForce, this.transform, arrowDamage);
+        ArrowAvoidColliders(arrow.gameObject);
+
+        StartCoroutine(DelayScatter(arrow.gameObject));
+    }
+
+    IEnumerator DelayScatter(GameObject arrow)
+    {
+        yield return new WaitForSeconds(scatterArrowDelay);
+        Vector3 origin = arrow.gameObject.transform.position;
+        Destroy(arrow);
+        yield return null;
+        Vector3 targetPosition = CombatTarget.transform.position;
+        targetPosition.y = 0f;
+        // create arrows
+        Vector3[] arrowDestinations = new Vector3[scatterArrowAmount];
+        BezierProjectileController[] arrows = new BezierProjectileController[scatterArrowAmount];
+        List<Collider> colliders = new List<Collider>();
+        int maxAttempts = 1000;
+        int attempts = 0;
+        for (int i = 0; i < scatterArrowAmount; i++)
+        {
+            bool distanceCheck = true;
+            Vector3 arrowDestination = targetPosition;
+            do
+            {
+                distanceCheck = true;
+                Vector3 unitDirection = Random.onUnitSphere;
+                unitDirection.y = 0f;
+                unitDirection.Normalize();
+                float offsetDistance = Random.Range(scatterArrowMinimumRadius, scatterArrowMaximumRadius);
+                arrowDestination = targetPosition + (unitDirection * offsetDistance);
+                
+                if (i > 0)
+                {
+                    for (int j = 0; j < i; j++)
+                    {
+                        if (Vector3.Distance(arrowDestinations[j], arrowDestination) < scatterArrowMinimumOtherDistance)
+                        {
+                            distanceCheck = false;
+                            attempts++;
+                        }
+                    }
+                }
+                
+            } while (!distanceCheck && attempts < maxAttempts);
+
+            if (attempts >= maxAttempts)
+            {
+                Debug.LogWarning("Scatter Arrow Timed Out!");
+            }
+            arrowDestinations[i] = arrowDestination;
+
+            Vector3[] controlPoints = new Vector3[bowBezierDistanceRatios.Length];
+
+            for (int b = 0; b < bowBezierDistanceRatios.Length; b++)
+            {
+                Vector3 point = Vector3.Lerp(origin, arrowDestination, bowBezierDistanceRatios[b].x);
+                point.y += bowBezierDistanceRatios[b].y;
+                controlPoints[b] = point;
+            }
+
+            BezierProjectileController newArrow = BezierProjectileController.Launch(homingArrowPrefab, origin, scatterArrowBezierDuration + (scattarArrowBezierAdditionalDelay * i), this.transform, arrowDamage, controlPoints);
+            arrows[i] = newArrow;
+            colliders.AddRange(GetAllArrowColliders(newArrow.gameObject));
+        }
+
+        // ignore other arrow collision
+        Collider colliderA;
+        Collider colliderB;
+        for (int a = 0; a < colliders.Count; a++)
+        {
+            colliderA = colliders[a];
+            for (int b = a; b < colliders.Count; b++)
+            {
+                colliderB = colliders[b];
+                if (colliderA.transform.root != colliderB.transform.root)
+                {
+                    Physics.IgnoreCollision(colliderA, colliderB);
+                }
+            }
+        }
+    }
+
+
+
+    void ArrowAvoidColliders(GameObject arrowObject)
+    {
+        Collider[] arrowColliders = arrowObject.GetComponentsInChildren<Collider>();
         foreach (Collider actorCollider in this.transform.GetComponentsInChildren<Collider>())
         {
             foreach (Collider arrowCollider in arrowColliders)
@@ -256,6 +396,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
     }
 
+    Collider[] GetAllArrowColliders(GameObject arrowObject)
+    {
+        List<Collider> colliders = new List<Collider>();
+        colliders.AddRange(arrowObject.GetComponents<Collider>());
+        colliders.AddRange(arrowObject.GetComponentsInChildren<Collider>());
+
+        return colliders.ToArray();
+    }
 
     /*
    * triggered by animation:

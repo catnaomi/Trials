@@ -16,6 +16,7 @@ public class BezierProjectileController : Projectile
     public float shockwaveRadius = 1f;
     public UnityEvent OnShockwaveHit;
 
+    public AnimationCurve curve = AnimationCurve.Linear(0, 0, 1, 1);
     bool launched;
 
     [ReadOnly, SerializeField] Vector3 initPos;
@@ -46,12 +47,14 @@ public class BezierProjectileController : Projectile
         this.transform.position = position;
         this.transform.rotation = Quaternion.LookRotation(Bezier.GetTangent(0, targetPoints));
 
+        /*
         if (gameObject.activeInHierarchy)
         {
             tip.velocity = Vector3.zero;
             tip.angularVelocity = Vector3.zero;
             tip.Sleep();
         }
+        */
 
         this.damageKnockback = damageKnockback;
         this.origin = source.gameObject;
@@ -100,11 +103,7 @@ public class BezierProjectileController : Projectile
             inFlight = true;
             tip.position = initPos;
         }
-        if (tip.velocity.magnitude < 0.1f)
-        {
-            EndFlight();
-        }
-        else if (inFlight)
+        if (inFlight)
         {
             float mag = hitbox.damageKnockback.kbForce.magnitude;
             hitbox.damageKnockback.kbForce = tip.velocity.normalized * mag;
@@ -114,7 +113,7 @@ public class BezierProjectileController : Projectile
     private void FixedUpdate()
     {
 
-        float t = Mathf.Clamp01(clock / duration);
+        float t = curve.Evaluate(Mathf.Clamp01(clock / duration));
 
         Vector3 position = Bezier.GetPoint(t, controlPoints);
         Vector3 heading = Bezier.GetTangent(t, controlPoints);

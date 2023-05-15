@@ -125,7 +125,7 @@ public class Hitbox : MonoBehaviour
                 }
                 else if (IsColliderHitbox(hitCollider, out Hitbox other))
                 {
-                    if (!didHitHitbox && other != this && hitCollider.transform.root != this.transform.root && other.isActive)
+                    if (!didHitHitbox && other != this && hitCollider.transform.root != source.transform.root && other.isActive)
                     {
                         didHitHitbox = true;
                         clashedHitbox = other;
@@ -165,7 +165,7 @@ public class Hitbox : MonoBehaviour
                     }
                     else if (IsColliderHitbox(hit.collider, out Hitbox other))
                     {
-                        if (!didHitHitbox && other != this && hit.collider.transform.root != this.transform.root && other.isActive)
+                        if (!didHitHitbox && other != this && hit.collider.transform.root != source.transform.root && other.isActive)
                         {
                             didHitHitbox = true;
                             clashedHitbox = other;
