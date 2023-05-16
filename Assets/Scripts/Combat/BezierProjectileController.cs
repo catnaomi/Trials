@@ -16,6 +16,8 @@ public class BezierProjectileController : Projectile
     public float shockwaveRadius = 1f;
     public UnityEvent OnShockwaveHit;
 
+    BezierTimeTravelHandler timeHandler;
+
     public AnimationCurve curve = AnimationCurve.Linear(0, 0, 1, 1);
     bool launched;
 
@@ -90,6 +92,7 @@ public class BezierProjectileController : Projectile
     {
         tip.isKinematic = true;
         clock = 0f;
+        timeHandler = this.GetComponent<BezierTimeTravelHandler>();
     }
 
     // Update is called once per frame
@@ -121,7 +124,11 @@ public class BezierProjectileController : Projectile
         tip.MovePosition(position);
         tip.MoveRotation(Quaternion.LookRotation(heading));
 
-        clock += Time.fixedDeltaTime;
+        float deltaTime = Time.fixedDeltaTime;
+        if (timeHandler != null) {
+            deltaTime = timeHandler.GetFixedDeltaTime();
+        }
+        clock += deltaTime;
 
         if (t >= 1)
         {
