@@ -2250,6 +2250,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         spawned = true;
     }
+    
+    public void ResetAnim()
+    {
+        _MoveOnEnd();
+    }
+    
     #endregion
 
     #region CLIMBING

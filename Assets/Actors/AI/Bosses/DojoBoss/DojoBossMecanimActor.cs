@@ -1,3 +1,4 @@
+using Animancer;
 using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
@@ -40,6 +41,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     bool inCritCoroutine;
     float critTime;
     float totalCritTime;
+    [Header("Animancer")]
+    public Animancer.ClipTransition playerParryFailAnim;
+    public float freezeTimeout = 5f;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
@@ -706,6 +710,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         */
         actor.DeactivateHitboxes();
         ParryFail = true;
+
+        PlayPlayerParryFailState(actor);
         /*
         animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
         AnimancerState hit = animancer.Play(CrossParryHit);
@@ -740,6 +746,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         */
         actor.DeactivateHitboxes();
         ParryFail = true;
+
+        PlayPlayerParryFailState(actor);
         /*
         animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
         AnimancerState hit = animancer.Play(CrossParryHit);
@@ -755,6 +763,24 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             crossParrying = false;
         };
         */
+    }
+
+    public void PlayPlayerParryFailState(Actor actor)
+    {
+        if (actor is PlayerActor player)
+        {
+            AnimancerState state = player.animancer.Play(playerParryFailAnim);
+            StartCoroutine(PlayerParryFailStateRoutine(state, player));
+        }
+    }
+
+    IEnumerator PlayerParryFailStateRoutine(AnimancerState state, PlayerActor player)
+    {
+        yield return new WaitForSeconds(freezeTimeout);
+        if (player.animancer.States.Current == state)
+        {
+            player.ResetAnim();
+        }
     }
 
     public void ParrySuccess(DamageKnockback damage, bool wasCircle)
