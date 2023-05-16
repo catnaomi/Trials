@@ -12,6 +12,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     DojoBossInventoryTransformingController inventory;
     bool isHitboxActive;
     HumanoidPositionReference positionReference;
+    DojobossTimeTravelHandler timeHandler;
     [Header("Animation Curves & Values")]
     public AnimationCurve lanceExtensionCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     public Vector2 lanceExtensionMinMax = Vector2.up;
@@ -44,6 +45,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [Header("Animancer")]
     public Animancer.ClipTransition playerParryFailAnim;
     public float freezeTimeout = 5f;
+    
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
@@ -75,6 +77,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         OnHitboxActive.AddListener(RealignToTarget);
         SetParryValue();
         arrowDamage.source = this.gameObject;
+        timeHandler = this.GetComponent<DojobossTimeTravelHandler>();
     }
 
     // Update is called once per frame
@@ -161,6 +164,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     public void RotateTowardsTarget()
     {
+        if (this.IsTimeStopped()) return;
         if (CombatTarget != null)
         {
             Vector3 dir = (CombatTarget.transform.position - this.transform.position);
@@ -217,6 +221,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         RaycastHit[] results = new RaycastHit[16];
         while (clock < duration)
         {
+            if (this.IsTimeStopped())
+            {
+                yield return new WaitWhile(this.IsTimeStopped);
+            }
             length = Mathf.Lerp(startLength, endLength, lanceExtensionCurve.Evaluate(Mathf.Clamp01(clock / duration)));
             ExtendLance(length, model, tip, extend);
             CheckLanceHitbox(length, inventory.weaponMainInstance.width, model.transform.position, model.transform.up, struck, results);
@@ -310,7 +318,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     IEnumerator DelayScatter(GameObject arrow)
     {
+
         yield return new WaitForSeconds(scatterArrowDelay);
+        if (this.IsTimeStopped())
+        {
+            yield return new WaitWhile(this.IsTimeStopped);
+        }
         Vector3 origin = arrow.gameObject.transform.position;
         Destroy(arrow);
         yield return null;
@@ -497,7 +510,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     }
     public GameObject GetGameObject()
     {
-        throw new System.NotImplementedException();
+        return this.gameObject;
     }
 
     public DamageKnockback GetLastDamage()
@@ -528,9 +541,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         if (!this.IsAlive()) return;
         lastDamageTaken = damage;
+        float damageAmount = damage.healthDamage;
         if (this.IsTimeStopped() || this.IsDodging())
         {
-            //damageHandler.TakeDamage(damage);
+            if (this.IsTimeStopped())
+            {
+                TimeTravelController.time.TimeStopDamage(damage, this, damageAmount);
+            }
             return;
         }
 
@@ -633,10 +650,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         while (critTime > 0)
         {
             yield return null;
-            //if (!actor.IsTimeStopped())
-            //{
+            if (!this.IsTimeStopped())
+            {
                 critTime -= Time.deltaTime;
-            //}
+            }
         }
         yield return new WaitForSeconds(1f);
         if (critTime <= 0)
@@ -789,5 +806,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         SetParryValue();
         StartCritVulnerability(5f);
         ParryHit = true;
+    }
+
+    public override bool IsTimeStopped()
+    {
+        return timeHandler != null && timeHandler.IsFrozen();
     }
 }

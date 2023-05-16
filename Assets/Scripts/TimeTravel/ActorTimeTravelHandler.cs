@@ -19,12 +19,13 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     protected Actor actor;
     float lastHealth;
     TimeTravelData lastData;
-    bool isFrozen;
+    protected bool isFrozen;
 
     List<Renderer> renderers;
     int initLayer;
     bool applyVisual;
 
+    public float deltaTime;
     public UnityEvent OnFreeze;
     public UnityEvent OnUnfreeze;
     void Start()
@@ -362,5 +363,4 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         }
         timeTravelStates.Clear();
     }
-
 }
