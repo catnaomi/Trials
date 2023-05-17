@@ -21,6 +21,7 @@ public class DamageAnims : ScriptableObject
     public ClipTransition blockFlinch;
     public ClipTransition guardBreak;
     public ClipTransition recoil;
+    public ClipTransition parry;
 
     public AvatarMask flinchMask;
     
@@ -108,6 +109,8 @@ public class DamageAnims : ScriptableObject
                 return guardBreak;
             case DamageKnockback.BlockStaggerType.Recoil:
                 return recoil;
+            case DamageKnockback.BlockStaggerType.AutoParry:
+                return parry;
         }
         return null;
     }

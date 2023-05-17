@@ -338,7 +338,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     {
         switch (((IHumanoidInventory)GetInventory()).GetItemHand(this))
         {
-            case -1:
+            case Inventory.OffType:
                 return GetPositionReference().OffHand;
             default:
                 return GetPositionReference().MainHand;

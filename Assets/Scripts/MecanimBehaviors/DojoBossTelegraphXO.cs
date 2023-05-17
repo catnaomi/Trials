@@ -5,13 +5,22 @@ using UnityEngine;
 public class DojoBossTelegraphXO : StateMachineBehaviour
 {
     public string sequence;
+    public bool complex;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         DojoBossXOParticleController telegraph = animator.GetComponentInChildren<DojoBossXOParticleController>();
         if (telegraph != null)
         {
-            telegraph.Telegraph(sequence);
+            if (!complex)
+            {
+                telegraph.Telegraph(sequence);
+            }
+            else
+            {
+                telegraph.TelegraphComplex(sequence);
+            }
+            
         }
     }
 

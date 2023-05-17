@@ -8,6 +8,7 @@ using UnityEngine.Events;
 public class DamageKnockback
 {
     public float healthDamage;
+    public float unresistedMinimum;
     [SerializeField]private DamageType types;
     [Space(5)]
     public CriticalData critData;
@@ -63,6 +64,7 @@ public class DamageKnockback
         public StaggerType onCounterHit;
         [Space(5)]
         public BlockStaggerType onBlock;
+        public BlockStaggerType onTypedBlock;
     }
 
     [Serializable]
@@ -109,7 +111,8 @@ public class DamageKnockback
         BlockHeavy,
         Flinch,
         GuardBreak,
-        Recoil
+        Recoil,
+        AutoParry,
     }
     public enum StaggerStrength
     {
@@ -134,6 +137,7 @@ public class DamageKnockback
         this.breaksArmor = damageKnockback.breaksArmor;
         this.kbRadial = damageKnockback.kbRadial;
         this.healthDamage = damageKnockback.healthDamage;
+        this.unresistedMinimum = damageKnockback.unresistedMinimum;
         this.types = damageKnockback.types;
         this.critData = damageKnockback.critData;
         this.disarm = damageKnockback.disarm;
@@ -174,6 +178,7 @@ public class DamageKnockback
     {
         DamageKnockback damage = new DamageKnockback();
         damage.healthDamage = 1f;
+        damage.unresistedMinimum = 1f;
         damage.kbForce = Vector3.up;
         damage.stagger = StaggerStrength.Light;
 
@@ -199,6 +204,7 @@ public class DamageKnockback
         onKill = StaggerType.Crumple,
         onCounterHit = StaggerType.StaggerSmall,
         onBlock = BlockStaggerType.BlockSmall,
+        onTypedBlock = BlockStaggerType.BlockSmall,
     };
 
     public static readonly CriticalData StandardCritData = new CriticalData()
@@ -212,17 +218,24 @@ public class DamageKnockback
 
     public static float GetTotalMinusResistances(float damage, DamageType types, DamageResistance resistance)
     {
+        return GetTotalMinusResistances(damage, 0f, types, resistance);
+    }
+
+    public static float GetTotalMinusResistances(float damage, float minimum, DamageType types, DamageResistance resistance)
+    {
 
         float total = damage;
         float ratio = 1f;
         float flat = 0f;
         bool neutral = true;
+        bool weak = false;
         if (types == 0) return total;
         if ((types & resistance.weaknesses) != 0)
         {
             ratio *= resistance.weaknessMultiplier;
             flat += resistance.weaknessFlat;
             neutral = false;
+            weak = true;
         }
         if ((types & resistance.strengths) != 0)
         {
@@ -238,9 +251,9 @@ public class DamageKnockback
         total *= ratio;
         total -= flat;
         total = Mathf.Floor(total);
-        if (total < resistance.minimumDamage)
+        if ((neutral || weak) && total < minimum)
         {
-            total = resistance.minimumDamage;
+            total = minimum;
         }
        
         return total;
@@ -299,8 +312,6 @@ public class DamageResistance
     [Space(10)]
     public float neutralMultiplier = 1f;
     public float neutralFlat = 0f;
-    [Space(10)]
-    public float minimumDamage = 0f;
 
     public static DamageResistance Add(DamageResistance dr1, DamageResistance dr2)
     {
@@ -315,8 +326,6 @@ public class DamageResistance
 
         dr.neutralMultiplier = dr1.neutralMultiplier * dr2.neutralMultiplier;
         dr.neutralFlat = dr1.neutralFlat + dr2.neutralFlat;
-
-        dr.minimumDamage = Mathf.Max(dr1.minimumDamage, dr2.minimumDamage);
         return dr;
     }
 

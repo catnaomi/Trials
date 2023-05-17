@@ -203,7 +203,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public UnityEvent OnParryStart;
     public UnityEvent OnParryThrustStart;
     public UnityEvent OnParrySlashStart;
-    public UnityEvent OnParrySuccess;
     [Header("Animancer")]
     public MixerTransition2DAsset moveAnim;
     public MixerTransition2DAsset strafeAnim;
@@ -4659,12 +4658,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public override bool IsBlockingSlash()
     {
-        return IsBlocking() && hasTypedBlocks && lastTypedBlockParam == DamageKnockback.SLASH_INT;
+        return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.SLASH_INT || IsSlashHeld());
     }
 
     public override bool IsBlockingThrust()
     {
-        return IsBlocking() && hasTypedBlocks && lastTypedBlockParam == DamageKnockback.THRUST_INT;
+        return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.THRUST_INT || IsThrustHeld());
     }
 
     public bool IsInDialogue()

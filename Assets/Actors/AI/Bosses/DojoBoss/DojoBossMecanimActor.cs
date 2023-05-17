@@ -57,6 +57,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] float xDirection;
     [ReadOnly, SerializeField] float yDirection;
     [ReadOnly, SerializeField] bool OnFlinch;
+    [ReadOnly, SerializeField] bool Parried;
     [Space(10)]
     public float closeRange = 5f;
     public float meleeRange = 1f;
@@ -151,6 +152,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             animator.SetTrigger("OnFlinch");
             OnFlinch = false;
+        }
+        if (Parried)
+        {
+            animator.SetTrigger("Parried");
+            Parried = false;
         }
     }
 
@@ -529,7 +535,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     public void GetParried()
     {
-        throw new System.NotImplementedException();
+        Parried = true;
+        HitboxActive(0);
+        OnHurt.Invoke();
+        StartCritVulnerability(5f);
     }
 
     public void Recoil()

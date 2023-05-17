@@ -131,8 +131,10 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             dr = DamageResistance.Add(dr, actor.GetResistances());
         }
         bool blockSuccess = (actor.IsBlocking() && !hitFromBehind && !damage.unblockable);
+        bool didTypedBlock = false;
         if (actor.IsTypedBlocking())
         {
+            didTypedBlock = true;
             if (damage.isSlash && !actor.IsBlockingSlash())
             {
                 blockSuccess = false;
@@ -207,16 +209,31 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         }
         else if (blockSuccess && !willKill && !willInjure)
         {
-
+            DamageKnockback.BlockStaggerType blockStagger = (didTypedBlock ? damage.staggers.onTypedBlock : damage.staggers.onBlock);
             if (!damage.breaksBlock)
             {
-                if (!actor.IsAttacking())
+                if (blockStagger == DamageKnockback.BlockStaggerType.AutoParry)
                 {
-                    if (damage.staggers.onBlock != DamageKnockback.BlockStaggerType.Flinch &&
-                        (animancer.States.Current != block || ((int)damage.staggers.onBlock >= lastBlockStagger)))
+                    ClipTransition clip = damageAnims.GetClipFromBlockType(blockStagger);
+                    animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
+                    animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+                    block = animancer.Layers[HumanoidAnimLayers.Base].Play(clip);
+                    block.NormalizedTime = 0f;
+                    block.Events.OnEnd = OnBlockEnd;
+                    if (damage.source.TryGetComponent<IDamageable>(out IDamageable attacker) && !damage.cannotRecoil)
                     {
-                        ClipTransition clip = damageAnims.GetClipFromBlockType(damage.staggers.onBlock);
+                        attacker.GetParried();
+                    }
+                    actor.OnParrySuccess.Invoke();
+                }
+                else if (!actor.IsAttacking())
+                {
+                    if (blockStagger != DamageKnockback.BlockStaggerType.Flinch &&
+                        (animancer.States.Current != block || ((int)blockStagger >= lastBlockStagger)))
+                    {
+                        ClipTransition clip = damageAnims.GetClipFromBlockType(blockStagger);
                         animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
+                        animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
                         block = animancer.Layers[HumanoidAnimLayers.Base].Play(clip);
                         block.NormalizedTime = 0f;
                         block.Events.OnEnd = OnBlockEnd;
@@ -237,6 +254,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             else
             {
                 animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
+                animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
                 ClipTransition clip = guardBreak;
                 AnimancerState state = animancer.Play(clip);
                 state.Events.OnEnd = OnEnd;
@@ -254,6 +272,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 actor.transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
             }
             AdjustDefendingPosition(damage.source, damage.repositionLength);
+            damage.OnCrit.Invoke();
             damage.OnBlock.Invoke();
             actor.OnBlock.Invoke();
         }
