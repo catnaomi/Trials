@@ -217,6 +217,10 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
         return weaponMainInstance.model;
     }
 
+    public float GetCurrentLength()
+    {
+        return currentWeapon.mainLength;
+    }
     #region unused
     public bool Add(Item item)
     {

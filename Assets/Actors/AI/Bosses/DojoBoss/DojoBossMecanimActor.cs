@@ -13,6 +13,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     bool isHitboxActive;
     HumanoidPositionReference positionReference;
     DojobossTimeTravelHandler timeHandler;
+    CapsuleCollider collider;
     [Header("Animation Curves & Values")]
     public AnimationCurve lanceExtensionCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     public Vector2 lanceExtensionMinMax = Vector2.up;
@@ -74,6 +75,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator = this.GetComponent<Animator>();
         inventory = this.GetComponent<DojoBossInventoryTransformingController>();
         positionReference = this.GetComponent<HumanoidPositionReference>();
+        collider = this.GetComponent<CapsuleCollider>();
         CombatTarget = PlayerActor.player.gameObject;
         OnHitboxActive.AddListener(RealignToTarget);
         SetParryValue();
@@ -533,6 +535,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("DODGE");
     }
 
+    public override bool IsAttacking()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("ATTACK");
+    }
+
     public void GetParried()
     {
         Parried = true;
@@ -817,6 +824,32 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         ParryHit = true;
     }
 
+    void OnAnimatorMove()
+    {
+        
+        if (IsAttacking())
+        {
+            Vector3 diff = animator.rootPosition - this.transform.position;
+            Vector3 dirToTarget = (CombatTarget.transform.position - this.transform.position).normalized;
+            diff = Vector3.Project(diff, dirToTarget);
+            float startingMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
+            float distanceAfterMovement = Vector3.Distance(this.transform.position + diff, CombatTarget.transform.position);
+            float minimumDistance = Mathf.Max(inventory.GetCurrentLength(),2f);
+            if (distanceAfterMovement < minimumDistance)
+            {
+                diff = diff.normalized * (distanceAfterMovement - minimumDistance) * Time.deltaTime;
+                //diff = Vector3.ClampMagnitude(diff, minimumDistance - distanceAfterMovement);
+                float endMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
+                Debug.Log($"adjusted root motion movement: {startingMagnitude} vs {endMagnitude}");
+            }
+            this.transform.position += diff;
+        }
+        else
+        {
+            this.transform.position = animator.rootPosition;
+        }
+
+    }
     public override bool IsTimeStopped()
     {
         return timeHandler != null && timeHandler.IsFrozen();
