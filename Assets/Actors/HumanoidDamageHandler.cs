@@ -150,7 +150,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         }
 
         Debug.Log("damage before resistances = " + damageAmount);
-        damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.GetTypes(), dr);
+        damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.unresistedMinimum, damage.GetTypes(), dr);
         Debug.Log("damage after resistances = " + damageAmount);
 
         bool isArmored = actor.IsArmored() && !damage.breaksArmor;

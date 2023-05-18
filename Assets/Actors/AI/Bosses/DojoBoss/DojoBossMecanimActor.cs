@@ -43,6 +43,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     bool inCritCoroutine;
     float critTime;
     float totalCritTime;
+    [Header("Offense")]
+    public int offensiveStageCount = 6;
     [Header("Animancer")]
     public Animancer.ClipTransition playerParryFailAnim;
     public float freezeTimeout = 5f;
@@ -59,6 +61,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] float yDirection;
     [ReadOnly, SerializeField] bool OnFlinch;
     [ReadOnly, SerializeField] bool Parried;
+    [ReadOnly, SerializeField] int OffenseStage;
     [Space(10)]
     public float closeRange = 5f;
     public float meleeRange = 1f;
@@ -160,6 +163,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             animator.SetTrigger("Parried");
             Parried = false;
         }
+        animator.SetInteger("OffenseStage", OffenseStage);
+
     }
 
     void OnCycle()
@@ -540,12 +545,19 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("ATTACK");
     }
 
+    public override bool IsBlocking()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("BLOCK");
+    }
+
     public void GetParried()
     {
         Parried = true;
         HitboxActive(0);
         OnHurt.Invoke();
         StartCritVulnerability(5f);
+        OffenseStage++;
+        OffenseStage %= offensiveStageCount;
     }
 
     public void Recoil()
@@ -570,8 +582,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         bool isParrying = IsParrying();
         bool circleParrying = IsCircleParrying();
         bool crossParrying = IsCrossParrying();
-        if ((isParrying) && damage.isRanged)
+        if (((isParrying) && damage.isRanged) || IsBlocking())
         {
+            RealignToTarget();
             damage.OnBlock.Invoke();
             this.OnBlock.Invoke();
         }
