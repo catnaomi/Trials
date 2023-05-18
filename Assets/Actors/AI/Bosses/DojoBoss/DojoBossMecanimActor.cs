@@ -16,6 +16,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     DojobossTimeTravelHandler timeHandler;
     CapsuleCollider collider;
     NavMeshAgent nav;
+    [Header("Phases")]
+    [SerializeField] CombatPhase currentPhase;
+    public float timeInPhase;
+    public float minPhaseDuration = 60f;
+    public float maxPhaseDuration = 180f;
+    int successesThisPhase;
+    public int attackSuccessesNeeded = 2;
+    public int parrySuccessesNeeded = 2;
     [Header("Animation Curves & Values")]
     public AnimationCurve lanceExtensionCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     public Vector2 lanceExtensionMinMax = Vector2.up;
@@ -42,6 +50,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public string[] parryPatterns;
     int parryCurrentIndex;
     int parrySequenceIndex;
+    int parrySequenceLength;
     bool inCritCoroutine;
     float critTime;
     float totalCritTime;
@@ -56,10 +65,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
+    [ReadOnly, SerializeField] bool AtLongRange;
     [ReadOnly, SerializeField] bool ParryHit;
     [ReadOnly, SerializeField] int NextParry;
     [ReadOnly, SerializeField] bool ParryFail;
-    [ReadOnly, SerializeField] bool OnDamage;
+    [ReadOnly, SerializeField] bool OnHeavyDamage;
     [ReadOnly, SerializeField] bool IsDamageHeavy;
     [ReadOnly, SerializeField] float xDirection;
     [ReadOnly, SerializeField] float yDirection;
@@ -69,12 +79,21 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [Space(10)]
     public float closeRange = 5f;
     public float meleeRange = 1f;
+    public float longRange = 10f;
     public float randomCycleSpeed = 3f;
     [Header("Events")]
     public UnityEvent OnHitboxActive;
     public UnityEvent OnParrySuccess;
     float randomClock = 0f;
     bool shouldRealign;
+
+    enum CombatPhase
+    {
+        AttackPhase,
+        ParryPhase,
+        PillarPhase,
+        Idle
+    }
     // Start is called before the first frame update
     public override void ActorStart()
     {
@@ -104,11 +123,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         */
         randomClock -= Time.deltaTime;
-        InCloseRange = Vector3.Distance(this.transform.position, CombatTarget.transform.position) <= closeRange;
-        InMeleeRange = Vector3.Distance(this.transform.position, CombatTarget.transform.position) <= meleeRange;
+        float dist = Vector3.Distance(this.transform.position, CombatTarget.transform.position);
+        InCloseRange = dist <= closeRange;
+        InMeleeRange = dist <= meleeRange;
+        AtLongRange = dist >= longRange;
         if (shouldRealign)
         {
-            this.transform.LookAt(CombatTarget.transform, Vector3.up);
+            RealignToTarget();
             shouldRealign = false;
         }
         else if (IsParrying())
@@ -131,6 +152,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             nav.updatePosition = false;
             nav.updateRotation = false;
         }
+        CheckPhase();
         UpdateMecanimValues();
         if (randomClock <= 0f)
         {
@@ -138,6 +160,44 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
     }
 
+
+    void CheckPhase()
+    {
+        timeInPhase += Time.deltaTime;
+        if (currentPhase == CombatPhase.AttackPhase)
+        {
+            if (timeInPhase >= minPhaseDuration && successesThisPhase >= attackSuccessesNeeded)
+            {
+                currentPhase = CombatPhase.ParryPhase;
+                timeInPhase = 0f;
+                successesThisPhase = 0;
+            }
+            else if (timeInPhase >= maxPhaseDuration)
+            {
+                //currentPhase = CombatPhase.PillarPhase;
+                currentPhase = CombatPhase.ParryPhase;
+                timeInPhase = 0f;
+                successesThisPhase = 0;
+            }
+        }
+        else if (currentPhase == CombatPhase.ParryPhase)
+        {
+            if (timeInPhase >= minPhaseDuration && successesThisPhase >= parrySuccessesNeeded)
+            {
+                currentPhase = CombatPhase.AttackPhase;
+                timeInPhase = 0f;
+                successesThisPhase = 0;
+            }
+            else if (timeInPhase >= maxPhaseDuration)
+            {
+                //currentPhase = CombatPhase.PillarPhase;
+                currentPhase = CombatPhase.AttackPhase;
+                timeInPhase = 0f;
+                successesThisPhase = 0;
+            }
+        }
+        
+    }
 
     void UpdateMecanimValues()
     {
@@ -148,6 +208,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         animator.SetBool("InCloseRange", InCloseRange);
         animator.SetBool("InMeleeRange", InMeleeRange);
+        animator.SetBool("AtLongRange", AtLongRange);
 
         animator.SetInteger("NextParry", NextParry);
         if (ParryHit)
@@ -161,11 +222,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             ParryFail = false;
         }
         animator.SetBool("IsDamageHeavy", IsDamageHeavy);
-        if (OnDamage)
-        {
-            animator.SetTrigger("OnDamage");
-            OnDamage = false;
-        }
+        
         Vector3 dir = (CombatTarget.transform.position - this.transform.position).normalized;
         xDirection = Vector3.Dot(this.transform.right, dir);
         yDirection = Vector3.Dot(this.transform.forward, dir);
@@ -173,17 +230,28 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator.SetFloat("xDirection", xDirection);
         animator.SetFloat("yDirection", yDirection);
 
-        if (OnFlinch)
+        if (OnHeavyDamage)
+        {
+            animator.SetTrigger("OnHeavyDamage");
+            OnHeavyDamage = false;
+            OnFlinch = false;
+            animator.ResetTrigger("OnFlinch");
+        }
+        else if (OnFlinch)
         {
             animator.SetTrigger("OnFlinch");
             OnFlinch = false;
+            OnHeavyDamage = false;
+            animator.ResetTrigger("OnHeavyDamage");
         }
+        
         if (Parried)
         {
             animator.SetTrigger("Parried");
             Parried = false;
         }
         animator.SetInteger("OffenseStage", OffenseStage);
+        animator.SetInteger("CurrentPhase", (int)currentPhase);
 
     }
 
@@ -595,7 +663,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         OnHurt.Invoke();
         StartCritVulnerability(5f);
         OffenseStage++;
-        OffenseStage %= offensiveStageCount;
+        if (OffenseStage > offensiveStageCount)
+        {
+            OffenseStage = 3;
+        }
+        if (currentPhase == CombatPhase.AttackPhase)
+        {
+            successesThisPhase++;
+        }
     }
 
     public void Recoil()
@@ -662,23 +737,18 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         else
         {
-            if (damage.stagger == DamageKnockback.StaggerStrength.Light)
+            
+            if (IsCritVulnerable())
             {
-                IsDamageHeavy = false;
-            }
-            else
-            {
-                damage.stagger = DamageKnockback.StaggerStrength.Heavy;
-                IsDamageHeavy = true;
-            }
-            if (IsCritVulnerable() && IsDamageHeavy)
-            {
-                OnDamage = true;
-                damage.OnCrit.Invoke();
-            }
-            else if (IsCritVulnerable())
-            {
-                OnFlinch = true;
+                if (damage.stagger != DamageKnockback.StaggerStrength.Light)
+                {
+                    damage.stagger = DamageKnockback.StaggerStrength.Heavy;
+                    OnHeavyDamage = true;
+                }
+                else
+                {
+                    OnFlinch = true;
+                }
                 damage.OnCrit.Invoke();
             }
             else
@@ -687,7 +757,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             }
             this.OnHurt.Invoke();
             damage.OnHit.Invoke();
-            //damageHandler.TakeDamage(damage);
         }
         DeactivateHitboxes();
     }
@@ -764,7 +833,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     public void OnGuardBreak()
     {
+        StartCritVulnerability(5f);
         NextParrySequence();
+        animator.ResetTrigger("OnHeavyDamage");
+        if (currentPhase == CombatPhase.ParryPhase)
+        {
+            successesThisPhase++;
+        }
+        
     }
     public void IncrementParryIndex()
     {
@@ -776,6 +852,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         parrySequenceIndex++;
         parrySequenceIndex %= parryPatterns.Length;
         parryCurrentIndex = 0;
+
     }
     public void CrossParryFail(DamageKnockback damage)
     {
@@ -871,7 +948,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         IncrementParryIndex();
         SetParryValue();
-        StartCritVulnerability(5f);
         ParryHit = true;
     }
 
@@ -881,7 +957,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         if (IsAttacking())
         {
             Vector3 diff = animator.rootPosition - this.transform.position;
-            Vector3 dirToTarget = (CombatTarget.transform.position - this.transform.position).normalized;
+            Vector3 dirToTarget = (CombatTarget.transform.position - this.transform.position);
+            dirToTarget.y = 0f;
+            dirToTarget.Normalize();
+
             diff = Vector3.Project(diff, dirToTarget);
             float startingMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
             float distanceAfterMovement = Vector3.Distance(this.transform.position + diff, CombatTarget.transform.position);
