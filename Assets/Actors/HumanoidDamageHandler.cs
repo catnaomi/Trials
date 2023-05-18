@@ -103,9 +103,8 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     public virtual void TakeDamage(DamageKnockback damage)
     {
         if (!actor.IsAlive() || IsInInvulnClip()) return;
-        bool isCrit = IsCritVulnerable() || damage.critData.alwaysCritical;
-        damage.didCrit = isCrit;
-        float damageAmount = damage.GetDamageAmount(isCrit);
+        float damageAmount = damage.GetDamageAmount();
+       
         if (actor.IsTimeStopped())
         {
             if (!inFrozenRoutine)
@@ -116,6 +115,10 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             TimeTravelController.time.TimeStopDamage(damage, this, damageAmount);
             return;
         }
+        bool isCrit = IsCritVulnerable() || damage.critData.alwaysCritical;
+        damage.didCrit = isCrit;
+        damageAmount = damage.GetDamageAmount(isCrit);
+
         lastDamage = damage.healthDamage;
         lastDamageTaken = damage;
         damageTaken += lastDamage;

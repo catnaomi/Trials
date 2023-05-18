@@ -103,7 +103,9 @@ public class BossHealthIndicator : MonoBehaviour
     {
         if (target == null) return;
         this.target = target;
-        actor = this.target.GetComponentInParent<Actor>();
+        actor = this.target.GetComponent<Actor>();
+        if (actor == null)
+            actor = this.target.GetComponentInParent<Actor>();
         if (actor != null)
         {
             impulseReceiver.SetActor(actor);

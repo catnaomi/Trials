@@ -70,7 +70,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] int NextParry;
     [ReadOnly, SerializeField] bool ParryFail;
     [ReadOnly, SerializeField] bool OnHeavyDamage;
-    [ReadOnly, SerializeField] bool IsDamageHeavy;
     [ReadOnly, SerializeField] float xDirection;
     [ReadOnly, SerializeField] float yDirection;
     [ReadOnly, SerializeField] bool OnFlinch;
@@ -83,7 +82,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public float randomCycleSpeed = 3f;
     [Header("Events")]
     public UnityEvent OnHitboxActive;
-    public UnityEvent OnParrySuccess;
+    public UnityEvent OnParryFail;
     float randomClock = 0f;
     bool shouldRealign;
 
@@ -221,7 +220,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             animator.SetTrigger("ParryFail");
             ParryFail = false;
         }
-        animator.SetBool("IsDamageHeavy", IsDamageHeavy);
         
         Vector3 dir = (CombatTarget.transform.position - this.transform.position).normalized;
         xDirection = Vector3.Dot(this.transform.right, dir);
@@ -682,7 +680,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         if (!this.IsAlive()) return;
         lastDamageTaken = damage;
-        float damageAmount = damage.healthDamage;
+        float damageAmount = damage.GetDamageAmount();
         if (this.IsTimeStopped() || this.IsDodging())
         {
             if (this.IsTimeStopped())
@@ -691,6 +689,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             }
             return;
         }
+        bool isCrit = IsCritVulnerable() || damage.critData.alwaysCritical;
+        damage.didCrit = isCrit;
+        damageAmount = damage.GetDamageAmount(isCrit);
+
+        damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.unresistedMinimum, damage.GetTypes(), this.attributes.resistances);
 
         bool isParrying = IsParrying();
         bool circleParrying = IsCircleParrying();
@@ -729,6 +732,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             ParrySuccess(damage, circleParrying);
 
+            //damage.didCrit = true;
             this.OnHurt.Invoke();
             damage.OnCrit.Invoke();
             damage.OnBlock.Invoke();
@@ -749,12 +753,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 {
                     OnFlinch = true;
                 }
+                damage.didCrit = true;
                 damage.OnCrit.Invoke();
             }
             else
             {
                 OnFlinch = true;
             }
+            this.attributes.ReduceHealth(damageAmount);
             this.OnHurt.Invoke();
             damage.OnHit.Invoke();
         }
@@ -856,7 +862,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     }
     public void CrossParryFail(DamageKnockback damage)
     {
-        OnParrySuccess.Invoke();
+        OnParryFail.Invoke();
         OnBlock.Invoke();
         damage.OnBlock.Invoke();
         Actor actor = damage.source.GetComponent<Actor>();
@@ -892,7 +898,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     public void CircleParryFail(DamageKnockback damage)
     {
-        OnParrySuccess.Invoke();
+        OnParryFail.Invoke();
         OnBlock.Invoke();
         damage.OnBlock.Invoke();
         Actor actor = damage.source.GetComponent<Actor>();
@@ -949,6 +955,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         IncrementParryIndex();
         SetParryValue();
         ParryHit = true;
+        OnParrySuccess.Invoke();
     }
 
     void OnAnimatorMove()
