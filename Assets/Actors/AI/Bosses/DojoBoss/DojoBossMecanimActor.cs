@@ -3,6 +3,7 @@ using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Events;
 
 public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
@@ -14,6 +15,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     HumanoidPositionReference positionReference;
     DojobossTimeTravelHandler timeHandler;
     CapsuleCollider collider;
+    NavMeshAgent nav;
     [Header("Animation Curves & Values")]
     public AnimationCurve lanceExtensionCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     public Vector2 lanceExtensionMinMax = Vector2.up;
@@ -45,6 +47,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     float totalCritTime;
     [Header("Offense")]
     public int offensiveStageCount = 6;
+    [Header("Navigation")]
+    public float speed = 5f;
     [Header("Animancer")]
     public Animancer.ClipTransition playerParryFailAnim;
     public float freezeTimeout = 5f;
@@ -84,6 +88,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         SetParryValue();
         arrowDamage.source = this.gameObject;
         timeHandler = this.GetComponent<DojobossTimeTravelHandler>();
+        nav = this.GetComponent<NavMeshAgent>();
+        nav.updatePosition = true;
+        nav.updateRotation = true;
+        StartCoroutine(DestinationCoroutine());
     }
 
     // Update is called once per frame
@@ -110,6 +118,18 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         if (randomClock <= 0f)
         {
             OnCycle();
+        }
+        if (IsMoving())
+        {
+            nav.enabled = true;
+            nav.updatePosition = true;
+            nav.updateRotation = true;
+        }
+        else
+        {
+            nav.enabled = false;
+            nav.updatePosition = false;
+            nav.updateRotation = false;
         }
         UpdateMecanimValues();
         if (randomClock <= 0f)
@@ -167,6 +187,18 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     }
 
+
+    IEnumerator DestinationCoroutine()
+    {
+        while (true)
+        {
+            if (CombatTarget != null && IsMoving())
+            {
+                nav.SetDestination(CombatTarget.transform.position);
+            }
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
     void OnCycle()
     {
         if (!IsParrying())
@@ -549,6 +581,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("BLOCK");
     }
+
+    public bool IsMoving()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("MOVE");
+    }
+
 
     public void GetParried()
     {

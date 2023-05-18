@@ -241,7 +241,10 @@ public class Actor : MonoBehaviour
     {
         if (CombatTarget != null)
         {
-            this.transform.LookAt(CombatTarget.transform, Vector3.up);
+            Vector3 dir = CombatTarget.transform.position - this.transform.position;
+            dir.y = 0f;
+            dir.Normalize();
+            this.transform.rotation = Quaternion.LookRotation(dir);
         }
     }
     public virtual void OnFallOffMap()
