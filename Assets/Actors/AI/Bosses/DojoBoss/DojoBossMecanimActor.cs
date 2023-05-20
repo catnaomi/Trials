@@ -977,7 +977,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 diff = diff.normalized * (distanceAfterMovement - minimumDistance) * Time.deltaTime;
                 //diff = Vector3.ClampMagnitude(diff, minimumDistance - distanceAfterMovement);
                 float endMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
-                Debug.Log($"adjusted root motion movement: {startingMagnitude} vs {endMagnitude}");
+                //Debug.Log($"adjusted root motion movement: {startingMagnitude} vs {endMagnitude}");
             }
             this.transform.position += diff;
         }

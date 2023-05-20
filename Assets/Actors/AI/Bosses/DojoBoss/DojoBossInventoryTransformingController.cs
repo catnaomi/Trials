@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using CustomUtilities;
 
 [RequireComponent(typeof(DojoBossMecanimActor), typeof(HumanoidPositionReference))]
 public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidInventory, IInventory
@@ -58,9 +59,9 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
     public void SetWeapon(WeaponStats stats)
     {
         if (weaponMainInstance == null || weaponOffInstance == null) return;
+        if (currentWeapon == stats) return;
 
         currentWeapon = stats;
-        // TODO: prefab pooling
 
         // generate models
         GenerateModels(stats);
@@ -76,6 +77,8 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
 
         // update FX
         UpdateBladeFX();
+
+        OnChange.Invoke();
     }
 
     public void SetWeaponByName(string name)
@@ -94,6 +97,10 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
         SetWeapon(weapons[index]);
     }
 
+    public WeaponStats GetCurrentWeaponStats()
+    {
+        return currentWeapon;
+    }
     void GenerateModels(WeaponStats stats)
     {
         if (GetWeaponModel() != null)
@@ -120,6 +127,7 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
             stats.mainHandModel.name = stats.name + "_main";
             weaponMainInstance.model = stats.mainHandModel;
             weaponMainInstance.SetModelLayer();
+            stats.mainHandMesh = GenerateMesh(stats.mainHandModel);
         }
 
         if (stats.offHandModel != null)
@@ -138,6 +146,7 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
             stats.offHandModel.name = stats.name + "_off";
             weaponOffInstance.model = stats.offHandModel;
             weaponOffInstance.SetModelLayer();
+            stats.offHandMesh = GenerateMesh(stats.offHandModel);
         }
     }
 
@@ -221,6 +230,11 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
     {
         return currentWeapon.mainLength;
     }
+
+    Mesh GenerateMesh(GameObject model)
+    {
+        return MeshUtilities.GetMergedMesh(model);
+    }
     #region unused
     public bool Add(Item item)
     {
@@ -278,7 +292,10 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
         public bool offDoubleSided;
         public float offWidth;
         [Space(10)]
-        [ReadOnly]public GameObject mainHandModel;
-        [ReadOnly]public GameObject offHandModel;
+        [ReadOnly] public GameObject mainHandModel;
+        [ReadOnly] public GameObject offHandModel;
+        [Space(10)]
+        [ReadOnly] public Mesh mainHandMesh;
+        [ReadOnly] public Mesh offHandMesh;
     }
 }
