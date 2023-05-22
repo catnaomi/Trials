@@ -2,6 +2,7 @@ using Animancer;
 using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
@@ -15,6 +16,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     HumanoidPositionReference positionReference;
     DojobossTimeTravelHandler timeHandler;
     CapsuleCollider collider;
+    CharacterController cc;
     NavMeshAgent nav;
     [Header("Phases")]
     [SerializeField] CombatPhase currentPhase;
@@ -63,6 +65,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public float pillarHeight;
     public List<GameObject> pillars;
     public int currentPillarIndex = 0;
+    public BreakableObject invulnerablePillar;
+    public DamageType pillarWeakness;
     [Space(20)]
     public float pillarJumpDuration = 1f;
     public AnimationCurve pillarJumpHorizCurve = AnimationCurve.Linear(0, 0, 1, 1);
@@ -70,6 +74,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public AnimationCurve pillarFallVertCurve = AnimationCurve.Linear(0, 0, 1, 1);
     public float horizontalClearDistance = 1.5f;
     public float horizontalClearSpeed = 5f;
+    bool wasOnPillarLastFrame;
+    bool isPillarJumping;
     [Space(10)]
     public float output;
     [Header("Navigation")]
@@ -121,6 +127,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         inventory = this.GetComponent<DojoBossInventoryTransformingController>();
         positionReference = this.GetComponent<HumanoidPositionReference>();
         collider = this.GetComponent<CapsuleCollider>();
+        cc = this.GetComponent<CharacterController>();
         CombatTarget = PlayerActor.player.gameObject;
         OnHitboxActive.AddListener(RealignToTarget);
         SetParryValue();
@@ -164,18 +171,26 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             nav.enabled = true;
             nav.updatePosition = true;
             nav.updateRotation = true;
+            cc.enabled = false;
         }
         else
         {
             nav.enabled = false;
             nav.updatePosition = false;
             nav.updateRotation = false;
+            cc.enabled = true;
         }
         CheckPhase();
         UpdateMecanimValues();
         if (randomClock <= 0f)
         {
             randomClock = randomCycleSpeed;
+        }
+
+        if (IsOnPillar != wasOnPillarLastFrame)
+        {
+            CheckInvulnerablePillar();
+            wasOnPillarLastFrame = IsOnPillar;
         }
     }
 
@@ -562,6 +577,38 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         colliders.AddRange(arrowObject.GetComponentsInChildren<Collider>());
 
         return colliders.ToArray();
+    }
+
+    void CheckInvulnerablePillar()
+    {
+        GameObject currentPillar = pillars[currentPillarIndex];
+        int pillarsCount = pillars.Count;
+        // remove null pillars
+        pillars = pillars.Where(p => p != null).ToList();
+        if (pillars.Count != pillarsCount && currentPillar != null)
+        {
+            for (int j = 0; j < pillars.Count; j++)
+            {
+                if (pillars[j] == currentPillar)
+                {
+                    currentPillarIndex = j;
+                    break;
+                }
+            }
+        }
+        for (int i = 0; i < pillars.Count; i++)
+        {
+            if (pillars[i] == null) continue;
+            BreakableObject breakableObject = pillars[i].GetComponent<BreakableObject>();
+            if ((IsOnPillar || isPillarJumping) && currentPillarIndex == i)
+            {
+                breakableObject.brokenByElements = 0;
+            }
+            else
+            {
+                breakableObject.brokenByElements = pillarWeakness;
+            }
+        }
     }
 
     /*
@@ -1025,12 +1072,16 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         Vector3 pillarPosition = this.transform.position;
         while (clock < pillarRiseDuration)
         {
+            if (this.IsTimeStopped())
+            {
+                yield return new WaitWhile(this.IsTimeStopped);
+            }
             clock += Time.deltaTime;
             float t = Mathf.Clamp01(clock / pillarRiseDuration);
             pillarPosition.y = pillarRiseCurve.Evaluate(t) * pillarHeight;
             //yield return new WaitForFixedUpdate();
             pillar.transform.position = pillarPosition;
-            this.transform.position = pillarPosition;
+            MoveTo(pillarPosition);
             yield return null;
         }
     }
@@ -1038,9 +1089,17 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public void StartPillarJump()
     {
         int newPillarIndex = -1;
-        while (newPillarIndex < 0 || newPillarIndex == currentPillarIndex)
+        int attempts = 0;
+        int maxAttempts = 10;
+        while (attempts < maxAttempts && (newPillarIndex < 0 || newPillarIndex == currentPillarIndex || pillars[newPillarIndex] == null))
         {
             newPillarIndex = Random.Range(0, pillars.Count - 1);
+            attempts++;
+        }
+        if (attempts >= maxAttempts)
+        {
+            Debug.LogWarning("Pillar Jump Timed Out!");
+            return;
         }
         StartCoroutine(PillarJumpRoutine(newPillarIndex));
     }
@@ -1049,24 +1108,31 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         if (newPillarIndex == currentPillarIndex) yield break;
         IsOnPillar = false;
+        isPillarJumping = true;
         GameObject oldPillar = pillars[currentPillarIndex];
         GameObject newPillar = pillars[newPillarIndex];
+        currentPillarIndex = newPillarIndex;
         float t = 0f;
         Vector3 pos;
+        CheckInvulnerablePillar();
         while (t < 0.95)
         {
+            if (this.IsTimeStopped())
+            {
+                yield return new WaitWhile(this.IsTimeStopped);
+            }
             if (out_PillarJumpCurve > t)
             {
                 t = out_PillarJumpCurve;
             }
             pos = Vector3.Lerp(oldPillar.transform.position, newPillar.transform.position, pillarJumpHorizCurve.Evaluate(t));
             pos.y = this.transform.position.y;
-            this.transform.position = pos;
+            MoveTo(pos);
             yield return null;
         }
+        MoveTo(newPillar.transform.position);
         IsOnPillar = true;
-        this.transform.position = newPillar.transform.position;
-        currentPillarIndex = newPillarIndex;
+        isPillarJumping = false;
     }
 
     public void StartPillarFall()
@@ -1087,6 +1153,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         targetHoriz.y = 0f;
         while (clock < pillarFallDuration)
         {
+            if (this.IsTimeStopped())
+            {
+                yield return new WaitWhile(this.IsTimeStopped);
+            }
             clock += Time.deltaTime;
             float t = Mathf.Clamp01(clock / pillarFallDuration);
             y = (pillarFallVertCurve.Evaluate(t)) * pillarHeight;
@@ -1097,9 +1167,21 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 xz = Vector3.MoveTowards(xz, targetHoriz, horizontalClearSpeed * Time.deltaTime);
             }
             
-            this.transform.position = new Vector3(xz.x, y, xz.z);
+            MoveTo(new Vector3(xz.x, y, xz.z));
             output = t;
             yield return null;
+        }
+    }
+
+    void MoveTo(Vector3 position)
+    {
+        if (cc.enabled)
+        {
+            cc.Move(position - this.transform.position);
+        }
+        else
+        {
+            this.transform.position = position;
         }
     }
     void OnAnimatorMove()
@@ -1123,11 +1205,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 float endMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
                 //Debug.Log($"adjusted root motion movement: {startingMagnitude} vs {endMagnitude}");
             }
-            this.transform.position += diff;
+            diff +=  -this.transform.position.y * Vector3.up;
+            cc.Move(diff);
         }
         else
         {
-            this.transform.position = animator.rootPosition;
+            MoveTo(animator.rootPosition);
         }
 
     }

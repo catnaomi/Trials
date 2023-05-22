@@ -7,6 +7,8 @@ using UnityEngine.Events;
 public class BreakableObject : MonoBehaviour, IDamageable
 {
     public DamageType brokenByElements;
+    public float health = -1;
+    [Space(10)]
     public GameObject particlePrefab;
     public UnityEvent OnBreak;
     public UnityEvent OnFail;
@@ -34,7 +36,11 @@ public class BreakableObject : MonoBehaviour, IDamageable
         lastDamage = damage;
         if (damage.GetTypes().HasType(brokenByElements))
         {
-            BreakObject();
+            health -= damage.healthDamage;
+            if (health <= 0)
+            {
+                BreakObject();             
+            }
             return;
         }
         if (recoilOnFail)
