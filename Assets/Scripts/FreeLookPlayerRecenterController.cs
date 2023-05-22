@@ -10,11 +10,18 @@ public class FreeLookPlayerRecenterController : MonoBehaviour
     public float recenterDuration;
     float recenterClock;
     bool wasRecenteringLastFrame;
+
+    public Cinemachine.AxisState.Recentering y_axisRecenterTarget;
+    Cinemachine.AxisState.Recentering y_axisRecenterBase;
+    public Cinemachine.AxisState.Recentering heading_axisRecenterTarget;
+    Cinemachine.AxisState.Recentering heading_axisRecenterBase;
     // Start is called before the first frame update
     void Start()
     {
         freeLook = this.GetComponent<CinemachineFreeLook>();
         ShouldRecenter();
+        y_axisRecenterBase = freeLook.m_YAxisRecentering;
+        heading_axisRecenterBase = freeLook.m_RecenterToTargetHeading;
         //recenterDuration = Mathf.Max(freeLook.m_RecenterToTargetHeading.m_RecenteringTime, freeLook.m_YAxisRecentering.m_RecenteringTime, 0.5f);
     }
 
@@ -23,11 +30,13 @@ public class FreeLookPlayerRecenterController : MonoBehaviour
     {
         if (recentering)
         {
+            /*
             if (PlayerActor.player.IsTargetHeld())
             {
                 recenterClock = 0f;
             }
-            else if (recenterClock > recenterDuration)
+            else*/ 
+            if (recenterClock > recenterDuration)
             {
                 recentering = false;
             }
@@ -44,10 +53,26 @@ public class FreeLookPlayerRecenterController : MonoBehaviour
             {
                 recentering = false;
             }
-        }
+            if (recentering)
+            {
+                Debug.Log("recentering target camera!");
+            }
 
-        freeLook.m_RecenterToTargetHeading.m_enabled = recentering;
-        freeLook.m_YAxisRecentering.m_enabled = recentering;
+        }
+        if (recentering && !wasRecenteringLastFrame)
+        {
+            freeLook.m_RecenterToTargetHeading = heading_axisRecenterTarget;
+            freeLook.m_YAxisRecentering = y_axisRecenterTarget;
+        }
+        else if (!recentering && wasRecenteringLastFrame)
+        {
+            freeLook.m_RecenterToTargetHeading = heading_axisRecenterBase;
+            freeLook.m_YAxisRecentering = y_axisRecenterBase;
+        }
+        wasRecenteringLastFrame = recentering;
+
+        //freeLook.m_RecenterToTargetHeading.m_enabled = recentering;
+        //freeLook.m_YAxisRecentering.m_enabled = recentering;
 
     }
 

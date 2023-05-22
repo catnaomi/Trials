@@ -82,7 +82,8 @@ public class PlayerTargetManager : MonoBehaviour
     [Space(5)]
     [SerializeField, ReadOnly] float botHeight;
     [SerializeField, ReadOnly] float botRadius;
-    public UnityEvent OnRecenter;
+    public UnityEvent OnRecenterFree;
+    public UnityEvent OnRecenterTarget;
     public UnityEvent OnTargetUpdate;
     // Start is called before the first frame update
     void Start()
@@ -355,7 +356,14 @@ public class PlayerTargetManager : MonoBehaviour
         {
             if (lockedOn)
             {
-                CycleTargets();
+                if (targets.Count > 1)
+                {
+                    CycleTargets();
+                }
+                else
+                {
+                    RecenterTarget();
+                }
             }
             else
             {
@@ -366,7 +374,7 @@ public class PlayerTargetManager : MonoBehaviour
                 else if (targets.Count <= 0)
                 {
                     lockedOn = false;
-                    Recenter();
+                    RecenterFree();
                 }
             }
         }
@@ -415,8 +423,25 @@ public class PlayerTargetManager : MonoBehaviour
                 if (targets.Count > 0)
                 {
                     changeTargetIndexOffset = 0;
-                    SetTarget(targets[changeTargetIndexOffset % targets.Count]);
-                    player.SetCombatTarget(currentTarget);
+                    while (changeTargetIndexOffset < targets.Count)
+                    {
+                        if (IsValidTarget(targets[changeTargetIndexOffset]))
+                        {
+                            break;
+                        }
+                        changeTargetIndexOffset++;
+                    }
+                    if (changeTargetIndexOffset < targets.Count)
+                    {
+                        SetTarget(targets[changeTargetIndexOffset % targets.Count]);
+                        player.SetCombatTarget(currentTarget);
+                    }
+                    else
+                    {
+                        player.SetCombatTarget(null);
+                        currentTarget = null;
+                        lockedOn = false;
+                    }
                 }
                 else
                 {
@@ -516,9 +541,14 @@ public class PlayerTargetManager : MonoBehaviour
         rightTarget = directionToTarget[AxisUtilities.AxisDirection.Right];
     }
 
-    public void Recenter()
+    public void RecenterFree()
     {
-        OnRecenter.Invoke();
+        OnRecenterFree.Invoke();
+    }
+
+    public void RecenterTarget()
+    {
+        OnRecenterTarget.Invoke();
     }
 
     void CycleTargets()

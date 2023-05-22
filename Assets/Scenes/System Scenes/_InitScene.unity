@@ -3242,7 +3242,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7769679, y: 1}
+    m_SensorSize: {x: 1.7761627, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -3259,7 +3259,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 247212858}
   m_LocalRotation: {x: -0.08544028, y: 0.94113266, z: 0.032369524, w: 0.325456}
-  m_LocalPosition: {x: -0.00007453041, y: 0.000011079482, z: 0.000041041458}
+  m_LocalPosition: {x: -0.00009702474, y: 0.000015326945, z: 0.00006248233}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3369,8 +3369,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 256774555}
-  m_LocalRotation: {x: 0.6129589, y: -0.056221984, z: 0.033581622, w: 0.7873962}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0.0000000037252899, y: -0, z: 0.0000000074505797, w: 1}
+  m_LocalPosition: {x: 1.051652, y: 0.34562588, z: -4.4012365}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3414,7 +3414,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7759563, y: 1}
+    m_SensorSize: {x: 1.7761627, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -5620,6 +5620,9 @@ MonoBehaviour:
   OnDodgeSuccess:
     m_PersistentCalls:
       m_Calls: []
+  OnParrySuccess:
+    m_PersistentCalls:
+      m_Calls: []
   OnBlock:
     m_PersistentCalls:
       m_Calls: []
@@ -5635,6 +5638,7 @@ MonoBehaviour:
   lastDamageAmountTaken: 0
   lastDamageTaken:
     healthDamage: 0
+    unresistedMinimum: 0
     types: 0
     critData:
       criticalMultiplier: 0
@@ -5665,6 +5669,7 @@ MonoBehaviour:
       onKill: 0
       onCounterHit: 0
       onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     didCrit: 0
@@ -5692,6 +5697,7 @@ MonoBehaviour:
   hitParticleDirection: {x: 0, y: 0, z: 0}
   currentDamage:
     healthDamage: 0
+    unresistedMinimum: 0
     types: 0
     critData:
       criticalMultiplier: 0
@@ -5722,6 +5728,7 @@ MonoBehaviour:
       onKill: 0
       onCounterHit: 0
       onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     didCrit: 0
@@ -5898,9 +5905,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnParrySlashStart:
-    m_PersistentCalls:
-      m_Calls: []
-  OnParrySuccess:
     m_PersistentCalls:
       m_Calls: []
   moveAnim: {fileID: 11400000, guid: 1501bcdeed2561947b6564d8f43bd572, type: 2}
@@ -6410,7 +6414,6 @@ MonoBehaviour:
     weaknessFlat: 0
     neutralMultiplier: 1
     neutralFlat: 0
-    minimumDamage: 0
   effects: []
   journalEntry: {fileID: 0}
 --- !u!114 &307703072
@@ -6486,6 +6489,7 @@ MonoBehaviour:
   timeRemaining: []
   timeTravelStates: []
   timeTravelController: {fileID: 0}
+  deltaTime: 0
   OnFreeze:
     m_PersistentCalls:
       m_Calls: []
@@ -6506,6 +6510,7 @@ GameObject:
   - component: {fileID: 314391787}
   - component: {fileID: 314391786}
   - component: {fileID: 314391785}
+  - component: {fileID: 314391789}
   m_Layer: 6
   m_Name: CM player - target freelook - gamepad
   m_TagString: Untagged
@@ -6520,8 +6525,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 314391783}
-  m_LocalRotation: {x: 0.004280537, y: 0.9956862, z: 0.0613296, w: -0.06949453}
-  m_LocalPosition: {x: 0.014517635, y: 5.2544255, z: 1.7499367}
+  m_LocalRotation: {x: 0.079545364, y: 0.8834748, z: 0.16264766, w: -0.43207687}
+  m_LocalPosition: {x: 1.2488996, y: 1.1544254, z: -0.36090457}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6629,7 +6634,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7759563, y: 1}
+    m_SensorSize: {x: 1.7761627, y: 1}
   m_Transitions:
     m_BlendHint: 1
     m_InheritPosition: 1
@@ -6638,7 +6643,7 @@ MonoBehaviour:
         m_Calls: []
   m_LegacyBlendHint: 0
   m_YAxis:
-    Value: 1
+    Value: 0
     m_SpeedMode: 0
     m_MaxSpeed: 2
     m_AccelTime: 0.2
@@ -6703,6 +6708,32 @@ MonoBehaviour:
   - {fileID: 256774557}
   - {fileID: 1646069605}
   - {fileID: 993592661}
+--- !u!114 &314391789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 314391783}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1c4c33083d32404aa092e2add6e12b3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  recentering: 0
+  recenterDuration: 1
+  y_axisRecenterTarget:
+    m_enabled: 1
+    m_WaitTime: 0
+    m_RecenteringTime: 0.1
+    m_LegacyHeadingDefinition: 0
+    m_LegacyVelocityFilterStrength: 0
+  heading_axisRecenterTarget:
+    m_enabled: 1
+    m_WaitTime: 0
+    m_RecenteringTime: 0.1
+    m_LegacyHeadingDefinition: 0
+    m_LegacyVelocityFilterStrength: 0
 --- !u!1 &325787362 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8001272643654753753, guid: 6daae0c2e643f2c4da58245d9631c8d2,
@@ -12026,7 +12057,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7769679, y: 1}
+    m_SensorSize: {x: 1.7761627, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -12042,7 +12073,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 420413097}
-  m_LocalRotation: {x: -0.08816202, y: 0.9408287, z: 0.040247604, w: 0.32472923}
+  m_LocalRotation: {x: -0.09134602, y: 0.9403882, z: 0.049482904, w: 0.323848}
   m_LocalPosition: {x: -0.0000028842232, y: 0.00000019512967, z: 0.0000008591446}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -12122,7 +12153,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 462353258}
-  m_LocalRotation: {x: 0.15396573, y: 0.43283707, z: -0.0752993, w: 0.8850292}
+  m_LocalRotation: {x: 0.1626477, y: 0.43207687, z: -0.07954534, w: 0.8834749}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -14933,8 +14964,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
-  m_LocalRotation: {x: 0.07529932, y: 0.8850292, z: 0.15396574, w: -0.43283716}
-  m_LocalPosition: {x: 3.7090433, y: 0.10028735, z: 2.884988}
+  m_LocalRotation: {x: 0.079545364, y: 0.8834748, z: 0.16264766, w: -0.43207687}
+  m_LocalPosition: {x: 3.94667, y: -0.090026855, z: 3.0698204}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -15077,7 +15108,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 993592659}
-  m_LocalRotation: {x: 0.5844558, y: -0.057385195, z: 0.03155298, w: 0.8087785}
+  m_LocalRotation: {x: -0.259569, y: -0.45288396, z: -0.031081315, w: -0.8523814}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -15122,7 +15153,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7759563, y: 1}
+    m_SensorSize: {x: 1.7761627, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -16030,12 +16061,12 @@ PrefabInstance:
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 291.9609
+      value: 582.3192
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 7.7633057
+      value: 10.191345
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
@@ -17294,6 +17325,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   recentering: 0
   recenterDuration: 0.5
+  y_axisRecenterTarget:
+    m_enabled: 1
+    m_WaitTime: 0
+    m_RecenteringTime: 0.1
+    m_LegacyHeadingDefinition: 0
+    m_LegacyVelocityFilterStrength: 0
+  heading_axisRecenterTarget:
+    m_enabled: 1
+    m_WaitTime: 0
+    m_RecenteringTime: 0.1
+    m_LegacyHeadingDefinition: 0
+    m_LegacyVelocityFilterStrength: 0
 --- !u!1 &1157774123
 GameObject:
   m_ObjectHideFlags: 0
@@ -19815,7 +19858,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7769679, y: 1}
+    m_SensorSize: {x: 1.7761627, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -19831,7 +19874,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1478947013}
-  m_LocalRotation: {x: 0.09403862, y: -0.9399436, z: -0.05730904, w: -0.32307643}
+  m_LocalRotation: {x: 0.097206086, y: -0.93933564, z: -0.06653478, w: -0.3221376}
   m_LocalPosition: {x: -0.0000028842232, y: 0.00000019512967, z: 0.0000008591446}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -20118,6 +20161,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
         type: 3}
+      propertyPath: OnRecenterFree.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
+      propertyPath: OnRecenterTarget.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
       propertyPath: OnRecenter.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
       value: 1
       objectReference: {fileID: 0}
@@ -20126,6 +20179,11 @@ PrefabInstance:
       propertyPath: OnRecenter.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1155430145}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
+      propertyPath: OnRecenterFree.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
         type: 3}
       propertyPath: OnRecenter.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
@@ -20138,12 +20196,67 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
         type: 3}
+      propertyPath: OnRecenterFree.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1155430145}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
+      propertyPath: OnRecenterTarget.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
+      propertyPath: OnRecenterTarget.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 314391789}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
+      propertyPath: OnRecenterFree.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
+      propertyPath: OnRecenterFree.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ShouldRecenter
+      objectReference: {fileID: 0}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
+      propertyPath: OnRecenterTarget.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
+      propertyPath: OnRecenterTarget.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ShouldRecenter
+      objectReference: {fileID: 0}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
       propertyPath: OnRecenter.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
       value: FreeLookPlayerRecenterController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
         type: 3}
+      propertyPath: OnRecenterFree.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: FreeLookPlayerRecenterController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
+      propertyPath: OnRecenterTarget.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: FreeLookPlayerRecenterController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
       propertyPath: OnRecenter.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
+      propertyPath: OnRecenterFree.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 3790137987329400829, guid: 6da9b425cb1f4d4429457966f0bdb3f1,
+        type: 3}
+      propertyPath: OnRecenterTarget.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
       value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -20734,8 +20847,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9384ab8608cdc3d479fe89cd51eed48f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 4.5, z: -1.75}
+  m_BindingMode: 1
+  m_FollowOffset: {x: 0, y: 0.4, z: -1.3}
   m_XDamping: 1
   m_YDamping: 1
   m_ZDamping: 1
@@ -21175,7 +21288,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1646069603}
-  m_LocalRotation: {x: 0.5987846, y: -0.05681345, z: 0.032571234, w: 0.79822826}
+  m_LocalRotation: {x: -0.27472702, y: -0.45336616, z: -0.023000764, w: -0.8476174}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -21220,7 +21333,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7769679, y: 1}
+    m_SensorSize: {x: 1.7761627, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -21400,8 +21513,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9384ab8608cdc3d479fe89cd51eed48f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 4.5, z: -1.75}
+  m_BindingMode: 1
+  m_FollowOffset: {x: 0, y: 0.4, z: -1.3}
   m_XDamping: 1
   m_YDamping: 1
   m_ZDamping: 1
@@ -27617,8 +27730,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925080555}
-  m_LocalRotation: {x: -0.07529933, y: -0.8850292, z: -0.15396579, w: 0.4328371}
-  m_LocalPosition: {x: 3.7090433, y: 0.10028735, z: 2.884988}
+  m_LocalRotation: {x: -0.07954534, y: -0.8834749, z: -0.16264768, w: 0.43207693}
+  m_LocalPosition: {x: 3.94667, y: -0.090026855, z: 3.0698204}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -27924,7 +28037,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7769679, y: 1}
+    m_SensorSize: {x: 1.7761627, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
@@ -28401,8 +28514,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9384ab8608cdc3d479fe89cd51eed48f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_BindingMode: 5
-  m_FollowOffset: {x: 0, y: 4.5, z: -1.75}
+  m_BindingMode: 1
+  m_FollowOffset: {x: 0, y: 0.4, z: -1.3}
   m_XDamping: 1
   m_YDamping: 1
   m_ZDamping: 1
@@ -29537,6 +29650,7 @@ MonoBehaviour:
   timeRemaining: []
   timeTravelStates: []
   timeTravelController: {fileID: 0}
+  deltaTime: 0
   OnFreeze:
     m_PersistentCalls:
       m_Calls: []
@@ -29709,7 +29823,6 @@ MonoBehaviour:
     weaknessFlat: 0
     neutralMultiplier: 1
     neutralFlat: 0
-    minimumDamage: 0
   effects: []
   journalEntry: {fileID: 0}
 --- !u!114 &2757355003389657204
@@ -29942,6 +30055,9 @@ MonoBehaviour:
   OnDodgeSuccess:
     m_PersistentCalls:
       m_Calls: []
+  OnParrySuccess:
+    m_PersistentCalls:
+      m_Calls: []
   OnBlock:
     m_PersistentCalls:
       m_Calls: []
@@ -29957,6 +30073,7 @@ MonoBehaviour:
   lastDamageAmountTaken: 0
   lastDamageTaken:
     healthDamage: 0
+    unresistedMinimum: 0
     types: 0
     critData:
       criticalMultiplier: 0
@@ -29987,6 +30104,7 @@ MonoBehaviour:
       onKill: 0
       onCounterHit: 0
       onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     didCrit: 0
@@ -30014,6 +30132,7 @@ MonoBehaviour:
   hitParticleDirection: {x: 0, y: 0, z: 0}
   currentDamage:
     healthDamage: 0
+    unresistedMinimum: 0
     types: 0
     critData:
       criticalMultiplier: 0
@@ -30044,6 +30163,7 @@ MonoBehaviour:
       onKill: 0
       onCounterHit: 0
       onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     didCrit: 0
@@ -30211,9 +30331,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnParrySlashStart:
-    m_PersistentCalls:
-      m_Calls: []
-  OnParrySuccess:
     m_PersistentCalls:
       m_Calls: []
   moveAnim: {fileID: 11400000, guid: dafdfce5704a7df45b3672c192d56bd2, type: 2}

@@ -56,6 +56,22 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     float totalCritTime;
     [Header("Offense")]
     public int offensiveStageCount = 6;
+    [Header("Pillars")]
+    public GameObject pillarPrefab;
+    public float pillarRiseDuration;
+    public AnimationCurve pillarRiseCurve = AnimationCurve.Linear(0, 0, 1, 1);
+    public float pillarHeight;
+    public List<GameObject> pillars;
+    public int currentPillarIndex = 0;
+    [Space(20)]
+    public float pillarJumpDuration = 1f;
+    public AnimationCurve pillarJumpHorizCurve = AnimationCurve.Linear(0, 0, 1, 1);
+    public float pillarFallDuration = 1f;
+    public AnimationCurve pillarFallVertCurve = AnimationCurve.Linear(0, 0, 1, 1);
+    public float horizontalClearDistance = 1.5f;
+    public float horizontalClearSpeed = 5f;
+    [Space(10)]
+    public float output;
     [Header("Navigation")]
     public float speed = 5f;
     [Header("Animancer")]
@@ -75,6 +91,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] bool OnFlinch;
     [ReadOnly, SerializeField] bool Parried;
     [ReadOnly, SerializeField] int OffenseStage;
+    [ReadOnly, SerializeField] bool IsOnPillar;
+    [ReadOnly, SerializeField] bool OnLightPillarHit;
+    [Space(5)]
+    [SerializeField] float out_PillarJumpCurve;
     [Space(10)]
     public float closeRange = 5f;
     public float meleeRange = 1f;
@@ -174,7 +194,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             else if (timeInPhase >= maxPhaseDuration)
             {
                 //currentPhase = CombatPhase.PillarPhase;
-                currentPhase = CombatPhase.ParryPhase;
+                currentPhase = CombatPhase.PillarPhase;
                 timeInPhase = 0f;
                 successesThisPhase = 0;
             }
@@ -183,13 +203,22 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             if (timeInPhase >= minPhaseDuration && successesThisPhase >= parrySuccessesNeeded)
             {
-                currentPhase = CombatPhase.AttackPhase;
+                currentPhase = CombatPhase.PillarPhase;
                 timeInPhase = 0f;
                 successesThisPhase = 0;
             }
             else if (timeInPhase >= maxPhaseDuration)
             {
                 //currentPhase = CombatPhase.PillarPhase;
+                currentPhase = CombatPhase.AttackPhase;
+                timeInPhase = 0f;
+                successesThisPhase = 0;
+            }
+        }
+        else if (currentPhase == CombatPhase.PillarPhase)
+        {
+            if (successesThisPhase > 0)
+            {
                 currentPhase = CombatPhase.AttackPhase;
                 timeInPhase = 0f;
                 successesThisPhase = 0;
@@ -210,16 +239,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator.SetBool("AtLongRange", AtLongRange);
 
         animator.SetInteger("NextParry", NextParry);
-        if (ParryHit)
-        {
-            animator.SetTrigger("ParryHit");
-            ParryHit = false;
-        }
-        if (ParryFail)
-        {
-            animator.SetTrigger("ParryFail");
-            ParryFail = false;
-        }
+
+        UpdateTrigger("ParryHit", ref ParryHit);
+        UpdateTrigger("ParryFail", ref ParryFail);
         
         Vector3 dir = (CombatTarget.transform.position - this.transform.position).normalized;
         xDirection = Vector3.Dot(this.transform.right, dir);
@@ -242,17 +264,26 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             OnHeavyDamage = false;
             animator.ResetTrigger("OnHeavyDamage");
         }
-        
-        if (Parried)
-        {
-            animator.SetTrigger("Parried");
-            Parried = false;
-        }
+
+        UpdateTrigger("Parried", ref Parried);
         animator.SetInteger("OffenseStage", OffenseStage);
         animator.SetInteger("CurrentPhase", (int)currentPhase);
 
+        animator.SetBool("IsOnPillar", IsOnPillar);
+
+        out_PillarJumpCurve = animator.GetFloat("out_PillarJumpCurve");
+
+        UpdateTrigger("OnLightPillarHit", ref OnLightPillarHit);
     }
 
+    void UpdateTrigger(string name, ref bool trigger)
+    {
+        if (trigger)
+        {
+            animator.SetTrigger(name);
+            trigger = false;
+        }
+    }
 
     IEnumerator DestinationCoroutine()
     {
@@ -739,6 +770,22 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             this.OnBlock.Invoke();
             //StartCritVulnerability(clip.MaximumDuration / clip.Speed);
         }
+        else if (IsOnPillar)
+        {
+            // face away
+            if (CombatTarget != null)
+            {
+                Vector3 dir = CombatTarget.transform.position - this.transform.position;
+                dir.y = 0f;
+                dir.Normalize();
+                this.transform.rotation = Quaternion.LookRotation(-dir);
+            }
+            OnHeavyDamage = true;
+            this.attributes.ReduceHealth(damageAmount);
+            this.OnHurt.Invoke();
+            damage.OnHit.Invoke();
+            if (currentPhase == CombatPhase.PillarPhase) successesThisPhase++;
+        }
         else
         {
             
@@ -748,6 +795,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 {
                     damage.stagger = DamageKnockback.StaggerStrength.Heavy;
                     OnHeavyDamage = true;
+                    RealignToTarget();
                 }
                 else
                 {
@@ -866,7 +914,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         OnBlock.Invoke();
         damage.OnBlock.Invoke();
         Actor actor = damage.source.GetComponent<Actor>();
-
+        RealignToTarget();
         /*
         float otherSpeed = 0f;
         if (actor.TryGetComponent<Animancer.AnimancerComponent>(out Animancer.AnimancerComponent otherAnimancer))
@@ -902,7 +950,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         OnBlock.Invoke();
         damage.OnBlock.Invoke();
         Actor actor = damage.source.GetComponent<Actor>();
-
+        RealignToTarget();
         /*
         float otherSpeed = 0f;
         if (actor.TryGetComponent<Animancer.AnimancerComponent>(out Animancer.AnimancerComponent otherAnimancer))
@@ -958,6 +1006,102 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         OnParrySuccess.Invoke();
     }
 
+
+    public void StartPillarRise()
+    {
+        GameObject pillar = Instantiate(pillarPrefab);
+        Vector3 pos = this.transform.position;
+        pos.y = 0f;
+        pillar.transform.position = pos;
+        IsOnPillar = true;
+        currentPillarIndex = pillars.Count;
+        pillars.Add(pillar);
+        StartCoroutine(PillarRiseRoutine(pillar));
+        
+    }
+    IEnumerator PillarRiseRoutine(GameObject pillar)
+    {
+        float clock = 0f;
+        Vector3 pillarPosition = this.transform.position;
+        while (clock < pillarRiseDuration)
+        {
+            clock += Time.deltaTime;
+            float t = Mathf.Clamp01(clock / pillarRiseDuration);
+            pillarPosition.y = pillarRiseCurve.Evaluate(t) * pillarHeight;
+            //yield return new WaitForFixedUpdate();
+            pillar.transform.position = pillarPosition;
+            this.transform.position = pillarPosition;
+            yield return null;
+        }
+    }
+
+    public void StartPillarJump()
+    {
+        int newPillarIndex = -1;
+        while (newPillarIndex < 0 || newPillarIndex == currentPillarIndex)
+        {
+            newPillarIndex = Random.Range(0, pillars.Count - 1);
+        }
+        StartCoroutine(PillarJumpRoutine(newPillarIndex));
+    }
+
+    IEnumerator PillarJumpRoutine(int newPillarIndex)
+    {
+        if (newPillarIndex == currentPillarIndex) yield break;
+        IsOnPillar = false;
+        GameObject oldPillar = pillars[currentPillarIndex];
+        GameObject newPillar = pillars[newPillarIndex];
+        float t = 0f;
+        Vector3 pos;
+        while (t < 0.95)
+        {
+            if (out_PillarJumpCurve > t)
+            {
+                t = out_PillarJumpCurve;
+            }
+            pos = Vector3.Lerp(oldPillar.transform.position, newPillar.transform.position, pillarJumpHorizCurve.Evaluate(t));
+            pos.y = this.transform.position.y;
+            this.transform.position = pos;
+            yield return null;
+        }
+        IsOnPillar = true;
+        this.transform.position = newPillar.transform.position;
+        currentPillarIndex = newPillarIndex;
+    }
+
+    public void StartPillarFall()
+    {
+        IsOnPillar = false;
+        StartCritVulnerability(pillarFallDuration + 5f);
+        StartCoroutine(PillarFallRoutine());
+    }
+
+    IEnumerator PillarFallRoutine()
+    {
+        float clock = 0f;
+
+        float y = this.transform.position.y;
+        Vector3 xz = this.transform.position;
+        xz.y = 0f;
+        Vector3 targetHoriz = this.transform.position + this.transform.forward * horizontalClearDistance;
+        targetHoriz.y = 0f;
+        while (clock < pillarFallDuration)
+        {
+            clock += Time.deltaTime;
+            float t = Mathf.Clamp01(clock / pillarFallDuration);
+            y = (pillarFallVertCurve.Evaluate(t)) * pillarHeight;
+            xz = this.transform.position;
+            xz.y = 0f;
+            if (Vector3.Dot(this.transform.forward, targetHoriz - xz) > 0)
+            {
+                xz = Vector3.MoveTowards(xz, targetHoriz, horizontalClearSpeed * Time.deltaTime);
+            }
+            
+            this.transform.position = new Vector3(xz.x, y, xz.z);
+            output = t;
+            yield return null;
+        }
+    }
     void OnAnimatorMove()
     {
         
