@@ -1,8 +1,10 @@
 using Animancer;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class PerspectiveHandController : MonoBehaviour
 {
     AnimancerComponent animancer;
@@ -24,6 +26,15 @@ public class PerspectiveHandController : MonoBehaviour
     bool playingSpellResurrect;
     public bool playSpellStop;
     bool playingSpellStop;
+
+    [Space(40)]
+
+    public HandAnim[] anims;
+
+    [Space(10)]
+    public int index;
+    public bool playHandAnim;
+    bool playingHandAnim;
     private void Start()
     {
         animancer = this.GetComponent<AnimancerComponent>();
@@ -46,6 +57,11 @@ public class PerspectiveHandController : MonoBehaviour
             playSpellStop = false;
             PlaySpellStop();
         }
+        if (playHandAnim)
+        {
+            playHandAnim = false;
+            PlayHandIndex();
+        }
         if (playingSpellCastForwards)
         {
             perspectiveCamera.transform.position = spellCastForwardsTransform.position;
@@ -60,6 +76,12 @@ public class PerspectiveHandController : MonoBehaviour
         {
             perspectiveCamera.transform.position = spellStopTransform.position;
             perspectiveCamera.transform.rotation = spellStopTransform.rotation;
+        }
+        else if (playingHandAnim)
+        {
+            Transform handTransform = anims[index].transform;
+            perspectiveCamera.transform.position = handTransform.position;
+            perspectiveCamera.transform.rotation = handTransform.rotation;
         }
     }
 
@@ -100,5 +122,26 @@ public class PerspectiveHandController : MonoBehaviour
         {
             playingSpellStop = false;
         };
+    }
+
+    public void PlayHandIndex()
+    {
+        playingHandAnim = true;
+        AnimancerState state = animancer.Play(anims[index].clip);
+        perspectiveCamera.transform.position = anims[index].transform.position;
+        perspectiveCamera.transform.rotation = anims[index].transform.rotation;
+
+        state.Events.OnEnd = () =>
+        {
+            playingHandAnim = false;
+        };
+    }
+
+    [Serializable]
+    public struct HandAnim
+    {
+        public string name;
+        public ClipTransition clip;
+        public Transform transform;
     }
 }
