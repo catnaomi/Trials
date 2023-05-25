@@ -13,6 +13,7 @@ using UnityEngine.InputSystem.Interactions;
 public class PlayerTargetManager : MonoBehaviour
 {
     public PlayerActor player;
+    public Transform playerHead;
     public Camera cam;
     public float maxPlayerDistance = 20f;
     public float maxCamDistance = 20f;
@@ -21,6 +22,7 @@ public class PlayerTargetManager : MonoBehaviour
     public int index = 0;
     public bool lockedOn;
     public GameObject currentTarget;
+    
 
     CinemachineTargetGroup cmtg;
 
@@ -65,12 +67,18 @@ public class PlayerTargetManager : MonoBehaviour
     public float freeLookDistanceOffset = 0f;
     public float freeLookDistanceMultiplier = 1f;
     public float freeLookMaxDistance = 25f;
-    [Space(5)]
+    [Space(10)]
     public float botRigHeightMult = .3f;
-    public float midRigHeightMult = .5f;
-    public float topRigHeightMult = .7f;
+    public float botRigHeightFixedHead = 0f;
     [Space(5)]
+    public float midRigHeightMult = .5f;
+    public float midRigHeightFixedHead = 0f;
+    [Space(5)]
+    public float topRigHeightMult = .7f;
+    public float topRigHeightFixedHead = 0f;
+    [Space(10)]
     public float radiusHeightMult = 1f;
+    public bool targetingCylinder = false;
     [Space(10)]
     [SerializeField, ReadOnly] float radius;
     [Space(5)]
@@ -624,13 +632,13 @@ public class PlayerTargetManager : MonoBehaviour
     {
         radius = Mathf.Clamp((cmtg.Sphere.radius * freeLookDistanceMultiplier) + freeLookDistanceOffset, freeLookMinDistance, freeLookMaxDistance);
 
-        topHeight = radius * topRigHeightMult;
+        topHeight = -(cmtg.transform.position.y - playerHead.position.y - topRigHeightFixedHead) + radius * topRigHeightMult;
         topRadius = RadiusWithY(radius + (radius * (radiusHeightMult * topRigHeightMult)), topHeight);
 
-        midHeight = radius * midRigHeightMult;
+        midHeight = -(cmtg.transform.position.y - playerHead.position.y - midRigHeightFixedHead) + radius * midRigHeightMult;
         midRadius = RadiusWithY(radius + (radius * (radiusHeightMult * midRigHeightMult)), midHeight);
 
-        botHeight = radius * botRigHeightMult;
+        botHeight = -(cmtg.transform.position.y - playerHead.position.y - botRigHeightFixedHead) + radius * botRigHeightMult;
         botRadius = RadiusWithY(radius + (radius * (radiusHeightMult * botRigHeightMult)), botHeight);
 
         freeLook.m_Orbits[0].m_Height = topHeight;
@@ -645,6 +653,7 @@ public class PlayerTargetManager : MonoBehaviour
 
     float RadiusWithY(float r, float y)
     {
+        if (targetingCylinder) return r;
         if (Mathf.Abs(y) > Mathf.Abs(r)) return r; // making sure we don't accidentally get NaNs, that should only be happening when editing values in inspector anyway
         return Mathf.Sqrt(Mathf.Pow(r,2) - Mathf.Pow(y,2));
     }

@@ -1232,7 +1232,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     void FixedUpdate()
     {
-        cc.Move(rootDelta);
+        if (IsAttacking())
+        {
+            cc.Move(rootDelta);
+        }
+        else
+        {
+            MoveTo(this.transform.position + rootDelta);
+        }
     }
     public override bool IsTimeStopped()
     {
