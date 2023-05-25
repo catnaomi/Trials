@@ -30,7 +30,7 @@ public class DojoBossParryParticleController : MonoBehaviour
                 }
                 if (crossParticle.isPlaying)
                 {
-                    crossParticle.Stop();
+                    crossParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 }
                 parryIsCircle = true;
             }
@@ -42,7 +42,7 @@ public class DojoBossParryParticleController : MonoBehaviour
                 }
                 if (circleParticle.isPlaying)
                 {
-                    circleParticle.Stop();
+                    circleParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 }
                 parryIsCircle = false;
             }
@@ -51,11 +51,11 @@ public class DojoBossParryParticleController : MonoBehaviour
         {
             if (crossParticle.isPlaying)
             {
-                crossParticle.Stop();
+                crossParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             }
             if (circleParticle.isPlaying)
             {
-                circleParticle.Stop();
+                circleParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             }
 
         }

@@ -30,6 +30,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public AnimationCurve lanceExtensionCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     public Vector2 lanceExtensionMinMax = Vector2.up;
     public float lanceExtensionDuration = 1f;
+    Vector3 rootDelta;
     [Header("Bow & Arrow")]
     public GameObject arrowPrefab;
     public GameObject homingArrowPrefab;
@@ -76,6 +77,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public float horizontalClearSpeed = 5f;
     bool wasOnPillarLastFrame;
     bool isPillarJumping;
+    bool isPillarRising;
+    bool isPillarFalling;
     [Space(10)]
     public float output;
     [Header("Navigation")]
@@ -600,7 +603,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             if (pillars[i] == null) continue;
             BreakableObject breakableObject = pillars[i].GetComponent<BreakableObject>();
-            if ((IsOnPillar || isPillarJumping) && currentPillarIndex == i)
+            if ((IsOnPillar || isPillarJumping || isPillarRising) && currentPillarIndex == i)
             {
                 breakableObject.brokenByElements = 0;
             }
@@ -1060,7 +1063,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         Vector3 pos = this.transform.position;
         pos.y = 0f;
         pillar.transform.position = pos;
-        IsOnPillar = true;
+        //IsOnPillar = true;
         currentPillarIndex = pillars.Count;
         pillars.Add(pillar);
         StartCoroutine(PillarRiseRoutine(pillar));
@@ -1070,20 +1073,24 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         float clock = 0f;
         Vector3 pillarPosition = this.transform.position;
+        isPillarRising = true;
+        yield return new WaitForFixedUpdate();
         while (clock < pillarRiseDuration)
         {
             if (this.IsTimeStopped())
             {
                 yield return new WaitWhile(this.IsTimeStopped);
             }
-            clock += Time.deltaTime;
+            clock += Time.fixedDeltaTime;
             float t = Mathf.Clamp01(clock / pillarRiseDuration);
             pillarPosition.y = pillarRiseCurve.Evaluate(t) * pillarHeight;
             //yield return new WaitForFixedUpdate();
             pillar.transform.position = pillarPosition;
             MoveTo(pillarPosition);
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
+        isPillarRising = false;
+        IsOnPillar = true;
     }
 
     public void StartPillarJump()
@@ -1115,6 +1122,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         float t = 0f;
         Vector3 pos;
         CheckInvulnerablePillar();
+        yield return new WaitForFixedUpdate();
         while (t < 0.95)
         {
             if (this.IsTimeStopped())
@@ -1128,7 +1136,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             pos = Vector3.Lerp(oldPillar.transform.position, newPillar.transform.position, pillarJumpHorizCurve.Evaluate(t));
             pos.y = this.transform.position.y;
             MoveTo(pos);
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
         MoveTo(newPillar.transform.position);
         IsOnPillar = true;
@@ -1151,13 +1159,15 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         xz.y = 0f;
         Vector3 targetHoriz = this.transform.position + this.transform.forward * horizontalClearDistance;
         targetHoriz.y = 0f;
+        isPillarFalling = true;
+        yield return new WaitForFixedUpdate();
         while (clock < pillarFallDuration)
         {
             if (this.IsTimeStopped())
             {
                 yield return new WaitWhile(this.IsTimeStopped);
             }
-            clock += Time.deltaTime;
+            clock += Time.fixedDeltaTime;
             float t = Mathf.Clamp01(clock / pillarFallDuration);
             y = (pillarFallVertCurve.Evaluate(t)) * pillarHeight;
             xz = this.transform.position;
@@ -1169,8 +1179,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             
             MoveTo(new Vector3(xz.x, y, xz.z));
             output = t;
-            yield return null;
+            yield return new WaitForFixedUpdate();
         }
+        isPillarFalling = false;
     }
 
     void MoveTo(Vector3 position)
@@ -1186,10 +1197,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     }
     void OnAnimatorMove()
     {
-        
+        Vector3 diff = animator.rootPosition - this.transform.position;
         if (IsAttacking())
         {
-            Vector3 diff = animator.rootPosition - this.transform.position;
+            
             Vector3 dirToTarget = (CombatTarget.transform.position - this.transform.position);
             dirToTarget.y = 0f;
             dirToTarget.Normalize();
@@ -1205,14 +1216,23 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 float endMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
                 //Debug.Log($"adjusted root motion movement: {startingMagnitude} vs {endMagnitude}");
             }
-            diff +=  -this.transform.position.y * Vector3.up;
-            cc.Move(diff);
+            //diff +=  -this.transform.position.y * Vector3.up;
+            //cc.Move(diff);
         }
         else
         {
-            MoveTo(animator.rootPosition);
+            //MoveTo(animator.rootPosition);
         }
+        if (!(IsOnPillar || isPillarRising || isPillarJumping || isPillarFalling))
+        {
+            diff += -this.transform.position.y * Vector3.up;
+        }
+        rootDelta = diff;
+    }
 
+    void FixedUpdate()
+    {
+        cc.Move(rootDelta);
     }
     public override bool IsTimeStopped()
     {
