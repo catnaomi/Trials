@@ -135,26 +135,34 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         }
         bool blockSuccess = (actor.IsBlocking() && !hitFromBehind && !damage.unblockable);
         bool didTypedBlock = false;
-        if (actor.IsTypedBlocking())
+        if (actor is PlayerActor player)
         {
-            didTypedBlock = true;
-            if (damage.isSlash && !actor.IsBlockingSlash())
+            if (player.IsBlockingSlash())
             {
-                blockSuccess = false;
+                didTypedBlock = true;
+                if (damage.isThrust)
+                {
+                    blockSuccess = false;
+                }
             }
-            else if (damage.isThrust && !actor.IsBlockingThrust())
+            else if (player.IsBlockingThrust())
             {
-                blockSuccess = false;
+                didTypedBlock = true;
+                if (damage.isSlash)
+                {
+                    blockSuccess = false;
+                }
             }
         }
+        
         if (blockSuccess && actor.GetBlockResistance() != null)
         {
             dr = DamageResistance.Add(dr, actor.GetBlockResistance());
         }
 
-        Debug.Log("damage before resistances = " + damageAmount);
+        //Debug.Log("damage before resistances = " + damageAmount);
         damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.unresistedMinimum, damage.GetTypes(), dr);
-        Debug.Log("damage after resistances = " + damageAmount);
+        //Debug.Log("damage after resistances = " + damageAmount);
 
         bool isArmored = actor.IsArmored() && !damage.breaksArmor;
         

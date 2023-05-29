@@ -12,17 +12,25 @@ public class OffHandShield : EquippableWeapon
 
     public override DamageResistance GetBlockResistance()
     {
-        if (hasTypedResistances && holder.IsBlockingSlash())
+        if (holder is PlayerActor player)
         {
-            return slashResistance;
-        }
-        else if (hasTypedResistances && holder.IsBlockingThrust())
-        {
-            return thrustResistance;
+            if (hasTypedResistances && player.IsBlockingSlash())
+            {
+                return slashResistance;
+            }
+            else if (hasTypedResistances && player.IsBlockingThrust())
+            {
+                return thrustResistance;
+            }
+            else
+            {
+                return blockResistance;
+            }
         }
         else
         {
             return blockResistance;
         }
+        
     }
 }

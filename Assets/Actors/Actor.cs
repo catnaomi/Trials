@@ -154,20 +154,6 @@ public class Actor : MonoBehaviour
     {
         return false;
     }
-    public virtual bool IsBlockingSlash()
-    {
-        return false;
-    }
-
-    public virtual bool IsBlockingThrust()
-    {
-        return false;
-    }
-
-    public virtual bool IsTypedBlocking()
-    {
-        return IsBlockingSlash() || IsBlockingThrust();
-    }
 
     public virtual bool IsFalling()
     {

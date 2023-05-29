@@ -168,6 +168,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool hasTypedBlocks;
     int lastTypedBlockParam;
     public float blockShiftSpeed = 4f;
+    public float blockShiftBufferWindow = 1f;
     public UnityEvent OnBlockTypeChange;
     bool shouldRecenter;
     ClipTransition plungeEnd;
@@ -4656,14 +4657,34 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return CanBlock() && (animancer.States.Current == state.block || animancer.States.Current == damageHandler.block);
     }
 
-    public override bool IsBlockingSlash()
+    public bool IsBlockingSlash()
     {
-        return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.SLASH_INT || IsSlashHeld());
+        if (buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Slash)
+        {
+            Debug.Log("tapblock:slash");
+        }
+        return IsBlocking() && buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Slash;
+        //return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.SLASH_INT || IsSlashHeld() || buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Slash);
     }
 
-    public override bool IsBlockingThrust()
+    public bool IsBlockingThrust()
     {
-        return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.THRUST_INT || IsThrustHeld());
+        if (buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Thrust)
+        {
+            Debug.Log("tapblock:thrust");
+        }
+        return IsBlocking() && buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Thrust;
+        //return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.THRUST_INT || IsThrustHeld() || buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Thrust);
+    }
+
+    public bool IsTypedBlocking()
+    {
+        return IsBlockingSlash() || IsBlockingThrust();
+    }
+
+    public bool HasTypedBlocks()
+    {
+        return hasTypedBlocks;
     }
 
     public bool IsInDialogue()
