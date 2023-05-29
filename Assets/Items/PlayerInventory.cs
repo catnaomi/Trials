@@ -1170,11 +1170,29 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     {
         if (weapon == this.MainWeapon)
         {
-            return 1;
+            if (weapon.ParentLeft)
+            {
+                return Inventory.OffType;
+            }
+            else
+            {
+                return Inventory.MainType;
+            }
         }
         else if (weapon == this.OffWeapon)
         {
-            return -1;
+            if (weapon.ParentLeft)
+            {
+                return Inventory.OffType;
+            }
+            else
+            {
+                return Inventory.MainType;
+            }
+        }
+        else if (weapon == this.RangedWeapon)
+        {
+            return Inventory.RangedType;
         }
         else
         {
