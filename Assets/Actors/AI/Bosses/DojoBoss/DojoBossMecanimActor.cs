@@ -102,6 +102,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] int OffenseStage;
     [ReadOnly, SerializeField] bool IsOnPillar;
     [ReadOnly, SerializeField] bool OnLightPillarHit;
+    [ReadOnly, SerializeField] bool PlayerIsProne;
     [Space(5)]
     [SerializeField] float out_PillarJumpCurve;
     [Space(10)]
@@ -139,6 +140,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         nav = this.GetComponent<NavMeshAgent>();
         nav.updatePosition = true;
         nav.updateRotation = true;
+        Physics.IgnoreCollision(cc, PlayerActor.player.GetComponent<Collider>());
         StartCoroutine(DestinationCoroutine());
     }
 
@@ -183,6 +185,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             nav.updateRotation = false;
             cc.enabled = true;
         }
+
+        PlayerIsProne = PlayerActor.player.IsProne();
         CheckPhase();
         UpdateMecanimValues();
         if (randomClock <= 0f)
@@ -292,6 +296,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         out_PillarJumpCurve = animator.GetFloat("out_PillarJumpCurve");
 
         UpdateTrigger("OnLightPillarHit", ref OnLightPillarHit);
+
+        animator.SetBool("PlayerIsProne", PlayerIsProne);
     }
 
     void UpdateTrigger(string name, ref bool trigger)
@@ -1223,23 +1229,31 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             //MoveTo(animator.rootPosition);
         }
-        if (!(IsOnPillar || isPillarRising || isPillarJumping || isPillarFalling))
-        {
-            diff += -this.transform.position.y * Vector3.up;
-        }
         rootDelta = diff;
     }
 
     void FixedUpdate()
     {
-        if (IsAttacking())
+        if (!(IsOnPillar || isPillarRising || isPillarJumping || isPillarFalling))
         {
-            cc.Move(rootDelta);
+            Vector3 position = this.transform.position;
+            position.y = 0f;
+            this.transform.position = position;
         }
-        else
+        if (rootDelta.magnitude > 0)
         {
-            MoveTo(this.transform.position + rootDelta);
+            if (IsAttacking())
+            {
+                cc.Move(rootDelta);
+            }
+            else
+            {
+                cc.enabled = false;
+                this.transform.position = this.transform.position + rootDelta;
+                cc.enabled = true;
+            }
         }
+        
     }
     public override bool IsTimeStopped()
     {

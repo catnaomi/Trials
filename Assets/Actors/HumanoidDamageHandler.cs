@@ -26,6 +26,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     public AnimancerState hurt;
     public AnimancerState block;
     public AnimancerState fall;
+    public AnimancerState rise;
     AnimancerState invuln;
     public Hitbox lastHitbox;
     //protected ClipTransition blockStagger;
@@ -606,6 +607,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         AnimancerState state = animancer.Play((faceUp) ? damageAnims.getupFaceUp : damageAnims.getupFaceDown);
         SetInvulnClip(state);
         hurt = state;
+        rise = hurt;
         hurt.Events.OnEnd = OnEnd;
     }
     IEnumerator CriticalTimeOut()

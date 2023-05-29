@@ -4617,6 +4617,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (animancer == null) return false;
         return animancer.States.Current == damageHandler.hurt;
     }
+
+    public bool IsProne()
+    {
+        if (animancer == null) return false;
+        return animancer.States.Current == damageHandler.fall || animancer.States.Current == damageHandler.rise || resurrecting;
+
+    }
     public override bool IsClimbing()
     {
         if (animancer == null) return false;
