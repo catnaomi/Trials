@@ -4659,22 +4659,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public bool IsBlockingSlash()
     {
-        if (buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Slash)
-        {
-            Debug.Log("tapblock:slash");
-        }
-        return IsBlocking() && buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Slash;
-        //return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.SLASH_INT || IsSlashHeld() || buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Slash);
+        return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.SLASH_INT || IsSlashHeld() || buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Slash);
     }
 
     public bool IsBlockingThrust()
     {
-        if (buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Thrust)
-        {
-            Debug.Log("tapblock:thrust");
-        }
-        return IsBlocking() && buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Thrust;
-        //return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.THRUST_INT || IsThrustHeld() || buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Thrust);
+        return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.THRUST_INT || IsThrustHeld() || buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Thrust);
     }
 
     public bool IsTypedBlocking()
