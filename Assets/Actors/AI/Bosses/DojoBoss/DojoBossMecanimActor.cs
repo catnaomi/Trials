@@ -68,6 +68,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public int currentPillarIndex = 0;
     public BreakableObject invulnerablePillar;
     public DamageType pillarWeakness;
+    [Space(10)]
+    public DamageKnockback pillarShockwaveDamage;
+    public float pillarShockwaveRange;
+    public float pillarPushSpeed = 5f;
     [Space(20)]
     public float pillarJumpDuration = 1f;
     public AnimationCurve pillarJumpHorizCurve = AnimationCurve.Linear(0, 0, 1, 1);
@@ -103,6 +107,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] bool IsOnPillar;
     [ReadOnly, SerializeField] bool OnLightPillarHit;
     [ReadOnly, SerializeField] bool PlayerIsProne;
+    [ReadOnly, SerializeField] bool PlayerIsAttacking;
     [Space(5)]
     [SerializeField] float out_PillarJumpCurve;
     [Space(10)]
@@ -187,6 +192,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
 
         PlayerIsProne = PlayerActor.player.IsProne();
+        PlayerIsAttacking = PlayerActor.player.IsAttacking();
         CheckPhase();
         UpdateMecanimValues();
         if (randomClock <= 0f)
@@ -298,6 +304,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         UpdateTrigger("OnLightPillarHit", ref OnLightPillarHit);
 
         animator.SetBool("PlayerIsProne", PlayerIsProne);
+        animator.SetBool("PlayerIsAttacking", PlayerIsAttacking);
     }
 
     void UpdateTrigger(string name, ref bool trigger)
@@ -482,6 +489,35 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         StartCoroutine(DelayScatter(arrow.gameObject));
     }
 
+    public void PillarShockwave()
+    {
+        if (Vector3.Distance(PlayerActor.player.transform.position, this.transform.position) < pillarShockwaveRange)
+        {
+            DamageKnockback damage = new DamageKnockback(pillarShockwaveDamage);
+            damage.source = this.gameObject;
+            PlayerActor.player.TakeDamage(damage);
+            StartCoroutine(PushPlayerToRange(pillarShockwaveRange, pillarPushSpeed));
+            
+        }
+    }
+
+    IEnumerator PushPlayerToRange(float range, float speed)
+    {
+        Vector3 dir = (PlayerActor.player.transform.position - this.transform.position).normalized;
+        CharacterController playerCC = PlayerActor.player.GetComponent<CharacterController>();
+        while (Vector3.Distance(PlayerActor.player.transform.position, this.transform.position) < range)
+        {
+            yield return new WaitForFixedUpdate();
+            if (playerCC.enabled)
+            {
+                playerCC.Move(dir * speed * Time.fixedDeltaTime);
+            }
+            else
+            {
+                PlayerActor.player.transform.position += dir * speed * Time.fixedDeltaTime;
+            }
+        }
+    }
     IEnumerator DelayScatter(GameObject arrow)
     {
 
