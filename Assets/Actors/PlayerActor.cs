@@ -4959,4 +4959,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         ((IDamageable)damageHandler).GetParried();
     }
+
+    public bool IsCritVulnerable()
+    {
+        return ((IDamageable)damageHandler).IsCritVulnerable();
+    }
 }

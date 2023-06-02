@@ -11,9 +11,11 @@ public interface IDamageable
 
     public void StartCritVulnerability(float time);
 
+    public bool IsCritVulnerable();
     public void SetHitParticleVectors(Vector3 position, Vector3 direction);
 
     public void GetParried();
+
     public DamageKnockback GetLastTakenDamage();
 
     public GameObject GetGameObject();

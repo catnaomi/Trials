@@ -214,4 +214,9 @@ public class CombatDummy : Actor, IDamageable
     {
         ((IDamageable)damageHandler).GetParried();
     }
+
+    public bool IsCritVulnerable()
+    {
+        return ((IDamageable)damageHandler).IsCritVulnerable();
+    }
 }

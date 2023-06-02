@@ -857,6 +857,15 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 {
                     OnFlinch = true;
                 }
+                if (!damage.critData.doesNotConsumeCritState)
+                {
+                    StopCritVulnerability();
+                }
+                else
+                {
+                    StartCritVulnerability(Mathf.Min(5f, damage.critData.criticalExtensionTime));
+                }
+                damage.OnCrit.Invoke();
                 damage.didCrit = true;
                 damage.OnCrit.Invoke();
             }
@@ -875,6 +884,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public void StartCritVulnerability(float time)
     {
         if (totalCritTime >= DamageKnockback.MAX_CRITVULN_TIME) return;
+        if (time < critTime)
+        {
+            totalCritTime -= critTime - time;
+        }
         critTime = time;
         totalCritTime += time;
         if (!inCritCoroutine)

@@ -469,4 +469,9 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     {
         ((IDamageable)damageHandler).GetParried();
     }
+
+    public bool IsCritVulnerable()
+    {
+        return ((IDamageable)damageHandler).IsCritVulnerable();
+    }
 }

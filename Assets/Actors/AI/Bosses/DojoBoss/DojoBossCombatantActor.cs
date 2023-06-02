@@ -2232,5 +2232,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         ((IDamageable)damageHandler).GetParried();
     }
+
+    public bool IsCritVulnerable()
+    {
+        return ((IDamageable)damageHandler).IsCritVulnerable();
+    }
     #endregion
 }

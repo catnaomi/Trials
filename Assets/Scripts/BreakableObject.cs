@@ -116,4 +116,9 @@ public class BreakableObject : MonoBehaviour, IDamageable
     {
         throw new System.NotImplementedException();
     }
+
+    public bool IsCritVulnerable()
+    {
+        return false;
+    }
 }

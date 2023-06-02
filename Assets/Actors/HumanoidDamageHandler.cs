@@ -59,8 +59,6 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
         totalCritTime = 0f;
 
-        DizzyHumanoid dizzy = FXController.CreateDizzy().GetComponent<DizzyHumanoid>();
-        dizzy.SetActor(actor, this);
         animancer.Layers[HumanoidAnimLayers.Flinch].SetMask(damageAnims.flinchMask);
         animancer.Layers[HumanoidAnimLayers.Flinch].IsAdditive = true;
         animancer.Layers[HumanoidAnimLayers.Flinch].SetWeight(1f);
@@ -563,6 +561,10 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     public void StartCritVulnerability(float time)
     {
         if (totalCritTime >= DamageKnockback.MAX_CRITVULN_TIME) return;
+        if (time < critTime)
+        {
+            totalCritTime -= critTime - time;
+        }
         critTime = time;
         totalCritTime += time;
         if (!inCritCoroutine)

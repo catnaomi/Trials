@@ -20,8 +20,6 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
 
         totalCritTime = 0f;
 
-        DizzyHumanoid dizzy = FXController.CreateDizzy().GetComponent<DizzyHumanoid>();
-        dizzy.SetActor(actor, this);
         animancer.Layers[HumanoidAnimLayers.Flinch].SetMask(damageAnims.flinchMask);
         animancer.Layers[HumanoidAnimLayers.Flinch].IsAdditive = true;
         animancer.Layers[HumanoidAnimLayers.Flinch].SetWeight(1f);

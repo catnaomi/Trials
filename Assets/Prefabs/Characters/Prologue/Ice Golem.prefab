@@ -651,6 +651,7 @@ Transform:
   - {fileID: 7701696502654383174}
   - {fileID: 3040821613352642859}
   - {fileID: 1729733229}
+  - {fileID: 3037999735953998830}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -840,6 +841,9 @@ MonoBehaviour:
   OnDodgeSuccess:
     m_PersistentCalls:
       m_Calls: []
+  OnParrySuccess:
+    m_PersistentCalls:
+      m_Calls: []
   OnBlock:
     m_PersistentCalls:
       m_Calls: []
@@ -853,16 +857,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   lastDamageAmountTaken: 0
-  moveDirection: {x: 0, y: 0, z: 0}
-  moveAdditional: {x: 0, y: 0, z: 0}
-  lastContactPoint: {x: 0, y: 0, z: 0}
-  lastBlockPoint: {x: 0, y: 0, z: 0}
-  xzVel: {x: 0, y: 0, z: 0}
-  yVel: 0
-  hitParticlePosition: {x: 0, y: 0, z: 0}
-  hitParticleDirection: {x: 0, y: 0, z: 0}
-  currentDamage:
+  lastDamageTaken:
     healthDamage: 0
+    unresistedMinimum: 0
     types: 0
     critData:
       criticalMultiplier: 0
@@ -876,11 +873,15 @@ MonoBehaviour:
     isThrust: 0
     isSlash: 0
     isRanged: 0
+    isParry: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
     stunTime: 0
+    repositionLength: 0
     stagger: 0
     staggers:
       onHit: 0
@@ -888,6 +889,67 @@ MonoBehaviour:
       onCritical: 0
       onKill: 0
       onCounterHit: 0
+      onBlock: 0
+      onTypedBlock: 0
+    kbForce: {x: 0, y: 0, z: 0}
+    kbRadial: 0
+    didCrit: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    hitClip: {fileID: 0}
+  moveDirection: {x: 0, y: 0, z: 0}
+  moveAdditional: {x: 0, y: 0, z: 0}
+  lastContactPoint: {x: 0, y: 0, z: 0}
+  lastBlockPoint: {x: 0, y: 0, z: 0}
+  xzVel: {x: 0, y: 0, z: 0}
+  yVel: 0
+  hitParticlePosition: {x: 0, y: 0, z: 0}
+  hitParticleDirection: {x: 0, y: 0, z: 0}
+  currentDamage:
+    healthDamage: 0
+    unresistedMinimum: 0
+    types: 0
+    critData:
+      criticalMultiplier: 0
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 0
+    isSlash: 0
+    isRanged: 0
+    isParry: 0
+    bouncesOffBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
+    stunTime: 0
+    repositionLength: 0
+    stagger: 0
+    staggers:
+      onHit: 0
+      onArmorHit: 0
+      onCritical: 0
+      onKill: 0
+      onCounterHit: 0
+      onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     didCrit: 0
@@ -1053,6 +1115,8 @@ MonoBehaviour:
   lBack: {fileID: 6050112396938137980}
   cBack: {fileID: 4804397128934485808}
   eyeHeight: 0
+  centerTarget: {fileID: 0}
+  eyeTarget: {fileID: 0}
   upperBodyMask: {fileID: 31900000, guid: 74da9ab124865d3498afd76d28f9bb59, type: 2}
 --- !u!114 &603506081
 MonoBehaviour:
@@ -1122,10 +1186,17 @@ MonoBehaviour:
   waterSource: {fileID: 603506086}
   combatWhiffSource: {fileID: 603506086}
   combatHitSource: {fileID: 603506086}
+  parryPosition: {x: 0, y: 0, z: 1}
   OnDust:
     m_PersistentCalls:
       m_Calls: []
   OnDashDust:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStepL:
+    m_PersistentCalls:
+      m_Calls: []
+  OnStepR:
     m_PersistentCalls:
       m_Calls: []
   StartSpiral:
@@ -1163,6 +1234,7 @@ MonoBehaviour:
   timeRemaining: []
   timeTravelStates: []
   timeTravelController: {fileID: 0}
+  deltaTime: 0
   OnFreeze:
     m_PersistentCalls:
       m_Calls: []
@@ -4331,3 +4403,80 @@ Transform:
   m_Father: {fileID: 3173679263520090880}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &5143848878027784536
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 2
+    m_TransformParent: {fileID: 2080545369736461827}
+    m_Modifications:
+    - target: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -8.14
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 17.446575
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5.2687736
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.9999395
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.011007849
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7875594964810826441, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+        type: 3}
+      propertyPath: m_Name
+      value: Dizzy Humanoid
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_AddedGameObjects: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5b3b4003494096c4ca8e1f4bbc347702, type: 3}
+--- !u!4 &3037999735953998830 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7875594964810826422, guid: 5b3b4003494096c4ca8e1f4bbc347702,
+    type: 3}
+  m_PrefabInstance: {fileID: 5143848878027784536}
+  m_PrefabAsset: {fileID: 0}

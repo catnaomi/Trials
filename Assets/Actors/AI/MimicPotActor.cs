@@ -594,4 +594,9 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
         state.hurt.Events.OnEnd = EndHide;
         OnHurt.Invoke();
     }
+
+    public bool IsCritVulnerable()
+    {
+        return false;
+    }
 }

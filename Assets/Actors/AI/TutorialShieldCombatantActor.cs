@@ -350,4 +350,9 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
     {
         ((IDamageable)damageHandler).GetParried();
     }
+
+    public bool IsCritVulnerable()
+    {
+        return ((IDamageable)damageHandler).IsCritVulnerable();
+    }
 }

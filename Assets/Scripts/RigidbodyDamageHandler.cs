@@ -146,4 +146,9 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
     {
         throw new System.NotImplementedException();
     }
+
+    public bool IsCritVulnerable()
+    {
+        return false;
+    }
 }

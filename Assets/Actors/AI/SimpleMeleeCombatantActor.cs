@@ -474,4 +474,9 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
     {
         ((IDamageable)damageHandler).GetParried();
     }
+
+    public bool IsCritVulnerable()
+    {
+        return ((IDamageable)damageHandler).IsCritVulnerable();
+    }
 }
