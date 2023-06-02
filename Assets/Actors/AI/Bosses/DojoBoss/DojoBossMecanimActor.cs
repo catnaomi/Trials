@@ -1041,7 +1041,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         if (actor is PlayerActor player)
         {
             AnimancerState state = player.animancer.Play(playerParryFailAnim);
-            StartCoroutine(PlayerParryFailStateRoutine(state, player));
+            //StartCoroutine(PlayerParryFailStateRoutine(state, player));
         }
     }
 
@@ -1232,6 +1232,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         rootDelta = diff;
     }
 
+
     void FixedUpdate()
     {
         if (!(IsOnPillar || isPillarRising || isPillarJumping || isPillarFalling))
@@ -1254,6 +1255,17 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             }
         }
         
+    }
+
+    public void StartTimeline()
+    {
+        animator.SetBool("InTimeline", true);
+        HitboxActive(0);
+    }
+
+    public void StopTimeline()
+    {
+        animator.SetBool("InTimeline", false);
     }
     public override bool IsTimeStopped()
     {

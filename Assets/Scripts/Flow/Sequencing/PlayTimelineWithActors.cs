@@ -63,6 +63,7 @@ public class PlayTimelineWithActors : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (playerRefTransform != null)
         playerRefTransform.gameObject.SetActive(false);
         
     }
@@ -89,7 +90,11 @@ public class PlayTimelineWithActors : MonoBehaviour
 
     public void Play()
     {
-        playerRefTransform.gameObject.SetActive(true);
+        if (playerRefTransform != null)
+        {
+            playerRefTransform.gameObject.SetActive(true);
+        }
+        
         SetBindings();
         director.Play();
         playing = true;
@@ -124,8 +129,8 @@ public class PlayTimelineWithActors : MonoBehaviour
             }
             PlayerActor.player.JumpToNavMesh();
         }
-        
-        playerRefTransform.gameObject.SetActive(false);
+
+        if (playerRefTransform != null) playerRefTransform.gameObject.SetActive(false);
         OnEnd.Invoke();
         if (destroyOnComplete)
         {

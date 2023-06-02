@@ -29,11 +29,17 @@ public class YarnTimelineBehaviour : PlayableBehaviour
             runner.onDialogueComplete.AddListener(OnDialogueComplete);
             //runner.onNodeComplete.AddListener(OnNodeEnd);
             runner.onNodeStart.AddListener(OnNodeStart);
-            if (runner.IsDialogueRunning) runner.Stop();
-            runner.GetComponent<LineActorPositioningHandler>()?.SetSpeaker(null, null);
+            if (node != "_pause")
+            {
+                if (runner.IsDialogueRunning) runner.Stop();
+                runner.GetComponent<LineActorPositioningHandler>()?.SetSpeaker(null, null);
 
-            runner.StartDialogue(node);
-
+                runner.StartDialogue(node);
+            }
+            else if (runner.IsDialogueRunning)
+            {
+                OnNodeStart(node);
+            }
             
             started = true;
         }

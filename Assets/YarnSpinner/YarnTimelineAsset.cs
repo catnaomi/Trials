@@ -8,8 +8,11 @@ public class YarnTimelineAsset : PlayableAsset
 {
     public YarnProject yarnProject;
     public string node;
+    [Tooltip("Pauses the entire Timeline, freezing all animations")]
     public bool pauseOnStart;
+    [Tooltip("Sets Timeline speed to zero, but extrapolate animations continue")]
     public bool zeroSpeedOnStart;
+
 
     public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
     {

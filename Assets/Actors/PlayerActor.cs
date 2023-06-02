@@ -129,6 +129,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool shouldDodge;
     public bool secondary;
     public Vector2 dodgeDirection;
+    [Space(10)]
+    public bool disablePhysics;
     [Header("Carrying Settings")]
     public Carryable carryable;
     public bool isCarrying;
@@ -2007,7 +2009,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     void FixedUpdate()
     {
-
+        if (disablePhysics) return;
         if (isGrounded)
         {
             if (yVel <= 0)
@@ -2068,6 +2070,20 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 cc.Move(velocity * Time.fixedDeltaTime);
             }
         }
+    }
+
+    public void DisablePhysics()
+    {
+        DisablePhysics(true);
+    }
+
+    public void EnablePhysics()
+    {
+        DisablePhysics(false);
+    }
+    public void DisablePhysics(bool disabled)
+    {
+        disablePhysics = disabled;
     }
 
     #region GAME FLOW

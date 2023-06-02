@@ -27,6 +27,9 @@ public class HumanoidPositionReference : MonoBehaviour
     public GameObject cBack;
     [Space(5)]
     public float eyeHeight;
+    [Space(5)]
+    public Transform centerTarget;
+    public Transform eyeTarget;
     [Header("Masks")]
     public AvatarMask upperBodyMask;
 
