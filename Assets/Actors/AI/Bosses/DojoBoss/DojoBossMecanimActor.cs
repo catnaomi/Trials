@@ -30,6 +30,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public AnimationCurve lanceExtensionCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     public Vector2 lanceExtensionMinMax = Vector2.up;
     public float lanceExtensionDuration = 1f;
+    public float maxRootMotionBackwardsAdjust = -1f;
     Vector3 rootDelta;
     [Header("Bow & Arrow")]
     public GameObject arrowPrefab;
@@ -108,6 +109,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] bool OnLightPillarHit;
     [ReadOnly, SerializeField] bool PlayerIsProne;
     [ReadOnly, SerializeField] bool PlayerIsAttacking;
+    [ReadOnly, SerializeField] bool Blocking;
     [Space(5)]
     [SerializeField] float out_PillarJumpCurve;
     [Space(10)]
@@ -193,6 +195,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         PlayerIsProne = PlayerActor.player.IsProne();
         PlayerIsAttacking = PlayerActor.player.IsAttacking();
+        Blocking = IsBlocking();
         CheckPhase();
         UpdateMecanimValues();
         if (randomClock <= 0f)
@@ -305,6 +308,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         animator.SetBool("PlayerIsProne", PlayerIsProne);
         animator.SetBool("PlayerIsAttacking", PlayerIsAttacking);
+        animator.SetBool("Blocking", Blocking);
     }
 
     void UpdateTrigger(string name, ref bool trigger)
@@ -823,6 +827,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         bool crossParrying = IsCrossParrying();
         if (((isParrying) && damage.isRanged) || IsBlocking())
         {
+            if (IsBlocking())
+            {
+                OnFlinch = true;
+            }
+            
             RealignToTarget();
             damage.OnBlock.Invoke();
             this.OnBlock.Invoke();
@@ -1268,9 +1277,15 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             {
                 diff = diff.normalized * (distanceAfterMovement - minimumDistance) * Time.deltaTime;
                 //diff = Vector3.ClampMagnitude(diff, minimumDistance - distanceAfterMovement);
-                float endMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
+                
                 //Debug.Log($"adjusted root motion movement: {startingMagnitude} vs {endMagnitude}");
             }
+            float endMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
+            if (endMagnitude < (maxRootMotionBackwardsAdjust * Time.deltaTime))
+            {
+                diff = Vector3.ClampMagnitude(diff, maxRootMotionBackwardsAdjust * Time.deltaTime);
+            }
+            
             //diff +=  -this.transform.position.y * Vector3.up;
             //cc.Move(diff);
         }
@@ -1292,7 +1307,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         if (rootDelta.magnitude > 0)
         {
-            if (IsAttacking())
+            if (false)// IsAttacking())
             {
                 cc.Move(rootDelta);
             }

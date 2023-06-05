@@ -30,6 +30,7 @@ public class Actor : MonoBehaviour
     public UnityEvent OnDodgeSuccess;
     public UnityEvent OnParrySuccess;
     public UnityEvent OnBlock;
+    public UnityEvent OnDodge;
     [HideInInspector]public UnityEvent OnHealthLoss;
     [HideInInspector]public UnityEvent OnHealthGain;
     [HideInInspector]public UnityEvent OnHealthChange;

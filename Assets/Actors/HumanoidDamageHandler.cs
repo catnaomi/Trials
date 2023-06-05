@@ -134,6 +134,8 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         }
         bool blockSuccess = (actor.IsBlocking() && !hitFromBehind && !damage.unblockable);
         bool didTypedBlock = false;
+        bool breaksBlock = damage.breaksBlock;
+
         if (actor is PlayerActor player)
         {
             if (player.IsBlockingSlash())
@@ -169,18 +171,30 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         bool willKill = (!willInjure) && damageAmount >= actor.attributes.health.current;
         bool isCounterhit = actor.IsAttacking();
 
-        if (!actor.IsDodging())
+        if (actor.IsDodging())
         {
-            if (willKill && damage.cannotKill)
-            {
-                actor.attributes.SetHealth(1f);
-                willKill = false;
-            }
-            else
-            {
-                actor.attributes.ReduceHealth(damageAmount);
-            }
+            // do nothing
+            actor.OnDodge.Invoke();
         }
+        else if (willKill && blockSuccess)
+        {
+            if (actor.attributes.health.current <= 1f)
+            {
+                breaksBlock = true;
+            }
+            actor.attributes.SetHealth(1f);
+            willKill = false;
+        }
+        else if (willKill && (damage.cannotKill || blockSuccess))
+        {
+            actor.attributes.SetHealth(1f);
+            willKill = false;
+        }
+        else
+        {
+            actor.attributes.ReduceHealth(damageAmount);
+        }
+
         
 
 
@@ -220,7 +234,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         else if (blockSuccess && !willKill && !willInjure)
         {
             DamageKnockback.BlockStaggerType blockStagger = (didTypedBlock ? damage.staggers.onTypedBlock : damage.staggers.onBlock);
-            if (!damage.breaksBlock)
+            if (!breaksBlock)
             {
                 if (blockStagger == DamageKnockback.BlockStaggerType.AutoParry)
                 {
@@ -282,7 +296,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 actor.transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
             }
             AdjustDefendingPosition(damage.source, damage.repositionLength);
-            damage.OnCrit.Invoke();
+            //damage.OnCrit.Invoke();
             damage.OnBlock.Invoke();
             actor.OnBlock.Invoke();
         }
