@@ -53,6 +53,7 @@ public class TimeMeterDisplay : MonoBehaviour
             timeController.OnMeterFail.AddListener(MeterFail);
             timeController.OnCooldownFail.AddListener(CooldownFail);
             timeController.OnCooldownComplete.AddListener(CooldownComplete);
+            timeController.OnBonusCharge.AddListener(CooldownComplete);
         }
     }
     // Update is called once per frame

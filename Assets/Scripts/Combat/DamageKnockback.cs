@@ -36,7 +36,7 @@ public class DamageKnockback
     public Vector3 kbForce;
     public bool kbRadial;
     [Space(5)]
-    public bool didCrit;
+    [ReadOnly] public bool didCrit;
     
     [ReadOnly]
     public GameObject hitboxSource;
@@ -49,6 +49,7 @@ public class DamageKnockback
     public UnityEvent OnHit;
     public UnityEvent OnCrit;
     public UnityEvent OnBlock;
+    public UnityEvent OnHitWeakness;
     
     public static float MAX_CRITVULN_TIME = 5f;
     public static readonly int SLASH_INT = -1;
@@ -167,6 +168,7 @@ public class DamageKnockback
         this.OnHit = damageKnockback.OnHit ?? new UnityEvent();
         this.OnCrit = damageKnockback.OnCrit ?? new UnityEvent();
         this.OnBlock = damageKnockback.OnBlock ?? new UnityEvent();
+        this.OnHitWeakness = damageKnockback.OnHitWeakness ?? new UnityEvent();
     }
 
     public DamageKnockback()

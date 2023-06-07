@@ -1,4 +1,5 @@
 ﻿using Animancer;
+using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -136,8 +137,10 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         bool didTypedBlock = false;
         bool breaksBlock = damage.breaksBlock;
 
-        if (actor is PlayerActor player)
+        PlayerActor player = null;
+        if (actor is PlayerActor)
         {
+            player = actor as PlayerActor;
             if (player.IsBlockingSlash())
             {
                 didTypedBlock = true;
@@ -165,6 +168,10 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.unresistedMinimum, damage.GetTypes(), dr);
         //Debug.Log("damage after resistances = " + damageAmount);
 
+        if (damage.GetTypes().HasType(dr.weaknesses))
+        {
+            damage.OnHitWeakness.Invoke();
+        }
         bool isArmored = actor.IsArmored() && !damage.breaksArmor;
         
         bool willInjure = actor.attributes.spareable && actor.attributes.HasHealthRemaining() && damageAmount >= actor.attributes.health.current;
@@ -296,6 +303,13 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 actor.transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
             }
             AdjustDefendingPosition(damage.source, damage.repositionLength);
+            if (actor is PlayerActor)
+            {
+                if (didTypedBlock && blockSuccess && !breaksBlock)
+                {
+                    player.OnTypedBlockSuccess.Invoke();
+                }
+            }
             //damage.OnCrit.Invoke();
             damage.OnBlock.Invoke();
             actor.OnBlock.Invoke();

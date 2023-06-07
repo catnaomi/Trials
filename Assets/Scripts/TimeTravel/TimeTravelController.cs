@@ -55,6 +55,7 @@ public class TimeTravelController : MonoBehaviour
     public float timeChargeRecoveryRate = 1f;
     public float timeChargeQuickRecoveryRate = 3f;
     [SerializeField, ReadOnly] public bool isQuickRecharging;
+    public float timeChargeBonus = 5f;
     public float timeStopDrainRate;
     public float rewindDrainRate;
     public float timePowerCooldown = 5f;
@@ -72,6 +73,7 @@ public class TimeTravelController : MonoBehaviour
     public UnityEvent OnChargeRecovered;
     public UnityEvent OnQuickChargeStart;
     public UnityEvent OnQuickChargeEnd;
+    public UnityEvent OnBonusCharge;
     [Header("Shader Settings")]
     public Material magicVignette;
     public float magicVignetteStrength;
@@ -106,7 +108,9 @@ public class TimeTravelController : MonoBehaviour
         {
             lastPosition = PlayerActor.player.transform.position;
             PlayerActor.player.OnHitboxActive.AddListener(TimeStopHitboxActivation);
-            PlayerActor.player.OnParrySuccess.AddListener(RecoverCharge);
+            PlayerActor.player.OnTypedBlockSuccess.AddListener(BonusCharge);
+            PlayerActor.player.OnHitWeakness.AddListener(BonusCharge);
+            //PlayerActor.player.OnParrySuccess.AddListener(RecoverCharge);
         }
         
     }
@@ -231,14 +235,14 @@ public class TimeTravelController : MonoBehaviour
                 if (timePowerClock > 0f)
                 {
                     timePowerClock -= Time.deltaTime * (isQuickRecharging ? timeChargeQuickRecoveryRate : timeChargeRecoveryRate);
-                    if (timePowerClock <= 0f)
+                }
+                if (timePowerClock <= 0f)
+                {
+                    RecoverCharge();
+                    OnCooldownComplete.Invoke();
+                    if (charges.current < charges.max || (isQuickRecharging && (charges.current < charges.max + 1)))
                     {
-                        RecoverCharge();
-                        OnCooldownComplete.Invoke();
-                        if (charges.current < charges.max || (isQuickRecharging && (charges.current < charges.max + 1)))
-                        {
-                            timePowerClock = timePowerCooldown;
-                        }
+                        timePowerClock += timePowerCooldown;
                     }
                 }
             }
@@ -353,6 +357,12 @@ public class TimeTravelController : MonoBehaviour
             charges.current++;
         }
         OnChargeRecovered.Invoke();
+    }
+
+    public void BonusCharge()
+    {
+        timePowerClock -= timeChargeBonus;
+        OnBonusCharge.Invoke();
     }
 
     public void ToggleQuickRecharge(bool isOn)

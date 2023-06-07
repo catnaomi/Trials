@@ -866,6 +866,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
             //damage.didCrit = true;
             this.OnHurt.Invoke();
+            damage.OnHitWeakness.Invoke();
             damage.OnCrit.Invoke();
             damage.OnBlock.Invoke();
             this.OnBlock.Invoke();

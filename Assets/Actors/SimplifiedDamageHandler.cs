@@ -1,4 +1,5 @@
 ﻿using Animancer;
+using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -66,6 +67,10 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
         bool tink = normalDamageAmount <= 0f;
         bool weak = isCrit || (dr.weaknesses & damage.GetTypes()) != 0;
 
+        if (weak)
+        {
+            damage.OnHitWeakness.Invoke();
+        }
         if (willKill && damage.cannotKill)
         {
             actor.attributes.SetHealth(1f);

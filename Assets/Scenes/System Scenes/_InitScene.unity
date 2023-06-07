@@ -3335,7 +3335,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 247212858}
-  m_LocalRotation: {x: 0.11144443, y: -0.0000000046730086, z: 1.906596e-10, w: 0.9937707}
+  m_LocalRotation: {x: 0.11144443, y: -0.0000000046723287, z: 1.9063226e-10, w: 0.9937707}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -5707,6 +5707,9 @@ MonoBehaviour:
   OnBlock:
     m_PersistentCalls:
       m_Calls: []
+  OnDodge:
+    m_PersistentCalls:
+      m_Calls: []
   OnHealthLoss:
     m_PersistentCalls:
       m_Calls: []
@@ -5767,6 +5770,9 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
     hitClip: {fileID: 0}
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
@@ -5824,6 +5830,9 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    OnHitWeakness:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
@@ -5988,6 +5997,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnParrySlashStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTypedBlockSuccess:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHitWeakness:
     m_PersistentCalls:
       m_Calls: []
   moveAnim: {fileID: 11400000, guid: 1501bcdeed2561947b6564d8f43bd572, type: 2}
@@ -12158,7 +12173,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 420413097}
-  m_LocalRotation: {x: 0.093349814, y: -0.0000000060235372, z: 1.3537324e-10, w: 0.9956334}
+  m_LocalRotation: {x: 0.093349814, y: -0.0000000059087597, z: 1.3284032e-10, w: 0.9956334}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -12238,7 +12253,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 462353258}
-  m_LocalRotation: {x: -0.22262056, y: 0.011106189, z: 0.0025362824, w: 0.9748386}
+  m_LocalRotation: {x: -0.0000000017110628, y: 0.9983062, z: 0.05817852, w: 0.000000029360745}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -15049,8 +15064,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
-  m_LocalRotation: {x: -0.0025362824, y: 0.9748386, z: -0.22262058, w: -0.01110619}
-  m_LocalPosition: {x: 0.11391376, y: 3.3919842, z: 4.998699}
+  m_LocalRotation: {x: 0.058178518, y: -0.000000029176261, z: -0.0000000014545318,
+    w: 0.9983062}
+  m_LocalPosition: {x: 0, y: 2.48142, z: -6.99781}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -16571,7 +16587,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7759563, y: 1}
+    m_SensorSize: {x: 1.7780126, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
@@ -16587,8 +16603,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1132656376}
-  m_LocalRotation: {x: 0.0000000026196403, y: 0.71325046, z: -0.70090926, w: 0.0000000026657065}
-  m_LocalPosition: {x: -0.0000000013037262, y: 11.248477, z: 0.17452486}
+  m_LocalRotation: {x: 0.000000002624074, y: 0.71325046, z: -0.70090926, w: 0.0000000026703677}
+  m_LocalPosition: {x: -0.0000000013080622, y: 11.248477, z: 0.17452486}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -18699,6 +18715,7 @@ MonoBehaviour:
   timeChargeRecoveryRate: 1
   timeChargeQuickRecoveryRate: 25
   isQuickRecharging: 0
+  timeChargeBonus: 5
   timeStopDrainRate: 0
   rewindDrainRate: 16.666666
   timePowerCooldown: 60
@@ -18726,6 +18743,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnQuickChargeEnd:
+    m_PersistentCalls:
+      m_Calls: []
+  OnBonusCharge:
     m_PersistentCalls:
       m_Calls: []
   magicVignette: {fileID: 2100000, guid: 55a41ba4be6d47c4d853230b7017b379, type: 2}
@@ -27825,8 +27845,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925080555}
-  m_LocalRotation: {x: 0.0025362945, y: -0.9748386, z: 0.22262056, w: 0.0111062415}
-  m_LocalPosition: {x: 0.11391376, y: 3.3919842, z: 4.998699}
+  m_LocalRotation: {x: 0.058178533, y: -0, z: -0, w: 0.9983062}
+  m_LocalPosition: {x: 0, y: 2.48142, z: -6.99781}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -30158,6 +30178,9 @@ MonoBehaviour:
   OnBlock:
     m_PersistentCalls:
       m_Calls: []
+  OnDodge:
+    m_PersistentCalls:
+      m_Calls: []
   OnHealthLoss:
     m_PersistentCalls:
       m_Calls: []
@@ -30218,6 +30241,9 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
     hitClip: {fileID: 0}
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
@@ -30275,6 +30301,9 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    OnHitWeakness:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
@@ -30430,6 +30459,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnParrySlashStart:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTypedBlockSuccess:
+    m_PersistentCalls:
+      m_Calls: []
+  OnHitWeakness:
     m_PersistentCalls:
       m_Calls: []
   moveAnim: {fileID: 11400000, guid: dafdfce5704a7df45b3672c192d56bd2, type: 2}

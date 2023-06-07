@@ -206,6 +206,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public UnityEvent OnParryStart;
     public UnityEvent OnParryThrustStart;
     public UnityEvent OnParrySlashStart;
+    public UnityEvent OnTypedBlockSuccess;
+    public UnityEvent OnHitWeakness;
     [Header("Animancer")]
     public MixerTransition2DAsset moveAnim;
     public MixerTransition2DAsset strafeAnim;
@@ -465,7 +467,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         OnHurt.AddListener(() => { HitboxActive(0); });
         OnHitboxActive.AddListener(RealignToTarget);
-
         onControlsChanged.AddListener(HandleCinemachine);
 
         //StartCoroutine("SafePointCoroutine");
@@ -4191,7 +4192,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         else
         {
-            base.SetCurrentDamage(damageKnockback);
+            if (currentDamage != null)
+            {
+                currentDamage.OnHit.RemoveListener(RegisterHit);
+                currentDamage.OnHitWeakness.RemoveListener(HitWeakness);
+            }
+            currentDamage = new DamageKnockback(damageKnockback);
+            currentDamage.source = this.gameObject;
+            currentDamage.OnHit.AddListener(RegisterHit);
+            currentDamage.OnHitWeakness.AddListener(HitWeakness);
         }
     }
     
@@ -4308,6 +4317,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+    public void HitWeakness()
+    {
+        OnHitWeakness.Invoke();
+    }
 
     void _OnDodgeEnd()
     {
