@@ -12,6 +12,9 @@ public class YarnTimelineAsset : PlayableAsset
     public bool pauseOnStart;
     [Tooltip("Sets Timeline speed to zero, but extrapolate animations continue")]
     public bool zeroSpeedOnStart;
+    [Space(20)]
+    public bool setPositionOnFinish = false;
+    public float timelinePosition = -1;
 
 
     public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
@@ -31,6 +34,8 @@ public class YarnTimelineAsset : PlayableAsset
         
         yarnTimelineBehaviour.pauseOnStart = pauseOnStart;
         yarnTimelineBehaviour.zeroSpeedOnStart = zeroSpeedOnStart;
+        yarnTimelineBehaviour.setPositionOnFinish = setPositionOnFinish;
+        yarnTimelineBehaviour.timelinePosition = timelinePosition;
         return playable;
     }
 }

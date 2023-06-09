@@ -1,3 +1,4 @@
+using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,8 @@ public class YarnTimelineBehaviour : PlayableBehaviour
     public string node;
     public bool pauseOnStart;
     public bool zeroSpeedOnStart;
+    public bool setPositionOnFinish = false;
+    public float timelinePosition = -1;
     bool started;
     double speed;
     DialogueRunner runner;
@@ -34,7 +37,7 @@ public class YarnTimelineBehaviour : PlayableBehaviour
                 if (runner.IsDialogueRunning) runner.Stop();
                 runner.GetComponent<LineActorPositioningHandler>()?.SetSpeaker(null, null);
 
-                runner.StartDialogue(node);
+                runner.StartDialogueWhenAble(node);
             }
             else if (runner.IsDialogueRunning)
             {
@@ -69,6 +72,24 @@ public class YarnTimelineBehaviour : PlayableBehaviour
         else if (zeroSpeedOnStart)
         {
             director.playableGraph.GetRootPlayable(0).SetSpeed(speed);
+        }
+        if (setPositionOnFinish)
+        {
+            if (director.time < timelinePosition)
+            {
+                FastForwardTimelineToPosition(timelinePosition);
+            }
+        }
+    }
+
+
+    void FastForwardTimelineToPosition(float targetPosition)
+    {
+        float RATE = 1 / 60f;
+        while (director.time < targetPosition)
+        {
+            director.Evaluate();
+            director.time += RATE;
         }
     }
 }

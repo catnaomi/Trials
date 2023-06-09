@@ -35,7 +35,9 @@ public class YarnPlayer : MonoBehaviour
         {
             runner.Stop();
             yield return new WaitWhile(() => runner.IsDialogueRunning);
+            
         }
+        yield return null;
         runner.SetProject(yarnProject);
         runner.StartDialogue(nodes[index]);
         runner.onDialogueComplete.AddListener(CallFinish);
