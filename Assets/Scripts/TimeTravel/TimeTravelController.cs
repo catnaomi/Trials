@@ -27,6 +27,7 @@ public class TimeTravelController : MonoBehaviour
     bool cancelRewind;
     PlayerInput playerInput;
     [Header("Time Stop Settings")]
+    public UnityEvent OnTimeStopAnimStart;
     public UnityEvent OnTimeStopStart;
     public UnityEvent OnTimeStopEnd;
     public EventHandler<DamageKnockback> OnTimeStopDamageEvent;
@@ -40,11 +41,15 @@ public class TimeTravelController : MonoBehaviour
     public List<IAffectedByTimeTravel> frozens;
     public UnityEvent OnTimeStopHit;
     bool updateFreeze;
+    [ReadOnly] public float timeStopDuration;
     [Header("Slow Time Settings")]
     public float timeSlowAmount = 0.5f;
     bool isSlowing;
     public UnityEvent OnSlowTimeStart;
     public UnityEvent OnSlowTimeStop;
+    [Header("Controls Settings")]
+    public float inputLockoutDuration = 3f;
+    public bool inInputLockout;
     [Header("Observation Point Settings")]
     public bool isObserving;
     public bool observationHighlighted;
@@ -271,6 +276,14 @@ public class TimeTravelController : MonoBehaviour
             charges.current = charges.max;
         }
 
+        if (freeze)
+        {
+            timeStopDuration += Time.deltaTime;
+        }
+        else
+        {
+            timeStopDuration = 0f;
+        }
         bool isAnyPowerOn = freeze || isSlowing || isRewinding;
         magicVignetteStrength = Mathf.MoveTowards(magicVignetteStrength, isAnyPowerOn ? 1f : 0f, 5f * Time.deltaTime);
         magicVignette.SetFloat("_Weight", magicVignetteStrength);
@@ -302,7 +315,7 @@ public class TimeTravelController : MonoBehaviour
         {
             // do nothing
         }
-        else if (!isRewinding && !freeze && c.interaction is TapInteraction)
+        else if (!isRewinding && !freeze)// && c.interaction is TapInteraction)
         {
             if (!CanStartPower())
             {
@@ -325,9 +338,11 @@ public class TimeTravelController : MonoBehaviour
                 StartCoroutine(OpenBubbleRoutine());
                 StartFreeze();
             }*/
-            AddAllToFreeze();
-            StartFreeze();
+            //AddAllToFreeze();
+            //StartFreeze();
+            StartFreezeFX();
         }
+        /*
         else if (!freeze && recording && !isRewinding && c.interaction is HoldInteraction)
         {
             if (!CanStartPower())
@@ -337,9 +352,11 @@ public class TimeTravelController : MonoBehaviour
             }
             StartRewind();
         }
-        else if (freeze && c.interaction is TapInteraction)
+        */
+        else if (freeze)
         {
             StopFreeze();
+            
         }
     }
 
@@ -555,6 +572,8 @@ public class TimeTravelController : MonoBehaviour
 
     public void StartFreeze()
     {
+        AddAllToFreeze();
+
         freeze = true;
         meter.current = meter.max;
         charges.current--;
@@ -571,6 +590,13 @@ public class TimeTravelController : MonoBehaviour
         ignoreLimits = false;
         StopPostProcessing();
         OnTimeStopEnd.Invoke();
+        StartInputLockout(inputLockoutDuration);
+    }
+
+    public void StartFreezeFX()
+    {
+        StartInputLockout(inputLockoutDuration);
+        OnTimeStopAnimStart.Invoke();
     }
 
     IEnumerator FreezeRoutine()
@@ -770,9 +796,21 @@ public class TimeTravelController : MonoBehaviour
         return freeze;
     }
 
+
+    public void StartInputLockout(float duration)
+    {
+        StartCoroutine(InputLockoutRoutine(duration));
+    }
+
+    IEnumerator InputLockoutRoutine(float duration)
+    {
+        inInputLockout = true;
+        yield return new WaitForSecondsRealtime(duration);
+        inInputLockout = false;
+    }
     public bool ShouldAllowInput()
     {
-        return Time.timeScale > 0f;
+        return Time.timeScale > 0f && !inInputLockout;
     }
     public static float GetTimeAffectedDeltaTime()
     {

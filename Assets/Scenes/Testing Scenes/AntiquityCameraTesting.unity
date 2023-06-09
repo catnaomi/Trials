@@ -140,7 +140,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &86996733
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,7 +171,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &86996735
 Animator:
@@ -299,8 +299,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_Father: {fileID: 589913411}
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &203844586
 GameObject:
@@ -533,31 +533,30 @@ MonoBehaviour:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: -2260685525311482940, guid: d99e189c4c02e514783e950c9561fc54,
-      type: 3}
+    _Clip: {fileID: 0}
     _Speed: 1
-    _NormalizedStartTime: 0
-  spellCastForwardsTransform: {fileID: 1541853298}
+    _NormalizedStartTime: NaN
+  spellCastForwardsTransform: {fileID: 0}
   spellResurrect:
     _FadeDuration: 0.25
     _Events:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: 7058473471010129006, guid: d84e39fbe96a2e548bf670511c8addf0, type: 3}
+    _Clip: {fileID: 0}
     _Speed: 1
-    _NormalizedStartTime: 0
-  spellResurrectTransform: {fileID: 939418811}
+    _NormalizedStartTime: NaN
+  spellResurrectTransform: {fileID: 0}
   spellStop:
     _FadeDuration: 0.25
     _Events:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: 7400000, guid: c414643d8f9d3ef46a1849f195252e8b, type: 2}
+    _Clip: {fileID: 0}
     _Speed: 1
-    _NormalizedStartTime: 0
-  spellStopTransform: {fileID: 1150884877}
+    _NormalizedStartTime: NaN
+  spellStopTransform: {fileID: 0}
   playSpellCastForwards: 0
   playSpellResurrect: 0
   playSpellStop: 0
@@ -587,6 +586,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 589913411}
+  - component: {fileID: 589913412}
   m_Layer: 0
   m_Name: Player Perspective
   m_TagString: Untagged
@@ -606,12 +606,83 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 188979924}
   - {fileID: 1447738664}
   - {fileID: 1041346807}
   - {fileID: 1106155677}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &589913412
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 589913410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ade9cf1246232944d87bf88083923bc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hand: {fileID: 1447738668}
+  body: {fileID: 0}
+  timeScale: {fileID: 0}
+  timeStopAnim:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: f17c72fa406a77f41a6fdb45040c5c1c, type: 2}
+    _Speed: 1
+    _NormalizedStartTime: NaN
+  timeScaleCurveDuration: 1
+  timeScaleCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: -4.950856
+      outSlope: -4.950856
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.09277213
+    - serializedVersion: 3
+      time: 0.45
+      value: 0.25
+      inSlope: 0
+      outSlope: Infinity
+      tangentMode: 97
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.46
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 136
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  TimeStopEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  bodyIdle:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: NaN
 --- !u!1 &879132623
 GameObject:
   m_ObjectHideFlags: 0
@@ -798,7 +869,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7788104, y: 1}
+    m_SensorSize: {x: 1.7787879, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -821,7 +892,7 @@ Transform:
   m_Children:
   - {fileID: 1407583272}
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &961739749
 GameObject:
@@ -3693,31 +3764,30 @@ MonoBehaviour:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: -2260685525311482940, guid: d99e189c4c02e514783e950c9561fc54,
-      type: 3}
+    _Clip: {fileID: 0}
     _Speed: 1
-    _NormalizedStartTime: 0
-  spellCastForwardsTransform: {fileID: 1804497214}
+    _NormalizedStartTime: NaN
+  spellCastForwardsTransform: {fileID: 0}
   spellResurrect:
     _FadeDuration: 0.25
     _Events:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: 7058473471010129006, guid: d84e39fbe96a2e548bf670511c8addf0, type: 3}
+    _Clip: {fileID: 0}
     _Speed: 1
-    _NormalizedStartTime: 0
-  spellResurrectTransform: {fileID: 1586571276}
+    _NormalizedStartTime: NaN
+  spellResurrectTransform: {fileID: 0}
   spellStop:
     _FadeDuration: 0.25
     _Events:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: 7400000, guid: c414643d8f9d3ef46a1849f195252e8b, type: 2}
+    _Clip: {fileID: 0}
     _Speed: 1
-    _NormalizedStartTime: 0
-  spellStopTransform: {fileID: 1864248311}
+    _NormalizedStartTime: NaN
+  spellStopTransform: {fileID: 0}
   playSpellCastForwards: 0
   playSpellResurrect: 0
   playSpellStop: 0
@@ -5556,7 +5626,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: b1ec250f75fa3b141a7cd9736a5774c2, type: 2}
+      objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 1e19801d86948234091bd671e5763e9a,
         type: 3}
       propertyPath: m_ApplyRootMotion
@@ -5981,95 +6051,41 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1447738663}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1447738666
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1447738665}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d4a9e67d8b34b24aa5c594bcbbec038, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  perspectiveCamera: {fileID: 879132626}
-  spellCastForwards:
-    _FadeDuration: 0.25
-    _Events:
-      _NormalizedTimes: []
-      _Callbacks: []
-      _Names: []
-    _Clip: {fileID: 0}
-    _Speed: 1
-    _NormalizedStartTime: NaN
-  spellCastForwardsTransform: {fileID: 0}
-  spellResurrect:
-    _FadeDuration: 0.25
-    _Events:
-      _NormalizedTimes: []
-      _Callbacks: []
-      _Names: []
-    _Clip: {fileID: 0}
-    _Speed: 1
-    _NormalizedStartTime: NaN
-  spellResurrectTransform: {fileID: 0}
-  spellStop:
-    _FadeDuration: 0.25
-    _Events:
-      _NormalizedTimes: []
-      _Callbacks: []
-      _Names: []
-    _Clip: {fileID: 0}
-    _Speed: 1
-    _NormalizedStartTime: NaN
-  spellStopTransform: {fileID: 0}
-  playSpellCastForwards: 0
-  playSpellResurrect: 0
-  playSpellStop: 0
-  anims:
-  - name: snap1
-    clip:
-      _FadeDuration: 0
-      _Events:
-        _NormalizedTimes: []
-        _Callbacks: []
-        _Names: []
-      _Clip: {fileID: -3192403513768849175, guid: 60b976b85e1d61d4e86afdcdc8e850f6,
-        type: 3}
-      _Speed: 0
-      _NormalizedStartTime: 0
-    transform: {fileID: 2020636970}
-  - name: snap1-edit
-    clip:
-      _FadeDuration: 0
-      _Events:
-        _NormalizedTimes: []
-        _Callbacks: []
-        _Names: []
-      _Clip: {fileID: 7400000, guid: 3a4f63a11378b8c4fbb2548201235003, type: 2}
-      _Speed: 0
-      _NormalizedStartTime: 0
-    transform: {fileID: 2020636970}
-  - name: snap2
-    clip:
-      _FadeDuration: 0
-      _Events:
-        _NormalizedTimes: []
-        _Callbacks: []
-        _Names: []
-      _Clip: {fileID: 7400000, guid: 3a4f63a11378b8c4fbb2548201235003, type: 2}
-      _Speed: 0
-      _NormalizedStartTime: 0
-    transform: {fileID: 2020636970}
-  index: 1
-  playHandAnim: 0
 --- !u!95 &1447738667 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 1e19801d86948234091bd671e5763e9a,
     type: 3}
   m_PrefabInstance: {fileID: 1447738663}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1447738668
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1447738665}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ad50f81b1d25c441943c37a89ba23f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _Animator: {fileID: 1447738667}
+  _ActionOnDisable: 0
+--- !u!114 &1447738669
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1447738665}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ed3b0ffac80a4348bf6ed718fe419cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnSnap:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1541853297
 GameObject:
   m_ObjectHideFlags: 0
@@ -8269,7 +8285,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1666904930
 GameObject:
@@ -8288,7 +8304,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!95 &1666904931
 Animator:
   serializedVersion: 4
@@ -8339,7 +8355,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1748971561
 PrefabInstance:
@@ -8352,7 +8368,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 517789e6cc6831346ac509deb8cba3dc,
         type: 3}
       propertyPath: m_RootOrder
-      value: 12
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 517789e6cc6831346ac509deb8cba3dc,
         type: 3}
@@ -10441,7 +10457,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1804497213
 GameObject:
@@ -10534,7 +10550,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2142501748
 GameObject:

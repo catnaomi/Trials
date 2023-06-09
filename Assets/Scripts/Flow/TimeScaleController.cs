@@ -4,8 +4,21 @@ using UnityEngine;
 
 public class TimeScaleController : MonoBehaviour
 {
+    public static TimeScaleController instance;
     public float scale = 1f;
     float fixedDeltaTime;
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            this.enabled = false;
+        }
+    }
     // Start is called before the first frame update
     void Start()
     {

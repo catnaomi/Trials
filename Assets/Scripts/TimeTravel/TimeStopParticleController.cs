@@ -17,6 +17,7 @@ public class TimeStopParticleController : MonoBehaviour
     [SerializeField, ReadOnly] ParticleState state;
     float speedMultiplierMax;
     float emissionTimeMax;
+    bool isFrozen;
     enum ParticleState
     {
         Stopped,
@@ -38,7 +39,7 @@ public class TimeStopParticleController : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        bool isFrozen = timeTravelController.IsFreezing();
+        //bool isFrozen = timeTravelController.IsFreezing();
 
         if (state == ParticleState.Stopped)
         {
@@ -161,6 +162,16 @@ public class TimeStopParticleController : MonoBehaviour
             SetParticles();
         }
         
+    }
+
+    public void StartFreeze()
+    {
+        isFrozen = true;
+    }
+
+    public void StopFreeze()
+    {
+        isFrozen = false;
     }
 
     void GetParticles()
