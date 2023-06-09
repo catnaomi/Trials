@@ -9,7 +9,10 @@ public class PerspectiveAnimController : MonoBehaviour
 {
     public AnimancerComponent hand;
     public AnimancerComponent body;
+    public AvatarMask bodyMask;
     public TimeScaleController timeScale;
+    AnimancerState handState;
+    AnimancerState bodyState;
     [Header("Time Stop")]
     public ClipTransition timeStopAnim;
     public float timeScaleCurveDuration = 1f;
@@ -17,12 +20,11 @@ public class PerspectiveAnimController : MonoBehaviour
     public UnityEvent TimeStopEvent;
     [Header("Time Resume")]
     public ClipTransition timeResumeAnim;
-    [Header("Other Animations")]
-    public ClipTransition bodyIdle;
     // Start is called before the first frame update
     void Start()
     {
-        
+        body.Layers[1].SetWeight(1f);
+        body.Layers[1].SetMask(bodyMask);
     }
 
     // Update is called once per frame
@@ -33,7 +35,11 @@ public class PerspectiveAnimController : MonoBehaviour
 
     public void PlayTimeStop()
     {
-        hand.Play(timeStopAnim).Events.OnEnd = HandStop;
+        handState = hand.Play(timeStopAnim);
+        handState.Events.OnEnd = HandStop;
+        body.Layers[1].SetWeight(1f);
+        bodyState = body.Layers[1].Play(timeStopAnim);
+        bodyState.Events.OnEnd = BodyStop;
         StartCoroutine(TimeStopRoutine());
     }
 
@@ -57,11 +63,20 @@ public class PerspectiveAnimController : MonoBehaviour
 
     public void PlayTimeResume()
     {
-        hand.Play(timeResumeAnim).Events.OnEnd = HandStop;
+        handState = hand.Play(timeResumeAnim);
+        handState.Events.OnEnd = HandStop;
+        body.Layers[1].SetWeight(1f);
+        bodyState = body.Layers[1].Play(timeResumeAnim);
+        bodyState.Events.OnEnd = BodyStop;
     }
 
     void HandStop()
     {
         hand.Stop();
+    }
+
+    void BodyStop()
+    {
+        body.Layers[1].StartFade(0f, .5f);
     }
 }
