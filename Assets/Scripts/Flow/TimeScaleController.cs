@@ -7,7 +7,7 @@ public class TimeScaleController : MonoBehaviour
     public static TimeScaleController instance;
     public float scale = 1f;
     float fixedDeltaTime;
-
+    float lastScale = 1f;
     private void Awake()
     {
         if (instance == null)
@@ -28,10 +28,11 @@ public class TimeScaleController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Time.timeScale != scale)
+        if (Time.timeScale != scale && lastScale != scale)
         {
             Time.timeScale = scale;
             Time.fixedDeltaTime = this.fixedDeltaTime * Time.timeScale;
         }
+        lastScale = scale;
     }
 }

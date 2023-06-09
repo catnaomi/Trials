@@ -102,6 +102,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] int NextParry;
     [ReadOnly, SerializeField] bool ParryFail;
     [ReadOnly, SerializeField] bool OnHeavyDamage;
+    [ReadOnly, SerializeField] bool OnTimeDamage;
     [ReadOnly, SerializeField] float xDirection;
     [ReadOnly, SerializeField] float yDirection;
     [ReadOnly, SerializeField] bool OnFlinch;
@@ -314,6 +315,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator.SetBool("PlayerIsAttacking", PlayerIsAttacking);
         animator.SetBool("Blocking", Blocking);
         animator.SetInteger("PillarCount", PillarCount);
+
+        UpdateTrigger("OnTimeDamage", ref OnTimeDamage);
     }
 
     void UpdateTrigger(string name, ref bool trigger)
@@ -344,6 +347,17 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
     }
 
+
+    public void ResetPainTriggers()
+    {
+        animator.ResetTrigger("OnFlinch");
+        animator.ResetTrigger("OnHeavyDamage");
+        animator.ResetTrigger("OnTimeDamage");
+        OnFlinch = false;
+        OnHeavyDamage = false;
+        OnTimeDamage = false;
+
+    }
     public void RotateTowardsTarget()
     {
         if (this.IsTimeStopped()) return;
@@ -813,7 +827,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         if (!this.IsAlive()) return;
         lastDamageTaken = damage;
         float damageAmount = damage.GetDamageAmount();
-        if (this.IsTimeStopped() || this.IsDodging())
+        if (this.IsTimeStopped() || (this.IsDodging() && !damage.timeDelayed))
         {
             if (this.IsTimeStopped())
             {
@@ -843,27 +857,47 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         else if (crossParrying && !damage.isSlash)
         {
-            if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable) && !damage.cannotRecoil)
+            if (damage.timeDelayed)
             {
-                damageable.StartCritVulnerability(3f);
-                damageable.Recoil();
+                OnBlock.Invoke();
+                damage.OnBlock.Invoke();
+                OnFlinch = true;
             }
-            CrossParryFail(damage);
+            else
+            {
+                if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable) && !damage.cannotRecoil)
+                {
+                    damageable.StartCritVulnerability(3f);
+                    damageable.Recoil();
+                }
+                CrossParryFail(damage);
 
-            OnBlock.Invoke();
-            damage.OnBlock.Invoke();
+                OnBlock.Invoke();
+                damage.OnBlock.Invoke();
+            }
+            
         }
         else if (circleParrying && !damage.isThrust)
         {
-            if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable) && !damage.cannotRecoil)
+            if (damage.timeDelayed)
             {
-                damageable.StartCritVulnerability(3f);
-                damageable.Recoil();
+                OnBlock.Invoke();
+                damage.OnBlock.Invoke();
+                OnFlinch = true;
             }
-            CircleParryFail(damage);
+            else
+            {
+                if (damage.source.TryGetComponent<IDamageable>(out IDamageable damageable) && !damage.cannotRecoil)
+                {
+                    damageable.StartCritVulnerability(3f);
+                    damageable.Recoil();
+                }
+                CircleParryFail(damage);
 
-            OnBlock.Invoke();
-            damage.OnBlock.Invoke();
+                OnBlock.Invoke();
+                damage.OnBlock.Invoke();
+            }
+            
         }
         else if ((crossParrying && damage.isSlash) || (circleParrying && damage.isThrust))
         {
@@ -898,7 +932,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             
             if (IsCritVulnerable())
             {
-                if (damage.stagger != DamageKnockback.StaggerStrength.Light)
+                if (damage.timeDelayed)
+                {
+                    OnTimeDamage = true;
+                    RealignToTarget();
+                }
+                else if (damage.stagger != DamageKnockback.StaggerStrength.Light)
                 {
                     damage.stagger = DamageKnockback.StaggerStrength.Heavy;
                     OnHeavyDamage = true;
@@ -919,6 +958,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 damage.OnCrit.Invoke();
                 damage.didCrit = true;
                 damage.OnCrit.Invoke();
+            }
+            else if (damage.timeDelayed)
+            {
+                damage.stagger = DamageKnockback.StaggerStrength.Heavy;
+                OnTimeDamage = true;
+                RealignToTarget();
             }
             else
             {
@@ -1007,7 +1052,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     public void OnGuardBreak()
     {
-        StartCritVulnerability(5f);
+        StartCritVulnerability(2f);
         NextParrySequence();
         animator.ResetTrigger("OnHeavyDamage");
         if (currentPhase == CombatPhase.ParryPhase)
@@ -1190,6 +1235,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             return;
         }
         StartCoroutine(PillarJumpRoutine(newPillarIndex));
+        ResetPainTriggers();
     }
 
     IEnumerator PillarJumpRoutine(int newPillarIndex)
@@ -1239,6 +1285,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             }
         }
         StartCoroutine(PillarHighJumpRoutine(pillarIndex));
+        ResetPainTriggers();
     }
 
     IEnumerator PillarHighJumpRoutine(int pillarIndex)
@@ -1260,6 +1307,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         float clock = 0f;
 
+        Vector3 dir = this.transform.position - pillar.transform.position;
+        dir.y = 0f;
+        this.transform.rotation = Quaternion.LookRotation(dir.normalized);
+        bool ccEnabled = cc.enabled;
         yield return new WaitForFixedUpdate();
         while (clock < pillarHighJumpDuration)
         {
@@ -1267,12 +1318,15 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
             Vector3 targetPosition = Bezier.GetPoint(t, bezierPoints);
 
+            cc.enabled = false;
             MoveTo(targetPosition);
+            
             clock += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
         }
 
         MoveTo(pillar.transform.position);
+        cc.enabled = ccEnabled;
         IsOnPillar = true;
         isPillarJumping = false;
     }
@@ -1281,6 +1335,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         IsOnPillar = false;
         StartCritVulnerability(pillarFallDuration + 5f);
         StartCoroutine(PillarFallRoutine());
+        ResetPainTriggers();
     }
 
     IEnumerator PillarFallRoutine()

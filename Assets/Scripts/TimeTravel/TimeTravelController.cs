@@ -139,6 +139,10 @@ public class TimeTravelController : MonoBehaviour
             movementDelta = lastPosition - PlayerActor.player.transform.position;
             movementDelta.y = 0f;
         }
+        if (TimelineListener.IsAnyDirectorPlaying())
+        {
+            return;
+        }
             
 
         if (isRewinding)
@@ -810,7 +814,7 @@ public class TimeTravelController : MonoBehaviour
     }
     public bool ShouldAllowInput()
     {
-        return Time.timeScale > 0f && !inInputLockout;
+        return Time.timeScale > 0f && !inInputLockout && !TimelineListener.IsAnyDirectorPlaying();
     }
     public static float GetTimeAffectedDeltaTime()
     {

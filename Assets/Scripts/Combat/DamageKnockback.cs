@@ -37,7 +37,7 @@ public class DamageKnockback
     public bool kbRadial;
     [Space(5)]
     [ReadOnly] public bool didCrit;
-    
+    [ReadOnly] public bool timeDelayed;
     [ReadOnly]
     public GameObject hitboxSource;
     [ReadOnly]

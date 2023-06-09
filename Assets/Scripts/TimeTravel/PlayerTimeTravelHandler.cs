@@ -115,6 +115,7 @@ public class PlayerTimeTravelHandler : ActorTimeTravelHandler
             damage.bouncesOffBlock = false;
             damage.cannotRecoil = true;
             damage.cannotKill = !timeStateDamagePair.isLastHitOnTarget;
+            damage.timeDelayed = true;
             GameObject targetObject = timeStateDamagePair.target.GetGameObject();
             ActorTimeTravelData data = timeStateDamagePair.data;
             if (afterImageDamageDataQueue.Count > 0)
