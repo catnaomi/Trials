@@ -75,6 +75,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public float pillarPushSpeed = 5f;
     [Space(20)]
     public float pillarJumpDuration = 1f;
+    public float pillarHighJumpDuration = 3f;
+    public float pillarExtraJumpHeight = 3f;
     public AnimationCurve pillarJumpHorizCurve = AnimationCurve.Linear(0, 0, 1, 1);
     public float pillarFallDuration = 1f;
     public AnimationCurve pillarFallVertCurve = AnimationCurve.Linear(0, 0, 1, 1);
@@ -110,6 +112,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] bool PlayerIsProne;
     [ReadOnly, SerializeField] bool PlayerIsAttacking;
     [ReadOnly, SerializeField] bool Blocking;
+    [ReadOnly, SerializeField] int PillarCount;
     [Space(5)]
     [SerializeField] float out_PillarJumpCurve;
     [Space(10)]
@@ -196,6 +199,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         PlayerIsProne = PlayerActor.player.IsProne();
         PlayerIsAttacking = PlayerActor.player.IsAttacking();
         Blocking = IsBlocking();
+        PillarCount = pillars.Count;
         CheckPhase();
         UpdateMecanimValues();
         if (randomClock <= 0f)
@@ -309,6 +313,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator.SetBool("PlayerIsProne", PlayerIsProne);
         animator.SetBool("PlayerIsAttacking", PlayerIsAttacking);
         animator.SetBool("Blocking", Blocking);
+        animator.SetInteger("PillarCount", PillarCount);
     }
 
     void UpdateTrigger(string name, ref bool trigger)
@@ -1219,6 +1224,58 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         isPillarJumping = false;
     }
 
+    public void StartPillarHighJump()
+    {
+        int pillarIndex = -1;
+        float farthest = 0f;
+        for (int i = 0; i < pillars.Count; i++)
+        {
+            GameObject pillar = pillars[i];
+            float dist = Vector3.Distance(pillar.transform.position, this.transform.position);
+            if (dist > farthest)
+            {
+                farthest = dist;
+                pillarIndex = i;
+            }
+        }
+        StartCoroutine(PillarHighJumpRoutine(pillarIndex));
+    }
+
+    IEnumerator PillarHighJumpRoutine(int pillarIndex)
+    {
+        isPillarJumping = true;
+        IsOnPillar = false;
+        currentPillarIndex = pillarIndex;
+        CheckInvulnerablePillar();
+        Vector3 pos = this.transform.position;
+        pos.y = 0f;
+        GameObject pillar = pillars[pillarIndex];
+        Vector3[] bezierPoints =
+        {
+            pos,
+            pos + Vector3.up * (pillarHeight + pillarExtraJumpHeight),
+            pillar.transform.position + Vector3.up * pillarExtraJumpHeight,
+            pillar.transform.position
+        };
+
+        float clock = 0f;
+
+        yield return new WaitForFixedUpdate();
+        while (clock < pillarHighJumpDuration)
+        {
+            float t = Mathf.Clamp01(clock / pillarHighJumpDuration);
+
+            Vector3 targetPosition = Bezier.GetPoint(t, bezierPoints);
+
+            MoveTo(targetPosition);
+            clock += Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate();
+        }
+
+        MoveTo(pillar.transform.position);
+        IsOnPillar = true;
+        isPillarJumping = false;
+    }
     public void StartPillarFall()
     {
         IsOnPillar = false;
