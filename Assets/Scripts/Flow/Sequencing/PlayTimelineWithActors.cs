@@ -64,8 +64,29 @@ public class PlayTimelineWithActors : MonoBehaviour
     void Start()
     {
         if (playerRefTransform != null)
-        playerRefTransform.gameObject.SetActive(false);
-        
+        {
+            playerRefTransform.gameObject.SetActive(false);
+        }
+        if (director == null)
+        {
+            director = this.GetComponent<PlayableDirector>();
+        }
+        if (director == null)
+        {
+            Debug.LogError("No Playable Director!");
+            this.enabled = false;
+            return;
+        }
+        TimelineListener.Register(director);
+        /*
+        if (playOnAwake || director.playOnAwake)
+        {
+            if (TimelineListener.instance != null)
+            {
+                TimelineListener.instance.OnDirectorPlay(director);
+            }
+        } 
+        */
     }
 
     // Update is called once per frame
@@ -180,5 +201,10 @@ public class PlayTimelineWithActors : MonoBehaviour
             bindings.Add(binding);
         }
         return bindings;
+    }
+
+    private void OnDestroy()
+    {
+        TimelineListener.Deregister(director);
     }
 }

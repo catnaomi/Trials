@@ -1100,16 +1100,27 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         if (actor is PlayerActor player)
         {
             AnimancerState state = player.animancer.Play(playerParryFailAnim);
-            //StartCoroutine(PlayerParryFailStateRoutine(state, player));
+            StartCoroutine(PlayerParryFailStateRoutine(state, player));
         }
     }
 
     IEnumerator PlayerParryFailStateRoutine(AnimancerState state, PlayerActor player)
     {
         yield return new WaitForSeconds(freezeTimeout);
+        if (TimelineListener.IsAnyDirectorPlaying())
+        {
+            yield return new WaitWhile(TimelineListener.IsAnyDirectorPlaying);
+            yield return new WaitForSeconds(freezeTimeout);
+        }
+        
         if (player.animancer.States.Current == state)
         {
             player.ResetAnim();
+            DojoBossIceBlockParticleController particle = FindObjectOfType<DojoBossIceBlockParticleController>();
+            if (particle != null)
+            {
+                particle.StopParticle();
+            }
         }
     }
 
