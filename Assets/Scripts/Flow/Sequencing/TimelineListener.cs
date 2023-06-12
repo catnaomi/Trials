@@ -46,7 +46,11 @@ public class TimelineListener : MonoBehaviour
 
     public void OnDirectorPlay(PlayableDirector director)
     {
-        playingDirectors.Add(director);
+        if (!playingDirectors.Contains(director))
+        {
+            playingDirectors.Add(director);
+        }
+        
     }
 
     public void OnDirectorStop(PlayableDirector director)

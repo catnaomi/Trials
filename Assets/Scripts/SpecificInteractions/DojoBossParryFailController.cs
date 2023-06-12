@@ -7,21 +7,40 @@ public class DojoBossParryFailController : MonoBehaviour
 {
     public DojoBossMecanimActor dojoBoss;
 
+    [Header("First Parry")]
     public PlayTimelineWithActors firstDirector;
     public float minDistanceToPlayer = 3f;
+    [Header("Second Parry")]
+    public YarnPlayer secondPlayer;
+    [Header("Third Parry")]
+    public YarnPlayer thirdPlayer;
+    [Space(20)]
+    public int parryCount = 0;
     // Start is called before the first frame update
+
     void Start()
     {
         dojoBoss.OnParryFail.AddListener(OnParryFail);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void OnParryFail()
     {
-        
+        parryCount++;
+        if (parryCount == 1)
+        {
+            FirstParry();
+        }
+        else if (parryCount == 2)
+        {
+            SecondParry();
+        }
+        else if (parryCount == 3)
+        {
+            ThirdParry();
+        }
     }
 
-    public void OnParryFail()
+    void FirstParry()
     {
         if (Vector3.Distance(dojoBoss.transform.position, PlayerActor.player.transform.position) < minDistanceToPlayer)
         {
@@ -33,6 +52,16 @@ public class DojoBossParryFailController : MonoBehaviour
         dojoBoss.StartTimeline();
         firstDirector.Play();
         firstDirector.OnEnd.AddListener(OnFinish);
+    }
+
+    void SecondParry()
+    {
+        secondPlayer.Play();
+    }
+
+    void ThirdParry()
+    {
+        thirdPlayer.Play();
     }
 
     IEnumerator RepositionPlayerRoutine()

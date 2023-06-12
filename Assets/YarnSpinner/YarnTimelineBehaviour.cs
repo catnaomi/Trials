@@ -56,6 +56,7 @@ public class YarnTimelineBehaviour : PlayableBehaviour
         }
         else if (zeroSpeedOnStart)
         {
+            if (director == null || !director.playableGraph.IsValid()) return;
             speed = director.playableGraph.GetRootPlayable(0).GetSpeed();
             director.playableGraph.GetRootPlayable(0).SetSpeed(0);
         }
@@ -71,7 +72,11 @@ public class YarnTimelineBehaviour : PlayableBehaviour
         }
         else if (zeroSpeedOnStart)
         {
-            director.playableGraph.GetRootPlayable(0).SetSpeed(speed);
+            if (director != null && director.playableGraph.IsValid())
+            {
+                director.playableGraph.GetRootPlayable(0).SetSpeed(speed);
+            }
+            
         }
         if (setPositionOnFinish)
         {
@@ -85,7 +90,7 @@ public class YarnTimelineBehaviour : PlayableBehaviour
 
     void FastForwardTimelineToPosition(float targetPosition)
     {
-        float RATE = 1 / 60f;
+        float RATE = 1 / 20f;
         while (director.time < targetPosition)
         {
             director.Evaluate();
