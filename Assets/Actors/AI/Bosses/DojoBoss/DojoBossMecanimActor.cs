@@ -317,6 +317,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator.SetInteger("PillarCount", PillarCount);
 
         UpdateTrigger("OnTimeDamage", ref OnTimeDamage);
+
+        animator.SetBool("Dead", dead);
+        animator.SetBool("IsPillarFalling", isPillarFalling);
     }
 
     void UpdateTrigger(string name, ref bool trigger)
@@ -822,6 +825,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         throw new System.NotImplementedException();
     }
 
+    public override void Die()
+    {
+        base.Die();
+        UpdateMecanimValues();
+    }
     public void TakeDamage(DamageKnockback damage)
     {
         if (!this.IsAlive()) return;
@@ -840,6 +848,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         damageAmount = damage.GetDamageAmount(isCrit);
 
         damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.unresistedMinimum, damage.GetTypes(), this.attributes.resistances);
+
+
+        bool willKill = damageAmount >= attributes.health.current && !damage.cannotKill;
 
         bool isParrying = IsParrying();
         bool circleParrying = IsCircleParrying();
@@ -922,12 +933,22 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 this.transform.rotation = Quaternion.LookRotation(-dir);
             }
             OnHeavyDamage = true;
-            this.attributes.ReduceHealth(damageAmount);
+            if (!willKill)
+            {
+                this.attributes.ReduceHealth(damageAmount);
+                if (currentPhase == CombatPhase.PillarPhase) successesThisPhase++;
+            }
+            else
+            {
+                this.attributes.SetHealth(0);
+                Die();
+            }
+            
             this.OnHurt.Invoke();
             damage.OnHit.Invoke();
-            if (currentPhase == CombatPhase.PillarPhase) successesThisPhase++;
+           
         }
-        else
+        else if (!willKill)
         {
             
             if (IsCritVulnerable())
@@ -970,6 +991,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 OnFlinch = true;
             }
             this.attributes.ReduceHealth(damageAmount);
+            this.OnHurt.Invoke();
+            damage.OnHit.Invoke();
+        }
+        else if (willKill)
+        {
+            this.attributes.SetHealth(0);
+            Die();
+            
             this.OnHurt.Invoke();
             damage.OnHit.Invoke();
         }
@@ -1369,7 +1398,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             output = t;
             yield return new WaitForFixedUpdate();
         }
-        isPillarFalling = false;
+        if (!dead)
+        {
+            isPillarFalling = false;
+        }
+        
     }
 
     void MoveTo(Vector3 position)
