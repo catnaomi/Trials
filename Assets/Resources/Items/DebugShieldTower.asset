@@ -47,15 +47,6 @@ MonoBehaviour:
   weight: 0
   usesAmmunition: 0
   ammunitionReference: {fileID: 0}
-  blockResistances:
-    strengths: 14
-    strengthMultiplier: 0
-    strengthsFlat: 0
-    weaknesses: 0
-    weaknessMultiplier: 1
-    weaknessFlat: 0
-    neutralMultiplier: 1
-    neutralFlat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -63,50 +54,31 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   model: {fileID: 0}
-  reductionStrength: 0.1
-  blockPoiseDamage: 100
-  bashCost: 20
-  bashDamage:
-    healthDamage: 0
-    types: 0
-    critData:
-      criticalMultiplier: 0
-      alwaysCritical: 0
-      causesCritState: 0
-      doesNotConsumeCritState: 0
-      criticalExtensionTime: 0
-    breaksArmor: 1
-    unblockable: 0
-    disarm: 0
-    isThrust: 0
-    isSlash: 0
-    isRanged: 0
-    bouncesOffBlock: 0
-    breaksBlock: 0
-    canDamageSelf: 0
-    cannotAutoFlinch: 0
-    stunTime: 0
-    stagger: 0
-    staggers:
-      onHit: 0
-      onArmorHit: 0
-      onCritical: 0
-      onKill: 0
-      onCounterHit: 0
-    kbForce: {x: 0, y: 0, z: 10}
-    kbRadial: 0
-    didCrit: 0
-    hitboxSource: {fileID: 0}
-    source: {fileID: 0}
-    originPoint: {x: 0, y: 0, z: 0}
-    hitMaterial: 0
-    OnHit:
-      m_PersistentCalls:
-        m_Calls: []
-    OnCrit:
-      m_PersistentCalls:
-        m_Calls: []
-    OnBlock:
-      m_PersistentCalls:
-        m_Calls: []
-    hitClip: {fileID: 8300000, guid: 8cf0a475e2a2ccc48bf5bb14d8c24c2e, type: 3}
+  blockResistance:
+    strengths: 30
+    strengthMultiplier: 0
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
+  hasTypedResistances: 0
+  slashResistance:
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0
+  thrustResistance:
+    strengths: 0
+    strengthMultiplier: 1
+    strengthsFlat: 0
+    weaknesses: 0
+    weaknessMultiplier: 1
+    weaknessFlat: 0
+    neutralMultiplier: 1
+    neutralFlat: 0

@@ -73,4 +73,37 @@ public class Item : ScriptableObject
     {
         return item.itemName == this.itemName && item.invID == this.invID;
     }
+
+
+    public virtual string GetItemSaveString()
+    {
+        string name = $"{this.name}${this.Quantity}";
+        name = name.Replace("(Clone)", "").Trim();
+        return name;
+    }
+
+    public virtual void UpdateItemFromSaveString(string itemData)
+    {
+        try
+        {
+            string[] split = itemData.Split('$');
+            if (!this.name.Contains(itemData[0]))
+            {
+                Debug.LogWarning($"item name mismatch! current:{this.name} src:{itemData[0]}");
+            }
+            if (int.TryParse(split[1],out int quantity))
+            {
+                this.Quantity = quantity;
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(ex);
+        }
+    }
+
+    public static Item GetItemFromSaveString(string itemData)
+    {
+        return null;
+    }
 }

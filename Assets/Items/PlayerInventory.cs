@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using UnityEngine.Events;
 using CustomUtilities;
 
-// TODO: FIX THIS
-
 public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 {
     public static int invID;
@@ -22,7 +20,9 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     [ReadOnly] public RangedWeapon RangedWeapon;
     private bool RangedIsDrawn;
 
-    public bool equipOnStart = true;
+    [NonSerialized]
+    public bool equipOnStart = false;
+    [NonSerialized]
     public bool initialized = false;
     [Header("Inspector-set Weapons")]
     [Tooltip("Up Slot.")]
@@ -1163,9 +1163,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
     }
     // gets which hand the current Equipped Weapon is Equipped to
-    //  0 - not equipped
-    //  1 - main hand
-    // -1 - off hand
+    //  -9 = not equipped
     public int GetItemHand(EquippableWeapon weapon)
     {
         if (weapon == this.MainWeapon)
@@ -1196,7 +1194,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
         else
         {
-            return 0;
+            return -9;
         }
     }
 
@@ -1240,6 +1238,11 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
     }
 
+    public bool IsWeaponOnAnyEquipSlot(Equippable equippable)
+    {
+        return (equippable is not EquippableWeapon weapon || GetItemHand(weapon) < -1) && FindSlotFromWeapon(equippable) <= -1;
+    }
+
     public void MarkChanged()
     {
         weaponChanged = true;
@@ -1252,5 +1255,67 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             return true;
         }
         return false;
+    }
+}
+
+[Serializable]
+public class PlayerInventoryData
+{
+    // format: item_name$amount
+    public string MainWeapon;
+    public string OffWeapon;
+    public string RangedWeapon;
+
+    public string Slot0;
+    public string Slot1;
+    public string Slot2;
+    public string Slot3;
+
+    public string[] contents;
+
+    public static PlayerInventoryData GetDataFromPlayerInventory(PlayerInventory inventory)
+    {
+        PlayerInventoryData data = new PlayerInventoryData();
+        if (inventory.MainWeapon != null)
+        {
+            data.MainWeapon = inventory.MainWeapon.GetItemSaveString();
+        }
+        if (inventory.OffWeapon != null)
+        {
+            data.OffWeapon = inventory.OffWeapon.GetItemSaveString();
+        }
+        if (inventory.RangedWeapon != null)
+        {
+            data.RangedWeapon = inventory.RangedWeapon.GetItemSaveString();
+        }
+        if (inventory.Slot0Equippable != null)
+        {
+            data.Slot0 = inventory.Slot0Equippable.GetItemSaveString();
+        }
+        if (inventory.Slot1Equippable != null)
+        {
+            data.Slot1 = inventory.Slot1Equippable.GetItemSaveString();
+        }
+        if (inventory.Slot2Equippable != null)
+        {
+            data.Slot2 = inventory.Slot2Equippable.GetItemSaveString();
+        }
+        if (inventory.Slot3Equippable != null)
+        {
+            data.Slot3 = inventory.Slot3Equippable.GetItemSaveString();
+        }
+        List<Item> invContents = inventory.GetContents();
+        data.contents = new string[invContents.Count];
+        for (int i = 0; i < invContents.Count; i++)
+        {
+            Item item = invContents[i];
+            if (item is not Equippable equippable || !inventory.IsWeaponOnAnyEquipSlot(equippable))
+            {
+                data.contents[i] = invContents[i].GetItemSaveString();
+            }
+           
+        }
+
+        return data;
     }
 }

@@ -164,6 +164,15 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             //inventory.SetDrawn(Inventory.MainType, true);
         }
         */
+        CheckTarget();
+        if (CombatTarget == null)
+        {
+            currentPhase = CombatPhase.Idle;
+            nav.enabled = false;
+            cc.enabled = false;
+            UpdateMecanimValues();
+            return;
+        }
         randomClock -= Time.deltaTime;
         float dist = Vector3.Distance(this.transform.position, CombatTarget.transform.position);
         InCloseRange = dist <= closeRange;
@@ -279,9 +288,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         UpdateTrigger("ParryHit", ref ParryHit);
         UpdateTrigger("ParryFail", ref ParryFail);
         
-        Vector3 dir = (CombatTarget.transform.position - this.transform.position).normalized;
-        xDirection = Vector3.Dot(this.transform.right, dir);
-        yDirection = Vector3.Dot(this.transform.forward, dir);
+        if (CombatTarget != null)
+        {
+            Vector3 dir = (CombatTarget.transform.position - this.transform.position).normalized;
+            xDirection = Vector3.Dot(this.transform.right, dir);
+            yDirection = Vector3.Dot(this.transform.forward, dir);
+        }
+        
 
         animator.SetFloat("xDirection", xDirection);
         animator.SetFloat("yDirection", yDirection);
@@ -331,6 +344,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
     }
 
+    void CheckTarget()
+    {
+        if (CombatTarget == null && PlayerActor.player != null)
+        {
+            CombatTarget = PlayerActor.player.gameObject;
+        } 
+    }
     IEnumerator DestinationCoroutine()
     {
         while (true)
