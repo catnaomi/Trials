@@ -45,12 +45,14 @@ public class EquippableWeapon : Equippable, IGeneratesModel
     }
     public virtual void EquipWeapon(Actor actor)
     {
+        holder = actor;
         OnEquip.Invoke();
         // do nothing
     }
 
     public virtual void UnequipWeapon(Actor actor)
     {
+        holder = null;
         OnUnequip.Invoke();
         // do nothing
     }

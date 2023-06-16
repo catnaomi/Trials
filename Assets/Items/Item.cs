@@ -102,8 +102,24 @@ public class Item : ScriptableObject
         }
     }
 
-    public static Item GetItemFromSaveString(string itemData)
+    /*
+    public static Item GetItemFromSaveString(string itemData, Item existingItem)
     {
-        return null;
-    }
+        try
+        {
+            string[] split = itemData.Split('$');
+            string itemName = split[0];
+            int quantity = int.Parse(split[1]);
+            if (existingItem != null)
+            {
+                if (existingItem.name.Replace("(Clone)","").Trim() == itemName)
+                {
+                    existingItem.Quantity = quantity;
+                    return existingItem;
+                }
+            }
+            Item item 
+        }
+        
+    }*/
 }

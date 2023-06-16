@@ -38,6 +38,11 @@ public class Inventory : MonoBehaviour, IInventory
         return contents;
     }
 
+    public void SetContents(List<Item> items)
+    {
+        contents = items;
+    }
+
     public bool Contains(Item item)
     {
         return contents.Contains(item);
@@ -160,7 +165,7 @@ public class Inventory : MonoBehaviour, IInventory
         }
         return count;
     }
-    public void Clear()
+    public virtual void Clear()
     {
         contents.Clear();
         OnChange.Invoke();

@@ -114,6 +114,7 @@ public class HitboxGroup
     {
         foreach (Hitbox hitbox in this.hitboxes)
         {
+            if (hitbox == null) continue;
             GameObject.Destroy(hitbox.gameObject);
         }
         this.hitboxes.Clear();

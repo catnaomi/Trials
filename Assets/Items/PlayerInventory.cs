@@ -37,56 +37,67 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     public bool weaponChanged;
 
     public PassItemEvent OnAddItem;
-    void Awake()
-    {
-        this.player = GetComponent<PlayerActor>();
-        contents = new List<Item>();
-        foreach (Item item in StartingContents)
-        {
-            if (item != null)
-            {
-                Item newItem = ScriptableObject.Instantiate(item);
-                Add(newItem);
-            }
-        }
-        OnChange.AddListener(() => { lastChanged = Time.time; });
-        StartingContents.Clear();
-
-        if (Slot0Equippable != null)
-        {
-            Equippable slot0 = Instantiate(Slot0Equippable);
-            Add(slot0);
-            Slot0Equippable = slot0;
-
-        }
-
-        if (Slot1Equippable != null)
-        {
-            Equippable slot1 = Instantiate(Slot1Equippable);
-            Add(slot1);
-            Slot1Equippable = slot1;
-        }
-
-        if (Slot2Equippable != null)
-        {
-            Equippable slot2 = Instantiate(Slot2Equippable);
-            Add(slot2);
-            Slot2Equippable = slot2;
-        }
-
-        if (Slot3Equippable != null)
-        {
-            Equippable slot3 = Instantiate(Slot3Equippable);
-            Add(slot3);
-            Slot3Equippable = slot3;
-        }
-    }
     void Start()
     {
-        
-        MainWeapon = null;
-        OffWeapon = null;
-        
+        this.player = GetComponent<PlayerActor>();
+
+        // persist inventory data if available
+        if (PlayerSaveDataManager.HasInventoryData())
+        {
+            PlayerInventoryData data = PlayerSaveDataManager.GetInventoryData();
+            data.LoadDataToInventory(this);
+        }
+        else
+        {
+            if (contents == null)
+            {
+                contents = new List<Item>();
+            }
+
+            foreach (Item item in StartingContents)
+            {
+                if (item != null)
+                {
+                    Item newItem = ScriptableObject.Instantiate(item);
+                    Add(newItem);
+                }
+            }
+
+            StartingContents.Clear();
+
+            if (Slot0Equippable != null)
+            {
+                Equippable slot0 = Instantiate(Slot0Equippable);
+                Add(slot0);
+                Slot0Equippable = slot0;
+
+            }
+
+            if (Slot1Equippable != null)
+            {
+                Equippable slot1 = Instantiate(Slot1Equippable);
+                Add(slot1);
+                Slot1Equippable = slot1;
+            }
+
+            if (Slot2Equippable != null)
+            {
+                Equippable slot2 = Instantiate(Slot2Equippable);
+                Add(slot2);
+                Slot2Equippable = slot2;
+            }
+
+            if (Slot3Equippable != null)
+            {
+                Equippable slot3 = Instantiate(Slot3Equippable);
+                Add(slot3);
+                Slot3Equippable = slot3;
+            }
+
+            MainWeapon = null;
+            OffWeapon = null;
+        }
+        OnChange.AddListener(() => { lastChanged = Time.time; });
     }
 
     void Update()
@@ -192,8 +203,9 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             this.player.TriggerSheath(true, MainWeapon.MainHandEquipSlot, true);
         }
 
-        OnChange.Invoke();
         MarkChanged();
+        OnChange.Invoke();
+        
     }
     public void EquipMainWeapon(EquippableWeapon weapon)
     {
@@ -251,8 +263,9 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             player.TriggerSheath(true, OffWeapon.OffHandEquipSlot, false);
         }
 
-        OnChange.Invoke();
         MarkChanged();
+        OnChange.Invoke();
+        
     }
 
     public void EquipOffHandWeapon(EquippableWeapon weapon)
@@ -278,8 +291,9 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         player.ResetMainRotation();
         PositionWeapon();
 
-        OnChange.Invoke();
         MarkChanged();
+        OnChange.Invoke();
+       
         
     }
 
@@ -301,8 +315,9 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         player.RotateOffWeapon(0f);
         PositionWeapon();
 
-        OnChange.Invoke();
         MarkChanged();
+        OnChange.Invoke();
+       
     }
 
     public void EquipRangedWeapon(RangedWeapon weapon)
@@ -362,8 +377,9 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             this.player.TriggerSheath(true, RangedWeapon.RangedEquipSlot, Inventory.RangedType);
         }
 
-        OnChange.Invoke();
         MarkChanged();
+        OnChange.Invoke();
+        
     }
 
     public void UnequipRangedWeapon()
@@ -392,10 +408,41 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         //player.RotateOffWeapon(0f);
         PositionWeapon();
 
-        OnChange.Invoke();
+        
         MarkChanged();
+        OnChange.Invoke();
     }
 
+    public void UnequipAll()
+    {
+        if (IsMainEquipped())
+        {
+            MainWeapon.UnequipWeapon(player);
+            MainWeapon.isEquipped = false;
+            MainWeapon.DestroyModel();
+        }
+        if (IsOffEquipped())
+        {
+            OffWeapon.UnequipWeapon(player);
+            OffWeapon.isEquipped = false;
+            OffWeapon.DestroyModel();
+        }
+        if (IsRangedEquipped())
+        {
+            RangedWeapon.UnequipWeapon(player);
+            RangedWeapon.isEquipped = false;
+            RangedWeapon.DestroyModel();
+        }
+        player.ResetMainRotation();
+        player.ResetOffRotation();
+        MainWeapon = null;
+        OffWeapon = null;
+        RangedWeapon = null;
+
+       
+        MarkChanged();
+        OnChange.Invoke();
+    }
     public void GenerateMainModel()
     {
         if (IsMainEquipped())
@@ -1262,60 +1309,140 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 public class PlayerInventoryData
 {
     // format: item_name$amount
-    public string MainWeapon;
-    public string OffWeapon;
-    public string RangedWeapon;
 
-    public string Slot0;
-    public string Slot1;
-    public string Slot2;
-    public string Slot3;
+    [NonSerialized] public EquippableWeapon MainWeapon;
+    public string MainWeaponString;
 
-    public string[] contents;
+    [NonSerialized] public EquippableWeapon OffWeapon;
+    public string OffWeaponString;
 
-    public static PlayerInventoryData GetDataFromPlayerInventory(PlayerInventory inventory)
+    [NonSerialized] public RangedWeapon RangedWeapon;
+    public string RangedWeaponString;
+
+    [NonSerialized] public Equippable Slot0;
+    public string Slot0String;
+    [NonSerialized] public Equippable Slot1;
+    public string Slot1String;
+    [NonSerialized] public Equippable Slot2;
+    public string Slot2String;
+    [NonSerialized] public Equippable Slot3;
+    public string Slot3String;
+
+    [NonSerialized]public List<Item> contents;
+    public string[] contentsString;
+
+    public void CopyDataFromPlayerInventory(PlayerInventory inventory)
     {
-        PlayerInventoryData data = new PlayerInventoryData();
+        PlayerInventoryData data = this;
         if (inventory.MainWeapon != null)
         {
-            data.MainWeapon = inventory.MainWeapon.GetItemSaveString();
+            data.MainWeapon = inventory.MainWeapon;
         }
         if (inventory.OffWeapon != null)
         {
-            data.OffWeapon = inventory.OffWeapon.GetItemSaveString();
+            data.OffWeapon = inventory.OffWeapon;
         }
         if (inventory.RangedWeapon != null)
         {
-            data.RangedWeapon = inventory.RangedWeapon.GetItemSaveString();
+            data.RangedWeapon = inventory.RangedWeapon;
         }
         if (inventory.Slot0Equippable != null)
         {
-            data.Slot0 = inventory.Slot0Equippable.GetItemSaveString();
+            data.Slot0 = inventory.Slot0Equippable;
         }
         if (inventory.Slot1Equippable != null)
         {
-            data.Slot1 = inventory.Slot1Equippable.GetItemSaveString();
+            data.Slot1 = inventory.Slot1Equippable;
         }
         if (inventory.Slot2Equippable != null)
         {
-            data.Slot2 = inventory.Slot2Equippable.GetItemSaveString();
+            data.Slot2 = inventory.Slot2Equippable;
         }
         if (inventory.Slot3Equippable != null)
         {
-            data.Slot3 = inventory.Slot3Equippable.GetItemSaveString();
+            data.Slot3 = inventory.Slot3Equippable;
         }
-        List<Item> invContents = inventory.GetContents();
-        data.contents = new string[invContents.Count];
-        for (int i = 0; i < invContents.Count; i++)
+        data.contents = inventory.GetContents();
+        GetStrings();
+    }
+
+    void GetStrings()
+    {
+        if (this.MainWeapon != null)
         {
-            Item item = invContents[i];
-            if (item is not Equippable equippable || !inventory.IsWeaponOnAnyEquipSlot(equippable))
+            this.MainWeaponString = this.MainWeapon.GetItemSaveString();
+        }
+        if (this.OffWeapon != null)
+        {
+            this.OffWeaponString = this.OffWeapon.GetItemSaveString();
+        }
+        if (this.RangedWeapon != null)
+        {
+            this.RangedWeaponString = this.RangedWeapon.GetItemSaveString();
+        }
+        if (this.Slot0 != null)
+        {
+            this.Slot0String = this.Slot0.GetItemSaveString();
+        }
+        if (this.Slot1 != null)
+        {
+            this.Slot1String = this.Slot1.GetItemSaveString();
+        }
+        if (this.Slot2 != null)
+        {
+            this.Slot2String = this.Slot2.GetItemSaveString();
+        }
+        if (this.Slot3 != null)
+        {
+            this.Slot3String = this.Slot3.GetItemSaveString();
+        }
+        this.contentsString = new string[contents.Count];
+        for (int i = 0; i < contents.Count; i++)
+        {
+            Item item = contents[i];
+            if (item is not Equippable equippable || !this.IsOnAnySlot(equippable))
             {
-                data.contents[i] = invContents[i].GetItemSaveString();
+                this.contentsString[i] = contents[i].GetItemSaveString();
             }
-           
+
+        }
+    }
+
+    bool IsOnAnySlot(Equippable equippable)
+    {
+        return equippable != MainWeapon &&
+            equippable != OffWeapon &&
+            equippable != RangedWeapon &&
+            equippable != Slot0 &&
+            equippable != Slot1 &&
+            equippable != Slot2 &&
+            equippable != Slot3;
+    }
+    public void LoadDataToInventory(PlayerInventory inventory)
+    {
+        inventory.UnequipAll();
+        inventory.Clear();
+
+        inventory.SetContents(this.contents);
+
+        if (this.MainWeapon != null)
+        {
+            inventory.EquipMainWeapon(this.MainWeapon, false);
+        }
+        if (this.OffWeapon != null)
+        {
+            inventory.EquipOffHandWeapon(this.OffWeapon, false);
+        }
+        if (this.RangedWeapon != null)
+        {
+            inventory.EquipRangedWeapon(this.RangedWeapon, false);
         }
 
-        return data;
+        inventory.Slot0Equippable = this.Slot0;
+        inventory.Slot1Equippable = this.Slot1;
+        inventory.Slot2Equippable = this.Slot2;
+        inventory.Slot3Equippable = this.Slot3;
+
+        inventory.OnChange.Invoke();
     }
 }

@@ -14,4 +14,13 @@ public class SaveManagerChecker : MonoBehaviour
             Instantiate(saveManagerPrefab);
         }
     }
+
+    private void Start()
+    {
+        PlayerSaveDataManager loader = FindObjectOfType<PlayerSaveDataManager>();
+        if (loader != null)
+        {
+            loader.OnSceneStart();
+        }
+    }
 }
