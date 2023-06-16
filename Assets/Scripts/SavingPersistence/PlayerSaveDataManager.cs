@@ -11,7 +11,7 @@ public class PlayerSaveDataManager : MonoBehaviour
     PlayerInventoryData inventoryData;
     bool inventoryChanged;
     public bool save;
-
+    public bool load;
     private void Awake()
     {
         instance = this;
@@ -30,6 +30,11 @@ public class PlayerSaveDataManager : MonoBehaviour
         {
             save = false;
             SaveData();
+        }
+        if (load)
+        {
+            load = false;
+            LoadData();
         }
     }
 
@@ -50,6 +55,11 @@ public class PlayerSaveDataManager : MonoBehaviour
     public void SaveData()
     {
         SaveInventoryData();
+    }
+
+    public void LoadData()
+    {
+        LoadInventoryData();
     }
 
     public void SaveInventoryData()
@@ -74,5 +84,15 @@ public class PlayerSaveDataManager : MonoBehaviour
             return instance.inventoryData;
         }
         return null;
+    }
+
+    public void LoadInventoryData()
+    {
+        if (PlayerActor.player == null || inventory == "") return;
+        inventoryData = PlayerInventoryData.GetDataFromJSON(inventory);
+        if (PlayerActor.player.TryGetComponent<PlayerInventory>(out PlayerInventory inventoryComponent))
+        {
+            inventoryData.LoadDataToInventory(inventoryComponent);
+        }
     }
 }

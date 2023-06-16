@@ -3313,6 +3313,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         //weaponModel.transform.rotation = rotation;
 
+        if (weaponModel == null) return;
         weaponModel.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
 
         if (weapon is BladeWeapon blade)
@@ -3339,6 +3340,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         //weaponModel.transform.rotation = rotation;
 
+        if (weaponModel == null) return;
         weaponModel.transform.RotateAround(mount.transform.position, mount.transform.up, angleDiff);
 
         if (weapon is BladeWeapon blade)

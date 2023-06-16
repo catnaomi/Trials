@@ -1310,13 +1310,13 @@ public class PlayerInventoryData
 {
     // format: item_name$amount
 
-    [NonSerialized] public EquippableWeapon MainWeapon;
+    [NonSerialized] public Equippable MainWeapon;
     public string MainWeaponString;
 
-    [NonSerialized] public EquippableWeapon OffWeapon;
+    [NonSerialized] public Equippable OffWeapon;
     public string OffWeaponString;
 
-    [NonSerialized] public RangedWeapon RangedWeapon;
+    [NonSerialized] public Equippable RangedWeapon;
     public string RangedWeaponString;
 
     [NonSerialized] public Equippable Slot0;
@@ -1400,6 +1400,10 @@ public class PlayerInventoryData
         for (int i = 0; i < contents.Count; i++)
         {
             Item item = contents[i];
+            if (item == null)
+            {
+                continue;
+            }
             if (item is not Equippable equippable || !this.IsOnAnySlot(equippable))
             {
                 this.contentsString[i] = contents[i].GetItemSaveString();
@@ -1410,13 +1414,15 @@ public class PlayerInventoryData
 
     bool IsOnAnySlot(Equippable equippable)
     {
-        return equippable != MainWeapon &&
+        return !(
+            equippable != MainWeapon &&
             equippable != OffWeapon &&
             equippable != RangedWeapon &&
             equippable != Slot0 &&
             equippable != Slot1 &&
             equippable != Slot2 &&
-            equippable != Slot3;
+            equippable != Slot3
+            );
     }
     public void LoadDataToInventory(PlayerInventory inventory)
     {
@@ -1425,17 +1431,17 @@ public class PlayerInventoryData
 
         inventory.SetContents(this.contents);
 
-        if (this.MainWeapon != null)
+        if (this.MainWeapon != null && this.MainWeapon is EquippableWeapon)
         {
-            inventory.EquipMainWeapon(this.MainWeapon, false);
+            inventory.EquipMainWeapon((EquippableWeapon)this.MainWeapon, false);
         }
         if (this.OffWeapon != null)
         {
-            inventory.EquipOffHandWeapon(this.OffWeapon, false);
+            inventory.EquipOffHandWeapon((EquippableWeapon)this.OffWeapon, false);
         }
-        if (this.RangedWeapon != null)
+        if (this.RangedWeapon != null && this.RangedWeapon is RangedWeapon)
         {
-            inventory.EquipRangedWeapon(this.RangedWeapon, false);
+            inventory.EquipRangedWeapon((RangedWeapon)this.RangedWeapon, false);
         }
 
         inventory.Slot0Equippable = this.Slot0;
@@ -1444,5 +1450,71 @@ public class PlayerInventoryData
         inventory.Slot3Equippable = this.Slot3;
 
         inventory.OnChange.Invoke();
+    }
+
+    public static PlayerInventoryData GetDataFromJSON(string json)
+    {
+        PlayerInventoryData data = null;
+        try
+        {
+            data = JsonUtility.FromJson<PlayerInventoryData>(json);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex);
+            return null;
+        }
+
+        data.contents = new List<Item>();
+
+        data.AddEquippableFromString(ref data.MainWeapon, data.MainWeaponString);
+        data.AddEquippableFromString(ref data.OffWeapon, data.OffWeaponString);
+        data.AddEquippableFromString(ref data.RangedWeapon, data.RangedWeaponString);
+
+        data.AddEquippableFromString(ref data.Slot0, data.Slot0String);
+        data.AddEquippableFromString(ref data.Slot1, data.Slot1String);
+        data.AddEquippableFromString(ref data.Slot2, data.Slot2String);
+        data.AddEquippableFromString(ref data.Slot3, data.Slot3String);
+
+        foreach(string itemData in data.contentsString)
+        {
+            if (itemData != "")
+            {
+                Item item = Item.GetItemFromSaveString(itemData);
+                if (item == null)
+                {
+                    Debug.LogError($"Item {itemData} came back null!");
+                    continue;
+                }
+                data.contents.Add(item);
+            }
+        }
+
+        return data;
+    }
+
+    void AddEquippableFromString(ref Equippable weaponSlot, string itemData)
+    {
+        if (itemData != "")
+        {
+            Item item = Item.GetItemFromSaveString(itemData);
+            if (item == null)
+            {
+                Debug.LogError($"Item {itemData} came back null!");
+            }
+            else if (item is not Equippable)
+            {
+                Debug.LogError($"Item {itemData} is not an Equippable!");
+            }
+            else
+            {
+                weaponSlot = item as Equippable;
+                if (this.contents != null)
+                {
+                    this.contents.Add(item);
+                }
+            }
+            
+        }
     }
 }

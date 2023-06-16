@@ -102,14 +102,20 @@ public class Item : ScriptableObject
         }
     }
 
-    /*
-    public static Item GetItemFromSaveString(string itemData, Item existingItem)
+    
+    public static Item GetItemFromSaveString(string itemData)
     {
+        if (itemData == "")
+        {
+            Debug.LogError("Item Data String was Blank!");
+            return null;
+        }
         try
         {
             string[] split = itemData.Split('$');
             string itemName = split[0];
             int quantity = int.Parse(split[1]);
+            /*
             if (existingItem != null)
             {
                 if (existingItem.name.Replace("(Clone)","").Trim() == itemName)
@@ -118,8 +124,25 @@ public class Item : ScriptableObject
                     return existingItem;
                 }
             }
-            Item item 
+            */
+            Item item = Resources.Load<Item>($"Items/{itemName}");
+            if (item != null)
+            {
+                item = Instantiate(item);
+                item.Quantity = quantity;
+
+                return item;
+            }
+            else
+            {
+                Debug.LogError($"Failed to find Item: {itemData}");
+            }
         }
+        catch (System.FormatException)
+        {
+            Debug.LogError($"Failed To Parse Item Quantity \n{itemData}");
+        }
+        return null;
         
-    }*/
+    }
 }
