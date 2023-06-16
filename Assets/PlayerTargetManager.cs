@@ -495,7 +495,11 @@ public class PlayerTargetManager : MonoBehaviour
         }
         if (handleCamera && lockedOn && cmtg.m_Targets.Length > 1)
         {
-            this.transform.rotation = Quaternion.LookRotation(PlayerActor.player.transform.forward);
+            //this.transform.rotation = Quaternion.LookRotation(PlayerActor.player.transform.forward);
+            Vector3 dir = cmtg.m_Targets[1].target.position - cmtg.m_Targets[0].target.position;
+            dir.y = 0;
+            dir.Normalize();
+            this.transform.rotation = Quaternion.LookRotation(dir);
             UpdateFreeLook();
             
         }
