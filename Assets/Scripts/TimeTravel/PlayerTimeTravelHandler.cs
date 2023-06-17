@@ -24,7 +24,7 @@ public class PlayerTimeTravelHandler : ActorTimeTravelHandler
     {
         PlayerTimeTravelData data = (PlayerTimeTravelData)base.SaveTimeState();
 
-        data.inWorld2 = PortalManager.instance.inWorld2;
+        data.inWorld2 = PortalManager.instance != null ? PortalManager.instance.inWorld2 : false;
         return data;
     }
 

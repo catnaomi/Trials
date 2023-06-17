@@ -143,7 +143,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         positionReference = this.GetComponent<HumanoidPositionReference>();
         collider = this.GetComponent<CapsuleCollider>();
         cc = this.GetComponent<CharacterController>();
-        CombatTarget = PlayerActor.player.gameObject;
+        CheckTarget();
         OnHitboxActive.AddListener(RealignToTarget);
         SetParryValue();
         arrowDamage.source = this.gameObject;
@@ -151,7 +151,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         nav = this.GetComponent<NavMeshAgent>();
         nav.updatePosition = true;
         nav.updateRotation = true;
-        Physics.IgnoreCollision(cc, PlayerActor.player.GetComponent<Collider>());
+        //
         StartCoroutine(DestinationCoroutine());
     }
 
@@ -349,6 +349,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         if (CombatTarget == null && PlayerActor.player != null)
         {
             CombatTarget = PlayerActor.player.gameObject;
+            Physics.IgnoreCollision(cc, PlayerActor.player.GetComponent<Collider>());
         } 
     }
     IEnumerator DestinationCoroutine()

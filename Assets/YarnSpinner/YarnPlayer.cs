@@ -31,10 +31,18 @@ public class YarnPlayer : MonoBehaviour
     {
         runner = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
 
-        if (runner.IsDialogueRunning && closeAlreadyRunningDialogue)
+        if (runner.IsDialogueRunning)
         {
-            runner.Stop();
-            yield return new WaitWhile(() => runner.IsDialogueRunning);
+            if (closeAlreadyRunningDialogue)
+            {
+                runner.Stop();
+                yield return new WaitWhile(() => runner.IsDialogueRunning);
+            }
+            else
+            {
+                yield break;
+            }
+            
             
         }
         yield return null;

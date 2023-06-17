@@ -819,7 +819,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
 
             if (wall && holder is PlayerActor player)
             {
-                player.HitWall();
+                //player.HitWall();
             }
 
             wall = false;

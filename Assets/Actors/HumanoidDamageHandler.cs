@@ -69,24 +69,38 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
     public void SetEndAction(System.Action action)
     {
-        _OnEnd = action;
+        if (action != null)
+        {
+            _OnEnd = action;
+        }
+        else
+        {
+            _OnEnd = () => { };
+        }
     }
 
     public void SetBlockEndAction(System.Action action)
     {
-        _OnBlockEnd = action;
+        if (action != null)
+        {
+            _OnBlockEnd = action;
+        }
+        else
+        {
+            _OnBlockEnd = () => { };
+        }
     }
 
     protected void OnEnd()
     {
         lastStagger = -1;
-        _OnEnd();
+        if (_OnEnd != null) _OnEnd();
     }
 
     protected void OnBlockEnd()
     {
         lastBlockStagger = -1;
-        _OnBlockEnd();
+        if (_OnBlockEnd != null) _OnBlockEnd();
     }
     /*
     public void SetBlockClip(ClipTransition clip)
