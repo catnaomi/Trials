@@ -411,6 +411,18 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             ClipTransition clip = (!isFacingUp) ? damageAnims.knockdownFaceDown : damageAnims.knockdownFaceUp;
             AnimancerState state = animancer.Play(clip);
 
+            Vector3 launchVector = dir * damage.kbForce.z + Vector3.up * damage.kbForce.y + Vector3.Cross(dir, Vector3.up) * damage.kbForce.x;
+
+            actor.xzVel = launchVector;
+            actor.xzVel.y = 0f;
+
+            actor.yVel = launchVector.y;
+
+            if (actor is PlayerActor player)
+            {
+                player.StartGroundedLockout(0.25f);
+            }
+
             SetInvulnClip(state);
             state.Events.OnEnd = () =>
             {

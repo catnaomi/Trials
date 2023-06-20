@@ -304,6 +304,7 @@ public class TimeTravelController : MonoBehaviour
 
     void UsePowerInput(UnityEngine.InputSystem.InputAction.CallbackContext c)
     {
+        if (TimeTravelController.time == null || time != this) return;
         if (!ShouldAllowInput()) return;
         if (ignoreLimits) return;
 
@@ -394,8 +395,10 @@ public class TimeTravelController : MonoBehaviour
     {
         return IsFreezing() || IsRewinding() || IsSlowingTime();
     }
+
     void CancelPowerInput(UnityEngine.InputSystem.InputAction.CallbackContext c)
     {
+        if (TimeTravelController.time == null || time != this) return;
         if (!ShouldAllowInput()) return;
         if (ignoreLimits) return;
         if (isSlowing)

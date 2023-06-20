@@ -1429,8 +1429,14 @@ public class PlayerInventoryData
         inventory.UnequipAll();
         inventory.Clear();
 
+        PlayerActor player = inventory.GetComponent<PlayerActor>();
+        foreach (Item item in this.contents)
+        {
+            item.holder = player;
+        }
         inventory.SetContents(this.contents);
 
+        
         if (this.MainWeapon != null && this.MainWeapon is EquippableWeapon)
         {
             inventory.EquipMainWeapon((EquippableWeapon)this.MainWeapon, false);

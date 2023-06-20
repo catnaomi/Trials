@@ -16,8 +16,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     HumanoidPositionReference positionReference;
     DojobossTimeTravelHandler timeHandler;
     CapsuleCollider collider;
+    
     CharacterController cc;
     NavMeshAgent nav;
+
+    CharacterController playerCC;
     [Header("Phases")]
     [SerializeField] CombatPhase currentPhase;
     public float timeInPhase;
@@ -114,6 +117,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] bool PlayerIsAttacking;
     [ReadOnly, SerializeField] bool Blocking;
     [ReadOnly, SerializeField] int PillarCount;
+    [ReadOnly, SerializeField] bool ResetToStart;
     [Space(5)]
     [SerializeField] float out_PillarJumpCurve;
     [Space(10)]
@@ -151,7 +155,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         nav = this.GetComponent<NavMeshAgent>();
         nav.updatePosition = true;
         nav.updateRotation = true;
-        //
         StartCoroutine(DestinationCoroutine());
     }
 
@@ -269,6 +272,15 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 successesThisPhase = 0;
             }
         }
+        else if (currentPhase == CombatPhase.Idle)
+        {
+            if (timeInPhase > minPhaseDuration)
+            {
+                currentPhase = CombatPhase.AttackPhase;
+                timeInPhase = 0f;
+                successesThisPhase = 0;
+            }
+        }
         
     }
 
@@ -333,6 +345,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         animator.SetBool("Dead", dead);
         animator.SetBool("IsPillarFalling", isPillarFalling);
+
+        UpdateTrigger("ResetToStart", ref ResetToStart);
     }
 
     void UpdateTrigger(string name, ref bool trigger)
@@ -371,6 +385,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
     }
 
+    public void ResetAnimatorToStart()
+    {
+        ResetToStart = true;
+    }
 
     public void ResetPainTriggers()
     {
@@ -1327,6 +1345,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         for (int i = 0; i < pillars.Count; i++)
         {
             GameObject pillar = pillars[i];
+            if (pillar == null) continue;
             float dist = Vector3.Distance(pillar.transform.position, this.transform.position);
             if (dist > farthest)
             {
@@ -1334,8 +1353,15 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 pillarIndex = i;
             }
         }
-        StartCoroutine(PillarHighJumpRoutine(pillarIndex));
-        ResetPainTriggers();
+        if (pillarIndex >= 0)
+        {
+            StartCoroutine(PillarHighJumpRoutine(pillarIndex));
+            ResetPainTriggers();
+        }
+        else
+        {
+
+        }
     }
 
     IEnumerator PillarHighJumpRoutine(int pillarIndex)
@@ -1495,6 +1521,19 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 this.transform.position = this.transform.position + rootDelta;
                 cc.enabled = true;
             }
+        }
+        if (CombatTarget != null)
+        {
+            if (playerCC == null)
+            {
+                playerCC = CombatTarget.GetComponent<CharacterController>();
+            }
+            if (CombatTarget == PlayerActor.player.gameObject && playerCC != null)
+            {
+                Physics.IgnoreCollision(playerCC, collider, !PlayerActor.player.isGrounded);
+                Physics.IgnoreCollision(playerCC, cc, !PlayerActor.player.isGrounded);
+            }
+            
         }
         
     }

@@ -78,6 +78,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float friction = 1f;
     public float groundFriction = 1f;
     public float waterFriction = 1f;
+    public float slideFriction = 0.5f;
     [Space(5)]
     public float rollSpeed = 5f;
     public float dodgeJumpVel = 5f;
@@ -88,6 +89,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool isGrounded;
     public float airTime = 0f;
     public float groundBias = 0f;
+    bool isGroundedLockout;
     bool isCaughtOnEdge;
     bool withinBias;
     float biasHeight;
@@ -1824,6 +1826,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 Debug.DrawRay(this.transform.position, dir * 5f, Color.magenta);
             }
             applyMove = isGrounded;
+            friction = Mathf.Min(groundFriction, slideFriction);
         }
         #endregion
         #region ALL OTHERS
@@ -2042,6 +2045,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Vector3 velocity = xzVel;
         velocity.y = yVel;
 
+        
         if (withinBias)
         {
             cc.Move(Vector3.up * (biasHeight - this.transform.position.y));
@@ -4850,6 +4854,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public bool GetGrounded(out RaycastHit rayHit, out RaycastHit sphereHit)
     {
+        if (isGroundedLockout)
+        {
+            rayHit = new RaycastHit();
+            sphereHit = new RaycastHit();
+            return false;
+        }
         // return cc.isGrounded;
         float RADIUS_MULT = 1f;
         float CAST_DISTANCE = 0.2f;
@@ -4907,6 +4917,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         return (didHit && slopeOK);// || cc.isGrounded;
     }
 
+    public void StartGroundedLockout(float duration)
+    {
+        StartCoroutine(GroundedLockoutCoroutine(duration));
+    }
+
+    IEnumerator GroundedLockoutCoroutine(float duration)
+    {
+        isGroundedLockout = true;
+        yield return new WaitForSecondsRealtime(duration);
+        isGroundedLockout = false;
+    }
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
         ccHitNormal = hit.normal;

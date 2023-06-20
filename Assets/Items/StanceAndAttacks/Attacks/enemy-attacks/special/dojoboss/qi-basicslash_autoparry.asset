@@ -61,9 +61,10 @@ MonoBehaviour:
       onCounterHit: 5
       onBlock: 2
       onTypedBlock: 6
-    kbForce: {x: 0, y: 1, z: 0}
+    kbForce: {x: 0, y: 5, z: 5}
     kbRadial: 0
     didCrit: 0
+    timeDelayed: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -75,6 +76,9 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    OnHitWeakness:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
