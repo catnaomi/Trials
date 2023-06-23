@@ -1,4 +1,5 @@
 using Cinemachine;
+using CustomUtilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using Yarn.Unity;
 
 public static class DebugReflectionMethods
 {
@@ -466,4 +468,63 @@ public static class DebugReflectionMethods
             Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
         }
     }
+
+    public static void ForceCloseDialogue()
+    {
+        try
+        {
+            DialogueRunner runner = GameObject.FindObjectOfType<DialogueRunner>();
+            if (runner == null)
+            {
+                Debug.LogError("Couldn't find Dialogue Runner");
+                return;
+            }
+            DebugConsole.instance.StartCoroutine(ForceCloseDialogueRoutine(runner));
+            if (PlayerActor.player.IsInDialogue())
+            {
+                PlayerActor.player.StopDialogue();
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
+    static IEnumerator ForceCloseDialogueRoutine(DialogueRunner runner)
+    {
+
+        do
+        {
+            Debug.Log("Attempting To Close Dialogue");
+            ForceCloseDialogueFunc(runner);
+            yield return new WaitForSecondsRealtime(2f);
+        } while (runner.CheckDialogueRunning());
+
+        Debug.Log("Dialogue Closed");
+    }
+
+    static void ForceCloseDialogueFunc(DialogueRunner runner)
+    {
+        runner.Stop();
+    }
+
+    
+    public static void PlayerStopDialogue()
+    {
+        try
+        {
+            if (PlayerActor.player.IsInDialogue())
+            {
+                Debug.Log("Forced Player out of Dialogue State");
+                PlayerActor.player.StopDialogue();
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
+
 }

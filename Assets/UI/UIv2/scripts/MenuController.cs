@@ -1,3 +1,4 @@
+using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -195,7 +196,7 @@ public class MenuController : MonoBehaviour
         if (runnerObj != null)
         {
             DialogueRunner runner = runnerObj.GetComponent<DialogueRunner>();
-            if (runner.IsDialogueRunning)
+            if (runner.CheckDialogueRunning())
             {
                 Debug.Log("could not open inventory, dialogue is running");
                 return;

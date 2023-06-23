@@ -13,9 +13,14 @@ namespace CustomUtilities
 
         static IEnumerator StartDialogueRoutine(DialogueRunner runner, string node)
         {
-            yield return new WaitWhile(() => runner.IsDialogueRunning);
+            yield return new WaitWhile(runner.CheckDialogueRunning);
             yield return null;
             runner.StartDialogue(node);
+        }
+
+        public static bool CheckDialogueRunning(this DialogueRunner runner)
+        {
+            return runner.IsDialogueRunning || runner.Dialogue.IsActive;
         }
     }
 }

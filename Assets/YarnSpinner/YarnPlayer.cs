@@ -1,3 +1,4 @@
+using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -31,12 +32,12 @@ public class YarnPlayer : MonoBehaviour
     {
         runner = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
 
-        if (runner.IsDialogueRunning)
+        if (runner.CheckDialogueRunning())
         {
             if (closeAlreadyRunningDialogue)
             {
                 runner.Stop();
-                yield return new WaitWhile(() => runner.IsDialogueRunning);
+                yield return new WaitWhile(runner.CheckDialogueRunning);
             }
             else
             {

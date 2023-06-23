@@ -34,12 +34,12 @@ public class YarnTimelineBehaviour : PlayableBehaviour
             runner.onNodeStart.AddListener(OnNodeStart);
             if (node != "_pause")
             {
-                if (runner.IsDialogueRunning) runner.Stop();
+                if (runner.CheckDialogueRunning()) runner.Stop();
                 runner.GetComponent<LineActorPositioningHandler>()?.SetSpeaker(null, null);
 
                 runner.StartDialogueWhenAble(node);
             }
-            else if (runner.IsDialogueRunning)
+            else if (runner.CheckDialogueRunning())
             {
                 OnNodeStart(node);
             }
