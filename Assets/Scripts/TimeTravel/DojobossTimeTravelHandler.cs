@@ -11,12 +11,7 @@ public class DojobossTimeTravelHandler : ActorTimeTravelHandler
     {
         animator = this.GetComponent<Animator>();
         timeTravelController = TimeTravelController.time;
-        if (timeTravelController == null)
-        {
-            this.enabled = false;
-            return;
-        }
-        TimeTravelController.time.RegisterAffectee(this);
+        TimeTravelController.AttemptToRegisterAffectee(this);
     }
 
     public override TimeTravelData SaveTimeState()

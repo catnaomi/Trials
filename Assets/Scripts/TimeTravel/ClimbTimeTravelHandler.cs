@@ -17,11 +17,11 @@ public class ClimbTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     // Update is called once per frame
     void Update()
     {
-        if (TimeTravelController.time.IsFreezing() && !isFrozen)
+        if (TimeTravelController.time != null && TimeTravelController.time.IsFreezing() && !isFrozen)
         {
             StartFreeze();
         }
-        else if (!TimeTravelController.time.IsFreezing() && isFrozen)
+        else if (TimeTravelController.time != null && !TimeTravelController.time.IsFreezing() && isFrozen)
         {
             StopFreeze();
         }
@@ -97,4 +97,13 @@ public class ClimbTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         
     }
 
+    public void SetRegistered()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool IsRegistered()
+    {
+        throw new System.NotImplementedException();
+    }
 }

@@ -24,6 +24,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     List<Renderer> renderers;
     int initLayer;
     bool applyVisual;
+    bool registered;
 
     public float deltaTime;
     public UnityEvent OnFreeze;
@@ -45,11 +46,6 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         }
         renderers.AddRange(this.GetComponentsInChildren<Renderer>());
         timeTravelController = TimeTravelController.time;
-        if (timeTravelController == null)
-        {
-            this.enabled = false;
-            return;
-        }
         if (useAfterimages)
         {
             int images = (int)Mathf.Min(timeTravelController.maxSteps, Mathf.Ceil(fadeTime / TimeTravelController.time.rewindStepDuration));
@@ -64,11 +60,12 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             }
         }
         timeTravelStates = new List<TimeTravelData>();
-        TimeTravelController.time.RegisterAffectee(this);
+        TimeTravelController.AttemptToRegisterAffectee(this);
     }
 
     void Update()
     {
+        if (!IsRegistered()) return;
         if (useAfterimages)
         {
             for (int i = 0; i < afterimages.Length; i++)
@@ -109,7 +106,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public virtual TimeTravelData SaveTimeState()
     {
-        if (isRewinding || isFrozen || actor == null) return null;
+        if (isRewinding || isFrozen || actor == null || !IsRegistered()) return null;
         ActorTimeTravelData data;
         if (actor is PlayerActor)
         {
@@ -169,7 +166,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public virtual void LoadTimeState(TimeTravelData data, float speed)
     {
-
+        if (!this.IsRegistered()) return;
         if (!this.gameObject.activeInHierarchy) return;
         actor.MoveOverTime(data.position, data.rotation, isRewinding ? TimeTravelController.time.rewindStepDuration : 0f);
         if (data is ActorTimeTravelData actorData)
@@ -362,5 +359,16 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             StopRewind();
         }
         timeTravelStates.Clear();
+    }
+
+    public void SetRegistered()
+    {
+        registered = true;
+        timeTravelController = TimeTravelController.time;
+    }
+
+    public bool IsRegistered()
+    {
+        return registered;
     }
 }

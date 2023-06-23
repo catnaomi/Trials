@@ -425,6 +425,7 @@ public class TimeTravelController : MonoBehaviour
     public void RegisterAffectee(IAffectedByTimeTravel affectee)
     {
         affectees.Add(affectee);
+        affectee.SetRegistered();
         if (freeze && globalFreeze)
         {
             AddFrozen(affectee);
@@ -434,6 +435,33 @@ public class TimeTravelController : MonoBehaviour
     public void DeregisterAffectee(IAffectedByTimeTravel affectee)
     {
         affectees.Remove(affectee);
+    }
+
+    public static bool AttemptToRegisterAffectee(IAffectedByTimeTravel affectee)
+    {
+        if (time != null)
+        {
+            if (!time.affectees.Contains(affectee))
+            {
+                time.RegisterAffectee(affectee);
+            }
+            return true;
+        }
+        else
+        {
+            if (affectee is MonoBehaviour affecteeController)
+            {
+                Debug.Log($"failed to register {affecteeController}, waiting for time travel controller load");
+                affecteeController.StartCoroutine(WaitToRegisterRoutine(affectee));
+            }
+            return false;
+        }
+    }
+
+    static IEnumerator WaitToRegisterRoutine(IAffectedByTimeTravel affectee)
+    {
+        yield return new WaitWhile(() => { return time == null; });
+        time.RegisterAffectee(affectee);
     }
 
     public void ClearTimeDatas()

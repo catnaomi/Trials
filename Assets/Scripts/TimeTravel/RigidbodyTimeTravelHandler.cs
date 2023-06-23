@@ -9,17 +9,13 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public TimeTravelController timeTravelController;
     bool isRewinding;
     bool isFrozen;
+    bool registered;
     RigidbodyTimeTravelData lastData;
     public float fixedTime;
 
     void Start()
     {
         timeTravelController = TimeTravelController.time;
-        if (timeTravelController == null)
-        {
-            this.enabled = false;
-            return;
-        }
         if (rigidbody == null)
         {
             rigidbody = this.GetComponent<Rigidbody>();
@@ -30,8 +26,19 @@ public class RigidbodyTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             }
         }
         timeTravelStates = new List<TimeTravelData>();
-        timeTravelController.RegisterAffectee(this);
+        TimeTravelController.AttemptToRegisterAffectee(this);
     }
+    public void SetRegistered()
+    {
+        registered = true;
+        timeTravelController = TimeTravelController.time;
+    }
+
+    public bool IsRegistered()
+    {
+        return registered;
+    }
+
     public GameObject GetObject()
     {
         return this.gameObject;

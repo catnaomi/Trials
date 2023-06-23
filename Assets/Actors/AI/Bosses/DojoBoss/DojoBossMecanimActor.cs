@@ -10,7 +10,6 @@ using UnityEngine.Events;
 public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 {
 
-    Animator animator;
     DojoBossInventoryTransformingController inventory;
     bool isHitboxActive;
     HumanoidPositionReference positionReference;
@@ -274,7 +273,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         else if (currentPhase == CombatPhase.Idle)
         {
-            if (timeInPhase > minPhaseDuration)
+            if (timeInPhase > 3f)
             {
                 currentPhase = CombatPhase.AttackPhase;
                 timeInPhase = 0f;

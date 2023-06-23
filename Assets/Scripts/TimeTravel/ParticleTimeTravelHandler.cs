@@ -6,18 +6,23 @@ public class ParticleTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 {
     bool isFrozen;
     ParticleSystem particles;
-    TimeTravelController timeTravelController;
+    bool registered;
     void Start()
     {
         particles = this.GetComponent<ParticleSystem>();
-        timeTravelController = TimeTravelController.time;
-        if (timeTravelController == null)
-        {
-            this.enabled = false;
-            return;
-        }
-        TimeTravelController.time.RegisterAffectee(this);
+        TimeTravelController.AttemptToRegisterAffectee(this);
     }
+
+    public void SetRegistered()
+    {
+        registered = true;
+    }
+
+    public bool IsRegistered()
+    {
+        return registered;
+    }
+
     public void ClearTimeData()
     {
         // do nothing

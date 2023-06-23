@@ -96,5 +96,10 @@ public class YarnTimelineBehaviour : PlayableBehaviour
             director.Evaluate();
             director.time += RATE;
         }
+        director.Resume();
+        if (director.playableGraph.GetRootPlayable(0).GetSpeed() <= 0)
+        {
+            director.playableGraph.GetRootPlayable(0).SetSpeed(1);
+        }
     }
 }

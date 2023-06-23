@@ -9,19 +9,15 @@ public class BezierTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     bool isRewinding;
     bool isFrozen;
     bool frozenOnCreate;
+    bool registered;
     BezierProjectileController projectile;
     ProjectileTimeTravelData lastData;
 
     void Start()
     {
         timeTravelController = TimeTravelController.time;
-        if (timeTravelController == null)
-        {
-            this.enabled = false;
-            return;
-        }
         projectile = this.GetComponent<BezierProjectileController>();
-        timeTravelController.RegisterAffectee(this);
+        TimeTravelController.AttemptToRegisterAffectee(this);
     }
     public GameObject GetObject()
     {
@@ -107,5 +103,16 @@ public class BezierTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         {
             return Time.fixedDeltaTime;
         }
+    }
+
+    public void SetRegistered()
+    {
+        registered = true;
+        timeTravelController = TimeTravelController.time;
+    }
+
+    public bool IsRegistered()
+    {
+        return registered;
     }
 }

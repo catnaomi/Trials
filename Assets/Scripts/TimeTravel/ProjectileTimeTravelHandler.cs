@@ -31,6 +31,16 @@ public class ProjectileTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             projectile.enabled = false;
         }
     }
+    public void SetRegistered()
+    {
+        
+    }
+
+    public bool IsRegistered()
+    {
+        return TimeTravelController.time != null;
+    }
+
     public GameObject GetObject()
     {
         return this.gameObject;

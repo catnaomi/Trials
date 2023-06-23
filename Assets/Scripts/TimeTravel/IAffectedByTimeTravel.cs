@@ -28,4 +28,8 @@ public interface IAffectedByTimeTravel
     public bool IsRewinding();
 
     public bool IsNull();
+
+    public void SetRegistered();
+
+    public bool IsRegistered();
 }
