@@ -16,6 +16,7 @@ public class PlayTimelineWithActors : MonoBehaviour
     public bool hidePlayer;
     public bool disablePlayerMovement;
     bool playing;
+    bool wasPlayerActive;
     public Transform playerRefTransform;
     public bool refTransformFollowsPlayer = false;
     public Animator fakePlayer;
@@ -111,11 +112,11 @@ public class PlayTimelineWithActors : MonoBehaviour
 
     public void Play()
     {
+        wasPlayerActive = PlayerActor.player != null && PlayerActor.player.gameObject.activeSelf;
         if (playerRefTransform != null)
         {
             playerRefTransform.gameObject.SetActive(true);
         }
-        
         SetBindings();
         director.Play();
         playing = true;
@@ -140,7 +141,7 @@ public class PlayTimelineWithActors : MonoBehaviour
         playing = false;
         if (PlayerActor.player != null)
         {
-            if (hidePlayer)
+            if (hidePlayer || (!PlayerActor.player.gameObject.activeSelf && wasPlayerActive))
             {
                 PlayerActor.player.gameObject.SetActive(true);
             }
@@ -157,6 +158,11 @@ public class PlayTimelineWithActors : MonoBehaviour
         {
             Destroy(this.gameObject);
         }
+    }
+
+    public void Stop()
+    {
+        Stop(null);
     }
     void SetBindings()
     {

@@ -72,4 +72,16 @@ public class TimelineListener : MonoBehaviour
         playingDirectors.RemoveAll(d => d == null);
         return playingDirectors.Count > 0;
     }
+
+    public static void StopAllTimelines()
+    {
+        foreach (PlayableDirector director in FindObjectsOfType<PlayableDirector>())
+        {
+            director.Stop();
+        }
+        foreach (PlayTimelineWithActors playTimeline in FindObjectsOfType<PlayTimelineWithActors>())
+        {
+            playTimeline.Stop();
+        }
+    }
 }

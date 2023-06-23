@@ -484,6 +484,7 @@ public static class DebugReflectionMethods
             {
                 PlayerActor.player.StopDialogue();
             }
+            TimelineListener.StopAllTimelines();
         }
         catch (Exception ex)
         {
