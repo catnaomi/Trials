@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 public class KillPlane : MonoBehaviour
 {
     public float interval = 0.1f;
+    public float maximumHeightDifference = 100;
     public bool ignorePlayer = false;
     public bool ignoreObjects = true;
     public UnityEvent OnKillPlayer;
@@ -66,6 +67,7 @@ public class KillPlane : MonoBehaviour
         Vector3 adjustedPosition = position - this.transform.position;
         if (Mathf.Abs(adjustedPosition.x) > bounds.extents.x) return false;
         if (Mathf.Abs(adjustedPosition.z) > bounds.extents.z) return false;
+        if (Mathf.Abs(adjustedPosition.y) > maximumHeightDifference) return false;
         return true;
     }
 }

@@ -558,6 +558,13 @@ public class SceneLoader : MonoBehaviour
             instance.OnActiveSceneChange.Invoke();
         }
     }
+
+    /*
+    IEnumerator SetActiveSceneRoutine(Scene scene)
+    {
+
+    }
+    */
     public static void AllowSceneActivation(bool active)
     {
         instance.allowSceneActivation = active;

@@ -96,6 +96,7 @@ public class SceneTransferHallway : MonoBehaviour
 
         SceneLoader.SetActiveScene(targetScene);
 
+
         OnTransferFrom.Invoke();
         other.OnTransferInto.Invoke();
     }
