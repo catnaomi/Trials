@@ -84,7 +84,7 @@ public class ActorAttributes : MonoBehaviour
             effectClock = 0f;
         }
     }
-
+    
     public void ResetAttributes()
     {
         effectClock = 0f;
