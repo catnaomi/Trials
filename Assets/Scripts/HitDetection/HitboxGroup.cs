@@ -89,7 +89,6 @@ public class HitboxGroup
             if (contactBox.hitTerrain.Raycast(new Ray(root.transform.position - dir.normalized * VERTICAL_TERRAIN_BIAS, dir.normalized), out RaycastHit hit, contactBox.radius + dir.magnitude + VERTICAL_TERRAIN_BIAS))
             {
                 float dot = Vector3.Dot(hit.normal, Vector3.up);
-                Debug.Log(dot);
                 if (Mathf.Abs(dot) < VERTICAL_TERRAIN_DOT_THRESHOLD)
                 {
                     OnHitWall.Invoke();

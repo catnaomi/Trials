@@ -296,8 +296,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         animator.SetInteger("NextParry", NextParry);
 
-        UpdateTrigger("ParryHit", ref ParryHit);
-        UpdateTrigger("ParryFail", ref ParryFail);
+        animator.UpdateTrigger("ParryHit", ref ParryHit);
+        animator.UpdateTrigger("ParryFail", ref ParryFail);
         
         if (CombatTarget != null)
         {
@@ -325,7 +325,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             animator.ResetTrigger("OnHeavyDamage");
         }
 
-        UpdateTrigger("Parried", ref Parried);
+        animator.UpdateTrigger("Parried", ref Parried);
         animator.SetInteger("OffenseStage", OffenseStage);
         animator.SetInteger("CurrentPhase", (int)currentPhase);
 
@@ -333,28 +333,19 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         out_PillarJumpCurve = animator.GetFloat("out_PillarJumpCurve");
 
-        UpdateTrigger("OnLightPillarHit", ref OnLightPillarHit);
+        animator.UpdateTrigger("OnLightPillarHit", ref OnLightPillarHit);
 
         animator.SetBool("PlayerIsProne", PlayerIsProne);
         animator.SetBool("PlayerIsAttacking", PlayerIsAttacking);
         animator.SetBool("Blocking", Blocking);
         animator.SetInteger("PillarCount", PillarCount);
 
-        UpdateTrigger("OnTimeDamage", ref OnTimeDamage);
+        animator.UpdateTrigger("OnTimeDamage", ref OnTimeDamage);
 
         animator.SetBool("Dead", dead);
         animator.SetBool("IsPillarFalling", isPillarFalling);
 
-        UpdateTrigger("ResetToStart", ref ResetToStart);
-    }
-
-    void UpdateTrigger(string name, ref bool trigger)
-    {
-        if (trigger)
-        {
-            animator.SetTrigger(name);
-            trigger = false;
-        }
+        animator.UpdateTrigger("ResetToStart", ref ResetToStart);
     }
 
     void CheckTarget()

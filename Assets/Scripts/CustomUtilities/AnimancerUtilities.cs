@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace CustomUtilities
 {
-    public class AnimancerUtilities
+    public static class AnimancerUtilities
     {
         public static AnimationClip GetCurrentClip(AnimancerComponent animancer)
         {
@@ -38,6 +38,15 @@ namespace CustomUtilities
                     return GetHighestWeightStateRecursive(leadingState);
                 }
                 return null;
+            }
+        }
+
+        public static void UpdateTrigger(this Animator animator, string name, ref bool trigger)
+        {
+            if (trigger)
+            {
+                animator.SetTrigger(name);
+                trigger = false;
             }
         }
     }

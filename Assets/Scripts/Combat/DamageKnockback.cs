@@ -301,6 +301,38 @@ public class DamageKnockback
         return this.healthDamage * (isCrit ? critData.criticalMultiplier : 1f);
     }
 
+    // sets contact point vectors for weapon fx
+    public static void GetContactPoints(IDamageable thisDamageable, DamageKnockback damage, Collider hitCollider, bool block)
+    {
+        Vector3 contactPosition = damage.originPoint;
+        Vector3 contactDirection = thisDamageable.GetGameObject().transform.right;
+        if (damage.hitboxSource != null)
+        {
+            contactPosition = hitCollider.ClosestPoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
+            contactDirection = damage.hitboxSource.GetComponent<Hitbox>().GetDeltaPosition().normalized;
+            if (damage.source.TryGetComponent<Actor>(out Actor sourceActor))
+            {
+
+                sourceActor.lastContactPoint = contactPosition;
+                sourceActor.SetLastBlockpoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
+                if (block)
+                {
+                    contactPosition = sourceActor.GetBlockpoint(contactPosition);
+                }
+            }
+        }
+        else if (damage.originPoint != Vector3.zero)
+        {
+            contactPosition = hitCollider.ClosestPoint(damage.originPoint);
+            if (damage.source.TryGetComponent<Actor>(out Actor sourceActor))
+            {
+                sourceActor.lastContactPoint = contactPosition;
+                sourceActor.SetLastBlockpoint(damage.originPoint);
+            }
+        }
+        thisDamageable.SetHitParticleVectors(contactPosition, contactDirection);
+    }
+
 }
 
 [Serializable]

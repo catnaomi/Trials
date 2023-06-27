@@ -184,10 +184,11 @@ public class Hitbox : MonoBehaviour
             {
                 if (collider.transform.root.gameObject != source)
                 {
-                    IDamageable hitActor = collider.GetComponentInParent<IDamageable>();
+                    IDamageable hitActor = collider.GetComponent<IDamageable>();
+                    
                     if (hitActor == null)
                     {
-                        hitActor = collider.GetComponent<IDamageable>();
+                        hitActor = collider.GetComponentInParent<IDamageable>();
                     }
                     if (hitActor != null && !victims.Contains(hitActor))
                     {

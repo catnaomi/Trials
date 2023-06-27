@@ -121,11 +121,6 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
        
         if (actor.IsTimeStopped())
         {
-            if (!inFrozenRoutine)
-            {
-                //actor.StartCoroutine(FrozenRoutine());
-            }
-            //timeStopDamages.Enqueue(damage);
             TimeTravelController.time.TimeStopDamage(damage, this, damageAmount);
             return;
         }
@@ -216,37 +211,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             actor.attributes.ReduceHealth(damageAmount);
         }
 
-        
-
-
-
-        Vector3 contactPosition = damage.originPoint;
-        Vector3 contactDirection = actor.transform.right;
-        if (damage.hitboxSource != null)
-        {
-            contactPosition = actor.GetComponent<Collider>().ClosestPoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
-            contactDirection = damage.hitboxSource.GetComponent<Hitbox>().GetDeltaPosition().normalized;
-            if (damage.source.TryGetComponent<Actor>(out Actor sourceActor))
-            {
-
-                sourceActor.lastContactPoint = contactPosition;
-                sourceActor.SetLastBlockpoint(damage.hitboxSource.GetComponent<SphereCollider>().bounds.center);
-                if (blockSuccess)
-                {
-                    contactPosition = sourceActor.GetBlockpoint(contactPosition); 
-                }
-            }
-        }
-        else if (damage.originPoint != Vector3.zero)
-        {
-            contactPosition = actor.GetComponent<Collider>().ClosestPoint(damage.originPoint);
-            if (damage.source.TryGetComponent<Actor>(out Actor sourceActor))
-            {
-                sourceActor.lastContactPoint = contactPosition;
-                sourceActor.SetLastBlockpoint(damage.originPoint);
-            }
-        }
-        actor.GetComponent<IDamageable>().SetHitParticleVectors(contactPosition, contactDirection);
+        DamageKnockback.GetContactPoints(actor.GetComponent<IDamageable>(), damage, actor.GetComponent<Collider>(), blockSuccess);
 
         if (actor.IsDodging())
         {

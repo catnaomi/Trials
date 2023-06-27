@@ -2,11 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IceGiantMecanimActor : Actor, IAttacker
+public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 {
     [Header("Position Reference")]
     public Transform RightHand;
     public Transform LeftHand;
+    public DamageablePoint leftLeg;
+    public DamageablePoint rightLeg;
+    public DamageablePoint weakPoint;
     [Header("Weapons")]
     public float RightWeaponLength = 1f;
     public float RightWeaponRadius = 1f;
@@ -15,19 +18,43 @@ public class IceGiantMecanimActor : Actor, IAttacker
     public float LeftWeaponRadius = 1f;
     [Header("Attacks")]
     public DamageKnockback tempDamage;
+    public float getupDelay = 5f;
+    float getupClock = 0f;
     HitboxGroup rightHitboxes;
+    DamageKnockback lastTakenDamage;
     HitboxGroup leftHitboxes;
+    [Header("Mecanim Values")]
+    [ReadOnly, SerializeField] bool Dead;
+    [ReadOnly, SerializeField] bool IsFallen;
     public override void ActorStart()
     {
         base.ActorStart();
         animator = this.GetComponent<Animator>();
         GenerateWeapons();
+        leftLeg.OnHurt.AddListener(() => TakeDamageFromDamagePoint(leftLeg));
+        rightLeg.OnHurt.AddListener(() => TakeDamageFromDamagePoint(rightLeg));
+        weakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(weakPoint));
+        EnableWeakPoint(false);
     }
 
     public override void ActorPostUpdate()
     {
         base.ActorPostUpdate();
 
+        if (IsFallen)
+        {
+            getupClock -= Time.deltaTime;
+            if (getupClock <= 0f)
+            {
+                GetUp();
+            }
+        }
+        UpdateMecanimValues();
+    }
+
+    void UpdateMecanimValues()
+    {
+        animator.SetBool("IsFallen", IsFallen);
     }
     void GenerateWeapons()
     {
@@ -47,6 +74,42 @@ public class IceGiantMecanimActor : Actor, IAttacker
         return tempDamage;
     }
 
+
+    public void TakeDamageFromDamagePoint(DamageablePoint point)
+    {
+        attributes.health.current -= point.GetLastAmountTaken();
+        if (point.hasHealth && point.health <= 0f)
+        {
+            BreakDamageablePoint(point);
+        }
+        lastDamageTaken = point.GetLastTakenDamage();
+        SetHitParticleVectors(point.GetHitPosition(), point.GetHitDirection());
+        OnHurt.Invoke();
+    }
+
+    void BreakDamageablePoint(DamageablePoint point)
+    {
+        point.gameObject.SetActive(false);
+        FallOver();
+    }
+
+    public void FallOver()
+    {
+        getupClock = getupDelay;
+        EnableWeakPoint(true);
+        weakPoint.StartCritVulnerability(getupDelay);
+        IsFallen = true;
+    }
+
+    public void GetUp()
+    {
+        IsFallen = false;
+        EnableWeakPoint(false);
+    }
+    public void EnableWeakPoint(bool active)
+    {
+        weakPoint.gameObject.SetActive(active);
+    }
     public void HitboxActive(int active)
     {
         if (active == 1)
@@ -65,5 +128,40 @@ public class IceGiantMecanimActor : Actor, IAttacker
             leftHitboxes.SetActive(false);
         }
 
+    }
+
+    public void TakeDamage(DamageKnockback damage)
+    {
+        // do nothing, never takes damage directly
+    }
+
+    public void Recoil()
+    {
+        
+    }
+
+    public void StartCritVulnerability(float time)
+    {
+        
+    }
+
+    public bool IsCritVulnerable()
+    {
+        return false;
+    }
+
+    public void GetParried()
+    {
+        
+    }
+
+    public DamageKnockback GetLastTakenDamage()
+    {
+        return lastDamageTaken;
+    }
+
+    public GameObject GetGameObject()
+    {
+        return this.gameObject;
     }
 }
