@@ -6,7 +6,7 @@ using UnityEngine.Events;
 
 public class DamageablePoint : MonoBehaviour, IDamageable
 {
-    public float health;
+    public AttributeValue health;
     public bool hasHealth;
     public DamageResistance resistance;
     Collider collider;
@@ -57,10 +57,10 @@ public class DamageablePoint : MonoBehaviour, IDamageable
 
         if (hasHealth)
         {
-            health -= Mathf.Floor(damageAmount);
-            if (health < 0)
+            health.current -= damageAmount;
+            if (health.current < 0)
             {
-                health = 0;
+                health.current = 0;
             }
         }
         
@@ -75,7 +75,7 @@ public class DamageablePoint : MonoBehaviour, IDamageable
         {
             damage.OnCrit.Invoke();
         }
-        if (hasHealth && health <= 0f)
+        if (hasHealth && health.current <= 0f)
         {
             OnDie.Invoke();
         }

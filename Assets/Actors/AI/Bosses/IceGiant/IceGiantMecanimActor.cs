@@ -7,8 +7,10 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     [Header("Position Reference")]
     public Transform RightHand;
     public Transform LeftHand;
-    public DamageablePoint leftLeg;
-    public DamageablePoint rightLeg;
+    public GameObject leftLeg;
+    public DamageablePoint leftLegWeakPoint;
+    public GameObject rightLeg;
+    public DamageablePoint rightLegWeakPoint;
     public DamageablePoint weakPoint;
     [Header("Weapons")]
     public float RightWeaponLength = 1f;
@@ -31,8 +33,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         base.ActorStart();
         animator = this.GetComponent<Animator>();
         GenerateWeapons();
-        leftLeg.OnHurt.AddListener(() => TakeDamageFromDamagePoint(leftLeg));
-        rightLeg.OnHurt.AddListener(() => TakeDamageFromDamagePoint(rightLeg));
+        leftLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(leftLegWeakPoint));
+        rightLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(rightLegWeakPoint));
         weakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(weakPoint));
         EnableWeakPoint(false);
     }
@@ -78,7 +80,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public void TakeDamageFromDamagePoint(DamageablePoint point)
     {
         attributes.health.current -= point.GetLastAmountTaken();
-        if (point.hasHealth && point.health <= 0f)
+        if (point.hasHealth && point.health.current <= 0f)
         {
             BreakDamageablePoint(point);
         }
@@ -90,6 +92,14 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     void BreakDamageablePoint(DamageablePoint point)
     {
         point.gameObject.SetActive(false);
+        if (point == rightLegWeakPoint)
+        {
+            rightLeg.SetActive(false);
+        }
+        else if (point == leftLegWeakPoint)
+        {
+            leftLeg.SetActive(false);
+        }
         FallOver();
     }
 

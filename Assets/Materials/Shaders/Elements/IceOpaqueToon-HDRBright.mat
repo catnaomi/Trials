@@ -36,9 +36,19 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _CrackNormal:
+        m_Texture: {fileID: 2800000, guid: fa3f8269a628fa149b769c9f149c53de, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CrackTexture:
+        m_Texture: {fileID: 2800000, guid: 1d1692bd46cbd914aa58df11648b4d53, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _CrackNormalStrength: 10
+    - _CrackedAmount: 0
     - _FresnelPower: 0
     - _HighlightTextureStrength: 0.069
     - _HighlightThreshold: 1.74
@@ -47,6 +57,7 @@ Material:
     - _Smoothness: 1
     m_Colors:
     - _BaseColor: {r: 0.63529414, g: 1.0901961, b: 1.4980392, a: 1}
+    - _CrackColor: {r: 0.04822221, g: 0.19288881, b: 0.21, a: 0.8}
     - _HighlightColor: {r: 1.4980392, g: 1.4980392, b: 1.4980392, a: 1}
     - _ShadowColor: {r: 0.0133888805, g: 0.2008334, b: 0.241, a: 1}
   m_BuildTextureStacks: []
