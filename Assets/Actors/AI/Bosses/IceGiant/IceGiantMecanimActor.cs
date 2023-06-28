@@ -1,3 +1,4 @@
+using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,6 +29,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool Dead;
     [ReadOnly, SerializeField] bool IsFallen;
+    [ReadOnly, SerializeField] bool Fall;
     public override void ActorStart()
     {
         base.ActorStart();
@@ -36,7 +38,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         leftLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(leftLegWeakPoint));
         rightLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(rightLegWeakPoint));
         weakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(weakPoint));
-        EnableWeakPoint(false);
+        //EnableWeakPoint(false);
     }
 
     public override void ActorPostUpdate()
@@ -57,6 +59,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     void UpdateMecanimValues()
     {
         animator.SetBool("IsFallen", IsFallen);
+        animator.UpdateTrigger("Fall", ref Fall);
     }
     void GenerateWeapons()
     {
@@ -106,7 +109,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public void FallOver()
     {
         getupClock = getupDelay;
-        EnableWeakPoint(true);
+        //EnableWeakPoint(true);
         weakPoint.StartCritVulnerability(getupDelay);
         IsFallen = true;
     }
@@ -114,7 +117,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public void GetUp()
     {
         IsFallen = false;
-        EnableWeakPoint(false);
+        //EnableWeakPoint(false);
     }
     public void EnableWeakPoint(bool active)
     {
