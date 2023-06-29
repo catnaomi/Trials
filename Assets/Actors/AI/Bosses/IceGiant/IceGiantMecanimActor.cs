@@ -1,3 +1,4 @@
+using Cinemachine;
 using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,11 +22,26 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public float LeftWeaponRadius = 1f;
     [Header("Attacks")]
     public DamageKnockback tempDamage;
+    public InputAttack stepShockwave;
+    public float stepShockwaveRadius = 2f;
+    public InputAttack harmlessShockwave;
+    public InputAttack smallShockwave;
+    public InputAttack largeShockwave;
+    public float shockwaveRadius = 2f;
+    public InputAttack groundShockwave;
+    public float groundShockwaveRadius = 25f;
+    [Space(10)]
+    public float nonActorGroundedThreshold = 1f;
+    [Space(20)]
     public float getupDelay = 5f;
     float getupClock = 0f;
     HitboxGroup rightHitboxes;
     DamageKnockback lastTakenDamage;
     HitboxGroup leftHitboxes;
+    [Header("Particles")]
+    public ParticleSystem stompParticle;
+    public ParticleSystem footReformParticleLeft;
+    public ParticleSystem footReformParticleRight;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool Dead;
     [ReadOnly, SerializeField] bool IsFallen;
@@ -38,6 +54,11 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         leftLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(leftLegWeakPoint));
         rightLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(rightLegWeakPoint));
         weakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(weakPoint));
+        if (TryGetComponent<AnimationFXHandler>(out AnimationFXHandler fxHandler))
+        {
+            fxHandler.OnStepL.AddListener(StepShockwaveLeft);
+            fxHandler.OnStepR.AddListener(StepShockwaveRight);
+        }
         //EnableWeakPoint(false);
     }
 
@@ -76,7 +97,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     }
     public DamageKnockback GetLastDamage()
     {
-        return tempDamage;
+        return currentDamage;
     }
 
 
@@ -104,6 +125,20 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             leftLeg.SetActive(false);
         }
         FallOver();
+    }
+
+    void FixDamageablePoint(DamageablePoint point)
+    {
+        point.gameObject.SetActive(true);
+        if (point == rightLegWeakPoint)
+        {
+            rightLeg.SetActive(true);
+        }
+        else if (point == leftLegWeakPoint)
+        {
+            leftLeg.SetActive(true);
+        }
+        point.health.current = point.health.max;
     }
 
     public void FallOver()
@@ -141,6 +176,113 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             leftHitboxes.SetActive(false);
         }
 
+    }
+
+    public void StartReformFoot()
+    {
+        bool isLeft = animator.GetCurrentAnimatorStateInfo(0).IsTag("STOMP_LEFT");
+        ParticleSystem particle = (isLeft) ? footReformParticleLeft : footReformParticleRight;
+        particle.Play();
+    }
+
+    public void ReformFoot()
+    {
+        bool isLeft = animator.GetCurrentAnimatorStateInfo(0).IsTag("STOMP_LEFT");
+        Transform foot = (isLeft) ? leftLeg.transform : rightLeg.transform;
+        DamageablePoint point = (isLeft) ? leftLegWeakPoint : rightLegWeakPoint;
+        FixDamageablePoint(point);
+    }
+    public void Stomp(int left)
+    {
+        bool isLeft = animator.GetCurrentAnimatorStateInfo(0).IsTag("STOMP_LEFT");
+        Transform foot = (isLeft) ? leftLeg.transform : rightLeg.transform;
+
+        Vector3 position = foot.position;
+        position.y = this.transform.position.y;
+        Shockwave(position, groundShockwaveRadius, new DamageKnockback(groundShockwave.GetDamage()), true);
+        Shockwave(position, shockwaveRadius, new DamageKnockback(largeShockwave.GetDamage()), true);
+
+        stompParticle.transform.position = position;
+        stompParticle.Play();
+        stompParticle.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
+        stompParticle.GetComponent<AudioSource>().Play();
+    }
+
+    public void HandShockwaveIn()
+    {
+        Vector3 position = LeftHand.position;
+        position.y = this.transform.position.y;
+        // activate particle only
+    }
+    public void HandShockwaveOut()
+    {
+        Vector3 position = LeftHand.position;
+        position.y = this.transform.position.y;
+        Shockwave(position, shockwaveRadius, new DamageKnockback(harmlessShockwave.GetDamage()), false);
+    }
+    public void StepShockwaveLeft()
+    {
+        StepShockwave(-1);
+    }
+
+    public void StepShockwaveRight()
+    {
+        StepShockwave(1);
+    }
+
+    public void StepShockwave(int left)
+    {
+        bool isLeft = left == -1;
+        Transform foot = (isLeft) ? leftLeg.transform : rightLeg.transform;
+        Vector3 position = foot.position;
+        position.y = this.transform.position.y;
+
+
+        Shockwave(position, stepShockwaveRadius, new DamageKnockback(stepShockwave.GetDamage()), false);
+    }
+
+    void Shockwave(Vector3 position, float radius, DamageKnockback damage, bool groundedOnly)
+    {
+        Collider[] colliders = Physics.OverlapSphere(position, radius, Hitbox.GetHitboxMask());
+        List<IDamageable> victims = new List<IDamageable>();
+
+        damage.source = this.gameObject;
+        foreach (Collider c in colliders)
+        {
+            if (c.transform.root == this.transform) continue;
+            if (c.TryGetComponent<IDamageable>(out IDamageable victim))
+            {
+                if (victims.Contains(victim))
+                {
+                    continue;
+                }
+                else
+                {
+                    victims.Add(victim);
+                }
+            }
+        }
+
+        foreach (IDamageable v in victims)
+        {
+            // check if they are grounded
+            if (groundedOnly)
+            {
+                if (v.GetGameObject().TryGetComponent<Actor>(out Actor actor) && !actor.IsGrounded())
+                {
+                    continue;
+                }
+                else if (v.GetGameObject().transform.position.y - this.transform.position.y > nonActorGroundedThreshold)
+                {
+                    continue;
+                }
+            }
+            v.TakeDamage(damage);
+        }
+        Debug.DrawRay(position, Vector3.forward * radius, Color.red, 5f);
+        Debug.DrawRay(position, Vector3.back * radius, Color.red, 5f);
+        Debug.DrawRay(position, Vector3.right * radius, Color.red, 5f);
+        Debug.DrawRay(position, Vector3.left * radius, Color.red, 5f);
     }
 
     public void TakeDamage(DamageKnockback damage)
