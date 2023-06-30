@@ -30,6 +30,10 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public float shockwaveRadius = 2f;
     public InputAttack groundShockwave;
     public float groundShockwaveRadius = 25f;
+    public float spinAccel = 360f;
+    public float spinAttackSpeed = 360f;
+    public float spinVelocity;
+    bool spinning;
     [Space(10)]
     public float nonActorGroundedThreshold = 1f;
     [Space(20)]
@@ -42,6 +46,11 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public ParticleSystem stompParticle;
     public ParticleSystem footReformParticleLeft;
     public ParticleSystem footReformParticleRight;
+    public ParticleSystem stepParticle;
+    public ParticleSystem stepSmallParticle;
+    public ParticleSystem handOutParticle;
+    public ParticleSystem spinHandParticle;
+    public ParticleSystem smallIceParticle;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool Dead;
     [ReadOnly, SerializeField] bool IsFallen;
@@ -73,6 +82,24 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             {
                 GetUp();
             }
+        }
+        
+        if (spinning)
+        {
+            spinVelocity = Mathf.MoveTowards(spinVelocity, spinAttackSpeed, spinAccel * Time.deltaTime);
+
+            Vector3 position = LeftHand.position;
+            position.y = 0f;
+
+            spinHandParticle.transform.position = position;
+        }
+        else
+        {
+            spinVelocity = Mathf.MoveTowards(spinVelocity, 0f, spinAccel * Time.deltaTime);
+        }
+        if (spinVelocity != 0f)
+        {
+            this.transform.Rotate(-Vector3.up, spinVelocity * Time.deltaTime);
         }
         UpdateMecanimValues();
     }
@@ -147,6 +174,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         //EnableWeakPoint(true);
         weakPoint.StartCritVulnerability(getupDelay);
         IsFallen = true;
+        Fall = true;
     }
 
     public void GetUp()
@@ -199,26 +227,33 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
         Vector3 position = foot.position;
         position.y = this.transform.position.y;
-        Shockwave(position, groundShockwaveRadius, new DamageKnockback(groundShockwave.GetDamage()), true);
-        Shockwave(position, shockwaveRadius, new DamageKnockback(largeShockwave.GetDamage()), true);
 
-        stompParticle.transform.position = position;
-        stompParticle.Play();
-        stompParticle.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
-        stompParticle.GetComponent<AudioSource>().Play();
+        StartCoroutine(StompShockwaveRoutine(position));
+
+        PlayParticleAtPosition(stompParticle, position);
     }
-
+    IEnumerator StompShockwaveRoutine(Vector3 position)
+    {
+        Shockwave(position, shockwaveRadius, new DamageKnockback(largeShockwave.GetDamage()), true);
+        yield return null;
+        Shockwave(position, groundShockwaveRadius, new DamageKnockback(groundShockwave.GetDamage()), true);
+    }
     public void HandShockwaveIn()
     {
         Vector3 position = LeftHand.position;
         position.y = this.transform.position.y;
         // activate particle only
+        PlayParticleAtPosition(smallIceParticle, position);
+
     }
     public void HandShockwaveOut()
     {
         Vector3 position = LeftHand.position;
         position.y = this.transform.position.y;
         Shockwave(position, shockwaveRadius, new DamageKnockback(harmlessShockwave.GetDamage()), false);
+
+        PlayParticleAtPosition(handOutParticle, position);
+
     }
     public void StepShockwaveLeft()
     {
@@ -237,8 +272,34 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         Vector3 position = foot.position;
         position.y = this.transform.position.y;
 
+        DamageablePoint point = (isLeft) ? leftLegWeakPoint : rightLegWeakPoint;
 
-        Shockwave(position, stepShockwaveRadius, new DamageKnockback(stepShockwave.GetDamage()), false);
+        if (point.health.current > 0)
+        {
+            Shockwave(position, stepShockwaveRadius, new DamageKnockback(stepShockwave.GetDamage()), false);
+            PlayParticleAtPosition(stepParticle, position);
+        }
+        else
+        {
+            PlayParticleAtPosition(stepSmallParticle, position);
+        }
+        
+
+        
+    }
+
+    void PlayParticleAtPosition(ParticleSystem particle, Vector3 position)
+    {
+        particle.transform.position = position;
+        particle.Play();
+        if (particle.TryGetComponent(out CinemachineImpulseSource impulse))
+        {
+            impulse.GenerateImpulse();
+        }
+        if (particle.TryGetComponent(out AudioSource source))
+        {
+            source.Play();
+        }
     }
 
     void Shockwave(Vector3 position, float radius, DamageKnockback damage, bool groundedOnly)
@@ -283,6 +344,26 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         Debug.DrawRay(position, Vector3.back * radius, Color.red, 5f);
         Debug.DrawRay(position, Vector3.right * radius, Color.red, 5f);
         Debug.DrawRay(position, Vector3.left * radius, Color.red, 5f);
+    }
+
+    public void Spin(int active)
+    {
+        spinning = active > 0;
+        if (spinning)
+        {
+            Vector3 position = LeftHand.position;
+            position.y = 0f;
+
+            spinHandParticle.transform.position = position;
+            spinHandParticle.Play();
+            spinHandParticle.GetComponent<AudioSource>().Play();
+        }
+        else
+        {
+            spinHandParticle.Stop();
+            spinHandParticle.GetComponent<AudioSource>().FadeOut(1f, this);
+        }
+        
     }
 
     public void TakeDamage(DamageKnockback damage)
