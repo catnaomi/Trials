@@ -347,6 +347,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         weakPoint.StartCritVulnerability(getupDelay);
         IsFallen = true;
         Fall = true;
+        spinning = false;
     }
 
     public void GetUp()
