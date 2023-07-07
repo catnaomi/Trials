@@ -124,7 +124,7 @@ NavMeshSettings:
     preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
-  m_NavMeshData: {fileID: 0}
+  m_NavMeshData: {fileID: 23800000, guid: 7d9ebcfefdc50d6488558f21784df953, type: 2}
 --- !u!1 &23040919
 GameObject:
   m_ObjectHideFlags: 0
@@ -25253,7 +25253,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-1866
+  m_Name: pb_Mesh-439544
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -116356,6 +116356,13 @@ MonoBehaviour:
   rightLeg: {fileID: 2111412140}
   rightLegWeakPoint: {fileID: 315760287}
   weakPoint: {fileID: 907829070}
+  actionsEnabled: 1
+  nav: {fileID: 0}
+  closeRange: 5
+  meleeRange: 3
+  stompTimer: 30
+  maxRealignAngle: 180
+  behindAngle: 90
   RightWeaponLength: 1.25
   RightWeaponRadius: 0.5
   LeftWeaponLength: 3.5
@@ -116426,8 +116433,13 @@ MonoBehaviour:
   spinAccel: 360
   spinAttackSpeed: 360
   spinVelocity: 0
+  maxIKHandDistance: 1
+  ikHandOffset: -1
   nonActorGroundedThreshold: 1
   getupDelay: 5
+  OnHitboxActive:
+    m_PersistentCalls:
+      m_Calls: []
   stompParticle: {fileID: 1431452184}
   footReformParticleLeft: {fileID: 588286295}
   footReformParticleRight: {fileID: 975228084}
@@ -116439,6 +116451,15 @@ MonoBehaviour:
   Dead: 0
   IsFallen: 0
   Fall: 0
+  InCloseRange: 0
+  InMeleeRange: 0
+  ShouldStomp: 0
+  ActionsEnabled: 0
+  StompLeft: 0
+  TargetBehind: 0
+  AngleBetween: 0
+  AngleBetweenAbs: 0
+  animated_TrackingHandIKWeight: 0
 --- !u!114 &1641067711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116454,9 +116475,9 @@ MonoBehaviour:
   smoothedHealth: 0
   healthRecoveryClock: 0
   health:
-    baseValue: 100
-    current: 100
-    max: 100
+    baseValue: 150
+    current: 150
+    max: 150
   healthRecoveryRate:
     baseValue: 0
     current: 0
@@ -116569,6 +116590,28 @@ MonoBehaviour:
   OnGunLoad:
     m_PersistentCalls:
       m_Calls: []
+--- !u!195 &1641067716
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1641067707}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 1
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &1653385069
 GameObject:
   m_ObjectHideFlags: 0

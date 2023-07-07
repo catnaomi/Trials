@@ -28,6 +28,14 @@ Material:
         m_Texture: {fileID: 2800000, guid: 7e9a3b59a3306c74e902f8745d6059e2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _CrackNormal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CrackTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _HighlightTexture:
         m_Texture: {fileID: 2800000, guid: bb0cb719a1c89a945872dc69ba7d1a2b, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -59,6 +67,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 1
+    - _CrackNormalStrength: 1
+    - _CrackedAmount: 1
     - _Float: 0
     - _FresnelPower: 1.5
     - _HighlightTextureStrength: 0.081
@@ -75,6 +85,7 @@ Material:
     - _Whiteness: 0.5
     m_Colors:
     - _BaseColor: {r: 0.7783019, g: 0.8901679, b: 1, a: 1}
+    - _CrackColor: {r: 0, g: 0, b: 0, a: 0}
     - _HighlightColor: {r: 1, g: 1, b: 1, a: 1}
     - _ShadowColor: {r: 0.011764699, g: 0.17509803, b: 0.21176471, a: 1}
   m_BuildTextureStacks: []

@@ -3,6 +3,8 @@ using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.Events;
 
 public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 {
@@ -14,6 +16,17 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public GameObject rightLeg;
     public DamageablePoint rightLegWeakPoint;
     public DamageablePoint weakPoint;
+    Vector3 rootDelta;
+    Quaternion animatorRotation;
+    [Header("Navigation & AI")]
+    public bool actionsEnabled = true;
+    [SerializeField, ReadOnly] NavMeshAgent nav;
+    public float closeRange = 8f;
+    public float meleeRange = 3f;
+    public float stompTimer = 15f;
+    Coroutine stompCoroutine;
+    public float maxRealignAngle = 30f;
+    public float behindAngle = 90f;
     [Header("Weapons")]
     public float RightWeaponLength = 1f;
     public float RightWeaponRadius = 1f;
@@ -34,6 +47,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public float spinAttackSpeed = 360f;
     public float spinVelocity;
     bool spinning;
+    public float maxIKHandDistance = 1f;
+    public float ikHandOffset = -1;
     [Space(10)]
     public float nonActorGroundedThreshold = 1f;
     [Space(20)]
@@ -42,6 +57,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     HitboxGroup rightHitboxes;
     DamageKnockback lastTakenDamage;
     HitboxGroup leftHitboxes;
+    public UnityEvent OnHitboxActive;
+    bool isHitboxActive;
     [Header("Particles")]
     public ParticleSystem stompParticle;
     public ParticleSystem footReformParticleLeft;
@@ -55,6 +72,16 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     [ReadOnly, SerializeField] bool Dead;
     [ReadOnly, SerializeField] bool IsFallen;
     [ReadOnly, SerializeField] bool Fall;
+    [ReadOnly, SerializeField] bool InCloseRange;
+    [ReadOnly, SerializeField] bool InMeleeRange;
+    [ReadOnly, SerializeField] bool ShouldStomp;
+    [ReadOnly, SerializeField] bool ActionsEnabled;
+    [ReadOnly, SerializeField] bool StompLeft;
+    [ReadOnly, SerializeField] bool TargetBehind;
+    [ReadOnly, SerializeField] float AngleBetween;
+    [ReadOnly, SerializeField] float AngleBetweenAbs;
+    public float animated_TrackingHandIKWeight;
+    Vector3 handIKPosition;
     public override void ActorStart()
     {
         base.ActorStart();
@@ -68,6 +95,10 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             fxHandler.OnStepL.AddListener(StepShockwaveLeft);
             fxHandler.OnStepR.AddListener(StepShockwaveRight);
         }
+        nav = GetComponent<NavMeshAgent>();
+        nav.updatePosition = false;
+        nav.updateRotation = false;
+        StartCoroutine(DestinationCoroutine());
         //EnableWeakPoint(false);
     }
 
@@ -83,24 +114,34 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
                 GetUp();
             }
         }
+
+        UpdateTarget();
+
+        if (IsMoving())
+        {
+            
+        }
+        else
+        {
+
+        }
+
+        if (CombatTarget != null)
+        {
+            InCloseRange = Vector3.Distance(this.transform.position, CombatTarget.transform.position) <= closeRange;
+            InMeleeRange = Vector3.Distance(this.transform.position, CombatTarget.transform.position) <= meleeRange;
+        }
         
         if (spinning)
         {
-            spinVelocity = Mathf.MoveTowards(spinVelocity, spinAttackSpeed, spinAccel * Time.deltaTime);
-
             Vector3 position = LeftHand.position;
             position.y = 0f;
 
             spinHandParticle.transform.position = position;
         }
-        else
-        {
-            spinVelocity = Mathf.MoveTowards(spinVelocity, 0f, spinAccel * Time.deltaTime);
-        }
-        if (spinVelocity != 0f)
-        {
-            this.transform.Rotate(-Vector3.up, spinVelocity * Time.deltaTime);
-        }
+
+        AngleBetween = Vector3.SignedAngle(nav.desiredVelocity.normalized, this.transform.forward, -Vector3.up);
+        AngleBetweenAbs = Mathf.Abs(AngleBetween);
         UpdateMecanimValues();
     }
 
@@ -108,7 +149,120 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     {
         animator.SetBool("IsFallen", IsFallen);
         animator.UpdateTrigger("Fall", ref Fall);
+        animator.SetBool("InCloseRange", InCloseRange);
+        animator.UpdateTrigger("ShouldStomp", ref ShouldStomp);
+
+        ActionsEnabled = actionsEnabled;
+        animator.SetBool("ActionsEnabled", ActionsEnabled);
+        animator.SetBool("StompLeft", StompLeft);
+        TargetBehind = IsTargetBehind();
+        animator.SetBool("TargetBehind", TargetBehind);
+        animator.SetFloat("AngleBetween", AngleBetween);
+        animator.SetFloat("AngleBetweenAbs", AngleBetweenAbs);
     }
+
+    void UpdateTarget()
+    {
+        // TODO: allow targets that aren't the player
+        if (CombatTarget == null && PlayerActor.player != null)
+        {
+            CombatTarget = PlayerActor.player.gameObject;
+            if (stompCoroutine == null)
+            {
+                stompCoroutine = StartCoroutine(StompTimer());
+            }
+        } 
+    }
+
+    IEnumerator StompTimer()
+    {
+        float clock;
+        while (actionsEnabled && !dead)
+        {
+            clock = stompTimer;
+            while (clock > 0)
+            {
+                yield return new WaitForSeconds(1f);
+                if (!isInTimeState)
+                {
+                    clock -= 1f;
+                }
+            }
+            BeginStomp();
+        }
+    }
+
+    IEnumerator DestinationCoroutine()
+    {
+        while (true)
+        {
+            if (CombatTarget != null && IsMoving() && nav.enabled)
+            {
+                nav.SetDestination(CombatTarget.transform.position);
+            }
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
+
+    void OnAnimatorMove()
+    {
+        Vector3 diff = animator.rootPosition - this.transform.position;
+        rootDelta = diff;
+        
+        animatorRotation = animator.rootRotation;
+    }
+
+    void FixedUpdate()
+    {
+        this.transform.position += rootDelta;
+        this.transform.rotation = animatorRotation;
+        if (spinning)
+        {
+            spinVelocity = Mathf.MoveTowards(spinVelocity, spinAttackSpeed, spinAccel * Time.fixedDeltaTime);
+        }
+        else
+        {
+            spinVelocity = Mathf.MoveTowards(spinVelocity, 0f, spinAccel * Time.fixedDeltaTime);
+        }
+        if (spinVelocity != 0f)
+        {
+            this.transform.Rotate(-Vector3.up, spinVelocity * Time.fixedDeltaTime);
+        }
+        nav.nextPosition = transform.position;
+    }
+
+    void OnAnimatorIK(int layer)
+    {
+        Transform bone = animator.GetBoneTransform(HumanBodyBones.LeftHand);
+        Vector3 bonePosition = bone.position;
+
+        if (isHitboxActive && CombatTarget != null)
+        {
+            handIKPosition = Vector3.MoveTowards(bonePosition, CombatTarget.transform.position, maxIKHandDistance);
+            
+        }
+        handIKPosition.y = bonePosition.y + ikHandOffset;
+        Debug.DrawLine(bonePosition, handIKPosition, Color.magenta, 1f);
+
+        animator.SetIKPosition(AvatarIKGoal.LeftHand, handIKPosition);
+        animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, animated_TrackingHandIKWeight);
+    }
+
+    public void BeginStomp()
+    {
+        ShouldStomp = true;
+        if (leftLegWeakPoint.health.current < rightLegWeakPoint.health.current)
+        {
+            StompLeft = true;
+        }
+        else
+        {
+            StompLeft = false;
+        }
+    }
+
+
     void GenerateWeapons()
     {
         if (rightHitboxes != null)
@@ -121,6 +275,24 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         }
         rightHitboxes = Hitbox.CreateHitboxLine(RightHand.position, RightHand.up, RightWeaponLength, RightWeaponRadius, RightHand, new DamageKnockback(tempDamage), this.gameObject);
         leftHitboxes = Hitbox.CreateHitboxLine(LeftHand.position, LeftHand.up, LeftWeaponLength, LeftWeaponRadius, LeftHand, new DamageKnockback(tempDamage), this.gameObject);
+    }
+    public override void RealignToTarget()
+    {
+        if (CombatTarget != null)
+        {
+            Vector3 dir = CombatTarget.transform.position - this.transform.position;
+            dir.y = 0f;
+            dir.Normalize();
+            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(dir), maxRealignAngle);
+        }
+    }
+
+    bool IsTargetBehind()
+    {
+        Vector3 dir = CombatTarget.transform.position - this.transform.position;
+        dir.y = 0f;
+        dir.Normalize();
+        return Vector3.Angle(dir, this.transform.forward) > behindAngle;
     }
     public DamageKnockback GetLastDamage()
     {
@@ -190,20 +362,24 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     {
         if (active == 1)
         {
+            isHitboxActive = true;
             rightHitboxes.SetActive(true);
             leftHitboxes.SetActive(false);
         }
         else if (active == 2)
         {
+            isHitboxActive = true;
             rightHitboxes.SetActive(false);
             leftHitboxes.SetActive(true);
         }
         else if (active == 0)
         {
+            isHitboxActive = false;
             rightHitboxes.SetActive(false);
             leftHitboxes.SetActive(false);
         }
-
+        if (isHitboxActive)
+        OnHitboxActive.Invoke();
     }
 
     public void StartReformFoot()
@@ -399,5 +575,14 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public GameObject GetGameObject()
     {
         return this.gameObject;
+    }
+    public override bool IsAttacking()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("ATTACK");
+    }
+
+    public bool IsMoving()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("MOVE");
     }
 }

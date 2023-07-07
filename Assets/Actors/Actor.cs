@@ -234,6 +234,17 @@ public class Actor : MonoBehaviour
             this.transform.rotation = Quaternion.LookRotation(dir);
         }
     }
+
+    public virtual void RealignAwayTarget()
+    {
+        if (CombatTarget != null)
+        {
+            Vector3 dir = CombatTarget.transform.position - this.transform.position;
+            dir.y = 0f;
+            dir.Normalize();
+            this.transform.rotation = Quaternion.LookRotation(-dir);
+        }
+    }
     public virtual void OnFallOffMap()
     {
         Die();
