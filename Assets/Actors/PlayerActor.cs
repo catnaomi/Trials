@@ -118,6 +118,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     Vector3 smoothedHeadPoint;
     Vector3 ccHitNormal;
     Vector3 warpDelta;
+
+    Vector3 animatorDelta;
     bool aimAtkLockout;
     public float headPointSpeed = 25f;
     public PhysicMaterial lastPhysicsMaterial;
@@ -145,11 +147,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool ledgeSnap;
     bool ledgeHanging;
     
+    Vector3 climbSnapPoint;
     bool allowClimb = true;
     bool allowLadderFinish = true;
     bool railSnap;
     public Collider hangCollider;
-    public float climbSpeed = 1f; 
+    public float climbSpeed = 1f;
+    public float climbSnapSpeed = 5f;
     [Header("Swim Settings")]
     public bool inWater;
     public Collider swimCollider;
@@ -2011,6 +2015,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
+    void OnAnimatorMove()
+    {
+        this.transform.position = animator.rootPosition;
+        this.transform.rotation = animator.rootRotation;
+        animatorDelta = animator.velocity;//animator.rootPosition - this.transform.position;
+    }
+
     void FixedUpdate()
     {
         if (disablePhysics) return;
@@ -2044,14 +2055,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         Vector3 velocity = xzVel;
         velocity.y = yVel;
-
         
         if (withinBias)
         {
             cc.Move(Vector3.up * (biasHeight - this.transform.position.y));
         }
 
-        if (cc.enabled)
+        if (IsClimbing())
+        {
+            climbSnapPoint += animatorDelta * Time.fixedDeltaTime;
+            this.transform.position = Vector3.MoveTowards(this.transform.position, climbSnapPoint, climbSnapSpeed * Time.fixedDeltaTime);
+        }
+        else if (cc.enabled)
         {
             if (animancer.States.Current != state.swim && (!isGrounded || yVel > 0 || animancer.States.Current == state.jump))
             {
@@ -2361,9 +2376,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
                 int sign = 0;
                 if (Mathf.Abs(move.x) > 0.1f) sign = (int)Mathf.Sign(move.x);
-                this.transform.position = ledge.GetSnapPointDot(cc.radius * 2f, this.transform.position, this, -sign);
-                this.GetComponent<Collider>().enabled = false;
-                ledgeHanging = true;
+                climbSnapPoint = ledge.GetSnapPointDot(cc.radius * 2f, this.transform.position, this, -sign);
+                cc.enabled = false;
             }
             else if (currentClimb is Ladder ladder)
             {
@@ -2372,18 +2386,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
                 int sign = 0;
                 if (Mathf.Abs(move.y) > 0.1f) sign = (int)Mathf.Sign(move.y);
-                this.transform.position = ladder.GetSnapPointDot(cc.height/2f, this.transform.position, this, -sign);
-                this.GetComponent<Collider>().enabled = false;
-                ledgeHanging = true;
+                climbSnapPoint = ladder.GetSnapPointDot(cc.height/2f, this.transform.position, this, -sign);
+                cc.enabled = false;
             }
             else if (currentClimb is Rail rail)
             {
                 this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.right);
                 int sign = 0;
                 if (Mathf.Abs(move.x) > 0.1f) sign = (int)Mathf.Sign(move.x);
-                this.transform.position = rail.GetSnapPointDot(cc.radius * 2f, this.transform.position, this, -sign);
-                this.GetComponent<Collider>().enabled = false;
-                ledgeHanging = true;
+                climbSnapPoint = rail.GetSnapPointDot(cc.radius * 2f, this.transform.position, this, -sign);
+                cc.enabled = false;
             }
             /*
             else
@@ -2446,7 +2458,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         if (animancer.States.Current == state.climb && currentClimb is not Rail)
         {
-            camState = CameraState.Climb;
+            camState = CameraState.Free;//CameraState.Climb;
         }
         else if (IsInDialogue() && GetCombatTarget() != null)
         {

@@ -7,6 +7,7 @@ public class Ledge : ClimbDetector
     Rigidbody ledge;
 
     public Transform snap;
+    public float verticalOffset = -0.5f;
     [Range(-1f,1f)]
     public float snapPoint;
     [SerializeField, ReadOnly]
@@ -78,7 +79,7 @@ public class Ledge : ClimbDetector
 
     public Vector3 GetSnapPointForValue(float climberWidth, float snapPoint)
     {
-        return snap.transform.position + snap.transform.right * -snapPoint * (GetLength() - climberWidth) * 0.5f;
+        return snap.transform.position + snap.transform.right * -snapPoint * (GetLength() - climberWidth) * 0.5f + Vector3.up * verticalOffset;
     }
 
     public Vector3 GetSnapPointDot(float climberWidth, Vector3 climberPosition, PlayerActor player, int dir)
