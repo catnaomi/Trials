@@ -29,7 +29,7 @@ public class OnTimeStopListener : MonoBehaviour
     IEnumerator TimeStopDelayEvent()
     {
         yield return new WaitForSecondsRealtime(delay);
-        if (TimeTravelController.time.IsFreezing())
+        if (TimeTravelController.time.IsFreezing() && this.enabled && this.gameObject.activeSelf)
         {
             OnTimeStop.Invoke();
         }

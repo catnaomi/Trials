@@ -492,6 +492,15 @@ public static class DebugReflectionMethods
         }
     }
 
+    public static void StopDialogue()
+    {
+        ForceCloseDialogue();
+    }
+
+    public static void SD()
+    {
+        ForceCloseDialogue();
+    }
     static IEnumerator ForceCloseDialogueRoutine(DialogueRunner runner)
     {
 
