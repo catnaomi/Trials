@@ -33,7 +33,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
 
     public void TakeDamage(DamageKnockback damage)
     {
-        lastDamage = damage;
+        lastDamage = damage; 
         if (damage.GetTypes().HasType(brokenByElements))
         {
             health -= damage.healthDamage;

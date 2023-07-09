@@ -82,6 +82,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   brokenByElements: -1
+  health: -1
   particlePrefab: {fileID: 5150521602947525884, guid: 8d8b6ae5d8d85f64f8a60375f446bc47,
     type: 3}
   OnBreak:
@@ -162,6 +163,7 @@ MonoBehaviour:
   sparkOnContact: 0
   damage:
     healthDamage: 1
+    unresistedMinimum: 1
     types: 8
     critData:
       criticalMultiplier: 1
@@ -175,6 +177,7 @@ MonoBehaviour:
     isThrust: 0
     isSlash: 0
     isRanged: 0
+    isParry: 0
     bouncesOffBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
@@ -182,6 +185,7 @@ MonoBehaviour:
     cannotRecoil: 0
     cannotKill: 0
     stunTime: 1
+    repositionLength: 1
     stagger: 0
     staggers:
       onHit: 1
@@ -189,9 +193,12 @@ MonoBehaviour:
       onCritical: 2
       onKill: 5
       onCounterHit: 5
+      onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
     didCrit: 0
+    timeDelayed: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -205,8 +212,11 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
     hitClip: {fileID: 0}
-  minimumForceForDamage: 400
+  minimumForceForDamage: 2000
   damagesSelf: 1
   forceMultiplier: 0.001
   maximumTimeStopMagnitude: 100
