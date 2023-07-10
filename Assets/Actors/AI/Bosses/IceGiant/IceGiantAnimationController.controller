@@ -9,7 +9,7 @@ BlendTree:
   m_Name: Blend Tree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 4900798947379254867, guid: 2aca95a8f9267784c907f6deaca16e27,
+    m_Motion: {fileID: -203655887218126122, guid: 6d44bdafad0610b479731a44cfd6ccc8,
       type: 3}
     m_Threshold: -5
     m_Position: {x: 0, y: 0}
@@ -18,7 +18,7 @@ BlendTree:
     m_DirectBlendParameter: AngleBetween
     m_Mirror: 0
   - serializedVersion: 2
-    m_Motion: {fileID: -203655887218126122, guid: 2aca95a8f9267784c907f6deaca16e27,
+    m_Motion: {fileID: -203655887218126122, guid: e4cea2cad5eb12749bef7e382e333d47,
       type: 3}
     m_Threshold: 5
     m_Position: {x: 0, y: 0}
@@ -432,7 +432,7 @@ AnimatorTransition:
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7553757444935416844}
   m_Solo: 0
-  m_Mute: 0
+  m_Mute: 1
   m_IsExit: 0
   serializedVersion: 1
 --- !u!114 &-1424770005921560826
@@ -447,7 +447,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e5bc37e429f5934c986bc33a95ca1ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attack: {fileID: 11400000, guid: 79932ab0efb0188409a493987867bce6, type: 2}
+  attack: {fileID: 11400000, guid: 86d486c9efc22c243a385b56708fee61, type: 2}
 --- !u!1102 &-1055459657727158861
 AnimatorState:
   serializedVersion: 6
@@ -694,7 +694,7 @@ AnimatorStateTransition:
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 0}
   m_Solo: 0
-  m_Mute: 0
+  m_Mute: 1
   m_IsExit: 1
   serializedVersion: 3
   m_TransitionDuration: 0.25
@@ -965,7 +965,7 @@ AnimatorState:
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
   m_Motion: {fileID: -9123675792442087640}
-  m_Tag: MOVE
+  m_Tag: ROTATE
   m_SpeedParameter: 
   m_MirrorParameter: 
   m_CycleOffsetParameter: 
@@ -984,7 +984,7 @@ AnimatorStateTransition:
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7553757444935416844}
   m_Solo: 0
-  m_Mute: 0
+  m_Mute: 1
   m_IsExit: 0
   serializedVersion: 3
   m_TransitionDuration: 0.8115268
@@ -1268,7 +1268,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: mutant-swipe-icegiant-edit
-  m_Speed: 1
+  m_Speed: 1.5
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 3313672406454111881}
@@ -1420,18 +1420,18 @@ AnimatorStateMachine:
   - {fileID: 2736462808982210213}
   m_EntryTransitions: []
   m_StateMachineTransitions:
-  - first: {fileID: 4176286669741497236}
-    second:
-    - {fileID: -970252645019988417}
-  - first: {fileID: 1725951241638564599}
-    second:
-    - {fileID: -6493004165084114069}
-  - first: {fileID: 7516665291127533782}
-    second:
-    - {fileID: -7208767844416549334}
   - first: {fileID: -8282891416106997913}
     second:
     - {fileID: -739253680353908391}
+  - first: {fileID: 7516665291127533782}
+    second:
+    - {fileID: -7208767844416549334}
+  - first: {fileID: 1725951241638564599}
+    second:
+    - {fileID: -6493004165084114069}
+  - first: {fileID: 4176286669741497236}
+    second:
+    - {fileID: -970252645019988417}
   m_StateMachineBehaviours: []
   m_AnyStatePosition: {x: 900, y: -140, z: 0}
   m_EntryPosition: {x: -150, y: 20, z: 0}

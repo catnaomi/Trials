@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e242662a52220dc40932f531094d4de5, type: 3}
-  m_Name: atk-icegiant-fist
+  m_Name: atk-icegiant-fist-knockback
   m_EditorClassIdentifier: 
   desc: 
   attackId: 0
@@ -54,14 +54,14 @@ MonoBehaviour:
     repositionLength: 1
     stagger: 1
     staggers:
-      onHit: 3
+      onHit: 5
       onArmorHit: 1
-      onCritical: 3
+      onCritical: 5
       onKill: 5
-      onCounterHit: 3
-      onBlock: 1
-      onTypedBlock: 1
-    kbForce: {x: 0, y: 2, z: 5}
+      onCounterHit: 5
+      onBlock: 2
+      onTypedBlock: 2
+    kbForce: {x: 0, y: 4, z: 5}
     kbRadial: 1
     didCrit: 0
     timeDelayed: 0

@@ -16,6 +16,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public GameObject rightLeg;
     public DamageablePoint rightLegWeakPoint;
     public DamageablePoint weakPoint;
+    public Collider leftLegCollider;
+    public Collider rightLegCollider;
     Vector3 rootDelta;
     Quaternion animatorRotation;
     [Header("Navigation & AI")]
@@ -27,6 +29,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     Coroutine stompCoroutine;
     public float maxRealignAngle = 30f;
     public float behindAngle = 90f;
+    public float rotationSpeed = 90f;
     [Header("Weapons")]
     public float RightWeaponLength = 1f;
     public float RightWeaponRadius = 1f;
@@ -47,6 +50,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public float spinAttackSpeed = 360f;
     public float spinVelocity;
     bool spinning;
+    bool wasRotatingLastFrame;
     public float maxIKHandDistance = 1f;
     public float ikHandOffset = -1;
     [Space(10)]
@@ -89,6 +93,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         GenerateWeapons();
         leftLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(leftLegWeakPoint));
         rightLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(rightLegWeakPoint));
+        leftLegCollider = leftLegWeakPoint.GetComponent<Collider>();
+        rightLegCollider = rightLegWeakPoint.GetComponent<Collider>();
         weakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(weakPoint));
         if (TryGetComponent<AnimationFXHandler>(out AnimationFXHandler fxHandler))
         {
@@ -117,14 +123,19 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
         UpdateTarget();
 
-        if (IsMoving())
+        bool rotating = IsRotating();
+        if (rotating && !wasRotatingLastFrame)
         {
-            
+            spinHandParticle.transform.position = this.transform.position + this.transform.forward;
+            spinHandParticle.Play();
+            spinHandParticle.GetComponent<AudioSource>().Play();
         }
-        else
+        else if (!rotating && wasRotatingLastFrame)
         {
-
+            spinHandParticle.Stop();
+            spinHandParticle.GetComponent<AudioSource>().Stop();
         }
+        wasRotatingLastFrame = rotating;
 
         if (CombatTarget != null)
         {
@@ -150,6 +161,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         animator.SetBool("IsFallen", IsFallen);
         animator.UpdateTrigger("Fall", ref Fall);
         animator.SetBool("InCloseRange", InCloseRange);
+        animator.SetBool("InMeleeRange", InMeleeRange);
         animator.UpdateTrigger("ShouldStomp", ref ShouldStomp);
 
         ActionsEnabled = actionsEnabled;
@@ -229,6 +241,13 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         {
             this.transform.Rotate(-Vector3.up, spinVelocity * Time.fixedDeltaTime);
         }
+        if (IsRotating())
+        {
+            Vector3 dir = CombatTarget.transform.position - this.transform.position;
+            dir.y = 0f;
+            dir.Normalize();
+            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.fixedDeltaTime);
+        }
         nav.nextPosition = transform.position;
     }
 
@@ -299,7 +318,12 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         return currentDamage;
     }
 
-
+    public override void SetCurrentDamage(DamageKnockback damageKnockback)
+    {
+        base.SetCurrentDamage(damageKnockback);
+        rightHitboxes.SetDamage(currentDamage);
+        leftHitboxes.SetDamage(currentDamage);
+    }
     public void TakeDamageFromDamagePoint(DamageablePoint point)
     {
         attributes.health.current -= point.GetLastAmountTaken();
@@ -534,9 +558,13 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             spinHandParticle.transform.position = position;
             spinHandParticle.Play();
             spinHandParticle.GetComponent<AudioSource>().Play();
+            leftLegCollider.enabled = false;
+            rightLegCollider.enabled = false;
         }
         else
         {
+            leftLegCollider.enabled = true;
+            rightLegCollider.enabled = true;
             spinHandParticle.Stop();
             spinHandParticle.GetComponent<AudioSource>().FadeOut(1f, this);
         }
@@ -584,6 +612,11 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
     public bool IsMoving()
     {
-        return animator.GetCurrentAnimatorStateInfo(0).IsTag("MOVE");
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("MOVE") || IsRotating();
+    }
+
+    public bool IsRotating()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("ROTATE");
     }
 }
