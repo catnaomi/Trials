@@ -155,7 +155,8 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 didTypedBlock = true;
                 if (damage.isThrust)
                 {
-                    blockSuccess = false;
+                    blockSuccess = true;
+                    didTypedBlock = false;
                 }
             }
             else if (player.IsBlockingThrust())
@@ -163,7 +164,8 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 didTypedBlock = true;
                 if (damage.isSlash)
                 {
-                    blockSuccess = false;
+                    blockSuccess = true;
+                    didTypedBlock = false;
                 }
             }
         }
@@ -191,15 +193,6 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         {
             // do nothing
             actor.OnDodge.Invoke();
-        }
-        else if (willKill && blockSuccess)
-        {
-            if (actor.attributes.health.current <= 1f)
-            {
-                breaksBlock = true;
-            }
-            actor.attributes.SetHealth(1f);
-            willKill = false;
         }
         else if (willKill && (damage.cannotKill || blockSuccess))
         {
@@ -284,6 +277,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             AdjustDefendingPosition(damage.source, damage.repositionLength);
             if (actor is PlayerActor)
             {
+                
                 if (didTypedBlock && blockSuccess && !breaksBlock)
                 {
                     player.OnTypedBlockSuccess.Invoke();
@@ -292,6 +286,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             //damage.OnCrit.Invoke();
             damage.OnBlock.Invoke();
             actor.OnBlock.Invoke();
+            Debug.Log("block buffer time:" + player.GetBlockBufferTime());
         }
         else
         {

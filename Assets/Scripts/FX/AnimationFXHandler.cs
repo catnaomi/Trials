@@ -40,6 +40,7 @@ public class AnimationFXHandler : MonoBehaviour
     [Space(10)]
     public UnityEvent OnGunLoad;
     Actor actor;
+    bool didTypedBlock;
     // Start is called before the first frame update
     void Start()
     {
@@ -52,6 +53,7 @@ public class AnimationFXHandler : MonoBehaviour
             player.OnParryThrustStart.AddListener(ParryThrustStart);
             player.OnParrySuccess.AddListener(ParrySuccess);
             player.OnBlockTypeChange.AddListener(BlockSwitch);
+            player.OnTypedBlockSuccess.AddListener(RegisterTypedBlock);
         }
     }
 
@@ -250,12 +252,12 @@ public class AnimationFXHandler : MonoBehaviour
 
             if (player.IsBlockingSlash())
             {
-                FXController.CreateCross(position, direction);
+                //FXController.CreateCross(position, direction);
                 combatHitSource.PlayOneShot(animSounds.blockSwitch);
             }
             else if (player.IsBlockingThrust())
             {
-                FXController.CreateCircle(position, direction);
+                //FXController.CreateCircle(position, direction);
                 combatHitSource.PlayOneShot(animSounds.blockSwitch);
             }
             
@@ -317,6 +319,11 @@ public class AnimationFXHandler : MonoBehaviour
        
     }
 
+    public void RegisterTypedBlock()
+    {
+        didTypedBlock = true;
+    }
+
     public void ShowBlockParticle()
     {
         DamageKnockback damage = actor.GetComponent<IDamageable>().GetLastTakenDamage();
@@ -328,11 +335,24 @@ public class AnimationFXHandler : MonoBehaviour
 
             if (isSlash || isThrust)
             {
-                AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
+                AudioClip clip = (isCrit || didTypedBlock) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
                 FXController.CreateSpark(actor.hitParticlePosition, actor.hitParticleDirection, clip);
                 FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
             }
+            if (didTypedBlock)
+            {
+                if (isSlash)
+                {
+                    FXController.CreateCross(actor.hitParticlePosition, actor.hitParticleDirection);
+                }
+                else if (isThrust)
+                {
+                    FXController.CreateCircle(actor.hitParticlePosition, actor.hitParticleDirection);
+                }
+                
+            }
         }
+        didTypedBlock = false;
     }
 
     #endregion

@@ -2720,7 +2720,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
-
+    public float GetBlockBufferTime()
+    {
+        InputBuffer.Inputs inputButton = buffer.PollInput(999f);
+        if (inputButton == InputBuffer.Inputs.Thrust || inputButton == InputBuffer.Inputs.Slash)
+        {
+            return Time.time - buffer.lastInputTime;
+        }
+        else
+        {
+            return -1;
+        }
+    }
     public void OnDodge(InputValue value)
     {
         return;
