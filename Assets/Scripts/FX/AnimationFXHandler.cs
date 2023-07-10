@@ -307,11 +307,12 @@ public class AnimationFXHandler : MonoBehaviour
             bool isSlash = damage.isSlash;
             bool isThrust = damage.isThrust || (damage.isRanged && damage.GetTypes().HasType(DamageType.Piercing));
 
-            if (isSlash || isThrust)
+            if (isSlash || isThrust || damage.hitClip != null)
             {
                 FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, isSlash, isCrit, fxMaterial, damage.hitClip);
-                FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, false);
+                
             }
+            FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, false);
         }
        
     }
