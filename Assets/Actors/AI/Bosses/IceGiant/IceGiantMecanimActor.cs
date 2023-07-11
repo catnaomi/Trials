@@ -16,8 +16,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public GameObject rightLeg;
     public DamageablePoint rightLegWeakPoint;
     public DamageablePoint weakPoint;
-    public Collider leftLegCollider;
-    public Collider rightLegCollider;
+    [SerializeField,ReadOnly] Collider leftLegCollider;
+    [SerializeField,ReadOnly] Collider rightLegCollider;
     Vector3 rootDelta;
     Quaternion animatorRotation;
     [Header("Navigation & AI")]
@@ -84,6 +84,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     [ReadOnly, SerializeField] bool TargetBehind;
     [ReadOnly, SerializeField] float AngleBetween;
     [ReadOnly, SerializeField] float AngleBetweenAbs;
+    [ReadOnly, SerializeField] bool DeadHand;
     public float animated_TrackingHandIKWeight;
     Vector3 handIKPosition;
     public override void ActorStart()
@@ -115,7 +116,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         if (IsFallen)
         {
             getupClock -= Time.deltaTime;
-            if (getupClock <= 0f)
+            if (getupClock <= 0f && !dead)
             {
                 GetUp();
             }
@@ -171,6 +172,9 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         animator.SetBool("TargetBehind", TargetBehind);
         animator.SetFloat("AngleBetween", AngleBetween);
         animator.SetFloat("AngleBetweenAbs", AngleBetweenAbs);
+
+        animator.SetBool("Dead", Dead);
+        animator.UpdateTrigger("DeadHand", ref DeadHand);
     }
 
     void UpdateTarget()
@@ -326,8 +330,14 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     }
     public void TakeDamageFromDamagePoint(DamageablePoint point)
     {
+        float damageTaken = point.GetLastAmountTaken();
+        bool willKill = damageTaken >= attributes.health.current;
         attributes.health.current -= point.GetLastAmountTaken();
-        if (point.hasHealth && point.health.current <= 0f)
+        if (willKill)
+        {
+            Die();
+        }
+        if (point.hasHealth && (point.health.current <= 0f || willKill))
         {
             BreakDamageablePoint(point);
         }
@@ -366,6 +376,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
     public void FallOver()
     {
+        spinning = false;
+        if (dead) return;
         getupClock = getupDelay;
         //EnableWeakPoint(true);
         weakPoint.StartCritVulnerability(getupDelay);
@@ -382,6 +394,15 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public void EnableWeakPoint(bool active)
     {
         weakPoint.gameObject.SetActive(active);
+    }
+
+    public override void Die()
+    {
+        if (dead) return;
+        Dead = dead = true;
+        OnDie.Invoke();
+        StartCleanUp(15f);
+        DeadHand = true;
     }
     public void HitboxActive(int active)
     {

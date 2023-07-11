@@ -52,6 +52,8 @@ public class Actor : MonoBehaviour
     [HideInInspector]
     public Vector3 hitParticleDirection;
     protected bool dead;
+
+    public static readonly float DEFAULT_CORPSECLEAN_TIME = 5f;
     // targets
 
     [SerializeField, ReadOnly] protected DamageKnockback currentDamage;
@@ -330,7 +332,18 @@ public class Actor : MonoBehaviour
     }
     public void StartCleanUp()
     {
-        StartCoroutine(CorpseClean());
+        StartCoroutine(CorpseClean(DEFAULT_CORPSECLEAN_TIME));
+    }
+
+    public void StartCleanUp(float duration)
+    {
+        StartCoroutine(CorpseClean(duration));
+    }
+
+    IEnumerator CorpseClean(float duration) 
+    {
+        yield return new WaitForSecondsRealtime(duration);
+        GameObject.Destroy(this.gameObject);
     }
 
     public virtual bool ShouldCalcFireStrength()
@@ -367,16 +380,6 @@ public class Actor : MonoBehaviour
         fx.transform.position = this.transform.position;
     }
 
-    IEnumerator CorpseClean()
-    {
-        int iterations = 5;
-        for (int i = 0; i < iterations; i++)
-        {
-            yield return new WaitForSecondsRealtime(1f);
-        }
-        GameObject.Destroy(this.gameObject);
-
-    }
 
     public virtual void SetToIdle()
     {
