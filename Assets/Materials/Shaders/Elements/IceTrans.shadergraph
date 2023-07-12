@@ -209,6 +209,9 @@
         },
         {
             "m_Id": "4dde42ac5d9f465789531472b73a59a7"
+        },
+        {
+            "m_Id": "4ecdb9f66ef74d7d888f025e96a0fb5d"
         }
     ],
     "m_GroupDatas": [],
@@ -910,6 +913,9 @@
             },
             {
                 "m_Id": "0b369ab2b37244aaacc2dcfd860ddd8b"
+            },
+            {
+                "m_Id": "4ecdb9f66ef74d7d888f025e96a0fb5d"
             }
         ]
     },
@@ -2513,6 +2519,40 @@
     "m_CustomColors": {
         "m_SerializableColors": []
     }
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.BlockNode",
+    "m_ObjectId": "4ecdb9f66ef74d7d888f025e96a0fb5d",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "SurfaceDescription.AlphaClipThreshold",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 0.0,
+            "height": 0.0
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "b48bcb15644f4835a8f7d75502fea9fa"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_SerializedDescriptor": "SurfaceDescription.AlphaClipThreshold"
 }
 
 {
@@ -4721,6 +4761,21 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
+    "m_ObjectId": "b48bcb15644f4835a8f7d75502fea9fa",
+    "m_Id": 0,
+    "m_DisplayName": "Alpha Clip Threshold",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "AlphaClipThreshold",
+    "m_StageCapability": 2,
+    "m_Value": 0.5,
+    "m_DefaultValue": 0.5,
+    "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.DynamicVectorMaterialSlot",
     "m_ObjectId": "b508e91c45eb41e79af5f22c19198456",
     "m_Id": 1,
@@ -6306,7 +6361,7 @@
     "m_ActiveSubTarget": {
         "m_Id": "8c9e1794fd6649f99ba9988aed78be05"
     },
-    "m_AllowMaterialOverride": false,
+    "m_AllowMaterialOverride": true,
     "m_SurfaceType": 1,
     "m_ZTestMode": 4,
     "m_ZWriteControl": 2,
