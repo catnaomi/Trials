@@ -12,14 +12,17 @@ Material:
     type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _SURFACE_TYPE_TRANSPARENT
   m_InvalidKeywords: []
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
+  stringTagMap:
+    RenderType: Transparent
+  disabledShaderPasses:
+  - DepthOnly
   m_LockedProperties: _BaseTex
   m_SavedProperties:
     serializedVersion: 3
@@ -51,6 +54,11 @@ Material:
     m_Ints: []
     m_Floats:
     - _Alpha: 1
+    - _AlphaClip: 0
+    - _Blend: 0
+    - _CastShadows: 1
+    - _Cull: 2
+    - _DstBlend: 10
     - _Float: 0
     - _FresnelPower: 1.5
     - _HighlightTextureStrength: 0.115
@@ -61,9 +69,14 @@ Material:
     - _RefractionIndex: 0
     - _ShadowThreshold: 0.31
     - _Smoothness: 0.622
+    - _SrcBlend: 5
+    - _Surface: 1
     - _ToonBrightness: 0
     - _ToonOffset: 0.3
     - _ToonSmoothness: 0.05
+    - _ZTest: 4
+    - _ZWrite: 0
+    - _ZWriteControl: 2
     m_Colors:
     - _BaseColor: {r: 0.6795426, g: 0.7681514, b: 0.84687346, a: 1}
     - _HighlightColor: {r: 0.9646866, g: 0.9734455, b: 0.9911022, a: 1}

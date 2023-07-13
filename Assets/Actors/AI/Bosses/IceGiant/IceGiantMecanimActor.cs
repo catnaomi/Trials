@@ -49,8 +49,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public float spinAccel = 360f;
     public float spinAttackSpeed = 360f;
     public float spinVelocity;
-    bool spinning;
-    bool wasRotatingLastFrame;
+    public bool spinning;
     public float maxIKHandDistance = 1f;
     public float ikHandOffset = -1;
     [Space(10)]
@@ -64,14 +63,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public UnityEvent OnHitboxActive;
     bool isHitboxActive;
     [Header("Particles")]
-    public ParticleSystem stompParticle;
-    public ParticleSystem footReformParticleLeft;
-    public ParticleSystem footReformParticleRight;
-    public ParticleSystem stepParticle;
-    public ParticleSystem stepSmallParticle;
-    public ParticleSystem handOutParticle;
-    public ParticleSystem spinHandParticle;
-    public ParticleSystem smallIceParticle;
+    public IceGiantFXHelper fx;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool Dead;
     [ReadOnly, SerializeField] bool IsFallen;
@@ -106,6 +98,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         nav.updatePosition = false;
         nav.updateRotation = false;
         StartCoroutine(DestinationCoroutine());
+        fx = this.GetComponent<IceGiantFXHelper>();
         //EnableWeakPoint(false);
     }
 
@@ -124,33 +117,12 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
         UpdateTarget();
 
-        bool rotating = IsRotating();
-        if (rotating && !wasRotatingLastFrame)
-        {
-            spinHandParticle.transform.position = this.transform.position + this.transform.forward;
-            spinHandParticle.Play();
-            spinHandParticle.GetComponent<AudioSource>().Play();
-        }
-        else if (!rotating && wasRotatingLastFrame)
-        {
-            spinHandParticle.Stop();
-            spinHandParticle.GetComponent<AudioSource>().Stop();
-        }
-        wasRotatingLastFrame = rotating;
-
         if (CombatTarget != null)
         {
             InCloseRange = Vector3.Distance(this.transform.position, CombatTarget.transform.position) <= closeRange;
             InMeleeRange = Vector3.Distance(this.transform.position, CombatTarget.transform.position) <= meleeRange;
         }
-        
-        if (spinning)
-        {
-            Vector3 position = LeftHand.position;
-            position.y = 0f;
 
-            spinHandParticle.transform.position = position;
-        }
 
         AngleBetween = Vector3.SignedAngle(nav.desiredVelocity.normalized, this.transform.forward, -Vector3.up);
         AngleBetweenAbs = Mathf.Abs(AngleBetween);
@@ -431,8 +403,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public void StartReformFoot()
     {
         bool isLeft = animator.GetCurrentAnimatorStateInfo(0).IsTag("STOMP_LEFT");
-        ParticleSystem particle = (isLeft) ? footReformParticleLeft : footReformParticleRight;
-        particle.Play();
+        fx.PlayReformFoot(isLeft);
+        
     }
 
     public void ReformFoot()
@@ -452,7 +424,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
         StartCoroutine(StompShockwaveRoutine(position));
 
-        PlayParticleAtPosition(stompParticle, position);
+        fx.StompFX(isLeft);
+        
     }
     IEnumerator StompShockwaveRoutine(Vector3 position)
     {
@@ -462,10 +435,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     }
     public void HandShockwaveIn()
     {
-        Vector3 position = LeftHand.position;
-        position.y = this.transform.position.y;
-        // activate particle only
-        PlayParticleAtPosition(smallIceParticle, position);
+        fx.HandShockwaveInFX();
 
     }
     public void HandShockwaveOut()
@@ -474,7 +444,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         position.y = this.transform.position.y;
         Shockwave(position, shockwaveRadius, new DamageKnockback(harmlessShockwave.GetDamage()), false);
 
-        PlayParticleAtPosition(handOutParticle, position);
+        fx.HandShockwaveOutFX();
 
     }
     public void StepShockwaveLeft()
@@ -499,29 +469,12 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         if (point.health.current > 0)
         {
             Shockwave(position, stepShockwaveRadius, new DamageKnockback(stepShockwave.GetDamage()), false);
-            PlayParticleAtPosition(stepParticle, position);
+            fx.StepFX(position, false);
         }
         else
         {
-            PlayParticleAtPosition(stepSmallParticle, position);
-        }
-        
-
-        
-    }
-
-    void PlayParticleAtPosition(ParticleSystem particle, Vector3 position)
-    {
-        particle.transform.position = position;
-        particle.Play();
-        if (particle.TryGetComponent(out CinemachineImpulseSource impulse))
-        {
-            impulse.GenerateImpulse();
-        }
-        if (particle.TryGetComponent(out AudioSource source))
-        {
-            source.Play();
-        }
+            fx.StepFX(position, true);
+        }       
     }
 
     void Shockwave(Vector3 position, float radius, DamageKnockback damage, bool groundedOnly)
@@ -573,12 +526,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         spinning = active > 0;
         if (spinning)
         {
-            Vector3 position = LeftHand.position;
-            position.y = 0f;
-
-            spinHandParticle.transform.position = position;
-            spinHandParticle.Play();
-            spinHandParticle.GetComponent<AudioSource>().Play();
+            fx.SpinFXStart();
             leftLegCollider.enabled = false;
             rightLegCollider.enabled = false;
         }
@@ -586,8 +534,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         {
             leftLegCollider.enabled = true;
             rightLegCollider.enabled = true;
-            spinHandParticle.Stop();
-            spinHandParticle.GetComponent<AudioSource>().FadeOut(1f, this);
+            fx.SpinFXStop();
         }
         
     }

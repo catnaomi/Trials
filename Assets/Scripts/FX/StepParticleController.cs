@@ -6,9 +6,10 @@ using UnityEngine;
 public class StepParticleController : MonoBehaviour
 {
     public static StepParticleController instance;
-    AnimationFXHandler[] fxHandlers;
+    HashSet<AnimationFXHandler> fxHandlers;
     public GameObject particlePrefab;
     public EventHandler<Vector3> StepEvent;
+    public Transform heightReference;
     private void Awake()
     {
         instance = this;
@@ -16,27 +17,64 @@ public class StepParticleController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        fxHandlers = FindObjectsOfType<AnimationFXHandler>();
-        if (fxHandlers == null || fxHandlers.Length == 0) //TODO : registration system for actors
+        Collider c = this.GetComponent<Collider>();
+        Collider[] colliders = Physics.OverlapBox(c.bounds.center, c.bounds.extents);
+
+        fxHandlers = new HashSet<AnimationFXHandler>();
+        foreach (Collider other in colliders)
         {
-            foreach (AnimationFXHandler fxHandler in fxHandlers)
+            if (other.TryGetComponent(out AnimationFXHandler fxHandler))
             {
-                fxHandler.OnStepL.AddListener(() => { CreateParticle(fxHandler.footL); });
-                fxHandler.OnStepR.AddListener(() => { CreateParticle(fxHandler.footR); });
+                Register(fxHandler);
             }
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    /*
+    void ListenLeftFoot(AnimationFXHandler fxHandler)
     {
-        
+        if (!fxHandlers.Contains(fxHandler)) return;
+        CreateParticle(fxHandler.footL);
     }
 
+    void ListenRightFoot(AnimationFXHandler fxHandler)
+    {
+        if (!fxHandlers.Contains(fxHandler)) return;
+        CreateParticle(fxHandler.footR);
+    }
+    */
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.TryGetComponent(out AnimationFXHandler fxHandler))
+        {
+            Register(fxHandler);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.TryGetComponent(out AnimationFXHandler fxHandler))
+        {
+            Deregister(fxHandler);
+        }
+    }
+
+    public void Register(AnimationFXHandler fxHandler)
+    {
+        if (fxHandlers.Contains(fxHandler)) return;
+        fxHandlers.Add(fxHandler);
+        fxHandler.OnStepR.AddListener(() => CreateParticle(fxHandler.footR));
+        fxHandler.OnStepL.AddListener(() => CreateParticle(fxHandler.footL));
+    }
+
+    public void Deregister(AnimationFXHandler fxHandler)
+    {
+        fxHandlers.Remove(fxHandler);
+    }
     public void CreateStep(Vector3 position)
     {
         Vector3 newPosition = position;
-        newPosition.y = this.transform.position.y;
+        newPosition.y = heightReference.position.y;
         GameObject particle = Instantiate(particlePrefab, newPosition, particlePrefab.transform.rotation);
         particle.SetActive(true);
     }
