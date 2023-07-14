@@ -89,7 +89,7 @@ public class StepParticleController : MonoBehaviour
 
     public void CreateParticle(Transform source)
     {
-        if (source != null)
+        if (source != null && this.enabled && this.gameObject.activeInHierarchy)
         {
             CreateStep(source.transform.position);
         }

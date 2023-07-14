@@ -72,10 +72,10 @@ public class Actor : MonoBehaviour
         OnHealthLoss = attributes.OnHealthLoss;
         OnHealthGain = attributes.OnHealthGain;
         OnHealthChange = attributes.OnHealthChange;
-        ActorAwake();
+        ActorOnEnable();
     }
 
-    protected virtual void ActorAwake()
+    protected virtual void ActorOnEnable()
     {
         // run after base class Awake()
     }

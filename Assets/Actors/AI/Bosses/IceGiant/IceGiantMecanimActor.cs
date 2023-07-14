@@ -79,6 +79,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     [ReadOnly, SerializeField] bool DeadHand;
     public float animated_TrackingHandIKWeight;
     Vector3 handIKPosition;
+
     public override void ActorStart()
     {
         base.ActorStart();
@@ -97,9 +98,16 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         nav = GetComponent<NavMeshAgent>();
         nav.updatePosition = false;
         nav.updateRotation = false;
-        StartCoroutine(DestinationCoroutine());
+        
         fx = this.GetComponent<IceGiantFXHelper>();
         //EnableWeakPoint(false);
+    }
+
+    protected override void ActorOnEnable()
+    {
+        base.ActorOnEnable();
+        StartCoroutine(DestinationCoroutine());
+        StartCoroutine(StompTimer());
     }
 
     public override void ActorPostUpdate()
@@ -157,7 +165,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             CombatTarget = PlayerActor.player.gameObject;
             if (stompCoroutine == null)
             {
-                stompCoroutine = StartCoroutine(StompTimer());
+                //stompCoroutine = StartCoroutine(StompTimer());
             }
         } 
     }
@@ -165,13 +173,13 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     IEnumerator StompTimer()
     {
         float clock;
-        while (actionsEnabled && !dead)
+        while (!dead)
         {
             clock = stompTimer;
             while (clock > 0)
             {
                 yield return new WaitForSeconds(1f);
-                if (!isInTimeState)
+                if (!isInTimeState && actionsEnabled)
                 {
                     clock -= 1f;
                 }
@@ -195,6 +203,16 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
     void OnAnimatorMove()
     {
+        if (animator == null)
+        {
+            animator = this.GetComponent<Animator>();
+        }
+        if (!actionsEnabled)
+        {
+            this.transform.position = animator.rootPosition;
+            this.transform.rotation = animator.rootRotation;
+            return;
+        }
         Vector3 diff = animator.rootPosition - this.transform.position;
         rootDelta = diff;
         
@@ -373,7 +391,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         if (dead) return;
         Dead = dead = true;
         OnDie.Invoke();
-        StartCleanUp(15f);
+        StartCleanUp(10f);
         DeadHand = true;
     }
     public void HitboxActive(int active)
