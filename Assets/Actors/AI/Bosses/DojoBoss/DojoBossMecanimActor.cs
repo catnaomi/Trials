@@ -802,11 +802,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         return this.gameObject;
     }
 
-    public DamageKnockback GetLastDamage()
-    {
-        return currentDamage;
-    }
-
     public DamageKnockback GetLastTakenDamage()
     {
         return lastDamageTaken;

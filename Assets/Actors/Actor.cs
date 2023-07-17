@@ -214,6 +214,11 @@ public class Actor : MonoBehaviour
 
     }
 
+    public virtual DamageKnockback GetLastDamage()
+    {
+        return currentDamage;
+    }
+
     public void RegisterHit()
     {
         OnHit.Invoke();
