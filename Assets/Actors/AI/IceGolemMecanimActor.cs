@@ -21,6 +21,8 @@ public class IceGolemMecanimActor : Actor, IAttacker
     public float meleeRange = 2f;
     public float farRange = 10f;
     bool shouldRealign;
+    public UnityEvent StartDash;
+    bool wasDashingLastFrame;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
@@ -76,10 +78,15 @@ public class IceGolemMecanimActor : Actor, IAttacker
             nav.updateRotation = false;
             cc.enabled = true;
         }
-        if (shouldRealign)
+        if (shouldRealign || IsDashing())
         {
             RealignToTarget();
         }
+        if (IsDashing() && !wasDashingLastFrame)
+        {
+            StartDash.Invoke();
+        }
+        wasDashingLastFrame = IsDashing();
         if (CombatTarget != null)
         {
             float dist = Vector3.Distance(this.transform.position, CombatTarget.transform.position);
@@ -227,5 +234,10 @@ public class IceGolemMecanimActor : Actor, IAttacker
     public bool IsMoving()
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("MOVE");
+    }
+
+    public bool IsDashing()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("DASH");
     }
 }
