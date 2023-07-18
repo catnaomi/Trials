@@ -597,7 +597,7 @@ PrefabInstance:
     - target: {fileID: 3128845696319544284, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -10.767746
+      value: -16.69
       objectReference: {fileID: 0}
     - target: {fileID: 3128845696319544284, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
@@ -637,7 +637,22 @@ PrefabInstance:
     - target: {fileID: 4013956763830427712, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4013956763830427712, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
+      propertyPath: m_Acceleration
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 4013956763830427712, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
+      propertyPath: m_AngularSpeed
+      value: 720
+      objectReference: {fileID: 0}
+    - target: {fileID: 4013956763830427712, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
+      propertyPath: m_StoppingDistance
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4013956763830427714, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
@@ -1300,10 +1315,24 @@ MonoBehaviour:
   FollowTarget: {fileID: 0}
   timeTravelStates: []
   isInTimeState: 0
+  nav: {fileID: 0}
+  attackTimer: 4
+  waterDashTimer: 10
   isHitboxActive: 0
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
+  actionsEnabled: 1
+  closeRange: 5
+  meleeRange: 3
+  farRange: 15
+  InCloseRange: 0
+  InMeleeRange: 0
+  InFarRange: 0
+  ShouldAttack: 0
+  ShouldDash: 0
+  ActionsEnabled: 0
+  Speed: 0
 --- !u!1 &735487671
 GameObject:
   m_ObjectHideFlags: 0

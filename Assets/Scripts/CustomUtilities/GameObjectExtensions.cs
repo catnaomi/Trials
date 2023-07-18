@@ -1,13 +1,15 @@
-// By Acegikmo
-// https://forum.unity.com/threads/accessing-prefab-children-in-editor-scripts.13167/#post-2316699
 
 
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.Events;
+
 namespace CustomUtilities
 {
     public static class GameObjectExtensions
     {
+        // By Acegikmo
+        // https://forum.unity.com/threads/accessing-prefab-children-in-editor-scripts.13167/#post-2316699
 
         public static T[] GetComponentsInChildrenOfAsset<T>(this GameObject go) where T : Component
         {
@@ -19,6 +21,8 @@ namespace CustomUtilities
             return all.ToArray();
         }
 
+        // By Acegikmo
+        // https://forum.unity.com/threads/accessing-prefab-children-in-editor-scripts.13167/#post-2316699
         static void CollectChildren(List<Transform> transforms, Transform tf)
         {
             transforms.Add(tf);
@@ -27,6 +31,5 @@ namespace CustomUtilities
                 CollectChildren(transforms, child);
             }
         }
-
     }
 }
