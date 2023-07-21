@@ -10,6 +10,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     HumanoidNPCInventory inventory;
     CapsuleCollider collider;
     CharacterController cc;
+    HumanoidPositionReference positionReference;
     [ReadOnly, SerializeField] NavMeshAgent nav;
     public float attackTimer = 2f;
     public float waterDashTimer = 3f;
@@ -29,6 +30,13 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     [Header("Damageable")]
     public DamageAnims damageAnims;
     HumanoidDamageHandler damageHandler;
+    [Header("Body Spin")]
+    public bool isBodySpinning;
+    public float bodySpinAccel = 90f;
+    public float bodySpinMaxSpeed = 720f;
+    public float bodySpinAngleDown = 30f;
+    [ReadOnly, SerializeField] float bodySpinAngle;
+    [ReadOnly, SerializeField] float bodySpinSpeed;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
@@ -47,7 +55,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         nav = GetComponent<NavMeshAgent>();
         cc = GetComponent<CharacterController>();
         collider = this.GetComponent<CapsuleCollider>();
-
+        positionReference = this.GetComponent<HumanoidPositionReference>();
         damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
 
         damageHandler.SetEndAction(StopDamageAnims);
@@ -179,6 +187,37 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         if (!isInTimeState && actionsEnabled)
         {
             ShouldDash = true;
+        }
+    }
+
+    public void BeginSpin()
+    {
+        isBodySpinning = true;
+    }
+
+    public void EndSpin()
+    {
+        positionReference.Spine.localRotation = Quaternion.identity;
+        isBodySpinning = false;
+        bodySpinSpeed = 0f;
+        bodySpinAngle = 0f;
+    }
+    void LateUpdate()
+    {
+        if (isBodySpinning)
+        {
+            positionReference.Spine.localRotation = Quaternion.Euler(bodySpinAngleDown, bodySpinAngle, 0f);
+            bodySpinAngle += bodySpinSpeed * Time.deltaTime;
+            if (bodySpinAngle >= 360f)
+            {
+                HitboxActive(2);
+            }
+            bodySpinAngle %= 360f;
+            bodySpinSpeed += bodySpinAccel * Time.deltaTime;
+            if (bodySpinSpeed > bodySpinMaxSpeed)
+            {
+                bodySpinSpeed = bodySpinMaxSpeed;
+            }
         }
     }
     /*
