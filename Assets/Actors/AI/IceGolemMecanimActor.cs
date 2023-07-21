@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 
-public class IceGolemMecanimActor : Actor, IAttacker
+public class IceGolemMecanimActor : Actor, IAttacker, IAdjustRootMotion
 {
     HumanoidNPCInventory inventory;
     CapsuleCollider collider;
@@ -21,7 +21,9 @@ public class IceGolemMecanimActor : Actor, IAttacker
     public float meleeRange = 2f;
     public float farRange = 10f;
     bool shouldRealign;
-    public UnityEvent StartDash;
+
+
+    
     bool wasDashingLastFrame;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
@@ -31,12 +33,15 @@ public class IceGolemMecanimActor : Actor, IAttacker
     [ReadOnly, SerializeField] bool ShouldDash;
     [ReadOnly, SerializeField] bool ActionsEnabled;
     [ReadOnly, SerializeField] float Speed;
+    [Header("Events")]
+    public UnityEvent StartDash;
 
     public override void ActorStart()
     {
         base.ActorStart();
         nav = GetComponent<NavMeshAgent>();
         cc = GetComponent<CharacterController>();
+        collider = this.GetComponent<CapsuleCollider>();
     }
     protected override void ActorOnEnable()
     {
@@ -128,8 +133,22 @@ public class IceGolemMecanimActor : Actor, IAttacker
         }
     }
 
+    public bool ShouldAdjustRootMotion()
+    {
+        return CombatTarget != null && (IsAttacking() || IsDashing());
+    }
 
-
+    public Vector3 GetAdjustmentRelativePosition()
+    {
+        if (CombatTarget != null)
+        {
+            return CombatTarget.transform.position;
+        }
+        else
+        {
+            return Vector3.zero;
+        }
+    }
     public void BeginAttack()
     {
         if (!isInTimeState && actionsEnabled)
@@ -239,5 +258,10 @@ public class IceGolemMecanimActor : Actor, IAttacker
     public bool IsDashing()
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("DASH");
+    }
+
+    public override bool IsAttacking()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("ATTACK");
     }
 }

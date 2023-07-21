@@ -1507,16 +1507,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 cc.enabled = true;
             }
         }
-        if (CombatTarget != null)
+        if (CombatTarget != null && PlayerActor.player != null)
         {
-            if (playerCC == null)
-            {
-                playerCC = CombatTarget.GetComponent<CharacterController>();
-            }
             if (CombatTarget == PlayerActor.player.gameObject && playerCC != null)
             {
-                Physics.IgnoreCollision(playerCC, collider, !PlayerActor.player.isGrounded);
-                Physics.IgnoreCollision(playerCC, cc, !PlayerActor.player.isGrounded);
+                Physics.IgnoreCollision(PlayerActor.player.cc, collider, !PlayerActor.player.isGrounded);
+                Physics.IgnoreCollision(PlayerActor.player.cc, cc, !PlayerActor.player.isGrounded);
             }
             
         }

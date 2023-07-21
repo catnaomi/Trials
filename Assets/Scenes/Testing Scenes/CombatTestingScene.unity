@@ -680,6 +680,11 @@ PrefabInstance:
       propertyPath: m_Controller
       value: 
       objectReference: {fileID: 9100000, guid: e5947a5820c39234bbd34fdfd9285cad, type: 2}
+    - target: {fileID: 9046544461682639270, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
+      propertyPath: m_UpdateMode
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4013956763830427714, guid: 8f083315fa2a75947ab86f7218ad8af3, type: 3}
     m_AddedGameObjects:
@@ -1316,8 +1321,8 @@ MonoBehaviour:
   timeTravelStates: []
   isInTimeState: 0
   nav: {fileID: 0}
-  attackTimer: 3
-  waterDashTimer: 8
+  attackTimer: 5
+  waterDashTimer: 10
   isHitboxActive: 0
   OnHitboxActive:
     m_PersistentCalls:
@@ -1326,6 +1331,13 @@ MonoBehaviour:
   closeRange: 5
   meleeRange: 3
   farRange: 15
+  InCloseRange: 0
+  InMeleeRange: 0
+  InFarRange: 0
+  ShouldAttack: 0
+  ShouldDash: 0
+  ActionsEnabled: 0
+  Speed: 0
   StartDash:
     m_PersistentCalls:
       m_Calls:
@@ -1341,19 +1353,26 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  InCloseRange: 0
-  InMeleeRange: 0
-  InFarRange: 0
-  ShouldAttack: 0
-  ShouldDash: 0
-  ActionsEnabled: 0
-  Speed: 0
 --- !u!4 &675521136 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3128845696319544284, guid: 8f083315fa2a75947ab86f7218ad8af3,
     type: 3}
   m_PrefabInstance: {fileID: 337980192}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &675521137
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 675521106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3003b89345da95041976724560385f5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minimumDistanceToTarget: 2
+  maxRootMotionBackwardsAdjust: 0.3
 --- !u!1 &735487671
 GameObject:
   m_ObjectHideFlags: 0

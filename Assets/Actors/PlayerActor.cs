@@ -11,7 +11,7 @@ using UnityEngine.InputSystem.Interactions;
 [RequireComponent(typeof(CharacterController), typeof(HumanoidPositionReference))]
 public class PlayerActor : Actor, IAttacker, IDamageable
 {
-    CharacterController cc;
+    [HideInInspector]public CharacterController cc;
     public bool instatemove;
     public Vector2 move;
     Vector2 moveSmoothed;
