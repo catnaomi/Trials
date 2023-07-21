@@ -21,6 +21,7 @@ public class DamageKnockback
     public bool isRanged;
     public bool isParry;
     public bool bouncesOffBlock;
+    public bool bouncesOffTypedBlock;
     public bool breaksBlock;
     public bool canDamageSelf;
     public bool cannotAutoFlinch;
@@ -148,6 +149,7 @@ public class DamageKnockback
         this.isRanged = damageKnockback.isRanged;
         this.isParry = damageKnockback.isParry;
         this.bouncesOffBlock = damageKnockback.bouncesOffBlock;
+        this.bouncesOffTypedBlock = damageKnockback.bouncesOffTypedBlock;
         this.cannotRecoil = damageKnockback.cannotRecoil;
         this.cannotKill = damageKnockback.cannotKill;
 

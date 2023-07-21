@@ -314,6 +314,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     {
         InDamageAnim = false;
         animancer.Stop();
+        BeginWaterDash();
     }
 
     public bool IsHurt()
@@ -352,11 +353,15 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public void TakeDamage(DamageKnockback damage)
     {
         InDamageAnim = true;
+        DeactivateHitboxes();
         ((IDamageable)damageHandler).TakeDamage(damage);
     }
 
     public void Recoil()
     {
+        InDamageAnim = true;
+        EndSpin();
+        DeactivateHitboxes();
         ((IDamageable)damageHandler).Recoil();
     }
 
@@ -372,6 +377,9 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
 
     public void GetParried()
     {
+        InDamageAnim = true;
+        EndSpin();
+        DeactivateHitboxes();
         ((IDamageable)damageHandler).GetParried();
     }
 

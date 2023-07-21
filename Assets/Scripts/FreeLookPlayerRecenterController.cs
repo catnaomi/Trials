@@ -19,7 +19,7 @@ public class FreeLookPlayerRecenterController : MonoBehaviour
     void Start()
     {
         freeLook = this.GetComponent<CinemachineFreeLook>();
-        ShouldRecenter();
+        //ShouldRecenter();
         y_axisRecenterBase = freeLook.m_YAxisRecentering;
         heading_axisRecenterBase = freeLook.m_RecenterToTargetHeading;
         //recenterDuration = Mathf.Max(freeLook.m_RecenterToTargetHeading.m_RecenteringTime, freeLook.m_YAxisRecentering.m_RecenteringTime, 0.5f);

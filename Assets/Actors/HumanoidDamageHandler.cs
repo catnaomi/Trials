@@ -169,6 +169,11 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 }
             }
         }
+        bool bouncesOffBlock = damage.bouncesOffBlock;
+        if (didTypedBlock && damage.bouncesOffTypedBlock)
+        {
+            bouncesOffBlock = true;
+        }
         
         if (blockSuccess && actor.GetBlockResistance() != null)
         {
@@ -249,7 +254,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                     }
                     lastBlockStagger = (int)damage.staggers.onBlock;
                 }
-                if (damage.bouncesOffBlock && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable) && !damage.cannotRecoil)
+                if (bouncesOffBlock && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable) && !damage.cannotRecoil)
                 {
                     damageable.Recoil();
                 }
@@ -650,6 +655,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             damage.breaksArmor = true;
             damage.cannotAutoFlinch = true;
             damage.bouncesOffBlock = false;
+            damage.bouncesOffTypedBlock = false;
             if (timeStopDamages.Count > 0)
             {
                 damage.critData.doesNotConsumeCritState = true;

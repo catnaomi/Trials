@@ -113,6 +113,7 @@ public class PlayerTimeTravelHandler : ActorTimeTravelHandler
             damage.breaksArmor = true;
             damage.cannotAutoFlinch = true;
             damage.bouncesOffBlock = false;
+            damage.bouncesOffTypedBlock = false;
             damage.cannotRecoil = true;
             damage.cannotKill = !timeStateDamagePair.isLastHitOnTarget;
             damage.timeDelayed = true;
