@@ -11,7 +11,8 @@ public class AttackerRootMotionHandler : MonoBehaviour
     NavMeshAgent nav;
     Animator animator;
     Vector3 rootDelta;
-    IAdjustRootMotion actor;
+    Actor actor;
+    IAdjustRootMotion adjustActor;
     CharacterController cc;
     Collider collider;
 
@@ -19,7 +20,8 @@ public class AttackerRootMotionHandler : MonoBehaviour
     {
         nav = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-        actor = GetComponent<IAdjustRootMotion>();
+        adjustActor = GetComponent<IAdjustRootMotion>();
+        actor = GetComponent<Actor>();
         cc = GetComponent<CharacterController>();
         collider = GetComponent<CapsuleCollider>();
     }
@@ -27,9 +29,9 @@ public class AttackerRootMotionHandler : MonoBehaviour
     void OnAnimatorMove()
     {
         Vector3 diff = animator.rootPosition - this.transform.position;
-        if (actor.ShouldAdjustRootMotion())
+        if (adjustActor.ShouldAdjustRootMotion())
         {
-            Vector3 target = actor.GetAdjustmentRelativePosition();
+            Vector3 target = adjustActor.GetAdjustmentRelativePosition();
             Vector3 dirToTarget = (target - this.transform.position);
             dirToTarget.y = 0f;
             dirToTarget.Normalize();
@@ -79,12 +81,28 @@ public class AttackerRootMotionHandler : MonoBehaviour
             cc.enabled = false;
             this.transform.position = this.transform.position + rootDelta;
             cc.enabled = true;
+            SetVelocity(rootDelta / Time.fixedDeltaTime);
+        }
+        else if (actor != null && !actor.IsGrounded())
+        {
+            cc.enabled = true;
+            cc.Move((actor.xzVel + Vector3.up * actor.yVel) * Time.fixedDeltaTime);
+            actor.yVel -= Physics.gravity.magnitude;
         }
         if (PlayerActor.player != null)
         {
             Physics.IgnoreCollision(PlayerActor.player.cc, collider, !PlayerActor.player.isGrounded);
             Physics.IgnoreCollision(PlayerActor.player.cc, cc, !PlayerActor.player.isGrounded);
         }
+    }
 
+    void SetVelocity(Vector3 velocity)
+    {
+        if (actor != null)
+        {
+            actor.xzVel = velocity;
+            actor.xzVel.y = 0f;
+            actor.yVel = velocity.y;
+        }
     }
 }
