@@ -654,6 +654,21 @@ PrefabInstance:
       propertyPath: m_StoppingDistance
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 4013956763830427713, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
+      propertyPath: health.max
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4013956763830427713, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
+      propertyPath: health.current
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4013956763830427713, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
+      propertyPath: health.baseValue
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 4013956763830427714, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
       propertyPath: m_Enabled
@@ -1321,8 +1336,8 @@ MonoBehaviour:
   timeTravelStates: []
   isInTimeState: 0
   nav: {fileID: 0}
-  attackTimer: 5
-  waterDashTimer: 10
+  attackTimer: 10
+  waterDashTimer: 15
   isHitboxActive: 0
   OnHitboxActive:
     m_PersistentCalls:
@@ -1331,6 +1346,7 @@ MonoBehaviour:
   closeRange: 5
   meleeRange: 3
   farRange: 15
+  damageAnims: {fileID: 11400000, guid: 221ae51d23f379f4a9d8bc53390ce0e9, type: 2}
   InCloseRange: 0
   InMeleeRange: 0
   InFarRange: 0
@@ -1338,6 +1354,7 @@ MonoBehaviour:
   ShouldDash: 0
   ActionsEnabled: 0
   Speed: 0
+  InDamageAnim: 0
   StartDash:
     m_PersistentCalls:
       m_Calls:

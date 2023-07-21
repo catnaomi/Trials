@@ -605,7 +605,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
     public bool IsInInvulnClip()
     {
-        return animancer.States.Current == invuln;
+        return invuln != null && animancer.States.Current == invuln;
     }
 
     public void SetInvulnClip(AnimancerState state)

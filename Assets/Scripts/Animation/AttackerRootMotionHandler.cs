@@ -38,7 +38,7 @@ public class AttackerRootMotionHandler : MonoBehaviour
             if (Vector3.Dot(diff, dirToTarget) > 0)
             {
                 diff = Vector3.Project(diff, dirToTarget);
-                Debug.DrawRay(this.transform.position + Vector3.up, diff.normalized, Color.cyan, 1f / 60f);
+                //Debug.DrawRay(this.transform.position + Vector3.up, diff.normalized, Color.cyan, 1f / 60f);
                 float startingMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
                 float distanceAfterMovement = Vector3.Distance(this.transform.position + diff, target);
                 float minimumDistance = minimumDistanceToTarget;//Mathf.Max(inventory.GetCurrentLength(), 2f);
@@ -54,11 +54,11 @@ public class AttackerRootMotionHandler : MonoBehaviour
                 {
                     //diff = Vector3.ClampMagnitude(diff, Mathf.Abs(maxRootMotionBackwardsAdjust) * Time.deltaTime);
                 }
-                Debug.Log($"adjusted root motion movement: {startingMagnitude} vs {endMagnitude}");
+                //Debug.Log($"adjusted root motion movement: {startingMagnitude} vs {endMagnitude}");
             }
             else
             {
-                Debug.DrawRay(this.transform.position + Vector3.up, diff.normalized, Color.red, 1f / 60f);
+                //Debug.DrawRay(this.transform.position + Vector3.up, diff.normalized, Color.red, 1f / 60f);
             }
             
         }

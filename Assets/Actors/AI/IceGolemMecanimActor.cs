@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 
-public class IceGolemMecanimActor : Actor, IAttacker, IAdjustRootMotion
+public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMotion
 {
     HumanoidNPCInventory inventory;
     CapsuleCollider collider;
@@ -25,6 +25,10 @@ public class IceGolemMecanimActor : Actor, IAttacker, IAdjustRootMotion
 
     
     bool wasDashingLastFrame;
+    [ReadOnly, SerializeField] bool isGrounded;
+    [Header("Damageable")]
+    public DamageAnims damageAnims;
+    HumanoidDamageHandler damageHandler;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
@@ -33,6 +37,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IAdjustRootMotion
     [ReadOnly, SerializeField] bool ShouldDash;
     [ReadOnly, SerializeField] bool ActionsEnabled;
     [ReadOnly, SerializeField] float Speed;
+    [ReadOnly, SerializeField] bool InDamageAnim;
     [Header("Events")]
     public UnityEvent StartDash;
 
@@ -42,6 +47,10 @@ public class IceGolemMecanimActor : Actor, IAttacker, IAdjustRootMotion
         nav = GetComponent<NavMeshAgent>();
         cc = GetComponent<CharacterController>();
         collider = this.GetComponent<CapsuleCollider>();
+
+        damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
+
+        damageHandler.SetEndAction(StopDamageAnims);
     }
     protected override void ActorOnEnable()
     {
@@ -60,6 +69,12 @@ public class IceGolemMecanimActor : Actor, IAttacker, IAdjustRootMotion
     public override void ActorPostUpdate()
     {
         base.ActorPostUpdate();
+        GetGrounded();
+        if (IsHurt())
+        {
+            UpdateMecanimValues();
+            return;
+        }
         if (inventory.IsMainEquipped() && !inventory.IsMainDrawn())
         {
             inventory.SetDrawn(true, true);
@@ -83,9 +98,10 @@ public class IceGolemMecanimActor : Actor, IAttacker, IAdjustRootMotion
             nav.updateRotation = false;
             cc.enabled = true;
         }
-        if (shouldRealign || IsDashing())
+        if (shouldRealign || IsDashing() || IsStrafing())
         {
-            RealignToTarget();
+            ForceRealignToTarget();
+            shouldRealign = false;
         }
         if (IsDashing() && !wasDashingLastFrame)
         {
@@ -116,6 +132,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IAdjustRootMotion
         Speed = nav.desiredVelocity.magnitude;
         animator.SetFloat("Speed", Speed);
         animator.UpdateTrigger("ShouldDash", ref ShouldDash);
+        animator.SetBool("InDamageAnim", InDamageAnim);
     }
     void UpdateTarget()
     {
@@ -237,8 +254,12 @@ public class IceGolemMecanimActor : Actor, IAttacker, IAdjustRootMotion
 
     public override void RealignToTarget()
     {
-        base.RealignToTarget();
         shouldRealign = true;
+    }
+
+    public void ForceRealignToTarget()
+    {
+        base.RealignToTarget();
     }
 
     public override void DeactivateHitboxes()
@@ -250,11 +271,35 @@ public class IceGolemMecanimActor : Actor, IAttacker, IAdjustRootMotion
         return isHitboxActive;
     }
 
+    public void StopDamageAnims()
+    {
+        InDamageAnim = false;
+        animancer.Stop();
+    }
+
+    public bool IsHurt()
+    {
+        return InDamageAnim && damageHandler.hurt != null && animancer.States.Current != damageHandler.hurt;
+    }
+
+    public bool GetGrounded()
+    {
+        isGrounded = Physics.Raycast(this.transform.position, -this.transform.up, out RaycastHit hit, 0.25f, MaskReference.Terrain);
+        return isGrounded;
+    }
+
+    public override bool IsGrounded()
+    {
+        return isGrounded;
+    }
     public bool IsMoving()
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("MOVE");
     }
 
+    public bool IsStrafing() {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("STRAFE");
+    }
     public bool IsDashing()
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("DASH");
@@ -263,5 +308,41 @@ public class IceGolemMecanimActor : Actor, IAttacker, IAdjustRootMotion
     public override bool IsAttacking()
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("ATTACK");
+    }
+
+    public void TakeDamage(DamageKnockback damage)
+    {
+        InDamageAnim = true;
+        ((IDamageable)damageHandler).TakeDamage(damage);
+    }
+
+    public void Recoil()
+    {
+        ((IDamageable)damageHandler).Recoil();
+    }
+
+    public void StartCritVulnerability(float time)
+    {
+        ((IDamageable)damageHandler).StartCritVulnerability(time);
+    }
+
+    public bool IsCritVulnerable()
+    {
+        return ((IDamageable)damageHandler).IsCritVulnerable();
+    }
+
+    public void GetParried()
+    {
+        ((IDamageable)damageHandler).GetParried();
+    }
+
+    public DamageKnockback GetLastTakenDamage()
+    {
+        return ((IDamageable)damageHandler).GetLastTakenDamage();
+    }
+
+    public GameObject GetGameObject()
+    {
+        return ((IDamageable)damageHandler).GetGameObject();
     }
 }
