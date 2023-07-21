@@ -78,9 +78,12 @@ public class AttackerRootMotionHandler : MonoBehaviour
 
         if (rootDelta.magnitude > 0)
         {
+            /*
             cc.enabled = false;
             this.transform.position = this.transform.position + rootDelta;
             cc.enabled = true;
+            */
+            cc.Move(rootDelta);
             SetVelocity(rootDelta / Time.fixedDeltaTime);
         }
         else if (actor != null && !actor.IsGrounded())
