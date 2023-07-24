@@ -13,7 +13,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     DojoBossInventoryTransformingController inventory;
     bool isHitboxActive;
     HumanoidPositionReference positionReference;
-    DojobossTimeTravelHandler timeHandler;
+    MecanimActorTimeTravelHandler timeHandler;
     CapsuleCollider collider;
     
     CharacterController cc;
@@ -150,7 +150,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         OnHitboxActive.AddListener(RealignToTarget);
         SetParryValue();
         arrowDamage.source = this.gameObject;
-        timeHandler = this.GetComponent<DojobossTimeTravelHandler>();
+        timeHandler = this.GetComponent<MecanimActorTimeTravelHandler>();
         nav = this.GetComponent<NavMeshAgent>();
         nav.updatePosition = true;
         nav.updateRotation = true;

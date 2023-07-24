@@ -7,18 +7,14 @@ using UnityEngine.Events;
 public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 {
     public AnimancerComponent animancer;
-    public GameObject afterimagePrefab;
-    public float fadeTime = 3f;
-    [ReadOnly]public AnimancerComponent[] afterimages;
-    public bool useAfterimages = false;
     public float[] timeRemaining;
     public List<TimeTravelData> timeTravelStates;
     public TimeTravelController timeTravelController;
     protected int imageIndex;
-    bool isRewinding;
+    protected bool isRewinding;
     protected Actor actor;
-    float lastHealth;
-    TimeTravelData lastData;
+    protected float lastHealth;
+    protected TimeTravelData lastData;
     protected bool isFrozen;
 
     List<Renderer> renderers;
@@ -46,46 +42,19 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         }
         renderers.AddRange(this.GetComponentsInChildren<Renderer>());
         timeTravelController = TimeTravelController.time;
-        if (useAfterimages)
-        {
-            int images = (int)Mathf.Min(timeTravelController.maxSteps, Mathf.Ceil(fadeTime / TimeTravelController.time.rewindStepDuration));
-            afterimages = new AnimancerComponent[images];
-            timeRemaining = new float[images];
-            for (int i = 0; i < images; i++)
-            {
-                GameObject image = GameObject.Instantiate(afterimagePrefab, timeTravelController.transform);
-                image.name = "Afterimage (" + i + ") for " + this.gameObject.name;
-                afterimages[i] = image.GetComponent<AnimancerComponent>();
-                timeRemaining[i] = 1f;
-            }
-        }
+
         timeTravelStates = new List<TimeTravelData>();
         TimeTravelController.AttemptToRegisterAffectee(this);
     }
 
     void Update()
     {
+        ActorTimeUpdate();
+    }
+
+    public virtual void ActorTimeUpdate()
+    {
         if (!IsRegistered()) return;
-        if (useAfterimages)
-        {
-            for (int i = 0; i < afterimages.Length; i++)
-            {
-                if (afterimages[i].gameObject.activeInHierarchy)
-                {
-                    if (timeRemaining[i] > 0)
-                    {
-                        timeRemaining[i] -= Time.deltaTime;
-                    }
-                    else
-                    {
-                        if (afterimages[i].gameObject.activeInHierarchy)
-                        {
-                            afterimages[i].gameObject.SetActive(false);
-                        }
-                    }
-                }
-            }
-        }
         if (ShouldApplyTimeVisualEffect() && !applyVisual)
         {
             applyVisual = true;
@@ -187,12 +156,6 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             actor.yVel = actorData.velocity.y;
         }
 
-        if (useAfterimages && lastData != null && lastData is ActorTimeTravelData actorLastData && isRewinding)
-        {
-            AnimancerComponent afterimage = GetNextAfterImage(fadeTime);
-            AnimancerState imageState = CreateAfterimageFromTimeState(afterimage, actorLastData);
-        }
-        
         if (actor is PlayerActor player)
         {
             player.UnsnapLedge();
@@ -221,14 +184,6 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         animancer.Layers[HumanoidAnimLayers.TimeEffects].SetWeight(1f);
         animancer.States.Current.IsPlaying = false;
         lastHealth = actor.attributes.health.current;
-        if (actor is PlayerActor player)
-        {
-            player.DisableCloth();
-        }
-        foreach (AnimancerComponent afterimage in afterimages)
-        {
-            afterimage.gameObject.SetActive(false);
-        }
     }
 
     public virtual void StopRewind()
@@ -282,9 +237,14 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         {
             player.walkAccelReal = player.walkAccel;
         }
+        
         animancer.Layers[HumanoidAnimLayers.TimeEffects].SetWeight(0f);
         animancer.Layers[HumanoidAnimLayers.TimeEffects].DestroyStates();
-        animancer.States.Current.IsPlaying = true;
+        if (animancer.States.Current != null)
+        {
+            animancer.States.Current.IsPlaying = true;
+        }
+        
         OnUnfreeze.Invoke();
     }
 
@@ -300,24 +260,6 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         return timeTravelStates;
     }
 
-    public GameObject GetAfterImagePrefab()
-    {
-        return afterimagePrefab;
-    }
-
-    public AnimancerComponent GetNextAfterImage(float fadeTime)
-    {
-        AnimancerComponent animancerComponent = afterimages[imageIndex];
-        timeRemaining[imageIndex] = fadeTime;
-        imageIndex++;
-        imageIndex %= afterimages.Length;
-        return animancerComponent;
-    }
-
-    public AnimancerComponent GetNextAfterImage()
-    {
-        return GetNextAfterImage(fadeTime);
-    }
     public bool IsFrozen()
     {
         return isFrozen;

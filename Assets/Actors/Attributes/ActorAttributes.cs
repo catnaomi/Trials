@@ -39,6 +39,8 @@ public class ActorAttributes : MonoBehaviour
     public List<EffectDuration> effects;
     [Header("Journal Entry")]
     public JournalEntry journalEntry;
+    [Header("Flow & World")]
+    public float cleanUpTime = 5f;
 
     private void Start()
     {

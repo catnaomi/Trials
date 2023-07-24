@@ -1,15 +1,19 @@
+using Animancer;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DojobossTimeTravelHandler : ActorTimeTravelHandler
+public class MecanimActorTimeTravelHandler : ActorTimeTravelHandler
 {
+    public bool runBaseFreeze = false;
     Animator animator;
     float oldSpeed;
     // Start is called before the first frame update
     void Start()
     {
+        actor = this.GetComponent<Actor>();
         animator = this.GetComponent<Animator>();
+        animancer = this.GetComponent<AnimancerComponent>();
         timeTravelController = TimeTravelController.time;
         TimeTravelController.AttemptToRegisterAffectee(this);
     }
@@ -36,6 +40,7 @@ public class DojobossTimeTravelHandler : ActorTimeTravelHandler
 
     public override void StartFreeze()
     {
+        if (runBaseFreeze) base.StartFreeze();
         oldSpeed = animator.speed;
         animator.speed = 0f;
         isFrozen = true;
@@ -44,6 +49,7 @@ public class DojobossTimeTravelHandler : ActorTimeTravelHandler
 
     public override void StopFreeze()
     {
+        if (runBaseFreeze) base.StopFreeze();
         if (oldSpeed > 0)
         {
             animator.speed = oldSpeed;

@@ -5,12 +5,32 @@ using UnityEngine;
 
 public class PlayerTimeTravelHandler : ActorTimeTravelHandler
 {
-    public float unfreezeDamageDelay = 1f;
+    [Header("After Images")]
+    public bool useAfterimages = false;
+    public GameObject afterimagePrefab;
+    public float fadeTime = 3f;
+    [ReadOnly] public AnimancerComponent[] afterimages;
     List<TimeStateDamagePair> afterImageData;
+    [Header("Damage")]
+    public float unfreezeDamageDelay = 1f;
+    
     bool unfreezeRoutineStarted;
     public override void Initialize()
     {
         base.Initialize();
+        if (useAfterimages)
+        {
+            int images = (int)Mathf.Min(timeTravelController.maxSteps, Mathf.Ceil(fadeTime / TimeTravelController.time.rewindStepDuration));
+            afterimages = new AnimancerComponent[images];
+            timeRemaining = new float[images];
+            for (int i = 0; i < images; i++)
+            {
+                GameObject image = GameObject.Instantiate(afterimagePrefab, timeTravelController.transform);
+                image.name = "Afterimage (" + i + ") for " + this.gameObject.name;
+                afterimages[i] = image.GetComponent<AnimancerComponent>();
+                timeRemaining[i] = 1f;
+            }
+        }
         afterImageData = new List<TimeStateDamagePair>();
         TimeTravelController.time.OnTimeStopDamageEvent += ProcessTimeStopHit;
         TimeTravelController.time.OnTimeStopEnd.AddListener(TimeResumeAfterImages);
@@ -20,6 +40,30 @@ public class PlayerTimeTravelHandler : ActorTimeTravelHandler
         return (actor is PlayerActor player && player.IsResurrecting());
     }
 
+    public override void ActorTimeUpdate()
+    {
+        base.ActorTimeUpdate();
+        if (useAfterimages)
+        {
+            for (int i = 0; i < afterimages.Length; i++)
+            {
+                if (afterimages[i].gameObject.activeInHierarchy)
+                {
+                    if (timeRemaining[i] > 0)
+                    {
+                        timeRemaining[i] -= Time.deltaTime;
+                    }
+                    else
+                    {
+                        if (afterimages[i].gameObject.activeInHierarchy)
+                        {
+                            afterimages[i].gameObject.SetActive(false);
+                        }
+                    }
+                }
+            }
+        }
+    }
     public override TimeTravelData SaveTimeState()
     {
         PlayerTimeTravelData data = (PlayerTimeTravelData)base.SaveTimeState();
@@ -37,12 +81,50 @@ public class PlayerTimeTravelHandler : ActorTimeTravelHandler
         player.GetComponent<CharacterController>();
 
         base.LoadTimeState(data, speed);
+        if (useAfterimages && lastData != null && lastData is ActorTimeTravelData actorLastData && isRewinding)
+        {
+            AnimancerComponent afterimage = GetNextAfterImage(fadeTime);
+            AnimancerState imageState = CreateAfterimageFromTimeState(afterimage, actorLastData);
+        }
+
 
         cc.enabled = ccWasEnabled;
 
         if (PortalManager.instance != null && ((PlayerTimeTravelData)data).inWorld2 != PortalManager.instance.inWorld2)
         {
             PortalManager.instance.Swap();
+        }
+    }
+
+    public GameObject GetAfterImagePrefab()
+    {
+        return afterimagePrefab;
+    }
+
+    public AnimancerComponent GetNextAfterImage(float fadeTime)
+    {
+        AnimancerComponent animancerComponent = afterimages[imageIndex];
+        timeRemaining[imageIndex] = fadeTime;
+        imageIndex++;
+        imageIndex %= afterimages.Length;
+        return animancerComponent;
+    }
+
+    public AnimancerComponent GetNextAfterImage()
+    {
+        return GetNextAfterImage(fadeTime);
+    }
+
+    public override void StartRewind()
+    {
+        base.StartRewind();
+        if (actor is PlayerActor player)
+        {
+            player.DisableCloth();
+        }
+        foreach (AnimancerComponent afterimage in afterimages)
+        {
+            afterimage.gameObject.SetActive(false);
         }
     }
 

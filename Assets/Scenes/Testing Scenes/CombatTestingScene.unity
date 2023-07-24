@@ -702,6 +702,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4013956763830427714, guid: 8f083315fa2a75947ab86f7218ad8af3, type: 3}
+    - {fileID: 5623160740940128038, guid: 8f083315fa2a75947ab86f7218ad8af3, type: 3}
+    - {fileID: 845350466507159468, guid: 8f083315fa2a75947ab86f7218ad8af3, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 3104697474370462949, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
@@ -1230,6 +1232,7 @@ MonoBehaviour:
     isRanged: 0
     isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
@@ -1293,6 +1296,7 @@ MonoBehaviour:
     isRanged: 0
     isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
@@ -1397,6 +1401,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minimumDistanceToTarget: 2
   maxRootMotionBackwardsAdjust: 0.3
+--- !u!114 &675521150
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 675521106}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4afefa2c96b7ac649ab3be045033169d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animancer: {fileID: 0}
+  timeRemaining: []
+  timeTravelStates: []
+  timeTravelController: {fileID: 0}
+  deltaTime: 0
+  OnFreeze:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnfreeze:
+    m_PersistentCalls:
+      m_Calls: []
+  runBaseFreeze: 1
 --- !u!1 &735487671
 GameObject:
   m_ObjectHideFlags: 0

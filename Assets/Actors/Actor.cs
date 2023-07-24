@@ -53,7 +53,6 @@ public class Actor : MonoBehaviour
     public Vector3 hitParticleDirection;
     protected bool dead;
 
-    public static readonly float DEFAULT_CORPSECLEAN_TIME = 5f;
     // targets
 
     [SerializeField, ReadOnly] protected DamageKnockback currentDamage;
@@ -337,7 +336,7 @@ public class Actor : MonoBehaviour
     }
     public void StartCleanUp()
     {
-        StartCoroutine(CorpseClean(DEFAULT_CORPSECLEAN_TIME));
+        StartCoroutine(CorpseClean(attributes.cleanUpTime));
     }
 
     public void StartCleanUp(float duration)
