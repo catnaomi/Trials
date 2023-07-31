@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class IceGolemStartSpin : StateMachineBehaviour
 {
+    public float initialSpeed = 0f;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         if (animator.TryGetComponent<IceGolemMecanimActor>(out IceGolemMecanimActor actor))
         {
             actor.BeginSpin();
+            actor.bodySpinSpeed = initialSpeed;
         }    
     }
 

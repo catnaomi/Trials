@@ -99,7 +99,7 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
             {
                 if (!actor.IsAttacking())
                 {
-                    if (animancer.States.Current != block || damage.cannotAutoFlinch)
+                    if ((block == null || animancer.States.Current != block) || damage.cannotAutoFlinch)
                     {
                         ClipTransition clip = damageAnims.GetClipFromBlockType(DamageKnockback.BlockStaggerType.BlockSmall);
                         animancer.Layers[HumanoidAnimLayers.Flinch].Stop();

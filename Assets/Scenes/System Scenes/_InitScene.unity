@@ -3319,7 +3319,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7777778, y: 1}
+    m_SensorSize: {x: 1.7764227, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -3397,7 +3397,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7777778, y: 1}
+    m_SensorSize: {x: 1.7764227, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -5845,6 +5845,7 @@ MonoBehaviour:
     isRanged: 0
     isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
@@ -5908,6 +5909,7 @@ MonoBehaviour:
     isRanged: 0
     isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
@@ -6626,6 +6628,7 @@ MonoBehaviour:
     neutralFlat: 0
   effects: []
   journalEntry: {fileID: 0}
+  cleanUpTime: 5
 --- !u!114 &307703072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6693,11 +6696,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animancer: {fileID: 307703068}
-  afterimagePrefab: {fileID: 8451886904576950616, guid: aa6a3596ac9bc654a8f3cfaf4e9fcefc,
-    type: 3}
-  fadeTime: 3
-  afterimages: []
-  useAfterimages: 1
   timeRemaining: []
   timeTravelStates: []
   timeTravelController: {fileID: 0}
@@ -6708,6 +6706,11 @@ MonoBehaviour:
   OnUnfreeze:
     m_PersistentCalls:
       m_Calls: []
+  useAfterimages: 1
+  afterimagePrefab: {fileID: 8451886904576950616, guid: aa6a3596ac9bc654a8f3cfaf4e9fcefc,
+    type: 3}
+  fadeTime: 3
+  afterimages: []
   unfreezeDamageDelay: 0.25
 --- !u!1 &314391783
 GameObject:
@@ -12269,7 +12272,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7777778, y: 1}
+    m_SensorSize: {x: 1.7764227, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -16040,7 +16043,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7777778, y: 1}
+    m_SensorSize: {x: 1.7764227, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -19111,17 +19114,17 @@ PrefabInstance:
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.0000076293945
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 404.36673
+      value: 407.1416
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 8.703247
+      value: 8.726501
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
@@ -23058,7 +23061,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7777778, y: 1}
+    m_SensorSize: {x: 1.7764227, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -23814,7 +23817,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7777778, y: 1}
+    m_SensorSize: {x: 1.7764227, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
@@ -23941,7 +23944,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7777778, y: 1}
+    m_SensorSize: {x: 1.7764227, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -24652,7 +24655,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7777778, y: 1}
+    m_SensorSize: {x: 1.7764227, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -31356,7 +31359,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7777778, y: 1}
+    m_SensorSize: {x: 1.7764227, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
@@ -33113,11 +33116,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animancer: {fileID: 0}
-  afterimagePrefab: {fileID: 8949687655159119596, guid: 899da15e46a049f419d75f626a00ba36,
-    type: 3}
-  fadeTime: 3
-  afterimages: []
-  useAfterimages: 1
   timeRemaining: []
   timeTravelStates: []
   timeTravelController: {fileID: 0}
@@ -33298,6 +33296,7 @@ MonoBehaviour:
     neutralFlat: 0
   effects: []
   journalEntry: {fileID: 0}
+  cleanUpTime: 5
 --- !u!114 &2757355003389657204
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33563,6 +33562,7 @@ MonoBehaviour:
     isRanged: 0
     isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
@@ -33626,6 +33626,7 @@ MonoBehaviour:
     isRanged: 0
     isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0

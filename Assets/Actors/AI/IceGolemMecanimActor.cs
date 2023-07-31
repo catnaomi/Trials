@@ -11,6 +11,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     CapsuleCollider collider;
     CharacterController cc;
     HumanoidPositionReference positionReference;
+    ActorTimeTravelHandler timeTravelHandler;
     [ReadOnly, SerializeField] NavMeshAgent nav;
     public float attackTimer = 2f;
     public float waterDashTimer = 3f;
@@ -29,14 +30,15 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     [ReadOnly, SerializeField] bool isGrounded;
     [Header("Damageable")]
     public DamageAnims damageAnims;
-    HumanoidDamageHandler damageHandler;
+    SimplifiedDamageHandler damageHandler;
     [Header("Body Spin")]
     public bool isBodySpinning;
     public float bodySpinAccel = 90f;
     public float bodySpinMaxSpeed = 720f;
     public float bodySpinAngleDown = 30f;
-    [ReadOnly, SerializeField] float bodySpinAngle;
-    [ReadOnly, SerializeField] float bodySpinSpeed;
+    public bool spinFacing;
+    public float bodySpinAngle;
+    public float bodySpinSpeed;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
@@ -46,6 +48,8 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     [ReadOnly, SerializeField] bool ActionsEnabled;
     [ReadOnly, SerializeField] float Speed;
     [ReadOnly, SerializeField] bool InDamageAnim;
+    [ReadOnly, SerializeField] float AngleBetween;
+    [ReadOnly, SerializeField] float AngleBetweenAbs;
     [Header("Events")]
     public UnityEvent StartDash;
 
@@ -56,8 +60,8 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         cc = GetComponent<CharacterController>();
         collider = this.GetComponent<CapsuleCollider>();
         positionReference = this.GetComponent<HumanoidPositionReference>();
-        damageHandler = new HumanoidDamageHandler(this, damageAnims, animancer);
-
+        damageHandler = new SimplifiedDamageHandler(this, damageAnims, animancer);
+        timeTravelHandler = this.GetComponent<ActorTimeTravelHandler>();
         damageHandler.SetEndAction(StopDamageAnims);
     }
     protected override void ActorOnEnable()
@@ -123,7 +127,12 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
             InMeleeRange = dist < meleeRange;
             InFarRange = dist < farRange;
 
-            
+            Vector3 dir = (CombatTarget.transform.position - this.transform.position);
+            dir.y = 0f;
+            dir.Normalize();
+            AngleBetween = Vector3.SignedAngle(dir, this.transform.forward, -Vector3.up);
+            AngleBetweenAbs = Mathf.Abs(AngleBetween);
+
         }
         
         UpdateMecanimValues();
@@ -141,6 +150,8 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         animator.SetFloat("Speed", Speed);
         animator.UpdateTrigger("ShouldDash", ref ShouldDash);
         animator.SetBool("InDamageAnim", InDamageAnim);
+        animator.SetFloat("AngleBetween", AngleBetween);
+        animator.SetFloat("AngleBetweenAbs", AngleBetweenAbs);
     }
     void UpdateTarget()
     {
@@ -195,6 +206,14 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         isBodySpinning = true;
     }
 
+    public void SpinWhileFacing()
+    {
+        if (isBodySpinning)
+        {
+            //spinFacing = true;
+        }
+    }
+
     public void EndSpin()
     {
         positionReference.Spine.localRotation = Quaternion.identity;
@@ -206,8 +225,20 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     {
         if (isBodySpinning)
         {
-            positionReference.Spine.localRotation = Quaternion.Euler(bodySpinAngleDown, bodySpinAngle, 0f);
-            bodySpinAngle += bodySpinSpeed * Time.deltaTime;
+            if (spinFacing)
+            {
+                Vector3 dir = (CombatTarget.transform.position - this.transform.position);
+                dir.y = 0f;
+                positionReference.Spine.rotation = Quaternion.LookRotation(dir.normalized) * Quaternion.Euler(0f, bodySpinAngle, 0f) * Quaternion.AngleAxis(bodySpinAngleDown, Vector3.Cross(Vector3.up, dir.normalized));
+            }
+            else
+            {
+                positionReference.Spine.localRotation = Quaternion.Euler(bodySpinAngleDown, bodySpinAngle, 0f);
+            }
+            if (!isInTimeState)
+            {
+                bodySpinAngle += bodySpinSpeed * Time.deltaTime;
+            }
             if (bodySpinAngle >= 360f)
             {
                 HitboxActive(2);

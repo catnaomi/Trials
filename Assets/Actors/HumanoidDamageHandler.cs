@@ -361,7 +361,11 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         {
             animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
         }
-        if (stagger == DamageKnockback.StaggerType.Flinch)
+        if (stagger == DamageKnockback.StaggerType.None)
+        {
+            // do nothing
+        }
+        else if (stagger == DamageKnockback.StaggerType.Flinch)
         {
             AnimancerState state = animancer.Layers[HumanoidAnimLayers.Flinch].Play(damageAnims.flinch);
             state.Time = 0f;
@@ -471,7 +475,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             float xdot = Vector3.Dot(actor.transform.right, dir);
             float ydot = Vector3.Dot(actor.transform.forward, dir);
 
-            if (animancer.States.Current != hurt || damage.cannotAutoFlinch)
+            if ((hurt == null || animancer.States.Current != hurt) || damage.cannotAutoFlinch)
             {
                 DirectionalMixerState state = (DirectionalMixerState)animancer.Play(damageAnims.staggerSmall);
                 state.Time = 0f;
@@ -745,7 +749,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     {
         hurt = state;
         critTime = time;
-        if (animancer.States.Current == state)
+        if (animancer.States.Current == state && state != null)
         {
             actor.OnCritVulnerable.Invoke();
         }
@@ -753,7 +757,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
     public bool IsCritVulnerable()
     {
-        bool isCritVuln = animancer.States.Current == hurt && critTime > 0f;
+        bool isCritVuln = animancer.States.Current == hurt && hurt != null && critTime > 0f;
         if (!isCritVuln) totalCritTime = 0f;
         return isCritVuln;
     }

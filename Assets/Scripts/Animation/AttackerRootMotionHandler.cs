@@ -65,6 +65,8 @@ public class AttackerRootMotionHandler : MonoBehaviour
             
         }
         rootDelta = diff;
+
+        this.transform.rotation = animator.rootRotation;
     }
 
     void FixedUpdate()
