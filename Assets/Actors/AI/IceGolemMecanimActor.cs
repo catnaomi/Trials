@@ -15,6 +15,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     [ReadOnly, SerializeField] NavMeshAgent nav;
     public float attackTimer = 2f;
     public float waterDashTimer = 3f;
+    public float specialAttackTimer = 90f;
     public bool isHitboxActive;
     public UnityEvent OnHitboxActive;
     [Header("Navigation")]
@@ -45,6 +46,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     [ReadOnly, SerializeField] bool InFarRange;
     [ReadOnly, SerializeField] bool ShouldAttack;
     [ReadOnly, SerializeField] bool ShouldDash;
+    [ReadOnly, SerializeField] bool ShouldSpecial;
     [ReadOnly, SerializeField] bool ActionsEnabled;
     [ReadOnly, SerializeField] float Speed;
     [ReadOnly, SerializeField] bool InDamageAnim;
@@ -62,6 +64,10 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         positionReference = this.GetComponent<HumanoidPositionReference>();
         damageHandler = new SimplifiedDamageHandler(this, damageAnims, animancer);
         timeTravelHandler = this.GetComponent<ActorTimeTravelHandler>();
+        if (timeTravelHandler != null)
+        {
+            timeTravelHandler.OnFreeze.AddListener(DeactivateHitboxes);
+        }
         damageHandler.SetEndAction(StopDamageAnims);
     }
     protected override void ActorOnEnable()
@@ -70,6 +76,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         this.StartTimer(0.1f, true, SetDestination);
         this.StartTimer(attackTimer, true, BeginAttack);
         this.StartTimer(waterDashTimer, true, BeginWaterDash);
+        this.StartTimer(specialAttackTimer, true, BeginSpecialAttack);
     }
 
 
@@ -152,6 +159,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         animator.SetBool("InDamageAnim", InDamageAnim);
         animator.SetFloat("AngleBetween", AngleBetween);
         animator.SetFloat("AngleBetweenAbs", AngleBetweenAbs);
+        animator.UpdateTrigger("ShouldSpecial", ref ShouldSpecial);
     }
     void UpdateTarget()
     {
@@ -198,6 +206,14 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         if (!isInTimeState && actionsEnabled)
         {
             ShouldDash = true;
+        }
+    }
+
+    public void BeginSpecialAttack()
+    {
+        if (!isInTimeState && actionsEnabled)
+        {
+            ShouldSpecial = true;
         }
     }
 
@@ -384,6 +400,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public void TakeDamage(DamageKnockback damage)
     {
         InDamageAnim = true;
+        isBodySpinning = false;
         DeactivateHitboxes();
         ((IDamageable)damageHandler).TakeDamage(damage);
     }

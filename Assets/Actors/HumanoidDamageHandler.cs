@@ -567,7 +567,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     }
     public void AdjustDefendingPosition(GameObject attacker, float length)
     {
-        if (attacker == null || !attacker.TryGetComponent<Actor>(out Actor attackerActor))
+        if (attacker == null || !attacker.TryGetComponent<Actor>(out Actor attackerActor) || length < 0)
         {
             return;
         }
