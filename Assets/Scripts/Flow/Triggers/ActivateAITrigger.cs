@@ -19,6 +19,7 @@ public class ActivateAITrigger : MonoBehaviour
         {
             foreach (Actor actor in actors)
             {
+                // TODO: figure out a way that doesn't require the Navigating Humanoid Actor class.
                 if (actor == null || !actor.IsAlive() || !actor.gameObject.activeInHierarchy) continue;
                 if (actor is NavigatingHumanoidActor navActor)
                 {
