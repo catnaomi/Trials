@@ -130,7 +130,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-624408
+  m_Name: pb_Mesh-194782
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -1062,7 +1062,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-624420
+  m_Name: pb_Mesh-194794
   serializedVersion: 11
   m_SubMeshes:
   - serializedVersion: 2
@@ -1514,31 +1514,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8622797609942491598, guid: ea99e2751c174e0418ca382e5dc17e08,
-        type: 3}
-      propertyPath: waterSource
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 8622797609942491598, guid: ea99e2751c174e0418ca382e5dc17e08,
-        type: 3}
-      propertyPath: combatHitSource
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 8622797609942491598, guid: ea99e2751c174e0418ca382e5dc17e08,
-        type: 3}
-      propertyPath: footSourceHeavy
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 8622797609942491598, guid: ea99e2751c174e0418ca382e5dc17e08,
-        type: 3}
-      propertyPath: footSourceLight
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 8622797609942491598, guid: ea99e2751c174e0418ca382e5dc17e08,
-        type: 3}
-      propertyPath: combatWhiffSource
-      value: 
-      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8622797609942491636, guid: ea99e2751c174e0418ca382e5dc17e08, type: 3}
     - {fileID: 1843655583291612564, guid: ea99e2751c174e0418ca382e5dc17e08, type: 3}
@@ -1780,22 +1755,22 @@ MonoBehaviour:
   timeTravelStates: []
   isInTimeState: 0
   nav: {fileID: 0}
-  attackTimer: 2
-  waterDashTimer: 3
+  attackTimer: 10
+  waterDashTimer: 15
   specialAttackTimer: 90
   isHitboxActive: 0
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  actionsEnabled: 0
-  closeRange: 4
-  meleeRange: 2
-  farRange: 10
+  actionsEnabled: 1
+  closeRange: 5
+  meleeRange: 3
+  farRange: 15
   isGrounded: 0
-  damageAnims: {fileID: 0}
+  damageAnims: {fileID: 11400000, guid: 221ae51d23f379f4a9d8bc53390ce0e9, type: 2}
   isBodySpinning: 0
-  bodySpinAccel: 90
-  bodySpinMaxSpeed: 720
+  bodySpinAccel: 360
+  bodySpinMaxSpeed: 1080
   bodySpinAngleDown: 30
   spinFacing: 0
   bodySpinAngle: 0
@@ -1813,7 +1788,19 @@ MonoBehaviour:
   AngleBetweenAbs: 0
   StartDash:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1122297177}
+        m_TargetAssemblyTypeName: UnityEngine.ParticleSystem, UnityEngine
+        m_MethodName: Play
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &888156298
 GameObject:
   m_ObjectHideFlags: 0

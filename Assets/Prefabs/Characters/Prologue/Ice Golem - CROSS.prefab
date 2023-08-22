@@ -955,6 +955,7 @@ GameObject:
   - component: {fileID: 845350466507159468}
   - component: {fileID: 579917600842904003}
   - component: {fileID: 5623160740940128038}
+  - component: {fileID: 6010974429586591444}
   m_Layer: 10
   m_Name: Ice Golem - CROSS
   m_TagString: Untagged
@@ -1203,7 +1204,13 @@ MonoBehaviour:
   OnDodgeSuccess:
     m_PersistentCalls:
       m_Calls: []
+  OnParrySuccess:
+    m_PersistentCalls:
+      m_Calls: []
   OnBlock:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDodge:
     m_PersistentCalls:
       m_Calls: []
   OnHealthLoss:
@@ -1216,16 +1223,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   lastDamageAmountTaken: 0
-  moveDirection: {x: 0, y: 0, z: 0}
-  moveAdditional: {x: 0, y: 0, z: 0}
-  lastContactPoint: {x: 0, y: 0, z: 0}
-  lastBlockPoint: {x: 0, y: 0, z: 0}
-  xzVel: {x: 0, y: 0, z: 0}
-  yVel: 0
-  hitParticlePosition: {x: 0, y: 0, z: 0}
-  hitParticleDirection: {x: 0, y: 0, z: 0}
-  currentDamage:
+  lastDamageTaken:
     healthDamage: 0
+    unresistedMinimum: 0
     types: 0
     critData:
       criticalMultiplier: 0
@@ -1239,11 +1239,16 @@ MonoBehaviour:
     isThrust: 0
     isSlash: 0
     isRanged: 0
+    isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
     stunTime: 0
+    repositionLength: 0
     stagger: 0
     staggers:
       onHit: 0
@@ -1251,9 +1256,12 @@ MonoBehaviour:
       onCritical: 0
       onKill: 0
       onCounterHit: 0
+      onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     didCrit: 0
+    timeDelayed: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -1265,6 +1273,73 @@ MonoBehaviour:
       m_PersistentCalls:
         m_Calls: []
     OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    hitClip: {fileID: 0}
+  moveDirection: {x: 0, y: 0, z: 0}
+  moveAdditional: {x: 0, y: 0, z: 0}
+  lastContactPoint: {x: 0, y: 0, z: 0}
+  lastBlockPoint: {x: 0, y: 0, z: 0}
+  xzVel: {x: 0, y: 0, z: 0}
+  yVel: 0
+  hitParticlePosition: {x: 0, y: 0, z: 0}
+  hitParticleDirection: {x: 0, y: 0, z: 0}
+  currentDamage:
+    healthDamage: 0
+    unresistedMinimum: 0
+    types: 0
+    critData:
+      criticalMultiplier: 0
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 0
+    isSlash: 0
+    isRanged: 0
+    isParry: 0
+    bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
+    stunTime: 0
+    repositionLength: 0
+    stagger: 0
+    staggers:
+      onHit: 0
+      onArmorHit: 0
+      onCritical: 0
+      onKill: 0
+      onCounterHit: 0
+      onBlock: 0
+      onTypedBlock: 0
+    kbForce: {x: 0, y: 0, z: 0}
+    kbRadial: 0
+    didCrit: 0
+    timeDelayed: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    OnHitWeakness:
       m_PersistentCalls:
         m_Calls: []
     hitClip: {fileID: 0}
@@ -1367,6 +1442,7 @@ MonoBehaviour:
     neutralFlat: 0
   effects: []
   journalEntry: {fileID: 11400000, guid: 648542cce6ec07d44853d44327c5fbbf, type: 2}
+  cleanUpTime: 5
 --- !u!195 &4013956763830427712
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1416,6 +1492,8 @@ MonoBehaviour:
   lBack: {fileID: 7216478659687150610}
   cBack: {fileID: 8465889388133501534}
   eyeHeight: 0
+  centerTarget: {fileID: 0}
+  eyeTarget: {fileID: 0}
   upperBodyMask: {fileID: 31900000, guid: 74da9ab124865d3498afd76d28f9bb59, type: 2}
 --- !u!114 &4013956763830427774
 MonoBehaviour:
@@ -1485,6 +1563,7 @@ MonoBehaviour:
   waterSource: {fileID: 4013956763830427769}
   combatWhiffSource: {fileID: 4013956763830427769}
   combatHitSource: {fileID: 4013956763830427769}
+  parryPosition: {x: 0, y: 0, z: 1}
   OnDust:
     m_PersistentCalls:
       m_Calls: []
@@ -1525,13 +1604,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animancer: {fileID: 0}
-  afterimagePrefab: {fileID: 0}
-  fadeTime: 3
-  afterimages: []
-  useAfterimages: 0
   timeRemaining: []
   timeTravelStates: []
   timeTravelController: {fileID: 0}
+  deltaTime: 0
   OnFreeze:
     m_PersistentCalls:
       m_Calls: []
@@ -1603,19 +1679,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animancer: {fileID: 0}
-  afterimagePrefab: {fileID: 0}
-  fadeTime: 3
-  afterimages: []
-  useAfterimages: 0
   timeRemaining: []
   timeTravelStates: []
   timeTravelController: {fileID: 0}
+  deltaTime: 0
   OnFreeze:
     m_PersistentCalls:
       m_Calls: []
   OnUnfreeze:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &6010974429586591444
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2314907631184150886}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9be8a23088e979a4b9436a6b3df8f0ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2327289656298777130
 GameObject:
   m_ObjectHideFlags: 0
