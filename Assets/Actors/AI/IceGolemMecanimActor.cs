@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 
-public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMotion
+public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMotion, INavigates
 {
     HumanoidNPCInventory inventory;
     CapsuleCollider collider;
@@ -439,5 +439,35 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public GameObject GetGameObject()
     {
         return ((IDamageable)damageHandler).GetGameObject();
+    }
+
+    public void SetDestination(Vector3 position)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void SetDestination(GameObject target)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void ResumeNavigation()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void StopNavigation()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public Vector3 GetDestination()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void EnableActions()
+    {
+        actionsEnabled = true;
     }
 }

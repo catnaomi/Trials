@@ -11,4 +11,6 @@ public interface INavigates
     public void StopNavigation();
 
     public Vector3 GetDestination();
+
+    public void EnableActions();
 }

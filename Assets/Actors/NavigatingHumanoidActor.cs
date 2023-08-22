@@ -738,4 +738,9 @@ public class NavigatingHumanoidActor : Actor, INavigates
     {
         return destination;
     }
+
+    public void EnableActions()
+    {
+        actionsEnabled = true;
+    }
 }

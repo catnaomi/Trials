@@ -599,4 +599,9 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     {
         return false;
     }
+
+    public void EnableActions()
+    {
+        // do nothing on mimics
+    }
 }

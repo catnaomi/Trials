@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 public class ActivateAITrigger : MonoBehaviour
 {
-    public NavigatingHumanoidActor[] actors;
+    public Actor[] actors;
 
     public bool shouldAttackImmediately = false;
     public InputAttack attack;
@@ -17,19 +17,27 @@ public class ActivateAITrigger : MonoBehaviour
         if (PlayerActor.player == null) return;
         if (other.GetComponent<PlayerActor>() != null || other.transform.IsChildOf(PlayerActor.player.transform))
         {
-            foreach (NavigatingHumanoidActor actor in actors)
+            foreach (Actor actor in actors)
             {
                 if (actor == null || !actor.IsAlive() || !actor.gameObject.activeInHierarchy) continue;
-                if (shouldAttackImmediately && !actor.actionsEnabled)
+                if (actor is NavigatingHumanoidActor navActor)
                 {
-                    attack.ProcessHumanoidAction(actor, actor.MoveOnEnd);
+                    if (shouldAttackImmediately && !navActor.actionsEnabled)
+                    {
+                        attack.ProcessHumanoidAction(navActor, navActor.MoveOnEnd);
+                    }
+                    navActor.EnableActions();
                 }
-                actor.actionsEnabled = true;
-                if (!triggered)
+                else if (actor is INavigates navigates)
                 {
-                    triggered = true;
-                    OnTrigger.Invoke();
+                    navigates.EnableActions();
                 }
+
+            }
+            if (!triggered)
+            {
+                triggered = true;
+                OnTrigger.Invoke();
             }
         }
     }
