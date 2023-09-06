@@ -24,6 +24,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public float meleeRange = 2f;
     public float farRange = 10f;
     bool shouldRealign;
+    float shouldRotateAmount;
 
 
     
@@ -121,6 +122,12 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         {
             ForceRealignToTarget();
             shouldRealign = false;
+            shouldRotateAmount = 0f;
+        }
+        else if (shouldRotateAmount != 0f)
+        {
+            ForceRotateTowards(shouldRotateAmount);
+            shouldRotateAmount = 0f;
         }
         if (IsDashing() && !wasDashingLastFrame)
         {
@@ -347,6 +354,16 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     {
         base.RealignToTarget();
     }
+    public override void RotateTowardsTarget(float maxDegreesDelta)
+    {
+        shouldRotateAmount = maxDegreesDelta;
+    }
+
+    public void ForceRotateTowards(float maxDegreesDelta)
+    {
+        base.RotateTowardsTarget(maxDegreesDelta);
+    }
+
 
     public override void DeactivateHitboxes()
     {
