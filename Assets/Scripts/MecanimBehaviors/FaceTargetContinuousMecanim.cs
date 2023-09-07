@@ -7,7 +7,7 @@ public class FaceTargetContinuousMecanim : StateMachineBehaviour
     public float speedPerSecond;
     public bool lerp;
     public string angleBetweenParameterName;
-    public float maxAngle;
+    public float percentPerSecond;
     // OnStateEnter is called when a transition starts and the state machine starts to evaluate this state
     override public void OnStateMove(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
@@ -20,9 +20,7 @@ public class FaceTargetContinuousMecanim : StateMachineBehaviour
             else
             {
                 float angle = animator.GetFloat(angleBetweenParameterName);
-                float t = Mathf.Clamp01(Mathf.Abs(angle) / maxAngle);
-                float speed = Mathf.LerpAngle(0f, speedPerSecond, t);
-                actor.RotateTowardsTarget(speed * Time.deltaTime);
+                actor.RotateTowardsTarget((Mathf.Abs(angle) * percentPerSecond) * Time.deltaTime);
             }
         }
     }
