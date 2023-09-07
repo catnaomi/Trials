@@ -17,49 +17,27 @@ public class PlayerTargetManager : MonoBehaviour
     public Camera cam;
     public float maxPlayerDistance = 20f;
     public float maxCamDistance = 20f;
-    public List<GameObject> targets;
+
     public LayerMask blocksTargetingMask;
-    public int index = 0;
-    public bool lockedOn;
+    [Header("Current Target Status")]
     public GameObject currentTarget;
+    public List<GameObject> targets;
+    public bool lockedOn;
+
     
 
     CinemachineTargetGroup cmtg;
 
-    Dictionary<AxisUtilities.AxisDirection, Transform> directionToTarget;
-
-    public Transform upTarget;
-    public Transform downTarget;
-    public Transform leftTarget;
-    public Transform rightTarget;
-
-    List<Ray> rays;
-
-
-    public bool handleUI = true;
-    public GameObject targetGraphic;
-    public GameObject upGraphic;
-    public GameObject downGraphic;
-    public GameObject leftGraphic;
-    public GameObject rightGraphic;
-    public Vector3 uiOffset;
-    public bool billboard = true;
     public float targetDelay;
-    float invalidTime;
-    public float invalidExpiryTime = 1f;
-    bool targetHeldLastFrame;
-    bool wasTargetBlock;
     [Header("Press To Change Target Settings")]
-    public float maxChangeTargetDelay = 2f;
-    public int changeTargetIndexOffset = 0;
-    public float changeTargetResetDelay = 3f;
-    float targetPressedClock;
-    float targetReleasedClock;
-    bool lockOnRelease;
-    bool lockOnPress;
     public float targetChangeSpeed = 10f;
     public float targetChangeMaxDistance = 25f;
     public Transform targetAim;
+    bool targetAimShouldSnap = true;
+    [SerializeField, ReadOnly] int changeTargetIndexOffset = 0;
+    bool lockOnRelease;
+    bool lockOnPress;
+    PlayerInput inputs;
     [Header("Free Look Control Settings")]
     public bool handleCamera;
     CinemachineFreeLook freeLook;
@@ -112,24 +90,15 @@ public class PlayerTargetManager : MonoBehaviour
         //player.toggleTarget.AddListener(ToggleTarget);
         //player.changeTarget.AddListener(SwitchTargets);
 
-        if (handleUI)
-        {
-            targetGraphic = GameObject.Instantiate(targetGraphic);
-            upGraphic = GameObject.Instantiate(upGraphic);
-            downGraphic = GameObject.Instantiate(downGraphic);
-            leftGraphic = GameObject.Instantiate(leftGraphic);
-            rightGraphic = GameObject.Instantiate(rightGraphic);
-        }
-        invalidTime = invalidExpiryTime;
         freeLook = player.vcam.target.GetComponent<CinemachineFreeLook>();
         targetAim.position = Vector3.zero;
     }
 
     void SetupInputListeners()
     {
-        PlayerInput inputs = player.GetComponent<PlayerInput>();
+        inputs = player.GetComponent<PlayerInput>();
 
-        inputs.actions["Target"].started += OnLockOn;
+        inputs.actions["Target"].performed += OnLockOn;
     }
 
 
@@ -151,49 +120,13 @@ public class PlayerTargetManager : MonoBehaviour
         {
             GameObject[] allLockTargets = GameObject.FindGameObjectsWithTag("LockTarget");
 
-            //targets.Clear();
-
             List<GameObject> validTargets = new List<GameObject>();
             List<GameObject> invalidTargets = new List<GameObject>();
 
-            rays = new List<Ray>();
             foreach (GameObject target in allLockTargets)
             {
-                float playerDist = Vector3.Distance(target.transform.position, player.positionReference.Spine.position);
-                float camDist = Vector3.Distance(target.transform.position, cam.transform.position);
+                bool invalid = !IsValidTarget(target);
 
-                Ray pRay = new Ray(player.positionReference.Spine.position, (target.transform.position - player.positionReference.Spine.position));
-                Ray cRay = new Ray(cam.transform.position, (target.transform.position - cam.transform.position));
-
-                bool playerTerrainBlocked = Physics.Raycast(pRay, playerDist, blocksTargetingMask);
-                bool camTerrainBlocked = Physics.Raycast(cRay, camDist, blocksTargetingMask);
-
-                bool playerInRange = playerDist < maxPlayerDistance;
-                bool camInRange = camDist < maxCamDistance;
-
-                Vector3 vpp = Camera.main.WorldToViewportPoint(target.transform.position);
-                bool onScreen = (Mathf.Abs(vpp.x) <= 1f) && (Mathf.Abs(vpp.y) <= 1f) && (vpp.z >= 0);
-                bool invalid = false;
-                if (target != PlayerActor.player.GetCombatTarget())
-                {
-                    invalid = !onScreen || ((!playerInRange || playerTerrainBlocked) && (!camInRange || camTerrainBlocked));
-                }
-
-                if (target.transform.root.TryGetComponent<Actor>(out Actor actor))
-                {
-                    if (!actor.IsAlive())
-                    {
-                        invalid = true;
-                    }
-                }
-
-                if (!invalid)
-                {
-                    rays.Add(pRay);
-                    rays.Add(cRay);
-                }
-
-                //Debug.Log(string.Format("object:{0}, pterr:{1}, prang:{2}, cterr:{3}, crang:{4}, invalid:{5}", target.name, playerTerrainBlocked, (int)playerDist, camTerrainBlocked, (int)camDist, invalid));
                 if (invalid)
                 {
                     invalidTargets.Add(target);
@@ -204,61 +137,23 @@ public class PlayerTargetManager : MonoBehaviour
                 }
             }
 
-            List<GameObject> targetsToDelete = new List<GameObject>();
-            foreach (GameObject workingTarget in targets)
-            {
-                if (!validTargets.Contains(workingTarget))
-                {
-                    targetsToDelete.Add(workingTarget);
-                }
-            }
-            targets = targets.Except(targetsToDelete).ToList();
+            // remove all invalid targets and add all valid targets to target list
+            targets.RemoveAll(t => t == null);
+            targets = targets.Except(invalidTargets).Union(validTargets).ToList();
 
-            targets = targets.Union(validTargets).ToList();
-            if (targets.Count > 0 && !(lockedOn))// || targetReleasedClock < changeTargetResetDelay))
+            if (targets.Count > 0 && !lockedOn)
             {
+                // sort by distance: closest first. current target remains in first always
                 targets.Sort((a,b) => {
-                    /*
-                    if (a == PlayerActor.player.GetCombatTarget())
-                    {
-                        return -1;
-                    }
-                    else if (b == PlayerActor.player.GetCombatTarget())
-                    {
-                        return 1;
-                    }
-                    else if (a == currentTarget && (lockedOn || targetReleasedClock < changeTargetResetDelay))
-                    {
-                        return -1;
-                    }
-                    else if (b == currentTarget && (lockedOn || targetReleasedClock < changeTargetResetDelay))
-                    {
-                        return 1;
-                    }
-                    */
                     return (int)Mathf.Sign(Vector3.Distance(player.transform.position, a.transform.position) - Vector3.Distance(player.transform.position, b.transform.position));
-                    /*
-                    Vector3 aDist = Camera.main.WorldToViewportPoint(a.transform.position);
-                    Vector3 bDist = Camera.main.WorldToViewportPoint(b.transform.position);
-                    return Math.Sign(bDist.magnitude - aDist.magnitude);
-                    if (aDist.z < 0 && bDist.z < 0)
-                    {
-                        return 0;
-                    }
-                    else if (aDist.z < 0)
-                    {
-                        return -1;
-                    }
-                    else if (bDist.z < 0)
-                    {
-                        return 1;
-                    }
-                    else
-                    {
-                        
-                    }*/
                 });
+                // don't re-sort while locked on to maintain target changing order
                 changeTargetIndexOffset = 0;
+                SetTarget(targets[changeTargetIndexOffset]);
+            }
+            else if (!lockedOn)
+            {
+                SetTarget(null);
             }
             OnTargetUpdate.Invoke();
             yield return new WaitForSecondsRealtime(targetDelay);
@@ -268,82 +163,12 @@ public class PlayerTargetManager : MonoBehaviour
 
     void Update()
     {
-        /*
-       
-        bool targetDown = false;
-        bool targetUp = false;
-        bool targetHeld = PlayerActor.player.IsTargetHeld();
-        bool targetIsBlock = PlayerActor.player.IsTargetHeld() && PlayerActor.player.IsBlockHeld();
-        bool didSwitchTargetButtons = false;
-        if (targetHeld)
-        {
-            if (!lockedOn && targets.Count > 0)
-            {
-                if (!targetHeldLastFrame)
-                {
-                    lockedOn = true;
-                }
-                //SetTarget(targets[0]);
-                //UpdateDirections();
-            }
-            else if (targets.Count <= 0)
-            {
-                lockedOn = false;
-                if (!targetHeldLastFrame)
-                {
-                    Recenter();
-                }
-                
-            }
+        HandleInput();
 
-            if (!targetHeldLastFrame)
-            {
-                targetDown = true;
-            }
-            didSwitchTargetButtons = targetIsBlock != wasTargetBlock;
-            wasTargetBlock = targetIsBlock;
-
-        }
-        else
-        {
-            if (targetHeldLastFrame)
-            {
-                targetUp = true;
-            }
-            if (player.IsInDialogue())
-            {
-                lockedOn = true;
-            }
-            else
-            {
-                lockedOn = false;
-            }
-            
-        }
-
-
-        if (!lockedOn || targetDown)
-        {
-            
-            if (targetDown && targetReleasedClock < maxChangeTargetDelay && !didSwitchTargetButtons)
-            {
-                changeTargetIndexOffset++; // change targets
-               
-            }
-            else if (!lockedOn && targetReleasedClock > changeTargetResetDelay)
-            {
-                changeTargetIndexOffset = 0;
-            }
-            if (targets.Count > 0)
-            {
-                SetTarget(targets[changeTargetIndexOffset % targets.Count]);
-            }
-        }
-        
-        
+        // set the player's target to the current target
         if (lockedOn)
         {
-            if (targetDown && !player.IsInDialogue())
+            if (!player.IsInDialogue())
             {
                 player.SetCombatTarget(currentTarget);
             }
@@ -351,15 +176,24 @@ public class PlayerTargetManager : MonoBehaviour
             {
                 SetTarget(player.GetCombatTarget());
             }
-        } 
+        }
         else
         {
+        // remove player's target if not locked on
             player.SetCombatTarget(null);
-          
         }
-        *
-        *
-        */
+
+        if (lockedOn && currentTarget == player.GetCombatTarget() && !IsValidTarget(currentTarget))
+        {
+            ExpireTarget();
+        }
+
+        HandleAimTargetPosition();
+        HandleTargetGroup();
+    }
+
+    void HandleInput()
+    {
         if (lockOnPress)
         {
             if (lockedOn)
@@ -368,20 +202,16 @@ public class PlayerTargetManager : MonoBehaviour
                 {
                     CycleTargets();
                 }
-                else
-                {
-                    RecenterTarget();
-                }
+                RecenterTarget();
             }
             else
             {
-                if (!lockedOn && targets.Count > 0)
+                if (targets.Count > 0)
                 {
                     lockedOn = true;
                 }
-                else if (targets.Count <= 0)
+                else
                 {
-                    lockedOn = false;
                     RecenterFree();
                 }
             }
@@ -391,108 +221,38 @@ public class PlayerTargetManager : MonoBehaviour
             if (lockedOn)
             {
                 lockedOn = false;
-            }     
-        }
-        
-
-        if (lockedOn)
-        {
-            if (lockOnPress && !player.IsInDialogue())
-            {
-                player.SetCombatTarget(currentTarget);
             }
-            else if (player.GetCombatTarget() != currentTarget)
-            {
-                SetTarget(player.GetCombatTarget());
-            }
-        }
-        else
-        {
-            player.SetCombatTarget(null);
-
         }
         lockOnRelease = false;
         lockOnPress = false;
 
-        bool shouldExpire = false;
-        if (currentTarget == player.GetCombatTarget() && !IsValidTarget(currentTarget))
-        {    
-            shouldExpire = true;
-        }
+    }
 
-        if (shouldExpire)
+    // controls the object that hovers on targets to create a gradual transition between targets
+    void HandleAimTargetPosition()
+    {
+        if (!lockedOn || currentTarget == null || Vector3.Distance(targetAim.position, currentTarget.transform.position) > targetChangeMaxDistance)
         {
-            if (invalidTime > 0f)
-            {
-                invalidTime -= Time.deltaTime;
-            }
-            else
-            {
-                if (targets.Count > 0)
-                {
-                    changeTargetIndexOffset = 0;
-                    while (changeTargetIndexOffset < targets.Count)
-                    {
-                        if (IsValidTarget(targets[changeTargetIndexOffset]))
-                        {
-                            break;
-                        }
-                        changeTargetIndexOffset++;
-                    }
-                    if (changeTargetIndexOffset < targets.Count)
-                    {
-                        SetTarget(targets[changeTargetIndexOffset % targets.Count]);
-                        player.SetCombatTarget(currentTarget);
-                    }
-                    else
-                    {
-                        player.SetCombatTarget(null);
-                        currentTarget = null;
-                        lockedOn = false;
-                    }
-                }
-                else
-                {
-                    player.SetCombatTarget(null);
-                    currentTarget = null;
-                    lockedOn = false;
-                }       
-            }
+            targetAimShouldSnap = true;
         }
-        else
-        {
-            invalidTime = invalidExpiryTime;
-        }
-
-        /*
-        if (cmtg.m_Targets.Length > 1)
-        {
-            cmtg.m_Targets[1].target = currentTarget != null ? currentTarget.transform : null;
-        }
-        else
-        {
-            cmtg.AddMember(currentTarget != null ? currentTarget.transform : null, 1f, 2f);
-        }
-        */
-
         if (currentTarget != null)
         {
-            if (targetAim.position.magnitude < 0.01f || Vector3.Distance(targetAim.position, currentTarget.transform.position) > targetChangeMaxDistance)
+            if (targetAimShouldSnap)
             {
                 targetAim.position = currentTarget.transform.position;
+                targetAimShouldSnap = false;
             }
             else
             {
                 targetAim.position = Vector3.MoveTowards(targetAim.position, currentTarget.transform.position, targetChangeSpeed * Time.deltaTime);
             }
         }
-        else
-        {
-            if (!lockedOn && targetReleasedClock >= changeTargetResetDelay)
-            {
-                targetAim.position = Vector3.zero;
-            }
-        }
+
+    }
+    
+    // controls the cinemachine target group
+    void HandleTargetGroup()
+    {
         if (handleCamera && lockedOn && cmtg.m_Targets.Length > 1)
         {
             //this.transform.rotation = Quaternion.LookRotation(PlayerActor.player.transform.forward);
@@ -501,66 +261,59 @@ public class PlayerTargetManager : MonoBehaviour
             dir.Normalize();
             this.transform.rotation = Quaternion.LookRotation(dir);
             UpdateFreeLook();
-            
-        }
 
-        /*
-        if (targetHeld)
+        }
+    }
+    
+    // runs when the current target expires (dies or becomes invalid)
+    void ExpireTarget()
+    {
+        if (targets.Count > 0)
         {
-            if (targetDown)
+            SetTarget(null);
+            // find a valid target from the current list and switch to that
+            changeTargetIndexOffset = 0;
+            while (changeTargetIndexOffset < targets.Count)
             {
-                targetPressedClock = 0f;
+                if (IsValidTarget(targets[changeTargetIndexOffset]))
+                {
+                    break;
+                }
+                changeTargetIndexOffset++;
             }
-            else if (targetPressedClock < 60f)
-            {
-                targetPressedClock += Time.deltaTime;
+
+            if (changeTargetIndexOffset < targets.Count)
+            {  //if an alternate target is successfully found
+                SetTarget(targets[changeTargetIndexOffset % targets.Count]);
+                player.SetCombatTarget(currentTarget);
             }
-            targetReleasedClock = 0f;
+            else
+            {   // end targeting if no alternative found
+                player.SetCombatTarget(null);
+                currentTarget = null;
+                lockedOn = false;
+            }
         }
         else
         {
-            if (targetUp)
-            {
-                targetReleasedClock = 0f;
-            }
-            else if (targetReleasedClock < 60f)
-            {
-                targetReleasedClock += Time.deltaTime;
-            }
-            targetPressedClock = 0f;
+            // end targeting if no targets
+            player.SetCombatTarget(null);
+            currentTarget = null;
+            lockedOn = false;
         }
-        targetHeldLastFrame = targetHeld;
-        */
     }
 
-    private void UpdateDirections()
-    {
-        if (!lockedOn || currentTarget == null) return;
-        List<Transform> otherTransforms = new List<Transform>();
-        foreach (GameObject target in targets)
-        {
-            if (target != currentTarget && target != null)
-            {
-                otherTransforms.Add(target.transform);
-            }
-        }
-
-        directionToTarget = AxisUtilities.MapTransformsToAxisDirections(cam.transform, currentTarget.transform.position, otherTransforms);
-
-        upTarget = directionToTarget[AxisUtilities.AxisDirection.Up];
-        downTarget = directionToTarget[AxisUtilities.AxisDirection.Down];
-        leftTarget = directionToTarget[AxisUtilities.AxisDirection.Left];
-        rightTarget = directionToTarget[AxisUtilities.AxisDirection.Right];
-    }
 
     public void RecenterFree()
     {
-        OnRecenterFree.Invoke();
+        if (inputs.actions["look"].ReadValue<Vector2>().magnitude == 0)
+            OnRecenterFree.Invoke();
     }
 
     public void RecenterTarget()
     {
-        OnRecenterTarget.Invoke();
+        if (inputs.actions["look"].ReadValue<Vector2>().magnitude == 0)
+            OnRecenterTarget.Invoke();
     }
 
     void CycleTargets()
@@ -571,36 +324,18 @@ public class PlayerTargetManager : MonoBehaviour
             SetTarget(targets[changeTargetIndexOffset % targets.Count]);
         }   
     }
-    void ToggleTarget()
-    {
-        //Debug.Log("target?");
-        if (!lockedOn && targets.Count > 0)
-        {
-            lockedOn = true;
-            SetTarget(targets[0]);
-            UpdateDirections();
-        }
-        else
-        {
-            lockedOn = false;
-            SetTarget(null);
-        }
-    }
-    void SwitchTargets()
-    {
-        if (lockedOn)
-        {
-            AxisUtilities.AxisDirection direction = AxisUtilities.DirectionToAxisDirection(player.look, "HORIZONTAL", "VERTICAL");
-            //AxisUtilities.AxisDirection direction = AxisUtilities.InvertAxis(InputHandler.main.SecondaryFlickDirection, false, false, false);
-            //Debug.Log("switch:" + direction + "--" + player.look);
-            if (directionToTarget.TryGetValue(direction, out Transform target) && target != null)
-            {
-                SetTarget(target.gameObject);
-                UpdateDirections();
-            }            
-        }
-    }
 
+    /*
+     * Criteria for Valid Targets:
+     * If not Player's current target:
+     * * must be on screen
+     * * must be within playerDist
+     * * must be within camDist
+     * * must not be blocked by terrain
+     * 
+     * If Player's current target:
+     * * must be within camDist
+     */
     public bool IsValidTarget(GameObject target)
     {
         if (target == null) return false;
@@ -625,9 +360,15 @@ public class PlayerTargetManager : MonoBehaviour
 
         Vector3 vpp = Camera.main.WorldToViewportPoint(target.transform.position);
         bool onScreen = (Mathf.Abs(vpp.x) <= 1f) && (Mathf.Abs(vpp.y) <= 1f) && (vpp.z >= 0);
-        bool invalid = !onScreen || ((!playerInRange || playerTerrainBlocked) && (!camInRange || camTerrainBlocked));
+        // for non current target
+        bool invalid = !onScreen || ((!playerInRange || playerTerrainBlocked) || (!camInRange || camTerrainBlocked));
 
+        if (target == PlayerActor.player.GetCombatTarget())
+        {
+            invalid = !camInRange;
+        }
 
+        //Debug.Log(string.Format("object:{0}, pterr:{1}, prang:{2}, cterr:{3}, crang:{4}, invalid:{5}", target.name, playerTerrainBlocked, (int)playerDist, camTerrainBlocked, (int)camDist, invalid));
 
         return !invalid;
     }
@@ -665,43 +406,6 @@ public class PlayerTargetManager : MonoBehaviour
     {
         currentTarget = t;
         //player.SetCombatTarget(currentTarget);
-    }
-
-    private void OnGUI()
-    {
-        if (handleUI)
-        {
-            HandleTargetGraphic(targetGraphic, currentTarget);
-            HandleTargetGraphic(upGraphic, upTarget);
-            HandleTargetGraphic(downGraphic, downTarget);
-            HandleTargetGraphic(leftGraphic, leftTarget);
-            HandleTargetGraphic(rightGraphic, rightTarget);
-            
-        }
-    }
-
-    private bool HandleTargetGraphic(GameObject graphic, Transform target)
-    {
-        if (target == null || player.GetCombatTarget() == null)
-        {
-            graphic.SetActive(false);
-            return false;
-        }
-        graphic.SetActive(true);
-        graphic.transform.position = target.position + uiOffset;
-        return true;
-    }
-
-    private bool HandleTargetGraphic(GameObject graphic, GameObject target)
-    {
-        if (target == null || player.GetCombatTarget() == null)
-        {
-            graphic.SetActive(false);
-            return false;
-        }
-        graphic.SetActive(true);
-        graphic.transform.position = target.transform.position + uiOffset;
-        return true;
     }
 
     private void OnDrawGizmosSelected()
