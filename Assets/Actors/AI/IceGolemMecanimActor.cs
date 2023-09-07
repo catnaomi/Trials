@@ -32,6 +32,9 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     [ReadOnly, SerializeField] bool isGrounded;
     [Header("Damageable")]
     public DamageAnims damageAnims;
+    public float maximumHurtDuration = 2f;
+    [SerializeField, ReadOnly]float hurtDuration;
+    bool wasHurtLastFrame;
     SimplifiedDamageHandler damageHandler;
     [Header("Body Spin")]
     public bool isBodySpinning;
@@ -41,6 +44,9 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public bool spinFacing;
     public float bodySpinAngle;
     public float bodySpinSpeed;
+    [Header("Particles")]
+    public GameObject puddlePrefab;
+    public GameObject puddleObject;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
@@ -65,6 +71,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         positionReference = this.GetComponent<HumanoidPositionReference>();
         damageHandler = new SimplifiedDamageHandler(this, damageAnims, animancer);
         timeTravelHandler = this.GetComponent<ActorTimeTravelHandler>();
+        InitPuddle();
         if (timeTravelHandler != null)
         {
             timeTravelHandler.OnFreeze.AddListener(DeactivateHitboxes);
@@ -94,6 +101,10 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         {
             UpdateMecanimValues();
             return;
+        }
+        else
+        {
+            InDamageAnim = false;
         }
         if (inventory.IsMainEquipped() && !inventory.IsMainDrawn())
         {
@@ -456,6 +467,21 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public GameObject GetGameObject()
     {
         return ((IDamageable)damageHandler).GetGameObject();
+    }
+
+    public void InitPuddle()
+    {
+        puddleObject = Instantiate(puddlePrefab);
+        ParticleSystem particle = puddleObject.GetComponent<ParticleSystem>();
+        RigidbodyFollowTransform follow = puddleObject.GetComponent<RigidbodyFollowTransform>();
+        follow.target = this.transform;
+        this.StartDash.AddListener(particle.Play);
+        this.OnDie.AddListener(DestroyPuddle);
+    }
+
+    public void DestroyPuddle()
+    {
+        Destroy(puddleObject);
     }
 
     public void SetDestination(Vector3 position)

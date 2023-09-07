@@ -19,6 +19,7 @@ public class RigidbodyFollowTransform : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (target == null) return;
         Vector3 position = target.position + offset;
         if (offsetForceX) position.x = offset.x;
         if (offsetForceY) position.y = offset.y;
