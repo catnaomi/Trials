@@ -216,10 +216,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public UnityEvent OnTypedBlockSuccess;
     public UnityEvent OnHitWeakness;
     [Header("Animancer")]
-    public MixerTransition2DAsset moveAnim;
-    public MixerTransition2DAsset strafeAnim;
-    public MixerTransition2DAsset aimAnimDefault;
+    [Header("Stance & Movement")]
+    public MixerTransition2DAsset unarmedStance;
+    public MixerTransition2DAsset armedStance;
+    public MixerTransition2DAsset blockingStance;
+    public MixerTransition2DAsset bowWalkStance;
+    public MixerTransition2DAsset bowAimStance;
+    [Header("Default Anims")]
     public AnimationClip idleAnim;
+    public MixerTransition2DAsset aimAnimDefault;
+    public MixerTransition2DAsset strafeAnimDefault;
+    [Space(10)]
     public ClipTransition dashAnim;
     public ClipTransition sprintAnim;
     ClipTransition currentSprintAnim;
@@ -326,9 +333,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public MixerState<Vector2> secondaryStance;
         public MixerState<float> upperBlock;
     }
-
-    
-
     
     [Serializable]
     public struct VirtualCameras
@@ -359,9 +363,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         interactables = new List<Interactable>();
 
         state = new AnimState();
-        state.move = (MixerState)animancer.States.GetOrCreate(moveAnim);
+        state.move = (MixerState)animancer.States.GetOrCreate(unarmedStance);
         state.attack = animancer.States.GetOrCreate(rollAnim);
-        state.block = animancer.States.GetOrCreate(strafeAnim);
+        state.block = animancer.States.GetOrCreate(strafeAnimDefault);
         animancer.Play(state.move);
 
         SetupInputListeners();
@@ -385,7 +389,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         _OnLandEnd = () =>
         {
-            state.move.ChildStates[0].Clip = idleAnim;
+            //state.move.ChildStates[0].Clip = idleAnim;
             walkAccelReal = walkAccel;
         };
 
@@ -3164,15 +3168,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public void UpdateFromMoveset()
     {
-        MixerTransition2DAsset movementAnim = moveAnim;
+        MixerTransition2DAsset movementAnim = unarmedStance;
 
-        if (inventory.IsMainDrawn())
+        if (inventory.IsMainDrawn() || inventory.IsOffDrawn())
         {
-            Moveset moveset = inventory.GetMainWeapon().moveset;
-            if (moveset.moveAnim != null)
-            {
-                //movementAnim = moveset.moveAnim;
-            }
+            movementAnim = armedStance;
+        }
+        else if (inventory.IsRangedDrawn())
+        {
+            movementAnim = bowWalkStance;
         }
         bool moving = false;
         if (animancer.States.Current == state.move)
@@ -3194,12 +3198,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             bilayerMove = null;
         }
 
-        MixerTransition2DAsset blockingMoveAnim = strafeAnim;
+        MixerTransition2DAsset blockingMoveAnim = strafeAnimDefault;
         ClipTransition guardBreak = null;
         EquippableWeapon blockWeapon = inventory.GetBlockWeapon();
         if (blockWeapon != null)
         {
-            blockingMoveAnim = blockWeapon.moveset.blockMove;
+            blockingMoveAnim = blockingStance;
             blockAnim = blockWeapon.moveset.blockAnim;
             blockAnimStart = blockWeapon.moveset.blockAnimStart;
             blockStagger = blockWeapon.moveset.blockStagger;
@@ -3235,7 +3239,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         if (inventory.IsRangedEquipped())
         {
-            aimAnim = inventory.GetRangedWeapon().moveset.aimAttack.GetMovement();
+            aimAnim = bowAimStance;
         }
         else
         {
@@ -3261,6 +3265,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void UpdateStances()
     {
+        return;
         primaryStance = (inventory.TryGetRightHandedWeapon(out EquippableWeapon rweapon)) ? rweapon.primaryStance : null;
         secondaryStance = (inventory.TryGetLeftHandedWeapon(out EquippableWeapon lweapon)) ? lweapon.secondaryStance : null;
         ApplyIdleBlends();

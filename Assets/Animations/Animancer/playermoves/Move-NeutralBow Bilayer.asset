@@ -9,18 +9,29 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a2d01d4f425b3848938f199392c9afb, type: 3}
-  m_Name: Move-Neutral 1
+  m_Script: {fileID: 11500000, guid: 72e9b7ceab820ec49bc9db7e0d693269, type: 3}
+  m_Name: Move-NeutralBow Bilayer
   m_EditorClassIdentifier: 
   _Transition:
-    rid: 1585613798262177792
+    rid: 8002217238392471574
+  transition2:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: a018daf27e4af0845b8fa033208360dc, type: 2}
+    _Speed: 1
+    _NormalizedStartTime: NaN
+  mask: {fileID: 31900000, guid: 2e164fd05488efe4eb197ad7c494f569, type: 2}
+  weight: 1
   references:
     version: 2
     RefIds:
-    - rid: 1585613798262177792
+    - rid: 8002217238392471574
       type: {class: MixerTransition2D, ns: Animancer, asm: Animancer}
       data:
-        _FadeDuration: 0.5
+        _FadeDuration: 0.25
         _Events:
           _NormalizedTimes: []
           _Callbacks: []
@@ -31,13 +42,13 @@ MonoBehaviour:
         - {fileID: -203655887218126122, guid: 632654462f8d73942a1c7771c12e49ce, type: 3}
         - {fileID: -203655887218126122, guid: bacd47027a7d3344ba0c79a67f50dc99, type: 3}
         - {fileID: 7400010, guid: da377704b7242394093984fb754cf1ab, type: 3}
-        - {fileID: 7400004, guid: 148cbbcee342bfb4f9361d7aa1b98eb8, type: 3}
-        - {fileID: 7400006, guid: da377704b7242394093984fb754cf1ab, type: 3}
-        - {fileID: 7400002, guid: 148cbbcee342bfb4f9361d7aa1b98eb8, type: 3}
-        - {fileID: 7400008, guid: da377704b7242394093984fb754cf1ab, type: 3}
+        - {fileID: -203655887218126122, guid: 895dba8387cfd06428d5cddf8b784484, type: 3}
+        - {fileID: -203655887218126122, guid: ff4c9e5f535b02a4592e5d2c32af98f3, type: 3}
+        - {fileID: -203655887218126122, guid: e17189c429426a441b74351a4f2a385c, type: 3}
+        - {fileID: -203655887218126122, guid: 262a685a048bd834baacba7d6717c622, type: 3}
         - {fileID: -203655887218126122, guid: f9630218e03bfe546a34b42717c367ee, type: 3}
         _Speeds: []
-        _SynchronizeChildren: 00
+        _SynchronizeChildren: 
         _Thresholds:
         - {x: 0, y: 0}
         - {x: 0, y: 0.5}
