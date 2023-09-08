@@ -215,6 +215,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public UnityEvent OnParrySlashStart;
     public UnityEvent OnTypedBlockSuccess;
     public UnityEvent OnHitWeakness;
+    public UnityEvent OnJumpStart;
     [Header("Animancer")]
     [Header("Stance & Movement")]
     public MixerTransition2DAsset unarmedStance;
@@ -640,7 +641,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     moveDirection = stickDirection.normalized;
                     //xzVel = xzVel.magnitude * stickDirection.normalized;
                 }
-                state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+                state.jump = animancer.Play(standJumpAnim);//animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
             }
             else if (!isGrounded && lastAirTime > fallBufferTime)
             {
@@ -1252,7 +1253,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         moveDirection = stickDirection.normalized;
                         //xzVel = xzVel.magnitude * stickDirection.normalized;
                     }
-                    state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+                    PlayJump();
                 }
                 
             }
@@ -1639,7 +1640,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 cc.enabled = true;
                 airTime = 0f;
                 xzVel = Vector3.zero;
-                state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+                PlayJump();
                 currentClimb.CheckLedgeAfter(0.5f);
                 //StartClimbLockout();
                 /*
@@ -2789,6 +2790,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void ApplyJump()
     {
         yVel = jumpVel;
+        OnJumpStart.Invoke();
     }
 
     public void ApplyDodgeJump()
@@ -4873,6 +4875,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void PlayMove()
     {
         _MoveOnEnd();
+    }
+
+    public void PlayJump()
+    {
+        state.jump = animancer.Play(standJumpAnim);
     }
 #endregion
 
