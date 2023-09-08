@@ -58,6 +58,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float walkTurnSpeed = 1080f;
     [Space(5)]
     public float strafeSpeed = 2.5f;
+    public float weaponsDrawnSpeed = 5f;
     [Space(5)]
     public float airAccel = 1f;
     public float airTurnSpeed = 45f;
@@ -571,19 +572,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         #region move
         if (animancer.States.Current == state.move)
         {
-            float speedMax = 0f;
+            float speedMax = walkSpeedMax;
+            if (inventory.IsAnyWeaponDrawn())
+            {
+                speedMax = Mathf.Min(speedMax, weaponsDrawnSpeed);
+            }
+            if (camState == CameraState.Lock)
+            {
+                speedMax = Mathf.Min(speedMax, strafeSpeed);
+            }
             if (wading)
             {
-                speedMax = Mathf.Lerp(walkSpeedMax, wadingSpeed, wadingPercent);
-            }
-            else if (camState == CameraState.Lock)
-            {
-                speedMax = strafeSpeed;
-            }
-            else
-            {
-                speedMax = walkSpeedMax;
-            }
+                speedMax = Mathf.Lerp(speedMax, wadingSpeed, wadingPercent);
+            } 
             speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * speedMax, walkAccelReal * Time.deltaTime);
             if (camState == CameraState.Free)
             {
@@ -4937,7 +4938,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Debug.DrawRay(top + Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), -this.transform.right * cc.radius * RADIUS_MULT, clr);
 
         Debug.DrawRay(c.bounds.center, Vector3.down * (c.bounds.extents.y + CAST_DISTANCE), didHit ? Color.red : Color.cyan);
-        return (didHit && slopeOK);// || cc.isGrounded;
+        return ((didHit || didSphereHit) && slopeOK);// || cc.isGrounded;
     }
 
     public void StartGroundedLockout(float duration)
