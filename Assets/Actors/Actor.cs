@@ -241,6 +241,16 @@ public class Actor : MonoBehaviour
         }
     }
 
+    public virtual void RotateTowardsTarget(float maxDegreesDelta)
+    {
+        if (CombatTarget != null)
+        {
+            Vector3 dir = CombatTarget.transform.position - this.transform.position;
+            dir.y = 0f;
+            dir.Normalize();
+            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(dir), maxDegreesDelta);
+        }
+    }
     public virtual void RealignAwayTarget()
     {
         if (CombatTarget != null)

@@ -24,6 +24,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public float meleeRange = 2f;
     public float farRange = 10f;
     bool shouldRealign;
+    float shouldRotateAmount;
 
 
     
@@ -31,6 +32,9 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     [ReadOnly, SerializeField] bool isGrounded;
     [Header("Damageable")]
     public DamageAnims damageAnims;
+    public float maximumHurtDuration = 2f;
+    [SerializeField, ReadOnly]float hurtDuration;
+    bool wasHurtLastFrame;
     SimplifiedDamageHandler damageHandler;
     [Header("Body Spin")]
     public bool isBodySpinning;
@@ -40,6 +44,9 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public bool spinFacing;
     public float bodySpinAngle;
     public float bodySpinSpeed;
+    [Header("Particles")]
+    public GameObject puddlePrefab;
+    public GameObject puddleObject;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
@@ -64,6 +71,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         positionReference = this.GetComponent<HumanoidPositionReference>();
         damageHandler = new SimplifiedDamageHandler(this, damageAnims, animancer);
         timeTravelHandler = this.GetComponent<ActorTimeTravelHandler>();
+        InitPuddle();
         if (timeTravelHandler != null)
         {
             timeTravelHandler.OnFreeze.AddListener(DeactivateHitboxes);
@@ -94,6 +102,10 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
             UpdateMecanimValues();
             return;
         }
+        else
+        {
+            InDamageAnim = false;
+        }
         if (inventory.IsMainEquipped() && !inventory.IsMainDrawn())
         {
             inventory.SetDrawn(true, true);
@@ -121,6 +133,12 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         {
             ForceRealignToTarget();
             shouldRealign = false;
+            shouldRotateAmount = 0f;
+        }
+        else if (shouldRotateAmount != 0f)
+        {
+            ForceRotateTowards(shouldRotateAmount);
+            shouldRotateAmount = 0f;
         }
         if (IsDashing() && !wasDashingLastFrame)
         {
@@ -347,6 +365,16 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     {
         base.RealignToTarget();
     }
+    public override void RotateTowardsTarget(float maxDegreesDelta)
+    {
+        shouldRotateAmount = maxDegreesDelta;
+    }
+
+    public void ForceRotateTowards(float maxDegreesDelta)
+    {
+        base.RotateTowardsTarget(maxDegreesDelta);
+    }
+
 
     public override void DeactivateHitboxes()
     {
@@ -439,6 +467,21 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public GameObject GetGameObject()
     {
         return ((IDamageable)damageHandler).GetGameObject();
+    }
+
+    public void InitPuddle()
+    {
+        puddleObject = Instantiate(puddlePrefab);
+        ParticleSystem particle = puddleObject.GetComponent<ParticleSystem>();
+        RigidbodyFollowTransform follow = puddleObject.GetComponent<RigidbodyFollowTransform>();
+        follow.target = this.transform;
+        this.StartDash.AddListener(particle.Play);
+        this.OnDie.AddListener(DestroyPuddle);
+    }
+
+    public void DestroyPuddle()
+    {
+        Destroy(puddleObject);
     }
 
     public void SetDestination(Vector3 position)
