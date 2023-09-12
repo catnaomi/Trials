@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class BowStringHandler : MonoBehaviour
 {
     public LineRenderer line;
@@ -12,6 +13,7 @@ public class BowStringHandler : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (mount1 == null || mount1 == null) return;
         line.SetPosition(0, mount1.position);
         line.SetPosition(2, mount2.position);
 
