@@ -58,6 +58,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float walkTurnSpeed = 1080f;
     [Space(5)]
     public float strafeSpeed = 2.5f;
+    public float weaponsDrawnSpeed = 5f;
     [Space(5)]
     public float airAccel = 1f;
     public float airTurnSpeed = 45f;
@@ -214,11 +215,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public UnityEvent OnParrySlashStart;
     public UnityEvent OnTypedBlockSuccess;
     public UnityEvent OnHitWeakness;
+    public UnityEvent OnJumpStart;
     [Header("Animancer")]
-    public MixerTransition2DAsset moveAnim;
-    public MixerTransition2DAsset strafeAnim;
-    public MixerTransition2DAsset aimAnimDefault;
+    [Header("Stance & Movement")]
+    public MixerTransition2DAsset unarmedStance;
+    public MixerTransition2DAsset armedStance;
+    public MixerTransition2DAsset blockingStance;
+    public MixerTransition2DAsset bowWalkStance;
+    public MixerTransition2DAsset bowAimStance;
+    [Header("Default Anims")]
     public AnimationClip idleAnim;
+    public MixerTransition2DAsset aimAnimDefault;
+    public MixerTransition2DAsset strafeAnimDefault;
+    [Space(10)]
     public ClipTransition dashAnim;
     public ClipTransition sprintAnim;
     ClipTransition currentSprintAnim;
@@ -325,9 +334,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public MixerState<Vector2> secondaryStance;
         public MixerState<float> upperBlock;
     }
-
-    
-
     
     [Serializable]
     public struct VirtualCameras
@@ -358,9 +364,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         interactables = new List<Interactable>();
 
         state = new AnimState();
-        state.move = (MixerState)animancer.States.GetOrCreate(moveAnim);
+        state.move = (MixerState)animancer.States.GetOrCreate(unarmedStance);
         state.attack = animancer.States.GetOrCreate(rollAnim);
-        state.block = animancer.States.GetOrCreate(strafeAnim);
+        state.block = animancer.States.GetOrCreate(strafeAnimDefault);
         animancer.Play(state.move);
 
         SetupInputListeners();
@@ -384,7 +390,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         _OnLandEnd = () =>
         {
-            state.move.ChildStates[0].Clip = idleAnim;
+            //state.move.ChildStates[0].Clip = idleAnim;
             walkAccelReal = walkAccel;
         };
 
@@ -571,19 +577,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         #region move
         if (animancer.States.Current == state.move)
         {
-            float speedMax = 0f;
+            float speedMax = walkSpeedMax;
+            if (inventory.IsAnyWeaponDrawn())
+            {
+                speedMax = Mathf.Min(speedMax, weaponsDrawnSpeed);
+            }
+            if (camState == CameraState.Lock)
+            {
+                speedMax = Mathf.Min(speedMax, strafeSpeed);
+            }
             if (wading)
             {
-                speedMax = Mathf.Lerp(walkSpeedMax, wadingSpeed, wadingPercent);
-            }
-            else if (camState == CameraState.Lock)
-            {
-                speedMax = strafeSpeed;
-            }
-            else
-            {
-                speedMax = walkSpeedMax;
-            }
+                speedMax = Mathf.Lerp(speedMax, wadingSpeed, wadingPercent);
+            } 
             speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * speedMax, walkAccelReal * Time.deltaTime);
             if (camState == CameraState.Free)
             {
@@ -635,7 +641,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     moveDirection = stickDirection.normalized;
                     //xzVel = xzVel.magnitude * stickDirection.normalized;
                 }
-                state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+                state.jump = animancer.Play(standJumpAnim);//animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
             }
             else if (!isGrounded && lastAirTime > fallBufferTime)
             {
@@ -1247,7 +1253,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         moveDirection = stickDirection.normalized;
                         //xzVel = xzVel.magnitude * stickDirection.normalized;
                     }
-                    state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+                    PlayJump();
                 }
                 
             }
@@ -1634,7 +1640,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 cc.enabled = true;
                 airTime = 0f;
                 xzVel = Vector3.zero;
-                state.jump = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+                PlayJump();
                 currentClimb.CheckLedgeAfter(0.5f);
                 //StartClimbLockout();
                 /*
@@ -2784,6 +2790,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void ApplyJump()
     {
         yVel = jumpVel;
+        OnJumpStart.Invoke();
     }
 
     public void ApplyDodgeJump()
@@ -3163,15 +3170,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public void UpdateFromMoveset()
     {
-        MixerTransition2DAsset movementAnim = moveAnim;
+        MixerTransition2DAsset movementAnim = unarmedStance;
 
-        if (inventory.IsMainDrawn())
+        if (inventory.IsMainDrawn() || inventory.IsOffDrawn())
         {
-            Moveset moveset = inventory.GetMainWeapon().moveset;
-            if (moveset.moveAnim != null)
-            {
-                //movementAnim = moveset.moveAnim;
-            }
+            movementAnim = armedStance;
+        }
+        else if (inventory.IsRangedDrawn())
+        {
+            movementAnim = bowWalkStance;
         }
         bool moving = false;
         if (animancer.States.Current == state.move)
@@ -3193,12 +3200,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             bilayerMove = null;
         }
 
-        MixerTransition2DAsset blockingMoveAnim = strafeAnim;
+        MixerTransition2DAsset blockingMoveAnim = strafeAnimDefault;
         ClipTransition guardBreak = null;
         EquippableWeapon blockWeapon = inventory.GetBlockWeapon();
         if (blockWeapon != null)
         {
-            blockingMoveAnim = blockWeapon.moveset.blockMove;
+            blockingMoveAnim = blockingStance;
             blockAnim = blockWeapon.moveset.blockAnim;
             blockAnimStart = blockWeapon.moveset.blockAnimStart;
             blockStagger = blockWeapon.moveset.blockStagger;
@@ -3234,7 +3241,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         if (inventory.IsRangedEquipped())
         {
-            aimAnim = inventory.GetRangedWeapon().moveset.aimAttack.GetMovement();
+            aimAnim = bowAimStance;
         }
         else
         {
@@ -3260,6 +3267,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void UpdateStances()
     {
+        return;
         primaryStance = (inventory.TryGetRightHandedWeapon(out EquippableWeapon rweapon)) ? rweapon.primaryStance : null;
         secondaryStance = (inventory.TryGetLeftHandedWeapon(out EquippableWeapon lweapon)) ? lweapon.secondaryStance : null;
         ApplyIdleBlends();
@@ -4868,6 +4876,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         _MoveOnEnd();
     }
+
+    public void PlayJump()
+    {
+        state.jump = animancer.Play(standJumpAnim);
+    }
 #endregion
 
     public bool GetGrounded()
@@ -4937,7 +4950,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Debug.DrawRay(top + Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), -this.transform.right * cc.radius * RADIUS_MULT, clr);
 
         Debug.DrawRay(c.bounds.center, Vector3.down * (c.bounds.extents.y + CAST_DISTANCE), didHit ? Color.red : Color.cyan);
-        return (didHit && slopeOK);// || cc.isGrounded;
+        return ((didHit || didSphereHit) && slopeOK);// || cc.isGrounded;
     }
 
     public void StartGroundedLockout(float duration)

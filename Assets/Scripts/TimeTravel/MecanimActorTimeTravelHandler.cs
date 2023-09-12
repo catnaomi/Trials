@@ -41,6 +41,7 @@ public class MecanimActorTimeTravelHandler : ActorTimeTravelHandler
     public override void StartFreeze()
     {
         if (runBaseFreeze) base.StartFreeze();
+        actor.isInTimeState = true;
         oldSpeed = animator.speed;
         animator.speed = 0f;
         isFrozen = true;
@@ -59,6 +60,7 @@ public class MecanimActorTimeTravelHandler : ActorTimeTravelHandler
             animator.speed = 1f;
         }
         isFrozen = false;
+        actor.isInTimeState = false;
         OnUnfreeze.Invoke();
     }
 }
