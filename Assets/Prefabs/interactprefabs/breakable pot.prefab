@@ -10,13 +10,13 @@ GameObject:
   m_Component:
   - component: {fileID: 211171209174470600}
   - component: {fileID: 211171209174470601}
-  - component: {fileID: 211171209174470602}
   - component: {fileID: 211171209174470603}
   - component: {fileID: 211171209174470604}
   - component: {fileID: 211171209174470646}
   - component: {fileID: 211171209174470647}
   - component: {fileID: 5987735291857643753}
   - component: {fileID: 1936646194501032077}
+  - component: {fileID: 6161927618214937056}
   m_Layer: 10
   m_Name: breakable pot
   m_TagString: Untagged
@@ -39,7 +39,7 @@ Transform:
   - {fileID: 4701464203408620207}
   - {fileID: 388578841182383195}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &211171209174470601
 Rigidbody:
@@ -57,19 +57,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!135 &211171209174470602
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 211171209174470605}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!114 &211171209174470603
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -254,6 +241,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9be8a23088e979a4b9436a6b3df8f0ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  alsoDisable: 0
+--- !u!65 &6161927618214937056
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 211171209174470605}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.95, y: 0.95, z: 0.95}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1001 &211171209524742451
 PrefabInstance:
   m_ObjectHideFlags: 0
