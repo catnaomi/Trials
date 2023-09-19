@@ -399,7 +399,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
 
     public bool GetGrounded()
     {
-        isGrounded = Physics.Raycast(this.transform.position, -this.transform.up, out RaycastHit hit, 0.25f, MaskReference.Terrain);
+        isGrounded = ActorUtilities.GetGrounded(this.transform);
         return isGrounded;
     }
 
