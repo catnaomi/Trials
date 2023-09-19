@@ -249,6 +249,10 @@ public class Hitbox : MonoBehaviour
             }
             didHitTerrain = false;
             didHitHitbox = false;
+            if (damageKnockback != null)
+            {
+                damageKnockback.Reset();
+            }
         }
     }
 

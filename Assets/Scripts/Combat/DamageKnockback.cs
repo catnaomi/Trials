@@ -37,8 +37,6 @@ public class DamageKnockback
     public Vector3 kbForce;
     public bool kbRadial;
     [Space(5)]
-    [ReadOnly] public bool didCrit;
-    [ReadOnly] public bool timeDelayed;
     [ReadOnly]
     public GameObject hitboxSource;
     [ReadOnly]
@@ -51,7 +49,10 @@ public class DamageKnockback
     public UnityEvent OnCrit;
     public UnityEvent OnBlock;
     public UnityEvent OnHitWeakness;
-    
+    [Header("Runtime Flags")]
+    [ReadOnly] public bool didCrit;
+    [ReadOnly] public bool timeDelayed;
+
     public static float MAX_CRITVULN_TIME = 5f;
     public static readonly int SLASH_INT = -1;
     public static readonly int THRUST_INT = 1;
@@ -198,6 +199,12 @@ public class DamageKnockback
     public static Vector3 GetKnockbackRelativeToTransform(Vector3 vector, Transform transform)
     {
         return transform.forward * vector.z + transform.right * vector.x + transform.up * vector.y;
+    }
+    
+    public void Reset()
+    {
+        didCrit = false;
+        timeDelayed = false;
     }
 
     public static readonly StaggerData StandardStaggerData = new StaggerData()

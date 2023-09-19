@@ -1,3 +1,4 @@
+using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,10 +8,13 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
 {
     HumanoidNPCInventory inventory;
     CapsuleCollider collider;
-    CharacterController cc;
     HumanoidPositionReference positionReference;
     ActorTimeTravelHandler timeTravelHandler;
 
+    [Header("Block & Block Switch")]
+    public bool isBlocking;
+    public string blockSequence;
+    [ReadOnly, SerializeField] Queue<int> blockQueue;
     [Header("Strafe Settings")]
     [SerializeField, ReadOnly] Vector3 initialPosition;
     [SerializeField, ReadOnly] Vector3 strafeVector;
@@ -20,10 +24,24 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
     public float strafeSpeed;
     public bool isHitboxActive;
     public UnityEvent OnHitboxActive;
-
+    [Header("Attack Settings")]
+    public float hitboxSize = 1f;
+    public DamageKnockback riposteDamage;
+    [Header("References")]
+    public Transform hitboxMountR;
+    [SerializeField, ReadOnly] Hitbox hitboxR;
+    public Transform hitboxMountL;
+    [SerializeField, ReadOnly] Hitbox hitboxL;
+    public GameObject shieldR;
+    public GameObject shieldL;
+    public GameObject blockCollider;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] float StrafeMove;
+    [ReadOnly, SerializeField] int BlockType;
+    [ReadOnly, SerializeField] bool OnHit; //trigger
+    [ReadOnly, SerializeField] bool OnFail; //trigger
+    [ReadOnly, SerializeField] bool GuardBreak; //trigger
 
     // Start is called before the first frame update
     public override void ActorStart()
@@ -31,14 +49,31 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
         base.ActorStart();
         inventory = GetComponent<HumanoidNPCInventory>();
         collider = GetComponent<CapsuleCollider>();
-        cc = GetComponent<CharacterController>();
         positionReference = GetComponent<HumanoidPositionReference>();
         timeTravelHandler = GetComponent<ActorTimeTravelHandler>();
 
-
+        BlockType = 1;
         InitializeStrafe();
+        InitializeBlockSequence();
+        NextBlock();
+        GenerateHitboxes();
     }
 
+    public override void ActorPostUpdate()
+    {
+        UpdateStrafe(this.transform.position);
+        UpdateMecanimValues();
+    }
+    void UpdateMecanimValues()
+    {
+        animator.SetFloat("StrafeMove", StrafeMove);
+        animator.UpdateTrigger("OnHit", ref OnHit);
+        animator.UpdateTrigger("OnFail", ref OnFail);
+        animator.UpdateTrigger("GuardBreak", ref GuardBreak);
+        animator.SetInteger("BlockType", BlockType);
+    }
+
+    #region Strafing
     public void InitializeStrafe()
     {
         initialPosition = this.transform.position;
@@ -66,8 +101,11 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
 
             position = Vector3.MoveTowards(position, targetPosition, strafeSpeed * Time.deltaTime);
         }
-
-        this.transform.position = position;
+        if (IsBlocking())
+        {
+            this.transform.position = position;
+        }
+        
     }
 
     void OnDrawGizmosSelected()
@@ -92,22 +130,147 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
 
         Gizmos.DrawRay(position + playerDot * direction, Vector3.up * 4f);
     }
-    // Update is called once per frame
-    public override void ActorPostUpdate()
+    #endregion
+
+    #region Blocking
+
+    void InitializeBlockSequence()
     {
-        UpdateStrafe(this.transform.position);
-        UpdateMecanimValues();
+        blockQueue = new Queue<int>();
+
+        string[] sequence = blockSequence.ToUpper().Split(' ');
+
+        foreach (string s in sequence)
+        {
+            if (s == "X")
+            {
+                blockQueue.Enqueue(1);
+            }
+            else if (s == "O")
+            {
+                blockQueue.Enqueue(-1);
+            }
+        }
+
+        this.attributes.health.max = this.attributes.health.current = blockQueue.Count * 4 + 1;
     }
-    void UpdateMecanimValues()
+
+    int GetNextInSequence()
     {
-        animator.SetFloat("StrafeMove", StrafeMove);
+        if (blockQueue.TryDequeue(out int result))
+        {
+            return result;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    public void NextBlock()
+    {
+        BlockType = GetNextInSequence();
     }
 
     public void TakeDamage(DamageKnockback damage)
     {
-        throw new System.NotImplementedException();
+        if (!IsAlive()) return;
+
+        // TODO: timestop stuff
+
+        bool hitFromBehind = !(Vector3.Dot(-this.transform.forward, (damage.source.transform.position - this.transform.position).normalized) <= 0f);
+
+        lastDamageTaken = damage;
+
+        if (IsBlocking())
+        {
+            bool success = (BlockType > 0 && damage.isSlash) || (BlockType < 0 && damage.isThrust);
+            bool fail = !success && !damage.isRanged;
+            if (success)
+            {
+                
+                NextBlock();
+
+                if (BlockType != 0)
+                {
+                    OnHit = true;
+                    damage.OnBlock.Invoke();
+                    OnBlock.Invoke();
+                }
+                else 
+                // guardbreak
+                {
+                    Break();
+                    this.OnHurt.Invoke();
+                    damage.OnCrit.Invoke();
+                    damage.didCrit = true;
+                    
+                }
+                attributes.health.current-=4;
+            }
+            else if (fail)
+            {
+                OnFail = true;
+                damage.OnBlock.Invoke();
+                OnBlock.Invoke();
+                if (!damage.cannotRecoil && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
+                {
+                    damageable.Recoil();
+                }
+            }
+            else
+            {
+                OnHit = true;
+                damage.OnBlock.Invoke();
+                OnBlock.Invoke();
+            }
+        }
+        else
+        {
+            this.OnHurt.Invoke();
+            damage.OnHit.Invoke();
+            attributes.health.current = 0;
+            Die();
+        }
     }
 
+    public void Break()
+    {
+        GuardBreak = true;
+        isBlocking = false;
+        blockCollider.SetActive(false);
+        shieldL.SetActive(false);
+        shieldR.SetActive(false);
+    }
+
+    #endregion Blocking
+
+    #region Attacking
+    void GenerateHitboxes()
+    {
+        hitboxL = Hitbox.CreateHitbox(hitboxMountL.position, hitboxSize, hitboxMountL, riposteDamage, this.gameObject);
+        hitboxR = Hitbox.CreateHitbox(hitboxMountR.position, hitboxSize, hitboxMountR, riposteDamage, this.gameObject);
+    }
+
+    public void HitboxActive(int active)
+    {
+        if (active == 0)
+        {
+            hitboxL.SetActive(false);
+            hitboxR.SetActive(false);
+        }
+        else if (active == 1)
+        {
+            hitboxR.SetActive(true);
+            OnHitboxActive.Invoke();
+        }
+        else if (active == 2)
+        {
+            hitboxL.SetActive(true);
+            OnHitboxActive.Invoke();
+        }
+    }
+    #endregion
     public void Recoil()
     {
         throw new System.NotImplementedException();
@@ -127,14 +290,13 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
     {
         throw new System.NotImplementedException();
     }
+    public override bool IsBlocking()
+    {
+        return isBlocking;
+    }
 
     public DamageKnockback GetLastTakenDamage()
     {
-        throw new System.NotImplementedException();
-    }
-
-    public GameObject GetGameObject()
-    {
-        throw new System.NotImplementedException();
+        return lastDamageTaken;
     }
 }
