@@ -182,7 +182,7 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
 
         lastDamageTaken = damage;
 
-        if (IsBlocking())
+        if (IsBlocking() && !hitFromBehind)
         {
             bool success = (BlockType > 0 && damage.isSlash) || (BlockType < 0 && damage.isThrust);
             bool fail = !success && !damage.isRanged;

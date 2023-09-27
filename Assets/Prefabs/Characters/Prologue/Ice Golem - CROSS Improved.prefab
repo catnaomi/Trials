@@ -225,7 +225,7 @@ PrefabInstance:
     - target: {fileID: 3128845696319544284, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3128845696319544284, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
@@ -456,8 +456,6 @@ MonoBehaviour:
       onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
-    didCrit: 0
-    timeDelayed: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -474,6 +472,8 @@ MonoBehaviour:
     OnHitWeakness:
       m_PersistentCalls:
         m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
     hitClip: {fileID: 0}
   moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
@@ -520,8 +520,6 @@ MonoBehaviour:
       onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
-    didCrit: 0
-    timeDelayed: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -538,6 +536,8 @@ MonoBehaviour:
     OnHitWeakness:
       m_PersistentCalls:
         m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
     hitClip: {fileID: 0}
   currentConsumable: {fileID: 0}
   CombatTarget: {fileID: 0}
@@ -552,12 +552,14 @@ MonoBehaviour:
   OnHitboxActive:
     m_PersistentCalls:
       m_Calls: []
-  actionsEnabled: 1
+  actionsEnabled: 0
   closeRange: 5
   meleeRange: 3
   farRange: 15
   isGrounded: 0
   damageAnims: {fileID: 11400000, guid: 221ae51d23f379f4a9d8bc53390ce0e9, type: 2}
+  maximumHurtDuration: 2
+  hurtDuration: 0
   isBodySpinning: 0
   bodySpinAccel: 360
   bodySpinMaxSpeed: 1080
