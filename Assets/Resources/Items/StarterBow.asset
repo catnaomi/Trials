@@ -48,15 +48,6 @@ MonoBehaviour:
   usesAmmunition: 1
   ammunitionReference: {fileID: 11400000, guid: d16790a012b3df64fba58b934c0a61e7,
     type: 2}
-  blockResistances:
-    strengths: 0
-    strengthMultiplier: 1
-    strengthsFlat: 0
-    weaknesses: 0
-    weaknessMultiplier: 1
-    weaknessFlat: 0
-    neutralMultiplier: 1
-    neutralFlat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -70,7 +61,8 @@ MonoBehaviour:
   deadArrowPrefab: {fileID: 919132149155446097, guid: 1be7bf8fb01023a43a86800e120ba0e4,
     type: 3}
   damageKnockback:
-    healthDamage: 1
+    healthDamage: 4
+    unresistedMinimum: 0
     types: 4
     critData:
       criticalMultiplier: 0
@@ -84,11 +76,16 @@ MonoBehaviour:
     isThrust: 0
     isSlash: 0
     isRanged: 1
+    isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
     stunTime: 0
+    repositionLength: 0
     stagger: 0
     staggers:
       onHit: 1
@@ -96,9 +93,10 @@ MonoBehaviour:
       onCritical: 5
       onKill: 5
       onCounterHit: 1
+      onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
-    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -112,6 +110,11 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
     hitClip: {fileID: 8300000, guid: f96b2ea2fa57ca84ca13fbb3ec7be592, type: 3}
   ikHandler: {fileID: 11400000, guid: 3e1da2a0b87efea48b403875a190a4af, type: 2}
   fireStrengthMult: 100
