@@ -24,13 +24,15 @@ public class EventVisualizer : MonoBehaviour
 
         foreach (MonoBehaviour mono in monoBehaviours)
         {
+
+            CheckSpecialScripts(mono);
+
             List<UnityEvent> properties = mono.GetType()
                 .GetFields()
                 .Where(prop => prop.FieldType == typeof(UnityEvent))
                 .Select(pi => (UnityEvent)pi.GetValue(mono))
                 .ToList();
 
-            
             foreach (UnityEvent e in properties)
             {
                 int eventCount = e.GetPersistentEventCount();
@@ -46,7 +48,17 @@ public class EventVisualizer : MonoBehaviour
         }
 #endif
     }
-
+    
+    public void CheckSpecialScripts(MonoBehaviour mono)
+    {
+        if (mono is ActivateAITrigger aiTrigger)
+        {
+            foreach (Actor actor in aiTrigger.actors)
+            {
+                targets.Add(actor.gameObject);
+            }
+        }
+    }
     private void OnDrawGizmos()
     {
         if (targets != null)

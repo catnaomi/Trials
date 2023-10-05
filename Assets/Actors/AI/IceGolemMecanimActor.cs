@@ -59,6 +59,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     [ReadOnly, SerializeField] bool InDamageAnim;
     [ReadOnly, SerializeField] float AngleBetween;
     [ReadOnly, SerializeField] float AngleBetweenAbs;
+    [ReadOnly, SerializeField] bool Ambush;
     [Header("Events")]
     public UnityEvent StartDash;
 
@@ -76,6 +77,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         {
             timeTravelHandler.OnFreeze.AddListener(DeactivateHitboxes);
         }
+        this.OnHurt.AddListener(DeactivateHitboxes);
         damageHandler.SetEndAction(StopDamageAnims);
     }
     protected override void ActorOnEnable()
@@ -178,6 +180,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         animator.SetFloat("AngleBetween", AngleBetween);
         animator.SetFloat("AngleBetweenAbs", AngleBetweenAbs);
         animator.UpdateTrigger("ShouldSpecial", ref ShouldSpecial);
+        animator.UpdateTrigger("Ambush", ref Ambush);
     }
     void UpdateTarget()
     {
@@ -211,6 +214,11 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
             return Vector3.zero;
         }
     }
+    public void BeginAmbush()
+    {
+        Ambush = true;
+    }
+
     public void BeginAttack()
     {
         if (!isInTimeState && actionsEnabled)
@@ -238,14 +246,6 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public void BeginSpin()
     {
         isBodySpinning = true;
-    }
-
-    public void SpinWhileFacing()
-    {
-        if (isBodySpinning)
-        {
-            //spinFacing = true;
-        }
     }
 
     public void EndSpin()
@@ -459,6 +459,13 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         ((IDamageable)damageHandler).GetParried();
     }
 
+    public override void Die()
+    {
+        base.Die();
+        InDamageAnim = true;
+        DeactivateHitboxes();
+        EndSpin();
+    }
     public DamageKnockback GetLastTakenDamage()
     {
         return ((IDamageable)damageHandler).GetLastTakenDamage();

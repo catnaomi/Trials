@@ -9,6 +9,7 @@ public class EnemySpawner : MonoBehaviour
     public ClipTransition SpawnAnim;
     public bool enableActionsOnSpawn = true;
     public bool destroyOnFinish = false;
+    public bool destroyOnDeath = false;
     public bool fakeSpawning;
     public bool spawnInspector;
 
@@ -36,17 +37,34 @@ public class EnemySpawner : MonoBehaviour
             actor1Obj.transform.rotation = Quaternion.LookRotation(this.transform.forward);
         }
 
-        NavigatingHumanoidActor actor1 = actor1Obj.GetComponent<NavigatingHumanoidActor>();
-
-        actor1Obj.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
+        if (actor1Obj.TryGetComponent<NavigatingHumanoidActor>(out NavigatingHumanoidActor actor1))
         {
-            actor1.shouldNavigate = true;
-            actor1.actionsEnabled = true;
-            actor1.PlayIdle();
-            if (destroyOnFinish)
+            actor1Obj.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
             {
-                Destroy(this.gameObject);
-            }
-        };
+                actor1.shouldNavigate = true;
+                if (enableActionsOnSpawn) actor1.actionsEnabled = true;
+                actor1.PlayIdle();
+                if (destroyOnFinish)
+                {
+                    Destroy(this.gameObject);
+                }
+            };
+        } else if (actor1Obj.TryGetComponent<AnimancerComponent>(out AnimancerComponent animancer))
+        {
+            animancer.Play(SpawnAnim).Events.OnEnd = () =>
+            {
+                animancer.Stop();
+                if (enableActionsOnSpawn) actor1Obj.SendMessage("EnableActions");
+                if (destroyOnFinish)
+                {
+                    Destroy(this.gameObject);
+                }
+            };
+        }
+
+        if (destroyOnDeath && actor1Obj.TryGetComponent<Actor>(out Actor actor))
+        {
+            actor.OnDie.AddListener(() => Destroy(this.gameObject));
+        }
     }
 }

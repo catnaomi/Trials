@@ -109,26 +109,26 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
     }
 
     void OnDrawGizmosSelected()
-    {
+    { 
         Vector3 position = initialPosition != Vector3.zero ? initialPosition : this.transform.position;
         Vector3 direction = strafeVector != Vector3.zero ? strafeVector : this.transform.right;
         direction *= maximumStrafeDistance;
 
         Gizmos.color = Color.blue;
 
-        Gizmos.DrawRay(position + Vector3.up * 2f, direction);
-        Gizmos.DrawRay(position + Vector3.up * 2f, -direction);
+        Gizmos.DrawRay(position + Vector3.up * 1f, direction);
+        Gizmos.DrawRay(position + Vector3.up * 1f, -direction);
 
-        Gizmos.DrawRay(position + direction, Vector3.up * 4f);
-        Gizmos.DrawRay(position - direction, Vector3.up * 4f);
+        Gizmos.DrawRay(position + direction, Vector3.up * 2f);
+        Gizmos.DrawRay(position - direction, Vector3.up * 2f);
 
         Gizmos.color = Color.red;
 
-        Gizmos.DrawRay(position + Vector3.Project(this.transform.position - position, direction), Vector3.up * 4f);
+        Gizmos.DrawRay(position + Vector3.Project(this.transform.position - position, direction), Vector3.up * 2f);
 
         Gizmos.color = Color.green;
 
-        Gizmos.DrawRay(position + playerDot * direction, Vector3.up * 4f);
+        Gizmos.DrawRay(position + playerDot * direction, Vector3.up * 2f);
     }
     #endregion
 
