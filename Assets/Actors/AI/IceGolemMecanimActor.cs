@@ -47,6 +47,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     [Header("Particles")]
     public GameObject puddlePrefab;
     public GameObject puddleObject;
+    public GameObject deathPrefab;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
@@ -79,16 +80,12 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         }
         this.OnHurt.AddListener(DeactivateHitboxes);
         damageHandler.SetEndAction(StopDamageAnims);
+        this.OnCorpseClean.AddListener(OnClean);
+        if (actionsEnabled)
+        {
+            EnableActions();
+        }
     }
-    protected override void ActorOnEnable()
-    {
-        base.ActorOnEnable();
-        this.StartTimer(0.1f, true, SetDestination);
-        this.StartTimer(attackTimer, true, BeginAttack);
-        this.StartTimer(waterDashTimer, true, BeginWaterDash);
-        this.StartTimer(specialAttackTimer, true, BeginSpecialAttack);
-    }
-
 
     void Awake()
     {
@@ -466,6 +463,11 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         DeactivateHitboxes();
         EndSpin();
     }
+
+    public void OnClean()
+    {
+        Instantiate(deathPrefab, this.transform.position, Quaternion.identity);
+    }
     public DamageKnockback GetLastTakenDamage()
     {
         return ((IDamageable)damageHandler).GetLastTakenDamage();
@@ -519,5 +521,9 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public void EnableActions()
     {
         actionsEnabled = true;
+        this.StartTimer(0.1f, true, SetDestination);
+        this.StartTimer(attackTimer, true, BeginAttack);
+        this.StartTimer(waterDashTimer, true, BeginWaterDash);
+        this.StartTimer(specialAttackTimer, true, BeginSpecialAttack);
     }
 }

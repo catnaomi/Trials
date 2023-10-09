@@ -304,6 +304,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4013956763830427713, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
+      propertyPath: cleanUpTime
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4013956763830427713, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
       propertyPath: health.current
       value: 4
       objectReference: {fileID: 0}
@@ -390,7 +395,19 @@ MonoBehaviour:
       m_Calls: []
   OnDie:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6217825991852826903}
+        m_TargetAssemblyTypeName: FreeRigidbodyEvent, Assembly-CSharp
+        m_MethodName: FreeRigidbody
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   OnAttack:
     m_PersistentCalls:
       m_Calls: []
@@ -407,6 +424,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   OnDodge:
+    m_PersistentCalls:
+      m_Calls: []
+  OnCorpseClean:
     m_PersistentCalls:
       m_Calls: []
   OnHealthLoss:
@@ -570,6 +590,8 @@ MonoBehaviour:
   puddlePrefab: {fileID: 2479227553607657573, guid: 199450f4072cffc419a90cd3cc7538bf,
     type: 3}
   puddleObject: {fileID: 0}
+  deathPrefab: {fileID: 6964537699824033535, guid: ce050d1c0a44c624392f846fcb29b2af,
+    type: 3}
   InCloseRange: 0
   InMeleeRange: 0
   InFarRange: 0
@@ -581,6 +603,7 @@ MonoBehaviour:
   InDamageAnim: 0
   AngleBetween: 0
   AngleBetweenAbs: 0
+  Ambush: 0
   StartDash:
     m_PersistentCalls:
       m_Calls:
@@ -646,3 +669,15 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 7280334522854573058}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6217825991852826903 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3693750383195628821, guid: 8f083315fa2a75947ab86f7218ad8af3,
+    type: 3}
+  m_PrefabInstance: {fileID: 7280334522854573058}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bf12b16d9436b449b234d7931b6f1a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

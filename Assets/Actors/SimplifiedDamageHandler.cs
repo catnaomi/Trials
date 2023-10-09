@@ -196,7 +196,8 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
             else
             {
                 ProcessStaggerType(damage, stagger, hitFromBehind, willKill, isCrit);
-                hurt.Events.OnEnd = actor.Die;
+                //hurt.Events.OnEnd = actor.Die;
+                actor.Die();
                 damage.OnHit.Invoke();
                 actor.OnHurt.Invoke();
 

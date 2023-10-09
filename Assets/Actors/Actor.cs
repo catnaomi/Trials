@@ -31,6 +31,7 @@ public class Actor : MonoBehaviour
     public UnityEvent OnParrySuccess;
     public UnityEvent OnBlock;
     public UnityEvent OnDodge;
+    public UnityEvent OnCorpseClean;
     [HideInInspector]public UnityEvent OnHealthLoss;
     [HideInInspector]public UnityEvent OnHealthGain;
     [HideInInspector]public UnityEvent OnHealthChange;
@@ -361,6 +362,7 @@ public class Actor : MonoBehaviour
     IEnumerator CorpseClean(float duration) 
     {
         yield return new WaitForSecondsRealtime(duration);
+        OnCorpseClean.Invoke();
         GameObject.Destroy(this.gameObject);
     }
 
