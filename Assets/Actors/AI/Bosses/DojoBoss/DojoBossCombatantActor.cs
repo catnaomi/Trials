@@ -127,6 +127,7 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     public ControllerTransition KnockdownOverride;
     public float knockdownMoveSpeed;
     public float knockdownMoveTime;
+    public Vector3 moveDirection;
     [Space(10)]
     public float clock;
     public float ActionDelayMinimum = 2f;

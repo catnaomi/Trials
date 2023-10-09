@@ -59,6 +59,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     [Space(5)]
     public float strafeSpeed = 2.5f;
     public float weaponsDrawnSpeed = 5f;
+    public float weaponDashSpeed = 2f;
+    public float weaponDashTargetDistance = 5f;
     [Space(5)]
     public float airAccel = 1f;
     public float airTurnSpeed = 45f;
@@ -216,6 +218,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public UnityEvent OnTypedBlockSuccess;
     public UnityEvent OnHitWeakness;
     public UnityEvent OnJumpStart;
+    [Header("Control Vectors")]
+    [ReadOnly] public Vector3 moveDirection;
+    [ReadOnly] public Vector3 lookDirection;
+    [ReadOnly] public Vector3 stickDirection;
     [Header("Animancer")]
     [Header("Stance & Movement")]
     public MixerTransition2DAsset unarmedStance;
@@ -480,7 +486,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         OnHurt.AddListener(() => { HitboxActive(0); });
         OnHitboxActive.AddListener(RealignToTarget);
         onControlsChanged.AddListener(HandleCinemachine);
-
+        OnAttack.AddListener(ProcessWeaponDash);
         //StartCoroutine("SafePointCoroutine");
         if (SceneLoader.IsSceneLoaderActive())
         {
@@ -522,8 +528,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         camForward.Scale(new Vector3(1f, 0f, 1f));
         Vector3 camRight = lastCameraRight;
         camRight.Scale(new Vector3(1f, 0f, 1f));
-        Vector3 stickDirection = Vector3.zero;
-        Vector3 lookDirection = this.transform.forward;
+        stickDirection = Vector3.zero;
+        lookDirection = this.transform.forward;
         moveDirection = Vector3.zero;
         bool applyMove = false;
         
@@ -4372,6 +4378,20 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else
         {
             animancer.Play(state.move, 0.5f);
+        }
+    }
+    
+    public void ProcessWeaponDash()
+    {
+        if (isGrounded)
+        {
+            if (stickDirection.magnitude > 0 || (camState == CameraState.Lock && GetCombatTarget() != null && Vector3.Distance(GetCombatTarget().transform.position, this.transform.position) < weaponDashTargetDistance))
+            {
+                if (speed < weaponDashSpeed)
+                {
+                    speed = weaponDashSpeed;
+                }
+            } 
         }
     }
     #endregion

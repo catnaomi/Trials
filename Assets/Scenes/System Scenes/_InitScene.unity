@@ -760,7 +760,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7753624, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -3319,7 +3319,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7753624, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -3397,7 +3397,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7771084, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -3753,7 +3753,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7753624, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -5817,6 +5817,9 @@ MonoBehaviour:
   OnDodge:
     m_PersistentCalls:
       m_Calls: []
+  OnCorpseClean:
+    m_PersistentCalls:
+      m_Calls: []
   OnHealthLoss:
     m_PersistentCalls:
       m_Calls: []
@@ -5883,7 +5886,6 @@ MonoBehaviour:
     didCrit: 0
     timeDelayed: 0
     hitClip: {fileID: 0}
-  moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
@@ -6019,6 +6021,8 @@ MonoBehaviour:
   walkTurnSpeed: 1080
   strafeSpeed: 5
   weaponsDrawnSpeed: 6.5
+  weaponDashSpeed: 5
+  weaponDashTargetDistance: 10
   airAccel: 10
   airTurnSpeed: 45
   hardLandAccel: 2.5
@@ -6123,6 +6127,9 @@ MonoBehaviour:
   OnJumpStart:
     m_PersistentCalls:
       m_Calls: []
+  moveDirection: {x: 0, y: 0, z: 0}
+  lookDirection: {x: 0, y: 0, z: 0}
+  stickDirection: {x: 0, y: 0, z: 0}
   unarmedStance: {fileID: 11400000, guid: 1501bcdeed2561947b6564d8f43bd572, type: 2}
   armedStance: {fileID: 11400000, guid: acd1da0c6c830034fba9295da79c6cdb, type: 2}
   blockingStance: {fileID: 11400000, guid: 7e0b32925e6e09b43a56e5a21fb733d3, type: 2}
@@ -12280,7 +12287,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7753624, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -15670,7 +15677,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7753624, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
@@ -16051,7 +16058,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7771084, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -19122,17 +19129,17 @@ PrefabInstance:
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.0000076293945
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 726.07446
+      value: 435.5349
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 11.393433
+      value: 8.963928
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
@@ -23069,7 +23076,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7753624, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -23830,7 +23837,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7771084, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
@@ -23957,7 +23964,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7771084, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -24668,7 +24675,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7753624, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -31372,7 +31379,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7753624, y: 1}
+    m_SensorSize: {x: 1.7760869, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
@@ -33547,6 +33554,9 @@ MonoBehaviour:
   OnDodge:
     m_PersistentCalls:
       m_Calls: []
+  OnCorpseClean:
+    m_PersistentCalls:
+      m_Calls: []
   OnHealthLoss:
     m_PersistentCalls:
       m_Calls: []
@@ -33613,7 +33623,6 @@ MonoBehaviour:
     didCrit: 0
     timeDelayed: 0
     hitClip: {fileID: 0}
-  moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
@@ -33740,6 +33749,8 @@ MonoBehaviour:
   walkTurnSpeed: 1080
   strafeSpeed: 2.5
   weaponsDrawnSpeed: 5
+  weaponDashSpeed: 2
+  weaponDashTargetDistance: 5
   airAccel: 5
   airTurnSpeed: 45
   hardLandAccel: 2.5
@@ -33844,6 +33855,9 @@ MonoBehaviour:
   OnJumpStart:
     m_PersistentCalls:
       m_Calls: []
+  moveDirection: {x: 0, y: 0, z: 0}
+  lookDirection: {x: 0, y: 0, z: 0}
+  stickDirection: {x: 0, y: 0, z: 0}
   unarmedStance: {fileID: 0}
   armedStance: {fileID: 0}
   blockingStance: {fileID: 0}

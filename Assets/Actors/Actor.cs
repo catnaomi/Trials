@@ -40,7 +40,6 @@ public class Actor : MonoBehaviour
     public DamageKnockback lastDamageTaken;
     private  int mercyId; //hitbox
 
-    public Vector3 moveDirection;
     public Vector3 moveAdditional;
     public Vector3 lastContactPoint;
     public Vector3 lastBlockPoint;
