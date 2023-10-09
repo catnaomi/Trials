@@ -19,18 +19,18 @@ MonoBehaviour:
   isFallingOK: 0
   isParryOK: 0
   anim:
-    _FadeDuration: 0.25
+    _FadeDuration: 0.05
     _Events:
       _NormalizedTimes:
-      - 0.63187855
+      - 0.5
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: -7911894043268297317, guid: 7c7da79be4202bb46a2154a2e93215f5,
-      type: 3}
-    _Speed: 1.25
-    _NormalizedStartTime: 0.1
+    _Clip: {fileID: 7400000, guid: f0bc98dfad672f54eb1f4326b289372b, type: 2}
+    _Speed: 1
+    _NormalizedStartTime: 0
   attackData:
     healthDamage: 1
+    unresistedMinimum: 1
     types: 0
     critData:
       criticalMultiplier: 2
@@ -46,12 +46,14 @@ MonoBehaviour:
     isRanged: 0
     isParry: 0
     bouncesOffBlock: 1
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     cannotRecoil: 0
     cannotKill: 0
     stunTime: 1
+    repositionLength: 1
     stagger: 1
     staggers:
       onHit: 3
@@ -59,9 +61,10 @@ MonoBehaviour:
       onCritical: 7
       onKill: 8
       onCounterHit: 7
+      onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 2.5, z: 10}
     kbRadial: 0
-    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
     originPoint: {x: 0, y: 0, z: 0}
@@ -75,6 +78,11 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
     hitClip: {fileID: 0}
   staminaCost: 0
   exitTime: 0.5
