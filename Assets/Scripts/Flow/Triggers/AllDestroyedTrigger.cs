@@ -34,8 +34,8 @@ public class AllDestroyedTrigger : MonoBehaviour
                 }
                 else if (!obj.activeSelf)
                 {
-                    currentRemaining--;
-                    removedObjects.Add(obj);
+                    //currentRemaining--;
+                    //removedObjects.Add(obj);
                 }
             }
             if (removedObjects.Count > 0)

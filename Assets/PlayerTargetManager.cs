@@ -120,9 +120,10 @@ public class PlayerTargetManager : MonoBehaviour
         {
             GameObject[] allLockTargets = GameObject.FindGameObjectsWithTag("LockTarget");
 
-            List<GameObject> validTargets = new List<GameObject>();
-            List<GameObject> invalidTargets = new List<GameObject>();
+            HashSet<GameObject> validTargets = new HashSet<GameObject>();
+            HashSet<GameObject> invalidTargets = new HashSet<GameObject>();
 
+            // find targets already in the scene
             foreach (GameObject target in allLockTargets)
             {
                 bool invalid = !IsValidTarget(target);
@@ -134,6 +135,22 @@ public class PlayerTargetManager : MonoBehaviour
                 else
                 {
                     validTargets.Add(target);
+                }
+            }
+
+            // also add targets already in list.
+            // disabled targets won't get caught above and thus won't be invalidated properly without this.
+            foreach (GameObject cTarget in targets)
+            {
+                bool invalidC = !IsValidTarget(cTarget);
+
+                if (invalidC)
+                {
+                    invalidTargets.Add(cTarget);
+                }
+                else
+                {
+                    validTargets.Add(cTarget);
                 }
             }
 
@@ -346,6 +363,12 @@ public class PlayerTargetManager : MonoBehaviour
                 return false;
             }
         }
+
+        if (!target.activeInHierarchy)
+        {
+            return false;
+        }
+
         float playerDist = Vector3.Distance(target.transform.position, player.positionReference.Spine.position);
         float camDist = Vector3.Distance(target.transform.position, cam.transform.position);
 
