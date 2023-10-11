@@ -16,6 +16,7 @@ public class DamageablePoint : MonoBehaviour, IDamageable
     float critDuration;
     Vector3 hitPosition;
     Vector3 hitDirection;
+    [ReadOnly] public bool isInTimeState;
     public UnityEvent OnHurt;
     public UnityEvent OnDie;
 
@@ -147,6 +148,6 @@ public class DamageablePoint : MonoBehaviour, IDamageable
 
     public bool IsTimeStopped()
     {
-        return false;
+        return isInTimeState;
     }
 }

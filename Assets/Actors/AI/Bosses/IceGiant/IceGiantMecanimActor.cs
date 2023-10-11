@@ -62,6 +62,15 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     HitboxGroup leftHitboxes;
     public UnityEvent OnHitboxActive;
     bool isHitboxActive;
+    [Header("Time Stuff")]
+    public float timestopHitstun = 1f;
+    bool isInTimeStopStun;
+    float timestopStunClock;
+    [Header("Target Points")]
+    public GameObject weakPointTarget;
+    public GameObject leftTarget;
+    public GameObject rightTarget;
+    public GameObject neutralTarget;
     [Header("Particles")]
     public IceGiantFXHelper fx;
     [Header("Mecanim Values")]
@@ -77,6 +86,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     [ReadOnly, SerializeField] float AngleBetween;
     [ReadOnly, SerializeField] float AngleBetweenAbs;
     [ReadOnly, SerializeField] bool DeadHand;
+    [ReadOnly, SerializeField] bool TimeStopHit;
     public float animated_TrackingHandIKWeight;
     Vector3 handIKPosition;
 
@@ -124,6 +134,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         }
 
         UpdateTarget();
+        SetTargetObjectActive();
 
         if (CombatTarget != null)
         {
@@ -155,6 +166,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
         animator.SetBool("Dead", Dead);
         animator.UpdateTrigger("DeadHand", ref DeadHand);
+
+        animator.SetBool("TimeStopHit", TimeStopHit);
     }
 
     void UpdateTarget()
@@ -168,6 +181,24 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
                 //stompCoroutine = StartCoroutine(StompTimer());
             }
         } 
+    }
+
+    void SetTargetObjectActive()
+    {
+        if (IsFallen)
+        {
+            weakPointTarget.SetActive(true);
+            leftTarget.SetActive(false);
+            rightTarget.SetActive(false);
+            neutralTarget.SetActive(false);
+        }
+        else
+        {
+            leftTarget.SetActive(leftLegWeakPoint.health.current > 0);
+            rightTarget.SetActive(rightLegWeakPoint.health.current > 0);
+            neutralTarget.SetActive(leftLegWeakPoint.health.current <= 0 && rightLegWeakPoint.health.current <= 0);
+            weakPointTarget.SetActive(false);
+        }
     }
 
     IEnumerator StompTimer()
@@ -221,6 +252,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
     void FixedUpdate()
     {
+        if (isInTimeState) return;
         this.transform.position += rootDelta;
         this.transform.rotation = animatorRotation;
         if (spinning)
@@ -320,6 +352,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     }
     public void TakeDamageFromDamagePoint(DamageablePoint point)
     {
+        DamageKnockback damage = point.GetLastTakenDamage();
         float damageTaken = point.GetLastAmountTaken();
         bool willKill = damageTaken >= attributes.health.current;
         attributes.health.current -= point.GetLastAmountTaken();
@@ -330,6 +363,10 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         if (point.hasHealth && (point.health.current <= 0f || willKill))
         {
             BreakDamageablePoint(point);
+        }
+        if (point != weakPoint && damage.timeDelayed)
+        {
+            StartTimeStopHitStun();
         }
         lastDamageTaken = point.GetLastTakenDamage();
         SetHitParticleVectors(point.GetHitPosition(), point.GetHitDirection());
@@ -366,7 +403,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
     public void FallOver()
     {
-        spinning = false;
+        ForceStopSpin();
         if (dead) return;
         getupClock = getupDelay;
         //EnableWeakPoint(true);
@@ -386,11 +423,33 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         weakPoint.gameObject.SetActive(active);
     }
 
+    public void StartTimeStopHitStun()
+    {
+        timestopStunClock = timestopHitstun;
+        if (!isInTimeStopStun)
+        {
+            StartCoroutine(TimeStopHitStun());
+        }
+    }
+    IEnumerator TimeStopHitStun()
+    {
+        TimeStopHit = true;
+        isInTimeStopStun = true;
+        while (timestopStunClock > 0)
+        {
+            yield return new WaitForSeconds(0.5f);
+            timestopStunClock -= 0.5f;
+        }
+        timestopStunClock = 0f;
+        TimeStopHit = false;
+        isInTimeStopStun = false;
+    }
     public override void Die()
     {
         if (dead) return;
         Dead = dead = true;
         OnDie.Invoke();
+        ForceStopSpin();
         StartCleanUp(10f);
         DeadHand = true;
     }
@@ -555,6 +614,12 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             fx.SpinFXStop();
         }
         
+    }
+
+    public void ForceStopSpin()
+    {
+        Spin(0);
+        spinVelocity = 0;
     }
 
     public void TakeDamage(DamageKnockback damage)
