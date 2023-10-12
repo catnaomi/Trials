@@ -988,7 +988,7 @@ PrefabInstance:
     - target: {fileID: 7909054546482848306, guid: 185093a1b0ad57d4699a52081098963b,
         type: 3}
       propertyPath: m_Name
-      value: Ice Golem - Neutral (Shield) Variant
+      value: Ice Golem - Neutral (Shield) Improved
       objectReference: {fileID: 0}
     - target: {fileID: 8815478949522785044, guid: 185093a1b0ad57d4699a52081098963b,
         type: 3}
@@ -1009,6 +1009,7 @@ PrefabInstance:
     - {fileID: 1704338329, guid: 185093a1b0ad57d4699a52081098963b, type: 3}
     - {fileID: 3831620255283499499, guid: 185093a1b0ad57d4699a52081098963b, type: 3}
     - {fileID: 8815478949522785066, guid: 185093a1b0ad57d4699a52081098963b, type: 3}
+    - {fileID: 2393685011895275112, guid: 185093a1b0ad57d4699a52081098963b, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 7388519781411600520, guid: 185093a1b0ad57d4699a52081098963b,
         type: 3}
@@ -1093,6 +1094,9 @@ MonoBehaviour:
   OnDodge:
     m_PersistentCalls:
       m_Calls: []
+  OnCorpseClean:
+    m_PersistentCalls:
+      m_Calls: []
   OnHealthLoss:
     m_PersistentCalls:
       m_Calls: []
@@ -1142,6 +1146,7 @@ MonoBehaviour:
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -1159,7 +1164,6 @@ MonoBehaviour:
     didCrit: 0
     timeDelayed: 0
     hitClip: {fileID: 0}
-  moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
@@ -1206,6 +1210,7 @@ MonoBehaviour:
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -1228,6 +1233,7 @@ MonoBehaviour:
   FollowTarget: {fileID: 0}
   timeTravelStates: []
   isInTimeState: 0
+  isInTimelineState: 0
   isBlocking: 1
   blockSequence: X O X X
   initialPosition: {x: 0, y: 0, z: 0}
@@ -1280,6 +1286,7 @@ MonoBehaviour:
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -1322,6 +1329,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 964a6db7369e236428674b1b53bf0856, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &27666990180441910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6435838758704039141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4afefa2c96b7ac649ab3be045033169d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animancer: {fileID: 0}
+  timeRemaining: []
+  timeTravelStates: []
+  timeTravelController: {fileID: 0}
+  deltaTime: 0
+  OnFreeze:
+    m_PersistentCalls:
+      m_Calls: []
+  OnUnfreeze:
+    m_PersistentCalls:
+      m_Calls: []
+  runBaseFreeze: 0
 --- !u!1001 &3788136916410307530
 PrefabInstance:
   m_ObjectHideFlags: 0

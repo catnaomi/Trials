@@ -213,7 +213,7 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
                 }
                 attributes.health.current-=4;
             }
-            else if (fail)
+            else if (fail && !damage.timeDelayed)
             {
                 OnFail = true;
                 damage.OnBlock.Invoke();

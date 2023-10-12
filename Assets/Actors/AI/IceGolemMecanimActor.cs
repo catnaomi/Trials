@@ -261,6 +261,11 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     }
     void LateUpdate()
     {
+        if (!CanUpdate())
+        {
+            nav.enabled = false;
+            return;
+        }
         if (isBodySpinning)
         {
             if (spinFacing)
@@ -288,6 +293,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
                 bodySpinSpeed = bodySpinMaxSpeed;
             }
         }
+        
     }
     /*
     * triggered by animation:
