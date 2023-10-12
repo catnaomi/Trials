@@ -117,6 +117,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     public virtual void TakeDamage(DamageKnockback damage)
     {
         if (!actor.IsAlive() || IsInInvulnClip()) return;
+        if (DamageKnockback.IsFriendlyFire(actor.attributes.friendlyGroup, damage.friendlyGroup)) return;
         float damageAmount = damage.GetDamageAmount();
        
         if (actor.IsTimeStopped())

@@ -212,6 +212,7 @@ public class Actor : MonoBehaviour
             currentDamage.OnHit.RemoveListener(RegisterHit);
         }
         currentDamage = new DamageKnockback(damageKnockback);
+        currentDamage.friendlyGroup = this.attributes.friendlyGroup;
         currentDamage.source = this.gameObject;
         currentDamage.OnHit.AddListener(RegisterHit);
 

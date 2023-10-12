@@ -31,6 +31,7 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
     {
 
         if (!actor.IsAlive()) return;
+        if (DamageKnockback.IsFriendlyFire(actor.attributes.friendlyGroup, damage.friendlyGroup)) return;
         bool isCrit = IsCritVulnerable();
         damage.didCrit = isCrit;
         float normalDamageAmount = damage.GetDamageAmount(isCrit);

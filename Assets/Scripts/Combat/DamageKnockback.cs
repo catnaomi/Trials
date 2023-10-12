@@ -41,6 +41,8 @@ public class DamageKnockback
     public GameObject hitboxSource;
     [ReadOnly]
     public GameObject source;
+    [ReadOnly]
+    public FriendlyGroup friendlyGroup;
 
     public Vector3 originPoint;
     public FXController.FXMaterial hitMaterial;
@@ -167,6 +169,7 @@ public class DamageKnockback
         this.originPoint = damageKnockback.originPoint;
         this.hitboxSource = damageKnockback.hitboxSource;
         this.source = damageKnockback.source;
+        this.friendlyGroup = damageKnockback.friendlyGroup;
 
         this.OnHit = damageKnockback.OnHit ?? new UnityEvent();
         this.OnCrit = damageKnockback.OnCrit ?? new UnityEvent();
@@ -301,6 +304,10 @@ public class DamageKnockback
         return types;
     }
 
+    public static bool IsFriendlyFire(FriendlyGroup group1, FriendlyGroup group2)
+    {
+        return (group1 & group2) != 0;
+    }
     public float GetDamageAmount()
     {
         return GetDamageAmount(false);

@@ -175,7 +175,7 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
     public void TakeDamage(DamageKnockback damage)
     {
         if (!IsAlive()) return;
-
+        if (DamageKnockback.IsFriendlyFire(this.attributes.friendlyGroup, damage.friendlyGroup)) return;
         // TODO: timestop stuff
 
         bool hitFromBehind = !(Vector3.Dot(-this.transform.forward, (damage.source.transform.position - this.transform.position).normalized) <= 0f);

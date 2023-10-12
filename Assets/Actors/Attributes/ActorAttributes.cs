@@ -35,7 +35,8 @@ public class ActorAttributes : MonoBehaviour
     public UnityEvent OnHealthChange;
     [Header("Resistances & Weaknesses")]
     public DamageResistance resistances;
-
+    [Header("Faction & Friendly Fire")]
+    public FriendlyGroup friendlyGroup;
     public List<EffectDuration> effects;
     [Header("Journal Entry")]
     public JournalEntry journalEntry;

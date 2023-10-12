@@ -3319,7 +3319,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7772795, y: 1}
+    m_SensorSize: {x: 1.7751678, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -5869,6 +5869,7 @@ MonoBehaviour:
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -5932,6 +5933,7 @@ MonoBehaviour:
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -6022,7 +6024,8 @@ MonoBehaviour:
   strafeSpeed: 5
   weaponsDrawnSpeed: 6.5
   weaponDashSpeed: 5
-  weaponDashTargetDistance: 10
+  weaponDashTargetDistanceMin: 5
+  weaponDashTargetDistanceMax: 1
   airAccel: 10
   airTurnSpeed: 45
   hardLandAccel: 2.5
@@ -6641,6 +6644,7 @@ MonoBehaviour:
     weaknessFlat: 0
     neutralMultiplier: 1
     neutralFlat: 0
+  friendlyGroup: 1
   effects: []
   journalEntry: {fileID: 0}
   cleanUpTime: 5
@@ -12287,7 +12291,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7772795, y: 1}
+    m_SensorSize: {x: 1.7751678, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -12383,7 +12387,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 462353258}
-  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalRotation: {x: 0.10500034, y: 0.69019324, z: -0.10226924, w: 0.7086249}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -18085,7 +18089,7 @@ Camera:
     height: 1
   near clip plane: 0.1
   far clip plane: 5000
-  field of view: 50.51977
+  field of view: 40
   orthographic: 0
   orthographic size: 10
   m_Depth: -1
@@ -18110,8 +18114,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.8919843, z: -10.000004}
+  m_LocalRotation: {x: -0.10226924, y: -0.7086249, z: -0.10500034, w: 0.69019324}
+  m_LocalPosition: {x: 5.39429, y: 0.16020477, z: 0.14218067}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -19134,12 +19138,12 @@ PrefabInstance:
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 299.32318
+      value: 672.55786
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 7.8249207
+      value: 10.945923
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_AddedGameObjects: []
@@ -23076,7 +23080,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7772795, y: 1}
+    m_SensorSize: {x: 1.7751678, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -24675,7 +24679,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7772795, y: 1}
+    m_SensorSize: {x: 1.7751678, y: 1}
   m_Transitions:
     m_BlendHint: 0
     m_InheritPosition: 0
@@ -31072,8 +31076,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1925080555}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.8919843, z: -10.000004}
+  m_LocalRotation: {x: -0.102269255, y: -0.7086249, z: -0.10500037, w: 0.69019324}
+  m_LocalPosition: {x: 5.39429, y: 0.16020477, z: 0.14218067}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -31379,7 +31383,7 @@ MonoBehaviour:
     ModeOverride: 0
     LensShift: {x: 0, y: 0}
     GateFit: 2
-    m_SensorSize: {x: 1.7772795, y: 1}
+    m_SensorSize: {x: 1.7751678, y: 1}
   m_Transitions:
     m_BlendHint: 3
     m_InheritPosition: 1
@@ -33314,6 +33318,7 @@ MonoBehaviour:
     weaknessFlat: 0
     neutralMultiplier: 1
     neutralFlat: 0
+  friendlyGroup: 0
   effects: []
   journalEntry: {fileID: 0}
   cleanUpTime: 5
@@ -33606,6 +33611,7 @@ MonoBehaviour:
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -33669,6 +33675,7 @@ MonoBehaviour:
     kbRadial: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -33750,7 +33757,8 @@ MonoBehaviour:
   strafeSpeed: 2.5
   weaponsDrawnSpeed: 5
   weaponDashSpeed: 2
-  weaponDashTargetDistance: 5
+  weaponDashTargetDistanceMin: 5
+  weaponDashTargetDistanceMax: 1
   airAccel: 5
   airTurnSpeed: 45
   hardLandAccel: 2.5

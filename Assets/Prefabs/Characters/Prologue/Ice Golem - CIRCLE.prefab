@@ -3178,6 +3178,9 @@ MonoBehaviour:
   OnDodge:
     m_PersistentCalls:
       m_Calls: []
+  OnCorpseClean:
+    m_PersistentCalls:
+      m_Calls: []
   OnHealthLoss:
     m_PersistentCalls:
       m_Calls: []
@@ -3225,10 +3228,9 @@ MonoBehaviour:
       onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
-    didCrit: 0
-    timeDelayed: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -3243,8 +3245,9 @@ MonoBehaviour:
     OnHitWeakness:
       m_PersistentCalls:
         m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
     hitClip: {fileID: 0}
-  moveDirection: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
@@ -3289,10 +3292,9 @@ MonoBehaviour:
       onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
-    didCrit: 0
-    timeDelayed: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -3307,6 +3309,8 @@ MonoBehaviour:
     OnHitWeakness:
       m_PersistentCalls:
         m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
     hitClip: {fileID: 0}
   currentConsumable: {fileID: 0}
   CombatTarget: {fileID: 0}
@@ -3405,6 +3409,7 @@ MonoBehaviour:
     weaknessFlat: 0
     neutralMultiplier: 0
     neutralFlat: 0
+  friendlyGroup: 2
   effects: []
   journalEntry: {fileID: 11400000, guid: b8dcf1c24208d83409aa2041f5563c3b, type: 2}
   cleanUpTime: 5
@@ -3643,6 +3648,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9be8a23088e979a4b9436a6b3df8f0ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  alsoDisable: 0
 --- !u!1 &6971410740396982279
 GameObject:
   m_ObjectHideFlags: 0
