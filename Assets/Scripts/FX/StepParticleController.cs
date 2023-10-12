@@ -10,6 +10,10 @@ public class StepParticleController : MonoBehaviour
     public GameObject particlePrefab;
     public EventHandler<Vector3> StepEvent;
     public Transform heightReference;
+    public List<ParticleSystem> ripples;
+    public int maxRipples = -1;
+    int poolIndex;
+    GenericTimeTravelHandler timeTravelController;
     private void Awake()
     {
         instance = this;
@@ -28,6 +32,12 @@ public class StepParticleController : MonoBehaviour
                 Register(fxHandler);
             }
         }
+        ripples = new List<ParticleSystem>(maxRipples > 0 ? maxRipples : 64);
+        timeTravelController = this.GetComponent<GenericTimeTravelHandler>();
+
+        timeTravelController.OnStartFreeze.AddListener(FreezeAll);
+        timeTravelController.OnStopFreeze.AddListener(UnFreezeAll);
+
     }
 
     /*
@@ -73,10 +83,81 @@ public class StepParticleController : MonoBehaviour
     }
     public void CreateStep(Vector3 position)
     {
+        if (maxRipples <= 0 || ripples.Count < maxRipples)
+        {
+            Vector3 newPosition = position;
+            newPosition.y = heightReference.position.y;
+            GameObject particle = Instantiate(particlePrefab, newPosition, particlePrefab.transform.rotation);
+
+            ParticleSystem system = particle.GetComponent<ParticleSystem>();
+            particle.SetActive(true);
+            if (CheckFreeze(system))
+            {
+                system.Pause();
+            }
+            else
+            {
+                system.Play();
+            }
+            ripples.Add(system);
+        }
+        else
+        {
+            RecycleStep(position);
+        }
+    }
+
+    public void RecycleStep(Vector3 position)
+    {
+        ParticleSystem system = ripples[poolIndex];
         Vector3 newPosition = position;
         newPosition.y = heightReference.position.y;
-        GameObject particle = Instantiate(particlePrefab, newPosition, particlePrefab.transform.rotation);
+        GameObject particle = system.gameObject;
+        particle.transform.position = newPosition;
+
         particle.SetActive(true);
+        system.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (CheckFreeze(system))
+        {
+            system.Play();
+            system.Pause();
+        }
+        else
+        {
+            system.Play();
+        }
+        
+
+        poolIndex ++;
+        poolIndex %= maxRipples;
+    }
+
+    public bool CheckFreeze(ParticleSystem system)
+    {
+        if (timeTravelController != null && timeTravelController.IsFrozen())
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public void FreezeAll()
+    {
+        foreach (ParticleSystem system in ripples)
+        {
+            system.Pause();
+        }
+    }
+
+    public void UnFreezeAll()
+    {
+        foreach (ParticleSystem system in ripples)
+        {
+            if (!system.isStopped)
+            {
+                system.Play();
+            }
+        }
     }
 
     public static void CreateStepGlobal(Vector3 position)

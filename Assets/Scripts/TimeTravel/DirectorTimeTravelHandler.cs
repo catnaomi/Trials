@@ -47,14 +47,18 @@ public class DirectorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             isFrozen = true;
             //director.Pause(); // normal pause not used bc it resets positioning for some godforsaken reason
 
-            director.playableGraph.GetRootPlayable(0).Pause();
+            if (director.playableGraph.IsValid())
+            {
+                director.playableGraph.GetRootPlayable(0).Pause();
+            }
+            
         }
     }
 
 
     public void StopFreeze()
     {
-        if (isFrozen && director.playableGraph.GetRootPlayable(0).GetPlayState() == PlayState.Paused)
+        if (isFrozen && director.playableGraph.IsValid() && director.playableGraph.GetRootPlayable(0).GetPlayState() == PlayState.Paused)
         {
             isFrozen = false;
             //director.Play();

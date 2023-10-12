@@ -55,6 +55,7 @@ public class EventVisualizer : MonoBehaviour
         {
             foreach (Actor actor in aiTrigger.actors)
             {
+                if (actor == null) continue;
                 targets.Add(actor.gameObject);
             }
         }

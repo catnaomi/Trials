@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GenericTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 {
     public bool isFrozen;
     bool registered;
 
+    public UnityEvent OnStartFreeze;
+    public UnityEvent OnStopFreeze;
     public void ClearTimeData()
     {
         
@@ -65,6 +68,7 @@ public class GenericTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public void StartFreeze()
     {
         isFrozen = true;
+        OnStartFreeze.Invoke();
     }
 
     public void StartRewind()
@@ -75,6 +79,7 @@ public class GenericTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public void StopFreeze()
     {
         isFrozen = false;
+        OnStopFreeze.Invoke();
     }
 
     public void StopRewind()
