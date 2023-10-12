@@ -62,7 +62,19 @@ public class AllDestroyedTrigger : MonoBehaviour
         {
             if (obj != null)
             {
-                Gizmos.color = Color.red;
+                Gizmos.color = new Color(0f, 1f, 1f, 1f);
+                DrawArrow.ForGizmoTwoPoints(this.transform.position, obj.transform.position);
+            }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        foreach (GameObject obj in watchList)
+        {
+            if (obj != null)
+            {
+                Gizmos.color = new Color(0f, 1f, 1f, 0.25f);
                 DrawArrow.ForGizmoTwoPoints(this.transform.position, obj.transform.position);
             }
         }

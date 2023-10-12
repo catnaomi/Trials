@@ -11,6 +11,8 @@ public class WaterfallFadeOverride : MonoBehaviour
     float lastBot;
     Renderer renderer;
     MaterialPropertyBlock block;
+    double time;
+    IAffectedByTimeTravel timeTravelHandler;
     // Start is called before the first frame update
     void Start()
     {
@@ -21,15 +23,17 @@ public class WaterfallFadeOverride : MonoBehaviour
     void Update()
     {
         if (block == null || renderer == null) Init();
+        UpdateTime();
         if (LowerFadeTop != lastTop || LowerFadeBottom != lastBot)
         {
             block.SetFloat("_LowerFadeTop", LowerFadeTop);
             block.SetFloat("_LowerFadeBottom", LowerFadeBottom);
-            renderer.SetPropertyBlock(block);
+            
             lastTop = LowerFadeTop;
             lastBot = LowerFadeBottom;
         }
-        
+        block.SetFloat("_InputTime", (float)time);
+        renderer.SetPropertyBlock(block);
     }
     private void Init()
     {
@@ -37,6 +41,18 @@ public class WaterfallFadeOverride : MonoBehaviour
         block = new MaterialPropertyBlock();
         block.SetFloat("_LowerFadeTop", LowerFadeTop);
         block.SetFloat("_LowerFadeBottom", LowerFadeBottom);
+        block.SetFloat("_InputTime", (float)time);
         renderer.SetPropertyBlock(block);
+        timeTravelHandler = this.GetComponent<IAffectedByTimeTravel>();
+        
+    }
+
+    void UpdateTime()
+    {
+        if (timeTravelHandler == null || !timeTravelHandler.IsFrozen())
+        {
+            time += Time.deltaTime;
+            time %= 86400;
+        }
     }
 }

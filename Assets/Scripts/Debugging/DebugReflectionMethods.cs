@@ -400,6 +400,11 @@ public static class DebugReflectionMethods
         }
     }
 
+    public static void TIR()
+    {
+        ToggleInfiniteResources();
+    }
+
     /*
     public static void Template()
     {

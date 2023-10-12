@@ -1,4 +1,5 @@
 using Cinemachine;
+using CustomUtilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -166,7 +167,7 @@ public class PlayTimelineWithActors : MonoBehaviour
     }
     void SetBindings()
     {
-        var bindings = GetBindings();
+        var bindings = director.GetTimelineBindings();
 
         foreach (BindingIndex bindingIndex in bindingIndexMap)
         {
@@ -197,16 +198,6 @@ public class PlayTimelineWithActors : MonoBehaviour
                 director.SetGenericBinding(track, bindingIndex.obj);
             }
         }
-    }
-    List<PlayableBinding> GetBindings()
-    {
-        TimelineAsset timeline = (TimelineAsset)director.playableAsset;
-        List<PlayableBinding> bindings = new List<PlayableBinding>();
-        foreach (var binding in timeline.outputs)
-        {
-            bindings.Add(binding);
-        }
-        return bindings;
     }
 
     private void OnDestroy()

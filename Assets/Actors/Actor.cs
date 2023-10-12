@@ -62,6 +62,7 @@ public class Actor : MonoBehaviour
     [Header("Time Travel Data")]
     public List<TimeTravelData> timeTravelStates;
     public bool isInTimeState;
+    public bool isInTimelineState;
     void OnEnable()
     {
 
@@ -95,11 +96,22 @@ public class Actor : MonoBehaviour
 
     public void Update()
     {
-        if (isInTimeState) return;
+        if (!CanUpdate()) return;
 
         ActorPreUpdate();
 
         ActorPostUpdate();
+    }
+
+
+    public bool CanUpdate()
+    {
+        return !isInTimeState && !isInTimelineState;
+    }
+
+    public void SetInTimeline(bool inTimeline)
+    {
+        isInTimelineState = inTimeline;
     }
 
     public virtual void ActorPreUpdate()

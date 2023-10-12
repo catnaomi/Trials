@@ -77,6 +77,10 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
             actor.attributes.SetHealth(1f);
             willKill = false;
         }
+        else if (willKill)
+        {
+            actor.attributes.SetHealth(0);
+        }
         else
         {
             actor.attributes.ReduceHealth(normalDamageAmount);

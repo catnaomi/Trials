@@ -4478,7 +4478,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     private void OnAnimatorIK(int layerIndex)
     {
-        if (isInTimeState) return;
+        if (CanUpdate()) return;
         //Vector3 initialThrustPos = this.transform.position + this.transform.up * thrustInitialHeight;
         Vector3 initialThrustPos = positionReference.Spine.position;
         float y = 0f;

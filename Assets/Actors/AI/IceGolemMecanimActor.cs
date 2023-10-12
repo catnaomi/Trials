@@ -96,6 +96,14 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     {
         base.ActorPostUpdate();
         GetGrounded();
+        if (ActionsEnabled != actionsEnabled)
+        {
+            if (actionsEnabled)
+            {
+                EnableActions();
+            }
+            ActionsEnabled = actionsEnabled;
+        }
         if (IsHurt())
         {
             UpdateMecanimValues();
@@ -167,7 +175,6 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         animator.SetBool("InCloseRange", InCloseRange);
         animator.SetBool("InMeleeRange", InMeleeRange); 
         animator.SetBool("InFarRange", InFarRange);
-        ActionsEnabled = actionsEnabled;
         animator.SetBool("ActionsEnabled", ActionsEnabled);
         animator.UpdateTrigger("ShouldAttack", ref ShouldAttack);
         Speed = nav.desiredVelocity.magnitude;
@@ -218,7 +225,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
 
     public void BeginAttack()
     {
-        if (!isInTimeState && actionsEnabled)
+        if (CanUpdate() && actionsEnabled)
         {
             ShouldAttack = true;
         }     
@@ -226,7 +233,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
 
     public void BeginWaterDash()
     {
-        if (!isInTimeState && actionsEnabled)
+        if (CanUpdate() && actionsEnabled)
         {
             ShouldDash = true;
         }
@@ -234,7 +241,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
 
     public void BeginSpecialAttack()
     {
-        if (!isInTimeState && actionsEnabled)
+        if (CanUpdate() && actionsEnabled)
         {
             ShouldSpecial = true;
         }
@@ -266,7 +273,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
             {
                 positionReference.Spine.localRotation = Quaternion.Euler(bodySpinAngleDown, bodySpinAngle, 0f);
             }
-            if (!isInTimeState)
+            if (CanUpdate())
             {
                 bodySpinAngle += bodySpinSpeed * Time.deltaTime;
             }
@@ -391,7 +398,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
 
     public bool IsHurt()
     {
-        return InDamageAnim && damageHandler.hurt != null && animancer.States.Current != damageHandler.hurt;
+        return InDamageAnim && damageHandler.hurt != null && animancer.States.Current == damageHandler.hurt;
     }
 
     public bool GetGrounded()

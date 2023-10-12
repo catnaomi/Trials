@@ -210,7 +210,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             while (clock > 0)
             {
                 yield return new WaitForSeconds(1f);
-                if (!isInTimeState && actionsEnabled)
+                if (CanUpdate() && actionsEnabled)
                 {
                     clock -= 1f;
                 }
@@ -252,7 +252,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
     void FixedUpdate()
     {
-        if (isInTimeState) return;
+        if (!CanUpdate()) return;
         this.transform.position += rootDelta;
         this.transform.rotation = animatorRotation;
         if (spinning)
