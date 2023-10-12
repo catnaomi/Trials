@@ -217,7 +217,7 @@ public class Hitbox : MonoBehaviour
 
     public static int GetHitboxMask()
     {
-        return LayerMask.GetMask("Actors") | MaskReference.Terrain | LayerMask.GetMask("Hitboxes");
+        return LayerMask.GetMask("Actors") | MaskReference.Terrain;// | LayerMask.GetMask("Hitboxes");
     }
 
     bool IsColliderTerrain(Collider c)
