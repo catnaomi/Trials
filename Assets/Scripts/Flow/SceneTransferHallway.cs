@@ -22,9 +22,14 @@ public class SceneTransferHallway : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _center = transform.Find("_center");
+        GetCenter();
     }
 
+
+    void GetCenter()
+    {
+        _center = transform.Find("_center");
+    }
     public void OnLoadTrigger()
     {
         SceneLoader.AllowSceneActivation(true);
@@ -67,6 +72,11 @@ public class SceneTransferHallway : MonoBehaviour
     {
         IsTransferInProgress = true;
 
+        if (_center == null)
+        {
+            GetCenter();
+        }
+        Debug.Assert(_center != null);
         bool loaded = false;
 
         do
@@ -83,6 +93,10 @@ public class SceneTransferHallway : MonoBehaviour
             if (!otherSideFound) yield return new WaitForSecondsRealtime(0.1f);
         } while (!otherSideFound);
 
+        if (other._center == null)
+        {
+            other.GetCenter();
+        }
         Vector3 offset = PlayerActor.player.transform.position - _center.position;
 
         PlayerActor.player.WarpTo(other._center.position + offset);

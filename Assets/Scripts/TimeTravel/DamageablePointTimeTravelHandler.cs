@@ -16,17 +16,17 @@ public class DamageablePointTimeTravelHandler : MonoBehaviour, IAffectedByTimeTr
 
     public void ClearTimeData()
     {
-        throw new System.NotImplementedException();
+        
     }
 
     public GameObject GetObject()
     {
-        throw new System.NotImplementedException();
+        return this.gameObject;
     }
 
     public List<TimeTravelData> GetTimeStates()
     {
-        throw new System.NotImplementedException();
+        return null;
     }
 
     public bool IsFrozen()

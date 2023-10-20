@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
@@ -39,6 +40,8 @@ public class TimeTravelController : MonoBehaviour
     public AnimationCurve bubbleCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
     public bool freeze;
     public List<IAffectedByTimeTravel> frozens;
+    List<IAffectedByTimeTravel> deregisters;
+    bool deregistering;
     public UnityEvent OnTimeStopHit;
     bool updateFreeze;
     [ReadOnly] public float timeStopDuration;
@@ -117,6 +120,7 @@ public class TimeTravelController : MonoBehaviour
             PlayerActor.player.OnHitWeakness.AddListener(BonusCharge);
             //PlayerActor.player.OnParrySuccess.AddListener(RecoverCharge);
         }
+        deregisters = new List<IAffectedByTimeTravel>();
         
     }
 
@@ -143,7 +147,7 @@ public class TimeTravelController : MonoBehaviour
         {
             return;
         }
-            
+           
 
         if (isRewinding)
         {
@@ -434,7 +438,37 @@ public class TimeTravelController : MonoBehaviour
 
     public void DeregisterAffectee(IAffectedByTimeTravel affectee)
     {
-        affectees.Remove(affectee);
+        if (!IsFreezing() && !IsRewinding() && !deregistering)
+        {
+            affectees.Remove(affectee);
+        }
+        else
+        {
+            DeregisterAfterFreeze(affectee);
+        }
+    }
+
+    void DeregisterAfterFreeze(IAffectedByTimeTravel affectee)
+    {
+        if (!deregisters.Contains(affectee))
+        {
+            deregisters.Add(affectee);
+        }
+        if (!deregistering)
+        {
+            StartCoroutine(DeregisterAfterFreeze());
+        }
+    }
+    IEnumerator DeregisterAfterFreeze()
+    {
+        deregistering = true;
+        yield return new WaitWhile(() => IsFreezing() || IsRewinding());
+        foreach (IAffectedByTimeTravel affectee in deregisters)
+        {
+            affectees.Remove(affectee);
+        }
+        deregisters.Clear();
+        deregistering = false;
     }
 
     public static bool AttemptToRegisterAffectee(IAffectedByTimeTravel affectee)
