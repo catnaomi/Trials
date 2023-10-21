@@ -5,9 +5,8 @@ using UnityEngine;
 public class TutorialHandler : MonoBehaviour
 {
     static TutorialHandler instance;
-    public BasicTutorialItem tutorial1;
-    public BasicTutorialItem tutorial2;
-    public BasicTutorialItem tutorial3;
+    public InteractionPrompt[] prompts;
+    
     AudioSource source;
     private void Awake()
     {
@@ -17,31 +16,42 @@ public class TutorialHandler : MonoBehaviour
     private void Start()
     {
         source = this.GetComponent<AudioSource>();
+        foreach (InteractionPrompt prompt in prompts)
+        {
+            prompt.gameObject.SetActive(false);
+        }
     }
-    public void ShowTutorial(Sprite icon1, Sprite icon2, Sprite icon3, string text)
+    public int ShowTutorial(string text)
     {
-        BasicTutorialItem tutorial = tutorial1;
-        float lastUpdateTime = instance.tutorial1.lastUpdateTime;
-        if (instance.tutorial2.lastUpdateTime < lastUpdateTime)
+        for (int i = 0; i < prompts.Length; i++)
         {
-            tutorial = tutorial2;
-            lastUpdateTime = instance.tutorial2.lastUpdateTime;
+            if (!prompts[i].gameObject.activeInHierarchy)
+            {
+                prompts[i].gameObject.SetActive(true);
+                prompts[i].SetText(text);
+                source.Play();
+                return i;
+            }
         }
-        if (instance.tutorial3.lastUpdateTime < lastUpdateTime)
-        {
-            tutorial = tutorial3;
-            lastUpdateTime = instance.tutorial3.lastUpdateTime;
-        }
-        tutorial.button1 = icon1;
-        tutorial.button2 = icon2;
-        tutorial.button3 = icon3;
-        tutorial.text = text;
-        tutorial.PopulateTutorial();
-        source.Play();
+        return -1;
     }
-    public static void ShowTutorialStatic(Sprite icon1, Sprite icon2, Sprite icon3, string text)
+
+    public void HideTutorial(int index)
+    {
+        if (index >= 0 && index < prompts.Length)
+        {
+            prompts[index].gameObject.SetActive(false);
+        }
+    }
+    public static int ShowTutorialStatic(string text)
+    {
+        if (instance == null) return -1;
+        return instance.ShowTutorial(text);
+    }
+
+    public static void HideTutorialStatic(int index)
     {
         if (instance == null) return;
-        instance.ShowTutorial(icon1, icon2, icon3, text);
+        instance.HideTutorial(index);
     }
 }

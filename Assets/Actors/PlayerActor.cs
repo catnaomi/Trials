@@ -4830,19 +4830,39 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         Interactable lastInteractable = highlightedInteractable;
         highlightedInteractable = null;
-        float leadDist = Mathf.Infinity;
 
-        foreach (Interactable interactable in interactables)
+        interactables.Sort((a,b) =>
         {
-            if (interactable == null || !interactable.canInteract) continue;
-            float dist = Vector3.Distance(this.transform.position, interactable.transform.position);
-            if (dist < leadDist && dist <= interactable.interactionNode.bounds.extents.magnitude)
+            bool aValid = IsInteractValid(a);
+            bool bValid = IsInteractValid(b);
+            if (!aValid || !bValid)
             {
-                leadDist = dist;
-                highlightedInteractable = interactable;
+                return (bValid ? 1 : 0) - (aValid ? 1 : 0);
             }
-            interactable.SetIconVisiblity(false);
+
+            if (!aValid && !bValid)
+            {
+                return 0;
+            }
+            
+            if (a.priority != b.priority)
+            {
+                return b.priority - a.priority;
+            }
+
+            float aDist = Vector3.Distance(this.transform.position, a.transform.position);
+            float bDist = Vector3.Distance(this.transform.position, b.transform.position);
+
+            return (int)Mathf.Sign(aDist - bDist);
+        });
+
+        Interactable leadInteractible = interactables[0];
+
+        if (IsInteractValid(leadInteractible))
+        {
+            highlightedInteractable = leadInteractible;
         }
+        
         if (highlightedInteractable != null)
         {
             highlightedInteractable.SetIconVisiblity(true);
@@ -4852,6 +4872,21 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             onNewCurrentInteractable.Invoke();
         }
         return highlightedInteractable;
+    }
+
+    bool IsInteractValid(Interactable i)
+    {
+        if (i == null || !i.canInteract)
+        {
+            return false;
+        }
+        
+        if (i.maxDistance > 0)
+        {
+            float dist = Vector3.Distance(this.transform.position, i.transform.position);
+            return dist < i.maxDistance; 
+        }
+        return true;
     }
 
     private void OnInteract()

@@ -9,7 +9,11 @@ public class Interactable : MonoBehaviour
     protected PlayerActor player;
     public bool canInteract;
     public GameObject interactIcon;
+    public int priority = 1;
+    [Header("Interact UI Settings")]
     public float interactIconHeight = 1f;
+    public string prompt;
+    public float maxDistance = -1;
 
     public UnityEvent OnInteract;
 
@@ -29,7 +33,9 @@ public class Interactable : MonoBehaviour
             Debug.LogWarning("Warning! Interaction Nodes must be in the layer 'InteractionNode' !");
         }
         SetIconVisiblity(false);
+        GetMaxDistance();
     }
+
 
     // Update is called once per frame
     private void OnTriggerEnter(Collider other)
@@ -67,6 +73,21 @@ public class Interactable : MonoBehaviour
             interactIcon.SetActive(false);
         }
         
+    }
+
+    void GetMaxDistance()
+    {
+        if (maxDistance < 0 && interactionNode != null)
+        {
+            if (interactionNode is SphereCollider sphere)
+            {
+                maxDistance = sphere.radius;
+            }
+            else
+            {
+                maxDistance = interactionNode.bounds.extents.magnitude;
+            }
+        }
     }
 
     public virtual void Interact(PlayerActor player)
