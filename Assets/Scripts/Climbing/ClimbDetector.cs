@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Linq;
+using UnityEngine.Events;
 
 public abstract class ClimbDetector : MonoBehaviour
 {
     public bool inUse;
     public bool isDisabled;
     public Collider collider;
-    
+
+    public UnityEvent OnStartClimb;
+    public UnityEvent OnStopClimb;
 
     public virtual Quaternion GetClimbRotation()
     {
@@ -76,5 +79,15 @@ public abstract class ClimbDetector : MonoBehaviour
         {
             SetClimb();
         }
+    }
+
+    public void StartClimb()
+    {
+        OnStartClimb.Invoke();
+    }
+
+    public void StopClimb()
+    {
+        OnStopClimb.Invoke();
     }
 }

@@ -10,6 +10,7 @@ public class Interactable : MonoBehaviour
     public bool canInteract;
     public GameObject interactIcon;
     public int priority = 1;
+    [ReadOnly] public bool isPlayerInside;
     [Header("Interact UI Settings")]
     public float interactIconHeight = 1f;
     public string prompt;
@@ -44,6 +45,7 @@ public class Interactable : MonoBehaviour
         if (player != null && canInteract)
         {
             player.AddInteractable(this);
+            isPlayerInside = true;
             //Debug.Log("Player enter!");
         }
     }
@@ -55,6 +57,7 @@ public class Interactable : MonoBehaviour
         {
             player.RemoveInteractable(this);
             this.SetIconVisiblity(false);
+            isPlayerInside = false;
             //Debug.Log("Player exit!");
         }
     }

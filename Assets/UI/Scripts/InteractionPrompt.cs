@@ -7,11 +7,49 @@ public class InteractionPrompt : MonoBehaviour
 {
     public string prompt;
     public TMP_Text promptText;
+    public CanvasGroup group;
+    [Header("Animation")]
+    public float easeTime = 1f;
+    bool active;
 
-
+    public void Start()
+    {
+        group.alpha = 0;
+        this.gameObject.SetActive(false);
+        if (easeTime <= 0)
+        {
+            easeTime = 1;
+        }
+    }
     public void SetText(string text)
     {
         prompt = text;
         this.promptText.text = prompt;
+        active = true;
+    }
+
+    public void Hide()
+    {
+        active = false;
+    }
+    public bool IsActive()
+    {
+        return active;
+    }
+
+    public void OnGUI()
+    {
+        if (active)
+        {
+            group.alpha = Mathf.MoveTowards(group.alpha, 1, Time.deltaTime / easeTime);
+        }
+        else
+        {
+            group.alpha = Mathf.MoveTowards(group.alpha, 0, Time.deltaTime / easeTime);
+            if (group.alpha <= 0)
+            {
+                this.gameObject.SetActive(false);
+            }
+        }
     }
 }

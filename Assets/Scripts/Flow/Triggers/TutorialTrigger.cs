@@ -11,13 +11,14 @@ public class TutorialTrigger : MonoBehaviour
     public bool onlyTriggersOnce;
     [ReadOnly] public bool triggered = false;
     public float expiryTime = -1;
+    public bool ignoreTrigger = false;
     int interactionIndex = -1;
 
 
     
     public void OnTriggerEnter(Collider other)
     {
-        if (PlayerActor.player == null || (triggered && onlyTriggersOnce)) return;
+        if (ignoreTrigger || PlayerActor.player == null || (triggered && onlyTriggersOnce)) return;
         if (other.GetComponent<PlayerActor>() != null || other.transform.IsChildOf(PlayerActor.player.transform))
         {
             ShowTutorial();
@@ -26,7 +27,7 @@ public class TutorialTrigger : MonoBehaviour
 
     public void OnTriggerExit(Collider other)
     {
-        if (other.GetComponent<PlayerActor>() != null || other.transform.IsChildOf(PlayerActor.player.transform))
+        if (ignoreTrigger || other.GetComponent<PlayerActor>() != null || other.transform.IsChildOf(PlayerActor.player.transform))
         {
             HideTutorial();
         }

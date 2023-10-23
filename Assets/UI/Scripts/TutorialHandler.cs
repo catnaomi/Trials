@@ -6,7 +6,8 @@ public class TutorialHandler : MonoBehaviour
 {
     static TutorialHandler instance;
     public InteractionPrompt[] prompts;
-    
+    public CanvasGroup background;
+    public float backgroundFadeInTime = 1f;
     AudioSource source;
     private void Awake()
     {
@@ -21,17 +22,56 @@ public class TutorialHandler : MonoBehaviour
             prompt.gameObject.SetActive(false);
         }
     }
+
+    private void OnGUI()
+    {
+        bool isTutorialActive = IsAnyTutorialActive();
+
+        if (backgroundFadeInTime <= 0)
+        {
+            backgroundFadeInTime = 1;
+        }
+        background.alpha = Mathf.MoveTowards(background.alpha, isTutorialActive ? 1 : 0, Time.deltaTime / backgroundFadeInTime);
+    }
+
+    bool IsAnyTutorialActive()
+    {
+        foreach (InteractionPrompt prompt in prompts)
+        {
+            if (prompt.IsActive())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     public int ShowTutorial(string text)
     {
+        int emptyIndex = -1;
+
         for (int i = 0; i < prompts.Length; i++)
         {
-            if (!prompts[i].gameObject.activeInHierarchy)
+            if (!prompts[i].IsActive())
             {
-                prompts[i].gameObject.SetActive(true);
-                prompts[i].SetText(text);
-                source.Play();
-                return i;
+               if (emptyIndex < 0)
+                {
+                    emptyIndex = i;
+                }
             }
+            else
+            {
+                if (prompts[i].prompt == text)
+                {
+                    return i;
+                }
+            }
+
+        }
+        if (emptyIndex >= 0)
+        {
+            prompts[emptyIndex].gameObject.SetActive(true);
+            prompts[emptyIndex].SetText(text);
+            return emptyIndex;
         }
         return -1;
     }
@@ -40,7 +80,25 @@ public class TutorialHandler : MonoBehaviour
     {
         if (index >= 0 && index < prompts.Length)
         {
-            prompts[index].gameObject.SetActive(false);
+            prompts[index].Hide();
+        }
+    }
+    public void HideTutorial(string text)
+    {
+        foreach (InteractionPrompt prompt in prompts)
+        {
+            if (text == prompt.prompt)
+            {
+                prompt.Hide();
+            }
+        }
+    }
+
+    public void HideAll()
+    {
+        for (int i = 0; i < prompts.Length; i++)
+        {
+            prompts[i].Hide();
         }
     }
     public static int ShowTutorialStatic(string text)
@@ -53,5 +111,17 @@ public class TutorialHandler : MonoBehaviour
     {
         if (instance == null) return;
         instance.HideTutorial(index);
+    }
+
+    public static void HideTutorialStatic(string text)
+    {
+        if (instance == null) return;
+        instance.HideTutorial(text);
+    }
+
+    public static void HideAllStatic()
+    {
+        if (instance == null) return;
+        instance.HideAll();
     }
 }

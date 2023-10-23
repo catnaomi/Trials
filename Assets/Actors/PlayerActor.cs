@@ -1618,7 +1618,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     ledgeSnap = false;
                     animancer.Play(ladderClimbUp);
                     StartClimbLockout();
-
+                    ladder.StopClimb();
                 }
             }
             else if (currentClimb is Rail rail)
@@ -2372,12 +2372,21 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         yVel = 0f;
         xzVel = Vector3.zero;
         StartClimbLockout();
+        currentClimb.StopClimb();
     }
 
     public void SnapToCurrentLedge()
     {
         SnapToLedge();
         //StartCoroutine(DelayedSnapToLedge());
+    }
+
+    public void ClimbUpLedge()
+    {
+        ledgeSnap = false;
+        animancer.Play(ledgeClimb);
+        currentClimb.StopClimb();
+        StartClimbLockout();
     }
 
     void SnapToLedge()
@@ -2410,6 +2419,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 climbSnapPoint = rail.GetSnapPointDot(cc.radius * 2f, this.transform.position, this, -sign);
                 cc.enabled = false;
             }
+            currentClimb.StartClimb();
             /*
             else
             {
@@ -2447,7 +2457,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void StartClimbLockout()
     {
-        StartCoroutine("ClimbLockout");
+        StartCoroutine(ClimbLockout());
     }
     IEnumerator ClimbLockout()
     {
@@ -2779,13 +2789,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         if (IsClimbing() && currentClimb != null && currentClimb is Ledge)
         {
-            ledgeSnap = false;
-            animancer.Play(ledgeClimb);
-            StartClimbLockout();
+            ClimbUpLedge();
         }
         else if (!GetGrounded() && !allowClimb && (currentClimb == null && !currentClimb.AllowJumps()))
         {
-            StopCoroutine("ClimbLockout");
+            // what was this supposed to do...?
+            StartClimbLockout();
             allowClimb = true;
         }
         else if (GetGrounded() || airTime < jumpBuffer || (IsClimbing() && currentClimb.AllowJumps()))
@@ -4856,7 +4865,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             return (int)Mathf.Sign(aDist - bDist);
         });
 
-        Interactable leadInteractible = interactables[0];
+
+        Interactable leadInteractible = interactables.Count > 0 ? interactables[0] : null;
 
         if (IsInteractValid(leadInteractible))
         {
@@ -4865,7 +4875,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         
         if (highlightedInteractable != null)
         {
-            highlightedInteractable.SetIconVisiblity(true);
+            //highlightedInteractable.SetIconVisiblity(true);
         }
         if (highlightedInteractable != lastInteractable)
         {

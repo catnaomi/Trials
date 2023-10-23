@@ -38,8 +38,9 @@ Transform:
   m_Children:
   - {fileID: 4701464203408620207}
   - {fileID: 388578841182383195}
+  - {fileID: 8217355939673338158}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &211171209174470601
 Rigidbody:
@@ -186,10 +187,9 @@ MonoBehaviour:
       onTypedBlock: 0
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
-    didCrit: 0
-    timeDelayed: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -204,6 +204,8 @@ MonoBehaviour:
     OnHitWeakness:
       m_PersistentCalls:
         m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
     hitClip: {fileID: 0}
   minimumForceForDamage: 2000
   damagesSelf: 1
@@ -255,6 +257,56 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.95, y: 0.95, z: 0.95}
   m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!1 &7625128466103189986
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8217355939673338158}
+  - component: {fileID: 4668968126413907388}
+  m_Layer: 10
+  m_Name: Tutorial Handler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8217355939673338158
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7625128466103189986}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 211171209174470600}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4668968126413907388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7625128466103189986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f5c3eaa6928f8049b8fb1668784c220, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  carryable: {fileID: 211171209174470604}
+  interact: {fileID: 4701464203408620204}
+  pickupPrompt: '[RB] Pick up'
+  throwPrompt: '[X] Throw'
+  putdownPrompt: '[B] Put down'
+  carryState: 0
 --- !u!1001 &211171209524742451
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -361,6 +413,18 @@ PrefabInstance:
     m_RemovedComponents: []
     m_AddedGameObjects: []
   m_SourcePrefab: {fileID: 100100000, guid: f281f8e66e2b5d841a31d280a8dfd498, type: 3}
+--- !u!114 &4701464203408620204 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4886634088945005471, guid: f281f8e66e2b5d841a31d280a8dfd498,
+    type: 3}
+  m_PrefabInstance: {fileID: 211171209524742451}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19db7e7142af5ad43acda6d101fffae8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &4701464203408620207 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4886634088945005468, guid: f281f8e66e2b5d841a31d280a8dfd498,
