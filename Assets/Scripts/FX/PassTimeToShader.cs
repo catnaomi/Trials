@@ -5,6 +5,7 @@ using UnityEngine;
 public class PassTimeToShader : MonoBehaviour
 {
     IAffectedByTimeTravel timeTravelHandler;
+    public GameObject timeTravelObject;
     double time;
     MaterialPropertyBlock block;
     Renderer renderer;
@@ -16,9 +17,7 @@ public class PassTimeToShader : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        timeTravelHandler = GetComponent<IAffectedByTimeTravel>();
-        if (timeTravelHandler == null)
-            timeTravelHandler = GetComponentInParent<IAffectedByTimeTravel>();
+        InitTimeTravelHandler();
         time = 0f;
         renderer = this.GetComponent<Renderer>();
         block = new MaterialPropertyBlock();
@@ -35,6 +34,22 @@ public class PassTimeToShader : MonoBehaviour
         }
     }
 
+    void InitTimeTravelHandler()
+    {
+        if (timeTravelObject != null)
+        {
+            timeTravelHandler = timeTravelObject.GetComponent<IAffectedByTimeTravel>();
+        }
+        else
+        {
+            timeTravelHandler = GetComponent<IAffectedByTimeTravel>();
+        }
+
+        if (timeTravelHandler == null)
+        {
+            timeTravelHandler = GetComponentInParent<IAffectedByTimeTravel>();
+        }
+    }
     // Update is called once per frame
     void Update()
     {
