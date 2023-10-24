@@ -15,6 +15,11 @@ namespace CustomUtilities
             return routine;
         }
 
+        public static Coroutine StartTimer(this MonoBehaviour mono, float duration, UnityAction callback)
+        {
+            return StartTimer(mono, duration, false, callback);
+        }
+
         static IEnumerator TimerRoutine(float duration, bool loops, UnityAction callback)
         {
             do {

@@ -15,6 +15,7 @@ public class YarnPlayer : MonoBehaviour
     public UnityEvent OnFinish;
 
     DialogueRunner runner;
+
     public void Play()
     {
        if (nodes.Length > 0)
@@ -24,8 +25,13 @@ public class YarnPlayer : MonoBehaviour
                 MenuController.menu.OpenDialogue();
             }
             StartCoroutine(PlayRoutine());
-            
        }
+    }
+
+
+    public void SetNodes(params string[] nodeNames)
+    {
+        nodes = nodeNames;
     }
 
     IEnumerator PlayRoutine()

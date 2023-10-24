@@ -4487,7 +4487,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     private void OnAnimatorIK(int layerIndex)
     {
-        if (CanUpdate()) return;
+        //if (CanUpdate()) return;
         //Vector3 initialThrustPos = this.transform.position + this.transform.up * thrustInitialHeight;
         Vector3 initialThrustPos = positionReference.Spine.position;
         float y = 0f;
@@ -4906,6 +4906,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (interactable != null)
         {
             interactable.Interact(this);
+        }
+        else if (ProtagDialogueController.HasDialogue())
+        {
+            ProtagDialogueController.PlayDialogue();
+            SheatheAll();
         }
         else
         {
