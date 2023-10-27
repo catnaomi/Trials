@@ -83,11 +83,13 @@ public abstract class ClimbDetector : MonoBehaviour
 
     public void StartClimb()
     {
+        inUse = true;
         OnStartClimb.Invoke();
     }
 
     public void StopClimb()
     {
+        inUse = false;
         OnStopClimb.Invoke();
     }
 }
