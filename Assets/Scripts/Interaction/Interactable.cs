@@ -21,6 +21,11 @@ public class Interactable : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Init();
+    }
+
+    protected virtual void Init()
+    {
         if (interactionNode == null)
         {
             interactionNode = this.GetComponent<Collider>();
@@ -37,7 +42,6 @@ public class Interactable : MonoBehaviour
         GetMaxDistance();
     }
 
-
     // Update is called once per frame
     private void OnTriggerEnter(Collider other)
     {
@@ -53,9 +57,9 @@ public class Interactable : MonoBehaviour
     private void OnTriggerExit(Collider other)
     {
         PlayerActor eplayer = other.GetComponentInParent<PlayerActor>();
-        if (eplayer != null && eplayer == player)
+        if (eplayer != null)
         {
-            player.RemoveInteractable(this);
+            eplayer.RemoveInteractable(this);
             this.SetIconVisiblity(false);
             isPlayerInside = false;
             //Debug.Log("Player exit!");
@@ -82,14 +86,7 @@ public class Interactable : MonoBehaviour
     {
         if (maxDistance < 0 && interactionNode != null)
         {
-            if (interactionNode is SphereCollider sphere)
-            {
-                maxDistance = sphere.radius;
-            }
-            else
-            {
-                maxDistance = interactionNode.bounds.extents.magnitude;
-            }
+            maxDistance = interactionNode.bounds.extents.magnitude + 1;
         }
     }
 

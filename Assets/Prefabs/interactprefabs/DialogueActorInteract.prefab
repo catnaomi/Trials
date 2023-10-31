@@ -36,7 +36,7 @@ Transform:
   m_Children:
   - {fileID: 4168801660728415379}
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4168801659276603776
 MeshFilter:
@@ -116,7 +116,11 @@ MonoBehaviour:
   interactionNode: {fileID: 4168801659276603782}
   canInteract: 1
   interactIcon: {fileID: 0}
+  priority: 1
+  isPlayerInside: 0
   interactIconHeight: 1
+  prompt: '[RB] Talk'
+  maxDistance: -1
   OnInteract:
     m_PersistentCalls:
       m_Calls: []
