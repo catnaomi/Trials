@@ -1,0 +1,361 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4066c3cc8a0d9dd4eb0c8047058b2f8d, type: 3}
+  m_Name: 1h-lunge combo new
+  m_EditorClassIdentifier: 
+  desc: 
+  attackId: 0
+  isBlockOK: 0
+  isSprintOK: 0
+  isFallingOK: 0
+  isParryOK: 0
+  anim:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  attackData:
+    healthDamage: 1
+    unresistedMinimum: 1
+    types: 0
+    critData:
+      criticalMultiplier: 1
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0.25
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 1
+    isSlash: 0
+    isRanged: 0
+    isParry: 0
+    bouncesOffBlock: 1
+    bouncesOffTypedBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
+    stunTime: 1
+    repositionLength: 1
+    stagger: 1
+    staggers:
+      onHit: 2
+      onArmorHit: 1
+      onCritical: 3
+      onKill: 6
+      onCounterHit: 2
+      onBlock: 0
+      onTypedBlock: 0
+    kbForce: {x: 0, y: 1, z: 0}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
+    hitClip: {fileID: 0}
+  staminaCost: 0
+  exitTime: -1
+  cancelStartTime: 0
+  mainHandAngleAdjust: 0
+  offHandAngleAdjust: 0
+  sequence:
+  - _FadeDuration: 0.05
+    _Events:
+      _NormalizedTimes:
+      - 0.5
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: f0bc98dfad672f54eb1f4326b289372b, type: 2}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  - _FadeDuration: 0.05
+    _Events:
+      _NormalizedTimes:
+      - 0.5
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 7400000, guid: f0bc98dfad672f54eb1f4326b289372b, type: 2}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  - _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes:
+      - 0.74999994
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 319952130272224933, guid: 4a59a7ab9b9923244accdb95ae326bf4, type: 3}
+    _Speed: 1.25
+    _NormalizedStartTime: 0.0735294
+  - _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes:
+      - 0.74999994
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: -5129100316845419537, guid: 3f8c8202f6763ce43bd3c90c171be36b,
+      type: 3}
+    _Speed: 1
+    _NormalizedStartTime: 0
+  exitTimes:
+  - 0.5
+  - 0.5
+  - 0.4
+  lastAttackTime: -100
+  currentIndex: 0
+  damages:
+  - healthDamage: 1
+    unresistedMinimum: 0
+    types: 0
+    critData:
+      criticalMultiplier: 0
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 1
+    isSlash: 0
+    isRanged: 0
+    isParry: 0
+    bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
+    stunTime: 0
+    repositionLength: 0
+    stagger: 0
+    staggers:
+      onHit: 2
+      onArmorHit: 1
+      onCritical: 3
+      onKill: 7
+      onCounterHit: 7
+      onBlock: 0
+      onTypedBlock: 0
+    kbForce: {x: 0, y: 2.5, z: 10}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
+    hitClip: {fileID: 0}
+  - healthDamage: 1
+    unresistedMinimum: 0
+    types: 0
+    critData:
+      criticalMultiplier: 0
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 1
+    isSlash: 0
+    isRanged: 0
+    isParry: 0
+    bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
+    stunTime: 0
+    repositionLength: 0
+    stagger: 0
+    staggers:
+      onHit: 2
+      onArmorHit: 1
+      onCritical: 3
+      onKill: 7
+      onCounterHit: 7
+      onBlock: 0
+      onTypedBlock: 0
+    kbForce: {x: 0, y: 2.5, z: 10}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
+    hitClip: {fileID: 0}
+  - healthDamage: 1
+    unresistedMinimum: 0
+    types: 0
+    critData:
+      criticalMultiplier: 0
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 1
+    isSlash: 0
+    isRanged: 0
+    isParry: 0
+    bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
+    stunTime: 0
+    repositionLength: 0
+    stagger: 0
+    staggers:
+      onHit: 2
+      onArmorHit: 1
+      onCritical: 3
+      onKill: 7
+      onCounterHit: 7
+      onBlock: 0
+      onTypedBlock: 0
+    kbForce: {x: 0, y: 2.5, z: 10}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
+    hitClip: {fileID: 0}
+  - healthDamage: 1
+    unresistedMinimum: 0
+    types: 0
+    critData:
+      criticalMultiplier: 0
+      alwaysCritical: 0
+      causesCritState: 0
+      doesNotConsumeCritState: 0
+      criticalExtensionTime: 0
+    breaksArmor: 0
+    unblockable: 0
+    disarm: 0
+    isThrust: 1
+    isSlash: 0
+    isRanged: 0
+    isParry: 0
+    bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
+    breaksBlock: 0
+    canDamageSelf: 0
+    cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
+    stunTime: 0
+    repositionLength: 0
+    stagger: 1
+    staggers:
+      onHit: 3
+      onArmorHit: 1
+      onCritical: 3
+      onKill: 7
+      onCounterHit: 7
+      onBlock: 0
+      onTypedBlock: 0
+    kbForce: {x: 0, y: 2.5, z: 10}
+    kbRadial: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
+    hitMaterial: 0
+    OnHit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnCrit:
+      m_PersistentCalls:
+        m_Calls: []
+    OnBlock:
+      m_PersistentCalls:
+        m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
+    hitClip: {fileID: 0}
+  maxTimeBetweenAttacks: 2

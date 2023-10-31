@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49ec267a4fd264d4fb0639743d4d32e7, type: 3}
   m_Name: moveset_default
   m_EditorClassIdentifier: 
-  quickSlash1h: {fileID: 11400000, guid: 9b92887145f27a6418e77a0543dcb239, type: 2}
-  quickThrust1h: {fileID: 11400000, guid: 1cab7743958381d42aa1eb48ae97ebd5, type: 2}
+  quickSlash1h: {fileID: 11400000, guid: d59d8b8918001da41952b0606d2307ae, type: 2}
+  quickThrust1h: {fileID: 11400000, guid: 33fd530dfa205fe47a1f2b5a79506ccc, type: 2}
   powerSlash: {fileID: 0}
-  powerThrust: {fileID: 11400000, guid: bba338fc3d50eb6429ebd50bccbb5dd8, type: 2}
+  powerThrust: {fileID: 0}
   stanceSlash: {fileID: 0}
   stanceThrust: {fileID: 0}
   aimAttack: {fileID: 0}
@@ -65,6 +65,20 @@ MonoBehaviour:
     _Clip: {fileID: 421682445191526625, guid: 108838967d7aece45b2511a4a7eec950, type: 3}
     _Speed: 1
     _NormalizedStartTime: 0
+  hasTypedBlocks: 0
+  blockAnimsTyped:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Speed: 1
+    _Animations: []
+    _Speeds: []
+    _SynchronizeChildren: 
+    _Thresholds: []
+    _DefaultParameter: 0
+    _ExtrapolateSpeed: 1
   blockStagger:
     _FadeDuration: 0.1
     _Events:
@@ -75,6 +89,33 @@ MonoBehaviour:
       type: 3}
     _Speed: 1
     _NormalizedStartTime: 0
+  blockStaggerLarge:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: NaN
+  blockStaggerHeavy:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: NaN
+  blockStaggerFlinch:
+    _FadeDuration: 0.25
+    _Events:
+      _NormalizedTimes: []
+      _Callbacks: []
+      _Names: []
+    _Clip: {fileID: 0}
+    _Speed: 1
+    _NormalizedStartTime: NaN
   guardBreak:
     _FadeDuration: 0.25
     _Events:

@@ -123,6 +123,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     Vector3 ccHitNormal;
     Vector3 warpDelta;
 
+    Vector3 animatorVelocity;
     Vector3 animatorDelta;
     bool aimAtkLockout;
     public float headPointSpeed = 25f;
@@ -213,6 +214,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     float holdAttackClock;
     float holdAttackMin;
+    [Space(20)]
+    public float standingColliderRadius;
+    public float attackingColliderRadius;
+    [Space(20)]
     public UnityEvent OnParryStart;
     public UnityEvent OnParryThrustStart;
     public UnityEvent OnParrySlashStart;
@@ -2030,9 +2035,22 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     void OnAnimatorMove()
     {
-        this.transform.position = animator.rootPosition;
-        this.transform.rotation = animator.rootRotation;
-        animatorDelta = animator.velocity;//animator.rootPosition - this.transform.position;
+        animatorDelta = animator.rootPosition - this.transform.position;
+        if (IsAttacking())
+        {
+            // remove sideways root motion during attacks
+            animatorDelta = Vector3.Project(animatorDelta, this.transform.forward);
+            //this.transform.position = this.transform.position + animatorDelta;
+            this.transform.rotation = animator.rootRotation;
+        }
+        else
+        {
+            //this.transform.position = animator.rootPosition;
+            this.transform.rotation = animator.rootRotation;
+        }
+        
+        
+        animatorVelocity = animator.velocity;//animator.rootPosition - this.transform.position;
     }
 
     void FixedUpdate()
@@ -2069,6 +2087,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Vector3 velocity = xzVel;
         velocity.y = yVel;
         
+        if (IsAttacking())
+        {
+            cc.radius = attackingColliderRadius;
+        }
+        else
+        {
+            cc.radius = standingColliderRadius;
+        }
+
         if (withinBias)
         {
             cc.Move(Vector3.up * (biasHeight - this.transform.position.y));
@@ -2076,7 +2103,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         if (IsClimbing())
         {
-            climbSnapPoint += animatorDelta * Time.fixedDeltaTime;
+            climbSnapPoint += animatorVelocity * Time.fixedDeltaTime;
             this.transform.position = Vector3.MoveTowards(this.transform.position, climbSnapPoint, climbSnapSpeed * Time.fixedDeltaTime);
         }
         else if (cc.enabled)
@@ -2091,16 +2118,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     cc.Move(dir.normalized * 10f);
                     Debug.Log("slide");
                 }*/
-                cc.Move(velocity * Time.fixedDeltaTime);
+                cc.Move((velocity * Time.fixedDeltaTime) + animatorDelta);
             }
             else if (Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 0.5f, MaskReference.Terrain) && yVel <= 0 && animancer.States.Current != state.swim)
             {
                 Vector3 temp = Vector3.Cross(hit.normal,velocity);
-                cc.Move((Vector3.Cross(temp, hit.normal) + gravity * Vector3.down) * Time.fixedDeltaTime);
+                cc.Move(((Vector3.Cross(temp, hit.normal) + gravity * Vector3.down) * Time.fixedDeltaTime) + animatorDelta);
             }
             else
             {
-                cc.Move(velocity * Time.fixedDeltaTime);
+                cc.Move((velocity * Time.fixedDeltaTime) + animatorDelta);
             }
         }
     }
@@ -3925,7 +3952,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         aimTime = 0f;
     }
 
-    public void RealignToTarget()
+    public override void RealignToTarget()
     {
         Quaternion targetRot;
         Vector3 dir = transform.forward;
@@ -4407,7 +4434,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     #endregion
 
-    #region IK
+    #region IK & Root Motion
 
     void GetHeadPoint()
     {
@@ -4579,6 +4606,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         wasSlidingIK = sliding;
         
     }
+
 
     public override void SetLastBlockpoint(Vector3 point)
     {
