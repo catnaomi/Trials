@@ -207,6 +207,38 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         //SetTrailColor(dk.healthDamage.GetHighestType(DamageType.Slashing, DamageType.Piercing));
         this.active = active;
     }
+
+    public virtual void TrailsActive(bool active)
+    {
+        if (active)
+        {
+            DamageKnockback dk = this.GetDamageFromAttack(holder);
+
+            slashFX.transform.position = holder.transform.position;
+            //thrustFX.transform.position = holder.transform.position;
+            wall = false;
+            //holder.attributes.ReduceAttribute(holder.attributes.stamina, this.GetPoiseCost(((HumanoidActor)holder).nextAttackType));
+            slashFX.SetTopPoint(InterfaceUtilities.FindRecursivelyActiveOnly(GetModel().transform, "_top"));
+            slashFX.SetBottomPoint(InterfaceUtilities.FindRecursivelyActiveOnly(GetModel().transform, "_bottom"));
+            thrustFX.SetTopPoint(InterfaceUtilities.FindRecursivelyActiveOnly(GetModel().transform, "_top"));
+            thrustFX.SetBottomPoint(InterfaceUtilities.FindRecursivelyActiveOnly(GetModel().transform, "_bottom"));
+            if (dk.isSlash)
+            {
+                holder.gameObject.SendMessage(dk.fxData.isHeavyAttack ? "SlashHeavy" : "SlashLight");
+                slashFX.BeginSlash();
+            }
+            else if (dk.isThrust)
+            {
+                holder.gameObject.SendMessage(dk.fxData.isHeavyAttack ? "ThrustHeavy" : "ThrustLight");
+                thrustFX.BeginThrust();
+            }
+        }
+        else
+        {
+            slashFX.EndSlash();
+            thrustFX.EndThrust();
+        }
+    }
     /*
     public void SetUpDamageListeners(DamageKnockback dk)
     {

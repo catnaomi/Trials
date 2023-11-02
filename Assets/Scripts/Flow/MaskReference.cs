@@ -5,11 +5,14 @@ using UnityEngine;
 public class MaskReference : MonoBehaviour
 {
     public LayerMask TerrainMask;
+    public LayerMask ActorMask;
     public static LayerMask Terrain;
-    // Start is called before the first frame update
-    void Start()
+    public static LayerMask Actors;
+
+    private void Awake()
     {
         Terrain = TerrainMask;
+        Actors = ActorMask;
     }
 
 }

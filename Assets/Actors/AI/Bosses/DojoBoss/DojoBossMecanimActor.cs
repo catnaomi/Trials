@@ -62,6 +62,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     float totalCritTime;
     [Header("Offense")]
     public int offensiveStageCount = 6;
+    bool inAttackSequence;
+    DojoBossXOParticleController xoParticle;
+    public float sequenceDelay = 0.25f;
+    public InputAttack slashRegular;
+    public InputAttack thrustRegular;
+    public InputAttack slashFinisher;
+    public InputAttack thrustFinisher;
     [Header("Pillars")]
     public GameObject pillarPrefab;
     public float pillarRiseDuration;
@@ -98,6 +105,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
+    [ReadOnly, SerializeField] float CloseRangeFloat;
     [ReadOnly, SerializeField] bool InMeleeRange;
     [ReadOnly, SerializeField] bool AtLongRange;
     [ReadOnly, SerializeField] bool ParryHit;
@@ -117,6 +125,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] bool Blocking;
     [ReadOnly, SerializeField] int PillarCount;
     [ReadOnly, SerializeField] bool ResetToStart;
+    [ReadOnly, SerializeField] bool StartAttack;
     [Space(5)]
     [SerializeField] float out_PillarJumpCurve;
     [Space(10)]
@@ -152,6 +161,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         arrowDamage.source = this.gameObject;
         timeHandler = this.GetComponent<MecanimActorTimeTravelHandler>();
         nav = this.GetComponent<NavMeshAgent>();
+        xoParticle = this.GetComponentInChildren<DojoBossXOParticleController>();
         nav.updatePosition = true;
         nav.updateRotation = true;
         StartCoroutine(DestinationCoroutine());
@@ -291,6 +301,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
 
         animator.SetBool("InCloseRange", InCloseRange);
+        animator.SetFloat("CloseRangeFloat", InCloseRange ? 1f : 0f);
         animator.SetBool("InMeleeRange", InMeleeRange);
         animator.SetBool("AtLongRange", AtLongRange);
 
@@ -346,6 +357,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator.SetBool("IsPillarFalling", isPillarFalling);
 
         animator.UpdateTrigger("ResetToStart", ref ResetToStart);
+
+        animator.UpdateTrigger("StartAttack", ref StartAttack);
     }
 
     void CheckTarget()
@@ -491,7 +504,115 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         shouldRealign = true;
     }
 
+    public void BeginTelegraphSequence(string sequence)
+    {
+        string[] split = sequence.Split(' ');
+        StartCoroutine(TelegraphAttacks(split));
+    }
 
+    IEnumerator TelegraphAttacks(string[] sequence)
+    {
+        inAttackSequence = true;
+        float interval = 0.05f;
+        float clock;
+        // telegraph first
+        for (int i = 0; i < 4; i++)
+        {
+            if (sequence.Length > i)
+            {
+                xoParticle.TelegraphOne(sequence[i]);
+            }
+            
+            clock = 0f;
+            if (i == 3)
+            {
+                StartAttack = true;
+            }
+            while (clock < sequenceDelay)
+            {
+                if (isInTimeState)
+                {
+                    yield return new WaitWhile(() => isInTimeState);
+                }
+                yield return null;
+                clock += Time.deltaTime;
+            }
+        }
+        // then attack
+
+        for (int j = 0; j < sequence.Length; j++)
+        {
+            TelegraphAttack(j == sequence.Length - 1, sequence[j]);
+            clock = 0f;
+            while (clock < sequenceDelay)
+            {
+                if (isInTimeState)
+                {
+                    yield return new WaitWhile(() => isInTimeState);
+                }
+                yield return null;
+                clock += Time.deltaTime;
+            }
+        }
+
+        inAttackSequence = false;
+    }
+
+    public void TelegraphAttack(bool isLast, string type)
+    {
+        DamageKnockback damage = null;
+        if (type == "X")
+        {
+            if (isLast)
+            {
+                damage = new DamageKnockback(slashFinisher.GetDamage());
+            }
+            else
+            {
+                damage = new DamageKnockback(slashRegular.GetDamage());
+            }
+        }
+        else if (type == "O")
+        {
+            if (isLast)
+            {
+                damage = new DamageKnockback(thrustFinisher.GetDamage());
+            }
+            else
+            {
+                damage = new DamageKnockback(thrustRegular.GetDamage());
+            }
+        }
+        FrontalHitbox(damage);
+    }
+
+    void FrontalHitbox(DamageKnockback damage)
+    {
+
+        if (damage == null) return;
+
+        Vector3 center = this.transform.position + Vector3.up + this.transform.forward * 2f;
+        Vector3 size = Vector3.one * 2f;
+        Collider[] colliders = Physics.OverlapBox(center, size * 0.5f, Quaternion.LookRotation(this.transform.forward), MaskReference.Actors);
+
+        DrawCube.ForDebug(center, size, Quaternion.LookRotation(this.transform.forward), damage.isSlash ? Color.red : Color.blue, 1f);
+
+        HashSet <IDamageable> targets = new HashSet<IDamageable>();
+        foreach (Collider c in colliders)
+        {
+            if (c.TryGetComponent<IDamageable>(out IDamageable damageable))
+            {
+                targets.Add(damageable);
+            }
+        }
+
+        SetCurrentDamage(damage);
+
+        foreach (IDamageable target in targets)
+        {
+            target.TakeDamage(this.GetLastDamage());
+        }
+    }
     public void BowFireStraight()
     {
         RealignToTarget();
@@ -727,7 +848,45 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         bool main = (mainWeapon != null && mainWeapon is IHitboxHandler);
         bool off = (offHandWeapon != null && offHandWeapon is IHitboxHandler);
         bool ranged = (rangedWeapon != null && rangedWeapon is IHitboxHandler);
-        if (active == 0)
+        if (inAttackSequence) {
+            if (active == 0)
+            {
+                if (main && mainWeapon is BladeWeapon bmain)
+                {
+                    bmain.TrailsActive(false);
+                }
+                if (off && offHandWeapon is BladeWeapon omain)
+                {
+                    omain.TrailsActive(false);
+                }
+            }
+            else if (active == 1)
+            {
+                if (main && mainWeapon is BladeWeapon bmain)
+                {
+                    bmain.TrailsActive(true);
+                }
+            }
+            else if (active == 2)
+            {
+                if (off && offHandWeapon is BladeWeapon omain)
+                {
+                    omain.TrailsActive(true);
+                }
+            }
+            else if (active == 3)
+            {
+                if (main && mainWeapon is BladeWeapon bmain)
+                {
+                    bmain.TrailsActive(true);
+                }
+                if (off && offHandWeapon is BladeWeapon omain)
+                {
+                    omain.TrailsActive(true);
+                }
+            }
+        }
+        else if (active == 0)
         {
             if (main)
             {

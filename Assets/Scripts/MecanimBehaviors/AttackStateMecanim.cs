@@ -10,8 +10,14 @@ public class AttackStateMecanim : StateMachineBehaviour
     {
         if (animator.gameObject.TryGetComponent<Actor>(out Actor actor))
         {
-
-            attack.ProcessMecanimAction(actor, animator, stateInfo, layerIndex);
+            if (attack != null)
+            {
+                attack.ProcessMecanimAction(actor, animator, stateInfo, layerIndex);
+            }
+            else
+            {
+                actor.SetCurrentDamage(null);
+            }
         }
     }
 

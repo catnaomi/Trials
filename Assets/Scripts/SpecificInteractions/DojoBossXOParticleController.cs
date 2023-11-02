@@ -74,4 +74,18 @@ public class DojoBossXOParticleController : MonoBehaviour
             }
         }
     }
+
+    public void TelegraphOne(string sequence)
+    {
+        if (sequence == "X")
+        {
+            cross.Play();
+            crossAudio.Play();
+        }
+        else if (sequence == "O")
+        {
+            circle.Play();
+            circleAudio.Play();
+        }
+    }
 }
