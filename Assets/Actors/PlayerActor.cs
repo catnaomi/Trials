@@ -34,7 +34,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool shouldLookAtCamera;
     public float[] headPointWeights = { 1f, 0.1f, 1f, 0f, 0.7f };
     Vector3 lastCameraForward = Vector3.forward;
+    Vector3 camForward;
     Vector3 lastCameraRight = Vector3.right;
+    Vector3 camRight;
     CinemachineBrain cinemachineBrain;
     [Header("Interaction & Dialogue")]
     public bool isMenuOpen;
@@ -89,15 +91,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float dodgeJumpSpeed = 5f;
     public float jumpVel = 10f;
     public float attackJumpVel = 10f;
+    public float backflipSpeed = 5f;
     [Space(5)]
-    public bool isGrounded;
-    public float airTime = 0f;
+    [ReadOnly] public bool isGrounded;
+    [ReadOnly] public float airTime = 0f;
     public float groundBias = 0f;
     bool isGroundedLockout;
     bool isCaughtOnEdge;
     bool withinBias;
     float biasHeight;
     public float jumpBuffer = 1f;
+    public float minAirTimeToAct = 0.5f;
     bool didJump;
     bool didAirJump;
     float lastAirTime;
@@ -112,11 +116,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool sliding;
     bool wasSlidingIK;
     bool wasSlidingUpdate;
-    public float slopeAngle;
+    [ReadOnly]public float slopeAngle;
     public float maxSlideAngle = 60f;
     public float minSlideAngle = 30f;
-    public Vector3 groundNormal;
-    public Vector3 groundPoint;
+
+    [ReadOnly] public Vector3 groundNormal;
+    [ReadOnly] public Vector3 groundPoint;
     Vector3 targetDirection;
     Vector3 headPoint;
     Vector3 smoothedHeadPoint;
@@ -133,10 +138,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float attackDecel = 25f;
     public float dashAttackDecel = 10f;
     float attackDecelReal;
-    public float walkAccelReal;
-    public bool sprinting;
-    public bool shouldDodge;
-    public bool secondary;
+    [ReadOnly] public float walkAccelReal;
+    [ReadOnly] public bool sprinting;
+    [ReadOnly] public bool shouldDodge;
+    [ReadOnly] public bool secondary;
     public Vector2 dodgeDirection;
     [Space(10)]
     public bool disablePhysics;
@@ -186,6 +191,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool shouldRecenter;
     ClipTransition plungeEnd;
     float cancelTime;
+    [SerializeField, ReadOnly] AttackCancelAction cancelAction;
     public float blockSpeed = 2.5f;
     float aimTimer;
     bool isHitboxActive;
@@ -330,6 +336,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState fall;
         public AnimancerState roll;
         public AnimancerState jump;
+        public AnimancerState backflip;
         public AnimancerState climb;
         public AnimancerState swim;
         public AnimancerState attack;
@@ -456,6 +463,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 StartCoroutine("GradualResetOffRotation");
             }
+            cancelAction = AttackCancelAction.None;
         };
 
         _StopUpperLayer = () =>
@@ -493,6 +501,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         OnHitboxActive.AddListener(RealignToTarget);
         onControlsChanged.AddListener(HandleCinemachine);
         OnAttack.AddListener(ProcessWeaponDash);
+        OnAttack.AddListener(ResetAttackCancelAction);
         //StartCoroutine("SafePointCoroutine");
         if (SceneLoader.IsSceneLoaderActive())
         {
@@ -530,15 +539,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             lastCameraForward = Camera.main.transform.forward;
             lastCameraRight = Camera.main.transform.right;
         }
-        Vector3 camForward = lastCameraForward;
-        camForward.Scale(new Vector3(1f, 0f, 1f));
-        Vector3 camRight = lastCameraRight;
-        camRight.Scale(new Vector3(1f, 0f, 1f));
+        camForward = lastCameraForward;
+        camForward.y = 0f;
+        camRight = lastCameraRight;
+        camRight.y = 0f;
         stickDirection = Vector3.zero;
         lookDirection = this.transform.forward;
         moveDirection = Vector3.zero;
         bool applyMove = false;
-        
+        bool allowEndBuffer = false;
         slopeAngle = -1f;
         groundNormal = Vector3.up;
         if (rayHit.collider != null)
@@ -645,15 +654,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             if (jump)
             {
-                jump = false;
-                buffer.ClearInput(InputBuffer.Inputs.Jump);
-                if (stickDirection.magnitude > 0)
-                {
-                    lookDirection = stickDirection.normalized;
-                    moveDirection = stickDirection.normalized;
-                    //xzVel = xzVel.magnitude * stickDirection.normalized;
-                }
-                state.jump = animancer.Play(standJumpAnim);//animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+                StandingJump();
             }
             else if (!isGrounded && lastAirTime > fallBufferTime)
             {
@@ -844,6 +845,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             
             if (jump)
             {
+                /*
                 float y = Vector3.Dot(stickDirection, this.transform.forward);
                 float x = Vector3.Dot(stickDirection, this.transform.right);
                 bool north = y > 0.25f && Mathf.Abs(y) > Mathf.Abs(x);
@@ -894,6 +896,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 //state.jump = animancer.Play(backflipAnim);
                 //moveDirection = this.transform.forward;
                 //speed = -blockSpeed;
+                */
+                StandingJump();
                 stopBlock = true;
             }
 
@@ -1259,13 +1263,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 jump = false;
                 if (airTime < jumpBuffer && !didJump)
                 {
-                    if (stickDirection.magnitude > 0)
-                    {
-                        lookDirection = stickDirection.normalized;
-                        moveDirection = stickDirection.normalized;
-                        //xzVel = xzVel.magnitude * stickDirection.normalized;
-                    }
-                    PlayJump();
+                    StandingJump();
                 }
                 
             }
@@ -1310,38 +1308,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     this.gameObject.SendMessage("SplashBig");
                 }
             }
-            if (aiming)
-            {
-                Aim();
-            }
-            else if (attack && isCarrying)
-            {
-                StartThrow();
-                attack = false;
-                slash = false;
-                thrust = false;
-            }
-            else if (attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
-            {
-                if (!inventory.IsMainDrawn())
-                {
-                    inventory.SetDrawn(true, true);
-                }
-                if (inventory.IsMainDrawn())
-                {
-                    if (slash)
-                    {
-                        PlungeSlash();
-                    }
-                    else if (thrust)
-                    {
-                        PlungeThrust();
-                    }
-                }
-                attack = false;
-                slash = false;
-                thrust = false;
-            }
+            HandleAirAttacks();
             animancer.Layers[0].ApplyAnimatorIK = sliding;
         }
         #endregion
@@ -1503,7 +1470,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     }
                     else
                     {
-                        jumpState = animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+                        jumpState = animancer.Play(standJumpAnim);
                     }
                     jumpState.NormalizedTime = 0f;
                     jumpState.Events.OnEnd = () =>
@@ -1574,13 +1541,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             //speed = sprintSpeed;
             moveDirection = this.transform.forward;
 
-            if (stickDirection.sqrMagnitude > 0)
+            if (stickDirection.sqrMagnitude > 0 && animancer.States.Current != state.backflip)
             {
                 xzVel += stickDirection * airAccel * Time.deltaTime;
                 xzVel = Vector3.ClampMagnitude(xzVel, sprintSpeed);
                 lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * airTurnSpeed * Time.deltaTime, 1f).normalized;
             }
 
+            // only allow actions out of jump if enough time has passed
+            if (airTime > minAirTimeToAct)
+            {
+                HandleAirAttacks();
+            }
             /*
             if (ledgeSnap && currentClimb is Ledge && currentClimb.transform.position.y > this.transform.position.y)
             {
@@ -1720,6 +1692,48 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             speed = Mathf.MoveTowards(speed, 0f, attackDecelReal * Time.deltaTime);
             moveDirection = this.transform.forward;
 
+            if (cancelTime > 0 && !plunge)
+            {
+                if (jump)
+                {
+                    jump = false;
+                    cancelAction = AttackCancelAction.Jump;
+                }
+                else if (attack && slash)
+                {
+                    attack = false;
+                    slash = false;
+                    cancelAction = AttackCancelAction.Slash;
+                }
+                else if (attack && thrust)
+                {
+                    attack = false;
+                    thrust = false;
+                    cancelAction = AttackCancelAction.Thrust;
+                }
+
+                if (animancer.States.Current.NormalizedTime >= cancelTime)
+                {
+                    if (cancelAction == AttackCancelAction.Jump)
+                    {
+                        cancelTime = -1f;
+                        cancelAction = AttackCancelAction.None;
+                        StandingJump();
+                    }
+                    else if (cancelAction == AttackCancelAction.Slash)
+                    {
+                        cancelTime = -1f;
+                        cancelAction = AttackCancelAction.None;
+                        CancelSlash();
+                    }
+                    else if (cancelAction == AttackCancelAction.Thrust)
+                    {
+                        cancelTime = -1f;
+                        cancelAction = AttackCancelAction.None;
+                        CancelThrust();
+                    }
+                }
+            }
             if (cancelTime > 0 && animancer.States.Current.NormalizedTime >= cancelTime && !plunge)
             {
                 if (attack && slash)
@@ -1728,7 +1742,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     slash = false;
                     cancelTime = -1f;
                     CancelSlash();
-                    
                 }
                 else if (attack && thrust)
                 {
@@ -1736,6 +1749,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     thrust = false;
                     cancelTime = -1f;
                     CancelThrust();
+                }
+                if (jump)
+                {
+                    StandingJump();
                 }
             }
             if (plunge && (isGrounded || (!isGrounded && isCaughtOnEdge)))
@@ -2705,8 +2722,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (lastInputTime > Time.time - bufferLength)
             {
                 input = lastInput;
+                //ClearAll();
             }
-            //ClearAll();
+            
             return input;
         }
     }
@@ -2739,6 +2757,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 jump = true;
                 break;
             case InputBuffer.Inputs.Slash:
+                Debug.Log("found slash input!");
+
                 attack = true;
                 slash = true;
                 break;
@@ -2845,6 +2865,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void ApplyAttackJump()
     {
         yVel = attackJumpVel;
+    }
+
+    public void ApplyBackflip()
+    {
+        speed = -backflipSpeed;
+        xzVel = moveDirection * -backflipSpeed;
+        yVel = dodgeJumpVel;
     }
 
     public void IncreaseJumpDrag()
@@ -3674,6 +3701,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         System.Action endAction = (GetMoveset().quickSlash1h != null && GetMoveset().quickSlash1h is ComboAttack) ? _MoveOnEnd : _AttackEnd;
         state.attack = GetMoveset().quickSlash1h.ProcessPlayerAction(this, out cancelTime, endAction);
         attackDecelReal = attackDecel;
+        ClearSlashInput();
         OnAttack.Invoke();
         hold = false;
     }
@@ -3689,6 +3717,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         System.Action endAction = (GetMoveset().quickThrust1h is ComboAttack) ? _MoveOnEnd : _AttackEnd;
         state.attack = GetMoveset().quickThrust1h.ProcessPlayerAction(this, out cancelTime, endAction);
         attackDecelReal = attackDecel;
+        ClearThrustInput();
         OnAttack.Invoke();
         hold = false;
     }
@@ -3713,6 +3742,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             hold = false;
             state.attack = GetMoveset().powerSlash.ProcessPlayerAction(this, out cancelTime, _AttackEnd);
         }
+        ClearSlashInput();
         OnAttack.Invoke();
         attackDecelReal = attackDecel;
     }
@@ -3739,6 +3769,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             hold = false;
             state.attack = GetMoveset().powerSlash.ProcessPlayerAction(this, out cancelTime, _AttackEnd);
         }
+        ClearThrustInput();
         OnAttack.Invoke();
         attackDecelReal = attackDecel;
     }
@@ -3766,6 +3797,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             //state.attack.Events.OnEnd = _AttackEnd;
         }
+        ClearSlashInput();
     }
 
     public void HoldThrustRelease(bool wasFullyCharged)
@@ -3792,17 +3824,20 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             //state.attack.Events.OnEnd = _AttackEnd;
         }
+        ClearThrustInput();
     }
 
     public void CancelSlash()
     {
         state.attack = GetMoveset().quickSlash1h.ProcessPlayerAction(this, out cancelTime, _AttackEnd);
+        ClearSlashInput();
         OnAttack.Invoke();
     }
 
     public void CancelThrust()
     {
         state.attack = GetMoveset().quickThrust1h.ProcessPlayerAction(this, out cancelTime, _AttackEnd);
+        ClearThrustInput();
         OnAttack.Invoke();
     }
     public void DashSlash()
@@ -3810,6 +3845,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         state.attack = GetMoveset().dashSlash.ProcessPlayerAction(this, out cancelTime, _AttackEnd);
         attackDecelReal = dashAttackDecel;
         dashed = false;
+        ClearSlashInput();
         OnAttack.Invoke();
     }
 
@@ -3818,6 +3854,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         state.attack = GetMoveset().dashThrust.ProcessPlayerAction(this, out cancelTime, _AttackEnd);
         attackDecelReal = dashAttackDecel;
         dashed = false;
+        ClearThrustInput();
         OnAttack.Invoke();
     }
     
@@ -3847,6 +3884,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             MainSlash();
         }
+        ClearSlashInput();
         OnAttack.Invoke();
     }
     public void BlockThrust()
@@ -3874,6 +3912,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             MainThrust();
         }
+        ClearThrustInput();
         OnAttack.Invoke();
     }
     public void RollSlash()
@@ -3882,6 +3921,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         attackDecelReal = dashAttackDecel;
         rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };   
         dashed = false;
+        ClearSlashInput();
         OnAttack.Invoke();
     }
 
@@ -3891,6 +3931,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         attackDecelReal = dashAttackDecel;
         rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
         dashed = false;
+        ClearThrustInput();
         OnAttack.Invoke();
     }
 
@@ -3925,6 +3966,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         //plunge = true;
         SetCurrentDamage(GetMoveset().plungeSlash.GetDamage());
+        ClearSlashInput();
         OnAttack.Invoke();
     }
 
@@ -3942,9 +3984,65 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         plunge = true;
         SetCurrentDamage(GetMoveset().plungeThrust.GetDamage());
+        ClearThrustInput();
         OnAttack.Invoke();
     }
 
+    void HandleAirAttacks()
+    {
+        if (aiming)
+        {
+            Aim();
+        }
+        else if (attack && isCarrying)
+        {
+            StartThrow();
+            attack = false;
+            slash = false;
+            thrust = false;
+        }
+        else if (attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
+        {
+            if (!inventory.IsMainDrawn())
+            {
+                inventory.SetDrawn(true, true);
+            }
+            if (inventory.IsMainDrawn())
+            {
+                if (slash)
+                {
+                    PlungeSlash();
+                }
+                else if (thrust)
+                {
+                    PlungeThrust();
+                }
+            }
+            attack = false;
+            slash = false;
+            thrust = false;
+        }
+    }
+
+    public void ClearAttackInput()
+    {
+        buffer.ClearInput(InputBuffer.Inputs.Slash);
+        buffer.ClearInput(InputBuffer.Inputs.Thrust);
+        buffer.ClearInput(InputBuffer.Inputs.SlashHold);
+        buffer.ClearInput(InputBuffer.Inputs.ThrustHold);
+    }
+
+    public void ClearSlashInput()
+    {
+        buffer.ClearInput(InputBuffer.Inputs.Slash);
+        buffer.ClearInput(InputBuffer.Inputs.SlashHold);
+    }
+
+    public void ClearThrustInput()
+    {
+        buffer.ClearInput(InputBuffer.Inputs.Thrust);
+        buffer.ClearInput(InputBuffer.Inputs.ThrustHold);
+    }
     public void Aim()
     {
         state.aim = animancer.Play(aimAnim);
@@ -4212,6 +4310,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             slash = false;
             thrust = false;
         }
+    }
+
+    public void ResetAttackCancelAction()
+    {
+        cancelAction = AttackCancelAction.None;
+    }
+    [Serializable]
+    enum AttackCancelAction
+    {
+        None,
+        Slash,
+        Thrust,
+        Jump
     }
 
     public override void DeactivateHitboxes()
@@ -4791,12 +4902,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public bool IsBlockingSlash()
     {
-        return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.SLASH_INT || IsSlashHeld() || buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Slash);
+        return IsBlocking() && hasTypedBlocks && (/*lastTypedBlockParam == DamageKnockback.SLASH_INT */ (IsSlashHeld() && !IsThrustHeld()) || buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Slash);
     }
 
     public bool IsBlockingThrust()
     {
-        return IsBlocking() && hasTypedBlocks && (lastTypedBlockParam == DamageKnockback.THRUST_INT || IsThrustHeld() || buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Thrust);
+        return IsBlocking() && hasTypedBlocks && (/*lastTypedBlockParam == DamageKnockback.THRUST_INT */ (IsThrustHeld() && !IsSlashHeld()) || buffer.PollInput(blockShiftBufferWindow) == InputBuffer.Inputs.Thrust);
     }
 
     public bool IsTypedBlocking()
@@ -4980,6 +5091,47 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void PlayJump()
     {
         state.jump = animancer.Play(standJumpAnim);
+    }
+
+    public void PlayBackflip()
+    {
+        //speed = -backflipSpeed;
+        state.backflip = state.jump = animancer.Play(backflipAnim);
+    }
+    public void StandingJump()
+    {
+        jump = false;
+        buffer.ClearInput(InputBuffer.Inputs.Jump);
+        if (!IsBlockHeld())
+        {
+            if (stickDirection.magnitude > 0)
+            {
+                lookDirection = stickDirection.normalized;
+                moveDirection = stickDirection.normalized;
+                //xzVel = xzVel.magnitude * stickDirection.normalized;
+            }
+            PlayJump();//animancer.Play((move.magnitude < 0.5f) ? standJumpAnim : runJumpAnim);
+        }
+        else
+        {
+            //backflip
+            if (stickDirection.magnitude > 0)
+            {
+                lookDirection = stickDirection.normalized;
+                moveDirection = stickDirection.normalized;
+            }
+            else if (camState == CameraState.Lock)
+            {
+                lookDirection = camForward;
+                moveDirection = lookDirection;
+            }
+            else
+            {
+                lookDirection = this.transform.forward;
+                moveDirection = this.transform.forward;
+            }
+            PlayBackflip();
+        }
     }
 #endregion
 
