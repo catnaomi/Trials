@@ -32,6 +32,7 @@ public class HumanoidPositionReference : MonoBehaviour
     public Transform eyeTarget;
     [Header("Masks")]
     public AvatarMask upperBodyMask;
+    public AvatarMask fullBodyMask;
 
     // Use this for initialization
     void Awake()

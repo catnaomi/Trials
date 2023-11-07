@@ -6,7 +6,7 @@ public class HumanoidAnimLayers
 {
     public const int Base = 0;
     public const int BilayerBlend = 1;
-    public const int Open1 = 2; //used by player for idle blends
+    public const int BlockBlend = 2; //used for typed blocks
     public const int Open2 = 3; // used by player for idle blends
     public const int UpperBody = 4;
     public const int Flinch = 5;
