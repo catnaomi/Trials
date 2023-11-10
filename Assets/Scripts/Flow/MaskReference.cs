@@ -15,4 +15,19 @@ public class MaskReference : MonoBehaviour
         Actors = ActorMask;
     }
 
+
+    public static bool IsTerrain(int layer)
+    {
+        return (layer & Terrain) != 0;
+    }
+
+    public static bool IsTerrain(GameObject obj)
+    {
+        return IsTerrain(obj.layer);
+    }
+
+    public static bool IsTerrain(Collider c)
+    {
+        return IsTerrain(c.gameObject);
+    }
 }

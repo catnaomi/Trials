@@ -123,6 +123,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     [ReadOnly] public Vector3 groundNormal;
     [ReadOnly] public Vector3 groundPoint;
+    RaycastHit rayHit;
+    ControllerColliderHit ccHit;
+    ControllerColliderHit lastCCHit;
     Vector3 targetDirection;
     Vector3 headPoint;
     Vector3 smoothedHeadPoint;
@@ -388,6 +391,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         state.move = (MixerState)animancer.States.GetOrCreate(unarmedStance);
         state.attack = animancer.States.GetOrCreate(rollAnim);
         state.block = animancer.States.GetOrCreate(strafeAnimDefault);
+        state.fall = animancer.States.GetOrCreate(fallAnim);
         animancer.Play(state.move);
 
         SetupInputListeners();
@@ -526,7 +530,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             TryFindSpawnPoint();
         }
         instatemove = (animancer.States.Current == state.move);
-        isGrounded = GetGrounded(out RaycastHit rayHit, out RaycastHit sphereHit);
+        //isGrounded = GetGrounded(out rayHit, out sphereHit, out nonterrainHit);
         if (isGrounded)
         {
             didJump = false;
@@ -558,13 +562,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             groundNormal = rayHit.normal;
             groundPoint = rayHit.point;
         }
-        else if (sphereHit.collider != null)
+        else if (ccHit != null && ccHit.collider != null)
         {
-            slopeAngle = Vector3.Angle(Vector3.up, sphereHit.normal);
-            groundNormal = sphereHit.normal;
-            groundPoint = sphereHit.point;
+            slopeAngle = Vector3.Angle(Vector3.up, ccHit.normal);
+            groundNormal = ccHit.normal;
+            groundPoint =  ccHit.point;
         }
-        isCaughtOnEdge = (rayHit.collider != null || sphereHit.collider != null);
+        isCaughtOnEdge = (rayHit.collider == null && ccHit?.collider != null);
         stickDirection = camForward * move.y + camRight * move.x;
 
         PollInputs();
@@ -1234,10 +1238,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 if (!isGrounded && isCaughtOnEdge)
                 {
+                    Vector3 planarNormal = Vector3.ProjectOnPlane(groundNormal, Vector3.up).normalized;
                     //Physics.Raycast(bottom, Vector3.down, out groundRayHit, 0.2f, LayerMask.GetMask("Terrain"));
                     Vector3 dir = Vector3.forward;
-                    if (slopeAngle > (!wasSlidingUpdate ? cc.slopeLimit : minSlideAngle) && slopeAngle < maxSlideAngle) {
-
+                    if (false)//slopeAngle > (!wasSlidingUpdate ? cc.slopeLimit : minSlideAngle) && slopeAngle < maxSlideAngle) {
+                    {
                         sliding = true;
                         Vector3 horizTangent = Vector3.Cross(groundNormal, Vector3.down);
                         Vector3 downSlope = Vector3.Cross(horizTangent, groundNormal);
@@ -1245,11 +1250,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     }
                     else if (slopeAngle > maxSlideAngle && slopeAngle < 90f)
                     {
-                        dir = Vector3.ProjectOnPlane(groundNormal, Vector3.up).normalized;
+                        dir = planarNormal;
                     }
-                    else if (rayHit.collider == null && sphereHit.collider != null)
+                    else
                     {
-                        dir = this.transform.position - sphereHit.point;
+                        dir = this.transform.position - ccHit.point;
                     }
 
                     if (sliding)
@@ -1261,7 +1266,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     else
                     {
                         dir.y = 0f;
-                        xzVel = Vector3.MoveTowards(xzVel, dir.normalized * 1f, slideOffSpeed * Time.deltaTime);
+                        if (planarNormal != Vector3.zero && Vector3.Dot(xzVel, planarNormal) < 0)
+                        {
+                            Vector3 remove = Vector3.Project(xzVel, -planarNormal);
+                            xzVel -= remove;
+                        }
+                        Vector3 stickAddition = Vector3.zero;
+                        if (stickDirection.sqrMagnitude > 0)
+                        {
+                            Vector3 horizTangent = Vector3.Cross(groundNormal, Vector3.down);
+                            stickAddition = Vector3.Project(stickDirection, horizTangent);
+                            Debug.DrawRay(this.transform.position, stickAddition * 5f, Color.green);
+                        }
+                        xzVel = Vector3.MoveTowards(xzVel, (dir.normalized * slideOffSpeed) + (stickAddition * maxAirSpeed), slideAccel * Time.deltaTime);
                     }
 
                     
@@ -1294,7 +1311,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         xzVel = Vector3.ClampMagnitude(xzVel, maxAirSpeed);
                         lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * airTurnSpeed * Time.deltaTime, 1f).normalized;
                     }
-                    else
+                    else if (!isCaughtOnEdge)
                     {
                         Vector3 horizTangent = Vector3.Cross(groundNormal, Vector3.down);
                         xzVel += airAccel * Time.deltaTime * Vector3.Project(stickDirection,horizTangent);
@@ -1801,21 +1818,32 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     StandingJump();
                 }
             }
-            if (plunge && (isGrounded || (!isGrounded && isCaughtOnEdge)))
+            if (plunge)
             {
-                state.attack = animancer.Play(plungeEnd);
-                plunge = false;
-                xzVel = Vector3.zero;
-                speed = 0f;
-            }
-            else if (plunge && !isGrounded)
-            {
-                if ((rayHit.collider != null || sphereHit.collider != null))
+                bool grounded = isGrounded;
+                grounded |= rayHit.collider != null || (ccHit != null && ccHit.collider != null && MaskReference.IsTerrain(ccHit.collider));
+                if (yVel > 0)
                 {
+                    // do nothing, don't stop until you start going down
+                }
+                else if (grounded)
+                {
+                    // end plunge
                     state.attack = animancer.Play(plungeEnd);
                     plunge = false;
                     xzVel = Vector3.zero;
                     speed = 0f;
+                }
+                else if (ccHit != null && ccHit.collider != null)
+                {
+                    // slide off
+                    Vector3 dir = Vector3.ProjectOnPlane(ccHit.normal, Vector3.up);
+
+                    if (dir.magnitude <= 0f || Vector3.Dot(ccHit.normal,Vector3.up) == 1)
+                    {
+                        dir = stickDirection.magnitude > 0 ? stickDirection.normalized : this.transform.forward;
+                    }
+                    xzVel = dir.normalized * slideOffSpeed;
                 }
             }
             else if (hold)
@@ -1891,7 +1919,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     Resurrect(astate);
                 }
             }
-            else if (!isGrounded && (rayHit.collider != null || sphereHit.collider != null))
+            else if (!isGrounded && (rayHit.collider != null || (ccHit != null && ccHit.collider != null)))
             {
                 //Physics.Raycast(bottom, Vector3.down, out groundRayHit, 0.2f, LayerMask.GetMask("Terrain"));
                 Vector3 dir = Vector3.forward;
@@ -1899,9 +1927,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     dir = Vector3.ProjectOnPlane(groundNormal, Vector3.up).normalized;
                 }
-                else if (rayHit.collider == null && sphereHit.collider != null)
+                else if (rayHit.collider == null && ccHit.collider != null)
                 {
-                    dir = this.transform.position - sphereHit.point;
+                    dir = this.transform.position - ccHit.point;
                 }
 
                 dir.y = 0f;
@@ -1917,7 +1945,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         #region ALL OTHERS
         else
         {
-            applyMove = GetGrounded();
+            applyMove = isGrounded;
         }
         #endregion
         #endregion
@@ -2059,7 +2087,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 safePointClock = 0.25f;
             }
-            else if (!GetGrounded())
+            else if (!isGrounded)
             {
                 safePointClock = 0f;
             }
@@ -2129,6 +2157,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     void FixedUpdate()
     {
         if (disablePhysics) return;
+        isGrounded = GetGrounded(out rayHit);
         if (isGrounded)
         {
             if (yVel <= 0)
@@ -2160,7 +2189,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Vector3 velocity = xzVel;
         velocity.y = yVel;
         
-        if (IsAttacking())
+        if (IsAttacking() && isGrounded)
         {
             cc.radius = attackingColliderRadius;
         }
@@ -2813,8 +2842,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 jump = true;
                 break;
             case InputBuffer.Inputs.Slash:
-                Debug.Log("found slash input!");
-
                 attack = true;
                 slash = true;
                 break;
@@ -2894,13 +2921,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             ClimbUpLedge();
         }
-        else if (!GetGrounded() && !allowClimb && (currentClimb == null && !currentClimb.AllowJumps()))
+        else if (!isGrounded && !allowClimb && (currentClimb == null && !currentClimb.AllowJumps()))
         {
             // what was this supposed to do...?
             StartClimbLockout();
             allowClimb = true;
         }
-        else if (GetGrounded() || airTime < jumpBuffer || (IsClimbing() && currentClimb.AllowJumps()))
+        else if (isGrounded || airTime < jumpBuffer || (IsClimbing() && currentClimb.AllowJumps()))
         {
             //jump = true;
             buffer.SetInput(InputBuffer.Inputs.Jump, Time.time);
@@ -4572,7 +4599,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     void _OnDodgeEnd()
     {
-        if (!GetGrounded() && airTime > 0.1f)
+        if (!isGrounded && airTime > 0.1f)
         {
             state.fall = animancer.Play(fallAnim);
         }
@@ -4934,7 +4961,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public override bool IsGrounded()
     {
-        return GetGrounded();
+        return isGrounded;
     }
     public override bool IsDodging()
     {
@@ -5003,7 +5030,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public bool IsSafe()
     {
-        return (GetGrounded() && lastGroundWasStatic) &&
+        return (isGrounded && lastGroundWasStatic) &&
             animancer.States.Current != damageHandler.hurt &&
             !dead &&
             !resurrecting &&
@@ -5199,35 +5226,44 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public bool GetGrounded()
     {
-        return GetGrounded(out RaycastHit rhit, out RaycastHit shit);
+        return GetGrounded(out RaycastHit rhit);
     }
 
-    public bool GetGrounded(out RaycastHit rayHit, out RaycastHit sphereHit)
+    public bool GetGrounded(out RaycastHit rayHit)
     {
         if (isGroundedLockout)
         {
             rayHit = new RaycastHit();
-            sphereHit = new RaycastHit();
             return false;
         }
         // return cc.isGrounded;
         float RADIUS_MULT = 1f;
         float CAST_DISTANCE = 0.2f;
-        Collider c = this.GetComponent<Collider>();
+        float SPHERE_CAST_DISTANCE = 0.0f;
+        Collider c = cc;
         Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down + Vector3.up * groundBias;
         Vector3 top = c.bounds.center + Vector3.up * c.bounds.extents.y;
         
+        if (lastCCHit != null)
+        {
+            ccHit = lastCCHit;
+            lastCCHit = null;
+        }
+        else
+        {
+            ccHit = null;
+        }
         bool didHit = Physics.Raycast(c.bounds.center, Vector3.down, out rayHit, c.bounds.extents.y + CAST_DISTANCE, MaskReference.Terrain);
-        bool didSphereHit = Physics.SphereCast(top, cc.radius, Vector3.down, out sphereHit, c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius), MaskReference.Terrain);
-        
+        bool didCCHit = ccHit != null && ccHit.collider != null && MaskReference.IsTerrain(ccHit.collider);
+
         float slopeAngle = -1f;
         if (didHit)
         {
             slopeAngle = Vector3.Angle(Vector3.up, rayHit.normal);
         }
-        else if (didSphereHit)
+        else if (didCCHit)
         {
-            slopeAngle = Vector3.Angle(Vector3.up, sphereHit.normal);
+            slopeAngle = Vector3.Angle(Vector3.up, ccHit.normal);
         }
         bool slopeOK = slopeAngle <= cc.slopeLimit;
         if (didHit)
@@ -5245,26 +5281,21 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             withinBias = false;
         }
+        /*
         Color clr = didSphereHit ? Color.magenta : Color.yellow;
         
 
-        Debug.DrawRay(top, this.transform.forward * cc.radius * RADIUS_MULT, clr);
-        Debug.DrawRay(top, -this.transform.forward * cc.radius * RADIUS_MULT, clr);
-        Debug.DrawRay(top, this.transform.right * cc.radius * RADIUS_MULT, clr);
-        Debug.DrawRay(top, -this.transform.right * cc.radius * RADIUS_MULT, clr);
 
-        Debug.DrawRay(top + this.transform.forward * cc.radius * RADIUS_MULT, Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), clr);
-        Debug.DrawRay(top + -this.transform.forward * cc.radius * RADIUS_MULT, Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), clr);
-        Debug.DrawRay(top + this.transform.right * cc.radius * RADIUS_MULT, Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), clr);
-        Debug.DrawRay(top + -this.transform.right * cc.radius * RADIUS_MULT, Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), clr);
+        Debug.DrawRay(top + this.transform.forward * cc.radius * RADIUS_MULT, Vector3.down * (c.bounds.extents.y * 2f + (SPHERE_CAST_DISTANCE)), clr);
+        Debug.DrawRay(top + -this.transform.forward * cc.radius * RADIUS_MULT, Vector3.down * (c.bounds.extents.y * 2f + (SPHERE_CAST_DISTANCE)), clr);
+        Debug.DrawRay(top + this.transform.right * cc.radius * RADIUS_MULT, Vector3.down * (c.bounds.extents.y * 2f + (SPHERE_CAST_DISTANCE)), clr);
+        Debug.DrawRay(top + -this.transform.right * cc.radius * RADIUS_MULT, Vector3.down * (c.bounds.extents.y * 2f + (SPHERE_CAST_DISTANCE)), clr);
 
-        Debug.DrawRay(top + Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), this.transform.forward * cc.radius * RADIUS_MULT, clr);
-        Debug.DrawRay(top + Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), -this.transform.forward * cc.radius * RADIUS_MULT, clr);
-        Debug.DrawRay(top + Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), this.transform.right * cc.radius * RADIUS_MULT, clr);
-        Debug.DrawRay(top + Vector3.down * (c.bounds.extents.y * 2f + (CAST_DISTANCE - cc.radius)), -this.transform.right * cc.radius * RADIUS_MULT, clr);
-
+        DrawCircle.DrawWireSphere(top, cc.radius, clr);
+        DrawCircle.DrawWireSphere(top + Vector3.down * (c.bounds.extents.y * 2f + (SPHERE_CAST_DISTANCE)), cc.radius, clr);
+        */
         Debug.DrawRay(c.bounds.center, Vector3.down * (c.bounds.extents.y + CAST_DISTANCE), didHit ? Color.red : Color.cyan);
-        return ((didHit || didSphereHit) && slopeOK);// || cc.isGrounded;
+        return ((didHit || didCCHit) && slopeOK);// || cc.isGrounded;
     }
 
     public void StartGroundedLockout(float duration)
@@ -5280,6 +5311,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
+        lastCCHit = hit;
         ccHitNormal = hit.normal;
     }
 
