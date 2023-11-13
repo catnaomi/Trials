@@ -83,6 +83,7 @@ public class Actor : MonoBehaviour
     {
         //CurrentAction = ActionsLibrary.GetInputAction(0);
 
+        ActorManager.Register(this);
         ActorStart();
 
     }
@@ -123,40 +124,21 @@ public class Actor : MonoBehaviour
         // run before base class 
     }
 
+
     public virtual void ActorPostUpdate()
     {
         // run after base class 
     }
 
-    private void OnTriggerEnter(Collider other)
+
+    private void OnDestroy()
     {
-        HitboxController hitbox;
-        if (!other.TryGetComponent<HitboxController>(out hitbox))
-        {
-            return;
-        }
-
-        if (hitbox.GetSource() == this.transform.root)
-        {
-            return;
-        }
-
-        if (hitbox.id == mercyId)
-        {
-            return;
-        }
-
-        mercyId = hitbox.id;
-        OnHurt.Invoke();
-        hitbox.lastHitActor = this;
-        hitbox.OnHit.Invoke();
-        OnHitboxEnter(hitbox);
+        ActorManager.Deregister(this);
+        ActorOnDestroy();
     }
-
-    protected virtual void OnHitboxEnter(HitboxController hitbox)
+    public virtual void ActorOnDestroy()
     {
-        // do nothing by default
-        ProcessDamageKnockback(hitbox.damageKnockback);
+
     }
 
     public virtual void ProcessDamageKnockback(DamageKnockback damageKnockback)

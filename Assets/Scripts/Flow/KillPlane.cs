@@ -29,7 +29,7 @@ public class KillPlane : MonoBehaviour
 
             yield return new WaitForSecondsRealtime(interval);
             if (this.gameObject.scene != SceneManager.GetActiveScene()) continue;
-            Actor[] actors = FindObjectsOfType<Actor>();
+            List<Actor> actors = ActorManager.GetActors();
             foreach (Actor actor in actors)
             {
                 if (!actor.IsAlive()) continue;

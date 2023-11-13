@@ -2144,9 +2144,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             //this.transform.position = this.transform.position + animatorDelta;
             this.transform.rotation = animator.rootRotation;
         }
-        else
+        else if (cc.enabled)
         {
             //this.transform.position = animator.rootPosition;
+            this.transform.rotation = animator.rootRotation;
+        }
+        else
+        {
+            this.transform.position = animator.rootPosition;
             this.transform.rotation = animator.rootRotation;
         }
         
