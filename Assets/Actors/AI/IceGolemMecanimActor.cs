@@ -539,4 +539,14 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         this.StartTimer(waterDashTimer, true, BeginWaterDash);
         this.StartTimer(specialAttackTimer, true, BeginSpecialAttack);
     }
+
+    public void StartInvulnerability(float duration)
+    {
+        ((IDamageable)damageHandler).StartInvulnerability(duration);
+    }
+
+    public bool IsInvulnerable()
+    {
+        return ((IDamageable)damageHandler).IsInvulnerable();
+    }
 }

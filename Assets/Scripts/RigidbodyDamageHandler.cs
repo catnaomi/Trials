@@ -151,4 +151,14 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
     {
         return false;
     }
+
+    public void StartInvulnerability(float duration)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool IsInvulnerable()
+    {
+        return false; //TODO: implement invulnerability?
+    }
 }

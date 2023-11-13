@@ -604,4 +604,14 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
     {
         // do nothing on mimics
     }
+
+    public void StartInvulnerability(float duration)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool IsInvulnerable()
+    {
+        return false; //TODO: implement invulnerability?
+    }
 }

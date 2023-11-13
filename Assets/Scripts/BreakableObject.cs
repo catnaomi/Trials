@@ -121,4 +121,14 @@ public class BreakableObject : MonoBehaviour, IDamageable
     {
         return false;
     }
+
+    public void StartInvulnerability(float duration)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool IsInvulnerable()
+    {
+        return false; //TODO: implement invulnerability?
+    }
 }

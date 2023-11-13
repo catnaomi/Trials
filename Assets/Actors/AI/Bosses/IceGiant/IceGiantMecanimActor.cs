@@ -647,6 +647,16 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         
     }
 
+    public void StartInvulnerability(float duration)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool IsInvulnerable()
+    {
+        return false; //TODO: implement invulnerability?
+    }
+
     public DamageKnockback GetLastTakenDamage()
     {
         return lastDamageTaken;

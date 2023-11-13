@@ -2,6 +2,7 @@ using Animancer;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -12,7 +13,11 @@ public class EnemySpawner : MonoBehaviour
     public bool destroyOnDeath = false;
     public bool fakeSpawning;
     public bool spawnInspector;
-
+    public float invulnDuration = -1f;
+    public UnityEvent OnSpawn;
+    public UnityEvent OnDeath;
+    bool afterSpawn;
+    GameObject lastSpawned;
     public void Update()
     {
         if (spawnInspector)
@@ -62,9 +67,38 @@ public class EnemySpawner : MonoBehaviour
             };
         }
 
-        if (destroyOnDeath && actor1Obj.TryGetComponent<Actor>(out Actor actor))
+        if (actor1Obj.TryGetComponent<Actor>(out Actor actor))
         {
-            actor.OnDie.AddListener(() => Destroy(this.gameObject));
+            actor.OnDie.AddListener(Die);
         }
+        OnSpawn.Invoke();
+
+        afterSpawn = true;
+        lastSpawned = actor1Obj;
+    }
+
+
+    private void LateUpdate()
+    {
+        if (afterSpawn && lastSpawned != null)
+        {
+            if (lastSpawned.TryGetComponent<Actor>(out Actor actor))
+            {
+                if (invulnDuration > 0 && actor is IDamageable damageable)
+                {
+                    damageable.StartInvulnerability(invulnDuration);
+                }
+            }
+            afterSpawn = false;
+        }
+    }
+    public void Die()
+    {
+        OnDeath.Invoke();
+        if (destroyOnDeath)
+        {
+            Destroy(this.gameObject);
+        }
+        
     }
 }

@@ -37,7 +37,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
     int lastStagger = 0;
     int lastBlockStagger = 0;
-
+    bool isInvulnerable;
     protected System.Action _OnEnd;
     protected System.Action _OnBlockEnd;
     public void Recoil()
@@ -116,7 +116,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
     public virtual void TakeDamage(DamageKnockback damage)
     {
-        if (!actor.IsAlive() || IsInInvulnClip()) return;
+        if (!actor.IsAlive() || IsInvulnerable()) return;
         if (DamageKnockback.IsFriendlyFire(actor.attributes.friendlyGroup, damage.friendlyGroup)) return;
         float damageAmount = damage.GetDamageAmount();
        
@@ -622,6 +622,34 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     {
         invuln = state;
     }
+
+    public void StartInvulnerability(float duration)
+    {
+        actor.StartCoroutine(InvulnerabilityRoutine(duration));
+    }
+    
+    public bool IsInvulnerable()
+    {
+        return isInvulnerable || IsInInvulnClip();
+    }
+
+    IEnumerator InvulnerabilityRoutine(float duration)
+    {
+        isInvulnerable = true;
+        float clock = 0f;
+        while (clock < duration)
+        {
+            if (actor.isInTimeState)
+            {
+                yield return new WaitWhile(() => actor.isInTimeState);
+            }
+            yield return new WaitForSeconds(0.25f);
+            clock += 0.25f;
+        }
+        isInvulnerable = false;
+    }
+
+
     public IEnumerator EndProne(bool faceUp)
     {
         yield return new WaitForSeconds(2f);

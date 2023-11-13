@@ -5387,4 +5387,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         return ((IDamageable)damageHandler).IsCritVulnerable();
     }
+
+    public void StartInvulnerability(float duration)
+    {
+        ((IDamageable)damageHandler).StartInvulnerability(duration);
+    }
+
+    public bool IsInvulnerable()
+    {
+        return ((IDamageable)damageHandler).IsInvulnerable();
+    }
 }

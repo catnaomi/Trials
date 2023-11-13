@@ -30,7 +30,7 @@ public class SimplifiedDamageHandler : HumanoidDamageHandler
     public override void TakeDamage(DamageKnockback damage)
     {
 
-        if (!actor.IsAlive()) return;
+        if (!actor.IsAlive() || (actor as IDamageable).IsInvulnerable()) return;
         if (DamageKnockback.IsFriendlyFire(actor.attributes.friendlyGroup, damage.friendlyGroup)) return;
         bool isCrit = IsCritVulnerable();
         damage.didCrit = isCrit;

@@ -304,4 +304,14 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
     {
         return lastDamageTaken;
     }
+
+    public void StartInvulnerability(float duration)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool IsInvulnerable()
+    {
+        return false; //TODO: implement invulnerability?
+    }
 }

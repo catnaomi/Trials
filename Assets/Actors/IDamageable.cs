@@ -16,6 +16,9 @@ public interface IDamageable
 
     public void GetParried();
 
+    public void StartInvulnerability(float duration);
+
+    public bool IsInvulnerable();
     public DamageKnockback GetLastTakenDamage();
 
     public GameObject GetGameObject();

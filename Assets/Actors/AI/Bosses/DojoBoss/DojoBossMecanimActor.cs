@@ -1692,4 +1692,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         return timeHandler != null && timeHandler.IsFrozen();
     }
+
+    public void StartInvulnerability(float duration)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool IsInvulnerable()
+    {
+        return false; //TODO: implement invulnerability?
+    }
 }

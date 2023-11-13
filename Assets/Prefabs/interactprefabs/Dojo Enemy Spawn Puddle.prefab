@@ -114,7 +114,7 @@ Transform:
   m_Children:
   - {fileID: 1093154236550548045}
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1093154237388905989
 MonoBehaviour:
@@ -136,9 +136,17 @@ MonoBehaviour:
       _Callbacks: []
       _Names: []
     _Clip: {fileID: 7400000, guid: 01101c58932e2bc4d9c3d347a5bf19a8, type: 2}
-    _Speed: 1
+    _Speed: 2
     _NormalizedStartTime: NaN
   enableActionsOnSpawn: 1
   destroyOnFinish: 0
+  destroyOnDeath: 0
   fakeSpawning: 1
   spawnInspector: 0
+  invulnDuration: 5
+  OnSpawn:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDeath:
+    m_PersistentCalls:
+      m_Calls: []
