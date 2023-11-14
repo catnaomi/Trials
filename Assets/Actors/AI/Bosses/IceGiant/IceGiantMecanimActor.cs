@@ -393,10 +393,12 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         if (point == rightLegWeakPoint)
         {
             rightLeg.SetActive(true);
+            rightLegWeakPoint.gameObject.SendMessage("Reform");
         }
         else if (point == leftLegWeakPoint)
         {
             leftLeg.SetActive(true);
+            leftLegWeakPoint.gameObject.SendMessage("Reform");
         }
         point.health.current = point.health.max;
     }

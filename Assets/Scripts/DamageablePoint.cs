@@ -20,7 +20,6 @@ public class DamageablePoint : MonoBehaviour, IDamageable
     public UnityEvent OnHurt;
     public UnityEvent OnDie;
 
-
     void Start()
     {
         collider = this.GetComponent<Collider>();

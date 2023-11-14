@@ -65,6 +65,7 @@ public class Carryable : MonoBehaviour
     }
     public void StartCarry()
     {
+        if (isBeingCarried) return;
         isBeingCarried = true;
         OnStartCarry.Invoke();
     }

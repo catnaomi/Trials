@@ -3694,6 +3694,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             _MoveOnEnd();
         };
     }
+
     public void StopCarrying()
     {
         StartCoroutine(DelayAllowingCollision(carryable));
