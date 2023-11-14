@@ -66,6 +66,10 @@ public class AttackerRootMotionHandler : MonoBehaviour
         }
         rootDelta = diff;
 
+        if (!Application.isPlaying)
+        {
+            this.transform.position = animator.rootPosition;
+        }
         this.transform.rotation = animator.rootRotation;
     }
 

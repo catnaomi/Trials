@@ -59,6 +59,10 @@ public class EventVisualizer : MonoBehaviour
                 targets.Add(actor.gameObject);
             }
         }
+        else if (mono is IEventVisualizable visualizable)
+        {
+            targets.AddRange(visualizable.GetEventTargets());
+        }
     }
     private void OnDrawGizmos()
     {

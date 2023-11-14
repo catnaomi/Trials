@@ -506,6 +506,11 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         Destroy(puddleObject);
     }
 
+    public void PlayPuddle()
+    {
+        puddleObject.GetComponent<ParticleSystem>().Play();
+    }
+
     public void SetDestination(Vector3 position)
     {
         throw new System.NotImplementedException();
