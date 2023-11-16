@@ -264,6 +264,8 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         if (!CanUpdate())
         {
             nav.enabled = false;
+            cc.enabled = false;
+            collider.enabled = true;
             return;
         }
         if (isBodySpinning)
