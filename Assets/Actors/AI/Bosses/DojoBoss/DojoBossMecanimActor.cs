@@ -34,6 +34,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public float lanceExtensionDuration = 1f;
     public float maxRootMotionBackwardsAdjust = -1f;
     Vector3 rootDelta;
+    Vector3 leftHandPos;
+    Vector3 rightHandPos;
+    Quaternion leftHandRot;
+    Quaternion rightHandRot;
     [Header("Bow & Arrow")]
     public GameObject arrowPrefab;
     public GameObject homingArrowPrefab;
@@ -65,6 +69,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     bool inAttackSequence;
     DojoBossXOParticleController xoParticle;
     public float sequenceDelay = 0.25f;
+    public float minimumAttackDistance = 2f;
     public InputAttack slashRegular;
     public InputAttack thrustRegular;
     public InputAttack slashFinisher;
@@ -155,6 +160,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         positionReference = this.GetComponent<HumanoidPositionReference>();
         collider = this.GetComponent<CapsuleCollider>();
         cc = this.GetComponent<CharacterController>();
+
         CheckTarget();
         OnHitboxActive.AddListener(RealignToTarget);
         SetParryValue();
@@ -164,6 +170,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         xoParticle = this.GetComponentInChildren<DojoBossXOParticleController>();
         nav.updatePosition = true;
         nav.updateRotation = true;
+        GetHandPositions();
+        this.OnHurt.AddListener(ResetHandPositions);
+        this.OnHurt.AddListener(DeactivateHitboxes);
         StartCoroutine(DestinationCoroutine());
     }
 
@@ -942,6 +951,25 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     }
 
+    void GetHandPositions()
+    {
+        leftHandPos = positionReference.MainHand.transform.localPosition;
+        rightHandPos = positionReference.OffHand.transform.localPosition;
+        leftHandRot = positionReference.MainHand.transform.localRotation;
+        rightHandRot = positionReference.OffHand.transform.localRotation;
+    }
+
+    public void ResetHandPositions()
+    {
+        positionReference.OffHand.transform.localPosition = rightHandPos;
+        positionReference.MainHand.transform.localRotation = leftHandRot;
+        positionReference.OffHand.transform.localRotation = rightHandRot;
+    }
+
+    public override void DeactivateHitboxes()
+    {
+        HitboxActive(0);
+    }
     public bool IsCircleParrying()
     {
         return animator.GetCurrentAnimatorStateInfo(0).IsTag("PARRY_CIRCLE");
@@ -1185,7 +1213,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             this.OnHurt.Invoke();
             damage.OnHit.Invoke();
         }
-        DeactivateHitboxes();
     }
 
 
@@ -1620,7 +1647,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             diff = Vector3.Project(diff, dirToTarget);
             float startingMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
             float distanceAfterMovement = Vector3.Distance(this.transform.position + diff, CombatTarget.transform.position);
-            float minimumDistance = Mathf.Max(inventory.GetCurrentLength(),2f);
+            float minimumDistance = minimumAttackDistance;
             if (distanceAfterMovement < minimumDistance)
             {
                 diff = diff.normalized * (distanceAfterMovement - minimumDistance) * Time.deltaTime;

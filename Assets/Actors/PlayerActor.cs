@@ -2194,7 +2194,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Vector3 velocity = xzVel;
         velocity.y = yVel;
         
-        if (IsAttacking() && isGrounded)
+        if ((IsAttacking() || IsBlocking()) && isGrounded)
         {
             cc.radius = attackingColliderRadius;
         }
