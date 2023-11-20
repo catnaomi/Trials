@@ -567,12 +567,21 @@ public class TimeTravelController : MonoBehaviour
 
     public void Freeze(IAffectedByTimeTravel affected)
     {
+        if (affected == null) return;
+        try
+        {
+            TimeTravelData data = affected.SaveTimeState();
+            affected.LoadTimeState(data);
+            affected.StartFreeze();
+        }
+        catch (Exception ex)
+        {
+            // catch exceptions caused by time travel controllers and log them, but don't stop.
+            // otherwise objects functioning correctly will not unfreeze
+            Debug.LogError(ex);
+        }
 
-        TimeTravelData data = affected.SaveTimeState();
-        affected.LoadTimeState(data);
-        affected.StartFreeze();
     }
-
     public void SetFreezeToVisible()
     {
         frozens.Clear();
@@ -611,7 +620,18 @@ public class TimeTravelController : MonoBehaviour
     public void Unfreeze(IAffectedByTimeTravel affected)
     {
         if (affected == null) return;
-        affected.StopFreeze();
+
+        try
+        {
+            affected.StopFreeze();
+        }
+        catch (Exception ex)
+        {
+            // catch exceptions caused by time travel controllers and log them, but don't stop.
+            // otherwise objects functioning correctly will not unfreeze
+            Debug.LogError(ex);
+        }
+       
     }
 
     public void AddFrozen(IAffectedByTimeTravel affected)

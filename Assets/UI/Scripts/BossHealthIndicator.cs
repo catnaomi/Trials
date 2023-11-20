@@ -116,4 +116,15 @@ public class BossHealthIndicator : MonoBehaviour
         instance.SetTargetLocal(target);
 
     }
+
+    public void HideLocal()
+    {
+        this.target = null;
+        actor = null;
+        impulseReceiver.SetActor(null);
+    }
+    public static void Hide()
+    {
+        instance.HideLocal();
+    }
 }

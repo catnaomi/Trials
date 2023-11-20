@@ -145,6 +145,7 @@ public class StepParticleController : MonoBehaviour
     {
         foreach (ParticleSystem system in ripples)
         {
+            if (system == null) continue;
             system.Pause();
         }
     }
@@ -153,6 +154,7 @@ public class StepParticleController : MonoBehaviour
     {
         foreach (ParticleSystem system in ripples)
         {
+            if (system == null) continue;
             if (!system.isStopped)
             {
                 system.Play();

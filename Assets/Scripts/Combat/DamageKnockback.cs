@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
+using CustomUtilities;
 
 [Serializable]
 public class DamageKnockback
@@ -347,6 +348,22 @@ public class DamageKnockback
             }
         }
         thisDamageable.SetHitParticleVectors(contactPosition, contactDirection);
+    }
+
+    public static string FlagsToString(DamageType type)
+    {
+        System.Text.StringBuilder sb = new();
+
+        foreach (DamageType t in type.ToArray())
+        {
+            if (type.HasType(t))
+            {
+                sb.Append(" ");
+                sb.Append(Enum.GetName(typeof(DamageType), t));
+            }
+        }
+
+        return sb.ToString();
     }
 
 }

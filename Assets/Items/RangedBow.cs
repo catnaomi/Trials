@@ -11,13 +11,16 @@ public class RangedBow : RangedWeapon, IHitboxHandler
     public GameObject deadArrowPrefab;
     public DamageKnockback damageKnockback;
     public IKHandler ikHandler;
-    public float fireStrengthMult = 100f;
+    public float fireStrengthMax = 100f;
     public float fireStrengthMin = 25f;
+
+    public float minDamage = 1f;
+    public float maxDamage = 1f;
 
     public float drawTime = 1f;
 
     public LinearMixerTransitionAsset bowBend;
-    float nockTime;
+    double nockTime;
     bool canFire;
     ArrowController[] arrows;
     GameObject deadArrow;
@@ -201,11 +204,15 @@ public class RangedBow : RangedWeapon, IHitboxHandler
             }
             
         }
-        float launchStrength = fireStrengthMult;
+
+        DamageKnockback damage = new DamageKnockback(this.damageKnockback);
+        float launchStrength = fireStrengthMax;
         if (holder.ShouldCalcFireStrength())
         {
-            float t = Mathf.Clamp01((Time.time - nockTime) / drawTime);
-            launchStrength = Mathf.Clamp(fireStrengthMult * t, fireStrengthMin, fireStrengthMult);
+            float t = Mathf.Clamp01((float)((Time.timeAsDouble - nockTime) / drawTime));
+            launchStrength = Mathf.Lerp(fireStrengthMin, fireStrengthMax, t);
+
+            damage.healthDamage = (t >= 1) ? maxDamage : minDamage;
         }
 
         //float launchStrength = 25f + (75f * holder.GetFireStrength());
@@ -216,8 +223,8 @@ public class RangedBow : RangedWeapon, IHitboxHandler
         }*/
 
         Vector3 origin = positionReference.MainHand.transform.position + positionReference.MainHand.transform.parent.up * arrowLength;//holder.transform.position + launchVector + holder.transform.up * 1f;//(parent.position - positionReference.OffHand.transform.position).normalized;
-        ArrowController arrow = ArrowController.Launch(arrowPrefab, origin, Quaternion.LookRotation(launchVector), launchVector * launchStrength, holder.transform, this.damageKnockback);
-        arrow.Launch(origin, Quaternion.LookRotation(launchVector), launchVector * launchStrength, holder.transform, this.damageKnockback);
+        ArrowController arrow = ArrowController.Launch(arrowPrefab, origin, Quaternion.LookRotation(launchVector), launchVector * launchStrength, holder.transform, damage);
+        arrow.Launch(origin, Quaternion.LookRotation(launchVector), launchVector * launchStrength, holder.transform, damage);
 
         Collider[] arrowColliders = arrow.GetComponentsInChildren<Collider>();
         foreach (Collider actorCollider in holder.transform.GetComponentsInChildren<Collider>())
@@ -334,5 +341,14 @@ public class RangedBow : RangedWeapon, IHitboxHandler
         {
             return holder.transform.forward;
         }
+    }
+
+    public float GetBowCharge()
+    {
+        if (nocked)
+        {
+            return Mathf.Clamp01((float)((Time.timeAsDouble - nockTime) / drawTime));
+        }
+        return 0;
     }
 }

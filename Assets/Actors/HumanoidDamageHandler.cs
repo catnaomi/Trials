@@ -129,9 +129,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         damage.didCrit = isCrit;
         damageAmount = damage.GetDamageAmount(isCrit);
 
-        lastDamage = damage.healthDamage;
-        lastDamageTaken = damage;
-        damageTaken += lastDamage;
+        actor.lastDamageTaken = damage;
 
         //lastHitbox = damage.hitboxSource.GetComponent<Hitbox>();
 
@@ -185,6 +183,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.unresistedMinimum, damage.GetTypes(), dr);
         //Debug.Log("damage after resistances = " + damageAmount);
 
+
         if (damage.GetTypes().HasType(dr.weaknesses))
         {
             damage.OnHitWeakness.Invoke();
@@ -194,6 +193,15 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         bool willInjure = actor.attributes.spareable && actor.attributes.HasHealthRemaining() && damageAmount >= actor.attributes.health.current;
         bool willKill = (!willInjure) && damageAmount >= actor.attributes.health.current;
         bool isCounterhit = actor.IsAttacking();
+
+
+        lastDamageTaken = damage;
+        lastDamage = damageAmount;
+        damageTaken += lastDamage;
+
+        actor.lastDamageTaken = damage;
+        actor.lastDamageAmountTaken = damageAmount;
+
 
         if (actor.IsDodging())
         {
