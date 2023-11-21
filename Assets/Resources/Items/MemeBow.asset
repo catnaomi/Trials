@@ -48,15 +48,6 @@ MonoBehaviour:
   usesAmmunition: 1
   ammunitionReference: {fileID: 11400000, guid: d16790a012b3df64fba58b934c0a61e7,
     type: 2}
-  blockResistances:
-    strengths: 0
-    strengthMultiplier: 1
-    strengthsFlat: 0
-    weaknesses: 0
-    weaknessMultiplier: 1
-    weaknessFlat: 0
-    neutralMultiplier: 1
-    neutralFlat: 0
   OnEquip:
     m_PersistentCalls:
       m_Calls: []
@@ -71,6 +62,7 @@ MonoBehaviour:
     type: 3}
   damageKnockback:
     healthDamage: 1000
+    unresistedMinimum: 0
     types: 0
     critData:
       criticalMultiplier: 0
@@ -84,11 +76,16 @@ MonoBehaviour:
     isThrust: 0
     isSlash: 0
     isRanged: 1
+    isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
     stunTime: 0
+    repositionLength: 0
     stagger: 0
     staggers:
       onHit: 3
@@ -96,11 +93,13 @@ MonoBehaviour:
       onCritical: 5
       onKill: 5
       onCounterHit: 4
+      onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
-    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -112,10 +111,17 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
     hitClip: {fileID: 0}
   ikHandler: {fileID: 11400000, guid: 3e1da2a0b87efea48b403875a190a4af, type: 2}
-  fireStrengthMult: 100
+  fireStrengthMax: 100
   fireStrengthMin: 25
+  minDamage: 1000
+  maxDamage: 1000
   drawTime: 1
   bowBend: {fileID: 11400000, guid: 977d6e38cfb48fd4b90690a626a267cc, type: 2}
   arrowCount: 4

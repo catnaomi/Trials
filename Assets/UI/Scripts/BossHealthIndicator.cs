@@ -127,4 +127,13 @@ public class BossHealthIndicator : MonoBehaviour
     {
         instance.HideLocal();
     }
+
+    public static GameObject GetTarget()
+    {
+        if (instance != null && instance.target != null)
+        {
+            return instance.target;
+        }
+        return null;
+    }
 }

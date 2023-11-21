@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class TargetUIInfo : MonoBehaviour
 {
     public GameObject target;
-    public Actor actor;
+    public IHasHealthAttribute actor;
     public bool isActiveTarget;
     public TargetUIController controller;
     public Canvas canvas;
@@ -21,15 +21,34 @@ public class TargetUIInfo : MonoBehaviour
 
     public void SetTarget(GameObject target)
     {
+        GameObject targetActual = target;
         if (this.target != target)
         {
             this.target = target;
             if (target != null)
             {
-                actor = target.transform.root.GetComponent<Actor>();
+                if (target.TryGetComponent<TargetUIMeta>(out TargetUIMeta meta))
+                {
+                    targetActual = meta.target;
+                    if (meta.target != null)
+                    {
+                        actor = meta.target.GetComponent<IHasHealthAttribute>();
+                    }
+                }
+                else
+                {
+                    targetActual = target.transform.root.gameObject;
+                    actor = target.transform.root.GetComponent<IHasHealthAttribute>();
+                }
+                
             }
 
+            if (targetActual != null && BossHealthIndicator.GetTarget() != null && targetActual == BossHealthIndicator.GetTarget())
+            {
+                actor = null;
+            }
         }
+
     }
 
     private void OnGUI()
@@ -43,16 +62,26 @@ public class TargetUIInfo : MonoBehaviour
         {
             group.alpha = 1f;
 
-            if (actor != null && actor.attributes.health.current != actor.attributes.health.max)
+            if (actor != null)
             {
-                healthBarGroup.alpha = Mathf.MoveTowards(healthBarGroup.alpha, 1f, healthBarFadeTime * Time.deltaTime);
-                health.fillAmount = actor.attributes.health.current / actor.attributes.health.max;
-                damaged.fillAmount = actor.attributes.smoothedHealth / actor.attributes.health.max;
+                AttributeValue actorHealth = actor.GetHealth();
+                float smoothedHealth = actor.GetSmoothedHealth();
+                if (actorHealth.current != actorHealth.max)
+                {
+                    healthBarGroup.alpha = Mathf.MoveTowards(healthBarGroup.alpha, 1f, healthBarFadeTime * Time.deltaTime);
+                    health.fillAmount = actorHealth.current / actorHealth.max;
+                    damaged.fillAmount = smoothedHealth / actorHealth.max;
+                }
+                else
+                {
+                    healthBarGroup.alpha = Mathf.MoveTowards(healthBarGroup.alpha, 0f, healthBarFadeTime * Time.deltaTime);
+                }
             }
             else
             {
                 healthBarGroup.alpha = Mathf.MoveTowards(healthBarGroup.alpha, 0f, healthBarFadeTime * Time.deltaTime);
             }
+            
 
             activeTargetIcon.enabled = controller.IsActiveTarget(target) && controller.IsTargeting();
             inactiveTargetIcon.enabled = controller.IsActiveTarget(target) && !controller.IsTargeting();

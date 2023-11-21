@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class DamageablePoint : MonoBehaviour, IDamageable
+public class DamageablePoint : MonoBehaviour, IDamageable, IHasHealthAttribute
 {
     public AttributeValue health;
+    public float smoothedHealth;
+    double lastSmoothedTime;
     public bool hasHealth;
     public DamageResistance resistance;
     Collider collider;
@@ -34,6 +36,7 @@ public class DamageablePoint : MonoBehaviour, IDamageable
                 critVulnerable = false;
             }
         }
+        smoothedHealth = ActorAttributes.GetSmoothedHealth(ref health, smoothedHealth, ref lastSmoothedTime);
     }
 
 
@@ -158,5 +161,15 @@ public class DamageablePoint : MonoBehaviour, IDamageable
     public bool IsInvulnerable()
     {
         return false; //TODO: implement invulnerability?
+    }
+
+    public AttributeValue GetHealth()
+    {
+        return health;
+    }
+
+    public float GetSmoothedHealth()
+    {
+        return smoothedHealth;
     }
 }

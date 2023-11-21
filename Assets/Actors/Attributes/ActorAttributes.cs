@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
 
-public class ActorAttributes : MonoBehaviour
+public class ActorAttributes : MonoBehaviour, IHasHealthAttribute
 {
     private readonly float SMOOTHING_DELAY = 1f;
     private readonly float SMOOTHING_MAX_DELTA = 0.5f;
@@ -19,7 +19,7 @@ public class ActorAttributes : MonoBehaviour
     [Header("Vitality")]
     [ReadOnly] public float smoothedHealth;
     public float healthRecoveryClock;
-    private float healthSmoothClock;
+    private double healthSmoothClock;
     private float healthLast;
     public AttributeValue health;
     public AttributeValue healthRecoveryRate;
@@ -50,7 +50,10 @@ public class ActorAttributes : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        smoothedHealth = NumberUtilities.TimeDelayedSmoothDelta(smoothedHealth, health.current, healthSmoothClock + SMOOTHING_DELAY, health.max * SMOOTHING_MAX_DELTA, Time.time);
+
+        //smoothedHealth = NumberUtilities.TimeDelayedSmoothDelta(smoothedHealth, health.current, healthSmoothClock + SMOOTHING_DELAY, health.max * SMOOTHING_MAX_DELTA, Time.timeAsDouble);
+        smoothedHealth = GetSmoothedHealth(ref health, smoothedHealth, ref healthSmoothClock, SMOOTHING_DELAY, SMOOTHING_MAX_DELTA);
+
 
         if (health.current < healthLast)
         {
@@ -59,14 +62,6 @@ public class ActorAttributes : MonoBehaviour
         else
         {
             healthRecoveryClock += Time.deltaTime;
-        }
-        if (smoothedHealth == health.current)
-        {
-            healthSmoothClock = Time.time;
-        }
-        else if (smoothedHealth < health.current)
-        {
-            smoothedHealth = health.current;
         }
 
         healthLast = health.current;
@@ -86,6 +81,21 @@ public class ActorAttributes : MonoBehaviour
             }
             effectClock = 0f;
         }
+    }
+
+    public static float GetSmoothedHealth(ref AttributeValue health, float currentSmoothed, ref double lastSmoothTime, float delay = 1f, float maxDelta = 0.5f)
+    {
+        float smoothed = NumberUtilities.TimeDelayedSmoothDelta(currentSmoothed, health.current, lastSmoothTime + delay, health.max * maxDelta, Time.timeAsDouble);
+        if (smoothed == health.current)
+        {
+            lastSmoothTime = Time.timeAsDouble;
+        }
+        else if (smoothed < health.current)
+        {
+            smoothed = health.current;
+        }
+
+        return smoothed;
     }
     
     public void ResetAttributes()
@@ -204,6 +214,16 @@ public class ActorAttributes : MonoBehaviour
                 effects.RemoveAt(removeIndex);
             }
         }
+    }
+
+    public AttributeValue GetHealth()
+    {
+        return health;
+    }
+
+    public float GetSmoothedHealth()
+    {
+        return smoothedHealth;
     }
 
     [Serializable]

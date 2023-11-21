@@ -31,7 +31,7 @@ namespace CustomUtilities
             return Mathf.Lerp(current, target, progress);
         }
 
-        public static float TimeDelayedSmoothDelta(float current, float target, float timeToStart, float maxDelta, float currentTime)
+        public static float TimeDelayedSmoothDelta(float current, float target, double timeToStart, float maxDelta, double currentTime)
         {
             if (currentTime >= timeToStart)
             {

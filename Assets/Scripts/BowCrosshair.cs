@@ -29,7 +29,7 @@ public class BowCrosshair : MonoBehaviour
         if (!Application.isPlaying) return;
         targetAlpha = 0f;
         targetOuterScale = group.alpha < 1 ? exitScale : 1;
-        if (PlayerActor.player.IsAiming())
+        if (PlayerActor.player.IsAiming() && PlayerActor.player.camState != PlayerActor.CameraState.Lock)
         {
             targetAlpha = 1f;
             if (PlayerActor.player.inventory.IsRangedDrawn() && PlayerActor.player.inventory.GetRangedWeapon() is RangedBow bow)
