@@ -19,4 +19,14 @@ public class PlayerAttributeData
         health.Copy(playerAttributes.health);
         timeCharges.Copy(time.charges);
     }
+
+    public string ToJSON()
+    {
+        return JsonUtility.ToJson(this);
+    }
+
+    public static PlayerAttributeData FromJSON(string json)
+    {
+        return JsonUtility.FromJson<PlayerAttributeData>(json);
+    }
 }

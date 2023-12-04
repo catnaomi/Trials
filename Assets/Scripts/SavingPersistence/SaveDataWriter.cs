@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -46,12 +47,13 @@ public class SaveDataWriter : MonoBehaviour
     {
         data.playerInventoryData = PlayerSaveDataManager.GetInventoryData();
         data.playerAttributeData = PlayerSaveDataManager.GetAttributeData();
+        data.yarnData = YarnSaveDataManager.GetSaveDataStatic();
     }
 
     public void Write()
     {
         string path = GetPath() + $"savedata{slot}.json";
-        string json = JsonUtility.ToJson(data);
+        string json = JsonConvert.SerializeObject(data);
 
         Directory.CreateDirectory(GetPath());
         using (StreamWriter sw = new StreamWriter(path, false, new UTF8Encoding()))
@@ -78,7 +80,7 @@ public class SaveDataWriter : MonoBehaviour
             return;
         }
 
-        SaveData readData = JsonUtility.FromJson<SaveData>(json);
+        SaveData readData = JsonConvert.DeserializeObject<SaveData>(json);
         if (readData != null)
         {
             data = readData;

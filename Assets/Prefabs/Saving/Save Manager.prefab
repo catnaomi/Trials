@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 283842642759987142}
   - component: {fileID: 4380368271242009094}
   - component: {fileID: 7639656470440485097}
+  - component: {fileID: 611670848963216522}
   m_Layer: 0
   m_Name: Save Manager
   m_TagString: Untagged
@@ -45,6 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a5663b7eb5e29d141a109ddc26999deb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugShowInventoryString: 0
   inventory: 
   save: 0
   load: 0
@@ -61,7 +63,43 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   savePath: '%persistentDataPath%/Saves/'
-  playerSaveDataManager: {fileID: 0}
   slot: 1
-  read: 0
   write: 0
+  read: 0
+  apply: 0
+  data:
+    playerInventoryData:
+      MainWeaponString: 
+      OffWeaponString: 
+      RangedWeaponString: 
+      Slot0String: 
+      Slot1String: 
+      Slot2String: 
+      Slot3String: 
+      contentsString: []
+    playerAttributeData:
+      health:
+        baseValue: 0
+        current: 0
+        max: 0
+      timeCharges:
+        baseValue: 0
+        current: 0
+        max: 0
+--- !u!114 &611670848963216522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3153745462788765620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fca592d093afc944185496a69e78fad4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  save: 0
+  load: 0
+  stringPreview: 
+  boolPreview: 
+  floatPreview: 

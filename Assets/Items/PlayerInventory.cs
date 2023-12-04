@@ -1523,4 +1523,14 @@ public class PlayerInventoryData
             
         }
     }
+
+    public string ToJSON()
+    {
+        return JsonUtility.ToJson(this);
+    }
+
+    public static PlayerInventoryData FromJSON(string json)
+    {
+        return GetDataFromJSON(json);
+    }
 }

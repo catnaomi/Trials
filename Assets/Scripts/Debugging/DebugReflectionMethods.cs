@@ -541,5 +541,81 @@ public static class DebugReflectionMethods
         }
     }
 
+    public static void SetYarn(string key, string value)
+    {
+        try
+        {
+            InMemoryVariableStorage yarnStorage = GameObject.FindObjectOfType<InMemoryVariableStorage>();
+            if (yarnStorage == null)
+            {
+                Debug.LogError("Yarn Variable Storage Missing!");
+                return;
+            }
+
+            string k = key;
+            if (k[0] != '$')
+            {
+                k = "$" + k;
+            }
+            
+            if (bool.TryParse(value, out bool boolValue))
+            {
+                yarnStorage.SetValue(k, boolValue);
+                Debug.Log($"Set Yarn Variable \"{k}\" to \"{value}\" with type Boolean");
+            }
+            else if (float.TryParse(value, out float floatValue))
+            {
+                yarnStorage.SetValue(k, floatValue);
+                Debug.Log($"Set Yarn Variable \"{k}\" to \"{value}\" with type Float");
+            }
+            else
+            {
+                yarnStorage.SetValue(k, value);
+                Debug.Log($"Set Yarn Variable \"{k}\" to \"{value}\" with type String");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
+    public static void GetYarn(string key)
+    {
+        try
+        {
+            InMemoryVariableStorage yarnStorage = GameObject.FindObjectOfType<InMemoryVariableStorage>();
+            if (yarnStorage == null)
+            {
+                Debug.LogError("Yarn Variable Storage Missing!");
+                return;
+            }
+
+            string k = key;
+            if (k[0] != '$')
+            {
+                k = "$" + k;
+            }
+
+            if (yarnStorage.TryGetValue<object>(k, out object value))
+            {
+                string type = "String";
+                if (value is bool) type = "Boolean";
+                if (value is float) type = "Float";
+
+                Debug.Log($"{k}: {value} ({type})");
+            }
+            else
+            {
+                Debug.Log($"Var {k} not found");
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
+
 
 }
