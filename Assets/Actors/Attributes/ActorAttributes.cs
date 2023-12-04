@@ -258,4 +258,18 @@ public class AttributeValue
         this.current = current;
         this.max = max;
     }
+
+    public AttributeValue(AttributeValue attribute)
+    {
+        this.baseValue = attribute.baseValue;
+        this.current = attribute.current;
+        this.max = attribute.max;
+    }
+
+    public void Copy(AttributeValue attribute)
+    {
+        this.baseValue = attribute.baseValue;
+        this.current = attribute.current;
+        this.max = attribute.max;
+    }
 }

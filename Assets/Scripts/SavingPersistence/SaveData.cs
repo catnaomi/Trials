@@ -7,4 +7,5 @@ using UnityEngine;
 public class SaveData
 {
     public PlayerInventoryData playerInventoryData;
+    public PlayerAttributeData playerAttributeData;
 }

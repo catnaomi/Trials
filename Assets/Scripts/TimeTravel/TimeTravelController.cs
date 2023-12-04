@@ -79,6 +79,7 @@ public class TimeTravelController : MonoBehaviour
     public UnityEvent OnMeterFail;
     public UnityEvent OnChargeSpent;
     public UnityEvent OnChargeRecovered;
+    public UnityEvent OnChargeChanged;
     public UnityEvent OnQuickChargeStart;
     public UnityEvent OnQuickChargeEnd;
     public UnityEvent OnBonusCharge;
@@ -374,6 +375,7 @@ public class TimeTravelController : MonoBehaviour
         charges.current--;
         meter.current = meter.max;
         OnChargeSpent.Invoke();
+        OnChargeChanged.Invoke();
     }
 
     public void RecoverCharge()
@@ -383,6 +385,7 @@ public class TimeTravelController : MonoBehaviour
             charges.current++;
         }
         OnChargeRecovered.Invoke();
+        OnChargeChanged.Invoke();
     }
 
     public void BonusCharge()
@@ -664,12 +667,11 @@ public class TimeTravelController : MonoBehaviour
         AddAllToFreeze();
 
         freeze = true;
-        meter.current = meter.max;
-        charges.current--;
         //StartCoroutine(OpenBubbleRoutine());
         StartCoroutine(FreezeRoutine());
         StartPostProcessing();
         OnTimeStopStart.Invoke();
+        ConsumeChargeAndResetMeter();
     }
 
     public void StopFreeze()

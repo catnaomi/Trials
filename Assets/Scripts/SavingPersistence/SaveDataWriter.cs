@@ -45,6 +45,7 @@ public class SaveDataWriter : MonoBehaviour
     public void CollectData()
     {
         data.playerInventoryData = PlayerSaveDataManager.GetInventoryData();
+        data.playerAttributeData = PlayerSaveDataManager.GetAttributeData();
     }
 
     public void Write()
@@ -97,11 +98,5 @@ public class SaveDataWriter : MonoBehaviour
     {
         string actualPath = savePath.Replace("%persistentDataPath%", Application.persistentDataPath);
         return actualPath;
-    }
-
-    private static void AddText(FileStream fs, string value)
-    {
-        byte[] info = new UTF8Encoding(true).GetBytes(value);
-        fs.Write(info, 0, info.Length);
     }
 }
