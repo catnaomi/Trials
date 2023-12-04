@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 283842642759987142}
   - component: {fileID: 4380368271242009094}
+  - component: {fileID: 7639656470440485097}
   m_Layer: 0
   m_Name: Save Manager
   m_TagString: Untagged
@@ -30,7 +31,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 40
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4380368271242009094
 MonoBehaviour:
@@ -46,3 +47,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventory: 
   save: 0
+  load: 0
+--- !u!114 &7639656470440485097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3153745462788765620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3616b56eaa8d36e42b1bfe8afc7e9900, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  savePath: '%persistentDataPath%/Saves/'
+  playerSaveDataManager: {fileID: 0}
+  slot: 1
+  read: 0
+  write: 0
