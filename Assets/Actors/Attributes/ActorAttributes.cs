@@ -46,6 +46,13 @@ public class ActorAttributes : MonoBehaviour, IHasHealthAttribute
     private void Start()
     {
         effects = new List<EffectDuration>();
+        if (PlayerActor.player.gameObject == this.gameObject)
+        {
+            if (PlayerSaveDataManager.HasAttributeData())
+            {
+                PlayerSaveDataManager.GetAttributeData().LoadDataToAttributes(this);
+            }
+        }
     }
     // Update is called once per frame
     void Update()

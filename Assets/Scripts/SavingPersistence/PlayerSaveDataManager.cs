@@ -147,6 +147,12 @@ public class PlayerSaveDataManager : MonoBehaviour
         return null;
     }
 
+
+    public static bool HasAttributeData()
+    {
+        return instance != null && instance.attributeData != null;
+    }
+
     public void SaveWorldData()
     {
         if (PlayerActor.player == null || PortalManager.instance == null) return;

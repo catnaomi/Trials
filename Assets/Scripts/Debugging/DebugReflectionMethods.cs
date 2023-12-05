@@ -179,7 +179,13 @@ public static class DebugReflectionMethods
     public static void LoadSceneAddit(string sceneName)
     {
         try
+
         {
+            if (!SceneLoader.DoesSceneExist(sceneName))
+            {
+                Debug.LogError($"scene {sceneName} does not exist!");
+                return;
+            }
             SceneLoader.ShouldReloadScenes(true);
             SceneLoader.EnsureScenesAreLoaded(sceneName);
         }
@@ -193,6 +199,11 @@ public static class DebugReflectionMethods
     {
         try
         {
+            if (!SceneLoader.DoesSceneExist(sceneName))
+            {
+                Debug.LogError($"scene {sceneName} does not exist!");
+                return;
+            }
             SceneLoader.LoadWithProgressBar(sceneName);
         }
         catch (Exception ex)

@@ -645,6 +645,19 @@ public class SceneLoader : MonoBehaviour
         return instance != null && instance.isLoadingComplete;
     }
 
+    public static bool DoesSceneExist(string sceneName)
+    {
+        //TODO: figure out best way to do this
+        return true;
+        for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
+        {
+            if (SceneManager.GetSceneByBuildIndex(i).name == sceneName)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     public void ValidateDoubleInitScenes()
     {
         bool foundInit = false;

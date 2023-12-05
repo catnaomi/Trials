@@ -29,4 +29,14 @@ public class PlayerAttributeData
     {
         return JsonUtility.FromJson<PlayerAttributeData>(json);
     }
+
+    public void LoadDataToAttributes(ActorAttributes attributes)
+    {
+        attributes.health.Copy(this.health);
+    }
+
+    public void LoadDataToTimeController(TimeTravelController time)
+    {
+        time.charges.Copy(this.timeCharges);
+    }
 }

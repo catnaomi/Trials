@@ -121,6 +121,10 @@ public class TimeTravelController : MonoBehaviour
             PlayerActor.player.OnHitWeakness.AddListener(BonusCharge);
             //PlayerActor.player.OnParrySuccess.AddListener(RecoverCharge);
         }
+        if (PlayerSaveDataManager.HasAttributeData())
+        {
+            PlayerSaveDataManager.GetAttributeData().LoadDataToTimeController(this);
+        }
         deregisters = new List<IAffectedByTimeTravel>();
         
     }
