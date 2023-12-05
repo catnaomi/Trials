@@ -615,7 +615,4 @@ public static class DebugReflectionMethods
             Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
         }
     }
-
-
-
 }

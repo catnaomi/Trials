@@ -9,6 +9,8 @@ public class FadeToBlackController : MonoBehaviour
     public static readonly float DEFAULT_FADEIN = 3f;
     public static readonly float DEFAULT_FADEOUT = 2f;
 
+    public static bool overrideNextFadeIn = false;
+
     public bool FadeInOnStart;
     public AnimationCurve fadeInCurve = AnimationCurve.Linear(1f, 1f, 0f, 0f);
     public AnimationCurve fadeOutCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
@@ -41,6 +43,10 @@ public class FadeToBlackController : MonoBehaviour
         }
     }
 
+    public static void FadeOut(System.Action callback)
+    {
+        FadeOut(DEFAULT_FADEOUT, callback, Color.black);
+    }
     public static void FadeOut(float duration)
     {
         FadeOut(duration, null, Color.black);
@@ -97,5 +103,30 @@ public class FadeToBlackController : MonoBehaviour
             group.alpha = 1f;
         }
         callback?.Invoke();
+    }
+
+    public static void OverrideNextFadeInOnStart(bool fade)
+    {
+        overrideNextFadeIn = fade;
+    }
+
+    bool ShouldFadeInOnStart()
+    {
+        if (FadeInOnStart)
+        {
+            if (overrideNextFadeIn)
+            {
+                overrideNextFadeIn = false;
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        else
+        {
+            return false;
+        }
     }
 }

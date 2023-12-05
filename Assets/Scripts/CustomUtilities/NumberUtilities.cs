@@ -42,5 +42,28 @@ namespace CustomUtilities
                 return current;
             }
         }
+
+        public static Vector3 ArrayToVector3(float[] array)
+        {
+            if (array.Length < 3) return Vector3.zero;
+            return new Vector3(array[0], array[1], array[2]);
+        }
+
+        public static Quaternion ArraytoQuaternion(float[] array)
+        {
+            if (array.Length < 4) return Quaternion.identity;
+
+            return new Quaternion(array[0], array[1], array[2], array[3]);
+        }
+
+        public static float[] Vector3ToArray(Vector3 vector)
+        {
+            return new float[] { vector.x, vector.y, vector.z };
+        }
+
+        public static float[] QuaternionToArray(Quaternion quaternion)
+        {
+            return new float[] { quaternion.x, quaternion.y, quaternion.z, quaternion.w };
+        }
     }
 }

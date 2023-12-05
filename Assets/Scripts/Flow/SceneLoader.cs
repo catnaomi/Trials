@@ -222,6 +222,7 @@ public class SceneLoader : MonoBehaviour
         
         SceneLoader.SetActiveScene(primarySceneToLoad);
         isLoading = false;
+        isLoadingComplete = true;
         OnFinishLoad.Invoke();
         
         /*
@@ -637,6 +638,11 @@ public class SceneLoader : MonoBehaviour
     public static bool IsSceneLoaderActive()
     {
         return instance != null;
+    }
+
+    public static bool IsSceneLoadingComplete()
+    {
+        return instance != null && instance.isLoadingComplete;
     }
 
     public void ValidateDoubleInitScenes()

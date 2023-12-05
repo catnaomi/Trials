@@ -12,6 +12,8 @@ public class PlayerSaveDataManager : MonoBehaviour
 
     PlayerInventoryData inventoryData;
     PlayerAttributeData attributeData;
+    PlayerWorldData worldData;
+
     bool inventoryChanged;
     bool attributesChanged;
     public bool save;
@@ -19,7 +21,6 @@ public class PlayerSaveDataManager : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        DontDestroyOnLoad(this.gameObject);
     }
     public void OnSceneStart()
     {
@@ -75,6 +76,7 @@ public class PlayerSaveDataManager : MonoBehaviour
     public void SaveData()
     {
         SaveInventoryData();
+        SaveAttributeData();
     }
 
     public void LoadData()
@@ -99,9 +101,13 @@ public class PlayerSaveDataManager : MonoBehaviour
     }
     public static PlayerInventoryData GetInventoryData()
     {
-        if (instance != null && instance.inventoryData != null)
+        if (instance != null)
         {
-            return instance.inventoryData;
+            instance.SaveInventoryData();
+            if (instance.inventoryData != null)
+            {
+                return instance.inventoryData;
+            }
         }
         return null;
     }
@@ -130,9 +136,38 @@ public class PlayerSaveDataManager : MonoBehaviour
 
     public static PlayerAttributeData GetAttributeData()
     {
-        if (instance != null && instance.attributeData != null)
+        if (instance != null)
         {
-            return instance.attributeData;
+            instance.SaveAttributeData();
+            if (instance.attributeData != null)
+            {
+                return instance.attributeData;
+            }
+        }
+        return null;
+    }
+
+    public void SaveWorldData()
+    {
+        if (PlayerActor.player == null || PortalManager.instance == null) return;
+        
+        if (worldData == null)
+        {
+            worldData = new PlayerWorldData();
+        }
+
+        worldData.GetWorldData(PortalManager.instance, PlayerActor.player);
+    }
+
+    public static PlayerWorldData GetWorldData()
+    {
+        if (instance != null)
+        {
+            instance.SaveWorldData();
+            if (instance.worldData != null)
+            {
+                return instance.worldData;
+            }
         }
         return null;
     }
