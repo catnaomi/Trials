@@ -92,6 +92,8 @@ public class PlayerTargetManager : MonoBehaviour
 
         freeLook = player.vcam.target.GetComponent<CinemachineFreeLook>();
         targetAim.position = Vector3.zero;
+
+        Recenter();
     }
 
     void SetupInputListeners()
@@ -320,16 +322,27 @@ public class PlayerTargetManager : MonoBehaviour
         }
     }
 
-
-    public void RecenterFree()
+    public void Recenter(bool force = false)
     {
-        if (inputs.actions["look"].ReadValue<Vector2>().magnitude == 0)
+        if (lockedOn)
+        {
+            RecenterTarget(force);
+        }
+        else
+        {
+            RecenterFree(force);
+        }
+    }
+
+    public void RecenterFree(bool force = false)
+    {
+        if (force || inputs.actions["look"].ReadValue<Vector2>().magnitude == 0)
             OnRecenterFree.Invoke();
     }
 
-    public void RecenterTarget()
+    public void RecenterTarget(bool force = false)
     {
-        if (inputs.actions["look"].ReadValue<Vector2>().magnitude == 0)
+        if (force || inputs.actions["look"].ReadValue<Vector2>().magnitude == 0)
             OnRecenterTarget.Invoke();
     }
 

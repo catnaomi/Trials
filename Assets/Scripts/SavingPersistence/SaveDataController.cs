@@ -9,8 +9,8 @@ using Yarn.Unity;
 
 public class SaveDataController : MonoBehaviour
 {
+    public static string SAVE_PATH = "%persistentDataPath%/Saves/";
     public static SaveDataController instance;
-    public string savePath;
     [Header("Inspector Slots")]
     public int slot = 1;
     public bool write;
@@ -74,7 +74,13 @@ public class SaveDataController : MonoBehaviour
 
     public void Read()
     {
-        string path = GetPath() + $"savedata{slot}.json";
+        data = ReadSlot(slot);
+
+    }
+
+    public static SaveData ReadSlot(int slotNum)
+    {
+        string path = GetPath() + $"savedata{slotNum}.json";
         string json = "";
         try
         {
@@ -86,15 +92,15 @@ public class SaveDataController : MonoBehaviour
         catch (FileNotFoundException ex)
         {
             Debug.LogError(ex);
-            return;
+            return null;
         }
 
         SaveData readData = JsonConvert.DeserializeObject<SaveData>(json);
         if (readData != null)
         {
-            data = readData;
+            return readData;
         }
-
+        return null;
     }
 
     public void Apply()
@@ -143,9 +149,20 @@ public class SaveDataController : MonoBehaviour
     {
         slot = s;
     }
-    public string GetPath()
+    public static string GetPath()
     {
-        string actualPath = savePath.Replace("%persistentDataPath%", Application.persistentDataPath);
+        string actualPath = SAVE_PATH.Replace("%persistentDataPath%", Application.persistentDataPath);
         return actualPath;
+    }
+
+    public static SaveData[] GetSaveDatas(int amount)
+    {
+        SaveData[] saves = new SaveData[amount];
+
+        for (int i = 0; i < amount; i++)
+        {
+            saves[i] = ReadSlot(i);
+        }
+        return saves;
     }
 }

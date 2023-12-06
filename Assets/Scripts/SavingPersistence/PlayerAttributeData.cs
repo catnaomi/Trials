@@ -8,11 +8,14 @@ public class PlayerAttributeData
 {
     public AttributeValue health;
     public AttributeValue timeCharges;
-
+    public int lives;
+    public int maxLives;
     public PlayerAttributeData()
     {
         health = new AttributeValue();
         timeCharges = new AttributeValue();
+        lives = 0;
+        maxLives = 0;
     }
 
     public PlayerAttributeData(PlayerAttributeData data)
@@ -24,16 +27,21 @@ public class PlayerAttributeData
             baseValue = data.health.baseValue,
         };
 
-        timeCharges= new AttributeValue()
+        timeCharges = new AttributeValue()
         {
             current = data.timeCharges.current,
             max = data.timeCharges.max,
             baseValue = data.timeCharges.baseValue,
         };
+
+        lives = data.lives;
+        maxLives = data.maxLives;
     }
     public void GetAttributeData(TimeTravelController time, ActorAttributes playerAttributes)
     {
         health.Copy(playerAttributes.health);
+        lives = playerAttributes.lives;
+        maxLives = playerAttributes.maxLives;
         timeCharges.Copy(time.charges);
     }
 
@@ -51,6 +59,8 @@ public class PlayerAttributeData
     public void LoadDataToAttributes(ActorAttributes attributes)
     {
         attributes.health.Copy(this.health);
+        attributes.lives = this.lives;
+        attributes.maxLives = this.maxLives;
     }
 
     public void LoadDataToTimeController(TimeTravelController time)
