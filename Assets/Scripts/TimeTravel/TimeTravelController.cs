@@ -124,6 +124,10 @@ public class TimeTravelController : MonoBehaviour
         if (PlayerSaveDataManager.HasAttributeData())
         {
             PlayerSaveDataManager.GetAttributeData().LoadDataToTimeController(this);
+            if (charges.current < charges.max)
+            {
+                timePowerClock = timePowerCooldown;
+            }
         }
         deregisters = new List<IAffectedByTimeTravel>();
         

@@ -119,17 +119,25 @@ public class SaveDataController : MonoBehaviour
 
         PlayerPositioner.SetNextOverridePosition(position, rotation);
 
-        // load the next scene and the loading screen
-        
+        // set all variables and attributes
 
         if (VariableStorageHelper.variableStorage != null)
         {
             VariableStorageHelper.variableStorage.SetAllVariables(data.yarnData.floats, data.yarnData.strings, data.yarnData.bools);
         }
 
+        PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
+
+
+        // load the next scene and the loading screen
+
         SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
 
+
         yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
+
+        // after loading
+
     }
     public void SetSlot(int s)
     {

@@ -14,11 +14,29 @@ public class PlayerAttributeData
         health = new AttributeValue();
         timeCharges = new AttributeValue();
     }
+
+    public PlayerAttributeData(PlayerAttributeData data)
+    {
+        health = new AttributeValue()
+        {
+            current = data.health.current,
+            max = data.health.max,
+            baseValue = data.health.baseValue,
+        };
+
+        timeCharges= new AttributeValue()
+        {
+            current = data.timeCharges.current,
+            max = data.timeCharges.max,
+            baseValue = data.timeCharges.baseValue,
+        };
+    }
     public void GetAttributeData(TimeTravelController time, ActorAttributes playerAttributes)
     {
         health.Copy(playerAttributes.health);
         timeCharges.Copy(time.charges);
     }
+
 
     public string ToJSON()
     {
