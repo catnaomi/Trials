@@ -72,12 +72,41 @@ public class SaveDataController : MonoBehaviour
         Debug.Log($"succesfully saved to {path}");
     }
 
+    public static void SaveToSlot(int slot)
+    {
+        if (instance == null) return;
+        SetSlotStatic(slot);
+        instance.CollectData();
+        instance.Write();
+    }
+
+    public static void LoadFromSlot(int slot)
+    {
+        if (instance == null) return;
+        SetSlotStatic(slot);
+        instance.Read();
+        instance.Apply();
+    }
     public void Read()
     {
         data = ReadSlot(slot);
 
     }
 
+    public void Clear()
+    {
+        data = null;
+
+    }
+
+    public static void ClearSaveData()
+    {
+        if (instance != null)
+            instance.Clear();
+
+        PlayerSaveDataManager.Clear();
+        YarnSaveDataManager.ClearMemory();
+    }
     public static SaveData ReadSlot(int slotNum)
     {
         string path = GetPath() + $"savedata{slotNum}.json";
@@ -91,7 +120,7 @@ public class SaveDataController : MonoBehaviour
         }
         catch (FileNotFoundException ex)
         {
-            Debug.LogError(ex);
+            Debug.LogWarning(ex);
             return null;
         }
 
@@ -107,11 +136,11 @@ public class SaveDataController : MonoBehaviour
     {
         if (data != null)
         {
-            StartCoroutine(LoadSaveDataRoutine());
+            StartCoroutine(LoadSaveDataRoutine(data));
         }
     }
 
-    IEnumerator LoadSaveDataRoutine()
+    IEnumerator LoadSaveDataRoutine(SaveData data)
     {
         // fade screen to black
         bool fadedToBlack = false;
@@ -127,10 +156,7 @@ public class SaveDataController : MonoBehaviour
 
         // set all variables and attributes
 
-        if (VariableStorageHelper.variableStorage != null)
-        {
-            VariableStorageHelper.variableStorage.SetAllVariables(data.yarnData.floats, data.yarnData.strings, data.yarnData.bools);
-        }
+        YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
 
         PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
 
@@ -138,21 +164,56 @@ public class SaveDataController : MonoBehaviour
         // load the next scene and the loading screen
 
         SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
-
-
-        yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
-
-        // after loading
-
     }
+
+    IEnumerator NewGameRoutine()
+    {
+        // fade screen to black
+        bool fadedToBlack = false;
+        FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
+        FadeToBlackController.OverrideNextFadeInOnStart(true);
+        yield return new WaitUntil(() => { return fadedToBlack; });
+
+        // make sure we don't spawn in a special place
+
+        PlayerPositioner.ClearOverride();
+
+        PlayerSaveDataManager.SetAttributesToDefault();
+
+        SceneLoader.LoadWithProgressBar(SceneLoader.FIRST_SCENE);
+    }
+    public static void LoadSaveDataStatic(SaveData data)
+    {
+        if (instance != null)
+        instance.StartCoroutine(instance.LoadSaveDataRoutine(data));
+    }
+
     public void SetSlot(int s)
     {
-        slot = s;
+        slot = Mathf.Abs(s);
+    }
+
+    public static void SetSlotStatic(int slot)
+    {
+        if (instance != null)
+            instance.SetSlot(slot);
     }
     public static string GetPath()
     {
         string actualPath = SAVE_PATH.Replace("%persistentDataPath%", Application.persistentDataPath);
         return actualPath;
+    }
+
+    public static void NewGameStatic()
+    {
+        if (instance != null)
+            instance.NewGame();
+    }
+
+    void NewGame()
+    {
+        ClearSaveData();
+        StartCoroutine(NewGameRoutine());
     }
 
     public static SaveData[] GetSaveDatas(int amount)

@@ -212,6 +212,23 @@ public static class DebugReflectionMethods
         }
     }
 
+    public static void MainMenu()
+    {
+        try
+        {
+            SceneLoader.LoadMainMenu();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
+    public static void MM()
+    {
+        MainMenu();
+    }
+
     public static void InvertYLook()
     {
         try
@@ -416,20 +433,6 @@ public static class DebugReflectionMethods
         ToggleInfiniteResources();
     }
 
-    /*
-    public static void Template()
-    {
-        try
-        {
-
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
-        }
-    }
-    */
-
     public static void Help()
     {
         try
@@ -626,4 +629,42 @@ public static class DebugReflectionMethods
             Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
         }
     }
+
+    public static void Save(int slot)
+    {
+        try
+        {
+            SaveDataController.SaveToSlot(slot);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
+    public static void Load(int slot)
+    {
+        try
+        {
+            SaveDataController.LoadFromSlot(slot);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+    /*
+    public static void Template()
+    {
+        try
+        {
+
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+    */
+
 }

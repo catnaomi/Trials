@@ -140,6 +140,12 @@ public class PlayerSaveDataManager : MonoBehaviour
         instance.attributeData = new PlayerAttributeData(data);
     }
 
+    public static void SetAttributesToDefault()
+    {
+        if (instance == null) return;
+        SetAttributeData(PlayerAttributeData.GetDefault());
+    }
+
     public static PlayerAttributeData GetAttributeData()
     {
         if (instance != null)
@@ -182,5 +188,20 @@ public class PlayerSaveDataManager : MonoBehaviour
             }
         }
         return null;
+    }
+
+    public static void Clear()
+    {
+        if (instance != null)
+        {
+            instance.ClearLocal();
+        }
+    }
+
+    public void ClearLocal()
+    {
+        inventoryData = null;
+        attributeData = null;
+        worldData = null;
     }
 }

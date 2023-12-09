@@ -113,6 +113,37 @@ public class YarnSaveDataManager : MonoBehaviour
 
         return sb.ToString();
     }
+
+    public static void ApplyDataToMemory(YarnSaveData data)
+    {
+        if (data == null)
+        {
+            ClearMemory();
+            return;
+        }
+        if (VariableStorageHelper.variableStorage != null)
+        {
+            VariableStorageHelper.variableStorage.SetAllVariables(data.floats, data.strings, data.bools);
+        }
+    }
+
+    public static void ClearMemory()
+    {
+        if (VariableStorageHelper.variableStorage != null)
+        {
+            VariableStorageHelper.variableStorage.Clear();
+        }
+        if (instance != null)
+            instance.Clear();
+    }
+
+    public void Clear()
+    {
+        boolDict = null;
+        stringDict = null;
+        floatDict = null;
+        yarnData = null;
+    }
 }
 
 [Serializable]

@@ -13,6 +13,7 @@ public class StatDisplayHP : MonoBehaviour
     [SerializeField,ReadOnly]private int[] heartValues;
     int heartCount;
     public Actor actor;
+    bool wasActorNull;
     // Start is called before the first frame update
     void Start()
     {
@@ -26,6 +27,7 @@ public class StatDisplayHP : MonoBehaviour
             UpdateHeartsFromActor();
         } else
         {
+            wasActorNull = true;
             UpdateHearts();
         }
     }
@@ -65,9 +67,10 @@ public class StatDisplayHP : MonoBehaviour
     }
     private void OnGUI()
     {
-        if (actor == null && healthyHealth != lastHealth)
+        if (actor == null && healthyHealth != lastHealth || wasActorNull)
         {
             lastHealth = healthyHealth;
+            wasActorNull = false;
             UpdateHearts();
         }
     }

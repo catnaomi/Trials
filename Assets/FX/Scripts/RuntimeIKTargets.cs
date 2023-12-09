@@ -44,6 +44,7 @@ public class RuntimeIKTargets : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        if (animator == null) animator = this.GetComponent<Animator>();
         Gizmos.color = new Color(1f, 0f, 0f, weight);
         if (directionTarget != null)
         Gizmos.DrawLine(animator.GetBoneTransform(HumanBodyBones.Head).position, directionTarget.position);

@@ -46,11 +46,12 @@ public class ActorAttributes : MonoBehaviour, IHasHealthAttribute
     private void Start()
     {
         effects = new List<EffectDuration>();
-        if (PlayerActor.player.gameObject == this.gameObject)
+        if (this.TryGetComponent<PlayerActor>(out PlayerActor player))
         {
             if (PlayerSaveDataManager.HasAttributeData())
             {
                 PlayerSaveDataManager.GetAttributeData().LoadDataToAttributes(this);
+                OnHealthChange.Invoke();
             }
         }
     }
@@ -278,5 +279,17 @@ public class AttributeValue
         this.baseValue = attribute.baseValue;
         this.current = attribute.current;
         this.max = attribute.max;
+    }
+
+    public void Set(float baseVal, float current, float max)
+    {
+        this.baseValue = baseVal;
+        this.current = current;
+        this.max = max;
+    }
+
+    public void Set(float baseVal)
+    {
+        this.baseValue = this.current = this.max = baseVal;
     }
 }

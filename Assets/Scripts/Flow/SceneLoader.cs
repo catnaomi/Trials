@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 
 public class SceneLoader : MonoBehaviour
 {
+    public static readonly string FIRST_SCENE = "TerrainSkyScene";
+
     public string primarySceneToLoad;
     public string[] secondaryScenesToLoad;
     public bool loadOnStart;
@@ -23,13 +25,6 @@ public class SceneLoader : MonoBehaviour
 
     public static bool isAfterFirstLoad;
 
-    [Header("Player Settings")]
-    public GameObject player;
-    public bool shouldSetPlayerPosition;
-    public Vector3 playerPosition;
-    public Quaternion playerRotation;
-    [Header("Disable These GameObjects While Loading")]
-    public GameObject[] objectsToDisable;
     public static SceneLoader instance;
     bool loadingFromLoadScreen;
     public UnityEvent OnFinishLoad;
@@ -40,7 +35,6 @@ public class SceneLoader : MonoBehaviour
         {
             instance = this;
             isAfterFirstLoad = false;
-            shouldSetPlayerPosition = true;
             DontDestroyOnLoad(this);
         }
         else
@@ -139,7 +133,6 @@ public class SceneLoader : MonoBehaviour
             
         }
 
-
         foreach (string secondarySceneName in secondaryScenesToLoad)
         {
             if (secondarySceneName == "")
@@ -224,127 +217,6 @@ public class SceneLoader : MonoBehaviour
         isLoading = false;
         isLoadingComplete = true;
         OnFinishLoad.Invoke();
-        
-        /*
-        float unloadingProgress;
-        float loadingProgress;
-        int preloadsCompleted = 0;
-        int loadsCompleted = 0;
-        int loadsToFinish = 0;
-        int skips;
-        bool primarySceneLoaded = false;
-
-        
-        while (!isLoadingComplete)
-        {
-            unloadingProgress = 1f;
-            loadingProgress = 1f;
-            skips = 0;
-            foreach (SceneLoadingData loadData in sceneLoadingDatas)
-            {
-                bool isPrimaryScene = (loadData.name == primarySceneToLoad);
-                if (loadData.skip)
-                {
-                    skips++;
-                    continue;
-                }
-                else if (loadData.isComplete)
-                {
-                    continue;
-                }
-                
-                if (loadData.isAlreadyLoaded && shouldReloadScenes && !loadData.isUnloading)
-                {
-                    // create unloading operations
-                    loadData.unloadOperation = SceneManager.UnloadSceneAsync(loadData.name, UnloadSceneOptions.None);
-                    if (loadData.unloadOperation == null)
-                    {
-                        Debug.LogError("Scene " + loadData.name + " failed to unload. Skipping.");
-                        loadData.skip = true;
-                    }
-                    else
-                    {
-                        loadData.isUnloading = true;
-                    }
-                    loadData.isAlreadyLoaded = false;
-                }
-                else if (loadData.isUnloading) {
-                    unloadingProgress *= loadData.unloadOperation.progress;
-                    if (loadData.unloadOperation.isDone)
-                    {
-                        loadData.isUnloading = false;
-                    }
-                }
-                else if (!loadData.isLoading)
-                {
-                    // create loading operations
-                    try
-                    {
-                        loadData.loadOperation = SceneManager.LoadSceneAsync(loadData.name, LoadSceneMode.Additive);
-                        loadData.loadOperation.allowSceneActivation = false;
-                    }
-                    catch (System.NullReferenceException ex)
-                    {
-                        didSceneLoadFail = true;
-                        Debug.LogError(ex);
-                        loadData.skip = true;
-                    }
-                    finally
-                    {
-                        loadsToFinish++;
-                        loadData.isLoading = true;
-                    }
-                }
-                else if (loadData.isLoading)
-                {
-                    loadingProgress *= loadData.loadOperation.progress;
-                    if (loadData.loadOperation.isDone)
-                    {
-                        loadData.isLoading = false;
-                        loadData.isComplete = true;
-                        loadsCompleted++;
-                        if (isPrimaryScene)
-                        {
-                            primarySceneLoaded = true;
-                            SceneManager.SetActiveScene(SceneManager.GetSceneByName(primarySceneToLoad));
-                        }
-                    }
-                    else if (loadData.loadOperation.progress >= 0.9f && !loadData.isPreloadCompleted)
-                    {
-                        loadData.isPreloadCompleted = true;
-                        preloadsCompleted++;
-                    }
-                    else if (isPreloadingComplete && allowSceneActivation && !loadData.loadOperation.allowSceneActivation)
-                    {
-                        if (primarySceneLoaded || isPrimaryScene)
-                        {
-                            loadData.loadOperation.allowSceneActivation = true;
-                        }
-                        
-                    }
-                }
-            }
-            if (loadsToFinish > 0)
-            {
-                if (preloadsCompleted == loadsToFinish)
-                {
-                    isPreloadingComplete = true;
-                }
-                if (loadsCompleted == loadsToFinish)
-                {
-                    isLoadingComplete = true;
-                }
-            }
-            else if (skips >= sceneLoadingDatas.Count)
-            {
-                Debug.LogError("All Scenes Failed To Load. Aborting.");
-                yield break;
-            }
-            totalLoading = 0.5f * unloadingProgress + 0.5f * loadingProgress;
-            yield return null;
-        }
-        */
-        //SceneManager.UnloadSceneAsync("_LoadScene");
     }
 
     IEnumerator LoadScenesThenSetActive()
@@ -352,35 +224,6 @@ public class SceneLoader : MonoBehaviour
         yield return StartCoroutine(LoadScenesRoutine());
         SceneManager.SetActiveScene(SceneManager.GetSceneByName(primarySceneToLoad));
         OnActiveSceneChange.Invoke();
-    }
-    IEnumerator DisableObjectsRoutine()
-    {
-        if (player != null)
-        {
-            player.SetActive(false);
-            foreach (GameObject obj in objectsToDisable)
-            {
-                obj.SetActive(false);
-            }
-        }
-        yield return new WaitUntil(() => { return isLoadingComplete; });
-        if (player == null)
-        {
-            player = FindObjectOfType<PlayerActor>().gameObject;
-        }
-        if (player != null)
-        {
-            player.SetActive(true);
-            if (shouldSetPlayerPosition)
-            {
-                PositionPlayer();
-            }
-        }  
-        foreach (GameObject obj in objectsToDisable)
-        {
-            obj.SetActive(true);
-        }
-        
     }
 
     public static void DelayReloadCurrentScene()
@@ -401,7 +244,6 @@ public class SceneLoader : MonoBehaviour
         loadOnStart = false;
         shouldLoadInitScene = true;
         shouldReloadScenes = true;
-        shouldSetPlayerPosition = true;
         LoadWithProgressBar(SceneManager.GetActiveScene().name);
         //LoadScenes();
 
@@ -421,14 +263,9 @@ public class SceneLoader : MonoBehaviour
         loadOnStart = false;
         shouldLoadInitScene = true;
         shouldReloadScenes = true;
-        shouldSetPlayerPosition = true;
         LoadScenes();
     }
-    void PositionPlayer()
-    {
-        if (player == null) return;
-        player.transform.SetPositionAndRotation(playerPosition, playerRotation);
-    }
+
 
     public float GetSceneLoadingProgress()
     {
@@ -472,19 +309,6 @@ public class SceneLoader : MonoBehaviour
         }
     }
 
-    public static bool ShouldRespawnPlayer()
-    {
-        if (instance != null)
-        {
-            if (instance.shouldSetPlayerPosition)
-            {
-                instance.shouldSetPlayerPosition = false;
-                return true;
-            }
-        }
-        return false;
-    }
-
     public static void EnsureScenesAreLoaded(string primary, params string[] secondaries)
     {
         if (instance.isLoading) return;
@@ -500,9 +324,15 @@ public class SceneLoader : MonoBehaviour
         instance.secondaryScenesToLoad = secondaries;
         instance.allowSceneActivation = false;
         instance.loadingFromLoadScreen = true;
-        instance.shouldSetPlayerPosition = true;
         instance.StartCoroutine(instance.LoadingBarScene());
     } 
+
+    public static void LoadMainMenu()
+    {
+        if (instance.isLoading) return;
+        instance.shouldLoadInitScene = false;
+        LoadWithProgressBar("MainMenu");
+    }
 
     IEnumerator LoadingBarScene()
     {

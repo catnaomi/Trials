@@ -69,4 +69,9 @@ public class PlayerPositioner : MonoBehaviour
         overrideRotation = rotation;
         hasOverridePosition = true;
     }
+
+    public static void ClearOverride()
+    {
+        hasOverridePosition = false;
+    }
 }

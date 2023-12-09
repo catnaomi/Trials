@@ -67,4 +67,15 @@ public class PlayerAttributeData
     {
         time.charges.Copy(this.timeCharges);
     }
+
+    public static PlayerAttributeData GetDefault()
+    {
+        PlayerAttributeData data = new PlayerAttributeData();
+        data.health.Set(9);
+        data.timeCharges.Set(1);
+        data.lives = 1;
+        data.maxLives = 1;
+        return data;
+
+    }
 }
