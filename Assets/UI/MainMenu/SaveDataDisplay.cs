@@ -2,15 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class SaveDataDisplay : MonoBehaviour
+public class SaveDataDisplay : MonoBehaviour, ICancelHandler
 {
     public int slot;
     [Header("UI References")]
     public TMP_Text previewText;
+    SavesMenu saveMenu;
     [Header("Data Preview")]
     [SerializeField, ReadOnly] SaveData data;
 
+    public void SetMenuReference(SavesMenu menu)
+    {
+        saveMenu = menu;
+    }
     public void SetSaveData(int slot, SaveData data)
     {
         this.slot = slot;
@@ -50,5 +56,21 @@ public class SaveDataDisplay : MonoBehaviour
     {
         SaveDataController.SetSlotStatic(slot);
         SaveDataController.NewGameStatic();
+    }
+
+    public void OnCancel(BaseEventData eventData)
+    {
+        if (saveMenu != null)
+        {
+            saveMenu.OnCancel(eventData);
+        }
+    }
+
+    void OnGUI()
+    {
+        if (saveMenu != null && EventSystem.current.currentSelectedGameObject == this.gameObject && !saveMenu.IsFocused)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+        }
     }
 }
