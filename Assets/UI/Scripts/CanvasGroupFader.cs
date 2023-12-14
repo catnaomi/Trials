@@ -84,7 +84,7 @@ public class CanvasGroupFader : MonoBehaviour
         float realDuration = (duration + delay);
         while (clock < realDuration)
         {
-            clock += Time.deltaTime;
+            clock += Time.unscaledDeltaTime;
             float t = Mathf.Clamp01((clock - delay) / duration);
             group.alpha = Mathf.Lerp(current, target, t);
             yield return null;

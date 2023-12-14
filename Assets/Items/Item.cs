@@ -105,7 +105,7 @@ public class Item : ScriptableObject
     
     public static Item GetItemFromSaveString(string itemData)
     {
-        if (itemData == "")
+        if (itemData == null || itemData == "")
         {
             Debug.LogError("Item Data String was Blank!");
             return null;

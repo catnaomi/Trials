@@ -33,8 +33,6 @@ public class PlayerSaveDataManager : MonoBehaviour
         {
             TimeTravelController.time.OnChargeChanged.AddListener(MarkAttributeChange);
         }
-        //MarkInventoryChange();
-        //MarkAttributeChange();
     }
     private void Update()
     {
@@ -99,6 +97,12 @@ public class PlayerSaveDataManager : MonoBehaviour
     {
         return instance != null && instance.inventoryData != null;
     }
+
+    public static void SetInventoryData(PlayerInventoryData data)
+    {
+        if (instance == null) return;
+        instance.inventoryData = new PlayerInventoryData(data);
+    }
     public static PlayerInventoryData GetInventoryData()
     {
         if (instance != null)
@@ -146,6 +150,7 @@ public class PlayerSaveDataManager : MonoBehaviour
         SetAttributeData(PlayerAttributeData.GetDefault());
     }
 
+
     public static PlayerAttributeData GetAttributeData()
     {
         if (instance != null)
@@ -159,6 +164,21 @@ public class PlayerSaveDataManager : MonoBehaviour
         return null;
     }
 
+    // makes sure fields aren't null when trying to save
+    public static void EnsureData()
+    {
+        if (instance != null)
+        {
+            instance.EnsureLocal();
+        }
+    }
+
+    void EnsureLocal()
+    {
+        SaveInventoryData();
+        SaveAttributeData();
+        SaveWorldData();
+    }
 
     public static bool HasAttributeData()
     {

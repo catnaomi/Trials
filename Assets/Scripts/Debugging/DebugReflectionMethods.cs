@@ -630,11 +630,18 @@ public static class DebugReflectionMethods
         }
     }
 
-    public static void Save(int slot)
+    public static void Save(string slotString)
     {
         try
         {
-            SaveDataController.SaveToSlot(slot);
+            if (int.TryParse(slotString, out int slot))
+            {
+                SaveDataController.SaveToSlot(slot);
+            }
+            else
+            {
+                Debug.LogWarning($"Invalid slot: \"{slotString}\" ");
+            }
         }
         catch (Exception ex)
         {
@@ -642,11 +649,18 @@ public static class DebugReflectionMethods
         }
     }
 
-    public static void Load(int slot)
+    public static void Load(string slotString)
     {
         try
         {
-            SaveDataController.LoadFromSlot(slot);
+            if (int.TryParse(slotString, out int slot))
+            {
+                SaveDataController.LoadFromSlot(slot);
+            }
+            else
+            {
+                Debug.LogWarning($"Invalid slot: \"{slotString}\" ");
+            }
         }
         catch (Exception ex)
         {

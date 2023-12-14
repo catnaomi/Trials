@@ -58,6 +58,11 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
         SaveDataController.NewGameStatic();
     }
 
+    public void SaveDataToSave()
+    {
+        SaveDataController.SaveToSlot(slot);
+    }
+
     public void OnCancel(BaseEventData eventData)
     {
         if (saveMenu != null)

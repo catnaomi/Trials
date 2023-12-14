@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using CustomUtilities;
 using Yarn.Unity;
+using UnityEngine.Events;
 
 public class SaveDataController : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class SaveDataController : MonoBehaviour
 
     [Header("Save Data")]
     [ReadOnly, SerializeField] SaveData data;
+    public UnityEvent OnSaveComplete;
     private void Awake()
     {
         instance = this;
@@ -53,6 +55,7 @@ public class SaveDataController : MonoBehaviour
 
     public void CollectData()
     {
+        PlayerSaveDataManager.EnsureData();
         data.playerInventoryData = PlayerSaveDataManager.GetInventoryData();
         data.playerAttributeData = PlayerSaveDataManager.GetAttributeData();
         data.yarnData = YarnSaveDataManager.GetSaveDataStatic();
@@ -70,6 +73,7 @@ public class SaveDataController : MonoBehaviour
             sw.Write(json);
         }
         Debug.Log($"succesfully saved to {path}");
+        OnSaveComplete.Invoke();
     }
 
     public static void SaveToSlot(int slot)
@@ -160,10 +164,12 @@ public class SaveDataController : MonoBehaviour
 
         PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
 
-
+        PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
         // load the next scene and the loading screen
 
         SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
+
+        yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
     }
 
     IEnumerator NewGameRoutine()

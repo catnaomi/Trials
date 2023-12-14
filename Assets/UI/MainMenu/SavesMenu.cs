@@ -2,6 +2,7 @@ using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 public class SavesMenu : MenuView
@@ -13,7 +14,7 @@ public class SavesMenu : MenuView
     public StartMenu startMenu;
     public SaveDataDisplay[] displays;
     CanvasGroupFader groupFade;
-    
+    public UnityEvent OnCancelEvent;
 
     // Start is called before the first frame update
     public override void MenuStart()
@@ -32,7 +33,7 @@ public class SavesMenu : MenuView
 
     public void Init()
     {
-        var saves = SaveDataController.GetSaveDatas(3);
+        
         if (SaveDataController.instance == null)
         {
             Instantiate(saveControllerPrefab);
@@ -41,7 +42,15 @@ public class SavesMenu : MenuView
         {
             Instantiate(sceneLoaderPrefab);
         }
-        
+
+        UpdateSlots();
+    }
+
+
+    public void UpdateSlots()
+    {
+        var saves = SaveDataController.GetSaveDatas(3);
+
 
         for (int i = 0; i < displays.Length; i++)
         {
@@ -61,6 +70,7 @@ public class SavesMenu : MenuView
         }
     }
 
+
     public void FadeIn()
     {
         groupFade.FadeIn();
@@ -72,12 +82,15 @@ public class SavesMenu : MenuView
     }
     void ShowStartMenu()
     {
+        if (startMenu != null)
         startMenu.Focus();
     }
+
 
     public void OnCancel(BaseEventData eventData)
     {
         if (focused)
         FadeOut();
+        OnCancelEvent.Invoke();
     }
 }

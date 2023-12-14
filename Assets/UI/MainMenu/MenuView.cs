@@ -32,7 +32,7 @@ public class MenuView : MonoBehaviour
     public virtual void Focus()
     {
         focused = true;
-        if (currentlyFocused != null)
+        if (currentlyFocused != null && currentlyFocused != this)
         {
             currentlyFocused.Unfocus();
         }  

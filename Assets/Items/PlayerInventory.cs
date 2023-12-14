@@ -45,6 +45,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         if (PlayerSaveDataManager.HasInventoryData())
         {
             PlayerInventoryData data = PlayerSaveDataManager.GetInventoryData();
+            data.PopulateIfEmpty();
             data.LoadDataToInventory(this);
         }
         else
@@ -1331,6 +1332,22 @@ public class PlayerInventoryData
     [NonSerialized]public List<Item> contents;
     public string[] contentsString;
 
+    public PlayerInventoryData()
+    {
+
+    }
+
+    public PlayerInventoryData(PlayerInventoryData data)
+    {
+        MainWeaponString = data.MainWeaponString;
+        OffWeaponString = data.OffWeaponString;
+        RangedWeaponString = data.RangedWeaponString;
+        Slot0String = data.Slot0String;
+        Slot1String = data.Slot1String;
+        Slot2String = data.Slot2String;
+        Slot3String = data.Slot3String;
+        contentsString = data.contentsString;
+    }
     public void CopyDataFromPlayerInventory(PlayerInventory inventory)
     {
         PlayerInventoryData data = this;
@@ -1471,37 +1488,61 @@ public class PlayerInventoryData
             return null;
         }
 
-        data.contents = new List<Item>();
-
-        data.AddEquippableFromString(ref data.MainWeapon, data.MainWeaponString);
-        data.AddEquippableFromString(ref data.OffWeapon, data.OffWeaponString);
-        data.AddEquippableFromString(ref data.RangedWeapon, data.RangedWeaponString);
-
-        data.AddEquippableFromString(ref data.Slot0, data.Slot0String);
-        data.AddEquippableFromString(ref data.Slot1, data.Slot1String);
-        data.AddEquippableFromString(ref data.Slot2, data.Slot2String);
-        data.AddEquippableFromString(ref data.Slot3, data.Slot3String);
-
-        foreach(string itemData in data.contentsString)
-        {
-            if (itemData != "")
-            {
-                Item item = Item.GetItemFromSaveString(itemData);
-                if (item == null)
-                {
-                    Debug.LogError($"Item {itemData} came back null!");
-                    continue;
-                }
-                data.contents.Add(item);
-            }
-        }
+        data.PopulateFromStringFields();
 
         return data;
     }
 
+    public void PopulateFromStringFields()
+    {
+        this.contents = new List<Item>();
+
+        this.AddEquippableFromString(ref this.MainWeapon, this.MainWeaponString);
+        this.AddEquippableFromString(ref this.OffWeapon, this.OffWeaponString);
+        this.AddEquippableFromString(ref this.RangedWeapon, this.RangedWeaponString);
+
+        this.AddEquippableFromString(ref this.Slot0, this.Slot0String);
+        this.AddEquippableFromString(ref this.Slot1, this.Slot1String);
+        this.AddEquippableFromString(ref this.Slot2, this.Slot2String);
+        this.AddEquippableFromString(ref this.Slot3, this.Slot3String);
+
+        foreach (string itemthis in this.contentsString)
+        {
+            if (itemthis != "")
+            {
+                Item item = Item.GetItemFromSaveString(itemthis);
+                if (item == null)
+                {
+                    Debug.LogError($"Item {itemthis} came back null!");
+                    continue;
+                }
+                this.contents.Add(item);
+            }
+        }
+    }
+
+    public bool IsAnyFieldNull()
+    {
+        return (this.MainWeapon == null && this.MainWeaponString != "") ||
+            (this.OffWeapon == null && this.OffWeaponString != "") ||
+            (this.RangedWeapon == null && this.RangedWeaponString != "") ||
+            (this.Slot0 == null && this.Slot0String != "") ||
+            (this.Slot1 == null && this.Slot1String != "") ||
+            (this.Slot2 == null && this.Slot2String != "") ||
+            (this.Slot3 == null && this.Slot3String != "") ||
+            ((this.contents == null || this.contents.Count == 0) && (this.contentsString != null || this.contentsString.Length == 0));
+    }
+
+    public void PopulateIfEmpty()
+    {
+        if (IsAnyFieldNull())
+        {
+            PopulateFromStringFields();
+        }
+    }
     void AddEquippableFromString(ref Equippable weaponSlot, string itemData)
     {
-        if (itemData != "")
+        if (itemData != null && itemData != "")
         {
             Item item = Item.GetItemFromSaveString(itemData);
             if (item == null)
