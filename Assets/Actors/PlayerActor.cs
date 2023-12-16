@@ -3268,7 +3268,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             swimCollider = waterHit.collider;
             waterHeight = swimCollider.bounds.center.y + swimCollider.bounds.extents.y;
-            if (Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit wadingHit, 10f, MaskReference.Terrain))
+            bool didWadingHit = Physics.Raycast(this.transform.position + Vector3.up * cc.height, Vector3.down, out RaycastHit wadingHit, 10f, MaskReference.Terrain);
+            float slopeAngle = -1f;
+            if (didWadingHit)
+            {
+                slopeAngle = Vector3.Angle(Vector3.up, wadingHit.normal);
+            }
+            bool slopeOK = slopeAngle <= cc.slopeLimit;
+            if (didWadingHit && slopeOK)
             {
                 wading = (waterHeight - wadingHit.point.y) <= wadingHeight;
                 if (wading)
