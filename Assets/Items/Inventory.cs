@@ -59,7 +59,7 @@ public class Inventory : MonoBehaviour, IInventory
                 {
                     if (presentItem.Quantity < presentItem.MaxStackSize)
                     {
-                        presentItem.Quantity++;
+                        presentItem.Quantity += item.Quantity;
                         OnChange.Invoke();
                         return true;
                     }
@@ -68,6 +68,40 @@ public class Inventory : MonoBehaviour, IInventory
         }
         item.holder = this.GetComponent<Actor>();
         contents.Add(item);
+        OnChange.Invoke();
+        return true;
+    }
+
+    public virtual bool AddMany(Item item, int amount)
+    {
+        if (item == null) return false;
+        if (item.MaxStackSize > 1)
+        {
+            foreach (Item presentItem in contents)
+            {
+                if (presentItem.ItemEqual(item))
+                {
+                    if (presentItem.Quantity < presentItem.MaxStackSize)
+                    {
+                        presentItem.Quantity += item.Quantity * amount;
+                        OnChange.Invoke();
+                        return true;
+                    }
+                }
+            }
+
+            // if could not find an item
+            item.Quantity *= amount;
+            contents.Add(item);
+        }
+        else
+        {
+            item.holder = this.GetComponent<Actor>();
+            for (int i = 0; i < amount; i++)
+            {
+                contents.Add(item);
+            }
+        }
         OnChange.Invoke();
         return true;
     }

@@ -18,6 +18,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
     [Header("Drop Item")]
     public Item[] drops;
     public GameObject dropPrefab;
+    public float dropProbability = 1f;
     public int dropPrefabAmount;
     public float forceMagnitude = 1f;
     public Vector3 angularVelocity;
@@ -75,6 +76,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
 
         foreach (Item item in drops)
         {
+            if (Random.value > dropProbability) continue;
             LooseItem loose = LooseItem.CreateLooseItem(item);
             droppedObjects.Add(loose.gameObject);
         }
@@ -82,6 +84,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
         {
             for (int i = 0; i < dropPrefabAmount; i++)
             {
+                if (Random.value > dropProbability) continue;
                 droppedObjects.Add(Instantiate(dropPrefab));
             }
         }
