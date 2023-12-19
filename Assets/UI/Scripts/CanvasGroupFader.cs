@@ -22,6 +22,7 @@ public class CanvasGroupFader : MonoBehaviour
             }
         }
     }
+
     CanvasGroup group;
     Coroutine coroutine;
     // Start is called before the first frame update
@@ -77,11 +78,16 @@ public class CanvasGroupFader : MonoBehaviour
         }
     }
 
+    public void SetInteractable(bool interact)
+    {
+        group.interactable = interact;
+    }
     static IEnumerator FadeCanvasRoutine(CanvasGroup group, float target, System.Action callback, float duration, float delay)
     {
         float clock = 0f;
         float current = group.alpha;
         float realDuration = (duration + delay);
+        group.interactable = false;
         while (clock < realDuration)
         {
             clock += Time.unscaledDeltaTime;
@@ -90,6 +96,7 @@ public class CanvasGroupFader : MonoBehaviour
             yield return null;
         }
         group.alpha = target;
+        group.interactable = target > 0;
         callback?.Invoke();
     }
 }

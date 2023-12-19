@@ -11,7 +11,7 @@ public class SavesMenu : MenuView
     public GameObject saveControllerPrefab;
     public GameObject sceneLoaderPrefab;
     [Header("References")]
-    public StartMenu startMenu;
+    public MenuView previousView;
     public SaveDataDisplay[] displays;
     CanvasGroupFader groupFade;
     public UnityEvent OnCancelEvent;
@@ -21,6 +21,7 @@ public class SavesMenu : MenuView
     {
         groupFade = this.GetComponent<CanvasGroupFader>();
         groupFade.Alpha = 0;
+        groupFade.SetInteractable(true);
         base.MenuStart();
     }
 
@@ -59,6 +60,11 @@ public class SavesMenu : MenuView
         }
     }
 
+    public SaveData GetData(int slot)
+    {
+        return SaveDataController.ReadSlot(slot);
+    }
+
     void OnGUI()
     {
         if (focused)
@@ -82,15 +88,22 @@ public class SavesMenu : MenuView
     }
     void ShowStartMenu()
     {
-        if (startMenu != null)
-        startMenu.Focus();
+        if (previousView != null)
+        previousView.Focus();
     }
 
 
     public void OnCancel(BaseEventData eventData)
     {
+        OnCancel();
+    }
+
+    public void OnCancel()
+    {
         if (focused)
-        FadeOut();
-        OnCancelEvent.Invoke();
+        {
+            FadeOut();
+            OnCancelEvent.Invoke();
+        }
     }
 }

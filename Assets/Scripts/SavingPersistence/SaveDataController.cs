@@ -55,6 +55,10 @@ public class SaveDataController : MonoBehaviour
 
     public void CollectData()
     {
+        if (data == null)
+        {
+            data = new SaveData();
+        }
         PlayerSaveDataManager.EnsureData();
         data.playerInventoryData = PlayerSaveDataManager.GetInventoryData();
         data.playerAttributeData = PlayerSaveDataManager.GetAttributeData();
@@ -101,6 +105,24 @@ public class SaveDataController : MonoBehaviour
     {
         data = null;
 
+    }
+
+    public static void DeleteSlot(int slot)
+    {
+        string path = GetPath() + $"savedata{slot}.json";
+
+        try
+        {
+            File.Delete(path);
+        }
+        catch (DirectoryNotFoundException ex)
+        {
+            Debug.LogWarning("Directory doesn't exist.");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError(ex);
+        }
     }
 
     public static void ClearSaveData()
