@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Yarn.Unity;
@@ -41,9 +42,17 @@ public class AnimatedDialogueView : DialogueViewBase
     List<RectTransform> historyBoxes;
     int historyIndex = -1;
     bool wipeFinished;
+    [SerializeField, ReadOnly] bool optionsAreNext;
     // Stores a reference to the method to call when the user wants to advance
-    // the line.
+    // the line. 
     Action advanceHandler = null;
+    public Events events;
+
+    [Serializable]
+    public struct Events
+    {
+        public UnityEvent OnLineRun;
+    }
     private void Start()
     {
         historyBoxes = new List<RectTransform>();
@@ -107,6 +116,7 @@ public class AnimatedDialogueView : DialogueViewBase
         }
 
         bool isSmall = false;
+        optionsAreNext = false;
         string mood = "default";
 
         string[] meta = dialogueLine.Metadata;
@@ -124,7 +134,10 @@ public class AnimatedDialogueView : DialogueViewBase
                 {
                     isSmall = true;
                 }
-
+                if (meta[i].Contains("options"))
+                {
+                    optionsAreNext = true;
+                }
             }
         }
         if (isSmall)
@@ -160,7 +173,12 @@ public class AnimatedDialogueView : DialogueViewBase
 
         Action OnFinish = () =>
         {
-            if (waitForInput || interrupt)
+            if (optionsAreNext)
+            {
+                interrupt = false;
+                onDialogueLineFinished();
+            }
+            else if (waitForInput || interrupt)
             {
                 OpenContinueButton();
             }
@@ -171,6 +189,7 @@ public class AnimatedDialogueView : DialogueViewBase
             }
         };
         StartCoroutine(FadeInText(dialogueLine.TextWithoutCharacterName.Text.Length, OnFinish));
+        this.events.OnLineRun.Invoke();
     }
 
     // InterruptLine is called when the dialogue runner indicates that the
@@ -265,8 +284,15 @@ public class AnimatedDialogueView : DialogueViewBase
             StopCoroutine(FadeRoutine);
         }
 
-
-        HideRoutine = StartCoroutine(HideText(EndAction));
+        if (!optionsAreNext)
+        {
+            HideRoutine = StartCoroutine(HideText(EndAction));
+        }
+        else
+        {
+            HideTextImmediate(EndAction);
+        }
+        
 
         activeTextBox.text = "";
         continueButton.gameObject.SetActive(false);
@@ -294,11 +320,11 @@ public class AnimatedDialogueView : DialogueViewBase
         timingArray = new float[characterCount];
         currentIndex = 0;
         activeTextBox.ForceMeshUpdate();
-        activeTextBox.verticalAlignment = activeTextBox.textInfo.lineCount > 1 ? VerticalAlignmentOptions.Top : VerticalAlignmentOptions.Middle;
+        //activeTextBox.verticalAlignment = activeTextBox.textInfo.lineCount > 1 ? VerticalAlignmentOptions.Top : VerticalAlignmentOptions.Middle;
 
         while (!lineFinished)
         {
-            activeTextBox.maxVisibleCharacters = currentIndex + 1;
+            //activeTextBox.maxVisibleCharacters = currentIndex + 1;
             for (int i = 0; i < timingArray.Length; i++)
             {
 
@@ -401,6 +427,13 @@ public class AnimatedDialogueView : DialogueViewBase
 
         Destroy(hidingTextBox.gameObject);
         textContainersParent.localPosition = Vector3.zero;
+        finishCallback();
+    }
+
+    void HideTextImmediate(Action finishCallback)
+    {
+        wipeFinished = true;
+        activeTextBox.text = "";
         finishCallback();
     }
     public void OpenContinueButton()

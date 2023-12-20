@@ -7,7 +7,7 @@ using Yarn.Unity;
 public class CancellableOptionView : OptionView, ICancelHandler
 {
     public DialogueOptionIcon icons;
-    public OptionCancelHandler handler;
+    public CancellableOptionsListView cancelHandler;
 
     protected virtual void OnGUI()
     {
@@ -29,15 +29,16 @@ public class CancellableOptionView : OptionView, ICancelHandler
             icons.SetState((IsSilent()) ? DialogueOptionIcon.State.Cancellable : DialogueOptionIcon.State.NotSelected);
         }
     }
+
     public void OnCancel(BaseEventData eventData)
     {
         if (IsSilent())
         {
             OnSubmit(eventData);
         }
-        else if (handler != null)
+        else if (cancelHandler != null)
         {
-            handler.OnCancel(eventData, this);
+            cancelHandler.OnCancel(eventData, this);
         }
     }
 }
