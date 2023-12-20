@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using System.Linq;
 
 public class SavesMenu : MenuView
 {
@@ -14,14 +16,15 @@ public class SavesMenu : MenuView
     public MenuView previousView;
     public SaveDataDisplay[] displays;
     CanvasGroupFader groupFade;
+    GameObject[] selectChildren;
     public UnityEvent OnCancelEvent;
 
     // Start is called before the first frame update
     public override void MenuStart()
     {
         groupFade = this.GetComponent<CanvasGroupFader>();
-        groupFade.Alpha = 0;
-        groupFade.SetInteractable(true);
+        groupFade.Hide();
+        selectChildren = GetComponentsInChildren<Selectable>().Select(s => s.gameObject).ToArray();
         base.MenuStart();
     }
 
@@ -69,7 +72,7 @@ public class SavesMenu : MenuView
     {
         if (focused)
         {
-            if (EventSystem.current.currentSelectedGameObject == null)
+            if (EventSystem.current.currentSelectedGameObject == null || !selectChildren.Contains(EventSystem.current.currentSelectedGameObject))
             {
                 EventSystem.current.SetSelectedGameObject(displays[0].gameObject);
             }

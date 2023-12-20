@@ -62,6 +62,15 @@ public class CanvasGroupFader : MonoBehaviour
         FadeTo(target, null);
     }
 
+    public void Hide()
+    {
+        FadeCanvasGroup(group, 0, null, 0, 0);
+    }
+
+    public void Show()
+    {
+        FadeCanvasGroup(group, 1, null, 0, 0);
+    }
     public void FadeCanvasGroup(CanvasGroup group, float target, System.Action callback, float duration = 1f, float delay = 0f)
     {
         if (duration < 0)
