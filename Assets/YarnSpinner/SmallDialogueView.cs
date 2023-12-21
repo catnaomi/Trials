@@ -9,10 +9,12 @@ using UnityEngine.UI;
 using Yarn.Unity;
 public class SmallDialogueView : DialogueViewBase
 {
+    public float speed = 1f;
     public float characterInDuration = 1f;
     public float nextCharacterDelay = 1f;
     public float whitespaceDelay = 1f;
     public float defaultContinueTime = 5f;
+    public float maxFrameDelta = 1f;
     public Vector2 characterScaleRange = Vector2.one;
     public Vector2 characterAlphaRange = Vector2.one;
     public float uiFadeInTime = 1f;
@@ -187,7 +189,7 @@ public class SmallDialogueView : DialogueViewBase
                 //onDialogueLineFinished();
             }
         };
-        StartCoroutine(FadeInText(dialogueLine.TextWithoutCharacterName.Text.Length, OnFinish));
+        FadeInText(dialogueLine.TextWithoutCharacterName.Text.Length, OnFinish);
         naturalFinishCallback = onDialogueLineFinished;
     }
 
@@ -274,7 +276,7 @@ public class SmallDialogueView : DialogueViewBase
             StopCoroutine(FadeRoutine);
         }
         interrupt = false;
-        activeTextBox.text = "";
+        //activeTextBox.text = "";
         continueDuration = -1f;
 
         
@@ -293,88 +295,22 @@ public class SmallDialogueView : DialogueViewBase
         advanceHandler?.Invoke();
     }
 
-    IEnumerator FadeInText(int characterCount, Action finishCallBack)
+    public void FadeInText(int characterCount, Action finishCallback)
     {
         lineFinished = false;
-        
-        int completedIndices = -1;
-        int lastRunIndices = -1;
-        bool done = false;
-        timingArray = new float[characterCount];
-        currentIndex = 0;
-        activeTextBox.ForceMeshUpdate();
-        while (!lineFinished)
+
+        void OnFinish()
         {
-            activeTextBox.maxVisibleCharacters = currentIndex + 1;
-            for (int i = 0; i < timingArray.Length; i++)
-            {
-
-                if (i <= currentIndex)
-                {
-                    timingArray[i] += Time.deltaTime;
-                    if (interrupt)
-                    {
-                        timingArray[i] = characterInDuration;
-                    }
-                    if (timingArray[i] >= characterInDuration)
-                    {
-                        timingArray[i] = characterInDuration;
-                        if (completedIndices == i - 1)
-                        {
-                            completedIndices++;
-                            if (completedIndices >= timingArray.Length - 1)
-                            {
-                                done = true;
-                            }
-                        }
-                    }
-                    if (timingArray[i] >= nextCharacterDelay && currentIndex == i)
-                    {
-                        currentIndex++;
-                        if (currentIndex < activeTextBox.textInfo.characterCount && activeTextBox.textInfo.characterInfo[currentIndex].character == ' ')
-                        {
-                            timingArray[currentIndex] = -whitespaceDelay;
-                        }
-                    }
-                }
-                else
-                {
-                    timingArray[i] = 0f;
-                }
-                if (done && lastRunIndices == i - 1)
-                {
-                    lastRunIndices++;
-                    if (lastRunIndices >= timingArray.Length - 1)
-                    {
-                        lineFinished = true;
-                    }
-                }
-                if (!activeTextBox.textInfo.characterInfo[i].isVisible)
-                {
-                    continue;
-                }
-                float t = Mathf.Clamp01(timingArray[i] / characterInDuration);
-                // Get the index of the material used by the current character.
-                int materialIndex = activeTextBox.textInfo.characterInfo[i].materialReferenceIndex;
-                // Copy the vertex colors to an array
-                vertexColors = activeTextBox.textInfo.meshInfo[materialIndex].colors32;
-                // get index of first vertex for character
-                int vertexIndex = activeTextBox.textInfo.characterInfo[i].vertexIndex;
-
-                vertexColors[vertexIndex + 0].a = (byte)(255f * Mathf.Lerp(characterAlphaRange.x, characterAlphaRange.y, t));
-                vertexColors[vertexIndex + 1].a = (byte)(255f * Mathf.Lerp(characterAlphaRange.x, characterAlphaRange.y, t));
-                vertexColors[vertexIndex + 2].a = (byte)(255f * Mathf.Lerp(characterAlphaRange.x, characterAlphaRange.y, t));
-                vertexColors[vertexIndex + 3].a = (byte)(255f * Mathf.Lerp(characterAlphaRange.x, characterAlphaRange.y, t));
-
-                //activeTextBox.textInfo.characterInfo[i].scale = Mathf.Lerp(characterScaleRange.x, characterScaleRange.y, t);
-
-
-                
-            }
-            activeTextBox.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
-            yield return null;
+            lineFinished = true;
+            interrupt = false;
+            finishCallback.Invoke();
         }
-        interrupt = false;
-        finishCallBack();
+
+        FadeRoutine = StartCoroutine(AnimatedDialogueView.FadeInTextRoutine(activeTextBox, characterCount, speed, characterInDuration, nextCharacterDelay, whitespaceDelay, maxFrameDelta, characterAlphaRange, ShouldInterrupt, OnFinish));
+    }
+
+    public bool ShouldInterrupt()
+    {
+        return interrupt;
     }
 }

@@ -11,9 +11,11 @@ using Yarn.Unity;
 public class AnimatedDialogueView : DialogueViewBase
 {
     public bool waitForInput = true;
+    public float speed = 1f;
     public float characterInDuration = 1f;
     public float nextCharacterDelay = 1f;
     public float whitespaceDelay = 1f;
+    public float maxFrameDelta = 1f;
     public Vector2 characterScaleRange = Vector2.one;
     public Vector2 characterAlphaRange = Vector2.one;
     public float uiFadeInTime = 1f;
@@ -188,7 +190,7 @@ public class AnimatedDialogueView : DialogueViewBase
                 onDialogueLineFinished();
             }
         };
-        StartCoroutine(FadeInText(dialogueLine.TextWithoutCharacterName.Text.Length, OnFinish));
+        FadeInText(dialogueLine.TextWithoutCharacterName.Text.Length, OnFinish);
         this.events.OnLineRun.Invoke();
     }
 
@@ -310,19 +312,39 @@ public class AnimatedDialogueView : DialogueViewBase
         advanceHandler?.Invoke();
     }
 
-    IEnumerator FadeInText(int characterCount, Action finishCallBack)
+    public void FadeInText(int characterCount, Action finishCallback)
     {
         lineFinished = false;
-        
+
+        void OnFinish()
+        {
+            lineFinished = true;
+            interrupt = false;
+            finishCallback.Invoke();
+        }
+
+        FadeRoutine = StartCoroutine(FadeInTextRoutine(activeTextBox, characterCount, speed, characterInDuration, nextCharacterDelay, whitespaceDelay, maxFrameDelta, characterAlphaRange, ShouldInterrupt, OnFinish));
+    }
+
+    public bool ShouldInterrupt()
+    {
+        return interrupt;
+    }
+
+
+    public static IEnumerator FadeInTextRoutine(TMP_Text activeTextBox, int characterCount, float speed, float characterInDuration, float nextCharacterDelay, float whitespaceDelay, float maxFrameDelta, Vector2 characterAlphaRange, Func<bool> shouldInterrupt, Action finishCallBack)
+    {
+        bool finished = false;
         int completedIndices = -1;
         int lastRunIndices = -1;
         bool done = false;
-        timingArray = new float[characterCount];
-        currentIndex = 0;
+        float[] timingArray = new float[characterCount];
+        Color32[] vertexColors;
+        int currentIndex = 0;
         activeTextBox.ForceMeshUpdate();
         //activeTextBox.verticalAlignment = activeTextBox.textInfo.lineCount > 1 ? VerticalAlignmentOptions.Top : VerticalAlignmentOptions.Middle;
 
-        while (!lineFinished)
+        while (!finished)
         {
             //activeTextBox.maxVisibleCharacters = currentIndex + 1;
             for (int i = 0; i < timingArray.Length; i++)
@@ -330,8 +352,8 @@ public class AnimatedDialogueView : DialogueViewBase
 
                 if (i <= currentIndex)
                 {
-                    timingArray[i] += Time.deltaTime;
-                    if (interrupt)
+                    timingArray[i] += Mathf.Min(Time.deltaTime * speed, maxFrameDelta);
+                    if (shouldInterrupt())
                     {
                         timingArray[i] = characterInDuration;
                     }
@@ -365,7 +387,7 @@ public class AnimatedDialogueView : DialogueViewBase
                     lastRunIndices++;
                     if (lastRunIndices >= timingArray.Length - 1)
                     {
-                        lineFinished = true;
+                        finished = true;
                     }
                 }
                 if (i >= activeTextBox.textInfo.characterInfo.Length || !activeTextBox.textInfo.characterInfo[i].isVisible)
@@ -393,7 +415,6 @@ public class AnimatedDialogueView : DialogueViewBase
             activeTextBox.UpdateVertexData(TMP_VertexDataUpdateFlags.Colors32);
             yield return null;
         }
-        interrupt = false;
         finishCallBack();
     }
 
