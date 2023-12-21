@@ -1,3 +1,4 @@
+using Animancer;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,6 +15,12 @@ public class DojoBossParryFailController : MonoBehaviour
     public YarnPlayer secondPlayer;
     [Header("Third Parry")]
     public YarnPlayer thirdPlayer;
+    [Header("Settings")]
+    public float freezeTimeout = 5f;
+    [Header("References")]
+    public DojoBossIceBlockParticleController particleController;
+    public ClipTransition playerParryFailAnim;
+    AnimancerState playerFailState;
     [Space(20)]
     public int parryCount = 0;
     // Start is called before the first frame update
@@ -38,6 +45,10 @@ public class DojoBossParryFailController : MonoBehaviour
         {
             ThirdParry();
         }
+        else if (parryCount > 3)
+        {
+            FourthParry();
+        }
     }
 
     void FirstParry()
@@ -47,6 +58,7 @@ public class DojoBossParryFailController : MonoBehaviour
             StartCoroutine(RepositionPlayerRoutine());
         }
         PlayerActor.player.DisablePhysics();
+        PlayPlayerParryFailState();
         dojoBoss.RealignToTarget();
         dojoBoss.GetComponent<DojoBossInventoryTransformingController>().SetWeaponByName("Pipe");
         dojoBoss.StartTimeline();
@@ -56,12 +68,47 @@ public class DojoBossParryFailController : MonoBehaviour
 
     void SecondParry()
     {
+        PlayPlayerParryFailState();
         secondPlayer.Play();
     }
 
     void ThirdParry()
     {
+        PlayPlayerParryFailState();
         thirdPlayer.Play();
+    }
+
+    void FourthParry()
+    {
+        PlayPlayerParryFailState();
+    }
+
+    void Update()
+    {
+        if (particleController.Playing && (playerFailState != null && PlayerActor.player.animancer.States.Current != playerFailState))
+        {
+            particleController.StopParticle();
+        }
+    }
+    public void PlayPlayerParryFailState()
+    {
+        playerFailState = PlayerActor.player.animancer.Play(playerParryFailAnim);
+        particleController.StartParticle();
+        StartCoroutine(PlayerParryFailStateRoutine(playerFailState, PlayerActor.player));
+    }
+    IEnumerator PlayerParryFailStateRoutine(AnimancerState state, PlayerActor player)
+    {
+        yield return new WaitForSeconds(freezeTimeout);
+        if (TimelineListener.IsAnyDirectorPlaying())
+        {
+            yield return new WaitWhile(TimelineListener.IsAnyDirectorPlaying);
+            yield return new WaitForSeconds(freezeTimeout);
+        }
+
+        if (player.animancer.States.Current == state)
+        {
+            player.ResetAnim();
+        }
     }
 
     IEnumerator RepositionPlayerRoutine()

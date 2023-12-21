@@ -11,6 +11,7 @@ public class DojoBossIceBlockParticleController : MonoBehaviour
     float clock = 0f;
     bool expanding;
     bool started;
+    public bool Playing { get { return started; } }
     public AnimationCurve expandCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
     public Vector2 scaleMinMax = new Vector2(0.01f, 1);
     bool addedListener;

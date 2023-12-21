@@ -3,9 +3,11 @@ using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
+using Random = UnityEngine.Random;
 
 public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 {
@@ -14,12 +16,26 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     bool isHitboxActive;
     HumanoidPositionReference positionReference;
     MecanimActorTimeTravelHandler timeHandler;
-    CapsuleCollider collider;
-    
+    CapsuleCollider capsuleC;
+
     CharacterController cc;
     NavMeshAgent nav;
 
     CharacterController playerCC;
+
+    ColliderMode collisionMode;
+
+    public Collider CurrentCollider
+    {
+        get
+        {
+            return GetCollider();
+        }
+    }
+
+    [Header("Physics")]
+    public Vector3 targetPosition;
+    FixedMoveMode fixedMode;
     [Header("Phases")]
     [SerializeField] CombatPhase currentPhase;
     public float timeInPhase;
@@ -107,7 +123,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [Header("Animancer")]
     public Animancer.ClipTransition playerParryFailAnim;
     public float freezeTimeout = 5f;
-    
+
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] float CloseRangeFloat;
@@ -151,6 +167,22 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         PillarPhase,
         Idle
     }
+
+    [Serializable]
+    public enum ColliderMode
+    {
+        Character,
+        Navigating,
+        Collider,
+        None
+    }
+
+    enum FixedMoveMode
+    {
+        None,
+        Translate,
+        Warp
+    }
     // Start is called before the first frame update
     public override void ActorStart()
     {
@@ -158,7 +190,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator = this.GetComponent<Animator>();
         inventory = this.GetComponent<DojoBossInventoryTransformingController>();
         positionReference = this.GetComponent<HumanoidPositionReference>();
-        collider = this.GetComponent<CapsuleCollider>();
+        capsuleC = this.GetComponent<CapsuleCollider>();
         cc = this.GetComponent<CharacterController>();
 
         CheckTarget();
@@ -176,6 +208,18 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         StartCoroutine(DestinationCoroutine());
     }
 
+    public override void Update()
+    {
+        if (!CanUpdate())
+        {
+            UpdateCollisionMode();
+            return;
+        }
+
+        ActorPreUpdate();
+
+        ActorPostUpdate();
+    }
     // Update is called once per frame
     public override void ActorPostUpdate()
     {
@@ -186,14 +230,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         */
         CheckTarget();
+        UpdateCollisionMode();
         if (CombatTarget == null)
         {
             currentPhase = CombatPhase.Idle;
-            nav.enabled = false;
-            cc.enabled = false;
             UpdateMecanimValues();
             return;
         }
+        
         randomClock -= Time.deltaTime;
         float dist = Vector3.Distance(this.transform.position, CombatTarget.transform.position);
         InCloseRange = dist <= closeRange;
@@ -211,20 +255,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         if (randomClock <= 0f)
         {
             OnCycle();
-        }
-        if (IsMoving())
-        {
-            nav.enabled = true;
-            nav.updatePosition = true;
-            nav.updateRotation = true;
-            cc.enabled = false;
-        }
-        else
-        {
-            nav.enabled = false;
-            nav.updatePosition = false;
-            nav.updateRotation = false;
-            cc.enabled = true;
         }
 
         PlayerIsProne = PlayerActor.player.IsProne();
@@ -299,14 +329,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 successesThisPhase = 0;
             }
         }
-        
+
     }
 
     void UpdateMecanimValues()
     {
         if (randomClock <= 0f)
         {
-            animator.SetFloat("Random", Random.value);
+            animator.SetFloat("Random", UnityEngine.Random.value);
         }
 
         animator.SetBool("InCloseRange", InCloseRange);
@@ -318,14 +348,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         animator.UpdateTrigger("ParryHit", ref ParryHit);
         animator.UpdateTrigger("ParryFail", ref ParryFail);
-        
+
         if (CombatTarget != null)
         {
             Vector3 dir = (CombatTarget.transform.position - this.transform.position).normalized;
             xDirection = Vector3.Dot(this.transform.right, dir);
             yDirection = Vector3.Dot(this.transform.forward, dir);
         }
-        
+
 
         animator.SetFloat("xDirection", xDirection);
         animator.SetFloat("yDirection", yDirection);
@@ -376,7 +406,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             CombatTarget = PlayerActor.player.gameObject;
             Physics.IgnoreCollision(cc, PlayerActor.player.GetComponent<Collider>());
-        } 
+        }
     }
     IEnumerator DestinationCoroutine()
     {
@@ -531,7 +561,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             {
                 xoParticle.TelegraphOne(sequence[i]);
             }
-            
+
             clock = 0f;
             if (i == 3)
             {
@@ -606,7 +636,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         DrawCube.ForDebug(center, size, Quaternion.LookRotation(this.transform.forward), damage.isSlash ? Color.red : Color.blue, 1f);
 
-        HashSet <IDamageable> targets = new HashSet<IDamageable>();
+        HashSet<IDamageable> targets = new HashSet<IDamageable>();
         foreach (Collider c in colliders)
         {
             if (c.TryGetComponent<IDamageable>(out IDamageable damageable))
@@ -682,7 +712,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             damage.source = this.gameObject;
             PlayerActor.player.TakeDamage(damage);
             StartCoroutine(PushPlayerToRange(pillarShockwaveRange, pillarPushSpeed));
-            
+
         }
     }
 
@@ -734,7 +764,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 unitDirection.Normalize();
                 float offsetDistance = Random.Range(scatterArrowMinimumRadius, scatterArrowMaximumRadius);
                 arrowDestination = targetPosition + (unitDirection * offsetDistance);
-                
+
                 if (i > 0)
                 {
                     for (int j = 0; j < i; j++)
@@ -746,7 +776,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                         }
                     }
                 }
-                
+
             } while (!distanceCheck && attempts < maxAttempts);
 
             if (attempts >= maxAttempts)
@@ -970,20 +1000,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         HitboxActive(0);
     }
-    public bool IsCircleParrying()
-    {
-        return animator.GetCurrentAnimatorStateInfo(0).IsTag("PARRY_CIRCLE");
-    }
 
-    public bool IsCrossParrying()
-    {
-        return animator.GetCurrentAnimatorStateInfo(0).IsTag("PARRY_CROSS");
-    }
-
-    public bool IsParrying()
-    {
-        return IsCircleParrying() || IsCrossParrying();
-    }
     public GameObject GetGameObject()
     {
         return this.gameObject;
@@ -993,26 +1010,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         return lastDamageTaken;
     }
-    public override bool IsDodging()
-    {
-        return animator.GetCurrentAnimatorStateInfo(0).IsTag("DODGE");
-    }
-
-    public override bool IsAttacking()
-    {
-        return animator.GetCurrentAnimatorStateInfo(0).IsTag("ATTACK");
-    }
-
-    public override bool IsBlocking()
-    {
-        return animator.GetCurrentAnimatorStateInfo(0).IsTag("BLOCK");
-    }
-
-    public bool IsMoving()
-    {
-        return animator.GetCurrentAnimatorStateInfo(0).IsTag("MOVE");
-    }
-
 
     public void GetParried()
     {
@@ -1033,7 +1030,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     public void Recoil()
     {
-        throw new System.NotImplementedException();
+        // doesn't recoil
     }
 
     public override void Die()
@@ -1072,7 +1069,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             {
                 OnFlinch = true;
             }
-            
+
             RealignToTarget();
             damage.OnBlock.Invoke();
             this.OnBlock.Invoke();
@@ -1097,7 +1094,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 OnBlock.Invoke();
                 damage.OnBlock.Invoke();
             }
-            
+
         }
         else if (circleParrying && !damage.isThrust)
         {
@@ -1119,7 +1116,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 OnBlock.Invoke();
                 damage.OnBlock.Invoke();
             }
-            
+
         }
         else if ((crossParrying && damage.isSlash) || (circleParrying && damage.isThrust))
         {
@@ -1154,14 +1151,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 this.attributes.SetHealth(0);
                 Die();
             }
-            
+
             this.OnHurt.Invoke();
             damage.OnHit.Invoke();
-           
+
         }
         else if (!willKill)
         {
-            
+
             if (IsCritVulnerable())
             {
                 if (damage.timeDelayed)
@@ -1209,7 +1206,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             this.attributes.SetHealth(0);
             Die();
-            
+
             this.OnHurt.Invoke();
             damage.OnHit.Invoke();
         }
@@ -1298,7 +1295,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             successesThisPhase++;
         }
-        
+
     }
     public void IncrementParryIndex()
     {
@@ -1330,7 +1327,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         actor.DeactivateHitboxes();
         ParryFail = true;
 
-        PlayPlayerParryFailState(actor);
         /*
         animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
         AnimancerState hit = animancer.Play(CrossParryHit);
@@ -1365,8 +1361,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         */
         actor.DeactivateHitboxes();
         ParryFail = true;
-
-        PlayPlayerParryFailState(actor);
         /*
         animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
         AnimancerState hit = animancer.Play(CrossParryHit);
@@ -1384,34 +1378,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         */
     }
 
-    public void PlayPlayerParryFailState(Actor actor)
-    {
-        if (actor is PlayerActor player)
-        {
-            AnimancerState state = player.animancer.Play(playerParryFailAnim);
-            StartCoroutine(PlayerParryFailStateRoutine(state, player));
-        }
-    }
 
-    IEnumerator PlayerParryFailStateRoutine(AnimancerState state, PlayerActor player)
-    {
-        yield return new WaitForSeconds(freezeTimeout);
-        if (TimelineListener.IsAnyDirectorPlaying())
-        {
-            yield return new WaitWhile(TimelineListener.IsAnyDirectorPlaying);
-            yield return new WaitForSeconds(freezeTimeout);
-        }
-        
-        if (player.animancer.States.Current == state)
-        {
-            player.ResetAnim();
-            DojoBossIceBlockParticleController particle = FindObjectOfType<DojoBossIceBlockParticleController>();
-            if (particle != null)
-            {
-                particle.StopParticle();
-            }
-        }
-    }
+
+    
 
     public void ParrySuccess(DamageKnockback damage, bool wasCircle)
     {
@@ -1432,7 +1401,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         currentPillarIndex = pillars.Count;
         pillars.Add(pillar);
         StartCoroutine(PillarRiseRoutine(pillar));
-        
+
     }
     IEnumerator PillarRiseRoutine(GameObject pillar)
     {
@@ -1488,13 +1457,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         float t = 0f;
         Vector3 pos;
         CheckInvulnerablePillar();
-        yield return new WaitForFixedUpdate();
         while (t < 0.95)
         {
             if (this.IsTimeStopped())
             {
                 yield return new WaitWhile(this.IsTimeStopped);
             }
+            yield return new WaitForFixedUpdate();
             if (out_PillarJumpCurve > t)
             {
                 t = out_PillarJumpCurve;
@@ -1502,7 +1471,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             pos = Vector3.Lerp(oldPillar.transform.position, newPillar.transform.position, pillarJumpHorizCurve.Evaluate(t));
             pos.y = this.transform.position.y;
             MoveTo(pos);
-            yield return new WaitForFixedUpdate();
         }
         MoveTo(newPillar.transform.position);
         IsOnPillar = true;
@@ -1567,7 +1535,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
             cc.enabled = false;
             MoveTo(targetPosition);
-            
+
             clock += Time.fixedDeltaTime;
             yield return new WaitForFixedUpdate();
         }
@@ -1611,7 +1579,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             {
                 xz = Vector3.MoveTowards(xz, targetHoriz, horizontalClearSpeed * Time.deltaTime);
             }
-            
+
             MoveTo(new Vector3(xz.x, y, xz.z));
             output = t;
             yield return new WaitForFixedUpdate();
@@ -1620,26 +1588,15 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             isPillarFalling = false;
         }
-        
+
     }
 
-    void MoveTo(Vector3 position)
-    {
-        if (cc.enabled)
-        {
-            cc.Move(position - this.transform.position);
-        }
-        else
-        {
-            this.transform.position = position;
-        }
-    }
     void OnAnimatorMove()
     {
         Vector3 diff = animator.rootPosition - this.transform.position;
-        if (IsAttacking())
+        if (IsAttacking() && !IsRootAttacking())
         {
-            
+
             Vector3 dirToTarget = (CombatTarget.transform.position - this.transform.position);
             dirToTarget.y = 0f;
             dirToTarget.Normalize();
@@ -1652,7 +1609,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             {
                 diff = diff.normalized * (distanceAfterMovement - minimumDistance) * Time.deltaTime;
                 //diff = Vector3.ClampMagnitude(diff, minimumDistance - distanceAfterMovement);
-                
+
                 //Debug.Log($"adjusted root motion movement: {startingMagnitude} vs {endMagnitude}");
             }
             float endMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
@@ -1660,7 +1617,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             {
                 diff = Vector3.ClampMagnitude(diff, maxRootMotionBackwardsAdjust * Time.deltaTime);
             }
-            
+
             //diff +=  -this.transform.position.y * Vector3.up;
             //cc.Move(diff);
         }
@@ -1682,27 +1639,139 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         if (rootDelta.magnitude > 0)
         {
-            if (false)// IsAttacking())
-            {
-                cc.Move(rootDelta);
-            }
-            else
-            {
-                cc.enabled = false;
-                this.transform.position = this.transform.position + rootDelta;
-                cc.enabled = true;
-            }
+            Move(rootDelta);
         }
         if (CombatTarget != null && PlayerActor.player != null)
         {
-            if (CombatTarget == PlayerActor.player.gameObject && playerCC != null)
+            if (CombatTarget == PlayerActor.player.gameObject && PlayerActor.player.cc != null)
             {
-                Physics.IgnoreCollision(PlayerActor.player.cc, collider, !PlayerActor.player.isGrounded);
-                Physics.IgnoreCollision(PlayerActor.player.cc, cc, !PlayerActor.player.isGrounded);
+                Physics.IgnoreCollision(PlayerActor.player.cc, capsuleC, !PlayerActor.player.isGrounded || IsDodging() || AnimIgnoresPlayer());
+                Physics.IgnoreCollision(PlayerActor.player.cc, cc, !PlayerActor.player.isGrounded || IsDodging() || AnimIgnoresPlayer());
             }
-            
+
+        }
+
+    }
+
+    void SetCollisionMode(ColliderMode mode)
+    {
+        if (mode == collisionMode) return;
+        collisionMode = mode;
+        switch (mode)
+        {
+            default:
+            case ColliderMode.Character:
+                cc.enabled = true;
+                nav.enabled = false;
+                capsuleC.enabled = true;
+                return;
+            case ColliderMode.Navigating:
+                cc.enabled = true;
+                nav.enabled = true;
+                capsuleC.enabled = true;
+                return;
+            case ColliderMode.Collider:
+                cc.enabled = false;
+                nav.enabled = false;
+                capsuleC.enabled = true;
+                return;
+            case ColliderMode.None:
+                cc.enabled = false;
+                nav.enabled = false;
+                capsuleC.enabled = false;
+                return;
         }
         
+    }
+
+    public Collider GetCollider()
+    {
+        switch (collisionMode)
+        {
+            default:
+            case ColliderMode.Character:
+                return cc;
+            case ColliderMode.Navigating:
+                return cc;
+            case ColliderMode.Collider:
+                return capsuleC;
+            case ColliderMode.None:
+                return capsuleC;
+        }
+    }
+    public void UpdateCollisionMode()
+    {
+        if (!CanUpdate())
+        {
+            SetCollisionMode(ColliderMode.Collider);
+        }
+        else if (currentPhase == CombatPhase.Idle)
+        {
+            SetCollisionMode(ColliderMode.Collider);
+        }
+        else if (IsMoving())
+        {
+            SetCollisionMode(ColliderMode.Navigating);
+        }
+        else if (IsHurt())
+        {
+            SetCollisionMode(ColliderMode.Collider);
+        }
+        else if (IsDodging())
+        {
+            SetCollisionMode(ColliderMode.None);
+        }
+        else if (currentPhase == CombatPhase.AttackPhase)
+        {
+            SetCollisionMode(ColliderMode.Collider);
+        }
+        else if (currentPhase == CombatPhase.ParryPhase)
+        {
+            SetCollisionMode(ColliderMode.Collider);
+        }
+        else if (currentPhase == CombatPhase.PillarPhase)
+        {
+            SetCollisionMode(ColliderMode.Collider);
+        }    
+    }
+
+
+    void MoveTo(Vector3 position)
+    {
+        if (collisionMode == ColliderMode.Character || collisionMode == ColliderMode.Navigating)
+        {
+            cc.Move(position - this.transform.position);
+        }
+        else
+        {
+            this.transform.position = position;
+        }
+    }
+
+    void WarpTo(Vector3 position)
+    {
+        if (collisionMode == ColliderMode.Character || collisionMode == ColliderMode.Navigating)
+        {
+            cc.enabled = false;
+            this.transform.position = position;
+            cc.enabled = true;
+        }
+        else
+        {
+            this.transform.position = position;
+        }
+    }
+
+    void Move(Vector3 delta)
+    {
+        if (collisionMode == ColliderMode.Character || collisionMode == ColliderMode.Navigating)
+        {
+            cc.Move(delta);
+        }
+        else
+        {
+            this.transform.Translate(delta);
+        }
     }
 
     public void StartTimeline()
@@ -1719,6 +1788,55 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         return timeHandler != null && timeHandler.IsFrozen();
     }
+    public bool IsCircleParrying()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("PARRY_CIRCLE");
+    }
+
+    public bool IsCrossParrying()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("PARRY_CROSS");
+    }
+
+    public bool IsParrying()
+    {
+        return IsCircleParrying() || IsCrossParrying();
+    }
+
+
+    public override bool IsDodging()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("DODGE");
+    }
+
+    public bool IsHurt()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("HURT");
+    }
+
+    public override bool IsAttacking()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("ATTACK") || animator.GetCurrentAnimatorStateInfo(0).IsTag("ROOT_ATTACK");
+    }
+
+    public bool IsRootAttacking()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("ROOT_ATTACK");
+    }
+
+    public bool AnimIgnoresPlayer()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("IGNORE_PLAYER");
+    }
+    public override bool IsBlocking()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("BLOCK");
+    }
+
+    public bool IsMoving()
+    {
+        return animator.GetCurrentAnimatorStateInfo(0).IsTag("MOVE");
+    }
 
     public void StartInvulnerability(float duration)
     {
@@ -1729,4 +1847,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         return false; //TODO: implement invulnerability?
     }
+
+
 }

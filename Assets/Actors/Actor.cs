@@ -95,7 +95,7 @@ public class Actor : MonoBehaviour
         // run after base class Start()
     }
 
-    public void Update()
+    public virtual void Update()
     {
         if (!CanUpdate()) return;
 

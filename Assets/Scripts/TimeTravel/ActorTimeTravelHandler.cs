@@ -60,7 +60,8 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             applyVisual = true;
             foreach (Renderer r in renderers)
             {
-                r.gameObject.layer = LayerMask.NameToLayer("TimeAffected");
+                // TODO: different way of doing this
+                //r.gameObject.layer = LayerMask.NameToLayer("TimeAffected");
             }
         }
         else if (!ShouldApplyTimeVisualEffect() && applyVisual)
@@ -68,7 +69,7 @@ public class ActorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
             applyVisual = false;
             foreach (Renderer r in renderers)
             {
-                r.gameObject.layer = initLayer;
+                //r.gameObject.layer = initLayer;
             }
         }
     }
