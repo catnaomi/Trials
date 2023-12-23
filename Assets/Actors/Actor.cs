@@ -231,34 +231,28 @@ public class Actor : MonoBehaviour
 
     public virtual void RealignToTarget()
     {
-        if (CombatTarget != null)
-        {
-            Vector3 dir = CombatTarget.transform.position - this.transform.position;
-            dir.y = 0f;
-            dir.Normalize();
-            this.transform.rotation = Quaternion.LookRotation(dir);
-        }
+        this.transform.rotation = Quaternion.LookRotation(GetDirectionToTarget());
     }
 
     public virtual void RotateTowardsTarget(float maxDegreesDelta)
     {
-        if (CombatTarget != null)
-        {
-            Vector3 dir = CombatTarget.transform.position - this.transform.position;
-            dir.y = 0f;
-            dir.Normalize();
-            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(dir), maxDegreesDelta);
-        }
+        this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(GetDirectionToTarget()), maxDegreesDelta);
     }
     public virtual void RealignAwayTarget()
+    {
+        this.transform.rotation = Quaternion.LookRotation(-GetDirectionToTarget());
+    }
+
+    public Vector3 GetDirectionToTarget()
     {
         if (CombatTarget != null)
         {
             Vector3 dir = CombatTarget.transform.position - this.transform.position;
             dir.y = 0f;
             dir.Normalize();
-            this.transform.rotation = Quaternion.LookRotation(-dir);
+            return dir;
         }
+        return this.transform.forward;
     }
     public virtual void OnFallOffMap()
     {

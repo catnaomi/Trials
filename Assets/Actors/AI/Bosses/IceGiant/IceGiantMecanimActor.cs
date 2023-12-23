@@ -34,6 +34,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public float rotationSpeed = 90f;
     public float walkRotationSpeed = 90f;
     public float minWalkRotationAngle = 10f;
+    bool shouldRealign;
+    bool shouldRealignAway;
     [Header("Weapons")]
     public float RightWeaponLength = 1f;
     public float RightWeaponRadius = 1f;
@@ -160,7 +162,6 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
             TargetInBounds = walkableArea.bounds.Contains(CombatTarget.transform.position);
         }
-
 
         AngleBetween = Vector3.SignedAngle(nav.desiredVelocity.normalized, this.transform.forward, -Vector3.up);
         AngleBetweenAbs = Mathf.Abs(AngleBetween);
@@ -293,23 +294,32 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             this.transform.Rotate(-Vector3.up, spinVelocity * Time.fixedDeltaTime);
         }
         // rotations
-        Vector3 dir = CombatTarget.transform.position - this.transform.position;
-        dir.y = 0f;
-        dir.Normalize();
 
-        float angle = Vector3.Angle(dir, this.transform.forward);
+        float angle = Vector3.Angle(nav.desiredVelocity.normalized, this.transform.forward);
 
-        if (IsRotating())
+        if (shouldRealign)
         {
-            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.fixedDeltaTime);
+            RealignToTarget();
+            shouldRealign = false;
+        }
+        else if (shouldRealignAway)
+        {
+            RealignAwayTarget();
+            shouldRealignAway = false;
+        }
+        else if (IsRotating() && nav.desiredVelocity.sqrMagnitude > 0)
+        {
+            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(nav.desiredVelocity.normalized), rotationSpeed * Time.fixedDeltaTime);
         }
         else if (IsMoving())
         {
-            if (angle > minWalkRotationAngle)
+            if (angle > minWalkRotationAngle && nav.desiredVelocity.sqrMagnitude > 0)
             {
-                this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(dir), walkRotationSpeed * Time.fixedDeltaTime);
+                this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(nav.desiredVelocity.normalized), walkRotationSpeed * Time.fixedDeltaTime);
             }
         }
+        // force stay inside walkable area
+        this.transform.position = walkableArea.ClosestPointOnBounds(this.transform.position);
         nav.nextPosition = transform.position;
     }
 
@@ -353,6 +363,10 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         }  
     }
 
+    bool IsInWalkBounds(Vector3 position)
+    {
+        return walkableArea.bounds.Contains(position);
+    }
 
     void GenerateWeapons()
     {
@@ -369,21 +383,19 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     }
     public override void RealignToTarget()
     {
-        if (CombatTarget != null)
-        {
-            Vector3 dir = CombatTarget.transform.position - this.transform.position;
-            dir.y = 0f;
-            dir.Normalize();
-            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(dir), maxRealignAngle);
-        }
+        this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(GetDirectionToTarget()), maxRealignAngle);
+        shouldRealign = true;
+    }
+
+    public override void RealignAwayTarget()
+    {
+        this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(-GetDirectionToTarget()), maxRealignAngle);
+        shouldRealignAway = true;
     }
 
     bool IsTargetBehind()
     {
-        Vector3 dir = CombatTarget.transform.position - this.transform.position;
-        dir.y = 0f;
-        dir.Normalize();
-        return Vector3.Angle(dir, this.transform.forward) > behindAngle;
+        return Vector3.Angle(GetDirectionToTarget(), this.transform.forward) > behindAngle;
     }
     public DamageKnockback GetLastDamage()
     {
