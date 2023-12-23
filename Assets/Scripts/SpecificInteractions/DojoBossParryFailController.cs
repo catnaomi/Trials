@@ -92,7 +92,7 @@ public class DojoBossParryFailController : MonoBehaviour
     }
     public void PlayPlayerParryFailState()
     {
-        playerFailState = PlayerActor.player.animancer.Play(playerParryFailAnim);
+        playerFailState = PlayerActor.player.PlayDialogueClip(playerParryFailAnim);
         particleController.StartParticle();
         StartCoroutine(PlayerParryFailStateRoutine(playerFailState, PlayerActor.player));
     }

@@ -17,6 +17,7 @@ public class PlayerTargetManager : MonoBehaviour
     public Camera cam;
     public float maxPlayerDistance = 20f;
     public float maxCamDistance = 20f;
+    public float maxMidpointDistance = 20f;
 
     public LayerMask blocksTargetingMask;
     [Header("Current Target Status")]
@@ -33,6 +34,7 @@ public class PlayerTargetManager : MonoBehaviour
     public float targetChangeSpeed = 10f;
     public float targetChangeMaxDistance = 25f;
     public Transform targetAim;
+    public Transform centerAim;
     bool targetAimShouldSnap = true;
     [SerializeField, ReadOnly] int changeTargetIndexOffset = 0;
     bool lockOnRelease;
@@ -247,27 +249,49 @@ public class PlayerTargetManager : MonoBehaviour
 
     }
 
+
     // controls the object that hovers on targets to create a gradual transition between targets
     void HandleAimTargetPosition()
     {
+        // center target
+        if (!player.IsInDialogue())
+        {
+            centerAim.position = player.positionReference.centerTarget.position;
+        }
+        else
+        {
+            Vector3 centerPos = player.positionReference.centerTarget.position;
+            if (currentTarget != null)
+            {
+                centerPos.y = currentTarget.transform.position.y;
+            }
+            centerAim.position = centerPos;
+        }
+        // aim target
         if (!lockedOn || currentTarget == null || Vector3.Distance(targetAim.position, currentTarget.transform.position) > targetChangeMaxDistance)
         {
             targetAimShouldSnap = true;
         }
         if (currentTarget != null)
         {
+            Vector3 targetPosition = currentTarget.transform.position;
+            Vector3 targetDir = currentTarget.transform.position - centerAim.position;
+
+            targetPosition = Vector3.ClampMagnitude(targetDir, maxMidpointDistance) + centerAim.position; 
+
             if (targetAimShouldSnap)
             {
-                targetAim.position = currentTarget.transform.position;
+                targetAim.position = targetPosition;
                 targetAimShouldSnap = false;
             }
             else
             {
-                targetAim.position = Vector3.MoveTowards(targetAim.position, currentTarget.transform.position, targetChangeSpeed * Time.deltaTime);
+                targetAim.position = Vector3.MoveTowards(targetAim.position, targetPosition, targetChangeSpeed * Time.deltaTime);
             }
         }
 
     }
+
     
     // controls the cinemachine target group
     void HandleTargetGroup()

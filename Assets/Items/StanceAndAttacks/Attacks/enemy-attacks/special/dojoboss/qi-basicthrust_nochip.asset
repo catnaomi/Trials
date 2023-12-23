@@ -45,6 +45,7 @@ MonoBehaviour:
     isRanged: 0
     isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
@@ -52,6 +53,7 @@ MonoBehaviour:
     cannotKill: 0
     stunTime: 1
     repositionLength: 1
+    repositionMaxDist: 0.25
     stagger: 1
     staggers:
       onHit: 3
@@ -63,9 +65,9 @@ MonoBehaviour:
       onTypedBlock: 0
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
-    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -77,6 +79,11 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
     hitClip: {fileID: 0}
   staminaCost: 0
   exitTime: -1

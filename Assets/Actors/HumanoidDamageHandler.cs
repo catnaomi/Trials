@@ -149,7 +149,10 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         if (actor is PlayerActor)
         {
             player = actor as PlayerActor;
-            if (player.IsBlockingSlash())
+            bool blockingSlash = player.IsBlockingSlash();
+            bool blockingThrust = player.IsBlockingThrust();
+
+            if (blockingSlash)
             {
                 didTypedBlock = true;
                 if (damage.isThrust)
@@ -158,7 +161,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                     didTypedBlock = false;
                 }
             }
-            else if (player.IsBlockingThrust())
+            else if (blockingThrust)
             {
                 didTypedBlock = true;
                 if (damage.isSlash)
@@ -288,7 +291,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
                 actor.transform.rotation = Quaternion.LookRotation(dir.normalized, Vector3.up);
             }
-            AdjustDefendingPosition(damage.source, damage.repositionLength);
+            AdjustDefendingPosition(damage.source, damage.repositionLength, damage.repositionMaxDist);
             if (actor is PlayerActor)
             {
                 
@@ -300,7 +303,6 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             //damage.OnCrit.Invoke();
             damage.OnBlock.Invoke();
             actor.OnBlock.Invoke();
-            Debug.Log("block buffer time:" + player.GetBlockBufferTime());
         }
         else
         {
@@ -552,7 +554,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
         if (!isFlinch)
         {
-            AdjustDefendingPosition(damage.source, damage.repositionLength);
+            AdjustDefendingPosition(damage.source, damage.repositionLength, damage.repositionMaxDist);
             animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
         }
     }
@@ -570,22 +572,16 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         StartCritVulnerability(clip.MaximumDuration / clip.Speed);
     }
 
-    public void AdjustDefendingPosition(GameObject attacker)
-    {
-        AdjustDefendingPosition(attacker, 1.5f);
-    }
-    public void AdjustDefendingPosition(GameObject attacker, float length)
+    public void AdjustDefendingPosition(GameObject attacker, float length = 1.5f, float maxAdjust = 0.25f)
     {
         if (attacker == null || !attacker.TryGetComponent<Actor>(out Actor attackerActor) || length < 0)
         {
             return;
         }
 
-        float MAX_ADJUST = 0.25f;
-
         Vector3 targetPosition = attacker.transform.position + (attacker.transform.forward * length);
 
-        Vector3 moveVector = Vector3.MoveTowards(actor.transform.position, targetPosition, MAX_ADJUST) - actor.transform.position;
+        Vector3 moveVector = Vector3.MoveTowards(actor.transform.position, targetPosition, maxAdjust) - actor.transform.position;
 
         actor.GetComponent<CharacterController>().Move(moveVector);
     }

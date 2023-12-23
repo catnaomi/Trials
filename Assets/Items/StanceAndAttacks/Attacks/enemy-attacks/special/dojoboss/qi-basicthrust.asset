@@ -29,7 +29,7 @@ MonoBehaviour:
     _NormalizedStartTime: 0
   attackData:
     healthDamage: 1
-    unresistedMinimum: 1
+    unresistedMinimum: 0
     types: 4
     critData:
       criticalMultiplier: 1
@@ -45,13 +45,15 @@ MonoBehaviour:
     isRanged: 0
     isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
     cannotRecoil: 0
     cannotKill: 0
     stunTime: 1
-    repositionLength: 1
+    repositionLength: 2
+    repositionMaxDist: 0
     stagger: 1
     staggers:
       onHit: 2
@@ -63,9 +65,9 @@ MonoBehaviour:
       onTypedBlock: 0
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
-    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -77,6 +79,11 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
     hitClip: {fileID: 0}
   staminaCost: 0
   exitTime: -1

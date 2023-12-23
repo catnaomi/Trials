@@ -2890,6 +2890,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             return -1;
         }
     }
+    
+    
     public void OnDodge(InputValue value)
     {
         return;
@@ -4528,6 +4530,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (!ShouldParry(damage))
         {
             damageHandler.TakeDamage(damage);
+            ClearAttackInput();
         }
         else
         {
@@ -5163,6 +5166,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         state.dialogue = animancer.States.GetOrCreate("dialogue", idleAnim);
         animancer.Play(state.dialogue);
         xzVel = Vector3.zero;
+    }
+
+    public AnimancerState PlayDialogueClip(ClipTransition clip)
+    {
+        state.dialogue = animancer.Play(clip);
+        xzVel = Vector3.zero;
+        return state.dialogue;
     }
 
     public void StopDialogue()

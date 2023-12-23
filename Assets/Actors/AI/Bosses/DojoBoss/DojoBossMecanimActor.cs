@@ -38,6 +38,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     FixedMoveMode fixedMode;
     [Header("Phases")]
     [SerializeField] CombatPhase currentPhase;
+    public bool stayInPhase = false;
     public float timeInPhase;
     public float minPhaseDuration = 60f;
     public float maxPhaseDuration = 180f;
@@ -81,10 +82,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     float critTime;
     float totalCritTime;
     [Header("Offense")]
-    public int offensiveStageCount = 6;
+    [SerializeField, ReadOnly] int offenseAttempts = 0;
     bool inAttackSequence;
     DojoBossXOParticleController xoParticle;
     public float sequenceDelay = 0.25f;
+    public float minimumAttackBuffer = 1.75f;
     public float minimumAttackDistance = 2f;
     public InputAttack slashRegular;
     public InputAttack thrustRegular;
@@ -97,6 +99,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public float pillarHeight;
     public List<GameObject> pillars;
     public int currentPillarIndex = 0;
+    public int closestPillar = 0;
     public BreakableObject invulnerablePillar;
     public DamageType pillarWeakness;
     [Space(10)]
@@ -104,9 +107,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public float pillarShockwaveRange;
     public float pillarPushSpeed = 5f;
     [Space(20)]
-    public float pillarJumpDuration = 1f;
-    public float pillarHighJumpDuration = 3f;
+    public float pillarJumpDurationMin = 1f;
+    public float pillarJumpDurationMax = 3f;
+    public float pillarHighJumpDurationMin = 1f;
+    public float pillarHighJumpDurationMax = 3f;
     public float pillarExtraJumpHeight = 3f;
+    public float pillarJumpMaxDistance = 10f;
+    public float pillarMinDistance = 5f;
     public AnimationCurve pillarJumpHorizCurve = AnimationCurve.Linear(0, 0, 1, 1);
     public float pillarFallDuration = 1f;
     public AnimationCurve pillarFallVertCurve = AnimationCurve.Linear(0, 0, 1, 1);
@@ -138,6 +145,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] float yDirection;
     [ReadOnly, SerializeField] bool OnFlinch;
     [ReadOnly, SerializeField] bool Parried;
+    [ReadOnly, SerializeField] int OffenseGroup;
     [ReadOnly, SerializeField] int OffenseStage;
     [ReadOnly, SerializeField] bool IsOnPillar;
     [ReadOnly, SerializeField] bool OnLightPillarHit;
@@ -145,6 +153,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] bool PlayerIsAttacking;
     [ReadOnly, SerializeField] bool Blocking;
     [ReadOnly, SerializeField] int PillarCount;
+    [ReadOnly, SerializeField] bool HasNearbyPillar;
+    [ReadOnly, SerializeField] bool PillarTooClose;
     [ReadOnly, SerializeField] bool ResetToStart;
     [ReadOnly, SerializeField] bool StartAttack;
     [Space(5)]
@@ -206,6 +216,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         this.OnHurt.AddListener(ResetHandPositions);
         this.OnHurt.AddListener(DeactivateHitboxes);
         StartCoroutine(DestinationCoroutine());
+        this.StartTimer(1f, true, CheckPillarStatus);
     }
 
     public override void Update()
@@ -281,13 +292,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         timeInPhase += Time.deltaTime;
         if (currentPhase == CombatPhase.AttackPhase)
         {
-            if (timeInPhase >= minPhaseDuration && successesThisPhase >= attackSuccessesNeeded)
+            if (timeInPhase >= minPhaseDuration && successesThisPhase >= attackSuccessesNeeded && !stayInPhase)
             {
                 currentPhase = CombatPhase.ParryPhase;
                 timeInPhase = 0f;
                 successesThisPhase = 0;
             }
-            else if (timeInPhase >= maxPhaseDuration)
+            else if (timeInPhase >= maxPhaseDuration && !stayInPhase)
             {
                 //currentPhase = CombatPhase.PillarPhase;
                 currentPhase = CombatPhase.PillarPhase;
@@ -297,13 +308,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         else if (currentPhase == CombatPhase.ParryPhase)
         {
-            if (timeInPhase >= minPhaseDuration && successesThisPhase >= parrySuccessesNeeded)
+            if (timeInPhase >= minPhaseDuration && successesThisPhase >= parrySuccessesNeeded && !stayInPhase)
             {
                 currentPhase = CombatPhase.PillarPhase;
                 timeInPhase = 0f;
                 successesThisPhase = 0;
             }
-            else if (timeInPhase >= maxPhaseDuration)
+            else if (timeInPhase >= maxPhaseDuration && !stayInPhase)
             {
                 //currentPhase = CombatPhase.PillarPhase;
                 currentPhase = CombatPhase.AttackPhase;
@@ -313,7 +324,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         else if (currentPhase == CombatPhase.PillarPhase)
         {
-            if (successesThisPhase > 0)
+            if (successesThisPhase > 0 && !stayInPhase)
             {
                 currentPhase = CombatPhase.AttackPhase;
                 timeInPhase = 0f;
@@ -322,7 +333,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         else if (currentPhase == CombatPhase.Idle)
         {
-            if (timeInPhase > 3f)
+            if (timeInPhase > 3f && !stayInPhase)
             {
                 currentPhase = CombatPhase.AttackPhase;
                 timeInPhase = 0f;
@@ -389,7 +400,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator.SetBool("PlayerIsAttacking", PlayerIsAttacking);
         animator.SetBool("Blocking", Blocking);
         animator.SetInteger("PillarCount", PillarCount);
-
+        animator.SetBool("HasNearbyPillar", HasNearbyPillar);
+        animator.SetBool("PillarTooClose", PillarTooClose);
         animator.UpdateTrigger("OnTimeDamage", ref OnTimeDamage);
 
         animator.SetBool("Dead", dead);
@@ -425,6 +437,80 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
 
         }
+    }
+
+    void CheckPillarStatus()
+    {
+        foreach (GameObject pillar in pillars)
+        {
+            if (pillar == null) continue;
+            if (IsOnPillar && pillar == pillars[currentPillarIndex]) continue;
+            Vector3 pillarPos = pillar.transform.position;
+            pillarPos.y = this.transform.position.y;
+            float dist = Vector3.Distance(this.transform.position, pillarPos);
+            if (dist < pillarJumpMaxDistance)
+            {      
+                HasNearbyPillar = true;
+                if (dist < pillarMinDistance)
+                {
+                    PillarTooClose = true;
+                    return;
+                }
+            }
+        }
+        HasNearbyPillar = false;
+    }
+
+    int GetClosestPillar(bool includeCurrent = false)
+    {
+        float leadDist = pillarJumpMaxDistance;
+        int lead = -1;
+        for (int i = 0; i < pillars.Count; i++)
+        {
+            GameObject pillar = pillars[i];
+            if (pillar == null) continue;
+            if (pillar == pillars[currentPillarIndex] && !includeCurrent) continue;
+            Vector3 pillarPos = pillar.transform.position;
+            pillarPos.y = this.transform.position.y;
+            float dist = Vector3.Distance(this.transform.position, pillarPos);
+            if (dist < leadDist)
+            {
+                HasNearbyPillar = true;
+                lead = i;
+            }
+        }
+        if (lead < 0)
+        {
+            HasNearbyPillar = false;
+        }
+        return lead;
+    }
+
+    int GetFarthestPillar(bool includeCurrent = false)
+    {
+        float leadDist = 0;
+        int lead = -1;
+        for (int i = 0; i < pillars.Count; i++)
+        {
+            GameObject pillar = pillars[i];
+            if (pillar == null) continue;
+            if (pillar == pillars[currentPillarIndex] && !includeCurrent) continue;
+            Vector3 pillarPos = pillar.transform.position;
+            pillarPos.y = this.transform.position.y;
+            float dist = Vector3.Distance(this.transform.position, pillarPos);
+            float playerDist = Vector3.Distance(CombatTarget.transform.position, pillarPos);
+            if (playerDist > leadDist && dist < pillarJumpMaxDistance)
+            {
+                HasNearbyPillar = true;
+                lead = i;
+                leadDist = playerDist;
+            }
+        }
+        if (lead < 0)
+        {
+            HasNearbyPillar = false;
+        }
+        return lead;
     }
 
     public void ResetAnimatorToStart()
@@ -545,8 +631,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     public void BeginTelegraphSequence(string sequence)
     {
+        offenseAttempts++;
         string[] split = sequence.Split(' ');
         StartCoroutine(TelegraphAttacks(split));
+        GetNextAttack();
     }
 
     IEnumerator TelegraphAttacks(string[] sequence)
@@ -630,7 +718,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         if (damage == null) return;
 
-        Vector3 center = this.transform.position + Vector3.up + this.transform.forward * 2f;
+        Vector3 center = this.transform.position + Vector3.up + this.transform.forward * 1f;
         Vector3 size = Vector3.one * 2f;
         Collider[] colliders = Physics.OverlapBox(center, size * 0.5f, Quaternion.LookRotation(this.transform.forward), MaskReference.Actors);
 
@@ -639,7 +727,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         HashSet<IDamageable> targets = new HashSet<IDamageable>();
         foreach (Collider c in colliders)
         {
-            if (c.TryGetComponent<IDamageable>(out IDamageable damageable))
+            if (c.TryGetComponent<IDamageable>(out IDamageable damageable) && this != (object)damageable)
             {
                 targets.Add(damageable);
             }
@@ -1017,17 +1105,32 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         HitboxActive(0);
         OnHurt.Invoke();
         StartCritVulnerability(5f);
-        OffenseStage++;
-        if (OffenseStage > offensiveStageCount)
+        OffenseGroup++;
+        if (OffenseGroup > offenseSequences.Length - 1)
         {
-            OffenseStage = 3;
+            OffenseGroup = offenseSequences.Length - 1;
         }
+        GetNextAttack();
         if (currentPhase == CombatPhase.AttackPhase)
         {
             successesThisPhase++;
         }
     }
 
+    void GetNextAttack()
+    {
+        int[] currentSequence = offenseSequences[OffenseGroup];
+        int currentAttack = currentSequence[offenseAttempts % currentSequence.Length];
+        OffenseStage = currentAttack;
+    }
+
+    int[][] offenseSequences =
+    {
+        new int[] {0,1},
+        new int[] {2,3},
+        new int[] {4,5,6},
+        new int[] {6,2,5,3,4},
+    };
     public void Recoil()
     {
         // doesn't recoil
@@ -1430,14 +1533,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public void StartPillarJump()
     {
         int newPillarIndex = -1;
-        int attempts = 0;
-        int maxAttempts = 10;
-        while (attempts < maxAttempts && (newPillarIndex < 0 || newPillarIndex == currentPillarIndex || pillars[newPillarIndex] == null))
-        {
-            newPillarIndex = Random.Range(0, pillars.Count - 1);
-            attempts++;
-        }
-        if (attempts >= maxAttempts)
+        newPillarIndex = GetFarthestPillar();
+        if (newPillarIndex < 0)
         {
             Debug.LogWarning("Pillar Jump Timed Out!");
             return;
@@ -1479,27 +1576,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     public void StartPillarHighJump()
     {
-        int pillarIndex = -1;
-        float farthest = 0f;
-        for (int i = 0; i < pillars.Count; i++)
-        {
-            GameObject pillar = pillars[i];
-            if (pillar == null) continue;
-            float dist = Vector3.Distance(pillar.transform.position, this.transform.position);
-            if (dist > farthest)
-            {
-                farthest = dist;
-                pillarIndex = i;
-            }
-        }
+        int pillarIndex = GetFarthestPillar(true);
+
         if (pillarIndex >= 0)
         {
             StartCoroutine(PillarHighJumpRoutine(pillarIndex));
             ResetPainTriggers();
-        }
-        else
-        {
-
         }
     }
 
@@ -1526,10 +1608,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         dir.y = 0f;
         this.transform.rotation = Quaternion.LookRotation(dir.normalized);
         bool ccEnabled = cc.enabled;
+
+        float dist = Vector3.Distance(this.transform.position, pillar.transform.position);
+
+        float duration = Mathf.Lerp(pillarHighJumpDurationMin, pillarHighJumpDurationMax, (dist - pillarMinDistance) / (pillarJumpMaxDistance - pillarMinDistance));
         yield return new WaitForFixedUpdate();
-        while (clock < pillarHighJumpDuration)
+        while (clock < duration)
         {
-            float t = Mathf.Clamp01(clock / pillarHighJumpDuration);
+            float t = Mathf.Clamp01(clock / duration);
 
             Vector3 targetPosition = Bezier.GetPoint(t, bezierPoints);
 
@@ -1594,6 +1680,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     void OnAnimatorMove()
     {
         Vector3 diff = animator.rootPosition - this.transform.position;
+       
         if (IsAttacking() && !IsRootAttacking())
         {
 
@@ -1601,25 +1688,34 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             dirToTarget.y = 0f;
             dirToTarget.Normalize();
 
-            diff = Vector3.Project(diff, dirToTarget);
-            float startingMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
-            float distanceAfterMovement = Vector3.Distance(this.transform.position + diff, CombatTarget.transform.position);
-            float minimumDistance = minimumAttackDistance;
-            if (distanceAfterMovement < minimumDistance)
+            Vector3 onNormal = Vector3.Project(diff, dirToTarget);
+            Vector3 offNormal = Vector3.ProjectOnPlane(diff, dirToTarget);
+
+            Debug.DrawRay(this.transform.position + Vector3.up * 3f, onNormal.normalized * 5f, Color.yellow);
+            Debug.DrawRay(this.transform.position + Vector3.up * 3f, offNormal.normalized * 5f, Color.magenta);
+
+            float startingMagnitude = onNormal.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, onNormal));
+            float distanceAfterMovement = Vector3.Distance(this.transform.position + onNormal, CombatTarget.transform.position);
+            float distanceBeforeMovement = Vector3.Distance(this.transform.position, CombatTarget.transform.position);
+
+            //DrawCircle.DrawWireCircle(CombatTarget.transform.position + Vector3.up, Vector3.up, minimumAttackBuffer, Color.green);
+
+            bool tooClose = false;
+            if (distanceAfterMovement < minimumAttackDistance && distanceAfterMovement < distanceBeforeMovement)
             {
-                diff = diff.normalized * (distanceAfterMovement - minimumDistance) * Time.deltaTime;
+                float magnitude = onNormal.magnitude - (minimumAttackDistance - distanceAfterMovement);// Mathf.Max(distanceAfterMovement - minimumDistance, (maxRootMotionBackwardsAdjust * Time.deltaTime));
+                magnitude = Mathf.Max(magnitude, 0);
+                onNormal = onNormal.normalized * magnitude;
+                tooClose = true;
                 //diff = Vector3.ClampMagnitude(diff, minimumDistance - distanceAfterMovement);
 
                 //Debug.Log($"adjusted root motion movement: {startingMagnitude} vs {endMagnitude}");
             }
-            float endMagnitude = diff.magnitude * Mathf.Sign(Vector3.Dot(dirToTarget, diff));
-            if (endMagnitude < (maxRootMotionBackwardsAdjust * Time.deltaTime))
-            {
-                diff = Vector3.ClampMagnitude(diff, maxRootMotionBackwardsAdjust * Time.deltaTime);
-            }
+            DrawCircle.DrawWireCircle(CombatTarget.transform.position + Vector3.up, Vector3.up, minimumAttackDistance,
+                !tooClose ? Color.green : Color.red,
+                !tooClose ? 0 : 1);
 
-            //diff +=  -this.transform.position.y * Vector3.up;
-            //cc.Move(diff);
+            //diff = onNormal + offNormal;
         }
         else
         {
@@ -1770,7 +1866,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         else
         {
-            this.transform.Translate(delta);
+            this.transform.position += delta;
         }
     }
 
