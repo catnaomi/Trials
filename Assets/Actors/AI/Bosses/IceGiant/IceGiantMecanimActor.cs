@@ -23,13 +23,17 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     [Header("Navigation & AI")]
     public bool actionsEnabled = true;
     [SerializeField, ReadOnly] NavMeshAgent nav;
+    public BoxCollider walkableArea;
     public float closeRange = 8f;
     public float meleeRange = 3f;
     public float stompTimer = 15f;
+    public float attackTimer = 3f;
     Coroutine stompCoroutine;
     public float maxRealignAngle = 30f;
     public float behindAngle = 90f;
     public float rotationSpeed = 90f;
+    public float walkRotationSpeed = 90f;
+    public float minWalkRotationAngle = 10f;
     [Header("Weapons")]
     public float RightWeaponLength = 1f;
     public float RightWeaponRadius = 1f;
@@ -79,6 +83,9 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     [ReadOnly, SerializeField] bool Fall;
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
+    [ReadOnly, SerializeField] bool TargetInBounds;
+    [ReadOnly, SerializeField] int AttackAlternate;
+    [ReadOnly, SerializeField] bool ShouldAttack;
     [ReadOnly, SerializeField] bool ShouldStomp;
     [ReadOnly, SerializeField] bool ActionsEnabled;
     [ReadOnly, SerializeField] bool StompLeft;
@@ -106,6 +113,11 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             fxHandler.OnStepR.AddListener(StepShockwaveRight);
         }
         nav = GetComponent<NavMeshAgent>();
+        nav.enabled = false;
+        if (actionsEnabled)
+        {
+            EnableActions();
+        }
         nav.updatePosition = false;
         nav.updateRotation = false;
         
@@ -113,11 +125,14 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         //EnableWeakPoint(false);
     }
 
-    protected override void ActorOnEnable()
+    public void EnableActions()
     {
-        base.ActorOnEnable();
+        actionsEnabled = true;
+        nav.enabled = true;
         StartCoroutine(DestinationCoroutine());
         StartCoroutine(StompTimer());
+
+        this.StartTimer(attackTimer, true, BeginAttack);
     }
 
     public override void ActorPostUpdate()
@@ -136,10 +151,14 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         UpdateTarget();
         SetTargetObjectActive();
 
-        if (CombatTarget != null)
+        if (CombatTarget != null && actionsEnabled)
         {
-            InCloseRange = Vector3.Distance(this.transform.position, CombatTarget.transform.position) <= closeRange;
-            InMeleeRange = Vector3.Distance(this.transform.position, CombatTarget.transform.position) <= meleeRange;
+            Vector3 targetPosition = nav.destination;//CombatTarget.transform.position;
+            DrawCircle.DrawWireSphere(targetPosition, 1, Color.magenta);
+            InCloseRange = Vector3.Distance(this.transform.position,  targetPosition) <= closeRange;
+            InMeleeRange = Vector3.Distance(this.transform.position,  targetPosition) <= meleeRange;
+
+            TargetInBounds = walkableArea.bounds.Contains(CombatTarget.transform.position);
         }
 
 
@@ -154,6 +173,9 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         animator.UpdateTrigger("Fall", ref Fall);
         animator.SetBool("InCloseRange", InCloseRange);
         animator.SetBool("InMeleeRange", InMeleeRange);
+        animator.SetBool("TargetInBounds", TargetInBounds);
+        animator.SetInteger("AttackAlternate", AttackAlternate);
+        animator.UpdateTrigger("ShouldAttack", ref ShouldAttack);
         animator.UpdateTrigger("ShouldStomp", ref ShouldStomp);
 
         ActionsEnabled = actionsEnabled;
@@ -223,10 +245,13 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     {
         while (true)
         {
-            if (CombatTarget != null && IsMoving() && nav.enabled)
+            if (CombatTarget != null && nav.enabled)
             {
-                nav.SetDestination(CombatTarget.transform.position);
+                Vector3 targetPosition = walkableArea.ClosestPointOnBounds(CombatTarget.transform.position);
+                bool foundDestination = nav.SetDestination(targetPosition);
+                yield return new WaitWhile(() => nav.pathPending);
             }
+            
             yield return new WaitForSeconds(0.1f);
         }
     }
@@ -267,12 +292,23 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         {
             this.transform.Rotate(-Vector3.up, spinVelocity * Time.fixedDeltaTime);
         }
+        // rotations
+        Vector3 dir = CombatTarget.transform.position - this.transform.position;
+        dir.y = 0f;
+        dir.Normalize();
+
+        float angle = Vector3.Angle(dir, this.transform.forward);
+
         if (IsRotating())
         {
-            Vector3 dir = CombatTarget.transform.position - this.transform.position;
-            dir.y = 0f;
-            dir.Normalize();
             this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.fixedDeltaTime);
+        }
+        else if (IsMoving())
+        {
+            if (angle > minWalkRotationAngle)
+            {
+                this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(dir), walkRotationSpeed * Time.fixedDeltaTime);
+            }
         }
         nav.nextPosition = transform.position;
     }
@@ -288,23 +324,33 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             
         }
         handIKPosition.y = bonePosition.y + ikHandOffset;
-        Debug.DrawLine(bonePosition, handIKPosition, Color.magenta, 1f);
 
         animator.SetIKPosition(AvatarIKGoal.LeftHand, handIKPosition);
         animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, animated_TrackingHandIKWeight);
     }
 
+
+    public void BeginAttack()
+    {
+        if (CanUpdate() && actionsEnabled)
+        {
+            ShouldAttack = true;
+        }
+    }
     public void BeginStomp()
     {
-        ShouldStomp = true;
-        if (leftLegWeakPoint.health.current < rightLegWeakPoint.health.current)
+        if (CanUpdate() && actionsEnabled)
         {
-            StompLeft = true;
-        }
-        else
-        {
-            StompLeft = false;
-        }
+            ShouldStomp = true;
+            if (leftLegWeakPoint.health.current < rightLegWeakPoint.health.current)
+            {
+                StompLeft = true;
+            }
+            else
+            {
+                StompLeft = false;
+            }
+        }  
     }
 
 
@@ -476,9 +522,17 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             leftHitboxes.SetActive(false);
         }
         if (isHitboxActive)
-        OnHitboxActive.Invoke();
+        {
+            OnHitboxActive.Invoke();
+            AlternateAttacks();
+        }
+        
     }
 
+    public void AlternateAttacks()
+    {
+        AttackAlternate = 1 - AttackAlternate;
+    }
     public void StartReformFoot()
     {
         bool isLeft = animator.GetCurrentAnimatorStateInfo(0).IsTag("STOMP_LEFT");
