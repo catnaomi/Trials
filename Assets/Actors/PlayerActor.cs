@@ -57,6 +57,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float sprintSpeed = 10f;
     public float sprintTurnSpeed = 90f;
     public float walkAccel = 25f;
+    public float blockHitAccel = 5f;
     public float walkTurnSpeed = 1080f;
     [Space(5)]
     public float strafeSpeed = 2.5f;
@@ -3201,14 +3202,27 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         onControlsChanged.Invoke();
     }
 
-    public void VerifyAccelerationAfterDelay()
+    public void SetSpeed(float speed)
     {
-        StartCoroutine(CheckAccelCoroutine());
+        this.speed = speed;
     }
 
-    IEnumerator CheckAccelCoroutine()
+    public void SetWalkAccel(float accel)
     {
-        float delay = 5f;
+        this.walkAccelReal = accel;
+    }
+
+    public void ResetWalkAccel()
+    {
+        this.walkAccelReal = walkAccel;
+    }
+    public void VerifyAccelerationAfterDelay(float delay = 5f)
+    {
+        StartCoroutine(CheckAccelCoroutine(delay));
+    }
+
+    IEnumerator CheckAccelCoroutine(float delay)
+    {
         float currentAccel = walkAccelReal;
         yield return new WaitForSeconds(delay);
         if (walkAccelReal == currentAccel && walkAccelReal < walkAccel)

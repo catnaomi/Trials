@@ -100,6 +100,10 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
     protected void OnBlockEnd()
     {
         lastBlockStagger = -1;
+        if (actor is PlayerActor player)
+        {
+            player.VerifyAccelerationAfterDelay(2f);
+        }
         if (_OnBlockEnd != null) _OnBlockEnd();
     }
     /*
@@ -248,7 +252,9 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                 }
                 else if (!actor.IsAttacking())
                 {
-                    if (blockStagger != DamageKnockback.BlockStaggerType.Flinch &&
+                    bool isBlockFlinch = blockStagger == DamageKnockback.BlockStaggerType.Flinch || blockStagger == DamageKnockback.BlockStaggerType.FlinchSlow;
+
+                    if (!isBlockFlinch &&
                         (animancer.States.Current != block || ((int)blockStagger >= lastBlockStagger)))
                     {
                         ClipTransition clip = damageAnims.GetClipFromBlockType(blockStagger);
@@ -257,12 +263,20 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                         block = animancer.Layers[HumanoidAnimLayers.Base].Play(clip);
                         block.NormalizedTime = 0f;
                         block.Events.OnEnd = OnBlockEnd;
+                        SetBlockAccel();
                     }
                     else
                     {
                         ClipTransition clip = damageAnims.GetClipFromBlockType(DamageKnockback.BlockStaggerType.Flinch);
                         AnimancerState state = animancer.Layers[HumanoidAnimLayers.Flinch].Play(clip);
-                        state.Events.OnEnd = () => { animancer.Layers[HumanoidAnimLayers.Flinch].Stop(); };
+                        state.Events.OnEnd = () => { 
+                            animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
+                            if (actor is PlayerActor && blockStagger == DamageKnockback.BlockStaggerType.FlinchSlow)
+                            {
+                                player.VerifyAccelerationAfterDelay(2f);
+                            }
+                        };
+                        SetBlockAccel();
                     }
                     lastBlockStagger = (int)damage.staggers.onBlock;
                 }
@@ -586,6 +600,14 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         actor.GetComponent<CharacterController>().Move(moveVector);
     }
 
+    public void SetBlockAccel()
+    {
+        if (actor is PlayerActor player)
+        {
+            player.SetSpeed(0);
+            player.SetWalkAccel(player.blockHitAccel);
+        }
+    }
     public void StartCritVulnerability(float time)
     {
         if (totalCritTime >= DamageKnockback.MAX_CRITVULN_TIME) return;

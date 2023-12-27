@@ -339,7 +339,7 @@ public class AnimationFXHandler : MonoBehaviour
                 FXController.CreateSpark(actor.hitParticlePosition, actor.hitParticleDirection, clip);
                 FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
             }
-            if (didTypedBlock)
+            if (true)//didTypedBlock)
             {
                 if (isSlash)
                 {

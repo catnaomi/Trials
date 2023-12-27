@@ -120,6 +120,7 @@ public class DamageKnockback
         GuardBreak,
         Recoil,
         AutoParry,
+        FlinchSlow,
     }
     public enum StaggerStrength
     {

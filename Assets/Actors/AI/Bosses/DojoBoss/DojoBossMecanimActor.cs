@@ -40,6 +40,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [SerializeField] CombatPhase currentPhase;
     public bool stayInPhase = false;
     public float timeInPhase;
+    public float timeTooFar;
     public float minPhaseDuration = 60f;
     public float maxPhaseDuration = 180f;
     int successesThisPhase;
@@ -127,6 +128,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public float output;
     [Header("Navigation")]
     public float speed = 5f;
+    public float arenaRadius = 10f;
+    public Transform arenaCenter;
     [Header("Animancer")]
     public Animancer.ClipTransition playerParryFailAnim;
     public float freezeTimeout = 5f;
@@ -135,6 +138,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] float CloseRangeFloat;
     [ReadOnly, SerializeField] bool InMeleeRange;
+    [ReadOnly, SerializeField] float MeleeRangeFloat;
     [ReadOnly, SerializeField] bool AtLongRange;
     [ReadOnly, SerializeField] bool ParryHit;
     [ReadOnly, SerializeField] int NextParry;
@@ -210,7 +214,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         timeHandler = this.GetComponent<MecanimActorTimeTravelHandler>();
         nav = this.GetComponent<NavMeshAgent>();
         xoParticle = this.GetComponentInChildren<DojoBossXOParticleController>();
-        nav.updatePosition = true;
+        nav.updatePosition = false;
         nav.updateRotation = true;
         GetHandPositions();
         this.OnHurt.AddListener(ResetHandPositions);
@@ -254,6 +258,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         InCloseRange = dist <= closeRange;
         InMeleeRange = dist <= meleeRange;
         AtLongRange = dist >= longRange;
+
+        if (AtLongRange)
+        {
+
+        }
         if (shouldRealign)
         {
             RealignToTarget();
@@ -353,6 +362,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator.SetBool("InCloseRange", InCloseRange);
         animator.SetFloat("CloseRangeFloat", InCloseRange ? 1f : 0f);
         animator.SetBool("InMeleeRange", InMeleeRange);
+        animator.SetFloat("MeleeRangeFloat", InMeleeRange ? 1f : 0f);
+
         animator.SetBool("AtLongRange", AtLongRange);
 
         animator.SetInteger("NextParry", NextParry);
@@ -427,6 +438,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             if (CombatTarget != null && IsMoving())
             {
                 nav.SetDestination(CombatTarget.transform.position);
+                yield return new WaitWhile(() => nav.pathPending);
+                DrawCircle.DrawWireSphere(nav.destination, 2f, Color.green, 0.25f);
             }
             yield return new WaitForSeconds(0.1f);
         }
@@ -634,6 +647,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         offenseAttempts++;
         string[] split = sequence.Split(' ');
         StartCoroutine(TelegraphAttacks(split));
+        GetNextAttack();
+    }
+
+    public void MarkAttempt()
+    {
+        offenseAttempts++;
         GetNextAttack();
     }
 
@@ -1128,8 +1147,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         new int[] {0,1},
         new int[] {2,3},
-        new int[] {4,5,6},
-        new int[] {6,2,5,3,4},
+        new int[] {1,2,0,3},
+        //new int[] {4,5,6},
+        //new int[] {6,2,5,3,4},
     };
     public void Recoil()
     {
@@ -1715,7 +1735,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 !tooClose ? Color.green : Color.red,
                 !tooClose ? 0 : 1);
 
-            //diff = onNormal + offNormal;
+            diff = onNormal + offNormal;
         }
         else
         {
@@ -1746,7 +1766,24 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             }
 
         }
+        // keep qi in arena
+        Vector3 arenaCenterPoint = Vector3.zero;
+        if (arenaCenter != null)
+        {
+            arenaCenterPoint = arenaCenter.position;
+        }
+        Vector3 pos = this.transform.position;
+        pos.y = arenaCenterPoint.y;
+        Vector3 dir = this.transform.position - arenaCenterPoint;
+        if (dir.magnitude > arenaRadius)
+        {
+            pos = arenaCenterPoint + dir.normalized * arenaRadius;
+            pos.y = this.transform.position.y;
+            this.transform.position = pos;
+        }
+        
 
+        nav.nextPosition = this.transform.position;
     }
 
     void SetCollisionMode(ColliderMode mode)
@@ -1944,5 +1981,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         return false; //TODO: implement invulnerability?
     }
 
-
+    void OnDrawGizmos()
+    {
+        Vector3 arenaCenterPoint = Vector3.zero;
+        if (arenaCenter != null)
+        {
+            arenaCenterPoint = arenaCenter.position;
+        }
+        DrawCircle.DrawWireCircle(arenaCenterPoint, Vector3.up, arenaRadius, Color.white, 0, 120);
+    }
 }
