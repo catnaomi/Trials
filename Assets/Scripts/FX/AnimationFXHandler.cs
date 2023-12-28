@@ -73,6 +73,7 @@ public class AnimationFXHandler : MonoBehaviour
         }
         if (actor != null && actor.ShouldDustOnStep()) OnDust.Invoke();
         OnStepL.Invoke();
+        Debug.DrawRay(footL.position, Vector3.up * 0.2f, Color.blue, 1f);
     }
 
     public void StepL()
@@ -92,11 +93,16 @@ public class AnimationFXHandler : MonoBehaviour
         }
         if (actor != null && actor.ShouldDustOnStep()) OnDust.Invoke();
         OnStepR.Invoke();
+        Debug.DrawRay(footR.position, Vector3.up * 0.2f, Color.red, 1f);
     }
 
     public void StepR()
     {
         StepR(0);
+    }
+    public void StepWeapon()
+    {
+        // TODO: step effect where weapon connects
     }
 
     public void Slide(int active)
@@ -350,7 +356,7 @@ public class AnimationFXHandler : MonoBehaviour
                 FXController.CreateSpark(actor.hitParticlePosition, actor.hitParticleDirection, clip);
                 FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
             }
-            if (true)//didTypedBlock)
+            if (actor is PlayerActor)//didTypedBlock)
             {
                 if (isSlash)
                 {
