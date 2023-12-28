@@ -8,9 +8,10 @@ public class StepParticleController : MonoBehaviour
     public static StepParticleController instance;
     HashSet<AnimationFXHandler> fxHandlers;
     public GameObject particlePrefab;
-    public EventHandler<Vector3> StepEvent;
+    public GameObject slideParticlePrefab;
     public Transform heightReference;
     public List<ParticleSystem> ripples;
+    public Dictionary<AnimationFXHandler, ParticleSystem> slideRipples;
     public int maxRipples = -1;
     int poolIndex;
     GenericTimeTravelHandler timeTravelController;
@@ -33,6 +34,7 @@ public class StepParticleController : MonoBehaviour
             }
         }
         ripples = new List<ParticleSystem>(maxRipples > 0 ? maxRipples : 64);
+        slideRipples = new Dictionary<AnimationFXHandler, ParticleSystem>();
         timeTravelController = this.GetComponent<GenericTimeTravelHandler>();
 
         timeTravelController.OnStartFreeze.AddListener(FreezeAll);
@@ -40,6 +42,22 @@ public class StepParticleController : MonoBehaviour
 
     }
 
+    void Update()
+    {
+        foreach (AnimationFXHandler fxHandler in slideRipples.Keys)
+        {
+            if (slideRipples.TryGetValue(fxHandler, out ParticleSystem system))
+            {
+                if (system != null && system.isPlaying)
+                {
+                    Vector3 pos = fxHandler.transform.position;
+                    pos.y = heightReference.position.y;
+
+                    system.transform.position = pos;
+                }
+            }
+        }
+    }
     /*
     void ListenLeftFoot(AnimationFXHandler fxHandler)
     {
@@ -75,6 +93,9 @@ public class StepParticleController : MonoBehaviour
         fxHandlers.Add(fxHandler);
         fxHandler.OnStepR.AddListener(() => CreateParticle(fxHandler.footR));
         fxHandler.OnStepL.AddListener(() => CreateParticle(fxHandler.footL));
+
+        fxHandler.OnSlideStart.AddListener(() => StartSlide(fxHandler));
+        fxHandler.OnSlideEnd.AddListener(() => StopSlide(fxHandler));
     }
 
     public void Deregister(AnimationFXHandler fxHandler)
@@ -132,6 +153,43 @@ public class StepParticleController : MonoBehaviour
         poolIndex %= maxRipples;
     }
 
+    public ParticleSystem CreateSlide(AnimationFXHandler fxHandler)
+    {
+        GameObject particle = Instantiate(slideParticlePrefab, fxHandler.transform.position, slideParticlePrefab.transform.rotation);
+
+        ParticleSystem system = particle.GetComponent<ParticleSystem>();
+        particle.SetActive(true);
+
+        slideRipples[fxHandler] = system;
+
+        return system;
+    }
+    public void StartSlide(AnimationFXHandler fxHandler)
+    {
+        ParticleSystem system = null;
+        if (!slideRipples.TryGetValue(fxHandler, out system))
+        {
+            system = CreateSlide(fxHandler);
+        }
+
+        Vector3 pos = fxHandler.transform.position;
+        pos.y = heightReference.position.y;
+
+        system.transform.position = pos;
+
+        system.Play();
+    }
+
+    public void StopSlide(AnimationFXHandler fxHandler)
+    {
+        ParticleSystem system = null;
+        if (!slideRipples.TryGetValue(fxHandler, out system))
+        {
+            return;
+        }
+
+        system.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+    }
     public bool CheckFreeze(ParticleSystem system)
     {
         if (timeTravelController != null && timeTravelController.IsFrozen())
@@ -148,6 +206,13 @@ public class StepParticleController : MonoBehaviour
             if (system == null) continue;
             system.Pause();
         }
+
+        foreach (ParticleSystem ssystem in slideRipples.Values)
+        {
+            if (ssystem == null) continue;
+            ssystem.Pause();
+            
+        }
     }
 
     public void UnFreezeAll()
@@ -159,6 +224,16 @@ public class StepParticleController : MonoBehaviour
             {
                 system.Play();
             }
+        }
+
+        foreach (ParticleSystem ssystem in slideRipples.Values)
+        {
+            if (ssystem == null) continue;
+            if (!ssystem.isStopped)
+            {
+                ssystem.Play();
+            }
+
         }
     }
 

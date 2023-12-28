@@ -11,10 +11,10 @@ GameObject:
   - component: {fileID: 3531579036663560983}
   - component: {fileID: 1503764044170152010}
   - component: {fileID: 7701454630553443046}
-  - component: {fileID: 2120939422883813024}
+  - component: {fileID: 5285294737062306337}
   m_Layer: 26
   m_Name: pillar bottom collider
-  m_TagString: Untagged
+  m_TagString: IgnoreCameraCollision
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 1
   m_StaticEditorFlags: 8
@@ -27,8 +27,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 803025412482292676}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -4.32, z: 0}
-  m_LocalScale: {x: 1.28841, y: 0.601258, z: 1.28841}
+  m_LocalPosition: {x: 0, y: -3.6211, z: 0}
+  m_LocalScale: {x: 1.28841, y: 1.3002204, z: 1.28841}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6101876781673290187}
@@ -84,8 +84,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &2120939422883813024
-CapsuleCollider:
+--- !u!64 &5285294737062306337
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -94,10 +94,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.5000006
-  m_Height: 1.9999999
-  m_Direction: 1
-  m_Center: {x: -0.0000056624413, y: -0.00000035762787, z: -0.00000295043}
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &5991056236349462014
 GameObject:
   m_ObjectHideFlags: 0
@@ -14729,7 +14729,7 @@ GameObject:
   - component: {fileID: 5991056237210899903}
   m_Layer: 26
   m_Name: pillar top collider
-  m_TagString: Untagged
+  m_TagString: IgnoreCameraCollision
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 8
@@ -14826,6 +14826,7 @@ GameObject:
   - component: {fileID: 4964396456179458724}
   - component: {fileID: 5991056237413432877}
   - component: {fileID: 4607706508629227459}
+  - component: {fileID: 7050053771672950005}
   m_Layer: 10
   m_Name: Rising Ice Pillar Prefab
   m_TagString: IgnoreCameraCollision
@@ -14943,6 +14944,46 @@ MonoBehaviour:
   recoilOnFail: 1
   drops: []
   dropPrefab: {fileID: 0}
+  dropProbability: 1
   dropPrefabAmount: 0
   forceMagnitude: 1
   angularVelocity: {x: 0, y: 0, z: 0}
+--- !u!114 &7050053771672950005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6910184522036757361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c7acedc5788f094ebda315ce9d03787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  renderer: {fileID: 4964396456179458724}
+  breakableObject: {fileID: 0}
+  crackSpeed: 4
+  curve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4

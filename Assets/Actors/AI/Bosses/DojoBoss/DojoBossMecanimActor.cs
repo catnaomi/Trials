@@ -161,6 +161,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] bool PillarTooClose;
     [ReadOnly, SerializeField] bool ResetToStart;
     [ReadOnly, SerializeField] bool StartAttack;
+    [ReadOnly, SerializeField] bool BeziersActive;
     [Space(5)]
     [SerializeField] float out_PillarJumpCurve;
     [Space(10)]
@@ -421,6 +422,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator.UpdateTrigger("ResetToStart", ref ResetToStart);
 
         animator.UpdateTrigger("StartAttack", ref StartAttack);
+
+        animator.SetBool("BeziersActive", BeziersActive);
     }
 
     void CheckTarget()
@@ -773,6 +776,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         ArrowController arrow = ArrowController.Launch(arrowPrefab, origin, Quaternion.LookRotation(launchVector), launchVector * force, this.transform, arrowDamage);
 
         ArrowAvoidColliders(arrow.gameObject);
+
     }
     public void BowFireHoming()
     {
@@ -796,6 +800,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         BezierProjectileController arrow = BezierProjectileController.Launch(homingArrowPrefab, origin, bezierDuration, this.transform, arrowDamage, controlPoints);
 
         ArrowAvoidColliders(arrow.gameObject);
+
+        MarkBeziersActive(bezierDuration);
     }
 
     public void BowFireScatter()
@@ -809,6 +815,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         ArrowAvoidColliders(arrow.gameObject);
 
         StartCoroutine(DelayScatter(arrow.gameObject));
+
+        MarkBeziersActive(bezierDuration + scatterArrowDelay);
     }
 
     public void PillarShockwave()
@@ -866,7 +874,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             do
             {
                 distanceCheck = true;
-                Vector3 unitDirection = Random.onUnitSphere;
+                Vector3 unitDirection = (i != 0) ? Random.onUnitSphere : Vector3.zero;
                 unitDirection.y = 0f;
                 unitDirection.Normalize();
                 float offsetDistance = Random.Range(scatterArrowMinimumRadius, scatterArrowMaximumRadius);
@@ -902,6 +910,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             }
 
             BezierProjectileController newArrow = BezierProjectileController.Launch(homingArrowPrefab, origin, scatterArrowBezierDuration + (scattarArrowBezierAdditionalDelay * i), this.transform, arrowDamage, controlPoints);
+            newArrow.SetHitbox(false);
             arrows[i] = newArrow;
             colliders.AddRange(GetAllArrowColliders(newArrow.gameObject));
         }
@@ -923,7 +932,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
     }
 
-
+    public void MarkBeziersActive(float duration)
+    {
+        BeziersActive = true;
+        this.StartTimer(duration, () => BeziersActive = false);
+    }
 
     void ArrowAvoidColliders(GameObject arrowObject)
     {
@@ -978,7 +991,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
     }
 
-    /*
+    /*  
    * triggered by animation:
    * 0 = deactivate hitboxes
    * 1 = main weapon

@@ -4,10 +4,12 @@ using CustomUtilities;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class BreakableObject : MonoBehaviour, IDamageable
+public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
 {
     public DamageType brokenByElements;
     public float health = -1;
+    float startingHealth;
+    AttributeValue healthAttribute;
     [Space(10)]
     public GameObject particlePrefab;
     public UnityEvent OnBreak;
@@ -22,6 +24,13 @@ public class BreakableObject : MonoBehaviour, IDamageable
     public int dropPrefabAmount;
     public float forceMagnitude = 1f;
     public Vector3 angularVelocity;
+
+
+    void Awake()
+    {
+        startingHealth = health;
+        UpdateHealthAttribute();
+    }
     public void Recoil()
     {
         
@@ -42,6 +51,7 @@ public class BreakableObject : MonoBehaviour, IDamageable
             {
                 BreakObject();             
             }
+            UpdateHealthAttribute();
             return;
         }
         if (recoilOnFail)
@@ -133,5 +143,25 @@ public class BreakableObject : MonoBehaviour, IDamageable
     public bool IsInvulnerable()
     {
         return false; //TODO: implement invulnerability?
+    }
+
+    public AttributeValue GetHealth()
+    {
+        UpdateHealthAttribute();
+        return healthAttribute;
+    }
+
+    void UpdateHealthAttribute()
+    {
+        if (healthAttribute == null)
+        {
+            healthAttribute = new AttributeValue(startingHealth, startingHealth, startingHealth);
+        }
+        healthAttribute.current = health;
+    }
+
+    public float GetSmoothedHealth()
+    {
+        return health;
     }
 }

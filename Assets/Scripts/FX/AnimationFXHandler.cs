@@ -31,6 +31,8 @@ public class AnimationFXHandler : MonoBehaviour
     public UnityEvent OnDashDust;
     public UnityEvent OnStepL;
     public UnityEvent OnStepR;
+    public UnityEvent OnSlideStart;
+    public UnityEvent OnSlideEnd;
     [Header("Spiral")]
     public UnityEvent StartSpiral;
     public UnityEvent EndSpiral;
@@ -97,6 +99,20 @@ public class AnimationFXHandler : MonoBehaviour
         StepR(0);
     }
 
+    public void Slide(int active)
+    {
+        footSourceHeavy.Stop();
+        footSourceHeavy.PlayOneShot(animSounds.default_slide);
+        if (active > 0)
+        {
+            OnSlideStart.Invoke();
+        }
+        else
+        {
+            OnSlideEnd.Invoke();
+        }
+    }
+
     public void Tap()
     {
         footSourceHeavy.Stop();
@@ -116,12 +132,7 @@ public class AnimationFXHandler : MonoBehaviour
         OnDashDust.Invoke();
     }
 
-    public void Slide()
-    {
-        footSourceHeavy.Stop();
-        footSourceHeavy.PlayOneShot(animSounds.default_slide);
-        OnDashDust.Invoke();
-    }
+
 
     public void StartContinuousSlide()
     {

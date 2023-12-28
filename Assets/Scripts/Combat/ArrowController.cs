@@ -8,10 +8,11 @@ public class ArrowController : Projectile
 {
     public Rigidbody tip;
     public Rigidbody feather;
-    public Hitbox hitbox;
+    [ReadOnly] public Hitbox hitbox;
     public DamageKnockback damageKnockback;
     public GameObject interactable;
     public GameObject prefabRef;
+    public GameObject[] dontDestroy;
     bool launched;
     
     Vector3 stickPos;
@@ -75,11 +76,8 @@ public class ArrowController : Projectile
 
         if (hitbox.didHitTerrain)
         {
-            Debug.Log("hit terrain?");
             tip.isKinematic = true;
             feather.isKinematic = true;
-
-            
 
             Stick(hitbox.hitTerrain);
             hitbox.SetActive(false);
@@ -88,6 +86,7 @@ public class ArrowController : Projectile
         else if (hitbox.victims.Count > 0)
         {
             //FXController.CreateFX(FXController.FX.FX_BleedPoint, feather.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
+            UnparentDontDestroy();
             Destroy(tip.gameObject);
             allowInteract = false;
         }
@@ -126,11 +125,13 @@ public class ArrowController : Projectile
         empty.transform.localScale = new Vector3(1f / hitbox.hitTerrain.transform.localScale.x, 1f / hitbox.hitTerrain.transform.localScale.y, 1f / hitbox.hitTerrain.transform.localScale.z);
         tip.transform.SetParent(empty.transform, true);
         tip.position = stickPos;
+        tip.GetComponent<Collider>().isTrigger = true;
         this.GetComponentInChildren<TrailRenderer>().emitting = false;
     }
 
     public void EnablePickup()
     {
+        if (interactable != null)
         interactable.SetActive(true);
     }
     /*
@@ -304,9 +305,13 @@ public class ArrowController : Projectile
         this.GetComponentInChildren<TrailRenderer>().Clear();
         this.gameObject.SetActive(false);
     }
-    private void OnDrawGizmos()
+
+    public void UnparentDontDestroy()
     {
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawSphere(stickPos, 0.05f);
+        foreach (GameObject gameObject in dontDestroy)
+        {
+            gameObject.transform.SetParent(null);
+            Destroy(gameObject, ARROW_DURATION);
+        }
     }
 }

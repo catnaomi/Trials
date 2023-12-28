@@ -9,14 +9,14 @@ public class FakeHitboxHandler : MonoBehaviour
     public UnityEvent OnDeactive;
     private void Update()
     {
-        
+
     }
     public void HitboxActive(int active)
     {
         if (active > 0)
         {
             OnActive.Invoke();
-           
+
         }
         else
         {
@@ -119,4 +119,8 @@ public class FakeHitboxHandler : MonoBehaviour
     }
 
     public void RealignToTarget() { }
+
+    public void Slide(int active)
+    {
+    }
 }

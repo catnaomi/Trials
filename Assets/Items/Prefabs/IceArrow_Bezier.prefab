@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2277119421271275643}
   - component: {fileID: 1416659280551639656}
   - component: {fileID: 7559356078344690479}
+  - component: {fileID: 5284031178792624416}
   m_Layer: 0
   m_Name: Target Location Viz
   m_TagString: Untagged
@@ -28,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 5988520697413143809}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 19.999998, y: 19.999998, z: 19.999998}
+  m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 3663513004846242621}
@@ -97,6 +98,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectileController: {fileID: 2439880948279388596}
+--- !u!114 &5284031178792624416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5988520697413143809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c68cccc456eab1418185416c97de477, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  particlePrefab: {fileID: 8029655284919068018, guid: 45a1bf3ebf430644695b72acea9d523b,
+    type: 3}
+  forceX: 0
+  forceY: 1
+  forceZ: 0
+  forcePosition: {x: 0, y: 0, z: 0}
 --- !u!1001 &997367077692692483
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -173,6 +192,12 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 3739406357463608453}
   m_SourcePrefab: {fileID: 100100000, guid: eefed287d4ed6d24f91f5687bcea2de4, type: 3}
+--- !u!1 &997367077819976098 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 413913505, guid: eefed287d4ed6d24f91f5687bcea2de4,
+    type: 3}
+  m_PrefabInstance: {fileID: 997367077692692483}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3663513004846242621 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4539687490313290558, guid: eefed287d4ed6d24f91f5687bcea2de4,
@@ -191,6 +216,19 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 997367077692692483}
   m_PrefabAsset: {fileID: 0}
+--- !u!65 &4536277271520729850
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8439524228247309663}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &2439880948279388596
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -209,6 +247,7 @@ MonoBehaviour:
   duration: 10
   damageKnockback:
     healthDamage: 0
+    unresistedMinimum: 0
     types: 0
     critData:
       criticalMultiplier: 0
@@ -224,6 +263,7 @@ MonoBehaviour:
     isRanged: 0
     isParry: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
@@ -231,6 +271,7 @@ MonoBehaviour:
     cannotKill: 0
     stunTime: 0
     repositionLength: 0
+    repositionMaxDist: 0
     stagger: 0
     staggers:
       onHit: 0
@@ -239,11 +280,12 @@ MonoBehaviour:
       onKill: 0
       onCounterHit: 0
       onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
-    didCrit: 0
     hitboxSource: {fileID: 0}
     source: {fileID: 0}
+    friendlyGroup: 0
     originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
     OnHit:
@@ -255,58 +297,14 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
     hitClip: {fileID: 0}
   controlPoints: []
   hitbox: {fileID: 0}
-  shockwaveDamage:
-    healthDamage: 3
-    types: 4
-    critData:
-      criticalMultiplier: 0
-      alwaysCritical: 0
-      causesCritState: 0
-      doesNotConsumeCritState: 0
-      criticalExtensionTime: 0
-    breaksArmor: 0
-    unblockable: 0
-    disarm: 0
-    isThrust: 0
-    isSlash: 0
-    isRanged: 1
-    isParry: 0
-    bouncesOffBlock: 0
-    breaksBlock: 0
-    canDamageSelf: 0
-    cannotAutoFlinch: 0
-    cannotRecoil: 0
-    cannotKill: 0
-    stunTime: 0
-    repositionLength: 0
-    stagger: 0
-    staggers:
-      onHit: 2
-      onArmorHit: 1
-      onCritical: 2
-      onKill: 5
-      onCounterHit: 2
-      onBlock: 0
-    kbForce: {x: 0, y: 0, z: 0}
-    kbRadial: 0
-    didCrit: 0
-    hitboxSource: {fileID: 0}
-    source: {fileID: 0}
-    originPoint: {x: 0, y: 0, z: 0}
-    hitMaterial: 0
-    OnHit:
-      m_PersistentCalls:
-        m_Calls: []
-    OnCrit:
-      m_PersistentCalls:
-        m_Calls: []
-    OnBlock:
-      m_PersistentCalls:
-        m_Calls: []
-    hitClip: {fileID: 0}
   shockwaveRadius: 1
   OnShockwaveHit:
     m_PersistentCalls:
@@ -335,20 +333,9 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  dontDestroy:
+  - {fileID: 997367077819976098}
   initPos: {x: 0, y: 0, z: 0}
---- !u!65 &4536277271520729850
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8439524228247309663}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &6549374372142576786
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -361,6 +348,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 82971fe4b35be2d4a9ba129cce2e9ac3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbodies: []
-  timeTravelStates: []
   timeTravelController: {fileID: 0}

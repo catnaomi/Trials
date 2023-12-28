@@ -12,7 +12,6 @@ public class BezierProjectileController : Projectile
 
     public Vector3[] controlPoints;
     public Hitbox hitbox;
-    public DamageKnockback shockwaveDamage;
     public float shockwaveRadius = 1f;
     public UnityEvent OnShockwaveHit;
 
@@ -21,6 +20,7 @@ public class BezierProjectileController : Projectile
     public AnimationCurve curve = AnimationCurve.Linear(0, 0, 1, 1);
     bool launched;
 
+    public GameObject[] dontDestroy;
     [ReadOnly, SerializeField] Vector3 initPos;
 
     private static readonly float ARROW_DURATION = 30f;
@@ -143,9 +143,6 @@ public class BezierProjectileController : Projectile
 
         if (hitbox.didHitTerrain)
         {
-            Debug.Log("hit terrain?");
-
-
             hitbox.SetActive(false);
             FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
         }
@@ -163,6 +160,11 @@ public class BezierProjectileController : Projectile
         Vector3 origin = tip.transform.position;
 
         Collider[] colliders = Physics.OverlapSphere(origin, shockwaveRadius, LayerMask.GetMask("Actors"));
+
+        DamageKnockback shockwaveDamage = new DamageKnockback(damageKnockback);
+        shockwaveDamage.source = this.hitbox.source;
+        shockwaveDamage.hitboxSource = this.hitbox.gameObject;
+
         foreach (Collider collider in colliders)
         {
             if (collider.TryGetComponent<IDamageable>(out IDamageable damageable))
@@ -175,7 +177,16 @@ public class BezierProjectileController : Projectile
     private void EndFlight()
     {
         inFlight = false;
+        UnparentDontDestroy();
         Destroy(this.gameObject);
     }
 
+    public void UnparentDontDestroy()
+    {
+        foreach (GameObject gameObject in dontDestroy)
+        {
+            gameObject.transform.SetParent(null, true);
+            Destroy(gameObject, ARROW_DURATION);
+        }
+    }
 }
