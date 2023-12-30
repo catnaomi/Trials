@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using CustomUtilities;
+using System.Linq;
 
 [RequireComponent(typeof(DojoBossMecanimActor), typeof(HumanoidPositionReference))]
 public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidInventory, IInventory
@@ -22,6 +23,9 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
     [ReadOnly] public TransformingWeapon weaponOffInstance;
     GameObject emptyMain;
     GameObject emptyOff;
+    [Header("Inspector")]
+    public int setByIndex;
+    [SerializeField, ReadOnly] int currentIndex;
     public UnityEvent OnChange;
 
     void Awake()
@@ -43,7 +47,7 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
         {
             weaponMainInstance.holder = actor;
             weaponOffInstance.holder = actor;
-            SetWeapon(weapons[0]);
+            SetWeaponByIndex(0);
 
             weaponMainInstance.EquipWeapon(actor);
         }
@@ -53,7 +57,10 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
     // Update is called once per frame
     void Update()
     {
-
+        if (setByIndex != currentIndex && setByIndex != -1)
+        {
+            SetWeaponByIndex(setByIndex);
+        }
     }
 
     public void SetWeapon(WeaponStats stats)
@@ -83,17 +90,21 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
 
     public void SetWeaponByName(string name)
     {
-        foreach (WeaponStats stats in weapons)
+        for (int i = 0; i < weapons.Length; i++)
         {
+            WeaponStats stats = weapons[i];
             if (name.ToLower() == stats.name.ToLower())
             {
-                SetWeapon(stats);
+
+                SetWeaponByIndex(i);
                 break;
             }
         }
     }
     public void SetWeaponByIndex(int index)
     {
+        currentIndex = index;
+        setByIndex = index;
         SetWeapon(weapons[index]);
     }
 
@@ -111,6 +122,7 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
         {
             GetOffhandModel().SetActive(false);
         }
+        
         if (stats.mainHandModel != null)
         {
             stats.mainHandModel.SetActive(true);
@@ -130,6 +142,10 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
             stats.mainHandMesh = GenerateMesh(stats.mainHandModel);
         }
 
+        if (stats.preObject != null)
+        {
+            stats.offHandModel = stats.preObject;
+        }
         if (stats.offHandModel != null)
         {
             stats.offHandModel.SetActive(true);
@@ -281,6 +297,7 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
     public class WeaponStats
     {
         public string name;
+        public GameObject preObject;
         [Space(10)]
         public GameObject mainHandPrefab;
         public float mainLength;

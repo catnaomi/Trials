@@ -14,13 +14,10 @@ public class DojoBossInventoryEditor : Editor
         DojoBossInventoryTransformingController inventory = (DojoBossInventoryTransformingController)target;
         DrawDefaultInspector();
         GUILayout.Space(25f);
-        indexText = EditorGUILayout.TextField("Set Weapon By Index", indexText);
+        //indexText = EditorGUILayout.TextField("Set Weapon By Index", indexText);
         if (GUILayout.Button("Set"))
         {
-            if (Int32.TryParse(indexText, out index))
-            {
-                inventory.SetWeaponByIndex(index);
-            }
+            inventory.SetWeaponByIndex(inventory.setByIndex);
         }
     }
 }

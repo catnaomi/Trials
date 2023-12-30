@@ -1260,7 +1260,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         OnHurt.Invoke();
         StartCritVulnerability(5f);
         offenseGroup++;
-        int max = (LowHealth) ? maxAttackFirstPhase : offenseSequences.Length - 1;
+        int max = (!LowHealth) ? maxAttackFirstPhase : offenseSequences.Length - 1;
         if (offenseGroup > max)
         {
             offenseGroup = max;
@@ -1575,7 +1575,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public void NextParrySequence()
     {
         parrySequenceIndex++;
-        int max = (LowHealth) ? maxParryFirstPhase + 1 : parryPatterns.Length;
+        int max = (!LowHealth) ? maxParryFirstPhase + 1 : parryPatterns.Length;
         parrySequenceIndex %= max;
         parryCurrentIndex = 0;
 
