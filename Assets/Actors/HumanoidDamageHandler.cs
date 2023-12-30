@@ -209,8 +209,9 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         actor.lastDamageTaken = damage;
         actor.lastDamageAmountTaken = damageAmount;
 
+        bool dodge = actor.IsDodging() || (damage.jumpable && actor.IsJumping());
 
-        if (actor.IsDodging())
+        if (dodge)
         {
             // do nothing
             actor.OnDodge.Invoke();
@@ -227,7 +228,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
         DamageKnockback.GetContactPoints(actor.GetComponent<IDamageable>(), damage, actor.GetComponent<Collider>(), blockSuccess);
 
-        if (actor.IsDodging())
+        if (dodge)
         {
             actor.OnDodgeSuccess.Invoke();
         }

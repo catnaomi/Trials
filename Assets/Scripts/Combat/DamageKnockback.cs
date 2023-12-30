@@ -14,17 +14,21 @@ public class DamageKnockback
     [Space(5)]
     public CriticalData critData;
     [Space(5)]
-    public bool breaksArmor;
-    public bool unblockable;
-    public bool disarm;
+    [Header("Type")]
     public bool isThrust;
     public bool isSlash;
     public bool isRanged;
     public bool isParry;
+    [Header("Dodge & Block Interactions")]
+    public bool breaksArmor;
+    public bool unblockable;
+    public bool jumpable;
+    [Space(5)]
     public bool bouncesOffBlock;
     public bool bouncesOffTypedBlock;
     public bool breaksBlock;
     public bool canDamageSelf;
+    [Header("Stagger & Kill Data")]
     public bool cannotAutoFlinch;
     public bool cannotRecoil;
     public bool cannotKill;
@@ -33,22 +37,18 @@ public class DamageKnockback
     public float repositionMaxDist;
     public StaggerStrength stagger;
     public StaggerData staggers;
-    [Space(10)]
-    public FXData fxData;
-    [Space(10)]
+    [Header("Knockback")]
     public Vector3 kbForce;
     public bool kbRadial;
-    [Space(5)]
-    [ReadOnly]
-    public GameObject hitboxSource;
-    [ReadOnly]
-    public GameObject source;
-    [ReadOnly]
-    public FriendlyGroup friendlyGroup;
-
-    public Vector3 originPoint;
+    [Header("FX")]
     public FXController.FXMaterial hitMaterial;
+    public FXData fxData;
+    public AudioClip hitClip;
+    [Space(20)]
+    [Header("Misc/Unused")]
+    public bool disarm;
 
+    [Header("Events")]
     public UnityEvent OnHit;
     public UnityEvent OnCrit;
     public UnityEvent OnBlock;
@@ -56,6 +56,14 @@ public class DamageKnockback
     [Header("Runtime Flags")]
     [ReadOnly] public bool didCrit;
     [ReadOnly] public bool timeDelayed;
+    [ReadOnly]
+    public GameObject hitboxSource;
+    [ReadOnly]
+    public GameObject source;
+    [ReadOnly]
+    public FriendlyGroup friendlyGroup;
+    [ReadOnly]
+    public Vector3 originPoint;
 
     public static float MAX_CRITVULN_TIME = 5f;
     public static readonly int SLASH_INT = -1;
@@ -130,7 +138,7 @@ public class DamageKnockback
 
     //public bool breaksArmor;
 
-    public AudioClip hitClip;
+
 
     public DamageKnockback(Vector3 force)
     {
@@ -149,6 +157,7 @@ public class DamageKnockback
         this.types = damageKnockback.types;
         this.critData = damageKnockback.critData;
         this.disarm = damageKnockback.disarm;
+        this.jumpable = damageKnockback.jumpable;
         this.stunTime = damageKnockback.stunTime;
         this.isSlash = damageKnockback.isSlash;
         this.isThrust = damageKnockback.isThrust;

@@ -4998,6 +4998,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (animancer == null) return false;
         return animancer.States.Current == state.roll;
     }
+    public override bool IsJumping()
+    {
+        if (animancer == null) return false;
+        return !IsGrounded() || animancer.States.Current == state.jump;
+    }
     public override bool IsHitboxActive()
     {
         return isHitboxActive;

@@ -17,6 +17,20 @@ public class HitboxGroup
     public UnityEvent OnHitTerrain;
     public UnityEvent OnHitWall;
     public UnityEvent OnHitHitbox;
+
+    public HitboxGroup()
+    {
+        this.hitboxes = new List<Hitbox>();
+        this.victims = new List<IDamageable>();
+
+        OnHitTerrain = new UnityEvent();
+        OnHitWall = new UnityEvent();
+        OnHitHitbox = new UnityEvent();
+    }
+    public HitboxGroup(GameObject root) : this()
+    {
+        this.root = root;
+    }
     public HitboxGroup(GameObject root, List<Hitbox> hitboxes)
     {
         this.root = root;
@@ -42,6 +56,29 @@ public class HitboxGroup
 
             hitbox.OnHitHitbox.AddListener(() => { HitboxHit(hitbox); });
         }
+    }
+
+    public void Add(Hitbox hitbox)
+    {
+        hitboxes.Add(hitbox);
+
+        hitbox.victims = this.victims;
+        hitbox.OnHitTerrain = new UnityEvent();
+
+        hitbox.OnHitTerrain.AddListener(() => { TerrainHit(hitbox); });
+
+        hitbox.OnHitWall = new UnityEvent();
+
+        hitbox.OnHitWall.AddListener(() => { OnHitWall.Invoke(); });
+
+        hitbox.OnHitHitbox = new UnityEvent();
+
+        hitbox.OnHitHitbox.AddListener(() => { HitboxHit(hitbox); });
+    }
+
+    public void SetRoot(GameObject root)
+    {
+        this.root = root;
     }
 
     public void SetActive(bool active)

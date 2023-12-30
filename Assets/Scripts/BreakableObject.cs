@@ -164,4 +164,10 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
     {
         return health;
     }
+
+    public void SetHealth(float health)
+    {
+        this.health = health;
+        UpdateHealthAttribute();
+    }
 }

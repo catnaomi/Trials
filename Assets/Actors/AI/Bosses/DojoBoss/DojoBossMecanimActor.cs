@@ -35,7 +35,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     [Header("Physics")]
     public Vector3 targetPosition;
-    FixedMoveMode fixedMode;
     [Header("Phases")]
     [SerializeField] CombatPhase currentPhase;
     public bool stayInPhase = false;
@@ -59,11 +58,19 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [Header("Bow & Arrow")]
     public GameObject arrowPrefab;
     public GameObject homingArrowPrefab;
+    public GameObject waveSinglePrefab;
+    public GameObject waveArcPrefab;
     public float bezierDuration;
     public float straightArrowForce;
+    public float waveArrowInitialForce;
+    public float waveArrowSpeed = 10f;
+    public float waveArcAngle = 60f;
+    public float waveDuration = 5f;
+    public int waveArcResolution = 10;
     public float forceAssistDistanceRatio;
     public float heightAssistDistanceRatio;
     public float initialScatterHeightOffset = 1f;
+    public float initialWaveDistanceOffset = 2f;
     public float scatterArrowDelay = 1f;
     public int scatterArrowAmount = 10;
     public float scatterArrowMinimumRadius = 1f;
@@ -74,16 +81,19 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [Tooltip("x: percentage along horizontal axis, y: height offset")]
     public Vector2[] bowBezierDistanceRatios;
     public DamageKnockback arrowDamage;
+    public DamageKnockback waveDamage;
     [Header("Parries")]
     public string[] parryPatterns;
-    int parryCurrentIndex;
-    int parrySequenceIndex;
-    int parrySequenceLength;
+    public int maxParryFirstPhase = 3;
+    [ReadOnly, SerializeField] int parryCurrentIndex;
+    [ReadOnly, SerializeField] int parrySequenceIndex;
     bool inCritCoroutine;
     float critTime;
     float totalCritTime;
     [Header("Offense")]
     [SerializeField, ReadOnly] int offenseAttempts = 0;
+    [ReadOnly, SerializeField] int offenseGroup;
+    public int maxAttackFirstPhase = 2;
     bool inAttackSequence;
     DojoBossXOParticleController xoParticle;
     public float sequenceDelay = 0.25f;
@@ -149,7 +159,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] float yDirection;
     [ReadOnly, SerializeField] bool OnFlinch;
     [ReadOnly, SerializeField] bool Parried;
-    [ReadOnly, SerializeField] int OffenseGroup;
     [ReadOnly, SerializeField] int OffenseStage;
     [ReadOnly, SerializeField] bool IsOnPillar;
     [ReadOnly, SerializeField] bool OnLightPillarHit;
@@ -158,10 +167,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] bool Blocking;
     [ReadOnly, SerializeField] int PillarCount;
     [ReadOnly, SerializeField] bool HasNearbyPillar;
+    [ReadOnly, SerializeField] bool AlreadyJumped;
     [ReadOnly, SerializeField] bool PillarTooClose;
     [ReadOnly, SerializeField] bool ResetToStart;
     [ReadOnly, SerializeField] bool StartAttack;
     [ReadOnly, SerializeField] bool BeziersActive;
+    [ReadOnly, SerializeField] bool WavesActive;
+    [ReadOnly, SerializeField] bool LowHealth;
     [Space(5)]
     [SerializeField] float out_PillarJumpCurve;
     [Space(10)]
@@ -192,12 +204,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         None
     }
 
-    enum FixedMoveMode
-    {
-        None,
-        Translate,
-        Warp
-    }
     // Start is called before the first frame update
     public override void ActorStart()
     {
@@ -260,10 +266,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         InMeleeRange = dist <= meleeRange;
         AtLongRange = dist >= longRange;
 
-        if (AtLongRange)
+        // TODO: cutscene for low health!
+        if (!LowHealth && attributes.health.current <= attributes.health.max * 0.5f)
         {
-
+            OnLowHealth();
         }
+
         if (shouldRealign)
         {
             RealignToTarget();
@@ -400,7 +408,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         animator.UpdateTrigger("Parried", ref Parried);
         animator.SetInteger("OffenseStage", OffenseStage);
+
         animator.SetInteger("CurrentPhase", (int)currentPhase);
+        animator.SetFloat("CurrentPhaseFloat", (float)currentPhase);
 
         animator.SetBool("IsOnPillar", IsOnPillar);
 
@@ -424,6 +434,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         animator.UpdateTrigger("StartAttack", ref StartAttack);
 
         animator.SetBool("BeziersActive", BeziersActive);
+        animator.SetBool("WavesActive", WavesActive);
+
+        animator.SetBool("LowHealth", LowHealth);
+
+        animator.SetBool("AlreadyJumped", AlreadyJumped);
     }
 
     void CheckTarget()
@@ -457,6 +472,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     void CheckPillarStatus()
     {
+        pillars.RemoveAll(p => p == null);
+        HasNearbyPillar = false;
         foreach (GameObject pillar in pillars)
         {
             if (pillar == null) continue;
@@ -465,16 +482,17 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             pillarPos.y = this.transform.position.y;
             float dist = Vector3.Distance(this.transform.position, pillarPos);
             if (dist < pillarJumpMaxDistance)
-            {      
+            {
                 HasNearbyPillar = true;
                 if (dist < pillarMinDistance)
                 {
                     PillarTooClose = true;
-                    return;
+                    break;
                 }
             }
         }
         HasNearbyPillar = false;
+        PillarCount = pillars.Count;
     }
 
     int GetClosestPillar(bool includeCurrent = false)
@@ -774,7 +792,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         float force = straightArrowForce + dist * forceAssistDistanceRatio;
         ArrowController arrow = ArrowController.Launch(arrowPrefab, origin, Quaternion.LookRotation(launchVector), launchVector * force, this.transform, arrowDamage);
-
+        arrow.IgnoreStick();
         ArrowAvoidColliders(arrow.gameObject);
 
     }
@@ -798,7 +816,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
 
         BezierProjectileController arrow = BezierProjectileController.Launch(homingArrowPrefab, origin, bezierDuration, this.transform, arrowDamage, controlPoints);
-
+        
         ArrowAvoidColliders(arrow.gameObject);
 
         MarkBeziersActive(bezierDuration);
@@ -813,12 +831,56 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         ArrowController arrow = ArrowController.Launch(arrowPrefab, origin, Quaternion.LookRotation(launchVector), launchVector * straightArrowForce, this.transform, arrowDamage);
         ArrowAvoidColliders(arrow.gameObject);
+        arrow.IgnoreStick();
 
         StartCoroutine(DelayScatter(arrow.gameObject));
 
         MarkBeziersActive(bezierDuration + scatterArrowDelay);
     }
 
+    public void BowFireWave()
+    {
+        RealignToTarget();
+        Vector3 origin = positionReference.MainHand.transform.position + positionReference.MainHand.transform.parent.up * 1f;
+
+        Vector3 dir = GetDirectionToTarget();
+        dir.y = 0;
+
+        Vector3 targetPosition = this.transform.position + dir * initialWaveDistanceOffset;
+        targetPosition.y = 0;
+
+        Vector3 launchVector = (targetPosition - origin).normalized;
+
+        ArrowController arrow = ArrowController.Launch(arrowPrefab, origin, Quaternion.LookRotation(launchVector), launchVector * waveArrowInitialForce, this.transform, arrowDamage);
+        ArrowAvoidColliders(arrow.gameObject);
+        arrow.IgnoreStick();
+
+        StartCoroutine(WaveSingle(arrow.gameObject, targetPosition));
+
+        MarkWavesActive(waveDuration);
+    }
+
+    public void BowFireWaveArc()
+    {
+        RealignToTarget();
+        Vector3 origin = positionReference.MainHand.transform.position + positionReference.MainHand.transform.parent.up * 1f;
+
+        Vector3 dir = GetDirectionToTarget();
+        dir.y = 0;
+
+        Vector3 targetPosition = this.transform.position + dir * initialWaveDistanceOffset;
+        targetPosition.y = 0;
+
+        Vector3 launchVector = (targetPosition - origin).normalized;
+
+        ArrowController arrow = ArrowController.Launch(arrowPrefab, origin, Quaternion.LookRotation(launchVector), launchVector * waveArrowInitialForce, this.transform, arrowDamage);
+        ArrowAvoidColliders(arrow.gameObject);
+        arrow.IgnoreStick();
+
+        StartCoroutine(WaveArc(arrow.gameObject, targetPosition));
+
+        MarkWavesActive(waveDuration);
+    }
     public void PillarShockwave()
     {
         if (Vector3.Distance(PlayerActor.player.transform.position, this.transform.position) < pillarShockwaveRange)
@@ -932,10 +994,75 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
     }
 
+    IEnumerator WaveSingle(GameObject arrow, Vector3 startPosition)
+    {
+        yield return new WaitUntil(() =>
+        {
+            return arrow == null ||
+            arrow.transform.position.y <= 0;
+        });
+
+        Destroy(arrow);
+
+        Vector3 dir = GetDirectionToTarget();
+        dir.y = 0;
+        dir.Normalize();
+        GenericProjectile wave = GenericProjectile.Launch(waveSinglePrefab, startPosition, Quaternion.LookRotation(dir), dir * waveArrowSpeed, this.transform, waveDamage);
+    }
+
+    IEnumerator WaveArc(GameObject arrow, Vector3 startPosition)
+    {
+        yield return new WaitUntil(() =>
+        {
+            return arrow == null ||
+            arrow.transform.position.y <= 0;
+        });
+
+        Destroy(arrow);
+
+        Vector3 dir = GetDirectionToTarget();
+        dir.y = 0;
+        dir.Normalize();
+
+        Vector3 arc1 = Quaternion.AngleAxis(waveArcAngle * 0.5f, Vector3.up) * dir;
+        Vector3 arc2 = Quaternion.AngleAxis(-waveArcAngle * 0.5f, Vector3.up) * dir;
+
+        Debug.DrawRay(startPosition, arc1 * 20f, Color.yellow, 10f);
+        Debug.DrawRay(startPosition, arc2 * 20f, Color.yellow, 10f);
+
+        GenericProjectile[] waves = new GenericProjectile[waveArcResolution];
+
+        HitboxGroup hitboxes = new HitboxGroup();
+        for (int i = 0; i < waveArcResolution; i++)
+        {
+            Vector3 direction = Vector3.Slerp(arc1, arc2, (float)i / (float)(waveArcResolution - 1));
+
+            waves[i] = GenericProjectile.Launch(waveSinglePrefab, startPosition, Quaternion.LookRotation(direction), direction * waveArrowSpeed, this.transform, waveDamage);
+
+            if (i == 0)
+            {
+                hitboxes.SetRoot(waves[i].gameObject);
+            }
+            hitboxes.Add(waves[i].hitbox);
+        }
+        GenericProjectile wave = GenericProjectile.Launch(waveSinglePrefab, startPosition, Quaternion.LookRotation(dir), dir * waveArrowSpeed, this.transform, waveDamage);
+    }
     public void MarkBeziersActive(float duration)
     {
         BeziersActive = true;
         this.StartTimer(duration, () => BeziersActive = false);
+    }
+
+    public void MarkWavesActive(float duration)
+    {
+        WavesActive = true;
+        this.StartTimer(duration, () => WavesActive = false);
+    }
+
+    public void MarkPillarJumped(float duration)
+    {
+        AlreadyJumped = true;
+        this.StartTimer(duration, () => AlreadyJumped = false);
     }
 
     void ArrowAvoidColliders(GameObject arrowObject)
@@ -1121,11 +1248,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         HitboxActive(0);
     }
 
-    public GameObject GetGameObject()
-    {
-        return this.gameObject;
-    }
-
     public DamageKnockback GetLastTakenDamage()
     {
         return lastDamageTaken;
@@ -1137,10 +1259,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         HitboxActive(0);
         OnHurt.Invoke();
         StartCritVulnerability(5f);
-        OffenseGroup++;
-        if (OffenseGroup > offenseSequences.Length - 1)
+        offenseGroup++;
+        int max = (LowHealth) ? maxAttackFirstPhase : offenseSequences.Length - 1;
+        if (offenseGroup > max)
         {
-            OffenseGroup = offenseSequences.Length - 1;
+            offenseGroup = max;
         }
         GetNextAttack();
         if (currentPhase == CombatPhase.AttackPhase)
@@ -1151,13 +1274,15 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     void GetNextAttack()
     {
-        int[] currentSequence = offenseSequences[OffenseGroup];
+        int[] currentSequence = offenseSequences[offenseGroup];
         int currentAttack = currentSequence[offenseAttempts % currentSequence.Length];
         OffenseStage = currentAttack;
     }
 
     int[][] offenseSequences =
     {
+        new int[] {0},
+        new int[] {1},
         new int[] {0,1},
         new int[] {2,3},
         new int[] {1,2,0,3},
@@ -1396,6 +1521,15 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         if (!isCritVuln) totalCritTime = 0f;
         return isCritVuln;
     }
+
+    public void OnLowHealth()
+    {
+        parrySequenceIndex = maxParryFirstPhase + 1;
+        parryCurrentIndex = 0;
+        offenseGroup = maxAttackFirstPhase + 1;
+
+        LowHealth = true;
+    }
     public void SetParryValue()
     {
         string sequence = parryPatterns[parrySequenceIndex];
@@ -1441,7 +1575,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public void NextParrySequence()
     {
         parrySequenceIndex++;
-        parrySequenceIndex %= parryPatterns.Length;
+        int max = (LowHealth) ? maxParryFirstPhase + 1 : parryPatterns.Length;
+        parrySequenceIndex %= max;
         parryCurrentIndex = 0;
 
     }
@@ -1574,6 +1709,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         StartCoroutine(PillarJumpRoutine(newPillarIndex));
         ResetPainTriggers();
+        MarkPillarJumped(10f);
     }
 
     IEnumerator PillarJumpRoutine(int newPillarIndex)
@@ -1605,6 +1741,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         MoveTo(newPillar.transform.position);
         IsOnPillar = true;
         isPillarJumping = false;
+        
     }
 
     public void StartPillarHighJump()
@@ -1749,6 +1886,10 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 !tooClose ? 0 : 1);
 
             diff = onNormal + offNormal;
+        }
+        else if (IsDodging())
+        {
+            diff *= 2;
         }
         else
         {

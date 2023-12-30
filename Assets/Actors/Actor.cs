@@ -301,6 +301,11 @@ public class Actor : MonoBehaviour
         return false;
     }
 
+    public virtual bool IsJumping()
+    {
+        return !IsGrounded();
+    }
+
     public virtual bool IsGrounded()
     {
         return Physics.Raycast(this.transform.position, -this.transform.up, 2f, MaskReference.Terrain);

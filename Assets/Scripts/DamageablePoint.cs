@@ -172,4 +172,9 @@ public class DamageablePoint : MonoBehaviour, IDamageable, IHasHealthAttribute
     {
         return smoothedHealth;
     }
+
+    public void SetHealth(float health)
+    {
+        this.health.current = health;
+    }
 }

@@ -14,6 +14,7 @@ public class ArrowController : Projectile
     public GameObject prefabRef;
     public GameObject[] dontDestroy;
     bool launched;
+    bool ignoreStick;
     
     Vector3 stickPos;
     
@@ -76,10 +77,18 @@ public class ArrowController : Projectile
 
         if (hitbox.didHitTerrain)
         {
-            tip.isKinematic = true;
-            feather.isKinematic = true;
+            if (!ignoreStick)
+            {
+                tip.isKinematic = true;
+                feather.isKinematic = true;
 
-            Stick(hitbox.hitTerrain);
+                Stick(hitbox.hitTerrain);
+            }
+            else
+            {
+                UnparentDontDestroy();
+                Destroy(tip.gameObject);
+            }
             hitbox.SetActive(false);
             FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
         }
@@ -134,98 +143,6 @@ public class ArrowController : Projectile
         if (interactable != null)
         interactable.SetActive(true);
     }
-    /*
-    private void DisabledUpdate()
-    {
-        
-        if (shouldStick)
-        {
-            /*
-            GameObject empty = new GameObject();
-            empty.name = "Arrow [" + hitboxController.id + "] Stick Mount";
-            Destroy(empty, ARROW_DURATION);
-            empty.transform.SetParent(stickParent.transform, true);
-            //empty.transform.localScale = new Vector3(1,1,1);
-            this.transform.root.SetParent(empty.transform, true);
-            this.transform.localScale = new Vector3(0.1f / empty.transform.localScale.x, 0.1f / empty.transform.localScale.y, 0.1f / empty.transform.localScale.z);
-            //this.transform.root.    stickParent.transform, false);
-            //tip.transform.localScale = stickScale;
-            //tip.transform.rotation = stickRotation;
-            //tip.transform.localScale = 1f / (tip.transform.parent.localScale.x);
-            tip.transform.position = stickParent.GetComponent<Collider>().ClosestPoint(tip.position);
-
-            hitboxController.Deactivate();
-            shouldStick = false;
-            
-            GameObject empty = new GameObject();
-            empty.name = "Arrow [" + 0 + "] Stick Mount";
-            Destroy(empty, ARROW_DURATION);
-            empty.transform.SetParent(stickParent.transform, false);
-            empty.transform.localScale = new Vector3(1f / stickParent.transform.localScale.x, 1f / stickParent.transform.localScale.y, 1f / stickParent.transform.localScale.z);
-            tip.transform.SetParent(empty.transform, true);
-            /*GameObject clone = Instantiate(tip.gameObject, stickParent.ClosestPoint(tip.position), tip.transform.rotation, empty.transform);
-            //clone.GetComponentInChildren<HitboxController>().enabled = false;
-            clone.GetComponentInChildren<ArrowController>().enabled = false;
-            foreach (Collider c in clone.GetComponentsInChildren<Collider>())
-            {
-                c.enabled = false;
-            }
-            Destroy(tip.gameObject);
-            shouldStick = false;
-        }
-        else if (inFlight)
-        {
-            RaycastHit[] hits = tip.SweepTestAll(tip.transform.forward, 0.5f);
-            Collider lead = null;
-            int leadChildren = 999;
-            foreach (RaycastHit hit in hits)
-            {
-                if (hit.collider != null)
-                {
-                    int count = hit.collider.transform.GetComponentsInChildren<Collider>().Length;
-                    if (count < leadChildren)
-                    {
-                        lead = hit.collider;
-                        leadChildren = count;
-                    }
-                }
-            }
-            if (lead != null) {
-
-                //this.transform.root.SetParent(lead.transform, false);
-                tip.transform.position = lead.ClosestPoint(tip.position);
-                shouldStick = true;
-                stickParent = lead;
-                tip.Sleep();
-                feather.Sleep();
-                tip.isKinematic = true;
-                feather.isKinematic = true;
-
-                EndFlight();
-
-                
-            }
-            
-            
-        }
-        else if (false)
-        {
-            if (tip.transform.parent != null)
-            {
-                tip.transform.position = tip.transform.parent.GetComponent<Collider>().ClosestPoint(tip.position);
-            }
-        }
-        /*
-        if (shouldStick)
-        {
-            
-            tip.transform.SetParent(stickTarget.transform, true);
-            tip.position = stickPos;
-            shouldStick = false;
-        }
-    }
-
-    */
     public static new ArrowController Launch(GameObject arrowPrefab, Vector3 position, Quaternion angle, Vector3 force, Transform source, DamageKnockback damageKnockback)
     {
 
@@ -313,5 +230,10 @@ public class ArrowController : Projectile
             gameObject.transform.SetParent(null);
             Destroy(gameObject, ARROW_DURATION);
         }
+    }
+
+    public void IgnoreStick(bool ignore = true)
+    {
+        ignoreStick = ignore;
     }
 }

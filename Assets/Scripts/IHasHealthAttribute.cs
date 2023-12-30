@@ -6,4 +6,6 @@ public interface IHasHealthAttribute
 {
     public AttributeValue GetHealth();
     public float GetSmoothedHealth();
+
+    public void SetHealth(float health);
 }

@@ -362,6 +362,39 @@ public static class DebugReflectionMethods
         }
     }
 
+    public static void SetBossHealth(string number)
+    {
+        try
+        {
+            GameObject target = BossHealthIndicator.GetTarget();
+
+            if (target == null)
+            {
+                Debug.LogError("No boss available!");
+                return;
+            }
+            if (!target.TryGetComponent<IHasHealthAttribute>(out IHasHealthAttribute actor))
+            {
+                Debug.LogError("Object " + target + " lacks an health attribute component");
+                return;
+            }
+
+            if (!float.TryParse(number, out float health))
+            {
+                Debug.LogError("Could not parse " + number);
+                return;
+            }
+
+            actor.SetHealth(health);
+
+            Debug.Log(string.Format("Set boss health to {0}", health.ToString()));
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
     public static void Quit()
     {
         try
