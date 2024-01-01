@@ -13,14 +13,23 @@ public class FauxReflectionCamera : MonoBehaviour
     public Renderer[] reflectedRenderers;
     RenderTexture rt;
     MaterialPropertyBlock block;
+    [Header("Time Travel Settings")]
+    public bool precisionMod = true;
+    IAffectedByTimeTravel timeTravelHandler;
+    double time;
     // Start is called before the first frame update
     void Start()
     {
+        InitTimeTravelHandler();
         plane = new Plane(Vector3.up, new Vector3(0, mirrorHeight, 0));
         rt = new RenderTexture(1024, 576, 24);
+        rt.name = "_fauxreflection";
         block = new MaterialPropertyBlock();
         block.SetTexture("_ReflectionMap", rt);
-        foreach(Renderer r in reflectedRenderers)
+        block.SetFloat("_UseTime", 1f);
+        block.SetFloat("_InputTime", (float)time);
+
+        foreach (Renderer r in reflectedRenderers)
         {
             r.SetPropertyBlock(block);
         }
@@ -41,10 +50,23 @@ public class FauxReflectionCamera : MonoBehaviour
 
         float dist = Camera.main.transform.position.y - mirrorHeight;
         this.transform.position = Camera.main.transform.position - (Vector3.up * dist * 2f);
+
+        if (timeTravelHandler != null && !timeTravelHandler.IsFrozen())
+        {
+            time += Time.deltaTime;
+            if (precisionMod) time %= 86400;
+            block.SetFloat("_UseTime", 1f);
+            block.SetFloat("_InputTime", (float)(time));
+
+            foreach (Renderer r in reflectedRenderers)
+            {
+                r.SetPropertyBlock(block);
+            }
+        }
     }
 
-    private void OnDestroy()
+    void InitTimeTravelHandler()
     {
-        //Destroy(rt);
+        timeTravelHandler = GetComponent<IAffectedByTimeTravel>();
     }
 }
