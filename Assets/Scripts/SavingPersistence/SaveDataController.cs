@@ -6,6 +6,7 @@ using UnityEngine;
 using CustomUtilities;
 using Yarn.Unity;
 using UnityEngine.Events;
+using Newtonsoft.Json;
 
 public class SaveDataController : MonoBehaviour
 {
