@@ -74,10 +74,11 @@ Material:
     - _CastShadows: 1
     - _Cull: 2
     - _Depth: 0
-    - _DepthCutoffOutStep: 0.999
-    - _DepthCutoffStep: 0.86
+    - _DepthCutoffOutStep: 1
+    - _DepthCutoffStep: 0.01
+    - _DepthHeight: 0
     - _DepthNoiseMult: 0
-    - _Displacement: 0
+    - _Displacement: 0.025
     - _DisplacementEdge1: 0
     - _DisplacementEdge2: 0.12
     - _DstBlend: 10
@@ -104,13 +105,15 @@ Material:
     - _WorkflowMode: 1
     - _ZTest: 4
     - _ZWrite: 0
-    - _ZWriteControl: 0
+    - _ZWriteControl: 2
     m_Colors:
     - _DeepColor: {r: 0, g: 0.015686275, b: 0.015686275, a: 1}
+    - _DepthPosition: {r: 0, g: 0, b: 0, a: 0}
     - _DisplacementSpeed: {r: 0.1, g: 0.1, b: 0, a: 0}
-    - _FoamColor: {r: 2.010437, g: 2.010437, b: 2.010437, a: 1}
+    - _FoamColor: {r: 0.33316898, g: 0.415, b: 0.415, a: 0.7137255}
     - _ReflectionNoiseSpeed: {r: 0.1, g: 0.1, b: 0, a: 0}
     - _RippleSpeedX: {r: 0.4, g: -0.2, b: 0, a: 0}
     - _RippleSpeedY: {r: 1, g: 0.2, b: 0, a: 0}
     - _ShallowColor: {r: 2, g: 2, b: 2, a: 1}
+    - _Vector2: {r: 0.85, g: 0.5, b: 0, a: 0}
   m_BuildTextureStacks: []

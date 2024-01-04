@@ -147,10 +147,10 @@ public class InputSettingsController : MonoBehaviour
 
     public void SetVirtualCamerasActive(PlayerActor.VirtualCameras vcams, bool active)
     {
-        vcams.aim.gameObject.SetActive(active);
-        vcams.climb.gameObject.SetActive(active);
-        vcams.dialogue.gameObject.SetActive(active);
-        vcams.free.gameObject.SetActive(active);
-        vcams.target.gameObject.SetActive(active);
+        if (vcams.aim != null) vcams.aim.gameObject.SetActive(active);
+        if (vcams.climb != null) vcams.climb.gameObject.SetActive(active);
+        if (vcams.dialogue != null) vcams.dialogue.gameObject.SetActive(active);
+        if (vcams.free != null) vcams.free.gameObject.SetActive(active);
+        if (vcams.target != null) vcams.target.gameObject.SetActive(active);
     }
 }
