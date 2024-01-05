@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ItemDropDeathListener : MonoBehaviour
 {
-    public NavigatingHumanoidActor targetListenForDeath;
+    public Actor targetListenForDeath;
     public Item itemToDrop;
     public Transform dropLocation;
     public int autoEquipToSlot = -1;
