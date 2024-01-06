@@ -1,12 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Yarn.Unity;
 
 public class CancellableOptionsListView : OptionsListView
 {
+    OptionView[] views;
     [Header("Last Option Components")]
     public GameObject lastOptionContainer;
     public LineView lastOptionView;
@@ -19,6 +22,7 @@ public class CancellableOptionsListView : OptionsListView
             onOptionSelected.Invoke(option);
         }
         base.RunOptions(dialogueOptions, OptionSelected);
+        views = GetComponentsInChildren<OptionView>();
     }
 
     public void SetLastOption(DialogueOption option)
@@ -40,6 +44,18 @@ public class CancellableOptionsListView : OptionsListView
     {
         lastOptionView.DialogueComplete();
         base.DialogueComplete();
+    }
+
+
+    protected virtual void OnGUI()
+    {
+        if (views != null && views.Length > 0)
+        {
+            if (EventSystem.current.currentSelectedGameObject == null)
+            {
+                EventSystem.current.SetSelectedGameObject(views[0].gameObject);
+            }
+        }
     }
 
     public void OnCancel(UnityEngine.EventSystems.BaseEventData eventData, CancellableOptionView option)

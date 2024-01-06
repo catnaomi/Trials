@@ -40,8 +40,11 @@ public class Ledge : ClimbDetector
         if (isDisabled) return;
         if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor player))
         {
-            player.SetLedge(this);
-            inUse = true;
+            if (!player.IsClimbing())
+            {
+                player.SetLedge(this);
+                inUse = true;
+            }
         }
     }
 
@@ -127,6 +130,7 @@ public class Ledge : ClimbDetector
 
     public void ValidateLinks()
     {
+        if (!this.gameObject.activeInHierarchy) return;
         isLeftLinkValid = true;
         if (linkedLeft)
         {
@@ -223,11 +227,11 @@ public class Ledge : ClimbDetector
         }
     }
 
-    public void AutoConnectLedge()
+    public void AutoConnectLedge(bool force = false)
     {
         
-        bool shouldCheckLeft = !this.isLeftLinkValid || !this.linkedLeft;
-        bool shouldCheckRight = !this.isRightLinkValid || !this.linkedRight;
+        bool shouldCheckLeft = !this.isLeftLinkValid || !this.linkedLeft || force;
+        bool shouldCheckRight = !this.isRightLinkValid || !this.linkedRight || force;
 
         if (shouldCheckLeft || shouldCheckRight)
         {
@@ -237,7 +241,7 @@ public class Ledge : ClimbDetector
             // left side
             foreach (Ledge connectingLedge in ledges)
             {
-                if (connectingLedge == this) continue;
+                if (connectingLedge == this || !connectingLedge.gameObject.activeInHierarchy) continue;
                 if (shouldCheckLeft && !foundLeftLink)
                 {
                     if (Vector3.Distance(this.GetLeftEnd(), connectingLedge.GetRightEnd()) <= MAX_AUTO_LEDGE_DISTANCE)
@@ -251,7 +255,7 @@ public class Ledge : ClimbDetector
                         connectingLedge.linkedRight = true;
                     }
                 }
-                else if (shouldCheckRight && !foundRightLink)
+                if (shouldCheckRight && !foundRightLink)
                 {
                     if (Vector3.Distance(this.GetRightEnd(), connectingLedge.GetLeftEnd()) <= MAX_AUTO_LEDGE_DISTANCE)
                     {
@@ -268,15 +272,36 @@ public class Ledge : ClimbDetector
             if (shouldCheckLeft && !foundLeftLink)
             {
                 this.linkedLeft = false;
+                this.left = null;
             }
             if (shouldCheckRight && !foundRightLink)
             {
                 this.linkedRight = false;
+                this.right = null;
             }
         }
         
     }
 
+    public (Ledge, Ledge) GetLedgesToConnect()
+    {
+        Ledge[] ledges = FindObjectsOfType<Ledge>();
+        Ledge toLeft = null;
+        Ledge toRight = null;
+        foreach (Ledge connectingLedge in ledges)
+        {
+            if (connectingLedge == this) continue;
+            if (Vector3.Distance(this.GetLeftEnd(), connectingLedge.GetRightEnd()) <= MAX_AUTO_LEDGE_DISTANCE)
+            {
+                toLeft = connectingLedge;
+            }
+            else if (Vector3.Distance(this.GetRightEnd(), connectingLedge.GetLeftEnd()) <= MAX_AUTO_LEDGE_DISTANCE)
+            {
+                toRight = connectingLedge;
+            }
+        }
+        return (toLeft, toRight);
+    }
     public void ValidateThenAutoConnectLedge()
     {
         ValidateLinks();
