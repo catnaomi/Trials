@@ -136,17 +136,17 @@ public class Ledge : ClimbDetector
         {
             if (left == null)
             {
-                Debug.LogWarning(string.Format("{0} is linked on left side with no connecting ledge", this));
+                Debug.LogWarning(string.Format("{0} is linked on left side with no connecting ledge", this), this);
                 isLeftLinkValid = false;
             }
             else if (!left.linkedRight || left.right != this)
             {
-                Debug.LogWarning(string.Format("{0} not properly linked to {1}", this, left));
+                Debug.LogWarning(string.Format("{0} not properly linked to {1}", this, left), this);
                 isLeftLinkValid = false;
             }
             else if (left == this)
             {
-                Debug.LogWarning(string.Format("{0} is linked to self", this));
+                Debug.LogWarning(string.Format("{0} is linked to self", this), this);
                 isLeftLinkValid = false;
             }
         }
@@ -155,17 +155,17 @@ public class Ledge : ClimbDetector
         {
             if (right == null)
             {
-                Debug.LogWarning(string.Format("{0} is linked on right side with no connecting ledge", this));
+                Debug.LogWarning(string.Format("{0} is linked on right side with no connecting ledge", this), this);
                 isRightLinkValid = false;
             }
             else if (!right.linkedLeft || right.left != this)
             {
-                Debug.LogWarning(string.Format("{0} not properly linked to {1}", this, right));
+                Debug.LogWarning(string.Format("{0} not properly linked to {1}", this, right), this);
                 isRightLinkValid = false;
             }
             else if (right == this)
             {
-                Debug.LogWarning(string.Format("{0} is linked to self", this));
+                Debug.LogWarning(string.Format("{0} is linked to self", this), this);
                 isRightLinkValid = false;
             }
         }

@@ -21,68 +21,59 @@ public class PortalPlane : MonoBehaviour
         plane = new Plane(this.transform.up, this.transform.position);
         renderer = this.GetComponent<Renderer>();
         bounds = renderer.bounds;
-
-        StartCoroutine("CheckPortalPlane");
     }
 
-    IEnumerator CheckPortalPlane()
+    private void Update()
     {
-        while (true)
+        CheckPortalPlane();
+    }
+    void CheckPortalPlane()
+    {
+        
+        if (this.gameObject.scene != SceneManager.GetActiveScene()) return;
+        withinBounds = Vector3.Distance(PlayerActor.player.transform.position, this.transform.position) < range || Vector3.Distance(Camera.main.transform.position, this.transform.position) < range;//IsWithinPlane(PlayerActor.player.transform.position);// IsWithinPlane(Camera.main.transform.position + Camera.main.nearClipPlane * Camera.main.transform.forward);
+        bool swap = false;
+        bool render = true;
+        if (withinBounds)
         {
-
-
-            yield return null;
-            if (this.gameObject.scene != SceneManager.GetActiveScene()) continue;
-            withinBounds = Vector3.Distance(PlayerActor.player.transform.position, this.transform.position) < range || Vector3.Distance(Camera.main.transform.position, this.transform.position) < range;//IsWithinPlane(PlayerActor.player.transform.position);// IsWithinPlane(Camera.main.transform.position + Camera.main.nearClipPlane * Camera.main.transform.forward);
-            bool swap = false;
-            bool render = true;
-            if (withinBounds)
+            bool inWorldOfThisPortal = PortalManager.instance.inWorld2 != toWorld2;
+            playerNegative = !plane.GetSide(PlayerActor.player.transform.position);
+            cameraNegative = !plane.GetSide(Camera.main.transform.position+ Camera.main.nearClipPlane* Camera.main.transform.forward);
+            nearPlaneClipping = IsNearPlaneClipping();
+            if (nearPlaneClipping)
             {
-                bool inWorldOfThisPortal = PortalManager.instance.inWorld2 != toWorld2;
-                playerNegative = !plane.GetSide(PlayerActor.player.transform.position);
-                cameraNegative = !plane.GetSide(Camera.main.transform.position+ Camera.main.nearClipPlane* Camera.main.transform.forward);
-                nearPlaneClipping = IsNearPlaneClipping();
-                if (nearPlaneClipping)
-                {
-                    render = false;
-                    if (playerNegative && inWorldOfThisPortal)
-                    {
-                        swap = true;
-                    }
-                    else if (!playerNegative && !inWorldOfThisPortal)
-                    {
-                        swap = true;
-                    }
-                }
-                else if (playerNegative && cameraNegative && inWorldOfThisPortal)
+                render = false;
+                if (playerNegative && inWorldOfThisPortal)
                 {
                     swap = true;
                 }
-                else if (playerNegative && !cameraNegative)
+                else if (!playerNegative && !inWorldOfThisPortal)
                 {
-                    bool visibleThroughPortal = StillVisibleThroughPortal(PlayerActor.player.transform.position, Camera.main.transform.position);
-                    if (visibleThroughPortal && !inWorldOfThisPortal)
-                    {
-                        swap = true;
-                    }
-                    else if (!visibleThroughPortal && inWorldOfThisPortal)
-                    {
-                        swap = true;
-                    }
+                    swap = true;
                 }
-                /*
-                if (playerNegative && (cameraNegative || !StillVisibleThroughPortal(PlayerActor.player.transform.position, Camera.main.transform.position)) && PortalManager.instance.inWorld2 != toWorld2)
-                {
-                    PortalManager.instance.Swap();
-                }
-                */
             }
-            if (swap)
+            else if (playerNegative && cameraNegative && inWorldOfThisPortal)
             {
-                PortalManager.instance.Swap();
+                swap = true;
             }
-            renderer.enabled = render;
+            else if (playerNegative && !cameraNegative)
+            {
+                bool visibleThroughPortal = StillVisibleThroughPortal(PlayerActor.player.transform.position, Camera.main.transform.position);
+                if (visibleThroughPortal && !inWorldOfThisPortal)
+                {
+                    swap = true;
+                }
+                else if (!visibleThroughPortal && inWorldOfThisPortal)
+                {
+                    swap = true;
+                }
+            }
         }
+        if (swap)
+        {
+            PortalManager.instance.Swap();
+        }
+        renderer.enabled = render;
     }
 
     bool IsWithinPlane(Vector3 position)

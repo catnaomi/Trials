@@ -7,7 +7,7 @@ using UnityEngine;
 
 public class NavBakeShortcut : Editor
 {
-    [MenuItem("Tools/Bake Nav Surface #n")]
+    [MenuItem("Tools/Navigation/Bake Nav Surface #n")]
     public static void BakeNav()
     {
         Debug.Log("attempting bake");
@@ -18,7 +18,7 @@ public class NavBakeShortcut : Editor
         }
     }
 
-    [MenuItem("Tools/Delete Nav Mods on Empty Objects")]
+    [MenuItem("Tools/Navigation/Delete Nav Mods on Empty Objects")]
     public static void DeleteNavFromEmptyObjects()
     {
         var targets = FindObjectsOfType<NavMeshModifier>();
