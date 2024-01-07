@@ -283,17 +283,21 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
 
     public void StartCritVulnerability(float time)
     {
-        throw new System.NotImplementedException();
+        
+    }
+    public void StopCritVulnerability()
+    {
+
     }
 
     public bool IsCritVulnerable()
     {
-        throw new System.NotImplementedException();
+        return false;
     }
 
     public void GetParried()
     {
-        throw new System.NotImplementedException();
+        
     }
     public override bool IsBlocking()
     {

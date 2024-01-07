@@ -440,9 +440,13 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
 
     public void StartCritVulnerability(float time)
     {
-        throw new System.NotImplementedException();
+        
     }
 
+    public void StopCritVulnerability()
+    {
+
+    }
     public DamageKnockback GetLastTakenDamage()
     {
         return lastDamageTaken;

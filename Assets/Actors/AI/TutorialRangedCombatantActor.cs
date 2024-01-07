@@ -392,4 +392,9 @@ public class TutorialRangedCombatantActor : NavigatingHumanoidActor, IAttacker, 
     {
         return ((IDamageable)damageHandler).IsInvulnerable();
     }
+
+    public void StopCritVulnerability()
+    {
+        ((IDamageable)damageHandler).StopCritVulnerability();
+    }
 }

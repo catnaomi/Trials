@@ -98,6 +98,11 @@ public class DamageablePoint : MonoBehaviour, IDamageable, IHasHealthAttribute
         critDuration = time;
     }
 
+    public void StopCritVulnerability()
+    {
+        critVulnerable = false;
+        critDuration = -1;
+    }
     public bool IsCritVulnerable()
     {
         return critVulnerable;

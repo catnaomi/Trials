@@ -132,6 +132,10 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
         // do nothing
     }
 
+    public void StopCritVulnerability()
+    {
+        // do nothing
+    }
     public void SetHitParticleVectors(Vector3 position, Vector3 direction)
     {
         

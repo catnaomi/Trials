@@ -365,4 +365,9 @@ public class TutorialShieldCombatantActor : NavigatingHumanoidActor, IAttacker, 
     {
         return ((IDamageable)damageHandler).IsInvulnerable();
     }
+
+    public void StopCritVulnerability()
+    {
+        ((IDamageable)damageHandler).StopCritVulnerability();
+    }
 }

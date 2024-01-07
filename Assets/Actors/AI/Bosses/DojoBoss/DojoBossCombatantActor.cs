@@ -2248,5 +2248,10 @@ public class DojoBossCombatantActor : NavigatingHumanoidActor, IAttacker, IDamag
     {
         return ((IDamageable)damageHandler).IsInvulnerable();
     }
+
+    public void StopCritVulnerability()
+    {
+        ((IDamageable)damageHandler).StopCritVulnerability();
+    }
     #endregion
 }

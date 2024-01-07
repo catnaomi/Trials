@@ -5434,4 +5434,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         return ((IDamageable)damageHandler).IsInvulnerable();
     }
+
+    public void StopCritVulnerability()
+    {
+        ((IDamageable)damageHandler).StopCritVulnerability();
+    }
 }

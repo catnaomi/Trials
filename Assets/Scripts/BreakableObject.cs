@@ -41,6 +41,10 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
         
     }
 
+    public void StopCritVulnerability()
+    {
+
+    }
     public void TakeDamage(DamageKnockback damage)
     {
         lastDamage = damage; 

@@ -61,7 +61,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     [Space(10)]
     public float nonActorGroundedThreshold = 1f;
     [Space(20)]
-    public float getupDelay = 5f;
+    public float getupDelayUnharmed = 5f;
+    public float getupDelayHarmed = 5f;
     float getupClock = 0f;
     HitboxGroup rightHitboxes;
     DamageKnockback lastTakenDamage;
@@ -129,6 +130,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
     public void EnableActions()
     {
+        if (!this.gameObject.activeInHierarchy) return;
         actionsEnabled = true;
         nav.enabled = true;
         StartCoroutine(DestinationCoroutine());
@@ -426,6 +428,10 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         {
             StartTimeStopHitStun();
         }
+        if (point == weakPoint && IsFallen && getupClock > getupDelayHarmed)
+        {
+            getupClock = getupDelayHarmed;
+        }
         lastDamageTaken = point.GetLastTakenDamage();
         SetHitParticleVectors(point.GetHitPosition(), point.GetHitDirection());
         OnHurt.Invoke();
@@ -465,9 +471,9 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     {
         ForceStopSpin();
         if (dead) return;
-        getupClock = getupDelay;
+        getupClock = getupDelayUnharmed;
         //EnableWeakPoint(true);
-        weakPoint.StartCritVulnerability(getupDelay);
+        weakPoint.StartCritVulnerability(getupDelayUnharmed);
         IsFallen = true;
         Fall = true;
         spinning = false;
@@ -476,6 +482,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public void GetUp()
     {
         IsFallen = false;
+        weakPoint.StopCritVulnerability();
         //EnableWeakPoint(false);
     }
     public void EnableWeakPoint(bool active)
@@ -703,6 +710,11 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public void StartCritVulnerability(float time)
     {
         
+    }
+
+    public void StopCritVulnerability()
+    {
+
     }
 
     public bool IsCritVulnerable()

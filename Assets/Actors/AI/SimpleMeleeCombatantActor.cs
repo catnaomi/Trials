@@ -489,4 +489,9 @@ public class SimpleMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, IDa
     {
         return ((IDamageable)damageHandler).IsInvulnerable();
     }
+
+    public void StopCritVulnerability()
+    {
+        ((IDamageable)damageHandler).StopCritVulnerability();
+    }
 }

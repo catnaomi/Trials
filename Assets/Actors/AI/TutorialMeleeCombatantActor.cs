@@ -484,4 +484,9 @@ public class TutorialMeleeCombatantActor : NavigatingHumanoidActor, IAttacker, I
     {
         return ((IDamageable)damageHandler).IsInvulnerable();
     }
+
+    public void StopCritVulnerability()
+    {
+        ((IDamageable)damageHandler).StopCritVulnerability();
+    }
 }

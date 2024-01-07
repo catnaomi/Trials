@@ -11,6 +11,7 @@ public interface IDamageable
 
     public void StartCritVulnerability(float time);
 
+    public void StopCritVulnerability();
     public bool IsCritVulnerable();
     public void SetHitParticleVectors(Vector3 position, Vector3 direction);
 

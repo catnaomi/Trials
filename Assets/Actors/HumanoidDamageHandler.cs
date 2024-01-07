@@ -264,7 +264,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                         block = animancer.Layers[HumanoidAnimLayers.Base].Play(clip);
                         block.NormalizedTime = 0f;
                         block.Events.OnEnd = OnBlockEnd;
-                        SetBlockAccel();
+                        SetBlockAccel(.25f + block.Length);
                     }
                     else
                     {
@@ -272,12 +272,12 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
                         AnimancerState state = animancer.Layers[HumanoidAnimLayers.Flinch].Play(clip);
                         state.Events.OnEnd = () => { 
                             animancer.Layers[HumanoidAnimLayers.Flinch].Stop();
-                            if (actor is PlayerActor && blockStagger == DamageKnockback.BlockStaggerType.FlinchSlow)
-                            {
-                                player.VerifyAccelerationAfterDelay(2f);
-                            }
                         };
-                        SetBlockAccel();
+                        if (blockStagger == DamageKnockback.BlockStaggerType.FlinchSlow)
+                        {
+                            SetBlockAccel(0.25f);
+                        }
+                        
                     }
                     lastBlockStagger = (int)damage.staggers.onBlock;
                 }
@@ -601,12 +601,13 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         actor.GetComponent<CharacterController>().Move(moveVector);
     }
 
-    public void SetBlockAccel()
+    public void SetBlockAccel(float duration = 2f)
     {
         if (actor is PlayerActor player)
         {
             player.SetSpeed(0);
             player.SetWalkAccel(player.blockHitAccel);
+            player.VerifyAccelerationAfterDelay(duration);
         }
     }
     public void StartCritVulnerability(float time)

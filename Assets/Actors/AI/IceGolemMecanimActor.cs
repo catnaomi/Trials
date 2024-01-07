@@ -556,4 +556,9 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     {
         return ((IDamageable)damageHandler).IsInvulnerable();
     }
+
+    public void StopCritVulnerability()
+    {
+        ((IDamageable)damageHandler).StopCritVulnerability();
+    }
 }
