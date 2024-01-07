@@ -70,4 +70,13 @@ public class KillPlane : MonoBehaviour
         if (Mathf.Abs(adjustedPosition.y) > maximumHeightDifference) return false;
         return true;
     }
+
+    private void OnDrawGizmosSelected()
+    {
+        Bounds gizBounds = (!Application.isPlaying) ? this.GetComponent<Renderer>().bounds : bounds;
+        Gizmos.color = new Color(1, 0, 0, 0.3f);
+        Vector3 center = gizBounds.center;
+        center.y -= maximumHeightDifference * 0.5f;
+        Gizmos.DrawCube(center, new Vector3(gizBounds.extents.x * 2, maximumHeightDifference, gizBounds.extents.z * 2));
+    }
 }
