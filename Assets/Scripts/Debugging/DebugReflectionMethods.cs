@@ -663,6 +663,36 @@ public static class DebugReflectionMethods
         }
     }
 
+    public static void PlayNode(string node)
+    {
+        try
+        {
+            DialogueRunner runner = DialogueRunnerReference.runner;
+            if (runner == null)
+            {
+                Debug.LogError("Couldn't find a dialogue runner!");
+                return;
+            }
+            runner.StartDialogue(node);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+    
+    public static void PlayProtagNode(string node)
+    {
+        try
+        {
+            ProtagDialogueController.PromptDialogue(node, 60f);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
     public static void Save(string slotString)
     {
         try

@@ -53,10 +53,6 @@ public class FreeLookPlayerRecenterController : MonoBehaviour
             {
                 recentering = false;
             }
-            if (recentering)
-            {
-                Debug.Log("recentering target camera!");
-            }
 
         }
         if (recentering && !wasRecenteringLastFrame)

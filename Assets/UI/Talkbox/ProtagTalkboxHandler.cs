@@ -6,6 +6,7 @@ public class ProtagTalkboxHandler : MonoBehaviour
 {
     Animator animator;
     public Transform targetPoint;
+    public Canvas parentCanvas;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,7 +21,9 @@ public class ProtagTalkboxHandler : MonoBehaviour
     private void OnGUI()
     {
         Vector2 viewPointPos = Camera.main.WorldToViewportPoint(targetPoint.position);
-        Vector2 screenPos = new Vector2(viewPointPos.x * Screen.width, viewPointPos.y * Screen.height);
+        float width = ((RectTransform)parentCanvas.transform).rect.width;
+        float height = ((RectTransform)parentCanvas.transform).rect.height;
+        Vector2 screenPos = new Vector2(viewPointPos.x * width, viewPointPos.y * height);
         ((RectTransform)this.transform).anchoredPosition = screenPos;
     }
 }

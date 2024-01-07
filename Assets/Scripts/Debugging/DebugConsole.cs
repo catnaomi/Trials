@@ -32,11 +32,15 @@ public class DebugConsole : MonoBehaviour
     public GameObject entryPrefab;
     public Transform entryParent;
     public TMP_InputField input;
+    public ScrollRect scroll;
     public bool open;
+
     float timeScale;
     CanvasGroup group;
     TMP_Text[] entries;
     LogEntry[] logs;
+    LinkedList<string> commandHistory;
+    LinkedListNode<string> currentCommand;
     string[] logStrings;
 
     private void Start()
@@ -48,10 +52,12 @@ public class DebugConsole : MonoBehaviour
         }
         logs = new LogEntry[logEntriesToShow];
         logStrings = new string[logEntriesToShow];
+        commandHistory = new LinkedList<string>();
         UpdateLogs();
         Application.logMessageReceivedThreaded += UpdateLogs;
         input.onSubmit.AddListener(OnSubmit);
         group = this.GetComponent<CanvasGroup>();
+        group.alpha = 0f;
     }
 
     private void Update()
@@ -59,6 +65,45 @@ public class DebugConsole : MonoBehaviour
         if (Keyboard.current.backquoteKey.wasPressedThisFrame)
         {
             ToggleOpen();
+        }
+        if (Keyboard.current.pageUpKey.wasPressedThisFrame)
+        {
+            float increment = (Screen.height / 2) / (entryParent as RectTransform).rect.height;
+            scroll.verticalNormalizedPosition = Mathf.Clamp(scroll.verticalNormalizedPosition + increment, 0f, 1f);
+        }
+        if (Keyboard.current.pageDownKey.wasPressedThisFrame)
+        {
+            float increment = (Screen.height / 2) / (entryParent as RectTransform).rect.height;
+            scroll.verticalNormalizedPosition = Mathf.Clamp(scroll.verticalNormalizedPosition - increment, 0f, 1f);
+        }
+        if (Keyboard.current.homeKey.wasPressedThisFrame)
+        {
+            scroll.verticalNormalizedPosition = 0f;
+        }
+        if (Keyboard.current.endKey.wasPressedThisFrame)
+        {
+            scroll.verticalNormalizedPosition = 1f;
+        }
+        if (Keyboard.current.upArrowKey.wasPressedThisFrame)
+        {
+            if (commandHistory.Count > 0 && currentCommand != null && currentCommand.Previous != null)
+            {
+                currentCommand = currentCommand.Previous;
+                input.text = currentCommand.Value;
+            }
+            else if (commandHistory.Count > 0 && currentCommand == null)
+            {
+                currentCommand = commandHistory.Last;
+                input.text = currentCommand.Value;
+            }
+        }
+        if (Keyboard.current.downArrowKey.wasPressedThisFrame)
+        {
+            if (commandHistory.Count > 0 && currentCommand != null && currentCommand.Next != null)
+            {
+                currentCommand = currentCommand.Next;
+                input.text = currentCommand.Value;
+            }
         }
         if (open && EventSystem.current != null && EventSystem.current.currentSelectedGameObject != input.gameObject)
         {
@@ -69,11 +114,24 @@ public class DebugConsole : MonoBehaviour
     public void UpdateLogs(string logString, string stackTrace, LogType type)
     {
         LogRecordService.instance.GetLastNumberOfLogs(logEntriesToShow, logStrings);
-        
+
+        string lastLog = "";
+        int index = 0;
+        int repeats = 0;
         for (int i = 0; i < logEntriesToShow; i++)
         {
-            entries[i].text = logStrings[i];
-            entries[i].gameObject.SetActive(entries[i].text != null && entries[i].text.Length > 0);
+            if (logStrings[i] == lastLog)
+            {
+                repeats++;
+                entries[index - 1].text = lastLog + " (x" + (repeats + 1) + ")";
+                entries[i].gameObject.SetActive(false);
+                continue;
+            }
+            entries[index].text = logStrings[i];
+            entries[index].gameObject.SetActive(entries[index].text != null && entries[index].text.Length > 0);
+            lastLog = logStrings[i];
+            index++;
+            repeats = 0;
         }
     }
 
@@ -81,6 +139,7 @@ public class DebugConsole : MonoBehaviour
     {
         UpdateLogs("", "", LogType.Log);
     }
+
 
     public void OnSubmit(string eventData)
     {
@@ -90,6 +149,10 @@ public class DebugConsole : MonoBehaviour
         UpdateLogs();
         EventSystem.current.SetSelectedGameObject(input.gameObject);
         input.ActivateInputField();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(entryParent as RectTransform);
+        scroll.verticalNormalizedPosition = 0f;
+        commandHistory.AddLast(eventData);
+        currentCommand = null;
     }
 
     public void RunMethod(string input)

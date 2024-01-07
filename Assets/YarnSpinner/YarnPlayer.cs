@@ -36,7 +36,7 @@ public class YarnPlayer : MonoBehaviour
 
     IEnumerator PlayRoutine()
     {
-        runner = GameObject.FindGameObjectWithTag("DialogueRunner").GetComponent<DialogueRunner>();
+        runner = DialogueRunnerReference.runner;
 
         if (runner.CheckDialogueRunning())
         {
