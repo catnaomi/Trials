@@ -5,19 +5,24 @@ using Yarn.Unity;
 
 public class VariableStorageHelper : MonoBehaviour
 {
-    public static VariableStorageBehaviour variableStorage;
     public GameObject variableStoragePrefab;
     public DialogueRunner runner;
 
 
     private void Awake()
     {
-        if (variableStorage == null)
+        var vs = FindObjectOfType<VariableStorageBehaviour>();
+        if (vs == null)
         {
             GameObject obj = Instantiate(variableStoragePrefab);
             DontDestroyOnLoad(obj);
-            variableStorage = obj.GetComponent<VariableStorageBehaviour>();
+            vs = obj.GetComponent<VariableStorageBehaviour>();
         }
-        runner.VariableStorage = variableStorage;
+        runner.VariableStorage = vs;
+    }
+
+    private void OnApplicationQuit()
+    {
+        Destroy(runner.VariableStorage);
     }
 }

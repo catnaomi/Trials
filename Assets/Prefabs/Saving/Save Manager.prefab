@@ -26,13 +26,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3153745462788765620}
+  serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4380368271242009094
 MonoBehaviour:
@@ -62,7 +62,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3616b56eaa8d36e42b1bfe8afc7e9900, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  savePath: '%persistentDataPath%/Saves/'
   slot: 1
   write: 0
   read: 0
@@ -86,6 +85,18 @@ MonoBehaviour:
         baseValue: 0
         current: 0
         max: 0
+      lives: 0
+      maxLives: 0
+    yarnData:
+      variableCount: 0
+    playerWorldData:
+      activeScene: 
+      position: []
+      rotation: []
+      inWorld2: 0
+  OnSaveComplete:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &611670848963216522
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98,8 +109,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fca592d093afc944185496a69e78fad4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  save: 0
-  load: 0
+  get: 1
   stringPreview: 
   boolPreview: 
   floatPreview: 
+  yarnData:
+    variableCount: 0

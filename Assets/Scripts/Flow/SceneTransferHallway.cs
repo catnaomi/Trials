@@ -108,10 +108,19 @@ public class SceneTransferHallway : MonoBehaviour
 
         IsTransferInProgress = false;
 
-        SceneLoader.SetActiveScene(targetScene);
-
 
         OnTransferFrom.Invoke();
         other.OnTransferInto.Invoke();
+
+        int attempts = 0;
+        do
+        {
+            SceneLoader.SetActiveScene(targetScene);
+            attempts++;
+            yield return new WaitForSecondsRealtime(0.1f);
+        }
+        while (SceneManager.GetActiveScene().name != targetScene);
+
+        Debug.Log($"Transfered to {targetScene} after {attempts} attempts.");
     }
 }

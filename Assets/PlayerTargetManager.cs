@@ -9,6 +9,7 @@ using UnityEngine.Events;
 using System.Linq;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
+using UnityEditor.ShaderGraph.Internal;
 
 public class PlayerTargetManager : MonoBehaviour
 {
@@ -40,6 +41,9 @@ public class PlayerTargetManager : MonoBehaviour
     bool lockOnRelease;
     bool lockOnPress;
     PlayerInput inputs;
+    [Header("Dialogue Settings")]
+    public CinemachineVirtualCameraBase dialogueCamera;
+    public float maxDialogueCameraDistance = 5f;
     [Header("Free Look Control Settings")]
     public bool handleCamera;
     CinemachineFreeLook freeLook;
@@ -186,25 +190,26 @@ public class PlayerTargetManager : MonoBehaviour
     {
         HandleInput();
 
-        // set the player's target to the current target
-        if (lockedOn)
+        if (player.IsInDialogue())
         {
-            if (!player.IsInDialogue())
-            {
-                player.SetCombatTarget(currentTarget);
-            }
-            else if (player.GetCombatTarget() != currentTarget)
+            if (player.GetCombatTarget() != currentTarget)
             {
                 SetTarget(player.GetCombatTarget());
             }
         }
+        // set the player's target to the current target
+        else if (lockedOn)
+        {
+            player.SetCombatTarget(currentTarget);
+        }
         else
         {
-        // remove player's target if not locked on
+            // remove player's target if not locked on
             player.SetCombatTarget(null);
+
         }
 
-        if (lockedOn && currentTarget == player.GetCombatTarget() && !IsValidTarget(currentTarget))
+        if (lockedOn && currentTarget == player.GetCombatTarget() && !IsValidTarget(currentTarget) && !player.IsInDialogue())
         {
             ExpireTarget();
         }
@@ -272,6 +277,7 @@ public class PlayerTargetManager : MonoBehaviour
         {
             targetAimShouldSnap = true;
         }
+
         if (currentTarget != null)
         {
             Vector3 targetPosition = currentTarget.transform.position;
@@ -305,6 +311,11 @@ public class PlayerTargetManager : MonoBehaviour
             this.transform.rotation = Quaternion.LookRotation(dir);
             UpdateFreeLook();
 
+        }
+        if (player.IsInDialogue())
+        {
+            float dist = Vector3.Distance(centerAim.position, currentTarget.transform.position);
+            dialogueCamera.LookAt = (dist < maxDialogueCameraDistance) ? targetAim : currentTarget.transform;
         }
     }
     

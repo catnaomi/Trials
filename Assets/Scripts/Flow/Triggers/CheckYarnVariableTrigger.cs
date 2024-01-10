@@ -27,18 +27,22 @@ public class CheckYarnVariableTrigger : MonoBehaviour
                 Debug.Log($"Checking Yarn variable \"{variableName}\" of type Boolean. Returned {result}");
                 if (boolResult == boolCheckValue)
                 {
+                    Debug.Log("PASS");
                     OnCheckSuccess.Invoke();
                     return;
                 }
+                Debug.Log("FAIL");
             }
             else if (variableType == YarnVarType.String && result is string stringResult)
             {
                 Debug.Log($"Checking Yarn variable \"{variableName}\" of type String. Returned {result}");
                 if (stringResult == stringCheckValue)
                 {
+                    Debug.Log("PASS");
                     OnCheckSuccess.Invoke();
                     return;
                 }
+                Debug.Log("FAIL");
             }
             else if (result is float floatResult)
             {
@@ -47,41 +51,51 @@ public class CheckYarnVariableTrigger : MonoBehaviour
                 {
                     if (floatResult == floatCheckValue)
                     {
+                        Debug.Log("PASS");
                         OnCheckSuccess.Invoke();
                         return;
                     }
+                    Debug.Log("FAIL");
                 }
                 else if (variableType == YarnVarType.Float_Less)
                 {
                     if (floatResult < floatCheckValue)
                     {
+                        Debug.Log("PASS");
                         OnCheckSuccess.Invoke();
                         return;
                     }
+                    Debug.Log("FAIL");
                 }
                 else if (variableType == YarnVarType.Float_Greater)
                 {
                     if (floatResult > floatCheckValue)
                     {
+                        Debug.Log("PASS");
                         OnCheckSuccess.Invoke();
                         return;
                     }
+                    Debug.Log("FAIL");
                 }
                 else if (variableType == YarnVarType.Float_LessEquals)
                 {
                     if (floatResult <= floatCheckValue)
                     {
+                        Debug.Log("PASS");
                         OnCheckSuccess.Invoke();
                         return;
                     }
+                    Debug.Log("FAIL");
                 }
                 else if (variableType == YarnVarType.Float_GreaterEquals)
                 {
                     if (floatResult >= floatCheckValue)
                     {
+                        Debug.Log("PASS");
                         OnCheckSuccess.Invoke();
                         return;
                     }
+                    Debug.Log("FAIL");
                 }
             }
         }
@@ -89,10 +103,12 @@ public class CheckYarnVariableTrigger : MonoBehaviour
         {
             Debug.Log($"Yarn variable \"{variableName}\" not defined.");
             if (passIfNotDefined)
-            {    
+            {
+                Debug.Log("PASS");
                 OnCheckSuccess.Invoke();
                 return;
             }
+            Debug.Log("FAIL");
         }
         OnCheckFail.Invoke();
     }

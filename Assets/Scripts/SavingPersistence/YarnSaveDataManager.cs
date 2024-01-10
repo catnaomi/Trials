@@ -44,7 +44,7 @@ public class YarnSaveDataManager : MonoBehaviour
 
     public YarnSaveData GetSaveData()
     {
-        InMemoryVariableStorage varStorage = FindObjectOfType<InMemoryVariableStorage>();
+        InMemoryVariableStorage varStorage = DialogueRunnerReference.runner.VariableStorage as InMemoryVariableStorage;
 
         var dicts = varStorage.GetAllVariables();
 
@@ -121,17 +121,17 @@ public class YarnSaveDataManager : MonoBehaviour
             ClearMemory();
             return;
         }
-        if (VariableStorageHelper.variableStorage != null)
+        if (DialogueRunnerReference.runner.VariableStorage != null)
         {
-            VariableStorageHelper.variableStorage.SetAllVariables(data.floats, data.strings, data.bools);
+            DialogueRunnerReference.runner.VariableStorage.SetAllVariables(data.floats, data.strings, data.bools);
         }
     }
 
     public static void ClearMemory()
     {
-        if (VariableStorageHelper.variableStorage != null)
+        if (DialogueRunnerReference.runner.VariableStorage != null)
         {
-            VariableStorageHelper.variableStorage.Clear();
+            DialogueRunnerReference.runner.VariableStorage.Clear();
         }
         if (instance != null)
             instance.Clear();
