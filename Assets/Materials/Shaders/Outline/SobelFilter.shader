@@ -1,13 +1,18 @@
-﻿Shader "Unlit/SobelFilter"
+﻿Shader"Unlit/SobelFilter"
 {
 	Properties 
 	{
 	    [HideInInspector]_MainTex ("Base (RGB)", 2D) = "white" {}
+        _OutlineColor ("Outline Color", Color) = (0,0,0,1)
 		_Delta ("Line Thickness", Range(0.0005, 0.0025)) = 0.001
 		[Toggle(RAW_OUTLINE)]_Raw ("Outline Only", Float) = 0
 		[Toggle(POSTERIZE)]_Poseterize ("Posterize", Float) = 0
 		_PosterizationCount ("Count", int) = 8
         _Power ("Power", float) = 50
+        [Toggle(SSTEP)]_SStep ("Should Step", Float) = 0
+        _StepIn ("StepIn", Range(0,1)) = 0
+        _StepOut ("StepOut", Range(0,1)) = 1
+
 	}
 	SubShader 
 	{
@@ -23,6 +28,7 @@
             
             #pragma shader_feature RAW_OUTLINE
             #pragma shader_feature POSTERIZE
+            #pragma shader_feature SSTEP
             
             TEXTURE2D(_CameraDepthTexture);
             SAMPLER(sampler_CameraDepthTexture);
@@ -34,6 +40,9 @@
             float _Delta;
             int _PosterizationCount;
             float _Power;
+            float _StepIn;
+            float _StepOut;
+            float4 _OutlineColor;
 
             struct Attributes
             {
@@ -98,9 +107,15 @@
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
                 
                 float s = pow(1 - saturate(sobel(input.uv)), _Power);
+
+#ifdef SSTEP
+                s = smoothstep(_StepIn,_StepOut, 1 - s);
+                s = 1 - s;
+#endif
 #ifdef RAW_OUTLINE
                 return half4(s.xxx, 1);
 #else
+                float4 s4 = lerp(_OutlineColor, float4(1,1,1,0), s);
                 half4 col = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, input.uv);
 #ifdef POSTERIZE
                 col = pow(col, 0.4545);
@@ -109,7 +124,7 @@
                 col = float4(HsvToRgb(c), col.a);
                 col = pow(col, 2.2);
 #endif
-                return col * s;
+                return col * s4;
 #endif
             }
             
