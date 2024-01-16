@@ -1,8 +1,9 @@
+using Animancer;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HumanoidAnimLayers
+public static class HumanoidAnimLayers
 {
     public const int Base = 0;
     public const int BilayerBlend = 1;
@@ -11,4 +12,9 @@ public class HumanoidAnimLayers
     public const int UpperBody = 4;
     public const int Flinch = 5;
     public const int TimeEffects = 6;
+
+    public static void InitLayers(AnimancerComponent animancer)
+    {
+        animancer.Layers.Capacity = 10;
+    }
 }

@@ -90,8 +90,7 @@ public class Actor : MonoBehaviour
 
     public virtual void ActorStart()
     {
-        animancer = this.GetComponent<AnimancerComponent>();
-        animancer.Layers.Capacity = 10;
+        InitAnimancer();
         // run after base class Start()
     }
 
@@ -130,6 +129,11 @@ public class Actor : MonoBehaviour
         // run after base class 
     }
 
+    protected virtual void InitAnimancer()
+    {
+        animancer = this.GetComponent<AnimancerComponent>();
+        HumanoidAnimLayers.InitLayers(animancer);
+    }
 
     private void OnDestroy()
     {
