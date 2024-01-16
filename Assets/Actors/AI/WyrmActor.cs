@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
+using UnityEngine.UIElements;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandler
@@ -12,11 +13,12 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
     [HideInInspector]
     public NavMeshAgent nav;
     CharacterController cc;
-    public Collider collider;
+    public SphereCollider collider;
 
-    public GameObject currentTarget;
-
+    public string statePreview;
     [Header("Movement & Navigation")]
+    public bool actionsEnabled;
+    bool wereActionsEnabled;
     public float updateSpeed = 0.1f;
     [ReadOnly, SerializeField] Vector3 destination;
     public float targetDistance = 10f;
@@ -27,18 +29,30 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
 
     [SerializeField, ReadOnly] Hitbox hitbox;
     public UnityEvent OnHitboxActive;
+    public bool hitboxActive;
+    [Space(15)]
     public InputAttack chargeAttack;
+    public float attackDuration = 2f;
+    public float attackSpeed = 15f;
+    public float attackAccel = 50f;
+    public float attackDecel = 20f;
+    public float attackCooldown = 5f;
+    bool attackOnCooldown;
     [Header("Animancer")]
+    public ClipTransition idleAnim;
     public LinearMixerTransition moveAnim;
     public ClipTransition hurtAnim;
     public ClipTransition deathAnim;
+    public ClipTransition fallAnim;
     WyrmAnimState state;
 
     struct WyrmAnimState
     {
+        public AnimancerState idle;
         public LinearMixerState move;
         public AnimancerState hurt;
         public AnimancerState attack;
+        public AnimancerState fall;
     }
     public override void ActorStart()
     {
@@ -54,34 +68,250 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
         hitbox = Hitbox.CreateHitbox(hitboxMount.position, hitboxRadius, hitboxMount, new DamageKnockback(), this.gameObject);
         hitbox.SetActive(false);
 
-        StartCoroutine(UpdateDestination());
+        if (actionsEnabled)
+        {
+            EnableActions();
+        }
+        else
+        {
+            state.idle = animancer.Play(idleAnim);
+        }
+    }
+
+    public void EnableActions()
+    {
+        actionsEnabled = true;
+        this.StartTimer(updateSpeed, true, SetDestination);
     }
 
     public override void ActorPostUpdate()
     {
         base.ActorPostUpdate();
 
-        if (currentTarget != null)
+        if (actionsEnabled && !wereActionsEnabled)
         {
-            targetDistance = Vector3.Distance(this.transform.position, currentTarget.transform.position);
+            EnableActions();
         }
+        wereActionsEnabled = actionsEnabled;
 
         UpdateStates();
+    }
+
+    private void FixedUpdate()
+    {
+        Vector3 velocity = Vector3.zero;
+
+        float gravity = (IsAttacking()) ? 0f : Physics.gravity.y;
+        if (GetGrounded(out RaycastHit hitCheck1))
+        {
+            if (yVel <= 0)
+            {
+                yVel = 0f;
+            }
+            else
+            {
+                yVel += gravity * Time.fixedDeltaTime;
+            }
+            Vector3 groundY = new Vector3(this.transform.position.x, hitCheck1.point.y, this.transform.position.z);
+            this.transform.position = Vector3.MoveTowards(this.transform.position, groundY, 0.2f * Time.fixedDeltaTime);
+        }
+        else if (IsAttacking())
+        {
+            yVel = 0f;
+        }
+        else
+        {
+            yVel += Physics.gravity.y * Time.fixedDeltaTime;
+            if (yVel < -70f)
+            {
+                yVel = -70;
+            }
+            if (IsFalling()) velocity += xzVel;
+        }
+
+        velocity += yVel * Vector3.up * Time.fixedDeltaTime;
+        if (cc.enabled) cc.Move(velocity);
+
+
+        if (nav.enabled)
+        {
+            if (cc.enabled)
+            {
+                cc.Move(nav.nextPosition - this.transform.position);
+            }
+            else
+            {
+                this.transform.Translate(nav.nextPosition - this.transform.position);
+            }
+            nav.nextPosition = this.transform.position;
+            xzVel = nav.velocity;
+        }
+
     }
 
     #region State Machine
     void UpdateStates()
     {
-
+        if (animancer.States.Current == state.idle)
+        {
+            IdleState();
+        }
+        else if (animancer.States.Current == state.move)
+        {
+            MoveState();
+        }
+        else if (animancer.States.Current == state.attack)
+        {
+            AttackState();
+        }
+        else if (animancer.States.Current == state.fall)
+        {
+            FallState();
+        }
     }
-    #endregion
-    
+
+    void IdleState()
+    {
+        cc.enabled = true;
+        collider.enabled = true;
+        nav.enabled = false;
+        nav.updatePosition = false;
+        nav.updateRotation = false;
+
+        if (actionsEnabled)
+        {
+            animancer.Play(state.move);
+        }
+        statePreview = "idle";
+    }
+    void MoveState()
+    {
+        cc.enabled = true;
+        collider.enabled = true;
+        nav.enabled = true;
+        nav.updatePosition = false;
+        nav.updateRotation = true;
+
+        float dist = Vector3.Distance(this.transform.position, CombatTarget.transform.position);
+        if (!attackOnCooldown && dist < targetDistance)
+        {
+            Vector3 origin = hitboxMount.position;
+            Vector3 dir = GetDirectionToTarget();
+            bool hit = Physics.SphereCast(origin, hitboxRadius, GetDirectionToTarget(), out RaycastHit rayhit, targetDistance, MaskReference.Terrain | MaskReference.Actors);
+            bool hitTarget = rayhit.collider.transform.root == CombatTarget.transform.root;
+            if (!hit || hitTarget)
+            {
+                StartChargeAttack();
+            }
+            Debug.DrawRay(origin, GetDirectionToTarget() * targetDistance, (!hit || hitTarget) ? Color.green : Color.red);
+        }
+        statePreview = "move";
+    }
+
+    void AttackState()
+    {
+        cc.enabled = false;
+        collider.enabled = false;
+        nav.enabled = false;
+        nav.updatePosition = false;
+        nav.updateRotation = false;
+
+        statePreview = "attack";
+    }
+    void FallState()
+    {
+        cc.enabled = true;
+        collider.enabled = true;
+        nav.enabled = false;
+        nav.updatePosition = false;
+        nav.updateRotation = false;
+
+        if (GetGrounded(out RaycastHit hitCheck1))
+        {
+            this.transform.position = hitCheck1.point;
+            yVel = 0f;
+            animancer.Play(state.move);
+        }
+        statePreview = "fall";
+    }
+
+   #endregion
+
     public void StartChargeAttack()
     {
-        this.transform.LookAt(currentTarget.transform, Vector3.up);
+        this.transform.LookAt(CombatTarget.transform, Vector3.up);
         state.attack = chargeAttack.ProcessGenericAction(this, _MoveOnEnd);
+        StartCoroutine(ChargeAttackRoutine());
     }
 
+    IEnumerator ChargeAttackRoutine()
+    {
+        yield return new WaitUntil(() => hitboxActive);
+        float speed = 0f;
+        float clock = 0f;
+        Vector3 dir = GetDirectionToTarget();
+        this.transform.LookAt(CombatTarget.transform, Vector3.up);
+        // accelerate in dash
+        while (clock < attackDuration)
+        {
+            yield return new WaitForFixedUpdate();
+            clock += Time.fixedDeltaTime;
+            speed = Mathf.MoveTowards(speed, attackSpeed, attackAccel * Time.fixedDeltaTime);
+            Vector3 move = dir * speed * Time.fixedDeltaTime;
+            // check collision
+
+            move = ChargeAttackCheckCollision(move);
+            this.transform.position += move;
+            
+            xzVel = dir * speed;
+        }
+
+        HitboxActive(false);
+        attackOnCooldown = true;
+        yield return new WaitForFixedUpdate();
+        // check grounded when we're done dashing
+        bool grounded = GetGrounded(out RaycastHit hitCheck1);
+        
+        if (grounded)
+        {
+            // decel if grounded
+            while (speed > 0f)
+            {
+                yield return new WaitForFixedUpdate();
+                speed = Mathf.MoveTowards(speed, 0f, attackDecel * Time.fixedDeltaTime);
+                Vector3 move = dir * speed * Time.fixedDeltaTime;
+                move = ChargeAttackCheckCollision(move);
+                this.transform.position += move;
+                xzVel = dir * speed;
+            }
+            animancer.Play(state.move);
+        }
+        else
+        {
+            state.fall = animancer.Play(fallAnim);
+        }
+
+        yield return new WaitForSeconds(attackCooldown);
+        attackOnCooldown = false;
+    }
+
+    Vector3 ChargeAttackCheckCollision(Vector3 inMove)
+    {
+        Vector3 move = inMove;
+        bool hit = Physics.SphereCast(collider.transform.position, collider.radius, move.normalized, out RaycastHit rayhit, move.magnitude, MaskReference.Terrain);
+        if (hit)
+        {
+            if (rayhit.distance > collider.radius)
+            {
+                move = move.normalized * (rayhit.distance - collider.radius);
+            }
+            else
+            {
+                move = Vector3.zero;
+            }
+        }
+        return move;
+    }
     
     public bool CalculateRunningAwayDestination(Vector3 runningFromPosition)
     {
@@ -107,9 +337,16 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
         throw new System.NotImplementedException();
     }
 
+    void SetDestination()
+    {
+        if (CombatTarget != null && IsMoving() && nav.enabled)
+        {
+            SetDestination(CombatTarget.transform.position);
+        }
+    }
     public void SetDestination(Vector3 position)
     {
-        throw new System.NotImplementedException();
+        nav.SetDestination(CombatTarget.transform.position);
     }
 
     public void SetDestination(GameObject target)
@@ -140,7 +377,7 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
         if (damage.source != null)
         {
             this.transform.LookAt(damage.source.transform, Vector3.up);
-            currentTarget = damage.source;
+            CombatTarget = damage.source;
         }
 
         bool willKill = damageAmount >= attributes.health.current || isCrit;
@@ -202,55 +439,6 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
         return lastDamageTaken;
     }
 
-    IEnumerator UpdateDestination()
-    {
-        while (this.enabled)
-        {
-            yield return new WaitForSecondsRealtime(updateSpeed);
-            if (nav.enabled) nav.SetDestination(destination);
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        Vector3 velocity = Vector3.zero;
-
-        float gravity = (IsAttacking()) ? 0f : Physics.gravity.y;
-        if (GetGrounded(out RaycastHit hitCheck1))
-        {
-            if (yVel <= 0)
-            {
-                yVel = 0f;
-            }
-            else
-            {
-                yVel += gravity * Time.fixedDeltaTime;
-            }
-            Vector3 groundY = new Vector3(this.transform.position.x, hitCheck1.point.y, this.transform.position.z);
-            this.transform.position = Vector3.MoveTowards(this.transform.position, groundY, 0.2f * Time.fixedDeltaTime);
-        }
-        else if (IsAttacking())
-        {
-            yVel = 0f;
-        }
-        else
-        {
-            yVel += Physics.gravity.y * Time.fixedDeltaTime;
-            if (yVel < -70f)
-            {
-                yVel = -70;
-            }
-            if (IsFalling()) velocity += xzVel;
-        }
-        velocity += yVel * Vector3.up * Time.fixedDeltaTime;
-        cc.Move(velocity);
-        if (!nav.isStopped)
-        {
-            cc.Move(nav.nextPosition - this.transform.position);
-            nav.nextPosition = this.transform.position;
-        }
-    }
-
     public bool GetGrounded(out RaycastHit hitInfo)
     {
         Vector3 bottom = cc.bounds.center + cc.bounds.extents.y * Vector3.down * 0.9f;
@@ -276,6 +464,7 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
         {
             hitbox.SetActive(false);
         }
+        hitboxActive = active;
     }
 
 
@@ -284,6 +473,10 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
         return animancer.States.Current == state.attack;
     }
 
+    public override bool IsFalling()
+    {
+        return animancer.States.Current == state.fall;
+    }
     public void GetParried()
     {
         state.hurt = animancer.Play(hurtAnim);
@@ -291,14 +484,14 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
         OnHurt.Invoke();
     }
 
+    public bool IsMoving()
+    {
+        return animancer.States.Current == state.move;
+    }
+
     public bool IsCritVulnerable()
     {
         return false;
-    }
-
-    public void EnableActions()
-    {
-        // do nothing on mimics
     }
 
     public void StartInvulnerability(float duration)
