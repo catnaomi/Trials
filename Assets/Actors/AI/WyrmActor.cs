@@ -198,7 +198,7 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
             Vector3 origin = hitboxMount.position;
             Vector3 dir = GetDirectionToTarget();
             bool hit = Physics.SphereCast(origin, hitboxRadius, GetDirectionToTarget(), out RaycastHit rayhit, targetDistance, MaskReference.Terrain | MaskReference.Actors);
-            bool hitTarget = rayhit.collider.transform.root == CombatTarget.transform.root;
+            bool hitTarget = (hit) && rayhit.collider.transform.root == CombatTarget.transform.root;
             if (!hit || hitTarget)
             {
                 StartChargeAttack();
@@ -239,18 +239,21 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
 
     public void StartChargeAttack()
     {
-        this.transform.LookAt(CombatTarget.transform, Vector3.up);
         state.attack = chargeAttack.ProcessGenericAction(this, _MoveOnEnd);
         StartCoroutine(ChargeAttackRoutine());
     }
 
     IEnumerator ChargeAttackRoutine()
     {
-        yield return new WaitUntil(() => hitboxActive);
+        while (!hitboxActive)
+        {
+            RotateTowardsTarget(nav.angularSpeed * Time.deltaTime);
+            yield return null;
+        }
         float speed = 0f;
         float clock = 0f;
         Vector3 dir = GetDirectionToTarget();
-        this.transform.LookAt(CombatTarget.transform, Vector3.up);
+        RealignToTarget();
         // accelerate in dash
         while (clock < attackDuration)
         {
