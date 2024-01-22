@@ -83,6 +83,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public DamageKnockback arrowDamage;
     public DamageKnockback waveDamage;
     [Header("Parries")]
+    public float parryDelay = 20f;
     public string[] parryPatterns;
     public int maxParryFirstPhase = 3;
     [ReadOnly, SerializeField] int parryCurrentIndex;
@@ -153,6 +154,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     [ReadOnly, SerializeField] bool ParryHit;
     [ReadOnly, SerializeField] int NextParry;
     [ReadOnly, SerializeField] bool ParryFail;
+    [ReadOnly, SerializeField] bool QuickParry;
     [ReadOnly, SerializeField] bool OnHeavyDamage;
     [ReadOnly, SerializeField] bool OnTimeDamage;
     [ReadOnly, SerializeField] float xDirection;
@@ -228,6 +230,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         this.OnHurt.AddListener(DeactivateHitboxes);
         StartCoroutine(DestinationCoroutine());
         this.StartTimer(1f, true, CheckPillarStatus);
+        this.StartTimer(parryDelay, true, CheckQuickParry);
     }
 
     public override void Update()
@@ -312,7 +315,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             if (timeInPhase >= minPhaseDuration && successesThisPhase >= attackSuccessesNeeded && !stayInPhase)
             {
-                currentPhase = CombatPhase.ParryPhase;
+                currentPhase = CombatPhase.PillarPhase;
                 timeInPhase = 0f;
                 successesThisPhase = 0;
             }
@@ -406,6 +409,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             animator.ResetTrigger("OnHeavyDamage");
         }
 
+        animator.UpdateTrigger("QuickParry", ref QuickParry);
         animator.UpdateTrigger("Parried", ref Parried);
         animator.SetInteger("OffenseStage", OffenseStage);
 
@@ -493,6 +497,14 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         HasNearbyPillar = false;
         PillarCount = pillars.Count;
+    }
+
+    void CheckQuickParry()
+    {
+        if (CombatTarget != null && currentPhase != CombatPhase.PillarPhase)
+        {
+            QuickParry = true;
+        }
     }
 
     int GetClosestPillar(bool includeCurrent = false)
@@ -1851,6 +1863,11 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     {
         Vector3 diff = animator.rootPosition - this.transform.position;
        
+        if (isInTimelineState)
+        {
+            this.transform.position = animator.rootPosition;
+            return;
+        }
         if (IsAttacking() && !IsRootAttacking())
         {
 

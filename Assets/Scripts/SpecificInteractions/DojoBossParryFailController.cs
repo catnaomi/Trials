@@ -1,4 +1,5 @@
 using Animancer;
+using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,10 +12,13 @@ public class DojoBossParryFailController : MonoBehaviour
     [Header("First Parry")]
     public PlayTimelineWithActors firstDirector;
     public float minDistanceToPlayer = 3f;
+    public float delay1 = 1f;
     [Header("Second Parry")]
     public YarnPlayer secondPlayer;
+    public float delay2 = 1f;
     [Header("Third Parry")]
     public YarnPlayer thirdPlayer;
+    public float delay3 = 1f;
     [Header("Settings")]
     public float freezeTimeout = 5f;
     [Header("References")]
@@ -58,29 +62,45 @@ public class DojoBossParryFailController : MonoBehaviour
             StartCoroutine(RepositionPlayerRoutine());
         }
         PlayerActor.player.DisablePhysics();
-        PlayPlayerParryFailState();
+        PlayPlayerParryFailState(true);
         dojoBoss.RealignToTarget();
-        dojoBoss.GetComponent<DojoBossInventoryTransformingController>().SetWeaponByName("Pipe");
+
+        
         dojoBoss.StartTimeline();
-        firstDirector.Play();
-        firstDirector.OnEnd.AddListener(OnFinish);
+
+        this.StartTimer(delay1, () =>
+        {
+            dojoBoss.GetComponent<DojoBossInventoryTransformingController>().SetWeaponByName("Pipe");
+            firstDirector.Play();
+            firstDirector.OnEnd.AddListener(OnFinish);
+        });
+        
     }
 
     void SecondParry()
     {
-        PlayPlayerParryFailState();
-        secondPlayer.Play();
+        PlayPlayerParryFailState(false);
+
+        this.StartTimer(delay2, () =>
+        {
+            secondPlayer.Play();
+        });
+        
     }
 
     void ThirdParry()
     {
-        PlayPlayerParryFailState();
-        thirdPlayer.Play();
+        PlayPlayerParryFailState(false);
+
+        this.StartTimer(delay3, () =>
+        {
+            secondPlayer.Play();
+        });
     }
 
     void FourthParry()
     {
-        PlayPlayerParryFailState();
+        PlayPlayerParryFailState(false);
     }
 
     void Update()
@@ -90,9 +110,17 @@ public class DojoBossParryFailController : MonoBehaviour
             particleController.StopParticle();
         }
     }
-    public void PlayPlayerParryFailState()
+    public void PlayPlayerParryFailState(bool isDialogue)
     {
-        playerFailState = PlayerActor.player.PlayDialogueClip(playerParryFailAnim);
+        if (isDialogue)
+        {
+            playerFailState = PlayerActor.player.PlayDialogueClip(playerParryFailAnim);
+            PlayerActor.player.SetCombatTarget(dojoBoss.GetComponent<HumanoidPositionReference>().eyeTarget.gameObject);
+        }
+        else
+        {
+            playerFailState = PlayerActor.player.animancer.Play(playerParryFailAnim);
+        }
         particleController.StartParticle();
         StartCoroutine(PlayerParryFailStateRoutine(playerFailState, PlayerActor.player));
     }
