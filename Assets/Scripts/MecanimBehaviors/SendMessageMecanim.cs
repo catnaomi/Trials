@@ -11,7 +11,11 @@ public class SendMessageMecanim : StateMachineBehaviour
     {
         if (start != "")
         {
-            animator.gameObject.SendMessage(start);
+            string[] split = start.Split(',');
+            foreach (string s in split)
+            {
+                animator.gameObject.SendMessage(s);
+            }
         }
     }
 
@@ -26,7 +30,11 @@ public class SendMessageMecanim : StateMachineBehaviour
     {
         if (end != "")
         {
-            animator.gameObject.SendMessage(end);
+            string[] split = end.Split(',');
+            foreach (string s in split)
+            {
+                animator.gameObject.SendMessage(s);
+            }
         }
     }
 

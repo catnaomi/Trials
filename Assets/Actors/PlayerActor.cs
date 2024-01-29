@@ -1998,6 +1998,19 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             
         }
         */
+        if (animancer.States.Current == damageHandler.block)
+        {
+            if (hasTypedBlocks)
+            {
+                int param = 0 + (IsSlashHeld() ? DamageKnockback.SLASH_INT : 0) + (IsThrustHeld() ? DamageKnockback.THRUST_INT : 0);
+                if (param != lastTypedBlockParam)
+                {
+                    lastTypedBlockParam = param;
+                    OnBlockTypeChange.Invoke();
+                }
+            }
+            
+        }
 
         if (applyMove)
         {

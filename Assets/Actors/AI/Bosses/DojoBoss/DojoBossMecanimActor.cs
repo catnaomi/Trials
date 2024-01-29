@@ -1684,6 +1684,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         currentPillarIndex = pillars.Count;
         pillars.Add(pillar);
         StartCoroutine(PillarRiseRoutine(pillar));
+        PillarShockwave();
 
     }
     IEnumerator PillarRiseRoutine(GameObject pillar)

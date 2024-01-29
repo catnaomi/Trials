@@ -39,6 +39,8 @@ public class AnimationFXHandler : MonoBehaviour
     [Header("Anim Events")]
     public UnityEvent OnArrowDraw;
     public UnityEvent OnArrowNock;
+    [Header("Flashes")]
+    public FlashRenderer flash;
     [Space(10)]
     public UnityEvent OnGunLoad;
     Actor actor;
@@ -271,11 +273,13 @@ public class AnimationFXHandler : MonoBehaviour
             {
                 //FXController.CreateCross(position, direction);
                 combatHitSource.PlayOneShot(animSounds.blockSwitch);
+                FlashColor(new Color(1,1,1,0.5f));
             }
             else if (player.IsBlockingThrust())
             {
                 //FXController.CreateCircle(position, direction);
                 combatHitSource.PlayOneShot(animSounds.blockSwitch);
+                FlashColor(new Color(1, 1, 1, 0.5f));
             }
             
         }
@@ -312,6 +316,19 @@ public class AnimationFXHandler : MonoBehaviour
             Vector3 rotation = actor.transform.forward;
             FXController.CreateParrySuccess(position, rotation);
         }
+    }
+
+    public void FlashColor(Color color)
+    {
+        if (flash != null)
+        {
+            flash.Flash(color);
+        }
+    }
+
+    public void FlashWhite()
+    {
+        FlashColor(Color.white);
     }
     #endregion
 
