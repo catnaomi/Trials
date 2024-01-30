@@ -12,6 +12,7 @@ public class AvenCombatantActor : CombatantActor
     public ClipTransition quickRiseAnim;
     public float quickRiseSpeed = 1f;
     [Space(10)]
+    public BoxCollider flyArea;
     public InputAttack swoopAttack;
     public ClipTransition swoopEndAnim;
     public float swoopSpeed = 10f;
@@ -176,5 +177,14 @@ public class AvenCombatantActor : CombatantActor
         }
         velocity += yVel * Vector3.up * Time.fixedDeltaTime;
         this.GetComponent<CharacterController>().Move((velocity));
+
+        // keep within bounds
+        if (flyArea != null)
+        {
+            if (!flyArea.bounds.Contains(this.transform.position))
+            {
+                cc.Move(flyArea.ClosestPoint(this.transform.position)- this.transform.position);
+            }
+        }
     }
 }
