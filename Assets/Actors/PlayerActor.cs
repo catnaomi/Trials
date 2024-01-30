@@ -2225,7 +2225,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (IsClimbing())
         {
             climbSnapPoint += animatorVelocity * Time.fixedDeltaTime;
-            this.transform.position = Vector3.MoveTowards(this.transform.position, climbSnapPoint, climbSnapSpeed * Time.fixedDeltaTime);
+            if (false) // did climb up to reach top
+            {
+
+            }
+            else
+            {
+                this.transform.position = Vector3.MoveTowards(this.transform.position, climbSnapPoint, climbSnapSpeed * Time.fixedDeltaTime);
+            }
+            
         }
         else if (cc.enabled)
         {
@@ -2532,6 +2540,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void ClimbUpLedge()
     {
         ledgeSnap = false;
+        this.transform.position = climbSnapPoint;
         animancer.Play(ledgeClimb);
         currentClimb.StopClimb();
         StartClimbLockout();
