@@ -42,8 +42,12 @@ public class PlayerTargetManager : MonoBehaviour
     bool lockOnPress;
     PlayerInput inputs;
     [Header("Dialogue Settings")]
-    public CinemachineVirtualCameraBase dialogueCamera;
-    public float maxDialogueCameraDistance = 5f;
+    public CinemachineVirtualCameraBase dialogueCameraNear;
+    public CinemachineVirtualCameraBase dialogueCameraFar1;
+    public CinemachineVirtualCameraBase dialogueCameraFar2;
+    public CinemachineMixingCamera dialogueMix;
+    public Transform dialogueCameraFarBase;
+    public float dialogueBlendDistance = 5f;
     [Header("Free Look Control Settings")]
     public bool handleCamera;
     CinemachineFreeLook freeLook;
@@ -259,7 +263,7 @@ public class PlayerTargetManager : MonoBehaviour
     void HandleAimTargetPosition()
     {
         // center target
-        if (!player.IsInDialogue())
+        if (true)//!player.IsInDialogue())
         {
             centerAim.position = player.positionReference.centerTarget.position;
         }
@@ -314,8 +318,43 @@ public class PlayerTargetManager : MonoBehaviour
         }
         if (player.IsInDialogue())
         {
+            Vector3 dir = targetAim.position - centerAim.position;
+            dir.y = 0;
+            dir.Normalize();
+            dialogueCameraFarBase.rotation = Quaternion.LookRotation(dir);
+            dialogueCameraFarBase.position = centerAim.position;
+
             float dist = Vector3.Distance(centerAim.position, currentTarget.transform.position);
-            dialogueCamera.LookAt = (dist < maxDialogueCameraDistance) ? targetAim : currentTarget.transform;
+
+            if (dist < dialogueBlendDistance)
+            { 
+                // near
+                dialogueMix.m_Weight0 = 1f;
+                dialogueMix.m_Weight1 = 0f;
+            }
+            else
+            {
+                // far
+                dialogueMix.m_Weight0 = 0f;
+                dialogueMix.m_Weight1 = 1f;
+            }
+
+            for (int i = 2; i <= 10; i++)
+            {
+                Vector3 pos = centerAim.position + Vector3.up * i + dir * -5;
+                DrawCircle.DrawWireSphere(pos, 0.25f, Color.red);
+                bool blocked = Physics.SphereCast(pos, 0.25f, (targetAim.position - pos).normalized, out RaycastHit hit, dist, MaskReference.Terrain);
+                if (!blocked || i == 10)
+                {
+                    Vector3 local1 = dialogueCameraFar1.transform.localPosition;
+                    local1.y = i;
+                    dialogueCameraFar1.transform.localPosition = local1;
+                    Vector3 local2 = dialogueCameraFar2.transform.localPosition;
+                    local2.y = i;
+                    dialogueCameraFar2.transform.localPosition = local2;
+                    break;
+                }
+            }
         }
     }
     
