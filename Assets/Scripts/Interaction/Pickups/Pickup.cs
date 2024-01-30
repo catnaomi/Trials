@@ -10,7 +10,7 @@ public class Pickup : MonoBehaviour
     private void Start()
     {
         clock = 0f;
-        if (activationDelay > 0f)
+        if (activationDelay > 0f && collider != null)
         {
             collider.enabled = false;
         }
@@ -25,7 +25,7 @@ public class Pickup : MonoBehaviour
         }
         else
         {
-            if (!collider.enabled)
+            if (!collider.enabled && collider != null)
             {
                 collider.enabled = true;
             }

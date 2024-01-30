@@ -23,6 +23,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public float closeRange = 4f;
     public float meleeRange = 2f;
     public float farRange = 10f;
+    public float endAmbushRange = 3f;
     bool shouldRealign;
     float shouldRotateAmount;
 
@@ -52,9 +53,11 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     [ReadOnly, SerializeField] bool InCloseRange;
     [ReadOnly, SerializeField] bool InMeleeRange;
     [ReadOnly, SerializeField] bool InFarRange;
+    [ReadOnly, SerializeField] bool EndAmbushRange;
     [ReadOnly, SerializeField] bool ShouldAttack;
     [ReadOnly, SerializeField] bool ShouldDash;
     [ReadOnly, SerializeField] bool ShouldSpecial;
+    [ReadOnly, SerializeField] bool AttackAlternator;
     [ReadOnly, SerializeField] bool ActionsEnabled;
     [ReadOnly, SerializeField] float Speed;
     [ReadOnly, SerializeField] bool InDamageAnim;
@@ -129,6 +132,20 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
             nav.updateRotation = true;
             cc.enabled = false;
         }
+        else if (IsAttacking())
+        {
+            nav.enabled = true;
+            nav.updatePosition = false;
+            nav.updateRotation = false;
+            cc.enabled = true;
+        }
+        else if (IsDashing())
+        {
+            nav.enabled = true;
+            nav.updatePosition = false;
+            nav.updateRotation = false;
+            cc.enabled = false;
+        }
         else
         {
             nav.enabled = false;
@@ -158,7 +175,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
             InCloseRange = dist < closeRange;
             InMeleeRange = dist < meleeRange;
             InFarRange = dist < farRange;
-
+            EndAmbushRange = dist < endAmbushRange;
             Vector3 dir = (CombatTarget.transform.position - this.transform.position);
             dir.y = 0f;
             dir.Normalize();
@@ -175,8 +192,10 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         animator.SetBool("InCloseRange", InCloseRange);
         animator.SetBool("InMeleeRange", InMeleeRange); 
         animator.SetBool("InFarRange", InFarRange);
+        animator.SetBool("EndAmbushRange", EndAmbushRange);
         animator.SetBool("ActionsEnabled", ActionsEnabled);
         animator.UpdateTrigger("ShouldAttack", ref ShouldAttack);
+        animator.SetBool("AttackAlternator", AttackAlternator);
         Speed = nav.desiredVelocity.magnitude;
         animator.SetFloat("Speed", Speed);
         animator.UpdateTrigger("ShouldDash", ref ShouldDash);
@@ -228,6 +247,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         if (CanUpdate() && actionsEnabled)
         {
             ShouldAttack = true;
+            AttackAlternator = !AttackAlternator;
         }     
     }
 
@@ -241,9 +261,10 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
 
     public void BeginSpecialAttack()
     {
-        if (CanUpdate() && actionsEnabled)
+        if (CanUpdate() && actionsEnabled && !InCloseRange && InFarRange)
         {
-            ShouldSpecial = true;
+            //ShouldSpecial = true;
+            BeginAmbush();
         }
     }
 
@@ -365,7 +386,6 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
             isHitboxActive = true;
             OnHitboxActive.Invoke();
         }
-
     }
 
     public override void RealignToTarget()
@@ -542,9 +562,9 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     {
         actionsEnabled = true;
         this.StartTimer(0.1f, true, SetDestination);
-        this.StartTimer(attackTimer, true, BeginAttack);
-        this.StartTimer(waterDashTimer, true, BeginWaterDash);
-        this.StartTimer(specialAttackTimer, true, BeginSpecialAttack);
+        if (attackTimer > 0) this.StartTimer(attackTimer, true, BeginAttack);
+        if (waterDashTimer > 0) this.StartTimer(waterDashTimer, true, BeginWaterDash);
+        if (specialAttackTimer > 0) this.StartTimer(specialAttackTimer, true, BeginSpecialAttack);
     }
 
     public void StartInvulnerability(float duration)

@@ -11,6 +11,7 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
     HumanoidPositionReference positionReference;
     ActorTimeTravelHandler timeTravelHandler;
 
+    public bool actionsEnabled;
     [Header("Block & Block Switch")]
     public bool isBlocking;
     public string blockSequence;
@@ -61,7 +62,10 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
 
     public override void ActorPostUpdate()
     {
-        UpdateStrafe(this.transform.position);
+        if (actionsEnabled)
+        {
+            UpdateStrafe(this.transform.position);
+        } 
         UpdateMecanimValues();
     }
     void UpdateMecanimValues()
@@ -276,6 +280,11 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
         }
     }
     #endregion
+
+    public void EnableActions()
+    {
+        actionsEnabled = true;
+    }
     public void Recoil()
     {
         throw new System.NotImplementedException();

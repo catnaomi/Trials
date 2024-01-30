@@ -75,22 +75,48 @@ public class AttackerRootMotionHandler : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (nav != null && nav.enabled)
+
+        Vector3 realDelta = rootDelta;
+        if (nav != null && nav.enabled && !nav.updatePosition)
         {
+
             Vector3 position = this.transform.position;
+            if (!NavMesh.SamplePosition(this.transform.position + rootDelta, out NavMeshHit hit, 0.1f, 1))
+            {
+                if (NavMesh.FindClosestEdge(this.transform.position + rootDelta, out NavMeshHit edgeHit, 1))
+                {
+                    realDelta = edgeHit.position - this.transform.position;
+                }
+            }
             position.y = nav.nextPosition.y;
-            this.transform.position = position;
+            if (!cc.enabled)
+            {
+                this.transform.position = position;
+            }
+            else
+            {
+                cc.Move(position - this.transform.position);
+            }
+            nav.nextPosition = this.transform.position;
         }
 
-        if (rootDelta.magnitude > 0)
+        if (realDelta.magnitude > 0)
         {
+            if (cc.enabled)
+            {
+                cc.Move(realDelta);
+            }
+            else
+            {
+                this.transform.Translate(realDelta);
+            }
             /*
             cc.enabled = false;
             this.transform.position = this.transform.position + rootDelta;
             cc.enabled = true;
             */
-            cc.Move(rootDelta);
-            SetVelocity(rootDelta / Time.fixedDeltaTime);
+            
+            SetVelocity(realDelta / Time.fixedDeltaTime);
         }
         else if (actor != null && !actor.IsGrounded())
         {
@@ -98,6 +124,9 @@ public class AttackerRootMotionHandler : MonoBehaviour
             cc.Move((actor.xzVel + Vector3.up * actor.yVel) * Time.fixedDeltaTime);
             actor.yVel -= Physics.gravity.magnitude;
         }
+
+        
+
         if (PlayerActor.player != null)
         {
             Physics.IgnoreCollision(PlayerActor.player.cc, collider, !PlayerActor.player.isGrounded);

@@ -5,7 +5,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 5629191996135825639}
     m_Modifications:
     - target: {fileID: 3915576032988358690, guid: 1681196436d2e6a458ae7efd512e6b84,
@@ -94,7 +94,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1681196436d2e6a458ae7efd512e6b84, type: 3}
 --- !u!4 &6007267560348499496 stripped
 Transform:
@@ -107,7 +109,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 5752563854258754257}
     m_Modifications:
     - target: {fileID: 3915576032988358690, guid: 1681196436d2e6a458ae7efd512e6b84,
@@ -196,7 +198,9 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1681196436d2e6a458ae7efd512e6b84, type: 3}
 --- !u!4 &6007267560761664988 stripped
 Transform:
@@ -209,7 +213,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 845350466507159468, guid: 8f083315fa2a75947ab86f7218ad8af3,
@@ -357,6 +361,7 @@ PrefabInstance:
     - {fileID: 4013956763830427714, guid: 8f083315fa2a75947ab86f7218ad8af3, type: 3}
     - {fileID: 5623160740940128038, guid: 8f083315fa2a75947ab86f7218ad8af3, type: 3}
     - {fileID: 845350466507159468, guid: 8f083315fa2a75947ab86f7218ad8af3, type: 3}
+    m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 3104697474370462949, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
@@ -366,6 +371,19 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 6007267560761664988}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2314907631184150886, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 675521122}
+    - targetCorrespondingSourceObject: {fileID: 2314907631184150886, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 675521137}
+    - targetCorrespondingSourceObject: {fileID: 2314907631184150886, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 675521150}
   m_SourcePrefab: {fileID: 100100000, guid: 8f083315fa2a75947ab86f7218ad8af3, type: 3}
 --- !u!1 &4983450232438130020 stripped
 GameObject:
@@ -454,13 +472,13 @@ MonoBehaviour:
       causesCritState: 0
       doesNotConsumeCritState: 0
       criticalExtensionTime: 0
-    breaksArmor: 0
-    unblockable: 0
-    disarm: 0
     isThrust: 0
     isSlash: 0
     isRanged: 0
     isParry: 0
+    breaksArmor: 0
+    unblockable: 0
+    jumpable: 0
     bouncesOffBlock: 0
     bouncesOffTypedBlock: 0
     breaksBlock: 0
@@ -470,6 +488,7 @@ MonoBehaviour:
     cannotKill: 0
     stunTime: 0
     repositionLength: 0
+    repositionMaxDist: 0
     stagger: 0
     staggers:
       onHit: 0
@@ -481,11 +500,9 @@ MonoBehaviour:
       onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
-    hitboxSource: {fileID: 0}
-    source: {fileID: 0}
-    friendlyGroup: 0
-    originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
+    hitClip: {fileID: 0}
+    disarm: 0
     OnHit:
       m_PersistentCalls:
         m_Calls: []
@@ -500,7 +517,10 @@ MonoBehaviour:
         m_Calls: []
     didCrit: 0
     timeDelayed: 0
-    hitClip: {fileID: 0}
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
   moveAdditional: {x: 0, y: 0, z: 0}
   lastContactPoint: {x: 0, y: 0, z: 0}
   lastBlockPoint: {x: 0, y: 0, z: 0}
@@ -518,13 +538,13 @@ MonoBehaviour:
       causesCritState: 0
       doesNotConsumeCritState: 0
       criticalExtensionTime: 0
-    breaksArmor: 0
-    unblockable: 0
-    disarm: 0
     isThrust: 0
     isSlash: 0
     isRanged: 0
     isParry: 0
+    breaksArmor: 0
+    unblockable: 0
+    jumpable: 0
     bouncesOffBlock: 0
     bouncesOffTypedBlock: 0
     breaksBlock: 0
@@ -534,6 +554,7 @@ MonoBehaviour:
     cannotKill: 0
     stunTime: 0
     repositionLength: 0
+    repositionMaxDist: 0
     stagger: 0
     staggers:
       onHit: 0
@@ -545,11 +566,9 @@ MonoBehaviour:
       onTypedBlock: 0
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
-    hitboxSource: {fileID: 0}
-    source: {fileID: 0}
-    friendlyGroup: 0
-    originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
+    hitClip: {fileID: 0}
+    disarm: 0
     OnHit:
       m_PersistentCalls:
         m_Calls: []
@@ -564,7 +583,10 @@ MonoBehaviour:
         m_Calls: []
     didCrit: 0
     timeDelayed: 0
-    hitClip: {fileID: 0}
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
   currentConsumable: {fileID: 0}
   CombatTarget: {fileID: 0}
   FollowTarget: {fileID: 0}
@@ -583,6 +605,7 @@ MonoBehaviour:
   closeRange: 5
   meleeRange: 3
   farRange: 15
+  endAmbushRange: 4
   isGrounded: 0
   damageAnims: {fileID: 11400000, guid: 221ae51d23f379f4a9d8bc53390ce0e9, type: 2}
   maximumHurtDuration: 2
@@ -602,9 +625,11 @@ MonoBehaviour:
   InCloseRange: 0
   InMeleeRange: 0
   InFarRange: 0
+  EndAmbushRange: 0
   ShouldAttack: 0
   ShouldDash: 0
   ShouldSpecial: 0
+  AttackAlternator: 0
   ActionsEnabled: 0
   Speed: 0
   InDamageAnim: 0

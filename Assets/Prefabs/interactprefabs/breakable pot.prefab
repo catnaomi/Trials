@@ -31,6 +31,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 211171209174470605}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 40.28, y: 0.574, z: -14.96}
   m_LocalScale: {x: 1, y: 1, z: 1}
@@ -40,7 +41,6 @@ Transform:
   - {fileID: 388578841182383195}
   - {fileID: 8217355939673338158}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &211171209174470601
 Rigidbody:
@@ -49,10 +49,21 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 211171209174470605}
-  serializedVersion: 2
+  serializedVersion: 4
   m_Mass: 10
   m_Drag: 0
   m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -82,8 +93,9 @@ MonoBehaviour:
       m_Calls: []
   recoilOnFail: 1
   drops: []
-  dropPrefab: {fileID: 8668257522388636843, guid: 1ddd605aef637064785208aedd07a633,
+  dropPrefab: {fileID: 7965028862543206387, guid: 25ff536c11f46cb48a1af06491647a69,
     type: 3}
+  dropProbability: 1
   dropPrefabAmount: 1
   forceMagnitude: 5
   angularVelocity: {x: 0, y: 45, z: 0}
@@ -160,13 +172,13 @@ MonoBehaviour:
       causesCritState: 0
       doesNotConsumeCritState: 0
       criticalExtensionTime: 0.25
-    breaksArmor: 0
-    unblockable: 0
-    disarm: 0
     isThrust: 0
     isSlash: 0
     isRanged: 0
     isParry: 0
+    breaksArmor: 0
+    unblockable: 0
+    jumpable: 0
     bouncesOffBlock: 0
     bouncesOffTypedBlock: 0
     breaksBlock: 0
@@ -176,6 +188,7 @@ MonoBehaviour:
     cannotKill: 0
     stunTime: 1
     repositionLength: 1
+    repositionMaxDist: 0.25
     stagger: 0
     staggers:
       onHit: 1
@@ -187,11 +200,9 @@ MonoBehaviour:
       onTypedBlock: 0
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
-    hitboxSource: {fileID: 0}
-    source: {fileID: 0}
-    friendlyGroup: 0
-    originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
+    hitClip: {fileID: 0}
+    disarm: 0
     OnHit:
       m_PersistentCalls:
         m_Calls: []
@@ -206,7 +217,10 @@ MonoBehaviour:
         m_Calls: []
     didCrit: 0
     timeDelayed: 0
-    hitClip: {fileID: 0}
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
   minimumForceForDamage: 2000
   damagesSelf: 1
   forceMultiplier: 0.001
@@ -252,9 +266,17 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 211171209174470605}
   m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
   m_IsTrigger: 0
+  m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
+  serializedVersion: 3
   m_Size: {x: 0.95, y: 0.95, z: 0.95}
   m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!1 &7625128466103189986
@@ -281,13 +303,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7625128466103189986}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 211171209174470600}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4668968126413907388
 MonoBehaviour:
@@ -312,7 +334,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 211171209174470600}
     m_Modifications:
     - target: {fileID: 4886634088945005441, guid: f281f8e66e2b5d841a31d280a8dfd498,
@@ -411,7 +433,9 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 211171209174470604}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f281f8e66e2b5d841a31d280a8dfd498, type: 3}
 --- !u!114 &4701464203408620204 stripped
 MonoBehaviour:
@@ -436,7 +460,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    serializedVersion: 2
+    serializedVersion: 3
     m_TransformParent: {fileID: 211171209174470600}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 2ad9178caf857ad45bd12c9bf668d2db,
@@ -535,7 +559,9 @@ PrefabInstance:
       value: breakable pot
       objectReference: {fileID: 0}
     m_RemovedComponents: []
+    m_RemovedGameObjects: []
     m_AddedGameObjects: []
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2ad9178caf857ad45bd12c9bf668d2db, type: 3}
 --- !u!4 &388578841182383195 stripped
 Transform:

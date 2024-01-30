@@ -260,7 +260,7 @@ public class Actor : MonoBehaviour
     }
     public virtual void OnFallOffMap()
     {
-        Die();
+        DieImmediate();
     }
     public virtual bool IsAlive()
     {
@@ -346,6 +346,14 @@ public class Actor : MonoBehaviour
         OnDie.Invoke();
         StartCleanUp();
     }
+
+    public virtual void DieImmediate()
+    {
+        Die();
+        OnCorpseClean.Invoke();
+        GameObject.Destroy(this.gameObject);
+    }
+
     public void StartCleanUp()
     {
         StartCoroutine(CorpseClean(attributes.cleanUpTime));

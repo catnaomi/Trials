@@ -105,7 +105,9 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
 
         foreach (GameObject droppedObject in droppedObjects)
         {
-            droppedObject.transform.position = this.transform.position + Random.insideUnitSphere;
+            Vector2 randOffset = Random.insideUnitCircle;
+            Vector3 randOffset3 = new Vector3(randOffset.x, 1f, randOffset.y);
+            droppedObject.transform.position = this.transform.position + randOffset3 * 0.25f;
             if (droppedObject.TryGetComponent<Rigidbody>(out Rigidbody rigidbody))
             {
                 rigidbody.velocity = Vector3.up * forceMagnitude;

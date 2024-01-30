@@ -34,7 +34,7 @@ public class InputSettingsController : MonoBehaviour
         aim_speedsMouse = new Vector2(((CinemachineFreeLook)mouseVcams.aim).m_XAxis.m_MaxSpeed, ((CinemachineFreeLook)mouseVcams.aim).m_YAxis.m_MaxSpeed);
 
         free_speedsMouse = new Vector2(((CinemachineFreeLook)mouseVcams.free).m_XAxis.m_MaxSpeed, ((CinemachineFreeLook)mouseVcams.free).m_YAxis.m_MaxSpeed);
-        dialogue_speedsMouse = new Vector2(((CinemachineFreeLook)mouseVcams.dialogue).m_XAxis.m_MaxSpeed, ((CinemachineFreeLook)mouseVcams.dialogue).m_YAxis.m_MaxSpeed);
+        //dialogue_speedsMouse = new Vector2(((CinemachineFreeLook)mouseVcams.dialogue).m_XAxis.m_MaxSpeed, ((CinemachineFreeLook)mouseVcams.dialogue).m_YAxis.m_MaxSpeed);
 
 
         if (playerInput != null)
