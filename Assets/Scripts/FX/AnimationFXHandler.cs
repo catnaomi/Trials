@@ -26,6 +26,9 @@ public class AnimationFXHandler : MonoBehaviour
     public AudioSource combatWhiffSource;
     public AudioSource combatHitSource;
     public Vector3 parryPosition = Vector3.forward;
+    public AudioClip blockGood;
+    public AudioClip blockBad;
+    public AudioClip blockBreak;
     [Header("Events")]
     public UnityEvent OnDust;
     public UnityEvent OnDashDust;
@@ -58,6 +61,9 @@ public class AnimationFXHandler : MonoBehaviour
             player.OnParrySuccess.AddListener(ParrySuccess);
             player.OnBlockTypeChange.AddListener(BlockSwitch);
             player.OnTypedBlockSuccess.AddListener(RegisterTypedBlock);
+        }
+        else if (actor is IceShieldGolemMecanimActor golem) {
+            golem.OnTypedBlockSuccess.AddListener(RegisterTypedBlock);
         }
     }
 
@@ -369,7 +375,20 @@ public class AnimationFXHandler : MonoBehaviour
 
             if (isSlash || isThrust)
             {
-                AudioClip clip = (isCrit || didTypedBlock) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
+                //AudioClip clip = (isCrit || didTypedBlock) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
+                AudioClip clip;
+                if (isCrit)
+                {
+                    clip = blockBreak;
+                }
+                else if (didTypedBlock)
+                {
+                    clip = blockGood;
+                }
+                else
+                {
+                    clip = blockBad;
+                }
                 FXController.CreateSpark(actor.hitParticlePosition, actor.hitParticleDirection, clip);
                 FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
             }

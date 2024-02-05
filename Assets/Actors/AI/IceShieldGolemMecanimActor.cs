@@ -44,6 +44,7 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
     [ReadOnly, SerializeField] bool OnFail; //trigger
     [ReadOnly, SerializeField] bool GuardBreak; //trigger
 
+    public UnityEvent OnTypedBlockSuccess;
     // Start is called before the first frame update
     public override void ActorStart()
     {
@@ -197,7 +198,7 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
             bool fail = !success && !damage.isRanged;
             if (success)
             {
-                
+                OnTypedBlockSuccess.Invoke();
                 NextBlock();
 
                 if (BlockType != 0)
@@ -215,6 +216,7 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
                     damage.didCrit = true;
                     
                 }
+                
                 attributes.health.current-=4;
             }
             else if (fail && !damage.timeDelayed)
