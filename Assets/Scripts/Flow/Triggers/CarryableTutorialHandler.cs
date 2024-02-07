@@ -7,8 +7,11 @@ public class CarryableTutorialHandler : MonoBehaviour
     public Carryable carryable;
     public Interactable interact;
     public string pickupPrompt;
+    public UnityEngine.InputSystem.InputActionReference pickupInput;
     public string throwPrompt;
+    public UnityEngine.InputSystem.InputActionReference throwInput;
     public string putdownPrompt;
+    public UnityEngine.InputSystem.InputActionReference putdownInput;
     [ReadOnly] public int carryState = 0;
 
     // Start is called before the first frame update
@@ -32,7 +35,7 @@ public class CarryableTutorialHandler : MonoBehaviour
         {
             if (ShouldShowInteract())
             {
-                ShowTutorial(pickupPrompt);
+                ShowTutorial(pickupPrompt, pickupInput);
                 carryState = (int)CarryState.InRange;
             }
         }
@@ -41,8 +44,8 @@ public class CarryableTutorialHandler : MonoBehaviour
             if (carryable.isBeingCarried)
             {
                 TutorialHandler.HideTutorialStatic(pickupPrompt);
-                ShowTutorial(throwPrompt);
-                ShowTutorial(putdownPrompt);
+                ShowTutorial(throwPrompt, throwInput);
+                ShowTutorial(putdownPrompt, putdownInput);
                 carryState = (int)CarryState.Carried;
             }
             else if (!ShouldShowInteract())
@@ -69,9 +72,10 @@ public class CarryableTutorialHandler : MonoBehaviour
         TutorialHandler.HideTutorialStatic(putdownPrompt);
     }
 
-    void ShowTutorial(string text)
+    void ShowTutorial(string text, UnityEngine.InputSystem.InputActionReference input)
     {
-        TutorialHandler.ShowTutorialStatic(text);
+        string inputString = TutorialHandler.GetInputString(input);
+        TutorialHandler.ShowTutorialStatic(text, inputString);
     }
 
     void OnThrow()

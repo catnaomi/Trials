@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class TutorialHandler : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class TutorialHandler : MonoBehaviour
     public CanvasGroup background;
     public float backgroundFadeInTime = 1f;
     AudioSource source;
+    PlayerInput input;
     private void Awake()
     {
         instance = this;
@@ -21,6 +23,7 @@ public class TutorialHandler : MonoBehaviour
         {
             prompt.gameObject.SetActive(false);
         }
+        input = FindObjectOfType<PlayerInput>();
     }
 
     private void OnGUI()
@@ -45,7 +48,7 @@ public class TutorialHandler : MonoBehaviour
         }
         return false;
     }
-    public int ShowTutorial(string text)
+    public int ShowTutorial(string text, Sprite sprite)
     {
         int emptyIndex = -1;
 
@@ -70,7 +73,7 @@ public class TutorialHandler : MonoBehaviour
         if (emptyIndex >= 0)
         {
             prompts[emptyIndex].gameObject.SetActive(true);
-            prompts[emptyIndex].SetText(text);
+            prompts[emptyIndex].Set(text, sprite);
             return emptyIndex;
         }
         return -1;
@@ -101,12 +104,23 @@ public class TutorialHandler : MonoBehaviour
             prompts[i].Hide();
         }
     }
-    public static int ShowTutorialStatic(string text)
+    public static int ShowTutorialStatic(string text, Sprite sprite)
     {
         if (instance == null) return -1;
-        return instance.ShowTutorial(text);
+        return instance.ShowTutorial(text, sprite);
     }
 
+    public static int ShowTutorialStatic(string text, string spriteString)
+    {
+        Sprite sprite = InputSpriteProvider.GetSprite(spriteString);
+        return ShowTutorialStatic(text, sprite);
+    }
+
+    public static void ShowTutorialStatic(string text)
+    {
+        if (instance == null) return;
+        instance.ShowTutorial(text, null);
+    }
     public static void HideTutorialStatic(int index)
     {
         if (instance == null) return;
@@ -123,5 +137,14 @@ public class TutorialHandler : MonoBehaviour
     {
         if (instance == null) return;
         instance.HideAll();
+    }
+
+    public static string GetInputString(UnityEngine.InputSystem.InputActionReference action)
+    {
+        PlayerInput input = (instance != null && instance.input != null) ? instance.input : FindObjectOfType<PlayerInput>();
+        int index = InputActionRebindingExtensions.GetBindingIndex(action, InputBinding.MaskByGroup(input.currentControlScheme));
+        if (index < 0) return "";
+        string buttonName = InputActionRebindingExtensions.GetBindingDisplayString(action, index, InputBinding.DisplayStringOptions.DontIncludeInteractions);
+        return buttonName;
     }
 }

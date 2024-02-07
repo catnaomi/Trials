@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class TutorialTrigger : MonoBehaviour
 {
-    public Sprite icon1;
-    public Sprite icon2;
-    public Sprite icon3;
+    public UnityEngine.InputSystem.InputActionReference input;
     public string text;
     public bool onlyTriggersOnce;
     [ReadOnly] public bool triggered = false;
@@ -39,7 +38,8 @@ public class TutorialTrigger : MonoBehaviour
         {
             HideTutorial();
         }
-        interactionIndex = TutorialHandler.ShowTutorialStatic(text);
+        string inputString = TutorialHandler.GetInputString(input);
+        interactionIndex = TutorialHandler.ShowTutorialStatic(text, inputString);
         triggered = true;
         if (expiryTime > 0)
         {
@@ -61,4 +61,6 @@ public class TutorialTrigger : MonoBehaviour
         yield return new WaitForSeconds(expiryTime);
         HideTutorial();
     }
+
+    
 }

@@ -11227,7 +11227,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 412899296}
   m_Enabled: 1
-  m_Alpha: 0
+  m_Alpha: 1
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -19105,7 +19105,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.113874584, y: 0.4129881, z: -0.05213355, w: 0.902084}
+  m_LocalRotation: {x: 0.113874584, y: 0.4129881, z: -0.052133545, w: 0.902084}
   m_LocalPosition: {x: -4.0851483, y: 4.391984, z: -3.0514853}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -20466,17 +20466,17 @@ PrefabInstance:
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.0000076293945
+      value: 0.0000076293945
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 306.27426
+      value: 275.90115
       objectReference: {fileID: 0}
     - target: {fileID: 8979617971438696211, guid: 1117b4bc7d4a3474abbe1a782189da59,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 7.883026
+      value: 7.6289673
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -22313,7 +22313,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1186161541}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.12498935, y: 0.06287217, z: -0.00793666, w: 0.9901322}
+  m_LocalRotation: {x: 0.12498935, y: 0.06287217, z: -0.0079366565, w: 0.9901322}
   m_LocalPosition: {x: -0.99999976, y: 2, z: -5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -22360,6 +22360,51 @@ MonoBehaviour:
         m_Calls: []
   m_LegacyBlendHint: 0
   m_ComponentOwner: {fileID: 208441871}
+--- !u!1 &1194456541
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1194456543}
+  - component: {fileID: 1194456542}
+  m_Layer: 0
+  m_Name: Input Sprite Provider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1194456542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1194456541}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64fba9d9cb1dfcb458ed278e558b206c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gamepad: {fileID: 11400000, guid: 97591ad43020aa04ba7550ed329320db, type: 2}
+--- !u!4 &1194456543
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1194456541}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1209863099 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5929132225268725225, guid: a6bc2285722fcda408e15d42f078ba4a,
@@ -28599,7 +28644,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1582206131}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.16875996, y: 0.38957676, z: -0.09174652, w: 0.9007401}
+  m_LocalRotation: {x: 0.16875997, y: 0.38957673, z: -0.09174649, w: 0.9007401}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -40863,6 +40908,7 @@ SceneRoots:
   - {fileID: 1714348248}
   - {fileID: 1284805143}
   - {fileID: 8700734631247895271}
+  - {fileID: 1194456543}
   - {fileID: 1964004077}
   - {fileID: 972486332}
   - {fileID: 1373818131}

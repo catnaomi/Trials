@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InteractionPrompt : MonoBehaviour
 {
     public string prompt;
     public TMP_Text promptText;
+    public Image promptSprite;
     public CanvasGroup group;
     [Header("Animation")]
     public float easeTime = 1f;
@@ -24,10 +26,17 @@ public class InteractionPrompt : MonoBehaviour
     public void SetText(string text)
     {
         prompt = text;
-        this.promptText.text = prompt;
+        
         active = true;
     }
 
+    public void Set(string text, Sprite sprite)
+    {
+        this.promptText.text = text;
+        this.promptSprite.sprite = sprite;
+        this.promptSprite.enabled = sprite != null;
+        active = true;
+    }
     public void Hide()
     {
         active = false;
