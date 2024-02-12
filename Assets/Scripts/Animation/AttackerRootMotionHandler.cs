@@ -28,6 +28,7 @@ public class AttackerRootMotionHandler : MonoBehaviour
 
     void OnAnimatorMove()
     {
+        if (actor.isInTimelineState) return;
         Vector3 diff = animator.rootPosition - this.transform.position;
         if (adjustActor.ShouldAdjustRootMotion())
         {
@@ -75,7 +76,7 @@ public class AttackerRootMotionHandler : MonoBehaviour
 
     void FixedUpdate()
     {
-
+        if (actor.isInTimelineState) return;
         Vector3 realDelta = rootDelta;
         if (nav != null && nav.enabled && !nav.updatePosition)
         {
@@ -115,8 +116,8 @@ public class AttackerRootMotionHandler : MonoBehaviour
             this.transform.position = this.transform.position + rootDelta;
             cc.enabled = true;
             */
-            
-            SetVelocity(realDelta / Time.fixedDeltaTime);
+
+            //SetVelocity(realDelta);// / Time.fixedDeltaTime);
         }
         else if (actor != null && !actor.IsGrounded())
         {

@@ -1,3 +1,4 @@
+using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,7 @@ using UnityEngine;
 public class Pickup : MonoBehaviour
 {
     public float activationDelay = 2f;
+    public float destructionDelay = 30f;
     public Collider collider;
     float clock;
     private void Start()
@@ -15,6 +17,7 @@ public class Pickup : MonoBehaviour
             collider.enabled = false;
         }
         OnStart();
+        this.StartTimer(destructionDelay, Destroy);
     }
 
     private void Update()
@@ -47,5 +50,10 @@ public class Pickup : MonoBehaviour
     public virtual void OnPickup()
     {
 
+    }
+
+    public void Destroy()
+    {
+        Destroy(this.gameObject);
     }
 }

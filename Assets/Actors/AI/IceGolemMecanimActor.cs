@@ -286,7 +286,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         {
             nav.enabled = false;
             cc.enabled = false;
-            collider.enabled = true;
+            collider.enabled = !isInTimelineState;
             return;
         }
         if (isBodySpinning)
@@ -431,7 +431,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
 
     public bool GetGrounded()
     {
-        isGrounded = ActorUtilities.GetGrounded(this.transform);
+        isGrounded = ActorUtilities.GetGrounded(this.transform, out RaycastHit hit);
         return isGrounded;
     }
 

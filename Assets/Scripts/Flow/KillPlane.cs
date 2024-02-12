@@ -18,7 +18,7 @@ public class KillPlane : MonoBehaviour
     {
         plane = new Plane(this.transform.up, this.transform.position);
         bounds = this.GetComponent<Renderer>().bounds;
-        StartCoroutine("CheckKillPlane");
+        StartCoroutine(CheckKillPlane());
     }
 
     IEnumerator CheckKillPlane()
@@ -58,9 +58,22 @@ public class KillPlane : MonoBehaviour
                         Debug.Log("killplaned: " + breakable);
                     }
                 }
+
+                Pickup[] pickups = FindObjectsOfType<Pickup>();
+                foreach (Pickup pickup in pickups)
+                {
+                    if (pickup.gameObject.scene != this.gameObject.scene) continue;
+                    if (!plane.GetSide(pickup.transform.position) && IsWithinPlane(pickup.transform.position))
+                    {
+                        Destroy(pickup);
+                        Debug.Log("killplaned: " + pickup);
+                    }
+                }
             }
         }
     }
+
+
 
     bool IsWithinPlane(Vector3 position)
     {
