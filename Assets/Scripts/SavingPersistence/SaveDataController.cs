@@ -109,6 +109,7 @@ public class SaveDataController : MonoBehaviour
 
     public static void DeleteSlot(int slot)
     {
+        CreateDirectory();
         string path = GetPath() + $"savedata{slot}.json";
 
         try
@@ -135,6 +136,7 @@ public class SaveDataController : MonoBehaviour
     }
     public static SaveData ReadSlot(int slotNum)
     {
+        CreateDirectory();
         string path = GetPath() + $"savedata{slotNum}.json";
         string json = "";
         try
@@ -230,6 +232,14 @@ public class SaveDataController : MonoBehaviour
     {
         string actualPath = SAVE_PATH.Replace("%persistentDataPath%", Application.persistentDataPath);
         return actualPath;
+    }
+
+    public static void CreateDirectory()
+    {
+        if (!Directory.Exists(GetPath()))
+        {
+            Directory.CreateDirectory(GetPath());
+        }
     }
 
     public static void NewGameStatic()
