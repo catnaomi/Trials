@@ -3,6 +3,8 @@ using Cinemachine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Resources;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
@@ -65,6 +67,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float weaponDashSpeed = 2f;
     public float weaponDashTargetDistanceMin = 5f;
     public float weaponDashTargetDistanceMax = 1f;
+    [Space(5)]
+    public float drinkSpeed = 2f;
     [Space(5)]
     public float airAccel = 1f;
     public float airTurnSpeed = 45f;
@@ -310,14 +314,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public static PlayerActor player;
     public UnityEvent OnHitboxActive;
-
-    private System.Action _OnLandEnd;
-    private System.Action _OnFinishClimb;
-    private System.Action _MoveOnEnd;
-    private System.Action _AttackEnd;
-    private System.Action _OnHurtEnd;
-
-    private System.Action _StopUpperLayer;
     [Header("Carry Anims")]
     public ClipTransition pickUpAnim;
     public ClipTransition slowPickUpAnim;
@@ -354,10 +350,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState externalSource;
         public AnimancerState carry;
         public AnimancerState resurrect;
-        public AnimancerState consume;
         public MixerState<Vector2> primaryStance;
         public MixerState<Vector2> secondaryStance;
         public MixerState<float> upperBlock;
+
+        public AnimancerState consume;
+        public MixerState<float> drink;
+        public AnimancerState drinkUpper;
     }
     
     [Serializable]
@@ -413,71 +412,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         };
         walkAccelReal = walkAccel;
 
-
-        _OnLandEnd = () =>
-        {
-            //state.move.ChildStates[0].Clip = idleAnim;
-            walkAccelReal = walkAccel;
-        };
-
-        _OnFinishClimb = () =>
-        {
-            cc.enabled = true;
-            airTime = 0f;
-            yVel = 0f;
-            xzVel = Vector3.zero;
-            animancer.Play(state.move, 0.25f);
-        };
-
-        _MoveOnEnd = () =>
-        {
-            animancer.Play(state.move, 0.1f);
-        };
-
-        _OnHurtEnd = () =>
-        {
-            bool blocked = CheckStartBlockAnim();
-            if (!blocked)
-            {
-                _MoveOnEnd();
-            }
-            if (mainWeaponAngle != 0f)
-            {
-                StartCoroutine("GradualResetMainRotation");
-            }
-            if (offWeaponAngle != 0f)
-            {
-                StartCoroutine("GradualResetOffRotation");
-            }
-        };
         damageHandler = new HumanoidDamageHandler(this, damageAnim, animancer);
         damageHandler.SetEndAction(_OnHurtEnd);
         damageHandler.SetBlockEndAction(() => { animancer.Play(state.block, 0.5f); });
 
         buffer = new InputBuffer();
-
-        _AttackEnd = () =>
-        {
-            animancer.Play(state.move, 0.5f);
-            //attack = false;
-            slash = false;
-            thrust = false;
-            if (mainWeaponAngle != 0f)
-            {
-                StartCoroutine("GradualResetMainRotation");
-            }
-            if (offWeaponAngle != 0f)
-            {
-                StartCoroutine("GradualResetOffRotation");
-            }
-            cancelAction = AttackCancelAction.None;
-        };
-
-        _StopUpperLayer = () =>
-        {
-            animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-        };
-
+        
         ledgeClimb.Events.OnEnd = _OnFinishClimb;
 
         ladderClimbUp.Events.OnEnd = _OnFinishClimb;
@@ -709,6 +649,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 //((MixerState)state.block).ChildStates[0].Clip = blockAnimStart.Clip;
 
+
                 if (blockWeapon != null)
                 {
                     int itemSlot = inventory.GetItemEquipType(blockWeapon);
@@ -788,7 +729,36 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             plunge = false;
         }
         #endregion
+        #region drink
+        else if (animancer.States.Current == state.drink)
+        {
+            float speedMax = drinkSpeed;
+            bool exitEarly = false;
+            if (stickDirection.magnitude > 0)
+            {
+                lookDirection = Vector3.RotateTowards(lookDirection, stickDirection.normalized, Mathf.Deg2Rad * walkTurnSpeed * Time.deltaTime, 1f);
+            }
+            moveDirection = stickDirection;
+            speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * speedMax, walkAccelReal * Time.deltaTime);
+            if (!isGrounded && lastAirTime > fallBufferTime)
+            {
+                state.fall = animancer.Play(fallAnim);
+                exitEarly = true;
+            }
+            else if (CheckWater())
+            {
+                state.swim = animancer.Play(swimStart, 0.25f);
+                this.gameObject.SendMessage("SplashBig");
+                exitEarly = true;
+            }
+            if (exitEarly)
+            {
+                animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+            }
 
+            applyMove = true;
+        }
+        #endregion
         #region block
         else if (animancer.States.Current == state.block)
         {
@@ -1968,6 +1938,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Vector3 downwardsVelocity = this.transform.up * yVel;
 
         ((MixerState<Vector2>)state.move).Parameter = GetMovementVector();
+        if (state.drink != null)
+        {
+            state.drink.Parameter = speed / drinkSpeed;
+        }
         if (bilayerMove != null)
         {
             animancer.Layers[HumanoidAnimLayers.BilayerBlend].Weight = (IsMoving()) ? Mathf.Min(state.move.Weight, bilayerMove.weight) : 0f;
@@ -3173,7 +3147,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         return Vector2.zero;
     }
-
     public void OnSheathe(InputValue value)
     {
         if (!CanPlayerInput()) return;
@@ -3668,6 +3641,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     Destroy(consumableModel);
                 }
                 animancer.Play(state.move, 0.5f);
+                DestroyEndEvents(ref state.consume);
             });
             
         }
@@ -4500,6 +4474,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         
     }
 
+    // called by animation events
     public void UseConsumable()
     {
         if (currentConsumable != null)
@@ -4876,7 +4851,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         
     }
-    
+
 
     /*
     public void ApplyIdleBlends()
@@ -4949,6 +4924,79 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         secondaryLayer.Weight = secondaryWeight;
     }
     */
+    #endregion
+
+    #region Anim End Events
+
+    private void _MoveOnEnd()
+    {
+        animancer.Play(state.move, 0.1f);
+    }
+
+    void _OnLandEnd()
+    {
+        walkAccelReal = walkAccel;
+    }
+
+    void _OnFinishClimb()
+    {
+        cc.enabled = true;
+        airTime = 0f;
+        yVel = 0f;
+        xzVel = Vector3.zero;
+        animancer.Play(state.move, 0.25f);
+    }
+
+    void _OnHurtEnd()
+    {
+        bool blocked = CheckStartBlockAnim();
+        if (!blocked)
+        {
+            _MoveOnEnd();
+        }
+        if (mainWeaponAngle != 0f)
+        {
+            StartCoroutine("GradualResetMainRotation");
+        }
+        if (offWeaponAngle != 0f)
+        {
+            StartCoroutine("GradualResetOffRotation");
+        }
+    }
+
+    void _AttackEnd()
+    {
+        animancer.Play(state.move, 0.5f);
+        //attack = false;
+        slash = false;
+        thrust = false;
+        if (mainWeaponAngle != 0f)
+        {
+            StartCoroutine("GradualResetMainRotation");
+        }
+        if (offWeaponAngle != 0f)
+        {
+            StartCoroutine("GradualResetOffRotation");
+        }
+        cancelAction = AttackCancelAction.None;
+    }
+
+    void _StopUpperLayer()
+    {
+        animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
+    }
+
+    void _EndDrink()
+    {
+        _StopUpperLayer();
+        _MoveOnEnd();
+    }
+
+    void DestroyEndEvents(ref AnimancerState state)
+    {
+        state.Events.OnEnd = null;
+    }
+
     #endregion
 
     #region State Checks
@@ -5209,6 +5257,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         xzVel = Vector3.zero;
     }
 
+    public (MixerState<float>,AnimancerState) PlayDrinkClip(LinearMixerTransition walk, ClipTransition drink)
+    {
+        state.drink = animancer.Play(walk) as MixerState<float>;
+        state.drinkUpper = animancer.Layers[HumanoidAnimLayers.UpperBody].Play(drink);
+        state.drinkUpper.Events.OnEnd += _EndDrink;
+        return (state.drink, state.drinkUpper);
+    }
     public AnimancerState PlayDialogueClip(ClipTransition clip)
     {
         state.dialogue = animancer.Play(clip);
