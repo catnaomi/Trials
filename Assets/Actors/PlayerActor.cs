@@ -193,6 +193,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     bool thrust;
     bool plunge;
     bool hold;
+    int invSlot = -1;
     bool hasTypedBlocks;
     bool wasBlockingLastFrame;
     int lastTypedBlockParam;
@@ -704,6 +705,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 BasicAttack();
             }
+            else if (invSlot > -1) // pressed a button to use consumable
+            {
+                inventory.InputOnSlot(invSlot);
+                invSlot = -1;
+            }
+            /*
             else if (!animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying() && !blocking)
             {
                 if (inventory.IsMainEquipped() && inventory.IsMainDrawn() && inventory.IsOffEquipped() && !inventory.IsOffDrawn())
@@ -714,17 +721,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     //TriggerSheath(false, inventory.GetOffWeapon().OffHandEquipSlot, false);
                 }
-            }
-            /*
-            if (attackResetTimer <= 0f)
-            {
-                attackIndex = 0;
-            }
-            else
-            {
-                attackResetTimer -= Time.deltaTime;
-            }
-            */
+            }*/
             animancer.Layers[0].ApplyAnimatorIK = true;
             applyMove = true;
             plunge = false;
@@ -1746,6 +1743,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     thrust = false;
                     cancelAction = AttackCancelAction.Thrust;
                 }
+                else if (invSlot > -1)
+                {
+                    cancelAction = (AttackCancelAction)((int)AttackCancelAction.InventorySlot0) + invSlot;
+                    invSlot = -1;
+                }
 
                 if (animancer.States.Current.NormalizedTime >= cancelTime)
                 {
@@ -1766,6 +1768,30 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         cancelTime = -1f;
                         cancelAction = AttackCancelAction.None;
                         CancelThrust();
+                    }
+                    else if (cancelAction == AttackCancelAction.InventorySlot0)
+                    {
+                        cancelTime = -1f;
+                        cancelAction = AttackCancelAction.None;
+                        inventory.InputOnSlot(0);
+                    }
+                    else if (cancelAction == AttackCancelAction.InventorySlot1)
+                    {
+                        cancelTime = -1f;
+                        cancelAction = AttackCancelAction.None;
+                        inventory.InputOnSlot(1);
+                    }
+                    else if (cancelAction == AttackCancelAction.InventorySlot2)
+                    {
+                        cancelTime = -1f;
+                        cancelAction = AttackCancelAction.None;
+                        inventory.InputOnSlot(2);
+                    }
+                    else if (cancelAction == AttackCancelAction.InventorySlot3)
+                    {
+                        cancelTime = -1f;
+                        cancelAction = AttackCancelAction.None;
+                        inventory.InputOnSlot(3);
                     }
                 }
             }
@@ -2776,6 +2802,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             Slash,
             SlashHold,
             RangedStart,
+            InventorySlot0,
+            InventorySlot1,
+            InventorySlot2,
+            InventorySlot3
         }
 
         public Inputs lastInput;
@@ -2831,6 +2861,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         attack = false;
         slash = false;
         thrust = false;
+        invSlot = -1;
         blocking = blocking && IsBlockHeld();
         sprinting = sprinting && IsSprintHeld();
         secondary = secondary && IsRangedHeld();
@@ -2872,6 +2903,20 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             case InputBuffer.Inputs.RangedStart:
                 secondary = true;
                 break;
+            case InputBuffer.Inputs.InventorySlot0:
+                invSlot = 0;
+                break;
+            case InputBuffer.Inputs.InventorySlot1:
+                invSlot = 1;
+                break;
+            case InputBuffer.Inputs.InventorySlot2:
+                invSlot = 2;
+                break;
+            case InputBuffer.Inputs.InventorySlot3:
+                invSlot = 3;
+                break;
+
+
 
         }
     }
@@ -3247,9 +3292,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void OnQuickSlot(int slot)
     {
-        if ((IsMoving() && CanPlayerInput()) || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
+        if (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput)
         {
             inventory.InputOnSlot(slot);
+            InventoryUI2.invUI.FlareSlot(slot);
+        }
+        else if (CanPlayerInput())
+        {
+            buffer.SetInput((InputBuffer.Inputs)(((int)InputBuffer.Inputs.InventorySlot0) + slot), Time.time);
             InventoryUI2.invUI.FlareSlot(slot);
         }
         else if (!isMenuOpen)
@@ -3605,7 +3655,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public void StartUsingConsumable(Consumable consumable)
     {
-        if (IsMoving() && consumable.CanBeUsed())
+        if (consumable.CanBeUsed())
         {
             SetCurrentConsumable(consumable);
             if (consumable.generateModelOnUse)
@@ -4438,7 +4488,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         None,
         Slash,
         Thrust,
-        Jump
+        Jump,
+        InventorySlot0,
+        InventorySlot1,
+        InventorySlot2,
+        InventorySlot3
     }
 
     public override void DeactivateHitboxes()
