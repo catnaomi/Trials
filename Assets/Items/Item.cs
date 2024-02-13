@@ -43,11 +43,9 @@ public class Item : ScriptableObject
 
     protected IInventory GetInventory()
     {
-        // TODO: make this cleaner
-
-        if (holder is PlayerActor player)
+        if (holder == null)
         {
-            return player.GetComponent<PlayerInventory>();
+            return null;
         }
         else if (holder.TryGetComponent<IInventory>(out IInventory inventory))
         {

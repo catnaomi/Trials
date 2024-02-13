@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
+using UnityEngine.ProBuilder.MeshOperations;
 
 [RequireComponent(typeof(CharacterController), typeof(HumanoidPositionReference))]
 public class PlayerActor : Actor, IAttacker, IDamageable
@@ -3249,19 +3250,25 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if ((IsMoving() && CanPlayerInput()) || (InventoryUI2.invUI != null && InventoryUI2.invUI.awaitingQuickSlotEquipInput))
         {
             inventory.InputOnSlot(slot);
-            
+            InventoryUI2.invUI.FlareSlot(slot);
         }
-        InventoryUI2.invUI.FlareSlot(slot);
+        else if (!isMenuOpen)
+        {
+            InventoryUI2.invUI.FlareSlot(slot);
+        }
+        
     }
 
     public void OnQuickSlotHold(int slot)
     {
+        /*
         if (IsMoving() && CanPlayerInput())
         {
             //inventory.UnequipOnSlot(slot);
             
         }
         InventoryUI2.invUI.FlareSlot(slot);
+        */
     }
     #endregion
     #endregion

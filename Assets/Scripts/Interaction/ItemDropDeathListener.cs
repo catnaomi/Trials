@@ -60,9 +60,9 @@ public class ItemDropDeathListener : MonoBehaviour
     public void OnInteract()
     {
         PlayerActor.player.inventory.Add(looseItem.item);
-        if (autoEquipToSlot >= 0 && looseItem.item is Equippable equippable)
+        if (looseItem.item is Equippable equippable)
         {
-            PlayerActor.player.inventory.EquipToSlot(equippable, autoEquipToSlot);
+            PlayerActor.player.inventory.AutoEquip(equippable, autoEquipToSlot);
         }
         spawned = false;
         Destroy(dropLocation.gameObject);
