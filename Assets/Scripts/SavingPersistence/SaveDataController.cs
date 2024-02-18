@@ -8,8 +8,8 @@ using Newtonsoft.Json;
 
 public class SaveDataController : MonoBehaviour
 {
-    public static string save_directory => Path.Combine(Application.persistentDataPath, "Saves");
-	public static string GetSaveSlotPath(int slot) => Path.Combine(save_directory, $"savedata{slot}.json");
+    public static string saveDirectory => Path.Combine(Application.persistentDataPath, "Saves");
+	public static string GetSaveSlotPath(int slot) => Path.Combine(saveDirectory, $"savedata{slot}.json");
 
 	public static SaveDataController instance;
 
@@ -71,21 +71,21 @@ public class SaveDataController : MonoBehaviour
 
     public static void EnsureSaveDirectoryExists()
     {
-        Directory.CreateDirectory(save_directory);
+        Directory.CreateDirectory(saveDirectory);
 	}
 
 	public void Write()
     {
         EnsureSaveDirectoryExists();
 
-        string save_slot_path = GetSaveSlotPath(slot);
+        string saveSlotPath = GetSaveSlotPath(slot);
 		string json = JsonConvert.SerializeObject(data);
 
-        using (StreamWriter sw = new StreamWriter(save_slot_path, false, new UTF8Encoding()))
+        using (StreamWriter sw = new StreamWriter(saveSlotPath, false, new UTF8Encoding()))
         {
             sw.Write(json);
         }
-        Debug.Log($"succesfully saved to {save_slot_path}");
+        Debug.Log($"succesfully saved to {saveSlotPath}");
         OnSaveComplete.Invoke();
     }
 
@@ -155,11 +155,11 @@ public class SaveDataController : MonoBehaviour
 
     public static SaveData ReadSlot(int slot)
     {
-        string save_path = GetSaveSlotPath(slot);
+        string savePath = GetSaveSlotPath(slot);
         string json = "";
         try
         {
-            using (StreamReader sr = new StreamReader(save_path))
+            using (StreamReader sr = new StreamReader(savePath))
             {
                 json = sr.ReadToEnd();
             }
@@ -188,14 +188,6 @@ public class SaveDataController : MonoBehaviour
     {
         if (instance != null)
             instance.SetSlot(slot);
-    }
-
-    public static void CreateDirectory()
-    {
-        if (!Directory.Exists(GetPath()))
-        {
-            Directory.CreateDirectory(GetPath());
-        }
     }
 
     public static void NewGameStatic()
