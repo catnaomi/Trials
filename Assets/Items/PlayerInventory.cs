@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Events;
 using CustomUtilities;
+using System.Diagnostics.Contracts;
 
 public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 {
@@ -37,6 +38,11 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     public bool weaponChanged;
 
     public PassItemEvent OnAddItem;
+
+    protected override void Awake()
+    {
+        OnChange.AddListener(() => { lastChanged = Time.time; });
+    }
     void Start()
     {
         this.player = GetComponent<PlayerActor>();
@@ -856,6 +862,32 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         */
     }
 
+    public void AutoEquip(Equippable item, int slot = -1)
+    {
+        if (item is BladeWeapon blade)
+        {
+            this.EquipMainWeapon(blade);
+        }
+        else if (item is OffHandShield shield)
+        {
+            this.EquipOffHandWeapon(shield);
+        }
+        else if (item is RangedWeapon ranged)
+        {
+            this.EquipRangedWeapon(ranged);
+        }
+        else if (item is Consumable && (slot > -1 && slot <= 3))
+        {
+            if ((slot > -1 && slot <= 3))
+            {
+                this.EquipToSlot(item, slot);
+            }
+            else
+            {
+                this.EquipToSlot(item, GetLastEmptySlot());
+            }
+        }
+    }
     public int FindSlotFromWeapon(Equippable weapon)
     {
         if (Slot0Equippable == weapon)
@@ -873,6 +905,48 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         else if (Slot3Equippable == weapon)
         {
             return 3;
+        }
+        return -1;
+    }
+
+    public int GetFirstEmptySlot()
+    {
+        if (Slot0Equippable == null)
+        {
+            return 0;
+        }
+        else if (Slot1Equippable == null)
+        {
+            return 1;
+        }
+        else if (Slot2Equippable == null)
+        {
+            return 2;
+        }
+        else if (Slot3Equippable == null)
+        {
+            return 3;
+        }
+        return -1;
+    }
+
+    public int GetLastEmptySlot()
+    {
+        if (Slot3Equippable == null)
+        {
+            return 3;
+        }
+        else if (Slot2Equippable == null)
+        {
+            return 2;
+        }
+        else if (Slot1Equippable == null)
+        {
+            return 1;
+        }
+        else if (Slot0Equippable == null)
+        {
+            return 0;
         }
         return -1;
     }
@@ -1057,9 +1131,9 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         if (InventoryUI2.invUI.awaitingQuickSlotEquipInput)
         {
             Item item = InventoryUI2.invUI.quickSlotItem;
-            if (item != null && item is EquippableWeapon weapon)
+            if (item != null && item is Equippable equippable)
             {
-                EquipToSlot(weapon, slot);
+                EquipToSlot(equippable, slot);
                 OnChange.Invoke();
             }
             InventoryUI2.invUI.EndQuickSlotEquip();
@@ -1072,6 +1146,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
             if (weapon != null)
             {
+                return; // weapons are not equipped via quickslot anymore
                 if (weapon.EquippableMain)
                 {
                     EquippableWeapon currentMain = GetMainWeapon();

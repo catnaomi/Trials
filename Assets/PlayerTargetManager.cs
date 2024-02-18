@@ -324,7 +324,7 @@ public class PlayerTargetManager : MonoBehaviour
             dialogueCameraFarBase.rotation = Quaternion.LookRotation(dir);
             dialogueCameraFarBase.position = centerAim.position;
 
-            float dist = Vector3.Distance(centerAim.position, currentTarget.transform.position);
+            float dist =  currentTarget != null ? Vector3.Distance(centerAim.position, currentTarget.transform.position) : 0;
 
             if (dist < dialogueBlendDistance)
             { 

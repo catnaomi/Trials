@@ -24,15 +24,16 @@ public class Inventory : MonoBehaviour, IInventory
     public const int OffType = 1;
     public const int RangedType = -1;
 
-    void Awake()
+    protected virtual void Awake()
     {
-        foreach(Item item in StartingContents)
+        foreach (Item item in StartingContents)
         {
-            contents.Add(ScriptableObject.Instantiate(item));
+            Add(ScriptableObject.Instantiate(item));
         }
         StartingContents.Clear();
         OnChange.AddListener(() => { lastChanged = Time.time; });
     }
+
     public List<Item> GetContents()
     {
         return contents;

@@ -38,6 +38,10 @@ public class InventoryUI2 : MonoBehaviour
     public QuickSelectItem quickSlot3;
     public QuickSheatheIndicator sheathSlot;
 
+    public QuickSelectItem quickSlotMain;
+    public QuickSelectItem quickSlotRanged;
+    public QuickSelectItem quickSlotOff;
+
     public GameObject selectPopup;
     GameObject lastSelected;
     Item selectedItem;
@@ -66,6 +70,7 @@ public class InventoryUI2 : MonoBehaviour
         quickSlot1.InitInventory(this);
         quickSlot2.InitInventory(this);
         quickSlot3.InitInventory(this);
+        selectPopup.SetActive(false);
     }
 
     private void Update()
@@ -226,11 +231,34 @@ public class InventoryUI2 : MonoBehaviour
     }
     public void StartQuickSlotEquip(Item item)
     {
-        if (item != null && item is Equippable weapon)
+        if (item != null && inventory is PlayerInventory playerInv)
         {
+            /*
             quickSlotItem = weapon;
             OnQuickSlotEquipStart.Invoke();
-            awaitingQuickSlotEquipInput = true;
+            awaitingQuickSlotEquipInput = true;*/
+            if (item is Consumable consumable)
+            {
+                quickSlotItem = consumable;
+                OnQuickSlotEquipStart.Invoke();
+                awaitingQuickSlotEquipInput = true;
+            }
+            else if (item is Equippable equippable)
+            {
+                playerInv.AutoEquip(equippable);
+                if (item is BladeWeapon)
+                {
+                    FlareEquipped(Inventory.MainType);
+                }
+                else if (item is RangedWeapon)
+                {
+                    FlareEquipped(Inventory.RangedType);
+                }
+                else if (item is OffHandShield)
+                {
+                    FlareEquipped(Inventory.OffType);
+                }
+            }
         }
     }
 
@@ -267,25 +295,37 @@ public class InventoryUI2 : MonoBehaviour
         inventory.Remove(selectedItem);
         LooseItem li = LooseItem.CreateLooseItem(selectedItem);
         li.gameObject.transform.position = source.transform.position + Vector3.up + source.transform.forward * 2f;
-        EventSystem.current.SetSelectedGameObject(items[0].gameObject);
+        EventSystem.current.SetSelectedGameObject(GetFirstItem().gameObject);
     }
 
     public void SelectCancel()
     {
         selectPopup.SetActive(false);
-        EventSystem.current.SetSelectedGameObject(FindItemDisplay(selectedItem).gameObject);
+        var display = FindItemDisplay(selectedItem);
+        EventSystem.current.SetSelectedGameObject(FindItemDisplayOrFirst(selectedItem).gameObject);
         Debug.Log("inv cancel!!!!");
     }
     public InventoryItemDisplay FindItemDisplay(Item targetItem)
     {
         foreach (InventoryItemDisplay item in items)
         {
+            if (item == null || targetItem == null) continue;
             if (item.item == targetItem)
             {
                 return item;
             }
         }
         return null;
+    }
+
+    public InventoryItemDisplay FindItemDisplayOrFirst(Item targetItem)
+    {
+        InventoryItemDisplay display = FindItemDisplay(targetItem);
+        if (display == null)
+        {
+            display = GetFirstItem();
+        }
+        return display;
     }
 
     public void FlareSlot(int slot)
@@ -304,6 +344,23 @@ public class InventoryUI2 : MonoBehaviour
             case 3:
                 quickSlot3.Flare();
                 break;
+        }
+    }
+
+    public void FlareEquipped(int type)
+    {
+        switch (type)
+        {
+            case Inventory.MainType:
+                quickSlotMain.Flare();
+                break;
+            case Inventory.RangedType:
+                quickSlotRanged.Flare();
+            break;
+            case Inventory.OffType:
+                quickSlotOff.Flare();
+            break;
+
         }
     }
 }

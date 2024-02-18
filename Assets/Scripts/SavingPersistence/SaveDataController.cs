@@ -131,15 +131,12 @@ public class SaveDataController : MonoBehaviour
 
     public static void DeleteSlot(int slot)
     {
+        EnsureSaveDirectoryExists();
         string path = GetSaveSlotPath(slot);
 
         try
         {
             File.Delete(path);
-        }
-        catch (DirectoryNotFoundException ex)
-        {
-            Debug.LogWarning(ex);
         }
         catch (System.Exception ex)
         {
@@ -191,6 +188,14 @@ public class SaveDataController : MonoBehaviour
     {
         if (instance != null)
             instance.SetSlot(slot);
+    }
+
+    public static void CreateDirectory()
+    {
+        if (!Directory.Exists(GetPath()))
+        {
+            Directory.CreateDirectory(GetPath());
+        }
     }
 
     public static void NewGameStatic()
