@@ -1,17 +1,18 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
 using CustomUtilities;
-using Yarn.Unity;
 using UnityEngine.Events;
 using Newtonsoft.Json;
 
 public class SaveDataController : MonoBehaviour
 {
-    public static string SAVE_PATH = "%persistentDataPath%/Saves/";
-    public static SaveDataController instance;
+    public static string save_directory => Path.Combine(Application.persistentDataPath, "Saves");
+	public static string GetSaveSlotPath(int slot) => Path.Combine(save_directory, $"savedata{slot}.json");
+
+	public static SaveDataController instance;
+
     [Header("Inspector Slots")]
     public int slot = 1;
     public bool write;
@@ -26,6 +27,7 @@ public class SaveDataController : MonoBehaviour
         instance = this;
         DontDestroyOnLoad(this.gameObject);
     }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -35,7 +37,8 @@ public class SaveDataController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (write)
+		// Check inspector debug flags
+		if (write)
         {
             write = false;
             CollectData();
@@ -66,24 +69,54 @@ public class SaveDataController : MonoBehaviour
         data.playerWorldData = PlayerSaveDataManager.GetWorldData();
     }
 
-    public void Write()
+    public static void EnsureSaveDirectoryExists()
     {
-        string path = GetPath() + $"savedata{slot}.json";
-        string json = JsonConvert.SerializeObject(data);
+        Directory.CreateDirectory(save_directory);
+	}
 
-        Directory.CreateDirectory(GetPath());
-        using (StreamWriter sw = new StreamWriter(path, false, new UTF8Encoding()))
+	public void Write()
+    {
+        EnsureSaveDirectoryExists();
+
+        string save_slot_path = GetSaveSlotPath(slot);
+		string json = JsonConvert.SerializeObject(data);
+
+        using (StreamWriter sw = new StreamWriter(save_slot_path, false, new UTF8Encoding()))
         {
             sw.Write(json);
         }
-        Debug.Log($"succesfully saved to {path}");
+        Debug.Log($"succesfully saved to {save_slot_path}");
         OnSaveComplete.Invoke();
     }
 
-    public static void SaveToSlot(int slot)
+	public void Read() {
+        EnsureSaveDirectoryExists();
+		data = ReadSlot(slot);
+	}
+
+	public void Clear() {
+		data = null;
+	}
+
+	public void SetSlot(int s) {
+		slot = Mathf.Abs(s);
+	}
+
+	void NewGame() {
+		ClearSaveData();
+		StartCoroutine(NewGameRoutine());
+	}
+
+	public void Apply() {
+		if (data != null) {
+			StartCoroutine(LoadSaveDataRoutine(data));
+		}
+	}
+
+	public static void SaveToSlot(int slot)
     {
         if (instance == null) return;
-        SetSlotStatic(slot);
+        instance.SetSlot(slot);
         instance.CollectData();
         instance.Write();
     }
@@ -91,25 +124,14 @@ public class SaveDataController : MonoBehaviour
     public static void LoadFromSlot(int slot)
     {
         if (instance == null) return;
-        SetSlotStatic(slot);
+        instance.SetSlot(slot);
         instance.Read();
         instance.Apply();
-    }
-    public void Read()
-    {
-        data = ReadSlot(slot);
-
-    }
-
-    public void Clear()
-    {
-        data = null;
-
     }
 
     public static void DeleteSlot(int slot)
     {
-        string path = GetPath() + $"savedata{slot}.json";
+        string path = GetSaveSlotPath(slot);
 
         try
         {
@@ -117,7 +139,7 @@ public class SaveDataController : MonoBehaviour
         }
         catch (DirectoryNotFoundException ex)
         {
-            Debug.LogWarning("Directory doesn't exist.");
+            Debug.LogWarning(ex);
         }
         catch (System.Exception ex)
         {
@@ -133,13 +155,14 @@ public class SaveDataController : MonoBehaviour
         PlayerSaveDataManager.Clear();
         YarnSaveDataManager.ClearMemory();
     }
-    public static SaveData ReadSlot(int slotNum)
+
+    public static SaveData ReadSlot(int slot)
     {
-        string path = GetPath() + $"savedata{slotNum}.json";
+        string save_path = GetSaveSlotPath(slot);
         string json = "";
         try
         {
-            using (StreamReader sr = new StreamReader(path))
+            using (StreamReader sr = new StreamReader(save_path))
             {
                 json = sr.ReadToEnd();
             }
@@ -158,78 +181,16 @@ public class SaveDataController : MonoBehaviour
         return null;
     }
 
-    public void Apply()
-    {
-        if (data != null)
-        {
-            StartCoroutine(LoadSaveDataRoutine(data));
-        }
-    }
-
-    IEnumerator LoadSaveDataRoutine(SaveData data)
-    {
-        // fade screen to black
-        bool fadedToBlack = false;
-        FadeToBlackController.FadeOut(1f,() => fadedToBlack = true,Color.black);
-        FadeToBlackController.OverrideNextFadeInOnStart(true);
-        yield return new WaitUntil(() => { return fadedToBlack; });
-
-        // set the spawn location before we load the scene
-        Vector3 position = NumberUtilities.ArrayToVector3(data.playerWorldData.position);
-        Quaternion rotation = NumberUtilities.ArraytoQuaternion(data.playerWorldData.rotation);
-
-        PlayerPositioner.SetNextOverridePosition(position, rotation);
-
-        // set all variables and attributes
-
-        YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
-
-        PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
-
-        PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
-        // load the next scene and the loading screen
-
-        SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
-
-        yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
-    }
-
-    IEnumerator NewGameRoutine()
-    {
-        // fade screen to black
-        bool fadedToBlack = false;
-        FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
-        FadeToBlackController.OverrideNextFadeInOnStart(true);
-        yield return new WaitUntil(() => { return fadedToBlack; });
-
-        // make sure we don't spawn in a special place
-
-        PlayerPositioner.ClearOverride();
-
-        PlayerSaveDataManager.SetAttributesToDefault();
-
-        SceneLoader.LoadWithProgressBar(SceneLoader.FIRST_SCENE);
-    }
     public static void LoadSaveDataStatic(SaveData data)
     {
         if (instance != null)
-        instance.StartCoroutine(instance.LoadSaveDataRoutine(data));
+            instance.StartCoroutine(instance.LoadSaveDataRoutine(data));
     }
 
-    public void SetSlot(int s)
-    {
-        slot = Mathf.Abs(s);
-    }
-
-    public static void SetSlotStatic(int slot)
+	public static void SetSlotStatic(int slot)
     {
         if (instance != null)
             instance.SetSlot(slot);
-    }
-    public static string GetPath()
-    {
-        string actualPath = SAVE_PATH.Replace("%persistentDataPath%", Application.persistentDataPath);
-        return actualPath;
     }
 
     public static void NewGameStatic()
@@ -238,20 +199,60 @@ public class SaveDataController : MonoBehaviour
             instance.NewGame();
     }
 
-    void NewGame()
-    {
-        ClearSaveData();
-        StartCoroutine(NewGameRoutine());
-    }
-
     public static SaveData[] GetSaveDatas(int amount)
     {
-        SaveData[] saves = new SaveData[amount];
+        EnsureSaveDirectoryExists();
+		SaveData[] saves = new SaveData[amount];
 
         for (int i = 0; i < amount; i++)
         {
             saves[i] = ReadSlot(i);
         }
+
         return saves;
     }
+
+    // Co-routines to apply data to game state
+	IEnumerator LoadSaveDataRoutine(SaveData data) {
+		// fade screen to black
+		bool fadedToBlack = false;
+		FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
+		FadeToBlackController.OverrideNextFadeInOnStart(true);
+		yield return new WaitUntil(() => { return fadedToBlack; });
+
+		// set the spawn location before we load the scene
+		Vector3 position = NumberUtilities.ArrayToVector3(data.playerWorldData.position);
+		Quaternion rotation = NumberUtilities.ArraytoQuaternion(data.playerWorldData.rotation);
+
+		PlayerPositioner.SetNextOverridePosition(position, rotation);
+
+		// set all variables and attributes
+
+		YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
+
+		PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
+
+		PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
+		// load the next scene and the loading screen
+
+		SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
+
+		yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
+	}
+
+	IEnumerator NewGameRoutine() {
+		// fade screen to black
+		bool fadedToBlack = false;
+		FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
+		FadeToBlackController.OverrideNextFadeInOnStart(true);
+		yield return new WaitUntil(() => { return fadedToBlack; });
+
+		// make sure we don't spawn in a special place
+
+		PlayerPositioner.ClearOverride();
+
+		PlayerSaveDataManager.SetAttributesToDefault();
+
+		SceneLoader.LoadWithProgressBar(SceneLoader.FIRST_SCENE);
+	}
 }
