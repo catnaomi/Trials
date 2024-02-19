@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public interface PersistentFlagLoader : MonoBehaviour
+public class PersistentFlagLoader : MonoBehaviour
 {
 	public virtual void LoadFlag(bool flag)
 	{
