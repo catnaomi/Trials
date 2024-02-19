@@ -74,8 +74,8 @@ public class CarryableTutorialHandler : MonoBehaviour
 
     void ShowTutorial(string text, UnityEngine.InputSystem.InputActionReference input)
     {
-        string inputString = TutorialHandler.GetInputString(input);
-        TutorialHandler.ShowTutorialStatic(text, inputString);
+        string inputString = TutorialHandler.GetFullText(text, input);
+        TutorialHandler.ShowTutorialStatic(inputString);
     }
 
     void OnThrow()
