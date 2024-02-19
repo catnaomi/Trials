@@ -225,17 +225,17 @@ public class SaveDataController : MonoBehaviour
 		PlayerPositioner.SetNextOverridePosition(position, rotation);
 
 		// set all variables and attributes
-
 		YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
-
 		PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
-
 		PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
-		// load the next scene and the loading screen
-
-		SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
+     
+        // load the next scene and the loading screen
+        SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
 
 		yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
+
+        // After scene load load our per scene data
+		SceneSaveDataManager.LoadData(data.sceneSaveData);
 	}
 
 	IEnumerator NewGameRoutine() {

@@ -4,7 +4,7 @@ using CustomUtilities;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class BreakableObject : PersistentFlagLoader, IDamageable, IHasHealthAttribute
+public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute, IPersistentFlagLoader
 {
     public DamageType brokenByElements;
     public float health = -1;
@@ -189,7 +189,7 @@ public class BreakableObject : PersistentFlagLoader, IDamageable, IHasHealthAttr
         UpdateHealthAttribute();
     }
 
-    public override void LoadFlag(bool flag)
+    public void LoadFlag(bool flag)
     {
         hasBeenBroken = flag;
         if (flag)

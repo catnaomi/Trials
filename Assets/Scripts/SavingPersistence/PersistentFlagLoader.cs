@@ -1,9 +1,4 @@
-﻿using UnityEngine;
-
-public class PersistentFlagLoader : MonoBehaviour
+﻿public interface IPersistentFlagLoader
 {
-	public virtual void LoadFlag(bool flag)
-	{
-		Debug.LogWarning($"Ignoring loaded flag for game object {gameObject.name}, value={flag}");
-	}
+	public void LoadFlag(bool flag);
 }
