@@ -4,19 +4,24 @@ using CustomUtilities;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
+public class BreakableObject : PersistentFlagLoader, IDamageable, IHasHealthAttribute
 {
     public DamageType brokenByElements;
     public float health = -1;
     float startingHealth;
     AttributeValue healthAttribute;
+
     [Space(10)]
     public GameObject particlePrefab;
     public UnityEvent OnBreak;
+	// invoked when we load and find that the object was broken at save
+	public UnityEvent OnLoadBroken;
     public UnityEvent OnFail;
     public bool recoilOnFail = true;
     DamageKnockback lastDamage;
     bool hasBeenBroken;
+    public bool persistBrokenState;
+
     [Header("Drop Item")]
     public Item[] drops;
     public GameObject dropPrefab;
@@ -25,12 +30,12 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
     public float forceMagnitude = 1f;
     public Vector3 angularVelocity;
 
-
     void Awake()
     {
         startingHealth = health;
         UpdateHealthAttribute();
     }
+
     public void Recoil()
     {
         
@@ -45,6 +50,7 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
     {
 
     }
+
     public void TakeDamage(DamageKnockback damage)
     {
         lastDamage = damage; 
@@ -82,6 +88,11 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
         OnBreak.Invoke();
         Destroy(this.gameObject, 0.01f);
         hasBeenBroken = true;
+
+        if (persistBrokenState)
+        {
+            SceneSaveDataManager.instance.PersistSceneFlag(gameObject, true);
+        }
     }
 
     public void DropItems()
@@ -116,6 +127,7 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
             }
         }
     }
+
     public void SetHitParticleVectors(Vector3 position, Vector3 direction)
     {
         //throw new System.NotImplementedException();
@@ -176,4 +188,14 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
         this.health = health;
         UpdateHealthAttribute();
     }
+
+    public override void LoadFlag(bool flag)
+    {
+        hasBeenBroken = flag;
+        if (flag)
+        {
+			OnLoadBroken.Invoke();
+			Destroy(this.gameObject);
+		}
+	}
 }

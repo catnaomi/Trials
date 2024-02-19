@@ -67,6 +67,7 @@ public class SaveDataController : MonoBehaviour
         data.playerAttributeData = PlayerSaveDataManager.GetAttributeData();
         data.yarnData = YarnSaveDataManager.GetSaveDataStatic();
         data.playerWorldData = PlayerSaveDataManager.GetWorldData();
+        data.sceneSaveData = SceneSaveDataManager.instance.data;
     }
 
     public static void EnsureSaveDirectoryExists()

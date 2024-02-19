@@ -5,6 +5,7 @@ using UnityEngine;
 public class SaveInteract : Interactable
 {
     SavesMenu savesMenu;
+
     public override void Interact(PlayerActor player)
     {
         base.Interact(player);
