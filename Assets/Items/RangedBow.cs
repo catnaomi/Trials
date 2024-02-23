@@ -82,16 +82,9 @@ public class RangedBow : RangedWeapon, IHitboxHandler
         else
         {
             canReceiveAnimEvents = false;
-        }
+        }     
 
-        if (!actor.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference)) return;
-
-        Transform parent = positionReference.MainHand.transform;
-
-        Vector3 dir = positionReference.MainHand.transform.parent.up;//(parent.position - positionReference.OffHand.transform.position).normalized;
-        deadArrow.transform.position = parent.transform.position + dir * arrowLength;
-        deadArrow.transform.rotation = Quaternion.LookRotation(dir);
-        deadArrow.transform.SetParent(parent.transform, true);
+        CreateDeadArrow();
 
         if (model.TryGetComponent<AnimancerComponent>(out AnimancerComponent animancerComponent))
         {
@@ -100,6 +93,15 @@ public class RangedBow : RangedWeapon, IHitboxHandler
         }
     }
 
+    void CreateDeadArrow()
+    {
+        if (!holder.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference)) return;
+        Transform parent = positionReference.MainHand.transform;
+        Vector3 dir = positionReference.MainHand.transform.parent.up;//(parent.position - positionReference.OffHand.transform.position).normalized;
+        deadArrow.transform.position = parent.transform.position + dir * arrowLength;
+        deadArrow.transform.rotation = Quaternion.LookRotation(dir);
+        deadArrow.transform.SetParent(parent.transform, true);
+    }
     public override void UnequipWeapon(Actor actor)
     {
         base.UnequipWeapon(actor);
@@ -146,6 +148,10 @@ public class RangedBow : RangedWeapon, IHitboxHandler
 
     public void Draw()
     {
+        if (deadArrow == null)
+        {
+            CreateDeadArrow();
+        }
         if (GetAmmunitionRemaining() > 0)
         {
             deadArrow.SetActive(true);

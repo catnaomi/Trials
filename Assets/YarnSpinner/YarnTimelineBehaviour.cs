@@ -14,6 +14,7 @@ public class YarnTimelineBehaviour : PlayableBehaviour
     public bool zeroSpeedOnStart;
     public bool setPositionOnFinish = false;
     public float timelinePosition = -1;
+    bool didAddListeners;
     bool started;
     double speed;
     DialogueRunner runner;
@@ -27,20 +28,16 @@ public class YarnTimelineBehaviour : PlayableBehaviour
        
         if (!started)
         {
-
-
-            runner.onDialogueComplete.AddListener(OnDialogueComplete);
-            //runner.onNodeComplete.AddListener(OnNodeEnd);
-            runner.onNodeStart.AddListener(OnNodeStart);
+            
             if (node != "_pause")
             {
                 if (runner.CheckDialogueRunning()) runner.Stop();
-                runner.GetComponent<LineActorPositioningHandler>()?.SetSpeaker(null, null);
-
+                AddListeners();
                 runner.StartDialogueWhenAble(node);
             }
             else if (runner.CheckDialogueRunning())
             {
+                RemoveListeners();
                 OnNodeStart(node);
             }
             
@@ -48,6 +45,23 @@ public class YarnTimelineBehaviour : PlayableBehaviour
         }
     }
 
+    void AddListeners()
+    {
+        if (runner != null)
+        {
+            runner.onDialogueComplete.AddListener(OnDialogueComplete);
+            runner.onNodeStart.AddListener(OnNodeStart);
+        }
+    }
+
+    void RemoveListeners()
+    {
+        if (runner != null)
+        {
+            runner.onDialogueComplete.RemoveListener(OnDialogueComplete);
+            runner.onNodeStart.RemoveListener(OnNodeStart);
+        }
+    }
     void OnNodeStart(string node)
     {
         if (pauseOnStart)
@@ -64,8 +78,6 @@ public class YarnTimelineBehaviour : PlayableBehaviour
 
     void OnDialogueComplete()
     {
-        runner.onDialogueComplete.RemoveListener(OnDialogueComplete);
-        runner.onNodeStart.RemoveListener(OnNodeStart);
         if (pauseOnStart)
         {
             director.Resume();
@@ -85,6 +97,7 @@ public class YarnTimelineBehaviour : PlayableBehaviour
                 FastForwardTimelineToPosition(timelinePosition);
             }
         }
+        RemoveListeners();
     }
 
 

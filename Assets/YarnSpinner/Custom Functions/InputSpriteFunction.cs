@@ -22,19 +22,7 @@ public class InputSpriteFunction : MonoBehaviour
             if (inputs != null)
             {
                 var action = inputs.actions[inputAction];
-                int index = InputActionRebindingExtensions.GetBindingIndex(action, InputBinding.MaskByGroup("Gamepad"));
-                string path = action.bindings[index].path;
-                if (path.Contains("Gamepad"))
-                {
-                    string[] split = path.Split("<Gamepad>/");
-                    string inputName = split[1];
-                    return string.Format("<sprite=\"xbox_icons\" name=\"xbox_{0}\" tint=1>", inputName);
-                }
-                else
-                {
-                    return action.bindings[index].ToDisplayString(InputBinding.DisplayStringOptions.DontIncludeInteractions);
-                }
-                
+                return InputSpriteProvider.GetSpriteTMP(action);
             }
             else
             {
