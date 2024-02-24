@@ -30,11 +30,9 @@ public class InteractionPrompt : MonoBehaviour
         active = true;
     }
 
-    public void Set(string text, Sprite sprite)
+    public void Set(string text)
     {
         this.promptText.text = text;
-        this.promptSprite.sprite = sprite;
-        this.promptSprite.enabled = sprite != null;
         active = true;
     }
     public void Hide()

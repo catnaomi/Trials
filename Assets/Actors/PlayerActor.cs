@@ -66,8 +66,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float strafeSpeed = 2.5f;
     public float weaponsDrawnSpeed = 5f;
     public float weaponDashSpeed = 2f;
-    public float weaponDashTargetDistanceMin = 5f;
-    public float weaponDashTargetDistanceMax = 1f;
+    public float weaponDashMinDist = 1f;
+    public float weaponDashMaxDist = 5f;
     [Space(5)]
     public float drinkSpeed = 2f;
     [Space(5)]
@@ -4706,7 +4706,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (isGrounded)
         {
             float dist = (GetCombatTarget() != null) ? Vector3.Distance(GetCombatTarget().transform.position, this.transform.position) : 0f;
-            if (stickDirection.magnitude > 0 || (camState == CameraState.Lock && GetCombatTarget() != null && dist > weaponDashTargetDistanceMin && dist < weaponDashTargetDistanceMax))
+            if (stickDirection.magnitude > 0 || (camState == CameraState.Lock && GetCombatTarget() != null && dist > weaponDashMinDist && dist < weaponDashMaxDist))
             {
                 if (speed < weaponDashSpeed)
                 {

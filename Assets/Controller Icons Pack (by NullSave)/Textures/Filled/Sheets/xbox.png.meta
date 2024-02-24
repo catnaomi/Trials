@@ -93,7 +93,7 @@ TextureImporter:
       213: 21300058
     second: Console
   externalObjects: {}
-  serializedVersion: 11
+  serializedVersion: 12
   mipmaps:
     mipMapMode: 0
     enableMipMap: 0
@@ -110,11 +110,12 @@ TextureImporter:
     externalNormalMap: 0
     heightScale: 0.25
     normalMapFilter: 0
+    flipGreenChannel: 0
   isReadable: 0
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
-  ignoreMasterTextureLimit: 0
+  ignoreMipmapLimit: 0
   grayScaleToAlpha: 0
   generateCubemap: 6
   cubemapConvolution: 0
@@ -139,7 +140,7 @@ TextureImporter:
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 600
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spriteGenerateFallbackPhysicsShape: 1
+  spriteGenerateFallbackPhysicsShape: 0
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
@@ -153,6 +154,8 @@ TextureImporter:
   textureFormatSet: 0
   ignorePngGamma: 0
   applyGammaDecoding: 1
+  swizzle: 50462976
+  cookieLightType: 1
   platformSettings:
   - serializedVersion: 3
     buildTarget: DefaultTexturePlatform
@@ -164,8 +167,9 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 1
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
     buildTarget: Standalone
     maxTextureSize: 2048
@@ -176,8 +180,9 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 1
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
     buildTarget: Android
     maxTextureSize: 2048
@@ -188,6 +193,7 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 1
   - serializedVersion: 3
@@ -200,6 +206,7 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 1
   - serializedVersion: 3
@@ -212,8 +219,22 @@ TextureImporter:
     crunchedCompression: 0
     allowsAlphaSplitting: 0
     overridden: 0
+    ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 1
+  - serializedVersion: 3
+    buildTarget: Server
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
@@ -858,39 +879,38 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      JS Left: 21300016
-      Controller: 21300056
-      LT: 21300032
-      JS Empty: 21300014
-      JS Empty Press: 21300020
-      DPad Right: 21300006
-      DPad Up: 21300004
-      LB Empty: 21300026
-      RT Empty: 21300038
-      Y: 21300050
-      Menu: 21300046
-      Console: 21300058
-      X: 21300048
-      View: 21300042
-      B: 21300054
-      JS Right Press: 21300024
-      DPad Left: 21300002
-      DPad: 21300000
-      JS Left Press: 21300022
-      RB Empty: 21300034
-      LB: 21300028
-      XBOX: 21300044
       A: 21300052
-      RT: 21300040
-      RB: 21300036
-      JS Right: 21300018
-      LT Empty: 21300030
-      DPad Vertical: 21300012
+      B: 21300054
+      Console: 21300058
+      Controller: 21300056
+      DPad: 21300000
       DPad Down: 21300008
       DPad Horizontal: 21300010
-  spritePackingTag: 
+      DPad Left: 21300002
+      DPad Right: 21300006
+      DPad Up: 21300004
+      DPad Vertical: 21300012
+      JS Empty: 21300014
+      JS Empty Press: 21300020
+      JS Left: 21300016
+      JS Left Press: 21300022
+      JS Right: 21300018
+      JS Right Press: 21300024
+      LB: 21300028
+      LB Empty: 21300026
+      LT: 21300032
+      LT Empty: 21300030
+      Menu: 21300046
+      RB: 21300036
+      RB Empty: 21300034
+      RT: 21300040
+      RT Empty: 21300038
+      View: 21300042
+      X: 21300048
+      XBOX: 21300044
+      Y: 21300050
+  mipmapLimitGroupName: 
   pSDRemoveMatte: 0
-  pSDShowRemoveMatteOption: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 

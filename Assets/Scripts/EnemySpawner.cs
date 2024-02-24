@@ -1,4 +1,5 @@
 using Animancer;
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,11 +14,12 @@ public class EnemySpawner : MonoBehaviour
     public bool destroyOnDeath = false;
     public bool fakeSpawning;
     public bool spawnInspector;
-    public float invulnDuration = -1f;
+    public float invulnDuration = -1;
     public UnityEvent OnSpawn;
     public UnityEvent OnDeath;
     bool afterSpawn;
-    GameObject lastSpawned;
+    [ReadOnly] public GameObject lastSpawned;
+    List<Renderer> renderers;
     public void Update()
     {
         if (spawnInspector)
@@ -32,7 +34,8 @@ public class EnemySpawner : MonoBehaviour
         if (!fakeSpawning)
         {
             actor1Obj = Instantiate(enemyToSpawn, this.transform.position, Quaternion.LookRotation(this.transform.forward));
-
+            actor1Obj.SetActive(true);
+            DisableRenderers(actor1Obj);
         }
         else
         {
@@ -42,42 +45,66 @@ public class EnemySpawner : MonoBehaviour
             actor1Obj.transform.rotation = Quaternion.LookRotation(this.transform.forward);
         }
 
-        if (actor1Obj.TryGetComponent<NavigatingHumanoidActor>(out NavigatingHumanoidActor actor1))
+        if (actor1Obj.TryGetComponent<AnimancerComponent>(out AnimancerComponent animancer))
         {
-            actor1Obj.GetComponent<AnimancerComponent>().Play(SpawnAnim).Events.OnEnd = () =>
-            {
-                actor1.shouldNavigate = true;
-                if (enableActionsOnSpawn) actor1.actionsEnabled = true;
-                actor1.PlayIdle();
-                if (destroyOnFinish)
-                {
-                    Destroy(this.gameObject);
-                }
-            };
-        } else if (actor1Obj.TryGetComponent<AnimancerComponent>(out AnimancerComponent animancer))
-        {
+            Actor actor1 = actor1Obj.GetComponent<Actor>();
             animancer.Play(SpawnAnim).Events.OnEnd = () =>
             {
-                animancer.Stop();
-                if (enableActionsOnSpawn) actor1Obj.SendMessage("EnableActions");
-                if (destroyOnFinish)
-                {
-                    Destroy(this.gameObject);
-                }
+                EndEvent(animancer);
             };
+
+            actor1.OnHurt.AddListener(CheckHurt);
         }
 
         if (actor1Obj.TryGetComponent<Actor>(out Actor actor))
         {
             actor.OnDie.AddListener(Die);
         }
-        OnSpawn.Invoke();
-
+        
         afterSpawn = true;
         lastSpawned = actor1Obj;
+        OnSpawn.Invoke();
+    }
+    
+    void CheckHurt()
+    {
+        AnimancerComponent animancer = lastSpawned.GetComponent<AnimancerComponent>();
+        if (animancer.IsPlayingClip(SpawnAnim.Clip))
+        {
+            EndEvent(animancer);
+        }
+    }
+    void EndEvent(AnimancerComponent animancer)
+    {
+        animancer.Stop();
+        if (enableActionsOnSpawn) animancer.gameObject.SendMessage("EnableActions");
+        if (destroyOnFinish)
+        {
+            Destroy(this.gameObject);
+        }
+    }
+    void DisableRenderers(GameObject obj)
+    {
+        renderers = new List<Renderer>();
+        foreach (Renderer r in obj.GetComponentsInChildren<Renderer>())
+        {
+            if (r.enabled)
+            {
+                renderers.Add(r);
+            }
+            r.enabled = false;
+        }
     }
 
-
+    void EnableRenderers()
+    {
+        if (renderers == null) return;
+        foreach (Renderer r in renderers)
+        {
+            r.enabled = true;
+        }
+        renderers.Clear();
+    }
     private void LateUpdate()
     {
         if (afterSpawn && lastSpawned != null)
@@ -89,6 +116,7 @@ public class EnemySpawner : MonoBehaviour
                     damageable.StartInvulnerability(invulnDuration);
                 }
             }
+            EnableRenderers();
             afterSpawn = false;
         }
     }

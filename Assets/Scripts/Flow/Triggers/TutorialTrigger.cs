@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class TutorialTrigger : MonoBehaviour
 {
     public UnityEngine.InputSystem.InputActionReference input;
+    public UnityEngine.InputSystem.InputActionReference input2;
+    public UnityEngine.InputSystem.InputActionReference input3;
     public string text;
     public bool onlyTriggersOnce;
     [ReadOnly] public bool triggered = false;
@@ -38,14 +41,15 @@ public class TutorialTrigger : MonoBehaviour
         {
             HideTutorial();
         }
-        string inputString = TutorialHandler.GetInputString(input);
-        interactionIndex = TutorialHandler.ShowTutorialStatic(text, inputString);
+        string inputString = TutorialHandler.GetFullText(text, input, input2, input3);
+        interactionIndex = TutorialHandler.ShowTutorialStatic(inputString);
         triggered = true;
         if (expiryTime > 0)
         {
             StartCoroutine(ExpireAfterTimer());
         }
     }
+
 
     public void HideTutorial()
     {

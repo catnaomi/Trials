@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -48,7 +49,7 @@ public class TutorialHandler : MonoBehaviour
         }
         return false;
     }
-    public int ShowTutorial(string text, Sprite sprite)
+    public int ShowTutorial(string text)
     {
         int emptyIndex = -1;
 
@@ -56,7 +57,7 @@ public class TutorialHandler : MonoBehaviour
         {
             if (!prompts[i].IsActive())
             {
-               if (emptyIndex < 0)
+                if (emptyIndex < 0)
                 {
                     emptyIndex = i;
                 }
@@ -73,7 +74,7 @@ public class TutorialHandler : MonoBehaviour
         if (emptyIndex >= 0)
         {
             prompts[emptyIndex].gameObject.SetActive(true);
-            prompts[emptyIndex].Set(text, sprite);
+            prompts[emptyIndex].Set(text);
             return emptyIndex;
         }
         return -1;
@@ -104,23 +105,12 @@ public class TutorialHandler : MonoBehaviour
             prompts[i].Hide();
         }
     }
-    public static int ShowTutorialStatic(string text, Sprite sprite)
+    public static int ShowTutorialStatic(string text)
     {
         if (instance == null) return -1;
-        return instance.ShowTutorial(text, sprite);
+        return instance.ShowTutorial(text);
     }
 
-    public static int ShowTutorialStatic(string text, string spriteString)
-    {
-        Sprite sprite = InputSpriteProvider.GetSprite(spriteString);
-        return ShowTutorialStatic(text, sprite);
-    }
-
-    public static void ShowTutorialStatic(string text)
-    {
-        if (instance == null) return;
-        instance.ShowTutorial(text, null);
-    }
     public static void HideTutorialStatic(int index)
     {
         if (instance == null) return;
@@ -139,12 +129,25 @@ public class TutorialHandler : MonoBehaviour
         instance.HideAll();
     }
 
-    public static string GetInputString(UnityEngine.InputSystem.InputActionReference action)
+    public static string GetFullText(string text, params UnityEngine.InputSystem.InputAction[] actions)
     {
-        PlayerInput input = (instance != null && instance.input != null) ? instance.input : FindObjectOfType<PlayerInput>();
-        int index = InputActionRebindingExtensions.GetBindingIndex(action, InputBinding.MaskByGroup(input.currentControlScheme));
-        if (index < 0) return "";
-        string buttonName = InputActionRebindingExtensions.GetBindingDisplayString(action, index, InputBinding.DisplayStringOptions.DontIncludeInteractions);
-        return buttonName;
+        StringBuilder sb = new StringBuilder();
+        bool appendSpace = false;
+        for (int i = 0; i < actions.Length; i++)
+        {
+            if (actions[i] == null) continue;
+            if (i > 0)
+            {
+                sb.Append("+");
+            }
+            sb.Append(InputSpriteProvider.GetSpriteTMP(actions[i]));
+            appendSpace = true;
+        }
+        if (appendSpace)
+        {
+            sb.Append(" ");
+        }
+        sb.Append(text);
+        return sb.ToString();
     }
 }
