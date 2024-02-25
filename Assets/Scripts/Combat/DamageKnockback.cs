@@ -138,8 +138,6 @@ public class DamageKnockback
 
     //public bool breaksArmor;
 
-
-
     public DamageKnockback(Vector3 force)
     {
         this.kbForce = force;
