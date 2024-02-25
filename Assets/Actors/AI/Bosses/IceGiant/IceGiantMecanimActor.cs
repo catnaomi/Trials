@@ -1,4 +1,3 @@
-using Cinemachine;
 using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
@@ -99,6 +98,20 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     [ReadOnly, SerializeField] bool TimeStopHit;
     public float animated_TrackingHandIKWeight;
     Vector3 handIKPosition;
+    [Header("Relations")]
+    public GameObject isDeadSaveLoader;
+    [Header("Debug")]
+    public bool kill;
+
+    public override void Update()
+    {
+        base.Update();
+        if (kill)
+        {
+            kill = false;
+            Die();
+        }
+    }
 
     public override void ActorStart()
     {
@@ -514,6 +527,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public override void Die()
     {
         if (dead) return;
+        isDeadSaveLoader.GetComponent<IceGiantIsDeadSaveLoader>().SaveDead();
         Dead = dead = true;
         OnDie.Invoke();
         ForceStopSpin();

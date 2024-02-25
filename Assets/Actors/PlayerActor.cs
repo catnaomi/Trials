@@ -1745,53 +1745,54 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
                 if (animancer.States.Current.NormalizedTime >= cancelTime)
                 {
-                    var currentCancelAction = cancelAction;
                     if (cancelAction != AttackCancelAction.None)
                     {
+                        var currentCancelAction = cancelAction;
                         cancelTime = -1f;
                         cancelAction = AttackCancelAction.None;
-                    }
 
-                    switch (currentCancelAction)
-                    {
-                        case AttackCancelAction.Jump:
+                        switch (currentCancelAction)
                         {
-                            StandingJump();
+                            case AttackCancelAction.Jump:
+                            {
+                                StandingJump();
+                            }
+                            break;
+                            case AttackCancelAction.Slash:
+                            {
+                                CancelSlash();
+                            }
+                            break;
+                            case AttackCancelAction.Thrust:
+                            {
+                                CancelThrust();
+                            }
+                            break;
+                            case AttackCancelAction.InventorySlot0:
+                            {
+                                inventory.InputOnSlot(0);
+                            }
+                            break;
+                            case AttackCancelAction.InventorySlot1:
+                            {
+                                inventory.InputOnSlot(1);
+                            }
+                            break;
+                            case AttackCancelAction.InventorySlot2:
+                            {
+                                inventory.InputOnSlot(2);
+                            }
+                            break;
+                            case AttackCancelAction.InventorySlot3:
+                            {
+                                inventory.InputOnSlot(3);
+                            }
+                            break;
                         }
-                        break;
-                        case AttackCancelAction.Slash:
-                        {
-                            CancelSlash();
-                        }
-                        break;
-                        case AttackCancelAction.Thrust:
-                        {
-                            CancelThrust();
-                        }
-                        break;
-                        case AttackCancelAction.InventorySlot0:
-                        {
-                            inventory.InputOnSlot(0);
-                        }
-                        break;
-                        case AttackCancelAction.InventorySlot1:
-                        {
-                            inventory.InputOnSlot(1);
-                        }
-                        break;
-                        case AttackCancelAction.InventorySlot2:
-                        {
-                            inventory.InputOnSlot(2);
-                        }
-                        break;
-                        case AttackCancelAction.InventorySlot3:
-                        {
-                            inventory.InputOnSlot(3);
-                        }
-                        break;
                     }
                 }
             }
+
             if (cancelTime > 0 && animancer.States.Current.NormalizedTime >= cancelTime && !plunge)
             {
                 if (attack && slash)
