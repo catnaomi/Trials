@@ -330,6 +330,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     [SerializeField]InputBuffer buffer;
     public UnityEvent onControlsChanged;
     public UnityEvent onNewCurrentInteractable;
+    [Header("Debug")]
+    public bool isGoddess; //god mode
+
     struct AnimState
     {
         public MixerState move;
@@ -4588,6 +4591,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         HitboxActive(0);
         TakeDamage(damageKnockback);
     }
+
     public void Recoil()
     {
         HitboxActive(0);
@@ -4599,7 +4603,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         HitboxActive(0);
         if (!ShouldParry(damage))
         {
-            damageHandler.TakeDamage(damage);
+            if (!isGoddess)
+            {
+                damageHandler.TakeDamage(damage);
+            }
             ClearAttackInput();
         }
         else
