@@ -4,7 +4,7 @@ using CustomUtilities;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute, IPersistentFlagLoader
+public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
 {
     public DamageType brokenByElements;
     public float health = -1;
@@ -14,13 +14,10 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute, 
     [Space(10)]
     public GameObject particlePrefab;
     public UnityEvent OnBreak;
-    // invoked when we load and find that the object was broken at save
-    public UnityEvent OnLoadBroken;
     public UnityEvent OnFail;
     public bool recoilOnFail = true;
     DamageKnockback lastDamage;
     bool hasBeenBroken;
-    public bool persistBrokenState;
 
     [Header("Drop Item")]
     public Item[] drops;
@@ -88,11 +85,6 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute, 
         OnBreak.Invoke();
         Destroy(this.gameObject, 0.01f);
         hasBeenBroken = true;
-
-        if (persistBrokenState)
-        {
-            SceneSaveDataManager.instance.PersistSceneFlag(gameObject, true);
-        }
     }
 
     public void DropItems()
@@ -187,15 +179,5 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute, 
     {
         this.health = health;
         UpdateHealthAttribute();
-    }
-
-    public void LoadFlag(bool flag)
-    {
-        hasBeenBroken = flag;
-        if (flag)
-        {
-            OnLoadBroken.Invoke();
-            Destroy(this.gameObject);
-        }
     }
 }
