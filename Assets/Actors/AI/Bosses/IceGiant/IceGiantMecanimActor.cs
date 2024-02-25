@@ -527,7 +527,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public override void Die()
     {
         if (dead) return;
-        isDeadSaveLoader.GetComponent<IceGiantIsDeadSaveLoader>().SaveDead();
+        isDeadSaveLoader.GetComponent<IceGiantIsDeadSaveLoader>().SaveFlag();
         Dead = dead = true;
         OnDie.Invoke();
         ForceStopSpin();
