@@ -9,9 +9,9 @@ using Newtonsoft.Json;
 public class SaveDataController : MonoBehaviour
 {
     public static string saveDirectory => Path.Combine(Application.persistentDataPath, "Saves");
-	public static string GetSaveSlotPath(int slot) => Path.Combine(saveDirectory, $"savedata{slot}.json");
+    public static string GetSaveSlotPath(int slot) => Path.Combine(saveDirectory, $"savedata{slot}.json");
 
-	public static SaveDataController instance;
+    public static SaveDataController instance;
 
     [Header("Inspector Slots")]
     public int slot = 1;
@@ -37,8 +37,8 @@ public class SaveDataController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-		// Check inspector debug flags
-		if (write)
+        // Check inspector debug flags
+        if (write)
         {
             write = false;
             CollectData();
@@ -73,14 +73,14 @@ public class SaveDataController : MonoBehaviour
     public static void EnsureSaveDirectoryExists()
     {
         Directory.CreateDirectory(saveDirectory);
-	}
+    }
 
-	public void Write()
+    public void Write()
     {
         EnsureSaveDirectoryExists();
 
         string saveSlotPath = GetSaveSlotPath(slot);
-		string json = JsonConvert.SerializeObject(data);
+        string json = JsonConvert.SerializeObject(data);
 
         using (StreamWriter sw = new StreamWriter(saveSlotPath, false, new UTF8Encoding()))
         {
@@ -90,31 +90,31 @@ public class SaveDataController : MonoBehaviour
         OnSaveComplete.Invoke();
     }
 
-	public void Read() {
+    public void Read() {
         EnsureSaveDirectoryExists();
-		data = ReadSlot(slot);
-	}
+        data = ReadSlot(slot);
+    }
 
-	public void Clear() {
-		data = null;
-	}
+    public void Clear() {
+        data = null;
+    }
 
-	public void SetSlot(int s) {
-		slot = Mathf.Abs(s);
-	}
+    public void SetSlot(int s) {
+        slot = Mathf.Abs(s);
+    }
 
-	void NewGame() {
-		ClearSaveData();
-		StartCoroutine(NewGameRoutine());
-	}
+    void NewGame() {
+        ClearSaveData();
+        StartCoroutine(NewGameRoutine());
+    }
 
-	public void Apply() {
-		if (data != null) {
-			StartCoroutine(LoadSaveDataRoutine(data));
-		}
-	}
+    public void Apply() {
+        if (data != null) {
+            StartCoroutine(LoadSaveDataRoutine(data));
+        }
+    }
 
-	public static void SaveToSlot(int slot)
+    public static void SaveToSlot(int slot)
     {
         if (instance == null) return;
         instance.SetSlot(slot);
@@ -185,7 +185,7 @@ public class SaveDataController : MonoBehaviour
             instance.StartCoroutine(instance.LoadSaveDataRoutine(data));
     }
 
-	public static void SetSlotStatic(int slot)
+    public static void SetSlotStatic(int slot)
     {
         if (instance != null)
             instance.SetSlot(slot);
@@ -200,7 +200,7 @@ public class SaveDataController : MonoBehaviour
     public static SaveData[] GetSaveDatas(int amount)
     {
         EnsureSaveDirectoryExists();
-		SaveData[] saves = new SaveData[amount];
+        SaveData[] saves = new SaveData[amount];
 
         for (int i = 0; i < amount; i++)
         {
@@ -211,46 +211,46 @@ public class SaveDataController : MonoBehaviour
     }
 
     // Co-routines to apply data to game state
-	IEnumerator LoadSaveDataRoutine(SaveData data) {
-		// fade screen to black
-		bool fadedToBlack = false;
-		FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
-		FadeToBlackController.OverrideNextFadeInOnStart(true);
-		yield return new WaitUntil(() => { return fadedToBlack; });
+    IEnumerator LoadSaveDataRoutine(SaveData data) {
+        // fade screen to black
+        bool fadedToBlack = false;
+        FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
+        FadeToBlackController.OverrideNextFadeInOnStart(true);
+        yield return new WaitUntil(() => { return fadedToBlack; });
 
-		// set the spawn location before we load the scene
-		Vector3 position = NumberUtilities.ArrayToVector3(data.playerWorldData.position);
-		Quaternion rotation = NumberUtilities.ArraytoQuaternion(data.playerWorldData.rotation);
+        // set the spawn location before we load the scene
+        Vector3 position = NumberUtilities.ArrayToVector3(data.playerWorldData.position);
+        Quaternion rotation = NumberUtilities.ArraytoQuaternion(data.playerWorldData.rotation);
 
-		PlayerPositioner.SetNextOverridePosition(position, rotation);
+        PlayerPositioner.SetNextOverridePosition(position, rotation);
 
-		// set all variables and attributes
-		YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
-		PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
-		PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
+        // set all variables and attributes
+        YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
+        PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
+        PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
      
         // load the next scene and the loading screen
         SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
 
-		yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
+        yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
 
         // After scene load load our per scene data
-		SceneSaveDataManager.LoadData(data.sceneSaveData);
-	}
+        SceneSaveDataManager.LoadData(data.sceneSaveData);
+    }
 
-	IEnumerator NewGameRoutine() {
-		// fade screen to black
-		bool fadedToBlack = false;
-		FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
-		FadeToBlackController.OverrideNextFadeInOnStart(true);
-		yield return new WaitUntil(() => { return fadedToBlack; });
+    IEnumerator NewGameRoutine() {
+        // fade screen to black
+        bool fadedToBlack = false;
+        FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
+        FadeToBlackController.OverrideNextFadeInOnStart(true);
+        yield return new WaitUntil(() => { return fadedToBlack; });
 
-		// make sure we don't spawn in a special place
+        // make sure we don't spawn in a special place
 
-		PlayerPositioner.ClearOverride();
+        PlayerPositioner.ClearOverride();
 
-		PlayerSaveDataManager.SetAttributesToDefault();
+        PlayerSaveDataManager.SetAttributesToDefault();
 
-		SceneLoader.LoadWithProgressBar(SceneLoader.FIRST_SCENE);
-	}
+        SceneLoader.LoadWithProgressBar(SceneLoader.FIRST_SCENE);
+    }
 }

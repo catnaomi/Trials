@@ -38,7 +38,7 @@ public class SceneSaveDataManager : MonoBehaviour
         EnsureSaveData();
         var objectPath = SearchUtils.GetHierarchyPath(objectAttachedTo, false);
         var sceneName = SceneManager.GetActiveScene().name;
-		data.dataByScene.TryAdd(sceneName, new PerSceneSaveData());
+        data.dataByScene.TryAdd(sceneName, new PerSceneSaveData());
         var dataForActiveScene = data.dataByScene[sceneName];
         dataForActiveScene.persistentSceneFlags[objectPath] = flag;
     }
@@ -47,24 +47,24 @@ public class SceneSaveDataManager : MonoBehaviour
     {
         EnsureSaveData();
         var sceneName = SceneManager.GetActiveScene().name;
-		PerSceneSaveData dataForActiveScene;
+        PerSceneSaveData dataForActiveScene;
         if (data.dataByScene.TryGetValue(sceneName, out dataForActiveScene))
         {
             foreach (KeyValuePair<string, bool> persistentFlag in dataForActiveScene.persistentSceneFlags)
             {
                 var gameObject = GameObject.Find(persistentFlag.Key);
-				gameObject.GetComponent<IPersistentFlagLoader>().LoadFlag(persistentFlag.Value);
+                gameObject.GetComponent<IPersistentFlagLoader>().LoadFlag(persistentFlag.Value);
             }
         }
         else
         {
             Debug.Log($"No scene save data to apply for scene {sceneName}");
         }
-	}
+    }
 
-	public static void LoadData(SceneSaveData loadedFromFile)
-	{
-		instance.data = loadedFromFile;
-		instance.ApplyData();
-	}
+    public static void LoadData(SceneSaveData loadedFromFile)
+    {
+        instance.data = loadedFromFile;
+        instance.ApplyData();
+    }
 }

@@ -14,8 +14,8 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute, 
     [Space(10)]
     public GameObject particlePrefab;
     public UnityEvent OnBreak;
-	// invoked when we load and find that the object was broken at save
-	public UnityEvent OnLoadBroken;
+    // invoked when we load and find that the object was broken at save
+    public UnityEvent OnLoadBroken;
     public UnityEvent OnFail;
     public bool recoilOnFail = true;
     DamageKnockback lastDamage;
@@ -194,8 +194,8 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute, 
         hasBeenBroken = flag;
         if (flag)
         {
-			OnLoadBroken.Invoke();
-			Destroy(this.gameObject);
-		}
-	}
+            OnLoadBroken.Invoke();
+            Destroy(this.gameObject);
+        }
+    }
 }
