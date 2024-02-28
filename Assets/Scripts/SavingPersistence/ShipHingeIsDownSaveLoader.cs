@@ -1,17 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using UnityEngine.Events;
 
 public class ShipHingeIsDownSaveLoader : SceneFlagSaveLoader
 {
-    public GameObject target;
-    public GameObject hinge;
-    public uint fallenAnimationIndex;
+    public UnityEvent playFallenAnimation;
 
     public override void LoadFlag(bool flag)
     {
-        target.SetActive(false);
-        var animationPlayers = hinge.GetComponents<AnimancerPlayEvent>();
-        animationPlayers[fallenAnimationIndex].PlayClip();
+        playFallenAnimation.Invoke();
+
+        // Attached to breakable target that lowers the bridge
+        gameObject.SetActive(false);
     }
 }
