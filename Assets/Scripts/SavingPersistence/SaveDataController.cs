@@ -231,11 +231,11 @@ public class SaveDataController : MonoBehaviour
      
         // load the next scene and the loading screen
         SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
-
         yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
 
         // After scene load load our per scene data
         SceneSaveDataManager.LoadData(data.sceneSaveData);
+        yield return new WaitForEndOfFrame();
     }
 
     IEnumerator NewGameRoutine() {

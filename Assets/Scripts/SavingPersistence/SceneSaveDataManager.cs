@@ -52,8 +52,8 @@ public class SceneSaveDataManager : MonoBehaviour
         {
             foreach (KeyValuePair<string, bool> persistentFlag in dataForActiveScene.persistentSceneFlags)
             {
-                var gameObject = GameObject.Find(persistentFlag.Key);
-                gameObject.GetComponent<IPersistentFlagLoader>().LoadFlag(persistentFlag.Value);
+                var loaderObject = GameObject.Find(persistentFlag.Key);
+                loaderObject.GetComponent<IPersistentFlagLoader>().LoadFlag(persistentFlag.Value);
             }
         }
         else
