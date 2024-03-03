@@ -1,14 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerSaveDataManager : MonoBehaviour
 {
     public static PlayerSaveDataManager instance;
     public bool debugShowInventoryString;
+
     [TextArea(5,20)]
     public string inventory;
-
 
     PlayerInventoryData inventoryData;
     PlayerAttributeData attributeData;
@@ -18,10 +16,12 @@ public class PlayerSaveDataManager : MonoBehaviour
     bool attributesChanged;
     public bool save;
     public bool load;
+
     private void Awake()
     {
         instance = this;
     }
+
     public void OnSceneStart()
     {
         if (PlayerActor.player != null)
@@ -34,6 +34,7 @@ public class PlayerSaveDataManager : MonoBehaviour
             TimeTravelController.time.OnChargeChanged.AddListener(MarkAttributeChange);
         }
     }
+
     private void Update()
     {
         if (save)
@@ -107,7 +108,6 @@ public class PlayerSaveDataManager : MonoBehaviour
     {
         if (instance != null)
         {
-            //instance.SaveInventoryData();
             if (instance.inventoryData != null)
             {
                 return instance.inventoryData;
@@ -129,13 +129,13 @@ public class PlayerSaveDataManager : MonoBehaviour
     public void SaveAttributeData()
     {
         if (PlayerActor.player == null || TimeTravelController.time == null) return;
+
         if (attributeData == null)
         {
             attributeData = new PlayerAttributeData();
         }
 
         attributeData.GetAttributeData(TimeTravelController.time, PlayerActor.player.GetComponent<ActorAttributes>());
-
     }
 
     public static void SetAttributeData(PlayerAttributeData data)

@@ -10,6 +10,7 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
     public float health = -1;
     float startingHealth;
     AttributeValue healthAttribute;
+
     [Space(10)]
     public GameObject particlePrefab;
     public UnityEvent OnBreak;
@@ -17,6 +18,7 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
     public bool recoilOnFail = true;
     DamageKnockback lastDamage;
     bool hasBeenBroken;
+
     [Header("Drop Item")]
     public Item[] drops;
     public GameObject dropPrefab;
@@ -25,12 +27,12 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
     public float forceMagnitude = 1f;
     public Vector3 angularVelocity;
 
-
     void Awake()
     {
         startingHealth = health;
         UpdateHealthAttribute();
     }
+
     public void Recoil()
     {
         
@@ -45,6 +47,7 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
     {
 
     }
+
     public void TakeDamage(DamageKnockback damage)
     {
         lastDamage = damage; 
@@ -116,6 +119,7 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
             }
         }
     }
+
     public void SetHitParticleVectors(Vector3 position, Vector3 direction)
     {
         //throw new System.NotImplementedException();

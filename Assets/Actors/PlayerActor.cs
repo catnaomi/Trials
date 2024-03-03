@@ -788,7 +788,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     targetDirection = this.transform.position - GetCombatTarget().transform.position;
                     targetDirection.Scale(new Vector3(-1f, 0f, -1f));
                     lookDirection = Vector3.RotateTowards(lookDirection, targetDirection, Mathf.Deg2Rad * walkTurnSpeed * Time.deltaTime, 1f);
-
                 }
                 else
                 {
@@ -801,13 +800,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 if (animancer.Layers[HumanoidAnimLayers.BlockBlend].CurrentState != state.upperBlock)
                 {
-
-
-
                     animancer.Layers[HumanoidAnimLayers.BlockBlend].Play(state.upperBlock);
                 }
-                
-
 
                 int param = 0 + (IsSlashHeld() ? DamageKnockback.SLASH_INT : 0) + (IsThrustHeld() ? DamageKnockback.THRUST_INT : 0);
                 if (param != lastTypedBlockParam)
@@ -1751,50 +1745,54 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
                 if (animancer.States.Current.NormalizedTime >= cancelTime)
                 {
-                    if (cancelAction == AttackCancelAction.Jump)
+                    if (cancelAction != AttackCancelAction.None)
                     {
+                        var currentCancelAction = cancelAction;
                         cancelTime = -1f;
                         cancelAction = AttackCancelAction.None;
-                        StandingJump();
-                    }
-                    else if (cancelAction == AttackCancelAction.Slash)
-                    {
-                        cancelTime = -1f;
-                        cancelAction = AttackCancelAction.None;
-                        CancelSlash();
-                    }
-                    else if (cancelAction == AttackCancelAction.Thrust)
-                    {
-                        cancelTime = -1f;
-                        cancelAction = AttackCancelAction.None;
-                        CancelThrust();
-                    }
-                    else if (cancelAction == AttackCancelAction.InventorySlot0)
-                    {
-                        cancelTime = -1f;
-                        cancelAction = AttackCancelAction.None;
-                        inventory.InputOnSlot(0);
-                    }
-                    else if (cancelAction == AttackCancelAction.InventorySlot1)
-                    {
-                        cancelTime = -1f;
-                        cancelAction = AttackCancelAction.None;
-                        inventory.InputOnSlot(1);
-                    }
-                    else if (cancelAction == AttackCancelAction.InventorySlot2)
-                    {
-                        cancelTime = -1f;
-                        cancelAction = AttackCancelAction.None;
-                        inventory.InputOnSlot(2);
-                    }
-                    else if (cancelAction == AttackCancelAction.InventorySlot3)
-                    {
-                        cancelTime = -1f;
-                        cancelAction = AttackCancelAction.None;
-                        inventory.InputOnSlot(3);
+
+                        switch (currentCancelAction)
+                        {
+                            case AttackCancelAction.Jump:
+                            {
+                                StandingJump();
+                            }
+                            break;
+                            case AttackCancelAction.Slash:
+                            {
+                                CancelSlash();
+                            }
+                            break;
+                            case AttackCancelAction.Thrust:
+                            {
+                                CancelThrust();
+                            }
+                            break;
+                            case AttackCancelAction.InventorySlot0:
+                            {
+                                inventory.InputOnSlot(0);
+                            }
+                            break;
+                            case AttackCancelAction.InventorySlot1:
+                            {
+                                inventory.InputOnSlot(1);
+                            }
+                            break;
+                            case AttackCancelAction.InventorySlot2:
+                            {
+                                inventory.InputOnSlot(2);
+                            }
+                            break;
+                            case AttackCancelAction.InventorySlot3:
+                            {
+                                inventory.InputOnSlot(3);
+                            }
+                            break;
+                        }
                     }
                 }
             }
+
             if (cancelTime > 0 && animancer.States.Current.NormalizedTime >= cancelTime && !plunge)
             {
                 if (attack && slash)

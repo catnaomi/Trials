@@ -13,11 +13,11 @@ public class PlayerPositioner : MonoBehaviour
     Vector3 spawnPosition;
     Quaternion spawnRotation;
 
-    // Start is called before the first frame update
+    // For game testing purposes run these console commands on spawn in
+    public string[] consoleCommands;
+
     void Start()
     {
-        
-        
         hasSpawned = false;
     }
 
@@ -42,6 +42,14 @@ public class PlayerPositioner : MonoBehaviour
                         spawnRotation = spawnPoint.rotation;
                     }
                     SpawnPlayer(player);
+
+                    if (consoleCommands != null)
+                    {
+                        foreach (var consoleCommand in consoleCommands)
+                        {
+                            DebugConsole.instance.RunMethod(consoleCommand);
+                        }
+                    }
                 }
             }
         }
