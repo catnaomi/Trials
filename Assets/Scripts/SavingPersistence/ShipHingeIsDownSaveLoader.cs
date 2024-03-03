@@ -1,12 +1,10 @@
-using UnityEngine.Events;
-
 public class ShipHingeIsDownSaveLoader : SceneFlagSaveLoader
 {
-    public UnityEvent playFallenAnimation;
+    public ShipHingeAnimationPlayer shipHingeAnimationPlayer;
 
     public override void LoadFlag(bool flag)
     {
-        playFallenAnimation.Invoke();
+        shipHingeAnimationPlayer.PlayHasFallen();
 
         // Attached to breakable target that lowers the bridge
         gameObject.SetActive(false);
