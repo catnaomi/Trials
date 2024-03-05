@@ -13,29 +13,28 @@ public class MenuView : MonoBehaviour
     }
     public UnityEvent OnFocus;
     public UnityEvent OnUnfocus;
-    
 
-    // Start is called before the first frame update
     void Start()
     {
         MenuStart();
         if (focusOnStart)
         {
             Focus();
-        }  
+        }
     }
 
     public virtual void MenuStart()
     {
         // use this for initialization
     }
+
     public virtual void Focus()
     {
         focused = true;
         if (currentlyFocused != null && currentlyFocused != this)
         {
             currentlyFocused.Unfocus();
-        }  
+        }
         currentlyFocused = this;
         OnFocus.Invoke();
     }

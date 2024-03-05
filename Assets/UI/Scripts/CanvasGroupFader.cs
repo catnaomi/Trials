@@ -25,7 +25,7 @@ public class CanvasGroupFader : MonoBehaviour
 
     CanvasGroup group;
     Coroutine coroutine;
-    // Start is called before the first frame update
+
     void Awake()
     {
         group = this.GetComponent<CanvasGroup>();

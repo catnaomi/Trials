@@ -7,7 +7,7 @@ public class OnTimeStopListener : MonoBehaviour
 {
     public UnityEvent OnTimeStop;
     public float delay = 0f;
-    // Start is called before the first frame update
+
     void Start()
     {
         TimeTravelController.time.OnTimeStopStart.AddListener(TimeStopEvent);

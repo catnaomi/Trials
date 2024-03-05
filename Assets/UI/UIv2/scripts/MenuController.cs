@@ -19,7 +19,6 @@ public class MenuController : MonoBehaviour
     public int lastMenu = 0;
     public bool showing = false;
 
-
     public const int Inventory = 0;
     public const int Journal = 1;
 
@@ -29,8 +28,8 @@ public class MenuController : MonoBehaviour
     public bool inspectorShow;
     public List<string> itemsUnderCursor;
 
-    public UnityEngine.InputSystem.InputActionReference nextPageAction;
-    public UnityEngine.InputSystem.InputActionReference previousPageAction;
+    public InputActionReference nextPageAction;
+    public InputActionReference previousPageAction;
 
     public UnityEvent OnMenuOpen;
     public UnityEvent OnMenuClose;

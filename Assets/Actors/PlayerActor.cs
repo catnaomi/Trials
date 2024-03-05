@@ -163,7 +163,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public ClimbDetector currentClimb;
     bool ledgeSnap;
     bool ledgeHanging;
-    
+
     Vector3 climbSnapPoint;
     bool allowClimb = true;
     bool allowLadderFinish = true;
@@ -216,7 +216,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     Vector3 lastLaunchVector;
     public Vector3 smoothLaunchVector = Vector3.forward;
     public float launchVectorSmoothSpeed = 120f;
-    
+
     [Range(-1f,1f)]
     public float thrustIKValue;
     public float thrustIKWeight;
@@ -360,7 +360,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public MixerState<float> drink;
         public AnimancerState drinkUpper;
     }
-    
+
     [Serializable]
     public struct VirtualCameras
     {
@@ -376,9 +376,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         positionReference = this.GetComponent<HumanoidPositionReference>();
         positionReference.LocateSlotsByName();
         player = this;
-        //Cursor.lockState = CursorLockMode.Locked;
-        //Cursor.visible = false;
-
     }
 
     public override void ActorStart()
@@ -419,7 +416,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         damageHandler.SetBlockEndAction(() => { animancer.Play(state.block, 0.5f); });
 
         buffer = new InputBuffer();
-        
+
         ledgeClimb.Events.OnEnd = _OnFinishClimb;
 
         ladderClimbUp.Events.OnEnd = _OnFinishClimb;
@@ -461,7 +458,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         cinemachineBrain = Camera.main.GetComponent<CinemachineBrain>();
     }
 
-    // Update is called once per frame
+
     public override void ActorPostUpdate()
     {
         if (dead) return;
@@ -556,7 +553,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (wading)
             {
                 speedMax = Mathf.Lerp(speedMax, wadingSpeed, wadingPercent);
-            } 
+            }
             speed = Mathf.MoveTowards(speed, walkSpeedCurve.Evaluate(move.magnitude) * speedMax, walkAccelReal * Time.deltaTime);
             if (camState == CameraState.Free)
             {
@@ -658,7 +655,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         UpdateFromMoveset();
                     }
                 }
-                
+
                 animancer.Play(state.block, 0.25f);
                 /*
                 animancer.Layers[HumanoidAnimLayers.UpperBody].Play(blockAnimStart, 0f);
@@ -776,7 +773,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     lookDirection = this.transform.forward;
                 }
-                
+
             }
             else if (camState == CameraState.Lock)
             {
@@ -834,7 +831,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 state.fall = animancer.Play(fallAnim);
                 stopBlock = true;
             }
-            
+
             if (jump)
             {
                 /*
@@ -846,7 +843,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 bool west = false;// x < 0.25f && Mathf.Abs(x) > Mathf.Abs(y);
 
                 jump = false;
-               
+
                 if (north)
                 {
                     state.jump = animancer.Play(runJumpAnim);
@@ -884,7 +881,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     state.jump = animancer.Play(standJumpAnim);
                 }
-                
+
                 //state.jump = animancer.Play(backflipAnim);
                 //moveDirection = this.transform.forward;
                 //speed = -blockSpeed;
@@ -916,7 +913,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         }
                     }
                     stopBlock = true;
-                }              
+                }
                 attack = false;
                 slash = false;
                 thrust = false;
@@ -1052,12 +1049,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     moveDirection = stickDirection.normalized;
                     //xzVel = xzVel.magnitude * stickDirection.normalized;
                 }
-                
+
                 state.jump = animancer.Play(runJumpAnim);
             }
             else if (move.magnitude > 0.75f && Vector3.Angle(lookDirection, stickDirection) >= skidAngle)
             {
-                
+
                 state.skid = animancer.Play(skidAnim);
                 lookDirection = -stickDirection;
                 lastSprintForward = -stickDirection;
@@ -1160,7 +1157,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
                     /*AnimancerState land = state.move.ChildStates[0];
                     land.Clip = landHardAnim;
-                    
+
                     land.Events.OnEnd = _OnLandEnd;
                     speed = 0f;
                     animancer.Play(state.move, 0.25f);*/
@@ -1241,7 +1238,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         xzVel = Vector3.MoveTowards(xzVel, (dir.normalized * slideOffSpeed) + (stickAddition * maxAirSpeed), slideAccel * Time.deltaTime);
                     }
 
-                    
+
                     Debug.DrawRay(this.transform.position, dir * 5f, Color.magenta);
                 }
 
@@ -1262,7 +1259,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                             else
                             {
                                 xzVel += airAccel * Time.deltaTime * stickDirection;
-                            } 
+                            }
                         }
                         else
                         {
@@ -1277,8 +1274,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                         xzVel += airAccel * Time.deltaTime * Vector3.Project(stickDirection,horizTangent);
                     }
                 }
-                    
-                    
+
+
 
             }
             if (jump)
@@ -1288,7 +1285,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     StandingJump();
                 }
-                
+
             }
             if (ledgeSnap)
             {
@@ -1300,7 +1297,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 else if (currentClimb is Ladder ladder)
                 {
                     state.climb = animancer.Play(ladderClimb);
- 
+
                 }
                 else if (currentClimb is Rail rail)
                 {
@@ -1370,7 +1367,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                             RollSlash();
                             EnableCloth();
                         };
-                        
+
                     }
                     else if (thrust)
                     {
@@ -1483,7 +1480,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (jump && animancer.States.Current != astate.jump)
             {
                 jump = false;
-                  
+
                 if (IsGrounded())
                 {
                     AnimancerState jumpState;
@@ -1503,7 +1500,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     state.aim = astate.jump = jumpState;
                     moveDirection = this.transform.forward;
                 }
-                
+
             }
             else if (IsGrounded() && animancer.States.Current == astate.jump && airTime > 0.5f)
             {
@@ -1652,7 +1649,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 //StartClimbLockout();
                 /*
                 ClimbDetector climbRef = currentClimb;
-                
+
                 state.jump.Events.OnEnd = () =>
                 {
                     if (climbRef.CheckPlayerCollision())
@@ -1669,7 +1666,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 yVel = 0f;
             }
-            
+
             animancer.Layers[0].ApplyAnimatorIK = false;
         }
         #endregion
@@ -1854,7 +1851,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     targetDirection.y = 0f;
                     lookDirection = targetDirection.normalized;
                 }
-                
+
                 if ((currentDamage.isThrust && !IsThrustHeld()) && holdAttackClock < holdAttackMin)
                 {
                     HoldThrustRelease(holdAttackClock <= 0);
@@ -1981,13 +1978,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             ((MixerState<Vector2>)state.block).Parameter = new Vector2(x, y);
         }
         Vector3 finalMov = (moveDirection * speed + downwardsVelocity);
-        
+
         /*
         if (animancer.States.Current == state.move || animancer.States.Current == state.sprint || animancer.States.Current == state.dash)
         {
             //xzVel = finalMov;
             //xzVel.y = 0;
-            
+
         }
         */
         if (animancer.States.Current == damageHandler.block)
@@ -2001,7 +1998,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     OnBlockTypeChange.Invoke();
                 }
             }
-            
+
         }
 
         if (applyMove)
@@ -2021,7 +2018,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         if (isGrounded && !IsFalling() && !IsClimbing())
         {
-            //UnsnapLedge();   
+            //UnsnapLedge();
         }
         if (IsHurt() && IsFalling())
         {
@@ -2068,7 +2065,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             SendMessage("StopContinuousSlide");
         }
         wasSlidingUpdate = sliding;
-        
+
         if (animancer.States.Current == state.externalSource)
         {
             externalSourceClock += Time.deltaTime;
@@ -2160,8 +2157,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             this.transform.position = animator.rootPosition;
             this.transform.rotation = animator.rootRotation;
         }
-        
-        
+
         animatorVelocity = animator.velocity;//animator.rootPosition - this.transform.position;
     }
 
@@ -2206,7 +2202,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         Vector3 velocity = xzVel;
         velocity.y = yVel;
-        
+
         if ((IsAttacking() || IsBlocking()) && isGrounded)
         {
             cc.radius = attackingColliderRadius;
@@ -2288,7 +2284,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             return base.GetCurrentGroundPhysicsMaterial();
         }
     }
-    
+
     public void WarpTo(Vector3 position)
     {
         CharacterController cc = this.GetComponent<CharacterController>();
@@ -2337,7 +2333,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     public override void OnFallOffMap()
     {
-        
+
         if (attributes.health.current > 1f || attributes.lives > 0f)
         {
             ResetToSafePoint();
@@ -2350,7 +2346,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
     public void ResetToSafePoint()
     {
-        //WarpTo(lastSafePoint); 
+        //WarpTo(lastSafePoint);
         if (!rewindingToSafePoint) StartCoroutine("RewindToSafePoint");
     }
 
@@ -2375,7 +2371,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 closestDistance = dist;
             }
         }
-        while (timeTravelHandler.IsRewinding() && Vector3.Distance(this.transform.position, lastSafePoint) > rewindDistanceThreshold && rewindTimeout > 0);  
+        while (timeTravelHandler.IsRewinding() && Vector3.Distance(this.transform.position, lastSafePoint) > rewindDistanceThreshold && rewindTimeout > 0);
         TimeTravelController.time.CancelRewind();
         if (rewindTimeout <= 0)
         {
@@ -2399,7 +2395,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         rewindingToSafePoint = false;
     }
-    
+
 
     IEnumerator DecelXZVel(float time)
     {
@@ -2423,7 +2419,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             lastSafePoint = hit.position;
         }
     }
-    
+
     public void TryFindSpawnPoint()
     {
         foreach (PlayerPositioner spawnPoint in GameObject.FindObjectsOfType<PlayerPositioner>())
@@ -2440,18 +2436,18 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public bool HasBeenSpawned()
     {
         return spawned;
-    }   
-    
+    }
+
     public void SetSpawned()
     {
         spawned = true;
     }
-    
+
     public void ResetAnim()
     {
         _MoveOnEnd();
     }
-    
+
     #endregion
 
     #region CLIMBING
@@ -2482,7 +2478,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             StartCoroutine(LadderFinishLockout());
         }
     }
-    
+
     public void SetRail(Rail rail)
     {
         if (allowClimb)
@@ -2775,6 +2771,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 OnQuickSlot(3);
             }
         };
+
+        inputs.actions["Pause"].performed += (context) =>
+        {
+            PauseManager.instance.TogglePauseMenu();
+        };
     }
 
     [Serializable]
@@ -2823,7 +2824,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             return input == Inputs.Thrust || input == Inputs.ThrustHold || input == Inputs.Slash || input == Inputs.SlashHold;
         }
-    
+
         public Inputs PollInput(float bufferLength)
         {
             Inputs input = Inputs.None;
@@ -2832,11 +2833,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 input = lastInput;
                 //ClearAll();
             }
-            
+
             return input;
         }
     }
-    
+
     // shouldDodge
     // jump
     // attack
@@ -2920,8 +2921,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             return -1;
         }
     }
-    
-    
+
+
     public void OnDodge(InputValue value)
     {
         return;
@@ -2942,14 +2943,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             //shouldDodge = true;
             buffer.SetInput(InputBuffer.Inputs.Dodge, Time.time);
         }
-        
+
     }
 
     public void OnJump(InputValue value)
     {
         if (!CanPlayerInput()) return;
         InputJump();
-        
+
     }
 
     public void InputJump()
@@ -3043,7 +3044,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         return this.GetComponent<PlayerInput>().actions["Target"].IsPressed();
     }
-    
+
     void BlockStart()
     {
         if (!CanPlayerInput()) return;
@@ -3075,7 +3076,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             return true;
         }
         return false;
-        
+
     }
     public bool IsBlockHeld()
     {
@@ -3133,7 +3134,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (!CanPlayerInput()) return;
         //toggleTarget.Invoke();
     }
-    
+
     /*
     public void OnChangeTarget(InputValue value)
     {
@@ -3151,7 +3152,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             buffer.SetInput(InputBuffer.Inputs.Slash, Time.time);
         }
-        
+
         //attack = true;
         //slash = true;
     }
@@ -3189,7 +3190,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         if (!CanPlayerInput()) return;
         InputSheathe();
-        
+
     }
 
     public void InputSheathe()
@@ -3272,11 +3273,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             ToggleMenu();
         }
     }
+
     // checks to see if player input is accepted. used for inventory menu
     public bool CanPlayerInput()
     {
-        return !isMenuOpen && Time.timeScale > 0;
+        return !isMenuOpen && !TimeScaleController.instance.paused;
     }
+
     public void ToggleMenu()
     {
         MenuController.menu.TryToggleInventory();
@@ -3298,7 +3301,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             InventoryUI2.invUI.FlareSlot(slot);
         }
-        
+
     }
 
     public void OnQuickSlotHold(int slot)
@@ -3307,7 +3310,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (IsMoving() && CanPlayerInput())
         {
             //inventory.UnequipOnSlot(slot);
-            
+
         }
         InventoryUI2.invUI.FlareSlot(slot);
         */
@@ -3341,7 +3344,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 if (wading)
                 {
                     wadingPercent = Mathf.Clamp((waterHeight - wadingHit.point.y)/wadingHeight,0f,1f);
-                    
+
                 }
                 else
                 {
@@ -3353,7 +3356,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 return true;
             }
-            
+
         }
         return false;
     }
@@ -3446,7 +3449,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 hasTypedBlocks = false;
             }
-            
+
         }
 
         state.block = (MixerState)animancer.States.GetOrCreate(blockingMoveAnim);
@@ -3454,7 +3457,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         damageHandler.SetGuardBreakClip(guardBreak);
 
         //UpdateStances();
-        
+
 
         ClipTransition sprintingAnim = sprintAnim;
         if (inventory.IsMainDrawn() && inventory.GetMainWeapon().moveset.overridesSprint)
@@ -3530,7 +3533,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             return drawState;
         }
 
-        
+
         return null;
     }
 
@@ -3622,7 +3625,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         StopCoroutine("GradualResetOffRotation");
         RotateOffWeapon(0f);
     }
-    
+
     IEnumerator GradualResetMainRotation()
     {
         float angle;
@@ -3665,7 +3668,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 else
                 {
                     parent = positionReference.GetPositionRefSlot(consumable.parentSlot).transform;
-                    
+
                 }
                 if (consumableModel != null && parent != null)
                 {
@@ -3673,7 +3676,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     consumableModel.transform.localPosition = Vector3.zero;
                     consumableModel.transform.localRotation = Quaternion.identity;
                 }
-                
+
             }
             if (consumable.sheatheMainOnUse)
             {
@@ -3692,7 +3695,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 animancer.Play(state.move, 0.5f);
                 DestroyEndEvents(ref state.consume);
             });
-            
+
         }
     }
 
@@ -3719,8 +3722,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         UpdateFromMoveset();
         Physics.IgnoreCollision(this.GetComponent<Collider>(), c.GetComponent<Collider>());
         isDropping = false;
-        
-        
+
+
     }
 
     public void CarryWithAnimation(Carryable c)
@@ -3794,7 +3797,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             StopCarrying();
             carryable.Throw(this.transform.forward * Mathf.Clamp(carryable.GetMass(),1f,throwMassMax) * throwForce + Vector3.up * Mathf.Clamp(carryable.GetMass(), 1f, throwMassMax) * throwForceUp);
-            
+
         }
     }
 
@@ -3832,7 +3835,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 Physics.IgnoreCollision(carryCollider, collider, false);
             }
         }
-        
+
     }
 
     Collider[] GetColliders()
@@ -4015,7 +4018,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         ClearThrustInput();
         OnAttack.Invoke();
     }
-    
+
 
     public void BlockSlash()
     {
@@ -4077,7 +4080,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         state.attack = GetMoveset().rollSlash.ProcessPlayerAction(this, out cancelTime, _MoveOnEnd);
         attackDecelReal = dashAttackDecel;
-        rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };   
+        rollAnim.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
         dashed = false;
         ClearSlashInput();
         OnAttack.Invoke();
@@ -4094,13 +4097,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     }
 
     public void PlungeSlash()
-    { 
+    {
         if (GetMoveset().plungeSlash is PhaseAttack phase)
         {
             ClipTransition clip = GetMoveset().plungeSlash.GetClip();
             state.attack = animancer.Play(clip);
             state.attack.Events.OnEnd = () => { state.attack = animancer.Play(phase.GetLoopPhaseClip(), 0.1f); };
- 
+
             attackDecelReal = 0f;
             plungeEnd = phase.GetEndPhaseClip();
             plungeEnd.Events.OnEnd = () => { animancer.Play(state.move, 0.5f); };
@@ -4135,7 +4138,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             ClipTransition clip = GetMoveset().plungeThrust.GetClip();
             state.attack = animancer.Play(clip);
             state.attack.Events.OnEnd = () => { state.attack = animancer.Play(phase.GetLoopPhaseClip(), 0.1f); };
-            
+
             attackDecelReal = 0f;
             plungeEnd = phase.GetEndPhaseClip();
             plungeEnd.Events.OnEnd = _AttackEnd;// = () => { animancer.Play(state.move, 0.5f); };
@@ -4494,7 +4497,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public override void FlashWarning(int hand)
     {
         //return; // flash won't appear for player
-        
+
         EquippableWeapon mainWeapon = inventory.GetMainWeapon();
         EquippableWeapon offHandWeapon = inventory.GetOffWeapon();
         EquippableWeapon rangedWeapon = inventory.GetRangedWeapon();
@@ -4524,7 +4527,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             rangedWeapon.FlashWarning();
         }
-        
+
     }
 
     // called by animation events
@@ -4557,7 +4560,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             currentDamage.OnHitWeakness.AddListener(HitWeakness);
         }
     }
-    
+
     public DamageKnockback GetLastDamage()
     {
         return currentDamage;
@@ -4571,7 +4574,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         return currentConsumable;
     }
-    
+
     public override DamageResistance GetBlockResistance()
     {
         return inventory.GetBlockResistance();
@@ -4622,7 +4625,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (attributes.lives <= 0)
         {
             base.Die();
- 
+
             ProcessDeath();
         }
         else
@@ -4696,7 +4699,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             animancer.Play(state.move, 0.5f);
         }
     }
-    
+
     public void ProcessWeaponDash()
     {
         if (isGrounded)
@@ -4708,7 +4711,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     speed = weaponDashSpeed;
                 }
-            } 
+            }
         }
     }
     #endregion
@@ -4775,7 +4778,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hit, 100f, LayerMask.GetMask("Terrain", "Terrain_World1Only", "Terrain_World2Only", "Actors", "Default", "Wall", "World1Only", "World2Only", "Terrain_Invisible")) && !hit.transform.IsChildOf(this.transform.root))
             {
                 aimPos = hit.point;
-                
+
             }
             Debug.DrawLine(origin, aimPos, Color.red);
             lastLaunchVector = (aimPos - origin).normalized;
@@ -4800,7 +4803,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         float h = 0f;
         if (GetCombatTarget() != null)
         {
-            
+
             y = (GetCombatTarget().transform.position - initialThrustPos).y;
             Vector3 diff = (GetCombatTarget().transform.position - initialThrustPos);
             diff.y = 0;
@@ -4819,7 +4822,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Debug.DrawLine(initialThrustPos, ikThrustVector, Color.red);
         if (IsAttacking())
         {
-            
+
             if (currentDamage != null && currentDamage.isThrust && animancer.States.Current == state.attack)
             {
 
@@ -4862,12 +4865,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
                 Vector3 hips = animancer.Animator.GetBoneTransform(HumanBodyBones.Hips).position;
                 float distanceHips = groundPlane.GetDistanceToPoint(hips);
-                
+
                 this.transform.rotation = Quaternion.LookRotation(xzVel.normalized);
                 animancer.Animator.bodyPosition = animancer.Animator.bodyPosition + groundNormal.normalized * (-distanceHips + 0.15f);
 
-                
-                
+
+
                 animancer.Animator.SetIKPosition(AvatarIKGoal.LeftHand, groundPlane.ClosestPointOnPlane(handL));
                 animancer.Animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1f);
                 animancer.Animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 0f);
@@ -4883,7 +4886,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             animancer.Animator.SetIKPositionWeight(AvatarIKGoal.RightFoot, 0f);
         }
         wasSlidingIK = sliding;
-        
+
     }
 
 
@@ -4906,7 +4909,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 lastBlockPoint = bounds.ClosestPoint(point);
             }
         }
-        
+
     }
 
 
@@ -4922,7 +4925,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             state.primaryStance = (MixerState<Vector2>)primaryLayer.Play(primaryStance.blendStance);
             primaryLayer.SetMask(primaryStance.blendMask);
-            primaryLayer.IsAdditive = primaryStance.additive;    
+            primaryLayer.IsAdditive = primaryStance.additive;
         }
         else if (primaryLayer.IsAnyStatePlaying())
         {
@@ -5175,17 +5178,17 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         if (animancer == null) return false;
         return animancer.States.Current == state.dialogue;
     }
+
     public bool ShouldShowTargetIcon()
     {
         return this.GetCombatTarget() != null && !IsInDialogue();
     }
-
     public bool ShouldSlowTime()
     {
-        //return this.IsAiming() && camState == CameraState.Aim && IsAttackHeld();
-        //return this.IsAiming() && !GetGrounded();
+        // No slow time power for now
         return false;
     }
+
     public override void SetToIdle()
     {
         animancer.Play(state.move);
@@ -5242,7 +5245,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 return 0;
             }
-            
+
             if (a.priority != b.priority)
             {
                 return b.priority - a.priority;
@@ -5261,7 +5264,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             highlightedInteractable = leadInteractible;
         }
-        
+
         if (highlightedInteractable != null)
         {
             //highlightedInteractable.SetIconVisiblity(true);
@@ -5279,11 +5282,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         {
             return false;
         }
-        
+
         if (i.maxDistance > 0)
         {
             float dist = Vector3.Distance(this.transform.position, i.transform.position);
-            return dist < i.maxDistance; 
+            return dist < i.maxDistance;
         }
         return true;
     }
@@ -5419,7 +5422,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         Collider c = cc;
         Vector3 bottom = c.bounds.center + c.bounds.extents.y * Vector3.down + Vector3.up * groundBias;
         Vector3 top = c.bounds.center + Vector3.up * c.bounds.extents.y;
-        
+
         if (lastCCHit != null)
         {
             ccHit = lastCCHit;
@@ -5459,7 +5462,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
         /*
         Color clr = didSphereHit ? Color.magenta : Color.yellow;
-        
+
 
 
         Debug.DrawRay(top + this.transform.forward * cc.radius * RADIUS_MULT, Vector3.down * (c.bounds.extents.y * 2f + (SPHERE_CAST_DISTANCE)), clr);

@@ -6,38 +6,28 @@ public class PauseManager : MonoBehaviour
     public static PauseManager instance;
 
     public CanvasGroup pausePanel;
-    public float pauseMenuAlpha;
     public float pauseFadeInTime;
-    public bool paused;
+
+    bool pauseMenuOpen = false;
 
     public void Awake()
     {
         instance = this;
     }
 
-    public void Pause()
+    public void TogglePauseMenu()
     {
-        paused = true;
-        Time.timeScale = 0.0f;
-        StartCoroutine(FadeInPauseMenu(Time.time));
-    }
-
-    public void Unpause()
-    {
-        paused = false;
-        pausePanel.alpha = 0.0f;
-        Time.timeScale = 1.0f;
-    }
-
-    public void TogglePause()
-    {
-        if (paused)
+        pauseMenuOpen = !pauseMenuOpen;
+        if (pauseMenuOpen)
         {
-            Unpause();
+            TimeScaleController.instance.paused = true;
+            pausePanel.alpha = 1f;
+            // StartCoroutine(FadeInPauseMenu(Time.time));
         }
         else
         {
-            Pause();
+            pausePanel.alpha = 0f;
+            TimeScaleController.instance.paused = false;
         }
     }
 
@@ -46,14 +36,14 @@ public class PauseManager : MonoBehaviour
         while (true)
         {
             var elapsed = (Time.time - startTime) / pauseFadeInTime;
-            if (elapsed >= 1.0f)
+            if (elapsed >= 1f)
             {
-                pausePanel.alpha = pauseMenuAlpha;
+                pausePanel.alpha = 1f;
                 break;
             }
 
             // Linear fade
-            pausePanel.alpha = elapsed * pauseMenuAlpha;
+            pausePanel.alpha = elapsed;
             yield return new WaitForEndOfFrame();
         }
     }

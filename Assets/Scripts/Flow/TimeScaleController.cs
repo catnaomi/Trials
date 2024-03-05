@@ -1,38 +1,34 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TimeScaleController : MonoBehaviour
 {
     public static TimeScaleController instance;
-    public float scale = 1f;
-    float fixedDeltaTime;
-    float lastScale = 1f;
-    private void Awake()
+
+    public float desiredTimescale = 1f;
+
+    private bool _paused;
+    public bool paused
     {
-        if (instance == null)
+        get => _paused;
+        set
         {
-            instance = this;
+            Debug.Log($"Setting paused {paused}");
+            _paused = value;
         }
-        else
-        {
-            this.enabled = false;
-        }
-    }
-    // Start is called before the first frame update
-    void Start()
-    {
-        fixedDeltaTime = Time.fixedDeltaTime;
     }
 
-    // Update is called once per frame
+    float defaultFixedDeltaTime;
+
+    void Awake()
+    {
+        instance = this;
+        paused = false;
+        defaultFixedDeltaTime = Time.fixedDeltaTime;
+    }
+
     void Update()
     {
-        if (Time.timeScale != scale && lastScale != scale)
-        {
-            Time.timeScale = scale;
-            Time.fixedDeltaTime = this.fixedDeltaTime * Time.timeScale;
-        }
-        lastScale = scale;
+        Time.timeScale = paused ? 0f : desiredTimescale;
+        Time.fixedDeltaTime = defaultFixedDeltaTime * Time.timeScale;
     }
 }

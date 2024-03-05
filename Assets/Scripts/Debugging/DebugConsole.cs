@@ -35,7 +35,6 @@ public class DebugConsole : MonoBehaviour
     public ScrollRect scroll;
     public bool open;
 
-    float timeScale;
     CanvasGroup group;
     TMP_Text[] entries;
     LogEntry[] logs;
@@ -193,18 +192,17 @@ public class DebugConsole : MonoBehaviour
 
     public void ToggleOpen()
     {
-        if (!open)
+        open = !open;
+
+        if (open)
         {
+            TimeScaleController.instance.paused = true;
             UpdateLogs();
             group.alpha = 1f;
             group.interactable = true;
             group.blocksRaycasts = true;
             input.interactable = true;
             EventSystem.current.SetSelectedGameObject(input.gameObject);
-            open = true;
-            timeScale = Time.timeScale;
-            Time.timeScale = 0f;
-
         }
         else
         {
@@ -212,8 +210,7 @@ public class DebugConsole : MonoBehaviour
             group.interactable = false;
             group.blocksRaycasts = false;
             input.interactable = false;
-            Time.timeScale = timeScale;
-            open = false;
+            TimeScaleController.instance.paused = false;
         }
     }
 

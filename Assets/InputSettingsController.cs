@@ -50,7 +50,7 @@ public class InputSettingsController : MonoBehaviour
                 CheckLook();
             };
         }
-        
+
         if (TimeTravelController.time != null)
         {
             TimeTravelController.time.OnSlowTimeStart.AddListener(OnStartSlowTime);
@@ -58,7 +58,6 @@ public class InputSettingsController : MonoBehaviour
         }
 
         fov = Camera.main.fieldOfView;
-
     }
 
     public void SetCameraBasedOnControlScheme()
@@ -123,7 +122,7 @@ public class InputSettingsController : MonoBehaviour
         PlayerActor.VirtualCameras vcam = (currentControlScheme == "Keyboard") ? mouseVcams : gamepadVcams;
         ((CinemachineFreeLook)vcam.aim).m_XAxis.m_MaxSpeed = speeds.x * multiplier;
         ((CinemachineFreeLook)vcam.aim).m_YAxis.m_MaxSpeed = speeds.y * multiplier;
-    } 
+    }
 
     public void ChangeVerticalFOV(float f)
     {
@@ -136,10 +135,12 @@ public class InputSettingsController : MonoBehaviour
         fov = Camera.HorizontalToVerticalFieldOfView(f, Camera.main.aspect);
         Camera.main.fieldOfView = fov;
     }
+
     public void OnStartSlowTime()
     {
         AdjustAimCameraSpeed(true);
     }
+
     public void OnStopSlowTime()
     {
         AdjustAimCameraSpeed(false);

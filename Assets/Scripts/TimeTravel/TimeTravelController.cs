@@ -1,12 +1,9 @@
-﻿using Animancer;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.Interactions;
 
 public class TimeTravelController : MonoBehaviour
 {
@@ -22,7 +19,7 @@ public class TimeTravelController : MonoBehaviour
     public int maxSteps = 30;
     public int stepsRecorded;
     public List<IAffectedByTimeTravel> affectees;
-    
+
     bool isRewinding;
     bool recording;
     bool cancelRewind;
@@ -90,13 +87,14 @@ public class TimeTravelController : MonoBehaviour
     MaterialPropertyBlock block;
     bool ignoreLimits;
     bool infiniteResources;
+
     private void Awake()
     {
         time = this;
         affectees = new List<IAffectedByTimeTravel>();
         frozens = new List<IAffectedByTimeTravel>();
     }
-    // Use this for initialization
+
     void Start()
     {
         playerInput = GameObject.FindObjectOfType<PlayerInput>();
@@ -130,10 +128,8 @@ public class TimeTravelController : MonoBehaviour
             }
         }
         deregisters = new List<IAffectedByTimeTravel>();
-        
     }
 
-    // Update is called once per frame
     void Update()
     {
         /*
@@ -156,7 +152,7 @@ public class TimeTravelController : MonoBehaviour
         {
             return;
         }
-           
+
 
         if (isRewinding)
         {
@@ -164,7 +160,7 @@ public class TimeTravelController : MonoBehaviour
             {
                 meter.current -= rewindDrainRate * Time.deltaTime;
             }
-            
+
             timePowerClock = timePowerCooldown;
             if (meter.current <= 0f)
             {
@@ -190,11 +186,11 @@ public class TimeTravelController : MonoBehaviour
 
                 meter.current -= movementDelta.magnitude * timeStopMovementCostRatio; // movement delta is already scaled by delta time, so don't scale it again!
             }
-            
+
 
             timePowerClock = timePowerCooldown;
 
-            
+
             if (meter.current <= 0f)
             {
                 if (!ignoreLimits)
@@ -208,7 +204,7 @@ public class TimeTravelController : MonoBehaviour
                         meter.current = 0f;
                         StopFreeze();
                         OnMeterFail.Invoke();
-                    }  
+                    }
                 }
             }
         }
@@ -218,7 +214,7 @@ public class TimeTravelController : MonoBehaviour
             {
                 meter.current -= timeAimSlowDrainRate * Time.deltaTime;
             }
-            
+
             if (meter.current < 0f)
             {
                 if (charges.current > 0)
@@ -235,23 +231,6 @@ public class TimeTravelController : MonoBehaviour
         }
         else // not using powers
         {
-
-            /*
-            if (meter.current < 0f)
-            {
-                meter.current = 0f;
-            }
-
-            if (meter.current < meter.max)
-            {
-                meter.current += time.timePowerRecoveryRate * Time.deltaTime;
-            }
-            if (meter.current > meter.max)
-            {
-                meter.current = meter.max;
-            }
-            */
-            //meter.current = meter.max;
             if (charges.current < charges.max || (isQuickRecharging && (charges.current < charges.max + 1)))
             {
                 if (timePowerClock > 0f)
@@ -272,8 +251,8 @@ public class TimeTravelController : MonoBehaviour
             {
                 timePowerClock = timePowerCooldown;
             }
-            
         }
+
         bool slow = PlayerActor.player.ShouldSlowTime();
         if (slow && !isSlowing)
         {
@@ -301,6 +280,7 @@ public class TimeTravelController : MonoBehaviour
         {
             timeStopDuration = 0f;
         }
+
         bool isAnyPowerOn = freeze || isSlowing || isRewinding;
         magicVignetteStrength = Mathf.MoveTowards(magicVignetteStrength, isAnyPowerOn ? 1f : 0f, 5f * Time.deltaTime);
         magicVignette.SetFloat("_Weight", magicVignetteStrength);
@@ -374,7 +354,6 @@ public class TimeTravelController : MonoBehaviour
         else if (freeze)
         {
             StopFreeze();
-            
         }
     }
 
@@ -642,7 +621,7 @@ public class TimeTravelController : MonoBehaviour
             // otherwise objects functioning correctly will not unfreeze
             Debug.LogError(ex);
         }
-       
+
     }
 
     public void AddFrozen(IAffectedByTimeTravel affected)
@@ -684,7 +663,6 @@ public class TimeTravelController : MonoBehaviour
 
     public void StopFreeze()
     {
-        //timeStopObject.SetActive(false);
         freeze = false;
         ignoreLimits = false;
         StopPostProcessing();
@@ -762,6 +740,7 @@ public class TimeTravelController : MonoBehaviour
         }
         timeStopObject.SetActive(false);
     }
+
     IEnumerator RecordRoutine()
     {
         while (recording)
@@ -777,9 +756,7 @@ public class TimeTravelController : MonoBehaviour
             stepsRecorded++;
 
             yield return new WaitForSeconds(recordInterval);
-
         }
-        
     }
 
     IEnumerator RewindRoutine(List<IAffectedByTimeTravel> affectees)
@@ -843,10 +820,10 @@ public class TimeTravelController : MonoBehaviour
     {
         return isSlowing;
     }
+
     public void StartSlowTime()
     {
         isSlowing = true;
-        //meter.current -= timeAimSlowDrainRate + timePowerRecoveryRate;
         StartCoroutine("SlowTimeRoutine");
         StartPostProcessing();
         OnSlowTimeStart.Invoke();
@@ -869,27 +846,24 @@ public class TimeTravelController : MonoBehaviour
     {
         infiniteResources = !infiniteResources;
     }
+
     IEnumerator SlowTimeRoutine()
     {
-        float timeScale = Time.timeScale;
-        float timeFixed = Time.fixedDeltaTime;
-        Time.timeScale = timeScale * timeSlowAmount;
-        Time.fixedDeltaTime = timeFixed * timeSlowAmount;
+        Time.timeScale = TimeScaleController.instance.desiredTimescale = timeSlowAmount;
         yield return new WaitWhile(() => { return isSlowing; });
-        Time.timeScale = timeScale;
-        Time.fixedDeltaTime = timeFixed;
+        TimeScaleController.instance.desiredTimescale = 1f;
     }
+
     public bool CanStartPower()
     {
         return charges.current > 0;
-        //return meter.current >= 0f && timePowerClock <= 0f;
     }
 
     public bool IsRewinding()
     {
         return isRewinding;
     }
-    
+
     public bool IsFreezing()
     {
         return freeze;
