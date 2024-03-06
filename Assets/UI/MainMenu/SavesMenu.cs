@@ -87,7 +87,9 @@ public class SavesMenu : MenuView
     void ShowStartMenu()
     {
         if (previousView != null)
-        previousView.Focus();
+        {
+            previousView.Focus();
+        }
     }
 
     public void OnCancel(BaseEventData eventData)

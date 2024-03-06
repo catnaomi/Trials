@@ -1,18 +1,20 @@
 using System.Collections;
 using UnityEngine;
 
-public class PauseManager : MonoBehaviour
+public class PauseManager : MenuView
 {
     public static PauseManager instance;
 
     public CanvasGroup pausePanel;
     public float pauseFadeInTime;
-
+    
+    CanvasGroupFader fader;
     bool pauseMenuOpen = false;
 
     public void Awake()
     {
         instance = this;
+        fader = gameObject.GetComponent<CanvasGroupFader>();
     }
 
     public void TogglePauseMenu()
@@ -28,23 +30,6 @@ public class PauseManager : MonoBehaviour
         {
             pausePanel.alpha = 0f;
             TimeScaleController.instance.paused = false;
-        }
-    }
-
-    IEnumerator FadeInPauseMenu(float startTime)
-    {
-        while (true)
-        {
-            var elapsed = (Time.time - startTime) / pauseFadeInTime;
-            if (elapsed >= 1f)
-            {
-                pausePanel.alpha = 1f;
-                break;
-            }
-
-            // Linear fade
-            pausePanel.alpha = elapsed;
-            yield return new WaitForEndOfFrame();
         }
     }
 }

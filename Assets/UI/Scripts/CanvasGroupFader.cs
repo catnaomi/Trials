@@ -24,13 +24,12 @@ public class CanvasGroupFader : MonoBehaviour
     }
 
     CanvasGroup group;
-    Coroutine coroutine;
+    Coroutine fadeRoutine;
 
     void Awake()
     {
         group = this.GetComponent<CanvasGroup>();
     }
-
 
     public void FadeIn(System.Action callback)
     {
@@ -71,6 +70,7 @@ public class CanvasGroupFader : MonoBehaviour
     {
         FadeCanvasGroup(group, 1, null, 0, 0);
     }
+
     public void FadeCanvasGroup(CanvasGroup group, float target, System.Action callback, float duration = 1f, float delay = 0f)
     {
         if (duration < 0)
@@ -79,18 +79,14 @@ public class CanvasGroupFader : MonoBehaviour
         }
         else
         {
-            if (coroutine != null)
+            if (fadeRoutine != null)
             {
-                StopCoroutine(coroutine);
+                StopCoroutine(fadeRoutine);
             }
-            coroutine = StartCoroutine(FadeCanvasRoutine(group, target, callback, duration, delay));
+            fadeRoutine = StartCoroutine(FadeCanvasRoutine(group, target, callback, duration, delay));
         }
     }
 
-    public void SetInteractable(bool interact)
-    {
-        group.interactable = interact;
-    }
     static IEnumerator FadeCanvasRoutine(CanvasGroup group, float target, System.Action callback, float duration, float delay)
     {
         float clock = 0f;
