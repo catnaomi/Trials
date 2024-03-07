@@ -49,6 +49,19 @@ public static class DebugReflectionMethods
     {
         AddPlayerItems();
     }
+
+    public static void God()
+    {
+        PlayerActor.player.isGoddess = !PlayerActor.player.isGoddess;
+        Debug.Log($"Goddess mode: {PlayerActor.player.isGoddess}");
+    }
+
+    public static void Fly()
+    {
+        PlayerActor.player.isBird = !PlayerActor.player.isBird;
+        Debug.Log($"Fly mode: {PlayerActor.player.isBird}");
+    }
+
     public static void GiveItem(string target, string itemName)
     {
         try
