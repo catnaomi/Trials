@@ -55,6 +55,7 @@ public class PlayerPositioner : MonoBehaviour
         }
     }
 
+
     public void SpawnPlayer(PlayerActor player)
     {
         player.transform.rotation = spawnRotation;
