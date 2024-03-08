@@ -1,20 +1,38 @@
-using System.Collections;
 using UnityEngine;
 
-public class PauseManager : MenuView
+public class PauseMenuManager : MenuView
 {
-    public static PauseManager instance;
+    public static PauseMenuManager instance;
 
-    public CanvasGroup pausePanel;
     public float pauseFadeInTime;
     
+    CanvasGroup pausePanel;
     CanvasGroupFader fader;
     bool pauseMenuOpen = false;
 
     public void Awake()
     {
         instance = this;
+        pausePanel = gameObject.GetComponent<CanvasGroup>();
         fader = gameObject.GetComponent<CanvasGroupFader>();
+    }
+
+    public override void MenuStart()
+    {
+        base.MenuStart();
+        fader.Hide();
+    }
+
+    public override void Focus()
+    {
+        base.Focus();
+        fader.FadeIn();
+    }
+
+    public override void Unfocus()
+    {
+        base.Focus();
+        fader.FadeOut();
     }
 
     public void TogglePauseMenu()
@@ -23,12 +41,11 @@ public class PauseManager : MenuView
         if (pauseMenuOpen)
         {
             TimeScaleController.instance.paused = true;
-            pausePanel.alpha = 1f;
-            // StartCoroutine(FadeInPauseMenu(Time.time));
+            Focus();
         }
         else
         {
-            pausePanel.alpha = 0f;
+            Unfocus();
             TimeScaleController.instance.paused = false;
         }
     }

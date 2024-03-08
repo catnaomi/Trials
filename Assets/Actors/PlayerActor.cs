@@ -2774,7 +2774,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         inputs.actions["Pause"].performed += (context) =>
         {
-            PauseManager.instance.TogglePauseMenu();
+            PauseMenuManager.instance.TogglePauseMenu();
         };
     }
 
