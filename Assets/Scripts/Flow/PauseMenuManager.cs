@@ -51,16 +51,32 @@ public class PauseMenuManager : MenuView
 
     public void TogglePauseMenu()
     {
-        pauseMenuOpen = !pauseMenuOpen;
         if (pauseMenuOpen)
         {
-            TimeScaleController.instance.paused = true;
-            Focus();
+            ClosePauseMenu();
         }
         else
         {
-            Unfocus();
-            TimeScaleController.instance.paused = false;
+            OpenPauseMenu();
         }
+    }
+
+    public void OpenPauseMenu()
+    {
+        pauseMenuOpen = true;
+        TimeScaleController.instance.paused = true;
+        Focus();
+    }
+
+    public void ClosePauseMenu()
+    {
+        pauseMenuOpen = false;
+        Unfocus();
+        TimeScaleController.instance.paused = false;
+    }
+
+    public static void Quit()
+    {
+        Application.Quit();
     }
 }
