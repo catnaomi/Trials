@@ -34,16 +34,6 @@ public class SavesMenu : MenuView
 
     public void Init()
     {
-        if (SaveDataController.instance == null)
-        {
-            Instantiate(saveControllerPrefab);
-        }
-
-        if (SceneLoader.instance == null)
-        {
-            Instantiate(sceneLoaderPrefab);
-        }
-
         UpdateSlots();
     }
 

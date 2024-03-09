@@ -1,4 +1,7 @@
+using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class PauseMenuManager : MenuView
 {
@@ -6,15 +9,15 @@ public class PauseMenuManager : MenuView
 
     public float pauseFadeInTime;
     
-    CanvasGroup pausePanel;
     CanvasGroupFader fader;
+    GameObject[] buttons;
     bool pauseMenuOpen = false;
 
     public void Awake()
     {
         instance = this;
-        pausePanel = gameObject.GetComponent<CanvasGroup>();
-        fader = gameObject.GetComponent<CanvasGroupFader>();
+        fader = GetComponent<CanvasGroupFader>();
+        buttons = GetComponentsInChildren<Button>().Select(button => button.gameObject).ToArray();
     }
 
     public override void MenuStart()
@@ -33,6 +36,17 @@ public class PauseMenuManager : MenuView
     {
         base.Focus();
         fader.FadeOut();
+    }
+
+    void OnGUI()
+    {
+        if (focused)
+        {
+            if (EventSystem.current.currentSelectedGameObject == null || !buttons.Contains(EventSystem.current.currentSelectedGameObject))
+            {
+                EventSystem.current.SetSelectedGameObject(buttons[0]);
+            }
+        }
     }
 
     public void TogglePauseMenu()
