@@ -28,13 +28,11 @@ public class SaveDataController : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         data = new SaveData();
     }
 
-    // Update is called once per frame
     void Update()
     {
         // Check inspector debug flags
@@ -165,9 +163,9 @@ public class SaveDataController : MonoBehaviour
                 json = sr.ReadToEnd();
             }
         }
-        catch (FileNotFoundException ex)
+        catch (FileNotFoundException)
         {
-            Debug.LogWarning(ex);
+            Debug.Log($"Slot {slot} is empty.");
             return null;
         }
 

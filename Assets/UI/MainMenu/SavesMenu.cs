@@ -7,9 +7,6 @@ using System.Linq;
 
 public class SavesMenu : MenuView
 {
-    [Header("Prefabs")]
-    public GameObject saveControllerPrefab;
-    public GameObject sceneLoaderPrefab;
     [Header("References")]
     public MenuView previousView;
     public SaveDataDisplay[] displays;
@@ -17,11 +14,19 @@ public class SavesMenu : MenuView
     GameObject[] selectChildren;
     public UnityEvent OnCancelEvent;
 
+    public enum SaveLoadKind
+    {
+        save,
+        load
+    }
+    public SaveLoadKind menuKind;
+
     public override void MenuStart()
     {
         groupFade = this.GetComponent<CanvasGroupFader>();
         groupFade.Hide();
         selectChildren = GetComponentsInChildren<Selectable>().Select(s => s.gameObject).ToArray();
+        //for (
         base.MenuStart();
     }
 

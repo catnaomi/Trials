@@ -7,8 +7,8 @@ public class PauseMenuManager : MenuView
 {
     public static PauseMenuManager instance;
 
-    public float pauseFadeInTime;
-    
+    public SavesMenu savesMenu;
+
     CanvasGroupFader fader;
     GameObject[] buttons;
     bool pauseMenuOpen = false;
@@ -73,6 +73,12 @@ public class PauseMenuManager : MenuView
         pauseMenuOpen = false;
         Unfocus();
         TimeScaleController.instance.paused = false;
+    }
+
+    public void Load()
+    {
+        savesMenu.previousView = this;
+        savesMenu.Focus();
     }
 
     public static void Quit()

@@ -16,6 +16,7 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
     bool updateOnEndOfFrame;
     [Header("Data Preview")]
     [SerializeField, ReadOnly] SaveData data;
+    SavesMenu.SaveLoadKind saveLoadKind;
 
     public void SetMenuReference(SavesMenu menu)
     {
@@ -72,15 +73,15 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
         }
     }
 
+    public void SaveDataToSave()
+    {
+        SaveDataController.SaveToSlot(slot);
+    }
+
     public void NewGameOnSave()
     {
         SaveDataController.SetSlotStatic(slot);
         SaveDataController.NewGameStatic();
-    }
-
-    public void SaveDataToSave()
-    {
-        SaveDataController.SaveToSlot(slot);
     }
 
     public void DeleteSave()
