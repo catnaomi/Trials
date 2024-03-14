@@ -16,7 +16,7 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
     bool updateOnEndOfFrame;
     [Header("Data Preview")]
     [SerializeField, ReadOnly] SaveData data;
-    SavesMenu.SaveLoadKind saveLoadKind;
+    public SaveLoadKind saveLoadKind;
 
     public void SetMenuReference(SavesMenu menu)
     {
@@ -32,24 +32,21 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
     {
         if (data != null && data.IsDataValid())
         {
-            previewText.text = $"Prologue, name: Antiquity, "+
-                $"{data.playerWorldData.activeScene},"+
-                $"hp: {data.playerAttributeData.health.current}/{data.playerAttributeData.health.max},"+
-                $"charges {data.playerAttributeData.timeCharges.current}/{data.playerAttributeData.timeCharges.max},"+
+            previewText.text = $"Prologue, name: Antiquity, " +
+                $"{data.playerWorldData.activeScene}," +
+                $"hp: {data.playerAttributeData.health.current}/{data.playerAttributeData.health.max}," +
+                $"charges {data.playerAttributeData.timeCharges.current}/{data.playerAttributeData.timeCharges.max}," +
                 $"lives 3/3";
-            //uiButton.interactable = true;
         }
         else
         {
             if (!isDeleteButton)
             {
                 previewText.text = "New Game";
-               // uiButton.interactable = true;
             }
             else
             {
                 previewText.text = "Empty";
-                //uiButton.interactable = false;
             }
         }
     }
@@ -59,6 +56,17 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
         data = saveMenu.GetData(slot);
     }
 
+    public void SaveLoadSlot()
+    {
+        if (saveLoadKind == SaveLoadKind.save)
+        {
+            SaveDataToSave();
+        }
+        else
+        {
+            LoadDataFromSave();
+        }
+    }
 
     public void LoadDataFromSave()
     {

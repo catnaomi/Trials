@@ -5,6 +5,12 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Linq;
 
+public enum SaveLoadKind
+{
+    save,
+    load
+}
+
 public class SavesMenu : MenuView
 {
     [Header("References")]
@@ -14,19 +20,26 @@ public class SavesMenu : MenuView
     GameObject[] selectChildren;
     public UnityEvent OnCancelEvent;
 
-    public enum SaveLoadKind
-    {
-        save,
-        load
-    }
     public SaveLoadKind menuKind;
+    public void SetMenuKind(SaveLoadKind kind)
+    {
+        menuKind = kind;
+        SetChildrenSaveLoadKind();
+    }
+    public void SetChildrenSaveLoadKind()
+    {
+        foreach (var display in displays)
+        {
+            display.saveLoadKind = menuKind;
+        }
+    }
 
     public override void MenuStart()
     {
         groupFade = this.GetComponent<CanvasGroupFader>();
         groupFade.Hide();
         selectChildren = GetComponentsInChildren<Selectable>().Select(s => s.gameObject).ToArray();
-        //for (
+        SetChildrenSaveLoadKind();
         base.MenuStart();
     }
 

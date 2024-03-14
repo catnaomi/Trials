@@ -34,7 +34,7 @@ public class PauseMenuManager : MenuView
 
     public override void Unfocus()
     {
-        base.Focus();
+        base.Unfocus();
         fader.FadeOut();
     }
 
@@ -78,6 +78,8 @@ public class PauseMenuManager : MenuView
     public void Load()
     {
         savesMenu.previousView = this;
+        savesMenu.SetMenuKind(SaveLoadKind.load);
+        Unfocus();
         savesMenu.Focus();
     }
 
