@@ -45,14 +45,9 @@ public class SavesMenu : MenuView
 
     public override void Focus()
     {
-        base.Focus();
-        Init();
-        FadeIn();
-    }
-
-    public void Init()
-    {
         UpdateSlots();
+        base.Focus();
+        FadeIn();
     }
 
     public void UpdateSlots()

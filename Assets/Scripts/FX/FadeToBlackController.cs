@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using CustomUtilities;
 
 public class FadeToBlackController : MonoBehaviour
 {
@@ -12,8 +11,6 @@ public class FadeToBlackController : MonoBehaviour
     public static bool overrideNextFadeIn = false;
 
     public bool FadeInOnStart;
-    public AnimationCurve fadeInCurve = AnimationCurve.Linear(1f, 1f, 0f, 0f);
-    public AnimationCurve fadeOutCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
     CanvasGroup group;
     public Image fadeGraphic;
@@ -22,7 +19,6 @@ public class FadeToBlackController : MonoBehaviour
     {
         instance = this;
     }
-    // Start is called before the first frame update
     void Start()
     {
         group = this.GetComponent<CanvasGroup>();
@@ -38,8 +34,12 @@ public class FadeToBlackController : MonoBehaviour
     {
         if (instance != null)
         {
+            if (duration <= 0)
+            {
+                Debug.LogWarning("Fade In Started With Zero Duration!");
+            }
             instance.fadeGraphic.color = color;
-            instance.StartCoroutine(instance.FadeInCoroutine(duration, callback));
+            instance.StartRenderTimer(duration, (elapsedFractional) => instance.group.alpha = (1.0f - elapsedFractional), callback);
         }
     }
 
@@ -51,82 +51,21 @@ public class FadeToBlackController : MonoBehaviour
     {
         FadeOut(duration, null, Color.black);
     }
-
     public static void FadeOut(float duration, System.Action callback, Color color)
     {
         if (instance != null)
         {
+            if (duration <= 0)
+            {
+                Debug.LogWarning("Fade Out Started With Zero Duration!");
+            }
             instance.fadeGraphic.color = color;
-            instance.StartCoroutine(instance.FadeOutCoroutine(duration, callback));
+            instance.StartRenderTimer(duration, (elapsedFractional) => instance.group.alpha = elapsedFractional, callback);
         }
-    }
-
-    IEnumerator FadeInCoroutine(float duration, System.Action callback)
-    {
-        if (duration <= 0)
-        {
-            group.alpha = 0f;
-            Debug.LogWarning("Fade In Started With Zero Duration!");
-        }
-        else
-        {
-            group.alpha = 1f;
-            float clock = 0f;
-            while (clock < duration)
-            {
-                yield return null;
-                clock += Time.deltaTime;
-                group.alpha = fadeInCurve.Evaluate(Mathf.Clamp01(clock / duration));
-            }
-            group.alpha = 0f;
-        }
-        callback?.Invoke();
-    }
-
-    IEnumerator FadeOutCoroutine(float duration, System.Action callback)
-    {
-        if (duration <= 0)
-        {
-            group.alpha = 1f;
-            Debug.LogWarning("Fade Out Started With Zero Duration!");
-        }
-        else
-        {
-            group.alpha = 0f;
-            float clock = 0f;
-            while (clock < duration)
-            {
-                yield return null;
-                clock += Time.deltaTime;
-                group.alpha = fadeOutCurve.Evaluate(Mathf.Clamp01(clock / duration));
-            }
-            group.alpha = 1f;
-        }
-        callback?.Invoke();
     }
 
     public static void OverrideNextFadeInOnStart(bool fade)
     {
         overrideNextFadeIn = fade;
-    }
-
-    bool ShouldFadeInOnStart()
-    {
-        if (FadeInOnStart)
-        {
-            if (overrideNextFadeIn)
-            {
-                overrideNextFadeIn = false;
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        else
-        {
-            return false;
-        }
     }
 }
