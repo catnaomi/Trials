@@ -12,7 +12,7 @@ public class GenericTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public UnityEvent OnStopFreeze;
     public void ClearTimeData()
     {
-        
+
     }
 
     public GameObject GetObject()
@@ -73,7 +73,7 @@ public class GenericTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public void StartRewind()
     {
-        
+
     }
 
     public void StopFreeze()
@@ -84,12 +84,11 @@ public class GenericTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public void StopRewind()
     {
-        
+
     }
 
-    // Start is called before the first frame update
     void Start()
     {
-        TimeTravelController.AttemptToRegisterAffectee(this); 
+        TimeTravelController.AttemptToRegisterAffectee(this);
     }
 }

@@ -27,7 +27,7 @@ public class TimeStopParticleController : MonoBehaviour
         Speeding,
         Ending
     }
-    // Start is called before the first frame update
+
     void Start()
     {
         system = this.GetComponent<ParticleSystem>();
@@ -36,7 +36,6 @@ public class TimeStopParticleController : MonoBehaviour
         state = ParticleState.Stopped;
     }
 
-    // Update is called once per frame
     void LateUpdate()
     {
         //bool isFrozen = timeTravelController.IsFreezing();
@@ -56,7 +55,7 @@ public class TimeStopParticleController : MonoBehaviour
                 {
                     system.Stop();
                 }
-            }           
+            }
         }
         else if (state == ParticleState.Started)
         {
@@ -73,7 +72,7 @@ public class TimeStopParticleController : MonoBehaviour
         }
         else if (state == ParticleState.Slowing)
         {
-            
+
             clock += Time.deltaTime;
             float t = Mathf.Clamp01(clock / timeToFreeze);
 
@@ -84,7 +83,7 @@ public class TimeStopParticleController : MonoBehaviour
             //var emission = system.emission;
             //emission.rateOverTimeMultiplier = Mathf.Lerp(emissionTimeMax, 0f, t);
 
-            
+
             //SetParticles();
             if (clock >= timeToFreeze)
             {
@@ -99,13 +98,13 @@ public class TimeStopParticleController : MonoBehaviour
                 clock = 0f;
             }
 
-            
+
             /*
             if (system.isEmitting)
             {
                 system.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             }*/
-            
+
         }
         else if (state == ParticleState.Speeding)
         {
@@ -132,13 +131,13 @@ public class TimeStopParticleController : MonoBehaviour
                 system.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 state = ParticleState.Stopped;
             }
-            
+
         }
         Vector3 midPoint = (PlayerActor.player.transform.position + Camera.main.transform.position) * 0.5f;
         this.transform.position = midPoint;
         if (system.IsAlive())
         {
-            
+
             GetParticles();
             for (int i = 0; i < particleCount; i++)
             {
@@ -161,7 +160,7 @@ public class TimeStopParticleController : MonoBehaviour
             }
             SetParticles();
         }
-        
+
     }
 
     public void StartFreeze()

@@ -48,7 +48,7 @@ public class WorldTime : MonoBehaviour
         public float targetIntensity;
         public string scene;
     }
-    // Start is called before the first frame update
+
     void Start()
     {
         //Material realSkybox = RenderSettings.skybox;
@@ -83,7 +83,6 @@ public class WorldTime : MonoBehaviour
         if (enableDayCycle) StartCoroutine(UpdateTime());
     }
 
-    // Update is called once per frame
     IEnumerator UpdateTime()
     {
         do
@@ -288,6 +287,7 @@ public class WorldTime : MonoBehaviour
         GetAllSunSources();
         HideInactiveSuns();
     }
+
     IEnumerator FadeSunRoutine(SunSource sun, bool active, float timeToFade)
     {
         if (timeToFade <= 0) yield break;
@@ -320,6 +320,7 @@ public class WorldTime : MonoBehaviour
             }
         }
     }
+
     private void OnDestroy()
     {
         //skybox.SetFloat("_ClockTime", assetSkyboxTime);

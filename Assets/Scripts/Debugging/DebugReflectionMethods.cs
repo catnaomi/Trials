@@ -309,7 +309,7 @@ public static class DebugReflectionMethods
                     stringBuilder.Append("(primary)");
                 }
                 stringBuilder.Append(scenes[i].name);
-                
+
                 if (i < scenes.Length - 1)
                 {
                     stringBuilder.Append(", ");
@@ -359,7 +359,7 @@ public static class DebugReflectionMethods
                     Debug.LogError("Object " + obj + " lacks an actor component");
                     return;
                 }
-                
+
             }
             if (!float.TryParse(number, out float health))
             {
@@ -584,7 +584,7 @@ public static class DebugReflectionMethods
         runner.Stop();
     }
 
-    
+
     public static void PlayerStopDialogue()
     {
         try
@@ -617,7 +617,7 @@ public static class DebugReflectionMethods
             {
                 k = "$" + k;
             }
-            
+
             if (bool.TryParse(value, out bool boolValue))
             {
                 yarnStorage.SetValue(k, boolValue);
@@ -693,7 +693,7 @@ public static class DebugReflectionMethods
             Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
         }
     }
-    
+
     public static void PlayProtagNode(string node)
     {
         try
@@ -712,7 +712,7 @@ public static class DebugReflectionMethods
         {
             if (int.TryParse(slotString, out int slot))
             {
-                SaveDataController.SaveToSlot(slot);
+                SaveDataController.instance.Save(Mathf.Abs(slot));
             }
             else
             {
@@ -731,7 +731,7 @@ public static class DebugReflectionMethods
         {
             if (int.TryParse(slotString, out int slot))
             {
-                SaveDataController.LoadFromSlot(slot);
+                SaveDataController.instance.Load(Mathf.Abs(slot));
             }
             else
             {
@@ -743,6 +743,8 @@ public static class DebugReflectionMethods
             Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
         }
     }
+
+    // TODO: instead of using a template just put this exception handling code around the actual method call
     /*
     public static void Template()
     {
@@ -756,5 +758,4 @@ public static class DebugReflectionMethods
         }
     }
     */
-
 }

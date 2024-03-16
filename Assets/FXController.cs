@@ -26,12 +26,6 @@ public class FXController : MonoBehaviour
     public GameObject fx_circle;
     public GameObject fx_cross;
 
-    private static float fixedDeltaTime;
-    private static float hitpauseLength;
-
-    private static float slowMotionLength;
-    private static float slowMotionAmount;
-
     public static FXController main;
 
     [Header("Damage Colors")]
@@ -135,7 +129,6 @@ public class FXController : MonoBehaviour
         {
             healParticle = PlayerActor.player.transform.Find("_healparticle").GetComponent<ParticleSystem>();
         }
-        fixedDeltaTime = Time.fixedDeltaTime;
 
         main = this;
     }
@@ -252,77 +245,12 @@ public class FXController : MonoBehaviour
         return newFX;
     }
 
-    public static void Hitpause(float duration)
-    {
-        hitpauseLength = duration;
-        Debug.Log(string.Format("Attempting to hit pause for {0} second(s)", hitpauseLength));
-        var coroutine = main.HitpauseCoroutine();
-        main.StartCoroutine(coroutine);
-    }
-
     static void CreateFromPrefab(GameObject prefab, Vector3 position, Vector3 direction)
     {
         EnsureSingleton();
         GameObject newFX = GameObject.Instantiate(prefab);
         newFX.transform.position = position;
         newFX.transform.rotation = Quaternion.LookRotation(direction);
-    }
-    IEnumerator HitpauseCoroutine()
-    {
-        yield return new WaitForEndOfFrame();
-        HitpauseStart();
-        Debug.Log(string.Format("Yielding for {0} second(s)", hitpauseLength));
-        yield return new WaitForSecondsRealtime(hitpauseLength);
-        Debug.Log("Ending hit pause Coroutine!");
-        HitpauseEnd();
-    }
-    private static void HitpauseStart()
-    {
-        Time.timeScale = 0.0f;
-        Time.fixedDeltaTime = fixedDeltaTime * Time.timeScale;
-    }
-
-    private static void HitpauseEnd()
-    {
-        Time.timeScale = 1f;
-        Time.fixedDeltaTime = fixedDeltaTime * Time.timeScale;
-    }
-
-    public static void SlowMo(float amount, float duration)
-    {
-        slowMotionLength = duration;
-        slowMotionAmount = amount;
-        Debug.Log(string.Format("Attempting to slow time by {1} for {0} second(s)", slowMotionLength, slowMotionAmount));
-        var coroutine = main.SlowMoCoroutine();
-        main.StartCoroutine(coroutine);
-    }
-
-    public static void CancelSlowMo()
-    {
-        Debug.Log("cancelling slow motion");
-        main.StopCoroutine("SlowMoCoroutine");
-        SlowMoEnd();
-    }
-
-    IEnumerator SlowMoCoroutine()
-    {
-        yield return new WaitForEndOfFrame();
-        SlowMoStart();
-        Debug.Log(string.Format("Yielding for {0} second(s)", slowMotionLength));
-        yield return new WaitForSecondsRealtime(slowMotionLength);
-        Debug.Log("Ending slowmo Coroutine!");
-        SlowMoEnd();
-    }
-    private static void SlowMoStart()
-    {
-        Time.timeScale = slowMotionAmount;
-        Time.fixedDeltaTime = fixedDeltaTime * Time.timeScale;
-    }
-
-    private static void SlowMoEnd()
-    {
-        Time.timeScale = 1f;
-        Time.fixedDeltaTime = fixedDeltaTime * Time.timeScale;
     }
 
     public static AudioClip GetSwordHitSoundFromFXMaterial(FXMaterial material)

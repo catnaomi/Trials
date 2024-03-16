@@ -18,7 +18,7 @@ public class SaveInteract : Interactable
         if (savesMenu == null) return;
         savesMenu.Focus();
 
-        Pause();
+        TimeScaleController.instance.paused = true;
         SaveDataController.instance.OnSaveComplete.AddListener(FinishSaving);
         savesMenu.OnCancelEvent.AddListener(SaveCancelled);
     }
@@ -32,16 +32,6 @@ public class SaveInteract : Interactable
     {
         SaveDataController.instance.OnSaveComplete.RemoveListener(FinishSaving);
         savesMenu.OnCancelEvent.RemoveListener(SaveCancelled);
-        Unpause();
-    }
-
-    void Pause()
-    {
-        PauseController.Pause();
-    }
-
-    void Unpause()
-    {
-        PauseController.Unpause();
+        TimeScaleController.instance.paused = false;
     }
 }

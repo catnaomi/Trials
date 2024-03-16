@@ -6,7 +6,7 @@ public class TimeFreezeCollider : MonoBehaviour
 {
     public bool inspectorFreeze;
     [ReadOnly]public bool freeze;
-    // Start is called before the first frame update
+
     void Update()
     {
        if (inspectorFreeze && !freeze)

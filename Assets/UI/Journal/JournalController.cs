@@ -21,11 +21,12 @@ public class JournalController : MonoBehaviour
     public UnityEngine.InputSystem.InputActionReference nextEntryAction;
     public UnityEngine.InputSystem.InputActionReference previousEntryAction;
     public UnityEngine.InputSystem.InputActionReference showDialogueAction;
+
     private void Awake()
     {
         journal = this;
     }
-    // Start is called before the first frame update
+
     void Start()
     {
         //knownEntries = new List<string>(); // TODO: load this from save file
@@ -112,9 +113,9 @@ public class JournalController : MonoBehaviour
         }
         currentIndex = index;
         currentEntry = journalEntry;
-        
+
         journalEntryView.SetJournalEntry(journalEntry);
-        
+
 
         if (isNew)
         {
@@ -174,7 +175,7 @@ public class JournalController : MonoBehaviour
                 nextEntry = null;
             }
         }
-        
+
         if (true)
         {
             if (knownEntries.Count > 1)
@@ -193,7 +194,7 @@ public class JournalController : MonoBehaviour
             }
         }
         journalEntryView.UpdateButtons(next, prev);
-        
+
     }
 
     public bool ShouldOpenToJournal()

@@ -1,17 +1,18 @@
 using CustomUtilities;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Linq;
 
+public enum SaveLoadKind
+{
+    save,
+    load
+}
+
 public class SavesMenu : MenuView
 {
-    [Header("Prefabs")]
-    public GameObject saveControllerPrefab;
-    public GameObject sceneLoaderPrefab;
     [Header("References")]
     public MenuView previousView;
     public SaveDataDisplay[] displays;
@@ -19,53 +20,45 @@ public class SavesMenu : MenuView
     GameObject[] selectChildren;
     public UnityEvent OnCancelEvent;
 
-    // Start is called before the first frame update
+    public SaveLoadKind menuKind;
+    public void SetMenuKind(SaveLoadKind kind)
+    {
+        menuKind = kind;
+        SetChildrenSaveLoadKind();
+    }
+    public void SetChildrenSaveLoadKind()
+    {
+        foreach (var display in displays)
+        {
+            display.saveLoadKind = menuKind;
+        }
+    }
+
     public override void MenuStart()
     {
         groupFade = this.GetComponent<CanvasGroupFader>();
         groupFade.Hide();
         selectChildren = GetComponentsInChildren<Selectable>().Select(s => s.gameObject).ToArray();
+        SetChildrenSaveLoadKind();
         base.MenuStart();
     }
 
     public override void Focus()
     {
+        UpdateSlots();
         base.Focus();
-        Init();
         FadeIn();
     }
-
-    public void Init()
-    {
-        
-        if (SaveDataController.instance == null)
-        {
-            Instantiate(saveControllerPrefab);
-        }
-        if (SceneLoader.instance == null)
-        {
-            Instantiate(sceneLoaderPrefab);
-        }
-
-        UpdateSlots();
-    }
-
 
     public void UpdateSlots()
     {
         var saves = SaveDataController.GetSaveDatas(3);
-
 
         for (int i = 0; i < displays.Length; i++)
         {
             displays[i].SetSaveData(i, saves[i]);
             displays[i].SetMenuReference(this);
         }
-    }
-
-    public SaveData GetData(int slot)
-    {
-        return SaveDataController.ReadSlot(slot);
     }
 
     void OnGUI()
@@ -79,7 +72,6 @@ public class SavesMenu : MenuView
         }
     }
 
-
     public void FadeIn()
     {
         groupFade.FadeIn();
@@ -89,12 +81,14 @@ public class SavesMenu : MenuView
     {
         groupFade.FadeOut(ShowStartMenu);
     }
+
     void ShowStartMenu()
     {
         if (previousView != null)
-        previousView.Focus();
+        {
+            previousView.Focus();
+        }
     }
-
 
     public void OnCancel(BaseEventData eventData)
     {

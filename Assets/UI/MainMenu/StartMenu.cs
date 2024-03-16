@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
-using CustomUtilities;
 
 public class StartMenu : MenuView
 {
@@ -19,8 +18,8 @@ public class StartMenu : MenuView
         fadeGroup = this.GetComponent<CanvasGroupFader>();
         fadeGroup.Alpha = 0f;
         base.MenuStart();
-
     }
+
     public override void Focus()
     {
         base.Focus();

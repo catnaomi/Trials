@@ -7,20 +7,19 @@ public class TimeRechargeArea : MonoBehaviour
     TimeTravelController timeTravelController;
     public float maxDistance = 5f;
     [SerializeField, ReadOnly] bool isPlayerInside;
-    // Start is called before the first frame update
+
     void Start()
     {
         timeTravelController = TimeTravelController.time;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (isPlayerInside)
         {
             if (Vector3.Distance(PlayerActor.player.transform.position, this.transform.position) > maxDistance) {
                 SetPlayerInside(false);
-            } 
+            }
         }
     }
 
