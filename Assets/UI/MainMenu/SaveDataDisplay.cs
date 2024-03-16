@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -51,11 +49,6 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
         }
     }
 
-    public void UpdateSaveData()
-    {
-        data = saveMenu.GetData(slot);
-    }
-
     public void SaveLoadSlot()
     {
         if (saveLoadKind == SaveLoadKind.save)
@@ -72,8 +65,7 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
     {
         if (data != null && data.IsDataValid())
         {
-            SaveDataController.SetSlotStatic(slot);
-            SaveDataController.LoadSaveDataStatic(data);
+            SaveDataController.instance.Load(slot);
         }
         else
         {
@@ -83,19 +75,18 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
 
     public void SaveDataToSave()
     {
-        SaveDataController.SaveToSlot(slot);
+        SaveDataController.instance.Save(slot);
     }
 
     public void NewGameOnSave()
     {
-        SaveDataController.SetSlotStatic(slot);
-        SaveDataController.NewGameStatic();
+        SaveDataController.instance.NewGame();
     }
 
     public void DeleteSave()
     {
         SaveDataController.DeleteSlot(slot);
-        UpdateSaveData();
+        data = null;
         UpdateUI();
     }
 

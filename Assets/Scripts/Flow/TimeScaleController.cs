@@ -5,17 +5,7 @@ public class TimeScaleController : MonoBehaviour
     public static TimeScaleController instance;
 
     public float desiredTimescale = 1f;
-
-    private bool _paused;
-    public bool paused
-    {
-        get => _paused;
-        set
-        {
-            Debug.Log($"Setting paused {paused}");
-            _paused = value;
-        }
-    }
+    public bool paused;
 
     float defaultFixedDeltaTime;
 

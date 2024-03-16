@@ -61,11 +61,6 @@ public class SavesMenu : MenuView
         }
     }
 
-    public SaveData GetData(int slot)
-    {
-        return SaveDataController.ReadSlot(slot);
-    }
-
     void OnGUI()
     {
         if (focused)
