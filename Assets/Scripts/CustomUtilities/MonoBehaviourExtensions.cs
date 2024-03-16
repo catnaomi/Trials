@@ -64,6 +64,7 @@ namespace CustomUtilities
                     updateCallback(elapsed / duration);
                 }
             }
+            updateCallback(1f);
             finishedCallback?.Invoke();
         }
     }
