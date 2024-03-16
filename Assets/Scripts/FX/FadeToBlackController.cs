@@ -8,8 +8,6 @@ public class FadeToBlackController : MonoBehaviour
     public static readonly float DEFAULT_FADEIN = 3f;
     public static readonly float DEFAULT_FADEOUT = 2f;
 
-    public static bool overrideNextFadeIn = false;
-
     public bool FadeInOnStart;
 
     CanvasGroup group;
@@ -21,7 +19,7 @@ public class FadeToBlackController : MonoBehaviour
     }
     void Start()
     {
-        group = this.GetComponent<CanvasGroup>();
+        group = GetComponent<CanvasGroup>();
         group.alpha = FadeInOnStart ? 1f : 0f;
         if (FadeInOnStart) FadeIn(DEFAULT_FADEIN);
     }
@@ -62,10 +60,5 @@ public class FadeToBlackController : MonoBehaviour
             instance.fadeGraphic.color = color;
             instance.StartRenderTimer(duration, (elapsedFractional) => instance.group.alpha = elapsedFractional, callback);
         }
-    }
-
-    public static void OverrideNextFadeInOnStart(bool fade)
-    {
-        overrideNextFadeIn = fade;
     }
 }

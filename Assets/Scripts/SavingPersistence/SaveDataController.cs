@@ -213,7 +213,6 @@ public class SaveDataController : MonoBehaviour
         // fade screen to black
         bool fadedToBlack = false;
         FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
-        FadeToBlackController.OverrideNextFadeInOnStart(true);
         yield return new WaitUntil(() => { return fadedToBlack; });
 
         // set the spawn location before we load the scene
@@ -226,7 +225,7 @@ public class SaveDataController : MonoBehaviour
         YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
         PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
         PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
-     
+
         // load the next scene and the loading screen
         SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
         yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
@@ -240,7 +239,6 @@ public class SaveDataController : MonoBehaviour
         // fade screen to black
         bool fadedToBlack = false;
         FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
-        FadeToBlackController.OverrideNextFadeInOnStart(true);
         yield return new WaitUntil(() => { return fadedToBlack; });
 
         // make sure we don't spawn in a special place
