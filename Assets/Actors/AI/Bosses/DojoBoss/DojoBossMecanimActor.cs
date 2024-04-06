@@ -141,9 +141,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public float speed = 5f;
     public float arenaRadius = 10f;
     public Transform arenaCenter;
-    [Header("Animancer")]
-    public Animancer.ClipTransition playerParryFailAnim;
-    public float freezeTimeout = 5f;
 
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
@@ -307,61 +304,52 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
     }
 
+    void TransitionPhase(CombatPhase newPhase)
+    {
+		  currentPhase = newPhase;
+		  timeInPhase = 0f;
+		  successesThisPhase = 0;
+	  }
 
-    void CheckPhase()
+	void CheckPhase()
     {
         timeInPhase += Time.deltaTime;
         if (currentPhase == CombatPhase.AttackPhase)
         {
             if (timeInPhase >= minPhaseDuration && successesThisPhase >= attackSuccessesNeeded && !stayInPhase)
             {
-                currentPhase = CombatPhase.PillarPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.PillarPhase);
             }
             else if (timeInPhase >= maxPhaseDuration && !stayInPhase)
             {
-                //currentPhase = CombatPhase.PillarPhase;
-                currentPhase = CombatPhase.PillarPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.PillarPhase);
             }
         }
         else if (currentPhase == CombatPhase.ParryPhase)
         {
             if (timeInPhase >= minPhaseDuration && successesThisPhase >= parrySuccessesNeeded && !stayInPhase)
             {
-                currentPhase = CombatPhase.PillarPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.PillarPhase);
             }
             else if (timeInPhase >= maxPhaseDuration && !stayInPhase)
             {
-                //currentPhase = CombatPhase.PillarPhase;
-                currentPhase = CombatPhase.AttackPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.AttackPhase);
             }
         }
         else if (currentPhase == CombatPhase.PillarPhase)
         {
             if (successesThisPhase > 0 && !stayInPhase)
             {
-                currentPhase = CombatPhase.AttackPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.AttackPhase);
             }
         }
         else if (currentPhase == CombatPhase.Idle)
         {
             if (timeInPhase > 3f && !stayInPhase)
             {
-                currentPhase = CombatPhase.AttackPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.AttackPhase);
             }
         }
-
     }
 
     void UpdateMecanimValues()
