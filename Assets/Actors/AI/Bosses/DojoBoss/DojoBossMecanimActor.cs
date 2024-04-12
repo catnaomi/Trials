@@ -38,6 +38,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public int attackSuccessesNeeded = 2;
     public int parrySuccessesNeeded = 2;
     public float lowHealthThreshold = 0.5f;
+    public PlayTimelineWithActors playLowHealthCutscene;
     [Header("Animation Curves & Values")]
     public AnimationCurve lanceExtensionCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     public Vector2 lanceExtensionMinMax = Vector2.up;
@@ -196,7 +197,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         None
     }
 
-    // Start is called before the first frame update
     public override void ActorStart()
     {
         base.ActorStart();
@@ -253,10 +253,13 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         InMeleeRange = dist <= meleeRange;
         AtLongRange = dist >= longRange;
 
-        // TODO: cutscene for low health!
         if (!LowHealth && attributes.health.current <= attributes.health.max * lowHealthThreshold)
         {
-            OnLowHealth();
+            playLowHealthCutscene.Play();
+            parrySequenceIndex = maxParryFirstPhase + 1;
+            parryCurrentIndex = 0;
+            offenseGroup = maxAttackFirstPhase + 1;
+            LowHealth = true;
         }
 
         if (shouldRealign)
@@ -1483,14 +1486,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         return isCritVuln;
     }
 
-    public void OnLowHealth()
-    {
-        parrySequenceIndex = maxParryFirstPhase + 1;
-        parryCurrentIndex = 0;
-        offenseGroup = maxAttackFirstPhase + 1;
-
-        LowHealth = true;
-    }
     public void SetParryValue()
     {
         string sequence = parryPatterns[parrySequenceIndex];
