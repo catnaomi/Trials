@@ -7,6 +7,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 using Random = UnityEngine.Random;
+using BK.HierarchyHeader;
 
 public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 {
@@ -180,6 +181,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     float randomClock = 0f;
     bool shouldRealign;
 
+    [Header("Inspector Debug")]
+    public bool setHalfHealth = false;
+
     enum CombatPhase
     {
         AttackPhase,
@@ -225,6 +229,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     public override void Update()
     {
+        if (setHalfHealth)
+        {
+            attributes.health.current = (attributes.health.max * lowHealthThreshold) - 1f;
+            setHalfHealth = false;
+        }
+
         if (!CanUpdate())
         {
             UpdateCollisionMode();
@@ -235,7 +245,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         ActorPostUpdate();
     }
-
     public override void ActorPostUpdate()
     {
         CheckTarget();
@@ -255,7 +264,20 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         if (!LowHealth && attributes.health.current <= attributes.health.max * lowHealthThreshold)
         {
-            playLowHealthCutscene.Play();
+            PlayerActor.player.DisablePhysics();
+            RealignToTarget();
+            StartTimeline();
+            this.StartTimer(1.0f, () => // TODO: magic number
+            {
+                GetComponent<DojoBossInventoryTransformingController>().SetWeaponByName("Pipe");
+                playLowHealthCutscene.Play();
+                playLowHealthCutscene.OnEnd.AddListener(() =>
+                {
+                    StopTimeline();
+                    PlayerActor.player.EnablePhysics();
+                });
+            });
+
             parrySequenceIndex = maxParryFirstPhase + 1;
             parryCurrentIndex = 0;
             offenseGroup = maxAttackFirstPhase + 1;
@@ -289,7 +311,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             wasOnPillarLastFrame = IsOnPillar;
         }
     }
-
     void TransitionPhase(CombatPhase newPhase)
     {
       currentPhase = newPhase;
