@@ -39,7 +39,7 @@ public class DojoBossParryFailController : MonoBehaviour
 
     void Update()
     {
-        if (particleController.Playing && (playerFailState != null && PlayerActor.player.animancer.States.Current != playerFailState))
+        if (particleController.Playing && playerFailState != null && PlayerActor.player.animancer.States.Current != playerFailState)
         {
             particleController.StopParticle();
         }
@@ -54,12 +54,6 @@ public class DojoBossParryFailController : MonoBehaviour
     IEnumerator PlayerParryFailStateRoutine(AnimancerState state, PlayerActor player)
     {
         yield return new WaitForSeconds(freezeTimeout);
-        if (TimelineListener.IsAnyDirectorPlaying())
-        {
-            yield return new WaitWhile(TimelineListener.IsAnyDirectorPlaying);
-            yield return new WaitForSeconds(freezeTimeout);
-        }
-
         if (player.animancer.States.Current == state)
         {
             player.ResetAnim();
