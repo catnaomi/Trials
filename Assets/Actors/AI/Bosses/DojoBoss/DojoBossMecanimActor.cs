@@ -21,6 +21,20 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     ColliderMode collisionMode;
 
+    public enum WeaponState
+    {
+        None,           // 0
+        Quarterstaff,   // 1
+        Scimitar,       // 2
+        Greatsword,     // 3
+        Rapier,         // 4
+        Bow,            // 5
+        Hammer,         // 6
+        Daox2,          // 7
+        MagicStaff,     // 8
+        Spear           // 9
+    }
+
     public Collider CurrentCollider
     {
         get => GetCollider();

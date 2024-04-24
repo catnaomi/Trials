@@ -37,7 +37,7 @@ public class TransformingSubWeapon : BladeWeapon
 
         Transform parent = positionReference.MainHand.transform;
 
-        Vector3 dir = positionReference.MainHand.transform.parent.up;//(parent.position - positionReference.OffHand.transform.position).normalized;
+        Vector3 dir = positionReference.MainHand.transform.parent.up;
         deadArrow.transform.position = parent.transform.position + dir * arrowLength;
         deadArrow.transform.rotation = Quaternion.LookRotation(dir);
         deadArrow.transform.SetParent(parent.transform, true);
@@ -45,7 +45,7 @@ public class TransformingSubWeapon : BladeWeapon
 
     public override void HitboxActive(bool active)
     {
-        if (primaryWeapon.weaponState != DojoBossCombatantActor.WeaponState.Bow)
+        if (primaryWeapon.weaponState != DojoBossMecanimActor.WeaponState.Bow)
         {
             base.HitboxActive(active);
             return;
@@ -114,12 +114,6 @@ public class TransformingSubWeapon : BladeWeapon
         {
             deadArrow.SetActive(true);
         }
-
-        //if (!holder.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference)) return;
-        //Transform parent = positionReference.MainHand.transform;
-        //Vector3 dir = (parent.position - positionReference.OffHand.transform.position).normalized;
-        //deadArrow.transform.position = parent.transform.position + dir * arrowLength;
-        //deadArrow.transform.rotation = Quaternion.LookRotation(dir);
     }
 
     public void Nock()
@@ -153,8 +147,7 @@ public class TransformingSubWeapon : BladeWeapon
 
             float dist = Vector3.Distance(holder.GetCombatTarget().transform.position, holder.transform.position);
 
-
-            Vector3 aimAssist = Vector3.zero;// Vector3.Lerp(Vector3.zero, new Vector3(0, 0.05f, 0), dist / 20f);
+            Vector3 aimAssist = Vector3.zero;
 
             Debug.Log("aim assist: " + aimAssist.y * 100f);
 
@@ -170,14 +163,7 @@ public class TransformingSubWeapon : BladeWeapon
         }
         float launchStrength = fireStrengthMult;
 
-        //float launchStrength = 25f + (75f * holder.GetFireStrength());
-        /*ArrowController arrow = arrows[index];
-        if (arrow == null)
-        {
-            arrow = arrows[index] = ArrowController.Spawn(arrowPrefab, holder.transform);
-        }*/
-
-        Vector3 origin = positionReference.MainHand.transform.position + positionReference.MainHand.transform.parent.up * arrowLength;//holder.transform.position + launchVector + holder.transform.up * 1f;//(parent.position - positionReference.OffHand.transform.position).normalized;
+        Vector3 origin = positionReference.MainHand.transform.position + positionReference.MainHand.transform.parent.up * arrowLength;
         ArrowController arrow = ArrowController.Launch(arrowPrefab, origin, Quaternion.LookRotation(launchVector), launchVector * launchStrength, holder.transform, this.bowDamageKnockback);
         arrow.Launch(origin, Quaternion.LookRotation(launchVector), launchVector * launchStrength, holder.transform, this.bowDamageKnockback);
 
