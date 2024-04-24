@@ -184,7 +184,6 @@ public class PlayerTimeTravelHandler : ActorTimeTravelHandler
 
     IEnumerator TimeResumeDamageRoutine(Queue<TimeStateDamagePair> afterImageDamageDataQueue)
     {
-        float clock = 0f;
         unfreezeRoutineStarted = true;
         yield return null;
         while (afterImageDamageDataQueue.Count > 0)
@@ -235,8 +234,6 @@ public class PlayerTimeTravelHandler : ActorTimeTravelHandler
                 timeStateDamagePair.target.TakeDamage(damage);
             }
             
-
-
             AnimancerComponent afterImage = GetNextAfterImage(fadeTime);
             AnimancerState afterimageState = CreateAfterimageFromTimeState(afterImage, timeStateDamagePair.data);
             afterImage.transform.position = timeStateDamagePair.target.GetGameObject().transform.position + offset;
@@ -244,21 +241,8 @@ public class PlayerTimeTravelHandler : ActorTimeTravelHandler
             afterimageState.Speed = (afterimageState.Length / unfreezeDamageDelay);
             afterimageState.NormalizedTime = 0f;
             afterimageState.Events.Clear();
-            /*
-            while (clock < unfreezeDamageDelay)
-            {
-                
-                afterimageState.NormalizedTime = Mathf.Clamp01(clock / unfreezeDamageDelay);
-                clock += Time.deltaTime;
-                if (damaged && clock > (unfreezeDamageDelay/2f))
-                {
-                    timeStateDamagePair.target.TakeDamage(damage);
-                }
-                yield return null;
-            }
-            */
+            
             yield return new WaitForSeconds(unfreezeDamageDelay);
-            //afterimageState.NormalizedTime = 1f;
         }
         afterImageDamageDataQueue.Clear();
         unfreezeRoutineStarted = false;

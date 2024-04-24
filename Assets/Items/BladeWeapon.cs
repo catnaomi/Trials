@@ -11,13 +11,12 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     public float width = 1f;
     public float length = 1.5f;
     public bool doubleSided;
-    //public float weight = 1f;
+
     [Space(10)]
     [SerializeField]public float slashModifier = 1f;
     [SerializeField]public float thrustModifier = 1f;
     bool wall;
     bool active;
-    //[HideInInspector] WeaponController weaponController;
     [HideInInspector] protected HitboxGroup hitboxes;
 
     ParticleSystem trailSystem;
@@ -33,11 +32,8 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     {
         base.EquipWeapon(actor);
 
-        //weaponController = new WeaponController(this, ((HumanoidActor)holder).positionReference.MainHand, holder);
-
         GenerateHitboxes();
 
-        SetTrails(false, false);
         hitboxes.OnHitTerrain.RemoveAllListeners();
         hitboxes.OnHitTerrain.AddListener(TerrainContact);
         hitboxes.OnHitWall.AddListener(WallContact);
@@ -433,52 +429,6 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         return elements;
     }
 
-    private void SetTrails(bool thrust, bool slash)
-    {
-        return;
-        if (GetModel() == null) return;
-        trailSystem = GetModel().GetComponentInChildren<ParticleSystem>();
-
-        if (trailSystem == null)
-        {
-            GameObject trailPrefab = Resources.Load<GameObject>("Prefabs/trail_particle");
-            GameObject trailObject = GameObject.Instantiate(trailPrefab, GetModel().transform);
-            trailObject.transform.position = GetHand().transform.position + GetModel().transform.up * GetLength();
-
-            trailSystem = trailObject.GetComponent<ParticleSystem>();
-        }
-        if (trailSystem != null)
-        {
-            if (thrust || slash)
-            {
-                var t = trailSystem.trails;
-
-                //t.lifetimeMultiplier = 0.2f;
-
-                //t.lifetime = 0.2f;
-                trailSystem.GetComponent<FadeTrails>().Reset();
-
-                trailSystem.Play();
-
-            }
-            else
-            {
-                var t = trailSystem.trails;
-
- 
-                trailSystem.GetComponent<FadeTrails>().StartFade();
-                //t.lifetimeMultiplier = 0f;
-                //t.lifetime = 0f;
-            }
-        }
-    }
-
-    private void SetTrailColor(DamageType type)
-    {
-        Color c = FXController.GetColorForDamageType(type);
-        Color c2 = FXController.GetSecondColorForDamageType(type);
-        
-    }
     public enum AttackType
     {
         None,               // 0
@@ -493,237 +443,6 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         ThrustingCritical,
         Disarming,
     }
-
-    public static bool AttackIsSlashing(AttackType type)
-    {
-        return true;
-        if (type == AttackType.SlashingLight ||
-            type == AttackType.SlashingMedium ||
-            type == AttackType.SlashingHeavy ||
-            type == AttackType.SlashingCritical)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    public static bool AttackIsThrusting(AttackType type)
-    {
-        return true;
-        if (type == AttackType.ThrustingLight ||
-            type == AttackType.ThrustingMedium ||
-            type == AttackType.ThrustingHeavy ||
-            type == AttackType.ThrustingCritical)
-        {
-            return true;
-        }
-        return false;
-    }
-    /*
-    public virtual DamageKnockback GetDamageFromAttack(AttackType attackType, Actor actor)
-    {
-
-        /*
-         * ATTACKS
-         * 
-         * LIGHTS:
-         *   8 base poise damage
-         *   + 10 on full thust/slash
-         *   + 2 at base weight
-         *   * range: 8-20+
-         *   
-         * MEDIUMS:
-         *   20 base poise damage
-         *   + 15 on full thust/slash
-         *   + 10 at base weight
-         *   * range: 20-45+
-         *   
-         * HEAVIES:
-         *  30 base poise damage
-         *   + 20 on full thust/slash
-         *   + 15 at base weight
-         *   * range: 30-65+
-         *   * can knockdown
-         *   
-         * knockback:
-         *    *  direction: out
-         *    *  50 base
-         *    *   + 0 on full thrust/slash
-         *    *   + 25 at base weight  
-         * 
-         * Blocking an attack takes
-         * (1.5x)
-         * the poise cost of the attack.
-         * 
-         * Damage:
-         *  Lights: 1 (1/3 heart)
-         *  Mediums: 3 (1 heart)
-         *  Heavies: 6 (2 hearts)
-         *    
-         *
-
-        Vector3 heavyKB = new Vector3(0, 20f, 50f + 25f * GetWeight());
-        Vector3 lightKB = new Vector3(0, 0, 20f);
-
-        switch (attackType)
-        {
-            case AttackType.SlashingLight:
-                return new DamageKnockback()
-                {
-                    healthDamage = GetModifiedDamage(true) * 1f,
-                    heartsDamage = GetModifiedHeartsDamage(true) * 1f,
-                    staminaDamage = GetStaminaDamage() * 1f,
-                    kbForce = DamageKnockback.GetKnockbackRelativeToTransform
-                        (
-                            lightKB,
-                            actor.transform
-                        ),
-                    staggers = DamageKnockback.StandardStaggerData,
-                    source = GetHeldActor().gameObject,
-                    types = GetModifiedDamageTypes(true),
-                    criticalMultiplier = 1.2f,
-                };           
-            case AttackType.SlashingMedium:
-                return new DamageKnockback()
-                {
-                    healthDamage = GetModifiedDamage(true) * 2f,
-                    heartsDamage = GetModifiedHeartsDamage(true) * 2f,
-                    staminaDamage = GetStaminaDamage() * 2f,
-                    kbForce = DamageKnockback.GetKnockbackRelativeToTransform
-                        (
-                            heavyKB,
-                            actor.transform
-                        ),
-                    staggers = DamageKnockback.StandardStaggerData,
-                    source = GetHeldActor().gameObject,
-                    types = GetModifiedDamageTypes(true),
-                    criticalMultiplier = 1.2f,
-                };
-            case AttackType.SlashingHeavy:
-                return new DamageKnockback()
-                {
-                    healthDamage = GetModifiedDamage(true) * 3f,
-                    heartsDamage = GetModifiedHeartsDamage(true) * 3f,
-                    staminaDamage = GetStaminaDamage() * 10f,
-                    kbForce = DamageKnockback.GetKnockbackRelativeToTransform
-                        (
-                            heavyKB,
-                            actor.transform
-                        ),
-                    staggers =  new DamageKnockback.StaggerData()
-                    {
-                        onHit = DamageKnockback.StaggerType.Stumble,
-                        onArmorHit = DamageKnockback.StaggerType.Stagger,
-                        onCritical = DamageKnockback.StaggerType.Knockdown,
-                        onInjure = DamageKnockback.StaggerType.Knockdown,
-                        onKill = DamageKnockback.StaggerType.Knockdown,
-                        onHelpless = DamageKnockback.StaggerType.Knockdown,
-                    },
-                    breaksArmor = true,
-                    source = GetHeldActor().gameObject,
-                    types = GetModifiedDamageTypes(true),
-                    criticalMultiplier = 1.2f,
-                };
-            case AttackType.ThrustingLight:
-                return new DamageKnockback()
-                {
-                    healthDamage = GetModifiedDamage(false) * 1f,
-                    heartsDamage = GetModifiedHeartsDamage(false) * 1f,
-                    staminaDamage = GetStaminaDamage() * 1f,
-                    kbForce = DamageKnockback.GetKnockbackRelativeToTransform
-                        (
-                            lightKB,
-                            actor.transform
-                        ),
-                    staggers = DamageKnockback.StandardStaggerData,
-                    source = GetHeldActor().gameObject,
-                    types = GetModifiedDamageTypes(false),
-                    criticalMultiplier = 1.7f,
-                };
-            case AttackType.ThrustingMedium:
-                return new DamageKnockback()
-                {
-                    healthDamage = GetModifiedDamage(false) * 2f,
-                    heartsDamage = GetModifiedHeartsDamage(false) * 2f,
-                    staminaDamage = GetStaminaDamage() * 2f,
-                    kbForce = DamageKnockback.GetKnockbackRelativeToTransform
-                        (
-                            heavyKB,
-                            actor.transform
-                        ),
-                    staggers = DamageKnockback.StandardStaggerData,
-                    source = GetHeldActor().gameObject,
-                    types = GetModifiedDamageTypes(false),
-                    criticalMultiplier = 1.7f,
-                };
-            case AttackType.ThrustingHeavy:
-                return new DamageKnockback()
-                {
-                    healthDamage = GetModifiedDamage(false) * 3f,
-                    heartsDamage = GetModifiedHeartsDamage(false) * 3f,
-                    staminaDamage = GetStaminaDamage() * 10f,
-                    kbForce = DamageKnockback.GetKnockbackRelativeToTransform
-                        (
-                            heavyKB,
-                            actor.transform
-                        ),
-                    staggers = new DamageKnockback.StaggerData()
-                    {
-                        onHit = DamageKnockback.StaggerType.Stumble,
-                        onArmorHit = DamageKnockback.StaggerType.Stagger,
-                        onCritical = DamageKnockback.StaggerType.Crumple,
-                        onInjure = DamageKnockback.StaggerType.Knockdown,
-                        onKill = DamageKnockback.StaggerType.Knockdown,
-                        onHelpless = DamageKnockback.StaggerType.Knockdown,
-                    },
-                    breaksArmor = true,
-                    source = GetHeldActor().gameObject,
-                    types = GetModifiedDamageTypes(false),
-                    criticalMultiplier = 1.7f,
-                };
-            case AttackType.ThrustingCritical:
-                return new DamageKnockback()
-                {
-                    healthDamage = GetModifiedDamage(false) * 3f,
-                    heartsDamage = GetModifiedHeartsDamage(false) * 3f,
-                    staminaDamage = GetStaminaDamage() * 10f,
-                    kbForce = DamageKnockback.GetKnockbackRelativeToTransform
-                        (
-                            heavyKB,
-                            actor.transform
-                        ),
-                    staggers = DamageKnockback.StandardStaggerData,
-                    breaksArmor = true,
-                    source = GetHeldActor().gameObject,
-                    types = GetModifiedDamageTypes(false),
-                    criticalMultiplier = 1.7f,
-                    forceCritical = true,
-                };
-            case AttackType.Disarming:
-                return new DamageKnockback()
-                {
-                    healthDamage = 0f,
-                    heartsDamage = 0f,
-                    staminaDamage = 0f,
-                    kbForce = heavyKB.magnitude * Vector3.up * 10f,
-                    staggers = new DamageKnockback.StaggerData()
-                    {
-                        onHit = DamageKnockback.StaggerType.Stumble,
-                        onArmorHit = DamageKnockback.StaggerType.Stumble,
-                        onCritical = DamageKnockback.StaggerType.Stumble,
-                        onInjure = DamageKnockback.StaggerType.Stumble,
-                        onKill = DamageKnockback.StaggerType.Stumble,
-                        onHelpless = DamageKnockback.StaggerType.Stumble,
-                    },
-                    breaksArmor = true,
-                    source = GetHeldActor().gameObject,
-                    disarm = true
-                };
-            default:
-                return new DamageKnockback();
-        }
-    }
-*/
 
     public virtual DamageKnockback GetDamageFromAttack(Actor actor)
     {
@@ -756,7 +475,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
 
     public override float GetBlockPoiseDamage()
     {
-        return 100f;//10f * GetWeight();
+        return 100f;
     }
 
     public float GetPoiseRecoveryRate()
@@ -831,15 +550,6 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     {
         Hitbox contactBox = hitboxes.terrainContactBox;
 
-        //Vector3 contactPoint = contactBox.hitTerrain.ClosestPoint(contactBox.collider.bounds.center);
-
-        /*
-        if (contactBox.hitTerrain.Raycast(
-            new Ray(((HumanoidActor)holder).positionReference.MainHand.transform.position,(((HumanoidActor)holder).positionReference.MainHand.transform.forward)),
-            out RaycastHit hit,
-            length))
-            */
-
         if (active && holder.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference))
         {
             Vector3 contactPoint = contactBox.hitTerrain.ClosestPoint((positionReference.MainHand.transform.position + positionReference.MainHand.transform.forward * (length / 2f)));
@@ -877,8 +587,6 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
             statBlock.stat_Durability.compare = true;
         }
 
-
-
         statBlock.stat_Weight.compare = true;
         statBlock.stat_Length.compare = true;
         statBlock.stat_Width.compare = true;
@@ -890,6 +598,4 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
     {
         return EquippableOff;
     }
-
- 
 }

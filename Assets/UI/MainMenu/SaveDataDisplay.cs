@@ -7,11 +7,12 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
 {
     public int slot;
     public bool isDeleteButton;
+
     [Header("UI References")]
     public TMP_Text previewText;
     public Button uiButton;
     SavesMenu saveMenu;
-    bool updateOnEndOfFrame;
+
     [Header("Data Preview")]
     [SerializeField, ReadOnly] SaveData data;
     public SaveLoadKind saveLoadKind;
@@ -103,10 +104,6 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
         if (saveMenu != null && EventSystem.current.currentSelectedGameObject == this.gameObject && !saveMenu.IsFocused)
         {
             EventSystem.current.SetSelectedGameObject(null);
-        }
-        if (updateOnEndOfFrame)
-        {
-            UpdateUI();
         }
     }
 }

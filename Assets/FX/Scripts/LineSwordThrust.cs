@@ -22,9 +22,7 @@ public class LineSwordThrust : MonoBehaviour
     //float lineTimer = 0f;
     public float bloodFadeTime = 0.5f;
     public float bloodFadeDelay = 0.5f;
-    float bloodTimer;
     bool thrusting;
-    bool bleeding;
     bool nextIsCrit;
     Vector3 contactPoint;
 
@@ -163,8 +161,6 @@ public class LineSwordThrust : MonoBehaviour
         bloodParticles[currentIndex].transform.rotation = Quaternion.LookRotation(pseudoParent.transform.forward);
         bloodParticles[currentIndex].gameObject.SetActive(true);
         bloodParticles[currentIndex].Play();
-        bloodTimer = bloodFadeDelay + bloodFadeTime;
-        bleeding = true;
         if (isCrit) Debug.Log("Crit!!!");
         AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Blood) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Blood);
         float volume = (isCrit) ? critVolume : hitVolume;
@@ -193,7 +189,6 @@ public class LineSwordThrust : MonoBehaviour
 
     public void StopBleeding()
     {
-        bleeding = false;
     }
 
     public void SetContactPoint(Vector3 position)

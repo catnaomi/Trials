@@ -41,12 +41,7 @@ public class MeshSwordSlash : MonoBehaviour
     public LineRenderer bloodlineRenderer;
     public float bloodFadeTime = 1f;
     public float bloodFadeDelay = 2f;
-    Vector3 contactPoint;
-    Vector3 contactDir;
-    int contactIndex;
-    float bloodTimer;
     bool bleeding;
-    bool nextIsCrit;
     List<Vector3> lineVertices;
     [Header("Other FX")]
     [Range(0f,1f)]
@@ -59,7 +54,7 @@ public class MeshSwordSlash : MonoBehaviour
 
     [ReadOnly] public bool slashing = false;
     int slashFrames = 0;
-    // Start is called before the first frame update
+
     void Start()
     {
         meshFilter = this.gameObject.AddComponent<MeshFilter>();
@@ -74,7 +69,6 @@ public class MeshSwordSlash : MonoBehaviour
         triangles = new List<int>(MAX_QUADS * 6);
         uvs = new List<Vector2>(MAX_QUADS * 4);
 
-        //lineRenderer = this.GetComponentInChildren<LineRenderer>();
         lineVertices = new List<Vector3>(MAX_QUADS * 2);
         StartCoroutine("UpdateAtFPS");
 
@@ -82,7 +76,6 @@ public class MeshSwordSlash : MonoBehaviour
         bottomPoints = new List<Vector3>();
         topCurve = new CatmullRom(emptyPoints, resolution, false);
         bottomCurve = new CatmullRom(emptyPoints, resolution, false);
-
     }
 
     public void BeginSlash()
@@ -117,6 +110,7 @@ public class MeshSwordSlash : MonoBehaviour
     {
         bottomPoint = t;
     }
+
     private void Update()
     {
         if (pseudoParent == null)
@@ -124,10 +118,8 @@ public class MeshSwordSlash : MonoBehaviour
             Destroy(this.gameObject);
             return;
         }
-        //UpdateTrail();
         topCurve.DrawSpline(Color.white);
         topCurve.DrawTangents(0.25f, Color.blue);
-        //bottomCurve.DrawSpline(Color.black);
         if (slashing)
         {
             fadeoutTimer = fadeoutTime;
@@ -159,17 +151,11 @@ public class MeshSwordSlash : MonoBehaviour
             lineRenderer.startColor = new Color(lineRenderer.startColor.r, lineRenderer.startColor.g, lineRenderer.startColor.b, alpha);
             lineRenderer.endColor = new Color(lineRenderer.endColor.r, lineRenderer.endColor.g, lineRenderer.endColor.b, alpha);
         }
-        if (slashing)// || fadeoutTimer > 0 || lineTimer > 0)
+        if (slashing)
         {
             this.transform.position = pseudoParent.position;
         }
         CatmullRomPoint[] points = topCurve.GetPoints();
-        if (contactIndex > 0 && points.Length > contactIndex & bleeding)
-        {
-            contactPoint = points[contactIndex].position;
-            //contactDir = Vector3.ProjectOnPlane(points[contactIndex].tangent.normalized, Camera.main.transform.forward).normalized;
-            contactDir = points[contactIndex].tangent.normalized;
-        }
     }
     IEnumerator UpdateAtFPS()
     {
@@ -180,6 +166,7 @@ public class MeshSwordSlash : MonoBehaviour
             UpdateTrail();
         }
     }
+
     private void UpdateTrail()
     {
         if (topPoint == null || bottomPoint == null) return;
@@ -200,19 +187,14 @@ public class MeshSwordSlash : MonoBehaviour
                 CatmullRomPoint[] topCurvePoints = topCurve.GetPoints();
                 CatmullRomPoint[] bottomCurvePoints = bottomCurve.GetPoints();
                 lineRenderer.positionCount = topCurvePoints.Length;
-                //bloodlineRenderer.positionCount = topCurvePoints.Length;
                 for (int i = 0; i < topCurvePoints.Length; i++)
                 {
                     vertices.Add(topCurvePoints[i].position - this.transform.position);
                     vertices.Add(bottomCurvePoints[i].position - this.transform.position);
-                    //vertices.Add(topCurvePoints[i].position + Vector3.up);
                     float x = (float)i / (float)(topCurvePoints.Length - 1);
                     uvs.Add(new Vector2(x, 0));
                     uvs.Add(new Vector2(x, 1));
 
-
-                    
-                    
                     if (vertices.Count >= 4)
                     {
                         int c = vertices.Count;
@@ -235,7 +217,6 @@ public class MeshSwordSlash : MonoBehaviour
                     }
 
                     lineRenderer.SetPosition(topCurvePoints.Length - 1 - i, topCurvePoints[i].position - this.transform.position);
-                    //bloodlineRenderer.SetPosition(topCurvePoints.Length - 1 - i, topCurvePoints[i].position - this.transform.position);
                 }
                 mesh.Clear();
                 mesh.SetVertices(vertices);
@@ -243,54 +224,9 @@ public class MeshSwordSlash : MonoBehaviour
                 mesh.SetUVs(0, uvs);
                 controlPoints = topCurve.GetControlPoints();
             }
-
-            /*
-            vertices.Add(topPoint.position - this.transform.position);
-            vertices.Add(bottomPoint.position - this.transform.position);
-            uvs.Add(Vector2.zero);
-            uvs.Add(Vector2.zero);
-            
-
-            
-            if (vertices.Count >= 4)
-            {
-                int c = vertices.Count;
-                // 0 = (c-4)
-                // 1 = (c-3)
-                // 2 = (c-2)
-                // 3 = (c-1)
-                int i0 = c - 4;
-                int i1 = c - 3;
-                int i2 = c - 2;
-                int i3 = c - 1;
-                for (int i = 0; i < slashFrames; i++)
-                {
-                    float x = (float)i / (float)(slashFrames - 1);
-                    uvs[2 * i] = new Vector2(x, 0);
-                    uvs[(2 * i) + 1] = new Vector2(x, 1);
-                    //uvs[i-1] = new Vector2(
-                }
-
-                triangles.Add(i0);
-                triangles.Add(i2);
-                triangles.Add(i1);
-
-                triangles.Add(i3);
-                triangles.Add(i1);
-                triangles.Add(i2);
-
-                mesh.Clear();
-                mesh.SetVertices(vertices);
-                mesh.SetTriangles(triangles, 0);
-                mesh.SetUVs(0, uvs);
-            }
-            */
-
         }
         else
         {
-            //if (fadeoutTimer <= 0)
-            //{
             int count = Mathf.FloorToInt(topCurve.GetPoints().Length * (lineTimer / lineFadeTime));
             if (count < 0)
             {
@@ -299,105 +235,4 @@ public class MeshSwordSlash : MonoBehaviour
             lineRenderer.positionCount = count;
         }
     }
-    
-    /*
-    public void Bleed()
-    {
-        bool isCrit = IsNextCrit();
-        bloodlineRenderer.sharedMaterial = linemat_blood;
-        bloodlineRenderer.gameObject.SetActive(true);
-        ParticleSystem particles = bloodlineRenderer.GetComponentInChildren<ParticleSystem>();
-        bloodlineRenderer.transform.position = contactPoint;
-        bloodlineRenderer.transform.rotation = Quaternion.LookRotation(contactDir);
-        particles.Play();
-        bloodTimer = bloodFadeDelay + bloodFadeTime;
-        bleeding = true;
-        AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Blood) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Blood);
-        float volume = (isCrit) ? critVolume : hitVolume;
-        this.GetComponent<AudioSource>().Stop();
-        this.GetComponent<AudioSource>().PlayOneShot(clip, volume);
-        float force = (isCrit) ? impulseCritMag : impulseMag;
-        Shake(force);
-        OnBleed.Invoke();
-    }
-
-    public void StopBleeding()
-    {
-        bloodlineRenderer.GetComponentInChildren<ParticleSystem>().Stop();
-        bloodlineRenderer.gameObject.SetActive(false);
-        bleeding = false;
-    }
-    */
-    /*
-    public void Block(Vector3 point)
-    {
-        bool isCrit = IsNextCrit();
-        AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
-        FXController.CreateFX(FXController.FX.FX_Sparks, point, Quaternion.LookRotation(-contactDir), 1f, clip);
-
-        float force = (isCrit) ? impulseCritMag : impulseMag;
-        Shake(force * impulseBlockMult);
-    }
-    public void SetContactPoint(Vector3 position)
-    {
-        contactPoint = position;
-        CatmullRomPoint[] points = topCurve.GetPoints();
-        if (points.Length > 0)
-        {
-            
-
-            Vector3 leadingPoint = position;
-            float leadingDist = Mathf.Infinity;
-            Vector3 tangent = pseudoParent.transform.right;
-            for (int i = 0; i < points.Length; i++)
-            {
-                CatmullRomPoint point = points[i];
-                float dist = Vector3.Distance(point.position, position);
-                if (dist < leadingDist)
-                {
-                    leadingDist = dist;
-                    leadingPoint = point.position;
-                    tangent = point.tangent;
-                    contactIndex = i;
-                }
-            }
-            contactPoint = leadingPoint;
-            contactDir = Vector3.ProjectOnPlane(tangent.normalized, pseudoParent.transform.forward).normalized;
-            //contactDir = tangent.normalized;
-        }
-        else
-        {
-            contactIndex = -1;
-            contactDir = pseudoParent.transform.right;
-            Debug.Log("empty on hit");
-        }
-
-        /*
-        Vector3 leadingPoint = position;
-        float leadingDist = Mathf.Infinity;
-        foreach (CatmullRomPoint point in topCurve.GetPoints())
-        {
-            float dist = Vector3.Distance(point.position, position);
-            if (dist < leadingDist)
-            {
-                dist = leadingDist;
-                leadingPoint = point.position;
-            }
-        }
-        contactPoint = leadingPoint;
-        
-    }
-
-    public void SetNextCrit(bool crit)
-    {
-        nextIsCrit = crit;
-    }
-
-    public bool IsNextCrit()
-    {
-        bool crit = nextIsCrit;
-        nextIsCrit = false;
-        return crit;
-    }
-    */
 }

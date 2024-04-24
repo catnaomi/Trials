@@ -1,11 +1,8 @@
 using CustomUtilities;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using CustomUtilities;
-using System.Linq;
 
 [RequireComponent(typeof(DojoBossMecanimActor), typeof(HumanoidPositionReference))]
 public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidInventory, IInventory

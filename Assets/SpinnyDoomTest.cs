@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class SpinnyDoomTest : MonoBehaviour
 {
@@ -13,7 +11,7 @@ public class SpinnyDoomTest : MonoBehaviour
     public float launchMagnitude;
     Vector3 lastPosition;
     float clock;
-    // Start is called before the first frame update
+
     void Start()
     {
         lastPosition = transform.position + transform.forward * probeDistance;
@@ -21,7 +19,6 @@ public class SpinnyDoomTest : MonoBehaviour
         clock = 0f;
     }
 
-    // Update is called once per frame
     void LateUpdate()
     {
         Vector3 additForce = transform.forward * launchMagnitude + transform.up * launchMagnitude;

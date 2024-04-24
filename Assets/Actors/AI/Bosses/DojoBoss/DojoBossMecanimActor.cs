@@ -698,7 +698,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     IEnumerator TelegraphAttacks(string[] sequence)
     {
         inAttackSequence = true;
-        float interval = 0.05f;
         float clock;
         // telegraph first
         for (int i = 0; i < 4; i++)

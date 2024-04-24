@@ -35,7 +35,6 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
     public bool isFacingUp;
 
-    int lastStagger = 0;
     int lastBlockStagger = 0;
     bool isInvulnerable;
     protected System.Action _OnEnd;
@@ -93,7 +92,6 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
 
     protected void OnEnd()
     {
-        lastStagger = -1;
         if (_OnEnd != null) _OnEnd();
     }
 

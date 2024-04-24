@@ -132,9 +132,6 @@ public class HomingGroundProjectileController : Projectile
     }
     private void OnArrowHit()
     {
-        bool allowInteract = true;
-        
-
         if (Vector3.Distance(tip.transform.position, targetPoint) < shockwaveRadius)
         {
             Shockwave();
@@ -147,11 +144,7 @@ public class HomingGroundProjectileController : Projectile
             hitbox.SetActive(false);
             FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
         }
-        else if (hitbox.victims.Count > 0)
-        {
-            //FXController.CreateFX(FXController.FX.FX_BleedPoint, feather.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
-            allowInteract = false;
-        }
+       
         EndFlight();
     }
 

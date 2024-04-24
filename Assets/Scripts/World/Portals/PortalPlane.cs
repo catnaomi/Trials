@@ -100,11 +100,5 @@ public class PortalPlane : MonoBehaviour
     {
         float distToPlane = Mathf.Abs(plane.GetDistanceToPoint(Camera.main.transform.position));
         return (distToPlane < camErrorDist) && IsWithinPlane(Camera.main.transform.position);
-        Vector3 min = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0f));
-        Vector3 max = Camera.main.ScreenToWorldPoint(new Vector3(Camera.main.pixelWidth, Camera.main.pixelHeight, Camera.main.nearClipPlane));
-        Bounds camBounds = new Bounds();
-        camBounds.SetMinMax(min, max);
-        bool intersect = bounds.Intersects(camBounds);
-        return intersect;
     }
 }

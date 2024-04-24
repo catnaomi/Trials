@@ -111,11 +111,11 @@ public class InventoryItemDisplay : MonoBehaviour, ISelectHandler
         {
             InventoryUI2.invUI.StartQuickSlotEquip(item);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            bool b = false;
         }
     }
+
     public void UpdatePreview()
     {
         if (item != null)

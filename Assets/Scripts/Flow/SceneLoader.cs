@@ -358,7 +358,7 @@ public class SceneLoader : MonoBehaviour
         {
             operation = SceneManager.UnloadSceneAsync(scene);
         }
-        catch (System.ArgumentException ex)
+        catch (System.ArgumentException)
         {
             Debug.LogWarning("Scene " + scene + " is not loaded!");
             yield break;
@@ -463,14 +463,6 @@ public class SceneLoader : MonoBehaviour
     {
         //TODO: figure out best way to do this
         return true;
-        for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
-        {
-            if (SceneManager.GetSceneByBuildIndex(i).name == sceneName)
-            {
-                return true;
-            }
-        }
-        return false;
     }
     public void ValidateDoubleInitScenes()
     {
@@ -518,7 +510,6 @@ class SceneLoadingData
     public AsyncOperation loadOperation;
     public bool isLoading;
     public bool isPreloadCompleted;
-    public AsyncOperation unloadOperation;
     public bool isUnloading;
     public Scene scene;
 }

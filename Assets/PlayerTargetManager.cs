@@ -263,19 +263,8 @@ public class PlayerTargetManager : MonoBehaviour
     void HandleAimTargetPosition()
     {
         // center target
-        if (true)//!player.IsInDialogue())
-        {
-            centerAim.position = player.positionReference.centerTarget.position;
-        }
-        else
-        {
-            Vector3 centerPos = player.positionReference.centerTarget.position;
-            if (currentTarget != null)
-            {
-                centerPos.y = currentTarget.transform.position.y;
-            }
-            centerAim.position = centerPos;
-        }
+        centerAim.position = player.positionReference.centerTarget.position;
+
         // aim target
         if (!lockedOn || currentTarget == null || Vector3.Distance(targetAim.position, currentTarget.transform.position) > targetChangeMaxDistance)
         {
@@ -284,10 +273,8 @@ public class PlayerTargetManager : MonoBehaviour
 
         if (currentTarget != null)
         {
-            Vector3 targetPosition = currentTarget.transform.position;
             Vector3 targetDir = currentTarget.transform.position - centerAim.position;
-
-            targetPosition = Vector3.ClampMagnitude(targetDir, maxMidpointDistance) + centerAim.position; 
+            Vector3 targetPosition = Vector3.ClampMagnitude(targetDir, maxMidpointDistance) + centerAim.position; 
 
             if (targetAimShouldSnap)
             {
@@ -301,14 +288,12 @@ public class PlayerTargetManager : MonoBehaviour
         }
 
     }
-
     
     // controls the cinemachine target group
     void HandleTargetGroup()
     {
         if (handleCamera && lockedOn && cmtg.m_Targets.Length > 1)
         {
-            //this.transform.rotation = Quaternion.LookRotation(PlayerActor.player.transform.forward);
             Vector3 dir = cmtg.m_Targets[1].target.position - cmtg.m_Targets[0].target.position;
             dir.y = 0;
             dir.Normalize();

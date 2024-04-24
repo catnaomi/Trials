@@ -13,13 +13,9 @@ public class SpiralSwordThrust : MonoBehaviour
     public ParticleSystem[] bloodParticles = new ParticleSystem[3];
 
     int currentIndex = 0;
-    float TRAIL_FPS = 60f;
-    //float lineTimer = 0f;
     public float bloodFadeTime = 0.5f;
     public float bloodFadeDelay = 0.5f;
-    float bloodTimer;
     bool thrusting;
-    bool bleeding;
     bool nextIsCrit;
     Vector3 contactPoint;
 
@@ -41,16 +37,12 @@ public class SpiralSwordThrust : MonoBehaviour
     public UnityEvent OnBleed;
     public float spiralFadeDelay = 0.5f;
     public float spiralFadeTime = 0.5f;
-    float maxSpiralSpeed;
-    float spiralFadeClock;
-    bool eraseSpiral;
-    // Start is called before the first frame update
+    
     void Start()
     {
         InitSpiral();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (thrusting)
@@ -62,54 +54,7 @@ public class SpiralSwordThrust : MonoBehaviour
                 spiral.Clear();
                 spiral.Play();
             }
-            spiralFadeClock = spiralFadeTime + spiralFadeDelay;
         }
-        else
-        {
-
-            //SetSpiralPosition();
-            if (spiral.isEmitting)
-            {
-                spiralFadeClock -= Time.deltaTime;
-                if (spiralFadeClock <= 0)
-                {
-                    //spiral.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-                }
-                
-                //spiral.Pause();
-            }
-            /*
-            if (spiral.line.positionCount > 0)
-            {
-                spiralFadeClock -= Time.deltaTime;
-                if (spiralFadeClock <= spiralFadeTime)
-                {
-                    int count = Mathf.FloorToInt(maxPositionCount * (spiralFadeClock/spiralFadeTime));
-                    if (count < 0) count = 0;
-                    spiral.line.positionCount = count;
-                }
-                //spiral.line.positionCount--;
-                /*Vector3[] posArray = new Vector3[spiral.line.positionCount];
-                spiral.line.GetPositions(posArray);
-                posArray = posArray.Skip(1).ToArray();
-                spiral.line.SetPositions(posArray);
-            }
-            if (!spiral.updateLine)
-            {
-                //spiral.transform.localRotation *= Quaternion.Euler(0f, 0f,  rotateSpeed * Time.deltaTime);
-            }
-            */
-            
-        }
-        for (int j = 0; j < bloodParticles.Length; j++)
-        {
-            if (bloodParticles[j].particleCount <= 0)
-            {
-                //bloodParticles[j].Stop();
-                //bloodParticles[j].gameObject.SetActive(false);
-            }
-        }
-
     }
 
     public void BeginThrust()
@@ -144,8 +89,6 @@ public class SpiralSwordThrust : MonoBehaviour
         bloodParticles[currentIndex].transform.rotation = Quaternion.LookRotation(pseudoParent.transform.forward);
         bloodParticles[currentIndex].gameObject.SetActive(true);
         bloodParticles[currentIndex].Play();
-        bloodTimer = bloodFadeDelay + bloodFadeTime;
-        bleeding = true;
         if (isCrit) Debug.Log("Crit!!!");
         AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Blood) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Blood);
         float volume = (isCrit) ? critVolume : hitVolume;
@@ -174,7 +117,6 @@ public class SpiralSwordThrust : MonoBehaviour
 
     public void StopBleeding()
     {
-        bleeding = false;
     }
 
     public void SetContactPoint(Vector3 position)
@@ -198,12 +140,7 @@ public class SpiralSwordThrust : MonoBehaviour
     {
         if (spiral != null)
         {
-
             spiral.gameObject.SetActive(true);
-
-            //LineRenderer line = spiral.GetComponent<LineRenderer>();
-            //line.positionCount = 1;
-            //line.SetPosition(0, topPoint.position);
             spiral.GetComponent<ParticleSystem>().Stop();
             spiral.GetComponent<ParticleSystem>().Clear();
             SetSpiralPosition();
@@ -214,8 +151,6 @@ public class SpiralSwordThrust : MonoBehaviour
     public void SetSpiralPosition()
     {
         if (topPoint == null) return;
-        //spiral.transform.position = topPoint.position;
-        //spiral.transform.rotation = Quaternion.LookRotation(pseudoParent.transform.forward);
         spiralParent.position = topPoint.position;
         spiralParent.rotation = Quaternion.LookRotation(pseudoParent.transform.forward);
     }

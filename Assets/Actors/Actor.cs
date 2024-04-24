@@ -198,6 +198,7 @@ public class Actor : MonoBehaviour
     {
         return this.gameObject;
     }
+
     public void SetFollowTarget(GameObject target)
     {
         FollowTarget = target;

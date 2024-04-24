@@ -255,7 +255,6 @@ public class DamageKnockback
         float flat = 0f;
         bool neutral = true;
         bool weak = false;
-        bool strong = false;
         if (types == 0) return total;
         if ((types & resistance.weaknesses) != 0)
         {
@@ -268,7 +267,6 @@ public class DamageKnockback
         {
             ratio *= resistance.strengthMultiplier;
             flat += resistance.strengthsFlat;
-            strong = true;
             neutral = false;
         }
         if (neutral)

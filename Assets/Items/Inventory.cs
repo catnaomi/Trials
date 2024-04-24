@@ -182,12 +182,10 @@ public class Inventory : MonoBehaviour, IInventory
     public int GetAmountOf(Item item)
     {
         int count = 0;
-        bool foundAny = false;
         foreach(Item presentItem in contents)
         {
             if (item.ItemEqual(presentItem))
             {
-                foundAny = true;
                 if (item.MaxStackSize <= 0)
                 {
                     count++;

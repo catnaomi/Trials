@@ -1147,48 +1147,6 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             if (weapon != null)
             {
                 return; // weapons are not equipped via quickslot anymore
-                if (weapon.EquippableMain)
-                {
-                    EquippableWeapon currentMain = GetMainWeapon();
-                    if (currentMain != null)
-                    {
-                        UnequipMainWeapon();
-                        EquipToSlot(currentMain, slot);
-                    }
-                    else
-                    {
-                        EquipToSlot(null, slot);
-                    }
-                    EquipMainWeapon(weapon, true);
-                }
-                else if (weapon.EquippableOff)
-                {
-                    EquippableWeapon currentOff = GetOffWeapon();
-                    if (currentOff != null)
-                    {
-                        UnequipOffHandWeapon();
-                        EquipToSlot(currentOff, slot);
-                    }
-                    else
-                    {
-                        EquipToSlot(null, slot);
-                    }
-                    EquipOffHandWeapon(weapon, true);
-                }
-                else if (weapon.EquippableRanged)
-                {
-                    EquippableWeapon currentRanged = GetRangedWeapon();
-                    if (currentRanged != null)
-                    {
-                        UnequipRangedWeapon();
-                        EquipToSlot(currentRanged, slot);
-                    }
-                    else
-                    {
-                        EquipToSlot(null, slot);
-                    }
-                    EquipRangedWeapon((RangedWeapon)weapon, true);
-                }
             }
             else if (consumable != null)
             {

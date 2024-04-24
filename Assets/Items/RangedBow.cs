@@ -25,7 +25,6 @@ public class RangedBow : RangedWeapon, IHitboxHandler
     ArrowController[] arrows;
     GameObject deadArrow;
     public int arrowCount = 4;
-    int index = 0;
     bool canReceiveAnimEvents = false;
     public float arrowLength = 1f;
 

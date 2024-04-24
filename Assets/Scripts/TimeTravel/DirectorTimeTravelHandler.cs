@@ -9,7 +9,6 @@ public class DirectorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     PlayableDirector director;
     bool isFrozen;
     bool directorPlaying;
-    bool directorPaused;
     bool registered;
 
     void Start()
@@ -25,33 +24,28 @@ public class DirectorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     void SetPlaying(PlayableDirector d)
     {
         directorPlaying = true;
-        directorPaused = false;
     }
 
     void SetStopped(PlayableDirector d)
     {
-        directorPaused = false;
         directorPlaying = false;
     }
 
     void SetPaused(PlayableDirector d)
     {
         directorPlaying = true;
-        directorPaused = true;
     }
 
     public void StartFreeze()
     {
         if (directorPlaying)
         {
-            isFrozen = true;
-            //director.Pause(); // normal pause not used bc it resets positioning for some godforsaken reason
+            isFrozen = true; // normal pause not used bc it resets positioning for some godforsaken reason
 
             if (director.playableGraph.IsValid())
             {
                 director.playableGraph.GetRootPlayable(0).Pause();
             }
-            
         }
     }
 
@@ -61,8 +55,6 @@ public class DirectorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         if (isFrozen && director.playableGraph.IsValid() && director.playableGraph.GetRootPlayable(0).GetPlayState() == PlayState.Paused)
         {
             isFrozen = false;
-            //director.Play();
-
             director.playableGraph.GetRootPlayable(0).Play();
         }
     }
@@ -92,12 +84,10 @@ public class DirectorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         return this.gameObject;
     }
 
-
     public void ClearTimeData()
     {
         
     }
-
     
     public List<TimeTravelData> GetTimeStates()
     {
@@ -133,5 +123,4 @@ public class DirectorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     {
         
     }
-
 }

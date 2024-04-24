@@ -8,7 +8,6 @@ using UnityEngine.Events;
 [RequireComponent(typeof(Inventory))]
 public class HumanoidActor : Actor
 {
-
     protected CharacterController cc;
     protected Rigidbody rigidbody;
 
@@ -16,28 +15,15 @@ public class HumanoidActor : Actor
     public Collider boundingCollider;
     [HideInInspector]
     public Collider[] joints;
-
-
     
     protected float stunLength;
     protected float stunAmount;
-    private float slideAmount;
     protected float slideAccel;
-
-
-    private float autoGetupVelocity = 0.1f;
-    private float helplessGetupDelay = 1f;
-    private float autoGetupDelay = 3f;
-    private float forceGetupDelay = 10f;
-    private float ragdollClock;
-    private float ragdollStillClock;
-
 
     private float reviveDelay = 30f;
     private float reviveClock;
 
     protected float airTime = 0f;
-    private float fallDamage = 0f;
 
     [HideInInspector] public Vector3 lastForce;
 
@@ -51,7 +37,6 @@ public class HumanoidActor : Actor
     public UnityEvent OnInjure;
     public UnityEvent OnHitboxActive;
     public UnityEvent OnParry;
-    //public StanceHandler stance;
 
     [ReadOnly] public IKHandler aimIKHandler;
     public float heft;
@@ -87,7 +72,6 @@ public class HumanoidActor : Actor
 
     public BladeWeapon.AttackType nextAttackType;
 
-    //public ActionsLibrary.BlockType blockType;
     [Header("Movement Settings")]
     public float BaseMovementSpeed = 5f;
     public float ForwardMultiplier = 1f;
@@ -122,33 +106,13 @@ public class HumanoidActor : Actor
             inventory = this.GetComponent<HumanoidNPCInventory>();
         }
 
-        //inventory.Init();
-
-        //inventory.OnChange.AddListener(GetStance);
-
-        //GetStance();
-
         cc = GetComponent<CharacterController>();
         rigidbody = GetComponent<Rigidbody>();
         boundingCollider = GetComponent<Collider>();
 
         SetHeft(1f);
 
-        //animator.SetFloat("Agility", 1f);
-
-        
-
         attributes.ResetAttributes();
-
-        /*
-        OnSheathe = new UnityEvent();
-        OnOffhandAttack = new UnityEvent();
-        OnAttack = new UnityEvent();
-        OnBlock = new UnityEvent();
-        OnDodge = new UnityEvent();
-        OnInjure = new UnityEvent();
-        OnHitboxActive = new UnityEvent();
-        */
     }
 
     public override void ActorPreUpdate()
@@ -163,7 +127,6 @@ public class HumanoidActor : Actor
         if (humanoidState == HumanoidState.Ragdolled)
         {
             TryGetup();
-            //staminaClock = 0f;
         }
         else if (humanoidState == HumanoidState.Helpless)
         {
@@ -178,55 +141,19 @@ public class HumanoidActor : Actor
             positionReference.Hips.transform.position = this.transform.position;
         }
 
-        if (IsSprinting())
-        {
-            //staminaClock = 0f;
-            /*
-            if (!attributes.HasstaminaRemaining())
-            {
-                animator.SetBool("Sprinting", false);
-            }
-            */
-            //attributes.ReduceAttribute(attributes.stamina, 10f * Time.deltaTime);
-            //attributes.ReduceAttributeToMin(attributes.poise, 50f * Time.deltaTime, 50f);
-        }
-
-        /*
-        if (IsDodging())
-        {
-            isInvulnerable = true;
-        }
-        else
-        {
-            isInvulnerable = false;
-        }
-        */
-        /*
-        animator.SetBool("WeaponDrawn", inventory.IsWeaponDrawn());
-        animator.SetInteger("BlockType", (int)blockType);
-        animator.SetBool("Aiming", IsAiming());
-        animator.SetBool("Injured", IsInjured());
-        */
-        //animator.SetBool("Grounded", GetGrounded());
-        //animator.SetBool("BlendMovement", animator.GetCurrentAnimatorStateInfo(0).IsTag("BLEND_MOVE"));
-
         animator.SetBool("InImpactState", IsInImpactState());
         animator.SetBool("Armed", inventory.IsWeaponDrawn());
 
         inventory.UpdateWeapon();
 
         wasAttackingLastFrame = IsAttacking();        
-        
     }
 
-    
-    
     protected void LateUpdate()
     {
         if (!GetGrounded())
         {
             airTime += Time.deltaTime;
-            fallDamage = (100f / 3f) * airTime;
             animator.SetFloat("AirTime", airTime);
         }
         else
@@ -282,7 +209,7 @@ public class HumanoidActor : Actor
 
     public void TryGetup()
     {
-        if (attributes.HasHealthRemaining() || this is PlayerActor)
+        if (attributes.HasHealthRemaining())
         {
             Getup();
         }
@@ -295,8 +222,6 @@ public class HumanoidActor : Actor
     public void Getup()
     {
         animator.SetTrigger("GetUp");
-
-        //attributes.RecoverAttribute(attributes.stamina, 50f);
 
         humanoidState = HumanoidState.Actionable;
     }
@@ -326,9 +251,7 @@ public class HumanoidActor : Actor
 
         if (reviveClock > reviveDelay)
         {
-            {
-                StopHelpless();
-            }
+            StopHelpless();
         }
     }
     public void StandingDeath()
@@ -342,7 +265,6 @@ public class HumanoidActor : Actor
 
     public void Kneel()
     {
-        //TakeAction(ActionsLibrary.GetInputAction("Kneel"));
         animator.SetBool("Helpless", true);
         animator.SetBool("FacingUp", false);
 
@@ -351,7 +273,6 @@ public class HumanoidActor : Actor
     public void Die()
     {
         this.gameObject.tag = "Corpse";
-        //animator.SetBool("Helpless", true);
         animator.SetBool("Dead", true);
         humanoidState = HumanoidState.Dead;
         OnDie.Invoke();
@@ -361,15 +282,6 @@ public class HumanoidActor : Actor
     public bool Vulnerable()
     {
         return !IsProne();
-        switch (humanoidState)
-        {
-            case HumanoidState.Ragdolled:
-            //case HumanoidState.Helpless:
-                return false;
-
-            default:
-                return true;
-        }
     }
 
     public override void ProcessDamageKnockback(DamageKnockback damageKnockback)
@@ -380,14 +292,12 @@ public class HumanoidActor : Actor
             return;
         }
         
-        // as flowchart
-
         AdjustDefendingPosition(damageKnockback.source);
 
         //  implement resistances
         //float totalDamage = DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.GetTypes(), this.attributes.resistances);
 
-        bool willKill = true;// attributes.HasHealthRemaining() && (totalDamage >= attributes.health.current);
+        bool willKill = true;
 
         if (this.IsDodging() || isInvulnerable)
         {
@@ -395,59 +305,19 @@ public class HumanoidActor : Actor
             // slowdown effect on player dodge!
             OnDodge.Invoke();
         }
-        else if (this.IsParrying()/* && attributes.HasAttributeRemaining(attributes.stamina)*/ && !damageKnockback.unblockable) // is actor parrying with stamina remaining
+        else if (this.IsParrying() && !damageKnockback.unblockable) // is actor parrying with stamina remaining
         {
             // take no damage / stamina damage, and stagger human opponents
-            // todo: Reimplement parrying
             ParryAtk(damageKnockback);
         }
-        else if (this.IsBlocking() && !damageKnockback.unblockable) // is actor blocking. cannot die through block.
-        {
-            // blocking deals stamina damage
-            //attributes.ReduceAttribute(attributes.stamina, damageKnockback.staminaDamage);
-            //attributes.ReducePoise(damageKnockback.poiseDamage);
-            //Damage(damageKnockback, true); don't take health damage through blocks
-
-            /*
-            if (!attributes.HasAttributeRemaining(attributes.health))
-            { // injure!
-                this.OnInjure.Invoke();
-            }
-            */
-            /*
-            if (attributes.HasAttributeRemaining(attributes.stamina))
-            {
-                ProcessStagger(DamageKnockback.StaggerType.BlockStagger, damageKnockback);
-            }
-            else
-            {
-                ProcessStagger(DamageKnockback.StaggerType.GuardBreak, damageKnockback);
-            }
-            */
-        }
-        else // get hit
+        else if (!this.IsBlocking() || damageKnockback.unblockable)
         {
             Damage(damageKnockback, this.IsCritVulnerable());
             if (willKill)
             {
-                if (!animator.GetBool("Helpless"))
-                {
-                    //ProcessStagger(damageKnockback.staggers.onKill, damageKnockback);
-                }
-                Die();
+               Die();
             }
-            else if (IsArmored() && !damageKnockback.breaksArmor)
-            {
-                //ProcessStagger(damageKnockback.staggers.onArmorHit, damageKnockback);
-            }
-            else if (IsCritVulnerable())
-            {
-                //ProcessStagger(damageKnockback.staggers.onCritical, damageKnockback);
-            }
-            else
-            {
-                //ProcessStagger(damageKnockback.staggers.onHit, damageKnockback);
-            }
+
             if (ShouldHelpless())
             {
                 animator.SetBool("Helpless", true);
@@ -463,7 +333,7 @@ public class HumanoidActor : Actor
     public void ProcessStagger(DamageKnockback.StaggerType type, DamageKnockback damageKnockback)
     {
         bool turn = false;
-        bool isBlock = false;// type == DamageKnockback.StaggerType.BlockStagger || type == DamageKnockback.StaggerType.GuardBreak;
+        bool isBlock = false;
         if (isBlock)
         {
             OnBlock.Invoke();
@@ -498,16 +368,6 @@ public class HumanoidActor : Actor
         {
             AnimatorImpact(DamageKnockback.StaggerType.Flinch);
         }
-
-        /*
-        if (type == DamageKnockback.StaggerType.BlockStagger)
-        {
-            if (damageKnockback.source != null && damageKnockback.source.TryGetComponent<HumanoidActor>(out HumanoidActor humanoid))
-            {
-                humanoid.BlockRecoil();
-            }
-        }
-        */
     }
 
     public void Disarm(DamageKnockback damageKnockback)
@@ -522,6 +382,7 @@ public class HumanoidActor : Actor
             li.GetComponent<Rigidbody>().AddForce(this.transform.up * 2.5f, ForceMode.Impulse);
         }
     }
+
     public void AnimatorImpact(DamageKnockback.StaggerType type)
     {
         animator.SetInteger("ImpactType", (int)type);
@@ -530,35 +391,11 @@ public class HumanoidActor : Actor
 
     public void BlockRecoil()
     {
-        if (!IsArmored() && !IsAiming())
-        {
-            //AnimatorImpact(DamageKnockback.StaggerType.Recoil);
-        }
+        
     }
 
     public bool Damage(DamageKnockback damageKnockback, bool isCritical)
     {
-        // account for resistances
-        //float critMult = (isCritical) ? damageKnockback.critData.criticalMultiplier : 1f;
-        //float totalDamage = (!isCritical) ? DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.GetTypes(), this.attributes.resistances) : this.attributes.health.max;
-        /*
-        lastDamageTaken = totalDamage;
-        OnHurt.Invoke();
-
-
-        if (totalDamage <= 0)
-        {
-            return false;
-        }
-
-        //attributes.ReducePoise(damageKnockback.poiseDamage);
-        if (attributes.HasHealthRemaining())
-        {
-            attributes.ReduceAttribute(attributes.health, totalDamage);
-        }
-        */
-        
-
         return true;
     }
 
@@ -589,8 +426,6 @@ public class HumanoidActor : Actor
             endpoint = damageKnockback.source.transform.position;
         }
 
-
-
         float dist = Vector3.Distance(origin, endpoint);
 
         if (dist < MAX_DIST)
@@ -602,15 +437,13 @@ public class HumanoidActor : Actor
             return Vector3.MoveTowards(origin, endpoint, MAX_DIST) + OFFSET;
         }
     }
+
     public virtual void DeductStaminaFromDodge()
     {
-        //attributes.ReduceAttribute(attributes.stamina, 10f);
-        //staminaClock = 0f;
     }
+
     public virtual void DeductStaminaFromAttack()
     {
-        //attributes.ReduceAttribute(attributes.stamina, 10f);
-        //staminaClock = 0f;
     }
 
     public void AdjustDefendingPosition(GameObject attacker)
@@ -632,12 +465,6 @@ public class HumanoidActor : Actor
     public void ForceLeftHand(bool left)
     {
         shouldForceLeft = left;
-    }
-
-    public virtual bool ShouldEndContinuousAttack()
-    {
-        // remove all references to this
-        return false;
     }
 
     public void SetNextAttackType(BladeWeapon.AttackType type, bool adjustPoise)
@@ -1055,14 +882,6 @@ public class HumanoidActor : Actor
                 actLayer = true;
             }
         }
-
-        string TAG = "EMPTY";
-        bool ALLOW_IN_TRANSITION = true;
-
-        /*
-        bool impactLayer = animator.GetCurrentAnimatorStateInfo(StanceHandler.ImpactLayer).IsTag(TAG) &&
-                (ALLOW_IN_TRANSITION || !animator.IsInTransition(StanceHandler.ImpactLayer));
-                */
 
         return actLayer;
     }

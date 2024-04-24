@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "BladeWeapon", menuName = "ScriptableObjects/Weapons/Special/Qi's Transforming Sub-Weapon", order = 1)]
 public class TransformingSubWeapon : BladeWeapon
@@ -15,7 +14,6 @@ public class TransformingSubWeapon : BladeWeapon
 
         thrustFX = FXController.CreateSwordThrust().GetComponent<SpiralSwordThrust>();
         thrustFX.pseudoParent = actor.transform;
-
 
         GenerateHitboxes();
         hitboxes.OnHitTerrain.RemoveAllListeners();
@@ -61,9 +59,7 @@ public class TransformingSubWeapon : BladeWeapon
         {
             canFire = true;
         }
-        nocked = false;
         if (deadArrow != null) deadArrow.SetActive(false);
-
     }
 
     #region RANGED WEAPON LOGIC
@@ -80,8 +76,6 @@ public class TransformingSubWeapon : BladeWeapon
     public int arrowCount = 4;
     bool canReceiveAnimEvents = false;
     public float arrowLength = 1f;
-    bool nocked;
-    LineRenderer line;
 
 
     public bool CanFire()
@@ -108,6 +102,7 @@ public class TransformingSubWeapon : BladeWeapon
     {
         return primaryWeapon.GetBlockBounds();
     }
+
     public void Draw()
     {
         if (GetAmmunitionRemaining() > 0)
@@ -120,10 +115,8 @@ public class TransformingSubWeapon : BladeWeapon
     {
         canFire = true;
         nockTime = Time.time;
-        nocked = true;
-
-
     }
+
     public void Fire()
     {
         if (!GetHeldActor().TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference)) return;
@@ -183,7 +176,6 @@ public class TransformingSubWeapon : BladeWeapon
         deadArrow = GameObject.Instantiate(deadArrowPrefab);
         deadArrow.SetActive(false);
         GameObject obj = base.GenerateModel();
-        line = model.GetComponentInChildren<LineRenderer>();
         return obj;
     }
 

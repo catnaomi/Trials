@@ -101,7 +101,6 @@ public class WorldTime : MonoBehaviour
 
     void UpdateSuns()
     {
-        float t;
         if (InRange(currentTime, 0, 5f))
         {
             sunColor = nightColor;

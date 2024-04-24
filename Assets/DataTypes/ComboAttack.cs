@@ -62,10 +62,7 @@ public class ComboAttack : InputAttack
         {
             currentIndex = 0;
         }
-        if (currentIndex == 2)
-        {
-            bool b = false;
-        }
+
         AnimancerState state = player.animancer.Play(this.GetClip(currentIndex));
         player.SetCurrentDamage(this.GetDamage(currentIndex));
         cancelTime = GetExitTime(currentIndex);

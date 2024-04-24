@@ -6,9 +6,6 @@ using UnityEngine;
 [CustomEditor(typeof(Ledge))]
 public class LedgeEditor : Editor
 {
-    Vector3 destination = Vector3.zero;
-    GameObject obj = null;
-
     public override void OnInspectorGUI()
     {
         Ledge ledge = (Ledge)target;
@@ -40,8 +37,6 @@ public class LedgeEditor : Editor
             }
             Ledge.ValidateAllLedges();
         }
-
-
     }
 
     void AutoconnectLedge(Ledge ledge)

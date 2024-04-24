@@ -27,7 +27,6 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public float meleeRange = 3f;
     public float stompTimer = 15f;
     public float attackTimer = 3f;
-    Coroutine stompCoroutine;
     public float maxRealignAngle = 30f;
     public float behindAngle = 90f;
     public float rotationSpeed = 90f;
@@ -214,10 +213,6 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         if (CombatTarget == null && PlayerActor.player != null)
         {
             CombatTarget = PlayerActor.player.gameObject;
-            if (stompCoroutine == null)
-            {
-                //stompCoroutine = StartCoroutine(StompTimer());
-            }
         } 
     }
 
@@ -412,6 +407,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     {
         return Vector3.Angle(GetDirectionToTarget(), this.transform.forward) > behindAngle;
     }
+
     public DamageKnockback GetLastDamage()
     {
         return currentDamage;
