@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "AnimationFXSounds", menuName = "ScriptableObjects/FX/Create AnimationFXSounds", order = 1), SerializeField]
 public class AnimationFXSounds : ScriptableObject
@@ -56,7 +55,7 @@ public class AnimationFXSounds : ScriptableObject
     public void PopulateWithDefaults()
     {
         Debug.Log("Populating AnimationFXSounds on " + this);
-
+        
         // footsteps
         default_stepL = Resources.Load<AudioClip>("Sounds/Footsteps/tile-stepL");
         default_stepR = Resources.Load<AudioClip>("Sounds/Footsteps/tile-stepR");
@@ -65,10 +64,12 @@ public class AnimationFXSounds : ScriptableObject
         default_slide = Resources.Load<AudioClip>("Sounds/Footsteps/dirt-slide");
         default_roll = Resources.Load<AudioClip>("Sounds/Footsteps/roll1");
         tap = Resources.Load<AudioClip>("Sounds/Footsteps/tap1");
+
         // swim
         swim = Resources.Load<AudioClip>("Sounds/Water/swim1");
         splashBig = Resources.Load<AudioClip>("Sounds/Water/splash1");
         splashSmall = Resources.Load<AudioClip>("Sounds/Water/splash2");
+
         // combat
         slashLight = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_light");
         slashHeavy = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy");

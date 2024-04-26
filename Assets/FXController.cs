@@ -65,9 +65,10 @@ public class FXController : MonoBehaviour
         Stone,
         Dirt,
         Glass,
-
         Ice,
+        Water,
     }
+    
     public static Dictionary<FX, GameObject> fxDictionary;
     public static Dictionary<string, AudioClip> clipDictionary;
     private void Awake()

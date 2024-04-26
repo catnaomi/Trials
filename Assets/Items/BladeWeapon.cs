@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System;
-using System.Collections.Generic;
 using CustomUtilities;
 
 [CreateAssetMenu(fileName = "BladeWeapon", menuName = "ScriptableObjects/Weapons/Create Blade Weapon", order = 1)]
@@ -187,13 +185,6 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
                 holder.gameObject.SendMessage(dk.fxData.isHeavyAttack ? "ThrustHeavy" : "ThrustLight");
                 thrustFX.BeginThrust();
             }
-
-            /*
-             * FXController.CreateFX(sound,
-                ((HumanoidActor)holder).positionReference.MainHand.transform.position + (((HumanoidActor)holder).positionReference.MainHand.transform.forward * length),
-                Quaternion.identity,
-                1f);
-                */
             hitboxes.SetDamage(dk);
         }
         else

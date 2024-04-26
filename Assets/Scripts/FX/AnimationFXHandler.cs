@@ -1,16 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using CustomUtilities;
-#if (UNITY_EDITOR)
-using UnityEditor;
-#endif
 
 public class AnimationFXHandler : MonoBehaviour
 {
     public AnimationFXSounds animSounds;
     public FXController.FXMaterial fxMaterial;
+
     [Header("Footsteps")]
     public AudioSource footSourceLight;
     public AudioSource footSourceHeavy;
@@ -45,7 +41,7 @@ public class AnimationFXHandler : MonoBehaviour
     public UnityEvent OnGunLoad;
     Actor actor;
     bool didTypedBlock;
-    // Start is called before the first frame update
+    
     void Start()
     {
         actor = this.GetComponent<Actor>();
@@ -64,12 +60,10 @@ public class AnimationFXHandler : MonoBehaviour
     #region Footsteps
     public void StepL(int heavy)
     {
-        //AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
         AudioSource source = footSourceLight;
         AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), true);
         if (Time.time - stepLTime > footstepDelay)
         {
-            //Debug.Log(Time.time - stepLTime);
             source.PlayOneShot(clip);
             stepLTime = Time.time;
         }
@@ -82,14 +76,13 @@ public class AnimationFXHandler : MonoBehaviour
     {
         StepL(0);
     }
+
     public void StepR(int heavy)
     {
-        //AudioSource source = (heavy > 0) ? footSourceHeavy : footSourceLight;
         AudioSource source = footSourceLight;
         AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), false);
         if (Time.time - stepRTime > footstepDelay)
         {
-            //Debug.Log(Time.time - stepRTime);
             source.PlayOneShot(clip);
             stepRTime = Time.time;
         }
@@ -102,6 +95,7 @@ public class AnimationFXHandler : MonoBehaviour
     {
         StepR(0);
     }
+
     public void StepWeapon()
     {
         // TODO: step effect where weapon connects
@@ -139,8 +133,6 @@ public class AnimationFXHandler : MonoBehaviour
         footSourceHeavy.PlayOneShot(animSounds.dash);
         OnDashDust.Invoke();
     }
-
-
 
     public void StartContinuousSlide()
     {
@@ -181,7 +173,6 @@ public class AnimationFXHandler : MonoBehaviour
 
     public void Swim()
     {
-        //waterSource.Stop();
         waterSource.PlayOneShot(animSounds.swim);
     }
 
@@ -264,24 +255,20 @@ public class AnimationFXHandler : MonoBehaviour
     {
         if (actor is PlayerActor player)
         {
-            Vector3 position = player.inventory.GetBlockWeapon().model.transform.position;
             Vector3 direction = Camera.main.transform.forward;
             direction.y = 0f;
             direction.Normalize();
 
             if (player.IsBlockingSlash())
             {
-                //FXController.CreateCross(position, direction);
                 combatHitSource.PlayOneShot(animSounds.blockSwitch);
                 FlashColor(new Color(1,1,1,0.5f));
             }
             else if (player.IsBlockingThrust())
             {
-                //FXController.CreateCircle(position, direction);
                 combatHitSource.PlayOneShot(animSounds.blockSwitch);
                 FlashColor(new Color(1, 1, 1, 0.5f));
             }
-            
         }
     }
 
@@ -330,8 +317,8 @@ public class AnimationFXHandler : MonoBehaviour
     {
         FlashColor(Color.white);
     }
-    #endregion
 
+    #endregion
     #region Hit Particles
 
     public void ShowHitParticle()
@@ -346,11 +333,9 @@ public class AnimationFXHandler : MonoBehaviour
             if (isSlash || isThrust || damage.hitClip != null)
             {
                 FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, isSlash, isCrit, fxMaterial, damage.hitClip);
-                
             }
             FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, false);
         }
-       
     }
 
     public void RegisterTypedBlock()
@@ -373,7 +358,7 @@ public class AnimationFXHandler : MonoBehaviour
                 FXController.CreateSpark(actor.hitParticlePosition, actor.hitParticleDirection, clip);
                 FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
             }
-            if (actor is PlayerActor)//didTypedBlock)
+            if (actor is PlayerActor)
             {
                 if (isSlash)
                 {
@@ -394,67 +379,23 @@ public class AnimationFXHandler : MonoBehaviour
 
     public AudioClip GetFootStepFromTerrain(string materialName, bool isLeft)
     {
+        string clipName = "default_step";
         string material = materialName.ToLower();
-        if (material.Contains("metal"))
+        string[] allMaterials = typeof(FXController.FXMaterial).GetEnumNames();
+        foreach (string curMaterial in allMaterials)
         {
-            return (isLeft) ? animSounds.metal_stepL : animSounds.metal_stepR;
+            var curMaterialLower = curMaterial.ToLower();
+            if (material.Contains(curMaterialLower))
+            {
+                clipName = $"{curMaterialLower}_step";
+                break;
+            }
         }
-        else if (material.Contains("stone"))
-        {
-            return (isLeft) ? animSounds.stone_stepL : animSounds.stone_stepR;
-        }
-        else if (material.Contains("grass"))
-        {
-            return (isLeft) ? animSounds.grass_stepL : animSounds.grass_stepR;
-        }
-        else if (material.Contains("dirt"))
-        {
-            return (isLeft) ? animSounds.dirt_stepL : animSounds.dirt_stepR;
-        }
-        else if (material.Contains("tile"))
-        {
-            return (isLeft) ? animSounds.tile_stepL : animSounds.tile_stepR;
-        }
-        else if (material.Contains("ice"))
-        {
-            return (isLeft) ? animSounds.ice_stepL : animSounds.ice_stepR;
-        }
-        else if (material.Contains("water"))
-        {
-            return (isLeft) ? animSounds.water_stepL : animSounds.water_stepR;
-        }
-        else
-        {
-            return (isLeft) ? animSounds.default_stepL : animSounds.default_stepR;
-        }
+
+        clipName += isLeft ? "L" : "R";
+        var clipField = typeof(AnimationFXSounds).GetField(clipName);
+        return (AudioClip)clipField.GetValue(animSounds);
     }
 
     #endregion
-#if (UNITY_EDITOR)
-    public void PopulateWithDefaults()
-    {
-        Debug.Log("Populating AnimationSoundHandler on " + this);
-
-        // footsteps
-        animSounds.default_stepL = Resources.Load<AudioClip>("Sounds/Footsteps/tile-stepL");
-        animSounds.default_stepR = Resources.Load<AudioClip>("Sounds/Footsteps/tile-stepR");
-        animSounds.default_thud = Resources.Load<AudioClip>("Sounds/Footsteps/thud1");
-        animSounds.dash = Resources.Load<AudioClip>("Sounds/Footsteps/dash1");
-        animSounds.default_slide = Resources.Load<AudioClip>("Sounds/Footsteps/dirt-slide");
-        animSounds.default_roll = Resources.Load<AudioClip>("Sounds/Footsteps/roll1");
-        animSounds.tap = Resources.Load<AudioClip>("Sounds/Footsteps/tap1");
-        // swim
-        animSounds.swim = Resources.Load<AudioClip>("Sounds/Water/swim1");
-        animSounds.splashBig = Resources.Load<AudioClip>("Sounds/Water/splash1");
-        animSounds.splashSmall = Resources.Load<AudioClip>("Sounds/Water/splash2");
-        // combat
-        animSounds.slashLight = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_light");
-        animSounds.slashHeavy = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy");
-        animSounds.thrustLight = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_light");
-        animSounds.thrustHeavy = Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_swing_heavy");
-
-        animSounds.bowPull = Resources.Load<AudioClip>("Sounds/Effects/bow-draw1");
-        animSounds.bowFire = Resources.Load<AudioClip>("Sounds/Effects/bow-fire");
-    }
-#endif
 }
