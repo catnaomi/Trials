@@ -19,22 +19,38 @@ public class MusicController : MonoBehaviour
             musicSource.volume = value;
         }
     }
+    public float playbackSpeed
+    {
+        get
+        {
+            return musicSource.pitch;
+        }
+        set
+        {
+            musicSource.pitch = value;
+        }
+    }
 
     [Header("Script Managed Properties")]
     public float volumeSetting = 1f;
     public bool paused = false;
-    public bool timeStopped
-    {
-        set
-        {
-            musicSource.pitch = value ? playbackSpeedDuringTimeStop : 1f;
-        }
-    }
+    public bool timeStopped = false;
     public float targetVolume
     {
         get
         {
             return paused ? (pauseVolumeMultiplier * volumeSetting) : volumeSetting;
+        }
+    }
+    public float targetPlaybackSpeed
+    {
+        get
+        {
+            if (timeStopped && !paused)
+            {
+                return playbackSpeedDuringTimeStop;
+            }
+            return 1f;
         }
     }
 
@@ -43,6 +59,7 @@ public class MusicController : MonoBehaviour
     public float volumeSpeed;
     public float startVolume;
     public float playbackSpeedDuringTimeStop;
+    public float playbackSpeedSpeed;
     
     Dictionary<string, AudioClip> tracks;
     AudioClip playing;
@@ -53,21 +70,28 @@ public class MusicController : MonoBehaviour
         tracks = new Dictionary<string, AudioClip>();
     }
 
-    void Update()
+    float AnimateMusicProperty(float currentValue, float targetValue, float speed)
     {
-        if (volume != targetVolume)
+        if (currentValue != targetValue)
         {
-            var volumeAdditionThisUpdate = volumeSpeed * Time.unscaledDeltaTime * (targetVolume > volume ? 1f : -1f);
-            var difference = targetVolume - volume;
-            if (Math.Abs(volumeAdditionThisUpdate) >= Math.Abs(difference))
+            var additionThisUpdate = speed * Time.unscaledDeltaTime * (targetValue > currentValue ? 1f : -1f);
+            var difference = targetValue - currentValue;
+            if (Math.Abs(additionThisUpdate) >= Math.Abs(difference))
             {
-                volume = targetVolume;
+                currentValue = targetValue;
             }
             else
             {
-                volume += volumeAdditionThisUpdate;
+                currentValue += additionThisUpdate;
             }
         }
+        return currentValue;
+    }
+
+    void Update()
+    {
+        volume = AnimateMusicProperty(volume, targetVolume, volumeSpeed);
+        playbackSpeed = AnimateMusicProperty(playbackSpeed, targetPlaybackSpeed, playbackSpeedSpeed);
 
         // Loop if track ends
         if (playing != null && !musicSource.isPlaying) {
