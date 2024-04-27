@@ -58,42 +58,44 @@ public class AnimationFXHandler : MonoBehaviour
     }
 
     #region Footsteps
-    public void StepL(int heavy)
+    public void Step(bool left)
     {
         AudioSource source = footSourceLight;
         AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), true);
-        if (Time.time - stepLTime > footstepDelay)
+
+        ref float stepTime = ref stepRTime;
+        if (left)
+        {
+            stepTime = ref stepLTime;
+        }
+
+        if (Time.time - stepTime > footstepDelay)
         {
             source.PlayOneShot(clip);
-            stepLTime = Time.time;
+            stepTime = Time.time;
         }
-        if (actor != null && actor.ShouldDustOnStep()) OnDust.Invoke();
-        OnStepL.Invoke();
-        Debug.DrawRay(footL.position, Vector3.up * 0.2f, Color.blue, 1f);
-    }
 
+        if (actor != null && actor.ShouldDustOnStep())
+        {
+            OnDust.Invoke();
+        }
+        if (left)
+        {
+            OnStepL.Invoke();
+        }
+        else
+        {
+            OnStepR.Invoke();
+        }
+        Debug.DrawRay(footL.position, Vector3.up * 0.2f, left ? Color.blue : Color.red, 1f);
+    }
     public void StepL()
     {
-        StepL(0);
+        Step(true);
     }
-
-    public void StepR(int heavy)
-    {
-        AudioSource source = footSourceLight;
-        AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), false);
-        if (Time.time - stepRTime > footstepDelay)
-        {
-            source.PlayOneShot(clip);
-            stepRTime = Time.time;
-        }
-        if (actor != null && actor.ShouldDustOnStep()) OnDust.Invoke();
-        OnStepR.Invoke();
-        Debug.DrawRay(footR.position, Vector3.up * 0.2f, Color.red, 1f);
-    }
-
     public void StepR()
     {
-        StepR(0);
+        Step(false);
     }
 
     public void StepWeapon()
@@ -259,10 +261,11 @@ public class AnimationFXHandler : MonoBehaviour
             direction.y = 0f;
             direction.Normalize();
 
+            // TODO: i think it would be nice to have different sounds for the diff blocks
             if (player.IsBlockingSlash())
             {
                 combatHitSource.PlayOneShot(animSounds.blockSwitch);
-                FlashColor(new Color(1,1,1,0.5f));
+                FlashColor(new Color(1, 1, 1, 0.5f));
             }
             else if (player.IsBlockingThrust())
             {
