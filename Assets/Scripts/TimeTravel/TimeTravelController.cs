@@ -659,6 +659,7 @@ public class TimeTravelController : MonoBehaviour
         StartPostProcessing();
         OnTimeStopStart.Invoke();
         ConsumeChargeAndResetMeter();
+        MusicController.instance.timeStopped = true;
     }
 
     public void StopFreeze()
@@ -668,6 +669,7 @@ public class TimeTravelController : MonoBehaviour
         StopPostProcessing();
         OnTimeStopEnd.Invoke();
         StartInputLockout(inputLockoutDuration);
+        MusicController.instance.timeStopped = false;
     }
 
     public void StartFreezeFX()

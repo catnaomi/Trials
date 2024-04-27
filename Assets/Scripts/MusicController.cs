@@ -21,8 +21,15 @@ public class MusicController : MonoBehaviour
     }
 
     [Header("Script Managed Properties")]
-    public float volumeSetting;
-    public bool paused;
+    public float volumeSetting = 1f;
+    public bool paused = false;
+    public bool timeStopped
+    {
+        set
+        {
+            musicSource.pitch = value ? playbackSpeedDuringTimeStop : 1f;
+        }
+    }
     public float targetVolume
     {
         get
@@ -33,10 +40,12 @@ public class MusicController : MonoBehaviour
 
     [Header("Constants")]
     public float pauseVolumeMultiplier;
-    public float volumeVelocity;
+    public float volumeSpeed;
     public float startVolume;
+    public float playbackSpeedDuringTimeStop;
     
     Dictionary<string, AudioClip> tracks;
+    AudioClip playing;
 
     void Awake()
     {
@@ -48,7 +57,7 @@ public class MusicController : MonoBehaviour
     {
         if (volume != targetVolume)
         {
-            var volumeAdditionThisUpdate = volumeVelocity * Time.unscaledDeltaTime * (targetVolume > volume ? 1f : -1f);
+            var volumeAdditionThisUpdate = volumeSpeed * Time.unscaledDeltaTime * (targetVolume > volume ? 1f : -1f);
             var difference = targetVolume - volume;
             if (Math.Abs(volumeAdditionThisUpdate) >= Math.Abs(difference))
             {
@@ -59,11 +68,17 @@ public class MusicController : MonoBehaviour
                 volume += volumeAdditionThisUpdate;
             }
         }
+
+        // Loop if track ends
+        if (playing != null && !musicSource.isPlaying) {
+            musicSource.PlayOneShot(playing);
+        }
     }
     
     void Play(AudioClip track)
     {
         volume = startVolume;
+        playing = track;
         musicSource.PlayOneShot(track);
     }
 
@@ -94,6 +109,7 @@ public class MusicController : MonoBehaviour
 
     public void Stop()
     {
+        playing = null;
         musicSource.Stop();
     }
 }
