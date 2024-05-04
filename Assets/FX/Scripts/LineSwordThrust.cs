@@ -166,7 +166,7 @@ public class LineSwordThrust : MonoBehaviour
         bloodTimer = bloodFadeDelay + bloodFadeTime;
         bleeding = true;
         if (isCrit) Debug.Log("Crit!!!");
-        AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Blood) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Blood);
+        AudioClip clip = (isCrit) ? FXController.instance.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Blood) : FXController.instance.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Blood);
         float volume = (isCrit) ? critVolume : hitVolume;
         this.GetComponent<AudioSource>().Stop();
         this.GetComponent<AudioSource>().PlayOneShot(clip, volume);
@@ -178,8 +178,8 @@ public class LineSwordThrust : MonoBehaviour
     public void Block(Vector3 point)
     {
         bool isCrit = IsNextCrit();
-        AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
-        FXController.CreateFX(FXController.FX.FX_Sparks, point, Quaternion.identity, 1f, clip);
+        AudioClip clip = (isCrit) ? FXController.instance.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.instance.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
+        FXController.instance.CreateFX(FXController.FX.FX_Sparks, point, Quaternion.identity, 1f, clip);
 
         float force = (isCrit) ? impulseCritMag : impulseMag;
         Shake(force * impulseBlockMult);

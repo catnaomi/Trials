@@ -144,11 +144,11 @@ public class BezierProjectileController : Projectile
         if (hitbox.didHitTerrain)
         {
             hitbox.SetActive(false);
-            FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
+            FXController.instance.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, FXController.instance.clipDictionary["bow_hit"]);
         }
         else if (hitbox.victims.Count > 0)
         {
-            //FXController.CreateFX(FXController.FX.FX_BleedPoint, feather.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
+            //FXController.instance.CreateFX(FXController.FX.FX_BleedPoint, feather.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
             allowInteract = false;
         }
         EndFlight();

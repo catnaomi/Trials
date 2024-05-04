@@ -46,6 +46,6 @@ public class DamageDisplay : MonoBehaviour
         this.damage += dmg;
         clock = -delay;
         text.text = Mathf.Round(this.damage).ToString();
-        text.color = FXController.GetColorForDamageType(type);
+        text.color = FXController.instance.GetColorForDamageType(type);
     }
 }

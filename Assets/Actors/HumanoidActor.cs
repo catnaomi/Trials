@@ -488,7 +488,7 @@ public class HumanoidActor : Actor
 
         // TODO: fx flexibility
         FXController.FX fx = (!isBlock) ? FXController.FX.FX_Hit : FXController.FX.FX_Block;
-        FXController.CreateFX(fx, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
+        FXController.instance.CreateFX(fx, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
 
         if (!IsProne())
         {
@@ -731,7 +731,7 @@ public class HumanoidActor : Actor
             kbForce = Vector3.zero,
             unblockable = true,
             breaksArmor = true,
-            hitClip = FXController.clipDictionary["shield_bash_hit"]
+            hitClip = FXController.instance.clipDictionary["shield_bash_hit"]
         };
         this.ProcessDamageKnockback(dk);
     }

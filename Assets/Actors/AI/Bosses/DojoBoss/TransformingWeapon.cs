@@ -16,10 +16,10 @@ public class TransformingWeapon : BladeWeapon
         OnEquip.Invoke();
         holder = actor;
         
-        slashFX = FXController.CreateSwordSlash().GetComponent<MeshSwordSlash>();
+        slashFX = FXController.instance.CreateSwordSlash().GetComponent<MeshSwordSlash>();
         slashFX.pseudoParent = actor.transform;
 
-        thrustFX = FXController.CreateSwordThrust().GetComponent<SpiralSwordThrust>();
+        thrustFX = FXController.instance.CreateSwordThrust().GetComponent<SpiralSwordThrust>();
         thrustFX.pseudoParent = actor.transform;
 
         GenerateHitboxes();

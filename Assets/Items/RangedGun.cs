@@ -111,7 +111,7 @@ public class RangedGun : RangedWeapon, IHitboxHandler
         if (hit.collider != null)
         {
             endPoint = hit.point;
-            FXController.CreateFX(FXController.FX.FX_Sparks, hit.point, Quaternion.LookRotation(launchVector), 1f);
+            FXController.instance.CreateFX(FXController.FX.FX_Sparks, hit.point, Quaternion.LookRotation(launchVector), 1f);
             if (hit.collider.transform.root.TryGetComponent<IDamageable>(out IDamageable damageable))
             {
                 DamageKnockback dk = new DamageKnockback(this.damageKnockback);
@@ -121,10 +121,10 @@ public class RangedGun : RangedWeapon, IHitboxHandler
             }
             else
             {
-                //FXController.CreateFX(FXController.FX.FX_Sparks, hit.point, Quaternion.LookRotation(launchVector), 1f);
+                //FXController.instance.CreateFX(FXController.FX.FX_Sparks, hit.point, Quaternion.LookRotation(launchVector), 1f);
             }
         }
-        FXController.CreateGunTrail(muzzle.transform.position, endPoint, muzzle.transform.forward, 5f, null);
+        FXController.instance.CreateGunTrail(muzzle.transform.position, endPoint, muzzle.transform.forward, 5f, null);
     }
     public override bool CanFire()
     {

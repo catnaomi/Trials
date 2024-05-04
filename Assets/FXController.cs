@@ -1,11 +1,10 @@
 ﻿using Cinemachine;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class FXController : MonoBehaviour
 {
-    // TODO: figure out a way to future-proof this/ make more dynamic
+    public static FXController instance;
 
     public GameObject fx_block;
     public GameObject fx_hit;
@@ -25,8 +24,6 @@ public class FXController : MonoBehaviour
     [Space(5)]
     public GameObject fx_circle;
     public GameObject fx_cross;
-
-    public static FXController main;
 
     [Header("Damage Colors")]
     public Color trueColor;
@@ -69,16 +66,13 @@ public class FXController : MonoBehaviour
         Water,
     }
     
-    public static Dictionary<FX, GameObject> fxDictionary;
-    public static Dictionary<string, AudioClip> clipDictionary;
-    private void Awake()
-    {
-        Init();
-    }
+    public Dictionary<FX, GameObject> fxDictionary;
+    public Dictionary<string, AudioClip> clipDictionary;
 
-    public void Init()
+    void Awake()
     {
-        if (main != null) return;
+        instance = this;
+
         fxDictionary = new Dictionary<FX, GameObject>()
         {
             { FX.FX_Block,  this.fx_block },
@@ -130,25 +124,20 @@ public class FXController : MonoBehaviour
         {
             healParticle = PlayerActor.player.transform.Find("_healparticle").GetComponent<ParticleSystem>();
         }
-
-        main = this;
     }
-    public static GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration)
+
+    public GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration)
     {
         return CreateFX(name, position, rotation, duration, null);
     }
 
-    public static GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration, AudioClip audioClipOverwrite)
+    public GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration, AudioClip audioClipOverwrite)
     {
-        EnsureSingleton();
         GameObject newFX = GameObject.Instantiate(fxDictionary[name], position, rotation);
 
         if (audioClipOverwrite != null)
         {
             AudioSource audioSource = newFX.GetComponentInChildren<AudioSource>();
-
-            //audioSource.playOnAwake = true;
-            //audioSource.Stop();
             audioSource.clip = audioClipOverwrite;
             audioSource.Play();
         }
@@ -157,44 +146,38 @@ public class FXController : MonoBehaviour
         return newFX;
     }
 
-    public static GameObject CreateSwordSlash()
+    public GameObject CreateSwordSlash()
     {
-        EnsureSingleton();
-        GameObject newFX = GameObject.Instantiate(main.fx_slash);
+        GameObject newFX = GameObject.Instantiate(fx_slash);
         return newFX;
     }
 
-    public static GameObject CreateSwordThrust()
+    public GameObject CreateSwordThrust()
     {
-        EnsureSingleton();
-        GameObject newFX = GameObject.Instantiate(main.fx_thrust);
+        GameObject newFX = GameObject.Instantiate(fx_thrust);
         return newFX;
     }
 
-    public static GameObject CreateDizzy()
+    public GameObject CreateDizzy()
     {
-        EnsureSingleton();
-        GameObject newFX = GameObject.Instantiate(main.fx_dizzy);
+        GameObject newFX = GameObject.Instantiate(fx_dizzy);
         return newFX;
     }
 
-    public static GameObject CreateBladeWarning()
+    public GameObject CreateBladeWarning()
     {
-        EnsureSingleton();
-        GameObject newFX = GameObject.Instantiate(main.fx_warn);
+        GameObject newFX = GameObject.Instantiate(fx_warn);
         return newFX;
     }
 
-    public static GameObject CreateSpiral()
+    public GameObject CreateSpiral()
     {
-        EnsureSingleton();
-        GameObject newFX = GameObject.Instantiate(main.fx_spiral);
+        GameObject newFX = GameObject.Instantiate(fx_spiral);
         return newFX;
     }
-    public static GameObject CreateGunTrail(Vector3 start, Vector3 end, Vector3 direction, float duration, AudioClip soundOverride)
+    public GameObject CreateGunTrail(Vector3 start, Vector3 end, Vector3 direction, float duration, AudioClip soundOverride)
     {
-        EnsureSingleton();
-        GameObject newFX = GameObject.Instantiate(main.fx_gunTrail);
+        GameObject newFX = GameObject.Instantiate(fx_gunTrail);
         newFX.transform.position = start;
         newFX.transform.rotation = Quaternion.LookRotation(direction);
 
@@ -207,40 +190,37 @@ public class FXController : MonoBehaviour
         return newFX;
     }
 
-    public static void CreateSpark(Vector3 position, Vector3 direction, AudioClip soundOverride)
+    public void CreateSpark(Vector3 position, Vector3 direction, AudioClip soundOverride)
     {
-        EnsureSingleton();
         CreateFX(FXController.FX.FX_Sparks, position, Quaternion.LookRotation(-direction), 1f, soundOverride);
     }
 
-    public static void CreateCross(Vector3 position, Vector3 direction)
+    public void CreateCross(Vector3 position, Vector3 direction)
     {
-        CreateFromPrefab(main.fx_cross, position, direction);
+        CreateFromPrefab(fx_cross, position, direction);
     }
 
-    public static void CreateCircle(Vector3 position, Vector3 direction)
+    public void CreateCircle(Vector3 position, Vector3 direction)
     {
-        CreateFromPrefab(main.fx_circle, position, direction);
+        CreateFromPrefab(fx_circle, position, direction);
     }
 
-    public static void CreateParrySuccess(Vector3 position, Vector3 direction)
+    public void CreateParrySuccess(Vector3 position, Vector3 direction)
     {
-        CreateFromPrefab(main.fx_parry_success, position, direction);
+        CreateFromPrefab(fx_parry_success, position, direction);
     }
 
-    public static GameObject CreateMiragiaParticleSingle(Vector3 position)
+    public GameObject CreateMiragiaParticleSingle(Vector3 position)
     {
-        EnsureSingleton();
-        GameObject newFX = GameObject.Instantiate(main.fx_miragia);
+        GameObject newFX = GameObject.Instantiate(fx_miragia);
         newFX.transform.position = position;
 
         return newFX;
     }
 
-    public static GameObject CreateMiragiaParticleSingleSound(Vector3 position)
+    public GameObject CreateMiragiaParticleSingleSound(Vector3 position)
     {
-        EnsureSingleton();
-        GameObject newFX = GameObject.Instantiate(main.fx_miragia_sound);
+        GameObject newFX = GameObject.Instantiate(fx_miragia_sound);
         newFX.transform.position = position;
 
         return newFX;
@@ -248,13 +228,12 @@ public class FXController : MonoBehaviour
 
     static void CreateFromPrefab(GameObject prefab, Vector3 position, Vector3 direction)
     {
-        EnsureSingleton();
         GameObject newFX = GameObject.Instantiate(prefab);
         newFX.transform.position = position;
         newFX.transform.rotation = Quaternion.LookRotation(direction);
     }
 
-    public static AudioClip GetSwordHitSoundFromFXMaterial(FXMaterial material)
+    public AudioClip GetSwordHitSoundFromFXMaterial(FXMaterial material)
     {
         switch (material)
         {
@@ -268,7 +247,7 @@ public class FXController : MonoBehaviour
         }
     }
 
-    public static AudioClip GetSwordCriticalSoundFromFXMaterial(FXMaterial material)
+    public AudioClip GetSwordCriticalSoundFromFXMaterial(FXMaterial material)
     {
         switch (material)
         {
@@ -282,72 +261,57 @@ public class FXController : MonoBehaviour
         }
     }
 
-    public static Color GetColorForDamageType(DamageType type)
+    public Color GetColorForDamageType(DamageType type)
     {
         switch (type)
         {
             default:
-                return main.trueColor;
+                return trueColor;
             case DamageType.Fire:
-                return main.fireColor;
+                return fireColor;
         }
     }
 
-    public static Color GetSecondColorForDamageType(DamageType type)
+    public Color GetSecondColorForDamageType(DamageType type)
     {
         switch (type)
         {
             default:
-                return main.trueColor2;
+                return trueColor2;
             case DamageType.Fire:
-                return main.fireColor2;
+                return fireColor2;
         }
     }
 
-    public static void ImpulseScreenShake(Vector3 force)
+    public void ImpulseScreenShake(Vector3 force)
     {
-        EnsureSingleton();
-        main.impulse.GenerateImpulseWithVelocity(force);
+        impulse.GenerateImpulseWithVelocity(force);
     }
 
-    public static void DamageScreenShake(Vector3 direction, bool isCrit, bool isBlock)
+    public void DamageScreenShake(Vector3 direction, bool isCrit, bool isBlock)
     {
-        EnsureSingleton();
-        float mag = main.hitImpulseMagnitude;
+        float mag = hitImpulseMagnitude;
         if (isCrit)
         {
-            mag = main.critImpulseMagnitude;
+            mag = critImpulseMagnitude;
         }
         else if (isBlock)
         {
-            mag = main.blockImpulseMagnitude;
+            mag = blockImpulseMagnitude;
         }
         ImpulseScreenShake(direction * mag);
     }
 
-    public static void EnsureSingleton()
+    public GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCrit, FXMaterial hurtMaterial, AudioClip soundOverride)
     {
-        if (main == null)
-        {
-            FXController fx = GameObject.FindObjectOfType<FXController>();
-            if (fx != null)
-            {
-                fx.Init();
-            }
-        }
-    }
-
-    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCrit, FXMaterial hurtMaterial, AudioClip soundOverride)
-    {
-        EnsureSingleton();
-        GameObject particlePrefab = main.fx_bleedSword;
+        GameObject particlePrefab;
         if (hurtMaterial == FXMaterial.Ice)
         {
-            particlePrefab = (isSlash ? main.fx_iceSlash : main.fx_icePoint);
+            particlePrefab = isSlash ? fx_iceSlash : fx_icePoint;
         }
         else
         {
-            particlePrefab = (isSlash ? main.fx_bleedSword : main.fx_bleedPoint);
+            particlePrefab = isSlash ? fx_bleedSword : fx_bleedPoint;
         }
         GameObject newFX = GameObject.Instantiate(particlePrefab);
         newFX.transform.position = position;
@@ -383,8 +347,8 @@ public class FXController : MonoBehaviour
         }
     }
 
-    public static void ShowPlayerHealParticle()
+    public void ShowPlayerHealParticle()
     {
-        main.ShowPlayerHealParticleInstance();
+        ShowPlayerHealParticleInstance();
     }
 }
