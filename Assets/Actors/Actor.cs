@@ -402,7 +402,7 @@ public class Actor : MonoBehaviour
     }
     public virtual void FlashWarning(int hand)
     {
-        GameObject fx = FXController.instance.CreateBladeWarning();
+        GameObject fx = FXController.CreateBladeWarning();
         fx.transform.position = this.transform.position;
     }
 

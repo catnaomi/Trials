@@ -333,7 +333,7 @@ public class MeshSwordSlash : MonoBehaviour
     {
         bool isCrit = IsNextCrit();
         AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
-        FXController.instance.CreateFX(FXController.FX.FX_Sparks, point, Quaternion.LookRotation(-contactDir), 1f, clip);
+        FXController.CreateFX(FXController.FX.FX_Sparks, point, Quaternion.LookRotation(-contactDir), 1f, clip);
 
         float force = (isCrit) ? impulseCritMag : impulseMag;
         Shake(force * impulseBlockMult);

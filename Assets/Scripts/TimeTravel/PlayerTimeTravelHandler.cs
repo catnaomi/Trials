@@ -146,7 +146,7 @@ public class PlayerTimeTravelHandler : ActorTimeTravelHandler
         {
             contactPoint = c.ClosestPoint(damage.originPoint);
         }
-        FXController.instance.CreateMiragiaParticleSingleSound(contactPoint);
+        FXController.CreateMiragiaParticleSingleSound(contactPoint);
         afterImageData.Add(pair);
     }
 

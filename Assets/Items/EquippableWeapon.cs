@@ -162,7 +162,7 @@ public class EquippableWeapon : Equippable, IGeneratesModel
     {
         if (model != null)
         {
-            GameObject fx = FXController.instance.CreateBladeWarning();
+            GameObject fx = FXController.CreateBladeWarning();
             fx.transform.position = model.transform.position;
             Destroy(fx, 1f);
         }

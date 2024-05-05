@@ -488,7 +488,7 @@ public class HumanoidActor : Actor
 
         // TODO: fx flexibility
         FXController.FX fx = (!isBlock) ? FXController.FX.FX_Hit : FXController.FX.FX_Block;
-        FXController.instance.CreateFX(fx, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
+        FXController.CreateFX(fx, GetFXPosition(damageKnockback), Quaternion.LookRotation(turnTowards), 2f, damageKnockback.hitClip);
 
         if (!IsProne())
         {

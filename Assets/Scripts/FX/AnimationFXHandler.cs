@@ -284,7 +284,7 @@ public class AnimationFXHandler : MonoBehaviour
                 actor.transform.up * parryPosition.y +
                 actor.transform.forward * parryPosition.z;
         Vector3 rotation = actor.transform.forward;
-        FXController.instance.CreateCross(position, rotation);
+        FXController.CreateCross(position, rotation);
     }
 
     public void ParryThrustStart()
@@ -294,7 +294,7 @@ public class AnimationFXHandler : MonoBehaviour
                 actor.transform.up * parryPosition.y +
                 actor.transform.forward * parryPosition.z;
         Vector3 rotation = actor.transform.forward;
-        FXController.instance.CreateCircle(position, rotation);
+        FXController.CreateCircle(position, rotation);
     }
 
     public void ParrySuccess()
@@ -306,7 +306,7 @@ public class AnimationFXHandler : MonoBehaviour
                 actor.transform.up * parryPosition.y +
                 actor.transform.forward * parryPosition.z;
             Vector3 rotation = actor.transform.forward;
-            FXController.instance.CreateParrySuccess(position, rotation);
+            FXController.CreateParrySuccess(position, rotation);
         }
     }
 
@@ -337,9 +337,9 @@ public class AnimationFXHandler : MonoBehaviour
 
             if (isSlash || isThrust || damage.hitClip != null)
             {
-                FXController.instance.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, isSlash, isCrit, fxMaterial, damage.hitClip);
+                FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, isSlash, isCrit, fxMaterial, damage.hitClip);
             }
-            FXController.instance.DamageScreenShake(actor.hitParticleDirection, isCrit, false);
+            FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, false);
         }
     }
 
@@ -359,19 +359,19 @@ public class AnimationFXHandler : MonoBehaviour
 
             if (isSlash || isThrust)
             {
-                AudioClip clip = (isCrit || didTypedBlock) ? FXController.instance.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.instance.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
-                FXController.instance.CreateSpark(actor.hitParticlePosition, actor.hitParticleDirection, clip);
-                FXController.instance.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
+                AudioClip clip = (isCrit || didTypedBlock) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
+                FXController.CreateSpark(actor.hitParticlePosition, actor.hitParticleDirection, clip);
+                FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
             }
             if (actor is PlayerActor)
             {
                 if (isSlash)
                 {
-                    FXController.instance.CreateCross(actor.hitParticlePosition, actor.hitParticleDirection);
+                    FXController.CreateCross(actor.hitParticlePosition, actor.hitParticleDirection);
                 }
                 else if (isThrust)
                 {
-                    FXController.instance.CreateCircle(actor.hitParticlePosition, actor.hitParticleDirection);
+                    FXController.CreateCircle(actor.hitParticlePosition, actor.hitParticleDirection);
                 }
                 
             }

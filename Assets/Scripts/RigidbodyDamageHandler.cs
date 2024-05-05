@@ -83,7 +83,7 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
                 collision.GetContacts(points);
                 foreach (ContactPoint point in points)
                 {
-                    FXController.instance.CreateFX(FXController.FX.FX_Sparks, point.point, Quaternion.identity, 1f, null);
+                    FXController.CreateFX(FXController.FX.FX_Sparks, point.point, Quaternion.identity, 1f, null);
                 }
                 
             }
@@ -118,7 +118,7 @@ public class RigidbodyDamageHandler : MonoBehaviour, IDamageable, IAttacker
         if (sparkOnContact)
         {
             Vector3 point = this.GetComponent<Collider>().ClosestPoint(damage.originPoint);
-            FXController.instance.CreateFX(FXController.FX.FX_Sparks, point, Quaternion.identity, 1f);
+            FXController.CreateFX(FXController.FX.FX_Sparks, point, Quaternion.identity, 1f);
         }
         if (hasAudio)
         {

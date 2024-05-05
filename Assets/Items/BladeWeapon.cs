@@ -44,7 +44,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         top = InterfaceUtilities.FindRecursively(GetModel().transform, "_top");
         bottom = InterfaceUtilities.FindRecursively(GetModel().transform, "_bottom");
 
-        slashFX = FXController.instance.CreateSwordSlash().GetComponent<MeshSwordSlash>();
+        slashFX = FXController.CreateSwordSlash().GetComponent<MeshSwordSlash>();
         slashFX.topPoint = top;
         slashFX.bottomPoint = bottom;
         slashFX.pseudoParent = actor.transform;
@@ -53,7 +53,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
             UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(slashFX.gameObject, actor.gameObject.scene);
         }
 
-        thrustFX = FXController.instance.CreateSwordThrust().GetComponent<SpiralSwordThrust>();
+        thrustFX = FXController.CreateSwordThrust().GetComponent<SpiralSwordThrust>();
         thrustFX.topPoint = top;
         thrustFX.bottomPoint = bottom;
         thrustFX.pseudoParent = actor.transform;
@@ -72,7 +72,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
 
         if (slashFX == null)
         {
-            slashFX = FXController.instance.CreateSwordSlash().GetComponent<MeshSwordSlash>();
+            slashFX = FXController.CreateSwordSlash().GetComponent<MeshSwordSlash>();
         }
         slashFX.topPoint = top;
         slashFX.bottomPoint = bottom;
@@ -84,7 +84,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
 
         if (thrustFX == null)
         {
-            thrustFX = FXController.instance.CreateSwordThrust().GetComponent<SpiralSwordThrust>();
+            thrustFX = FXController.CreateSwordThrust().GetComponent<SpiralSwordThrust>();
         }
         thrustFX.topPoint = top;
         thrustFX.bottomPoint = bottom;
@@ -307,7 +307,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
 
     public override void FlashWarning()
     {
-        GameObject fx = FXController.instance.CreateBladeWarning();
+        GameObject fx = FXController.CreateBladeWarning();
         fx.transform.SetParent(bottom);
         fx.transform.localScale = Vector3.one;
         holder.StartCoroutine(FlashWarningRoutine(fx));
@@ -466,8 +466,8 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
 
     private void SetTrailColor(DamageType type)
     {
-        Color c = FXController.instance.GetColorForDamageType(type);
-        Color c2 = FXController.instance.GetSecondColorForDamageType(type);
+        Color c = FXController.GetColorForDamageType(type);
+        Color c2 = FXController.GetSecondColorForDamageType(type);
         
     }
     public enum AttackType
@@ -804,7 +804,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         if (thisDamage.isSlash && (otherDamage.isSlash || otherDamage.isThrust) && !otherDamage.cannotRecoil)
         {
             Vector3 contactPoint = ((contactBox.transform.position) + (otherBox.transform.position)) / 2f;
-            FXController.instance.CreateFX(FXController.FX.FX_Sparks,
+            FXController.CreateFX(FXController.FX.FX_Sparks,
                     contactPoint,
                     Quaternion.identity,
                     1f);
@@ -835,7 +835,7 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         {
             Vector3 contactPoint = contactBox.hitTerrain.ClosestPoint((positionReference.MainHand.transform.position + positionReference.MainHand.transform.forward * (length / 2f)));
 
-            FXController.instance.CreateFX(FXController.FX.FX_Sparks,
+            FXController.CreateFX(FXController.FX.FX_Sparks,
                     contactPoint,
                     Quaternion.identity,
                     1f);

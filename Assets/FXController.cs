@@ -131,14 +131,14 @@ public class FXController : MonoBehaviour
         }
     }
 
-    public GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration)
+    public static GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration)
     {
         return CreateFX(name, position, rotation, duration, null);
     }
 
-    public GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration, AudioClip audioClipOverwrite)
+    public static GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration, AudioClip audioClipOverwrite)
     {
-        GameObject newFX = GameObject.Instantiate(fxDictionary[name], position, rotation);
+        GameObject newFX = GameObject.Instantiate(instance.fxDictionary[name], position, rotation);
 
         if (audioClipOverwrite != null)
         {
@@ -151,38 +151,38 @@ public class FXController : MonoBehaviour
         return newFX;
     }
 
-    public GameObject CreateSwordSlash()
+    public static GameObject CreateSwordSlash()
     {
-        GameObject newFX = GameObject.Instantiate(fx_slash);
+        GameObject newFX = GameObject.Instantiate(instance.fx_slash);
         return newFX;
     }
 
-    public GameObject CreateSwordThrust()
+    public static GameObject CreateSwordThrust()
     {
-        GameObject newFX = GameObject.Instantiate(fx_thrust);
+        GameObject newFX = GameObject.Instantiate(instance.fx_thrust);
         return newFX;
     }
 
-    public GameObject CreateDizzy()
+    public static GameObject CreateDizzy()
     {
-        GameObject newFX = GameObject.Instantiate(fx_dizzy);
+        GameObject newFX = GameObject.Instantiate(instance.fx_dizzy);
         return newFX;
     }
 
-    public GameObject CreateBladeWarning()
+    public static GameObject CreateBladeWarning()
     {
-        GameObject newFX = GameObject.Instantiate(fx_warn);
+        GameObject newFX = GameObject.Instantiate(instance.fx_warn);
         return newFX;
     }
 
-    public GameObject CreateSpiral()
+    public static GameObject CreateSpiral()
     {
-        GameObject newFX = GameObject.Instantiate(fx_spiral);
+        GameObject newFX = GameObject.Instantiate(instance.fx_spiral);
         return newFX;
     }
-    public GameObject CreateGunTrail(Vector3 start, Vector3 end, Vector3 direction, float duration, AudioClip soundOverride)
+    public static GameObject CreateGunTrail(Vector3 start, Vector3 end, Vector3 direction, float duration, AudioClip soundOverride)
     {
-        GameObject newFX = GameObject.Instantiate(fx_gunTrail);
+        GameObject newFX = GameObject.Instantiate(instance.fx_gunTrail);
         newFX.transform.position = start;
         newFX.transform.rotation = Quaternion.LookRotation(direction);
 
@@ -195,37 +195,37 @@ public class FXController : MonoBehaviour
         return newFX;
     }
 
-    public void CreateSpark(Vector3 position, Vector3 direction, AudioClip soundOverride)
+    public static void CreateSpark(Vector3 position, Vector3 direction, AudioClip soundOverride)
     {
-        CreateFX(FXController.FX.FX_Sparks, position, Quaternion.LookRotation(-direction), 1f, soundOverride);
+        CreateFX(FX.FX_Sparks, position, Quaternion.LookRotation(-direction), 1f, soundOverride);
     }
 
-    public void CreateCross(Vector3 position, Vector3 direction)
+    public static void CreateCross(Vector3 position, Vector3 direction)
     {
-        CreateFromPrefab(fx_cross, position, direction);
+        CreateFromPrefab(instance.fx_cross, position, direction);
     }
 
-    public void CreateCircle(Vector3 position, Vector3 direction)
+    public static void CreateCircle(Vector3 position, Vector3 direction)
     {
-        CreateFromPrefab(fx_circle, position, direction);
+        CreateFromPrefab(instance.fx_circle, position, direction);
     }
 
-    public void CreateParrySuccess(Vector3 position, Vector3 direction)
+    public static void CreateParrySuccess(Vector3 position, Vector3 direction)
     {
-        CreateFromPrefab(fx_parry_success, position, direction);
+        CreateFromPrefab(instance.fx_parry_success, position, direction);
     }
 
-    public GameObject CreateMiragiaParticleSingle(Vector3 position)
+    public static GameObject CreateMiragiaParticleSingle(Vector3 position)
     {
-        GameObject newFX = GameObject.Instantiate(fx_miragia);
+        GameObject newFX = GameObject.Instantiate(instance.fx_miragia);
         newFX.transform.position = position;
 
         return newFX;
     }
 
-    public GameObject CreateMiragiaParticleSingleSound(Vector3 position)
+    public static GameObject CreateMiragiaParticleSingleSound(Vector3 position)
     {
-        GameObject newFX = GameObject.Instantiate(fx_miragia_sound);
+        GameObject newFX = GameObject.Instantiate(instance.fx_miragia_sound);
         newFX.transform.position = position;
 
         return newFX;
@@ -238,85 +238,85 @@ public class FXController : MonoBehaviour
         newFX.transform.rotation = Quaternion.LookRotation(direction);
     }
 
-    public AudioClip GetSwordHitSoundFromFXMaterial(FXMaterial material)
+    public static AudioClip GetSwordHitSoundFromFXMaterial(FXMaterial material)
     {
         switch (material)
         {
             default:
             case FXMaterial.Blood:
-                return clipDictionary["sword_blood"];
+                return instance.clipDictionary["sword_blood"];
             case FXMaterial.Metal:
-                return clipDictionary["sword_metal"];
+                return instance.clipDictionary["sword_metal"];
             case FXMaterial.Wood:
-                return clipDictionary["sword_wood"];
+                return instance.clipDictionary["sword_wood"];
         }
     }
 
-    public AudioClip GetSwordCriticalSoundFromFXMaterial(FXMaterial material)
+    public static AudioClip GetSwordCriticalSoundFromFXMaterial(FXMaterial material)
     {
         switch (material)
         {
             default:
             case FXMaterial.Blood:
-                return clipDictionary["sword_blood_crit"];
+                return instance.clipDictionary["sword_blood_crit"];
             case FXMaterial.Wood:
-                return clipDictionary["sword_wood_crit"];
+                return instance.clipDictionary["sword_wood_crit"];
             case FXMaterial.Metal:
-                return clipDictionary["sword_metal_crit"];
+                return instance.clipDictionary["sword_metal_crit"];
         }
     }
 
-    public Color GetColorForDamageType(DamageType type)
+    public static Color GetColorForDamageType(DamageType type)
     {
         switch (type)
         {
             default:
-                return trueColor;
+                return instance.trueColor;
             case DamageType.Fire:
-                return fireColor;
+                return instance.fireColor;
         }
     }
 
-    public Color GetSecondColorForDamageType(DamageType type)
+    public static Color GetSecondColorForDamageType(DamageType type)
     {
         switch (type)
         {
             default:
-                return trueColor2;
+                return instance.trueColor2;
             case DamageType.Fire:
-                return fireColor2;
+                return instance.fireColor2;
         }
     }
 
-    public void ImpulseScreenShake(Vector3 force)
+    public static void ImpulseScreenShake(Vector3 force)
     {
-        impulse.GenerateImpulseWithVelocity(force);
+        instance.impulse.GenerateImpulseWithVelocity(force);
     }
 
-    public void DamageScreenShake(Vector3 direction, bool isCrit, bool isBlock)
+    public static void DamageScreenShake(Vector3 direction, bool isCrit, bool isBlock)
     {
-        float mag = hitImpulseMagnitude;
+        float mag = instance.hitImpulseMagnitude;
         if (isCrit)
         {
-            mag = critImpulseMagnitude;
+            mag = instance.critImpulseMagnitude;
         }
         else if (isBlock)
         {
-            mag = blockImpulseMagnitude;
+            mag = instance.blockImpulseMagnitude;
         }
         ImpulseScreenShake(direction * mag);
     }
 
-    public GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCrit, FXMaterial hurtMaterial, AudioClip soundOverride)
+    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCrit, FXMaterial hurtMaterial, AudioClip soundOverride)
     {
         GameObject particlePrefab;
         if (hurtMaterial == FXMaterial.Ice)
         {
-            particlePrefab = isSlash ? fx_iceSlash : fx_icePoint;
+            particlePrefab = isSlash ? instance.fx_iceSlash : instance.fx_icePoint;
         }
         else
         {
-            particlePrefab = isSlash ? fx_bleedSword : fx_bleedPoint;
+            particlePrefab = isSlash ? instance.fx_bleedSword : instance.fx_bleedPoint;
         }
         GameObject newFX = GameObject.Instantiate(particlePrefab);
         newFX.transform.position = position;
