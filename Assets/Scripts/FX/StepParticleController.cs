@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,11 +13,12 @@ public class StepParticleController : MonoBehaviour
     public int maxRipples = -1;
     int poolIndex;
     GenericTimeTravelHandler timeTravelController;
+
     private void Awake()
     {
         instance = this;
     }
-    // Start is called before the first frame update
+
     void Start()
     {
         Collider c = this.GetComponent<Collider>();
@@ -39,11 +38,15 @@ public class StepParticleController : MonoBehaviour
 
         timeTravelController.OnStartFreeze.AddListener(FreezeAll);
         timeTravelController.OnStopFreeze.AddListener(UnFreezeAll);
-
     }
 
     void Update()
     {
+        if (slideRipples == null)
+        {
+            return;
+        }
+
         foreach (AnimationFXHandler fxHandler in slideRipples.Keys)
         {
             if (slideRipples.TryGetValue(fxHandler, out ParticleSystem system))
@@ -58,19 +61,7 @@ public class StepParticleController : MonoBehaviour
             }
         }
     }
-    /*
-    void ListenLeftFoot(AnimationFXHandler fxHandler)
-    {
-        if (!fxHandlers.Contains(fxHandler)) return;
-        CreateParticle(fxHandler.footL);
-    }
-
-    void ListenRightFoot(AnimationFXHandler fxHandler)
-    {
-        if (!fxHandlers.Contains(fxHandler)) return;
-        CreateParticle(fxHandler.footR);
-    }
-    */
+    
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent(out AnimationFXHandler fxHandler))
@@ -91,8 +82,12 @@ public class StepParticleController : MonoBehaviour
     {
         if (fxHandlers.Contains(fxHandler)) return;
         fxHandlers.Add(fxHandler);
-        fxHandler.OnStepR.AddListener(() => CreateParticle(fxHandler.footR));
-        fxHandler.OnStepL.AddListener(() => CreateParticle(fxHandler.footL));
+        for (int footIndex = 0; footIndex < 2; footIndex++)
+        {
+            var foot = fxHandler.feet[footIndex];
+            fxHandler.OnStep[footIndex].AddListener(() => CreateParticle(foot));
+            fxHandler.OnStep[footIndex].AddListener(() => CreateParticle(foot));
+        }
 
         fxHandler.OnSlideStart.AddListener(() => StartSlide(fxHandler));
         fxHandler.OnSlideEnd.AddListener(() => StopSlide(fxHandler));
@@ -102,6 +97,7 @@ public class StepParticleController : MonoBehaviour
     {
         fxHandlers.Remove(fxHandler);
     }
+
     public void CreateStep(Vector3 position)
     {
         if (maxRipples <= 0 || ripples.Count < maxRipples)
@@ -164,6 +160,7 @@ public class StepParticleController : MonoBehaviour
 
         return system;
     }
+
     public void StartSlide(AnimationFXHandler fxHandler)
     {
         ParticleSystem system = null;
@@ -190,6 +187,7 @@ public class StepParticleController : MonoBehaviour
 
         system.Stop(true, ParticleSystemStopBehavior.StopEmitting);
     }
+
     public bool CheckFreeze(ParticleSystem system)
     {
         if (timeTravelController != null && timeTravelController.IsFrozen())
@@ -233,7 +231,6 @@ public class StepParticleController : MonoBehaviour
             {
                 ssystem.Play();
             }
-
         }
     }
 

@@ -6,7 +6,8 @@ public class AnimationFXHandler : MonoBehaviour
 {
     public FXController.FXMaterial fxMaterial;
 
-    public enum LeftOrRight {
+    public enum LeftOrRight
+    {
         Left,
         Right,
     }
@@ -17,8 +18,7 @@ public class AnimationFXHandler : MonoBehaviour
     public float footstepDelay = 0.25f;
     float[] stepTimes = new float[2];
     [Space(10)]
-    public Transform footL; // TODO: make array
-    public Transform footR;
+    public Transform[] feet;
     [Header("Swim")]
     public AudioSource waterSource;
     [Header("Combat")]
@@ -28,8 +28,9 @@ public class AnimationFXHandler : MonoBehaviour
     [Header("Events")]
     public UnityEvent OnDust;
     public UnityEvent OnDashDust;
-    public UnityEvent OnStepL; // TODO: make array
+    public UnityEvent OnStepL;
     public UnityEvent OnStepR;
+    public UnityEvent[] OnStep;
     public UnityEvent OnSlideStart;
     public UnityEvent OnSlideEnd;
     [Header("Spiral")]
@@ -45,9 +46,9 @@ public class AnimationFXHandler : MonoBehaviour
     Actor actor;
     bool didTypedBlock;
     
-    void Start()
+    void Awake()
     {
-        actor = this.GetComponent<Actor>();
+        actor = GetComponent<Actor>();
         actor.OnHurt.AddListener(ShowHitParticle);
         actor.OnBlock.AddListener(ShowBlockParticle);
         if (actor is PlayerActor player)
@@ -58,6 +59,8 @@ public class AnimationFXHandler : MonoBehaviour
             player.OnBlockTypeChange.AddListener(BlockSwitch);
             player.OnTypedBlockSuccess.AddListener(RegisterTypedBlock);
         }
+
+        OnStep = new[] {OnStepL, OnStepR};
     }
 
     static void PlaySound(AudioSource source, string soundName)
@@ -69,28 +72,22 @@ public class AnimationFXHandler : MonoBehaviour
 
     public void Step(LeftOrRight leftOrRight)
     {
+        var footIndex = (int)leftOrRight;
         AudioSource source = footSourceLight;
         AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), leftOrRight);
 
-        if (Time.time - stepTimes[(int)leftOrRight] > footstepDelay)
+        if (Time.time - stepTimes[footIndex] > footstepDelay)
         {
             source.PlayOneShot(clip);
-            stepTimes[(int)leftOrRight] = Time.time;
+            stepTimes[footIndex] = Time.time;
         }
 
         if (actor != null && actor.ShouldDustOnStep())
         {
             OnDust.Invoke();
         }
-        if (leftOrRight == LeftOrRight.Left)
-        {
-            OnStepL.Invoke();
-        }
-        else
-        {
-            OnStepR.Invoke();
-        }
-        Debug.DrawRay(footL.position, Vector3.up * 0.2f, (leftOrRight == LeftOrRight.Left) ? Color.blue : Color.red, 1f); // TODO: make sure footL gets replaced with approp
+        OnStep[footIndex].Invoke();
+        Debug.DrawRay(feet[footIndex].position, Vector3.up * 0.2f, leftOrRight == LeftOrRight.Left ? Color.blue : Color.red, 1f);
     }
     public void StepL()
     {
@@ -337,7 +334,7 @@ public class AnimationFXHandler : MonoBehaviour
 
             if (isSlash || isThrust || damage.hitClip != null)
             {
-                FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, isSlash, isCrit, fxMaterial, damage.hitClip);
+                FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, isSlash, isCrit ? FXController.IsCritical.Critical : FXController.IsCritical.NoCritical, fxMaterial, damage.hitClip);
             }
             FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, false);
         }
@@ -359,10 +356,10 @@ public class AnimationFXHandler : MonoBehaviour
 
             if (isSlash || isThrust)
             {
-                AudioClip clip = (isCrit || didTypedBlock) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
-                FXController.CreateSpark(actor.hitParticlePosition, actor.hitParticleDirection, clip);
+                FXController.CreateBlock(actor.hitParticlePosition, Quaternion.identity, 1f, (isCrit || didTypedBlock) ? FXController.IsCritical.Critical : FXController.IsCritical.NoCritical);
                 FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
             }
+
             if (actor is PlayerActor)
             {
                 if (isSlash)

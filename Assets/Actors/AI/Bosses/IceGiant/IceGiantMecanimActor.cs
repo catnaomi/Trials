@@ -123,10 +123,10 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         leftLegCollider = leftLegWeakPoint.GetComponent<Collider>();
         rightLegCollider = rightLegWeakPoint.GetComponent<Collider>();
         weakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(weakPoint));
-        if (TryGetComponent<AnimationFXHandler>(out AnimationFXHandler fxHandler))
+        if (TryGetComponent(out AnimationFXHandler fxHandler))
         {
-            fxHandler.OnStepL.AddListener(StepShockwaveLeft);
-            fxHandler.OnStepR.AddListener(StepShockwaveRight);
+            fxHandler.OnStep[0].AddListener(StepShockwaveLeft);
+            fxHandler.OnStep[1].AddListener(StepShockwaveRight);
         }
         nav = GetComponent<NavMeshAgent>();
         nav.enabled = false;
@@ -138,7 +138,6 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         nav.updateRotation = false;
         
         fx = this.GetComponent<IceGiantFXHelper>();
-        //EnableWeakPoint(false);
     }
 
     public void EnableActions()

@@ -727,11 +727,11 @@ public class HumanoidActor : Actor
     {
         DamageKnockback dk = new DamageKnockback()
         {
-            healthDamage = 100f,//new Damage(fallDamage * mult, DamageType.TrueDamage),
+            healthDamage = 100f,
             kbForce = Vector3.zero,
             unblockable = true,
             breaksArmor = true,
-            hitClip = FXController.instance.clipDictionary["shield_bash_hit"]
+            hitClip = SoundFXAssetManager.GetSound("Shield/Bash/Hit"),
         };
         this.ProcessDamageKnockback(dk);
     }
@@ -759,18 +759,6 @@ public class HumanoidActor : Actor
 
     public void AnimSheathWeapon(int slot)
     {
-        //Inventory.EquipSlot equipSlot = (Inventory.EquipSlot)slot;
-
-        /*
-        if (slot == 1 || slot == 3)
-        { // main hand
-            inventory.SetDrawn(true, false);
-        }
-        else if (slot == 2 || slot == 4)s
-        {
-            inventory.SetDrawn(false, false);
-        }
-        */
         inventory.SetDrawn(equipToMain, false);
     }
 
@@ -811,10 +799,6 @@ public class HumanoidActor : Actor
         {
             speed *= WeaponDrawnMultiplier;
         }
-        //if (IsSprinting())
-        //{
-            //speed *= SprintMultiplier;
-        //}
         if (IsAiming())
         {
             speed *= AimMultipler;
@@ -828,10 +812,9 @@ public class HumanoidActor : Actor
 
     public void AnimDrawWeapon(int slot)
     {
-        //Inventory.EquipSlot equipSlot = (Inventory.EquipSlot)slot;
-
         inventory.SetDrawn(equipToMain, true);
     }
+    
     /*
      * triggered by animation:
      * 0 = deactivate hitboxes

@@ -1,4 +1,5 @@
 ﻿using Cinemachine;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -25,11 +26,11 @@ public class FXController : MonoBehaviour
     public GameObject fx_circle;
     public GameObject fx_cross;
 
+    // Unity cannot serialize dictionaries so we manually populate them
     [Header("Damage Colors")]
-    public Color trueColor;
-    public Color trueColor2;
-    public Color fireColor;
-    public Color fireColor2;
+    public Color trueDamageColor;
+    public Color fireDamageColor;
+    Dictionary<DamageType, Color> colorFromDamageType = new Dictionary<DamageType, Color>();
 
     [Header("Screen Shake")]
     public CinemachineImpulseSource impulse;
@@ -44,8 +45,16 @@ public class FXController : MonoBehaviour
     public GameObject fx_iceSlash;
     public GameObject fx_icePoint;
 
+    // Unity cannot serialize dictionaries so we manually populate them
+    [Header("Sound Constants")]
+    public float criticalHitVolume;
+    public float noCriticalHitVolume;
+    Dictionary<IsCritical, float> hitVolumeFromIsCritical = new Dictionary<IsCritical, float>();
+
     ParticleSystem healParticle;
-    public enum FX {
+
+    public enum FX
+    {
         FX_Block,
         FX_Hit,
         FX_Stagger,
@@ -65,65 +74,40 @@ public class FXController : MonoBehaviour
         Ice,
         Water,
     }
+
+    public enum IsCritical
+    {
+        NoCritical,
+        Critical,
+    }
     
-    public Dictionary<FX, GameObject> fxDictionary;
-    public Dictionary<string, AudioClip> clipDictionary;
+    Dictionary<FX, GameObject> fxObjects;
 
     void Awake()
     {
         if (instance != null)
         {
-            Debug.LogError("Duplicated SoundFXAssetManager");
+            throw new Exception("Duplicated FXController");
         }
         instance = this;
         DontDestroyOnLoad(this);
 
-        fxDictionary = new Dictionary<FX, GameObject>()
+        fxObjects = new Dictionary<FX, GameObject>()
         {
-            { FX.FX_Block,  this.fx_block },
-            { FX.FX_Hit, this.fx_hit },
-            { FX.FX_Stagger, this.fx_stagger },
-            { FX.FX_Sparks, this.fx_sparks },
-            { FX.FX_BleedSword, this.fx_bleedSword },
-            { FX.FX_BleedPoint, this.fx_bleedPoint },
+            { FX.FX_Block,  fx_block },
+            { FX.FX_Hit, fx_hit },
+            { FX.FX_Stagger, fx_stagger },
+            { FX.FX_Sparks, fx_sparks },
+            { FX.FX_BleedSword, fx_bleedSword },
+            { FX.FX_BleedPoint, fx_bleedPoint },
         };
 
-        clipDictionary = new Dictionary<string, AudioClip>()
-        {
-            { "sword_swing_light",  Resources.Load<AudioClip>("Sounds/Effects/sword_swing1") },
-            { "sword_swing_medium", Resources.Load<AudioClip>("Sounds/Effects/sword_swing1") },
-            { "sword_swing_heavy", Resources.Load<AudioClip>("Sounds/Effects/sword_swing1") },
+        // Populate dictionaries filled by unity inspector values
+        colorFromDamageType.Add(DamageType.TrueDamage, trueDamageColor);
+        colorFromDamageType.Add(DamageType.Fire, fireDamageColor);
 
-            { "sword_hit_light",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_hit_light") },
-            { "sword_hit_heavy", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_sword_hit_heavy") },
-
-
-            { "shield_bash",  Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bash") },
-            { "shield_bash_hit", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_bash_hit") },
-
-            { "metal_clash", Resources.Load<AudioClip>("Sounds/Effects/sound_temp_clash") },
-
-            { "bow_draw",  Resources.Load<AudioClip>("Sounds/Effects/bow-draw1") },
-            { "bow_fire", Resources.Load<AudioClip>("Sounds/Effects/bow-fire") },
-            { "bow_hit", Resources.Load<AudioClip>("Sounds/Effects/bow-hit1") },
-
-            { "parry_start", Resources.Load<AudioClip>("Sounds/Effects/sword-parry01") },
-            { "parry_success", Resources.Load<AudioClip>("Sounds/Effects/sword-parry02") },
-
-            // material on hits
-            // blood, metal, wood, stone, dirt, glass
-
-            { "sword_blood",  Resources.Load<AudioClip>("Sounds/Effects/sword-bleed1") },
-            { "sword_blood_crit",  Resources.Load<AudioClip>("Sounds/Effects/sword-bleed2") },
-
-            { "sword_metal",  Resources.Load<AudioClip>("Sounds/Effects/metal-hit2") },
-            { "sword_metal_crit",  Resources.Load<AudioClip>("Sounds/Effects/stone-break1") },
-
-            { "sword_wood",  Resources.Load<AudioClip>("Sounds/Effects/metal-hit1") },
-            { "sword_wood_crit",  Resources.Load<AudioClip>("Sounds/Effects/wood-break1") },
-
-            { "sword_bleed",  Resources.Load<AudioClip>("Sounds/Effects/sword-bleed1") },
-        };
+        hitVolumeFromIsCritical.Add(IsCritical.NoCritical, noCriticalHitVolume);
+        hitVolumeFromIsCritical.Add(IsCritical.Critical, criticalHitVolume);
 
         if (PlayerActor.player != null)
         {
@@ -138,13 +122,12 @@ public class FXController : MonoBehaviour
 
     public static GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration, AudioClip audioClipOverwrite)
     {
-        GameObject newFX = GameObject.Instantiate(instance.fxDictionary[name], position, rotation);
+        GameObject newFX = GameObject.Instantiate(instance.fxObjects[name], position, rotation);
 
         if (audioClipOverwrite != null)
         {
             AudioSource audioSource = newFX.GetComponentInChildren<AudioSource>();
-            audioSource.clip = audioClipOverwrite;
-            audioSource.Play();
+            audioSource.PlayOneShot(audioClipOverwrite);
         }
 
         GameObject.Destroy(newFX, duration);
@@ -238,54 +221,14 @@ public class FXController : MonoBehaviour
         newFX.transform.rotation = Quaternion.LookRotation(direction);
     }
 
-    public static AudioClip GetSwordHitSoundFromFXMaterial(FXMaterial material)
+    public static void PlaySwordHitSound(AudioSource source, FXMaterial material, IsCritical isCritical)
     {
-        switch (material)
-        {
-            default:
-            case FXMaterial.Blood:
-                return instance.clipDictionary["sword_blood"];
-            case FXMaterial.Metal:
-                return instance.clipDictionary["sword_metal"];
-            case FXMaterial.Wood:
-                return instance.clipDictionary["sword_wood"];
-        }
+        source.PlayOneShot(SoundFXAssetManager.GetSound("Sword", material.ToString(), isCritical.ToString()), instance.hitVolumeFromIsCritical[isCritical]);
     }
 
-    public static AudioClip GetSwordCriticalSoundFromFXMaterial(FXMaterial material)
+    public static Color GetColorFromDamageType(DamageType damageType)
     {
-        switch (material)
-        {
-            default:
-            case FXMaterial.Blood:
-                return instance.clipDictionary["sword_blood_crit"];
-            case FXMaterial.Wood:
-                return instance.clipDictionary["sword_wood_crit"];
-            case FXMaterial.Metal:
-                return instance.clipDictionary["sword_metal_crit"];
-        }
-    }
-
-    public static Color GetColorForDamageType(DamageType type)
-    {
-        switch (type)
-        {
-            default:
-                return instance.trueColor;
-            case DamageType.Fire:
-                return instance.fireColor;
-        }
-    }
-
-    public static Color GetSecondColorForDamageType(DamageType type)
-    {
-        switch (type)
-        {
-            default:
-                return instance.trueColor2;
-            case DamageType.Fire:
-                return instance.fireColor2;
-        }
+        return instance.colorFromDamageType[damageType];
     }
 
     public static void ImpulseScreenShake(Vector3 force)
@@ -307,7 +250,7 @@ public class FXController : MonoBehaviour
         ImpulseScreenShake(direction * mag);
     }
 
-    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCrit, FXMaterial hurtMaterial, AudioClip soundOverride)
+    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, IsCritical isCritical, FXMaterial hurtMaterial, AudioClip soundOverride)
     {
         GameObject particlePrefab;
         if (hurtMaterial == FXMaterial.Ice)
@@ -318,24 +261,31 @@ public class FXController : MonoBehaviour
         {
             particlePrefab = isSlash ? instance.fx_bleedSword : instance.fx_bleedPoint;
         }
+
         GameObject newFX = GameObject.Instantiate(particlePrefab);
         newFX.transform.position = position;
         newFX.transform.rotation = Quaternion.LookRotation(direction);
-        if (soundOverride != null)
+        if (soundOverride != null) // TODO: could we not?
         {
             AudioSource source = newFX.GetComponentInChildren<AudioSource>();
             source.clip = soundOverride;
             source.Play();
         }
-        else if (isCrit)
+        else if (isCritical == IsCritical.Critical) // TODO: why do we only play a sound if we are critical
         {
-            AudioClip clip = GetSwordCriticalSoundFromFXMaterial(hurtMaterial);
             AudioSource source = newFX.GetComponentInChildren<AudioSource>();
-
-            source.clip = clip;
-            source.Play();
+            PlaySwordHitSound(source, hurtMaterial, isCritical);
         }
+
         Destroy(newFX, 10f);
+        return newFX;
+    }
+    
+    public static GameObject CreateBlock(Vector3 position, Quaternion rotation, float duration, IsCritical isCritical)
+    {
+        var newFX = CreateFX(FX.FX_Sparks, position, rotation, duration, null);
+        AudioSource audioSource = newFX.GetComponentInChildren<AudioSource>();
+        PlaySwordHitSound(audioSource, FXMaterial.Metal, isCritical);
         return newFX;
     }
 

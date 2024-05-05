@@ -19,7 +19,6 @@ public class LineSwordThrust : MonoBehaviour
     public float lineFadeTime = 0.5f;
     public float lineWidth = 0.1f;
     public float sublineWidth = 0.25f;
-    //float lineTimer = 0f;
     public float bloodFadeTime = 0.5f;
     public float bloodFadeDelay = 0.5f;
     float bloodTimer;
@@ -30,15 +29,11 @@ public class LineSwordThrust : MonoBehaviour
 
     [Header("Other FX")]
     public CinemachineImpulseSource impulse;
-    [Range(0f, 1f)]
-    public float hitVolume = 0.5f;
-    [Range(0f, 1f)]
-    public float critVolume = 1f;
     public float impulseMag = 0.1f;
     public float impulseCritMag = 0.2f;
     public float impulseBlockMult = 0.5f;
     public UnityEvent OnBleed;
-    // Start is called before the first frame update
+
     void Start()
     {
         StartCoroutine("UpdateAtFPS");
@@ -48,7 +43,6 @@ public class LineSwordThrust : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
         for (int i = 0; i < lineTimers.Length; i++)
@@ -64,15 +58,6 @@ public class LineSwordThrust : MonoBehaviour
         {
             lineTimers[currentIndex] = lineFadeTime;
         }
-        for (int j = 0; j < bloodParticles.Length; j++)
-        {
-            if (bloodParticles[j].particleCount <= 0)
-            {
-                //bloodParticles[j].Stop();
-                //bloodParticles[j].gameObject.SetActive(false);
-            }
-        }
-
     }
 
     public void OnDestroy()
@@ -117,6 +102,7 @@ public class LineSwordThrust : MonoBehaviour
             UpdateTrail();
         }
     }
+    
     private void UpdateTrail()
     {
         if (bottomPoint == null || topPoint == null)
@@ -125,11 +111,9 @@ public class LineSwordThrust : MonoBehaviour
         }
         if (thrusting)
         {
-            //lineRenderers[currentIndex].SetPosition(0, bottomPoint.position);
             lineRenderers[currentIndex].SetPosition(1, (lineRenderers[currentIndex].GetPosition(0) + topPoint.position) / 2f);
             lineRenderers[currentIndex].SetPosition(2, topPoint.position);
             LineRenderer subline = lineRenderers[currentIndex].transform.GetChild(0).GetComponent<LineRenderer>();
-            //subline.SetPosition(0, bottomPoint.position);
             subline.SetPosition(1, (subline.GetPosition(0) + topPoint.position) / 2f);
             subline.SetPosition(2, topPoint.position);
 
@@ -165,12 +149,12 @@ public class LineSwordThrust : MonoBehaviour
         bloodParticles[currentIndex].Play();
         bloodTimer = bloodFadeDelay + bloodFadeTime;
         bleeding = true;
-        if (isCrit) Debug.Log("Crit!!!");
-        AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Blood) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Blood);
-        float volume = (isCrit) ? critVolume : hitVolume;
-        this.GetComponent<AudioSource>().Stop();
-        this.GetComponent<AudioSource>().PlayOneShot(clip, volume);
-        float force = (isCrit) ? impulseCritMag : impulseMag;
+
+        var soundSource = GetComponent<AudioSource>();
+        soundSource.Stop();
+        FXController.PlaySwordHitSound(soundSource, FXController.FXMaterial.Blood, isCrit ? FXController.IsCritical.Critical : FXController.IsCritical.NoCritical);
+
+        float force = isCrit ? impulseCritMag : impulseMag;
         Shake(force);
         OnBleed.Invoke();
     }
@@ -178,10 +162,8 @@ public class LineSwordThrust : MonoBehaviour
     public void Block(Vector3 point)
     {
         bool isCrit = IsNextCrit();
-        AudioClip clip = (isCrit) ? FXController.GetSwordCriticalSoundFromFXMaterial(FXController.FXMaterial.Metal) : FXController.GetSwordHitSoundFromFXMaterial(FXController.FXMaterial.Metal);
-        FXController.CreateFX(FXController.FX.FX_Sparks, point, Quaternion.identity, 1f, clip);
-
-        float force = (isCrit) ? impulseCritMag : impulseMag;
+        FXController.CreateBlock(point, Quaternion.identity, 1f, isCrit ? FXController.IsCritical.Critical : FXController.IsCritical.NoCritical);
+        float force = isCrit ? impulseCritMag : impulseMag;
         Shake(force * impulseBlockMult);
     }
 
@@ -189,7 +171,6 @@ public class LineSwordThrust : MonoBehaviour
     {
         impulse.GenerateImpulseWithForce(force);
     }
-
 
     public void StopBleeding()
     {

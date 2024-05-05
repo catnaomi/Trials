@@ -13,12 +13,13 @@ public class SoundFXAssetManager : MonoBehaviour
     {
         if (instance != null)
         {
-            Debug.LogError("Duplicated SoundFXAssetManager");
+            throw new Exception("Duplicated SoundFXAssetManager");
         }
         instance = this;
         DontDestroyOnLoad(this);
         
         // TODO: organize sound assets so that where possible name and path are identical
+        // TODO: organize the actual loads
         LoadSound("Footsteps/dash1", "Dash");
         LoadSound("Footsteps/tap1", "Tap");
         LoadSound("Footsteps/thud1", "Thud");
@@ -31,9 +32,6 @@ public class SoundFXAssetManager : MonoBehaviour
         LoadSound("Effects/bow-draw1", "Bow/Draw", "Bow/Pull", "Gun/Reload"); // TODO: de-alias draw/pull
         LoadSound("Effects/sword-parry01", "Parry/Start");
         LoadSound("Effects/sword-parry02", "Parry/Success");
-        LoadSound("Effects/sword-bleed1", "Sword/Bleed", "Sword/Blood"); // TODO: de-alias
-        LoadSound("Effects/metal-hit2", "Sword/Metal");
-        LoadSound("Effects/metal-hit1", "Sword/Wood");
         LoadSound("Effects/slide", "Slide/Continuous");
         LoadSound("Water/splash2", "Splash/Small");
         LoadSound("Water/splash1", "Splash/Big");
@@ -44,9 +42,17 @@ public class SoundFXAssetManager : MonoBehaviour
         LoadSound("Effects/icecharge1", "Charge/Start");
         LoadSound("Effects/click1", "Block/Switch");
         LoadSound("Effects/sound_temp_bash_hit", "Shield/Bash/Hit");
-        LoadSound("Effects/sword-bleed2", "Sword/Blood/Crit");
-        LoadSound("Effects/stone-break1", "Sword/Metal/Crit");
-        LoadSound("Effects/wood-break1", "Sword/Wood/Crit");
+
+        LoadSound("Effects/sword-bleed1", "Sword/Blood/NoCritical");
+        LoadSound("Effects/metal-hit1", "Sword/Metal/NoCritical");
+        LoadSound("Effects/wood-cut1", "Sword/Wood/NoCritical");
+        LoadSound("Effects/stone-hit1", "Sword/Stone/NoCritical", "Sword/Ice/NoCritical");
+
+        LoadSound("Effects/sword-bleed2", "Sword/Blood/Critical");
+        LoadSound("Effects/metal-hit2", "Sword/Metal/Critical");
+        LoadSound("Effects/wood-break1", "Sword/Wood/Critical");
+        LoadSound("Effects/stone-break1", "Sword/Stone/Critical", "Sword/Ice/Critical");
+        
         LoadSound("Effects/sword_swing1", "Sword/Swing/Light", "Sword/Swing/Medium", "Sword/Swing/Heavy");
         LoadSound("Footsteps/tile-stepL", "Step/Default/Left", "Step/Metal/Left", "Step/Ice/Left");
         LoadSound("Footsteps/tile-stepR", "Step/Default/Right", "Step/Metal/Right", "Step/Ice/Right");
