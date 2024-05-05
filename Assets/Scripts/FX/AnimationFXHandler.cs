@@ -4,17 +4,20 @@ using CustomUtilities;
 
 public class AnimationFXHandler : MonoBehaviour
 {
-    public AnimationFXSounds animSounds;
     public FXController.FXMaterial fxMaterial;
+
+    public enum LeftOrRight {
+        Left,
+        Right,
+    }
 
     [Header("Footsteps")]
     public AudioSource footSourceLight;
     public AudioSource footSourceHeavy;
     public float footstepDelay = 0.25f;
-    float stepLTime;
-    float stepRTime;
+    float[] stepTimes = new float[2];
     [Space(10)]
-    public Transform footL;
+    public Transform footL; // TODO: make array
     public Transform footR;
     [Header("Swim")]
     public AudioSource waterSource;
@@ -25,7 +28,7 @@ public class AnimationFXHandler : MonoBehaviour
     [Header("Events")]
     public UnityEvent OnDust;
     public UnityEvent OnDashDust;
-    public UnityEvent OnStepL;
+    public UnityEvent OnStepL; // TODO: make array
     public UnityEvent OnStepR;
     public UnityEvent OnSlideStart;
     public UnityEvent OnSlideEnd;
@@ -57,29 +60,29 @@ public class AnimationFXHandler : MonoBehaviour
         }
     }
 
+    static void PlaySound(AudioSource source, string soundName)
+    {
+        source.PlayOneShot(SoundFXAssetManager.GetSound(soundName));
+    }
+
     #region Footsteps
-    public void Step(bool left)
+
+    public void Step(LeftOrRight leftOrRight)
     {
         AudioSource source = footSourceLight;
-        AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), true);
+        AudioClip clip = GetFootStepFromTerrain(actor.GetCurrentGroundPhysicsMaterial(), leftOrRight);
 
-        ref float stepTime = ref stepRTime;
-        if (left)
-        {
-            stepTime = ref stepLTime;
-        }
-
-        if (Time.time - stepTime > footstepDelay)
+        if (Time.time - stepTimes[(int)leftOrRight] > footstepDelay)
         {
             source.PlayOneShot(clip);
-            stepTime = Time.time;
+            stepTimes[(int)leftOrRight] = Time.time;
         }
 
         if (actor != null && actor.ShouldDustOnStep())
         {
             OnDust.Invoke();
         }
-        if (left)
+        if (leftOrRight == LeftOrRight.Left)
         {
             OnStepL.Invoke();
         }
@@ -87,15 +90,15 @@ public class AnimationFXHandler : MonoBehaviour
         {
             OnStepR.Invoke();
         }
-        Debug.DrawRay(footL.position, Vector3.up * 0.2f, left ? Color.blue : Color.red, 1f);
+        Debug.DrawRay(footL.position, Vector3.up * 0.2f, (leftOrRight == LeftOrRight.Left) ? Color.blue : Color.red, 1f); // TODO: make sure footL gets replaced with approp
     }
     public void StepL()
     {
-        Step(true);
+        Step(LeftOrRight.Left);
     }
     public void StepR()
     {
-        Step(false);
+        Step(LeftOrRight.Right);
     }
 
     public void StepWeapon()
@@ -106,7 +109,7 @@ public class AnimationFXHandler : MonoBehaviour
     public void Slide(int active)
     {
         footSourceHeavy.Stop();
-        footSourceHeavy.PlayOneShot(animSounds.default_slide);
+        PlaySound(footSourceHeavy, "Slide");
         if (active > 0)
         {
             OnSlideStart.Invoke();
@@ -120,29 +123,29 @@ public class AnimationFXHandler : MonoBehaviour
     public void Tap()
     {
         footSourceHeavy.Stop();
-        footSourceHeavy.PlayOneShot(animSounds.tap);
+        PlaySound(footSourceHeavy, "Tap");
     }
 
     public void Thud()
     {
         footSourceHeavy.Stop();
-        footSourceHeavy.PlayOneShot(animSounds.default_thud);
+        PlaySound(footSourceHeavy, "Thud");
     }
 
     public void Dash()
     {
         footSourceHeavy.Stop();
-        footSourceHeavy.PlayOneShot(animSounds.dash);
+        PlaySound(footSourceHeavy, "Dash");
         OnDashDust.Invoke();
     }
 
     public void StartContinuousSlide()
     {
-        
-        if (footSourceHeavy.clip != animSounds.continuousSlide)
+        var continuousSlideSound = SoundFXAssetManager.GetSound("Slide/Continuous");
+        if (footSourceHeavy.clip != continuousSlideSound)
         {
             footSourceHeavy.Stop();
-            footSourceHeavy.clip = animSounds.continuousSlide;
+            footSourceHeavy.clip = continuousSlideSound;
         }
         footSourceHeavy.loop = true;
         if (!footSourceHeavy.isPlaying)
@@ -160,7 +163,7 @@ public class AnimationFXHandler : MonoBehaviour
     public void Roll()
     {
         footSourceHeavy.Stop();
-        footSourceHeavy.PlayOneShot(animSounds.default_roll);
+        PlaySound(footSourceHeavy, "Roll");
         
     }
 
@@ -170,51 +173,50 @@ public class AnimationFXHandler : MonoBehaviour
     }
 
     #endregion
-
     #region Swimming
 
     public void Swim()
     {
-        waterSource.PlayOneShot(animSounds.swim);
+        PlaySound(waterSource, "Swim");
     }
 
     public void SplashBig()
     {
         waterSource.Stop();
-        waterSource.PlayOneShot(animSounds.splashBig);
+        PlaySound(waterSource, "Splash/Big");
     }
 
     public void SplashSmall()
     {
         waterSource.Stop();
-        waterSource.PlayOneShot(animSounds.splashSmall);
+        PlaySound(waterSource, "Splash/Small");
     }
-    #endregion
 
+    #endregion
     #region Combat
 
     public void SlashLight()
     {
         combatWhiffSource.Stop();
-        combatWhiffSource.PlayOneShot(animSounds.slashLight);
+        PlaySound(combatWhiffSource, "Slash/Light");
     }
 
     public void SlashHeavy()
     {
         combatWhiffSource.Stop();
-        combatWhiffSource.PlayOneShot(animSounds.slashHeavy);
+        PlaySound(combatWhiffSource, "Slash/Heavy");
     }
 
     public void ThrustLight()
     {
         combatWhiffSource.Stop();
-        combatWhiffSource.PlayOneShot(animSounds.thrustLight);
+        PlaySound(combatWhiffSource, "Thrust/Light");
     }
 
     public void ThrustHeavy()
     {
         combatWhiffSource.Stop();
-        combatWhiffSource.PlayOneShot(animSounds.thrustHeavy);
+        PlaySound(combatWhiffSource, "Thrust/Heavy");
     }
 
     public void ArrowDraw()
@@ -224,33 +226,33 @@ public class AnimationFXHandler : MonoBehaviour
 
     public void ArrowNock()
     {
-        combatWhiffSource.PlayOneShot(animSounds.bowPull);
+        PlaySound(combatWhiffSource, "Bow/Pull");
         OnArrowNock.Invoke();
     }
 
     public void ArrowFire()
     {
         combatWhiffSource.Stop();
-        combatHitSource.PlayOneShot(animSounds.bowFire);
+        PlaySound(combatHitSource, "Bow/Fire");
     }
 
     public void GunFire()
     {
         combatWhiffSource.Stop();
-        combatHitSource.PlayOneShot(animSounds.bowFire);
+        PlaySound(combatHitSource, "Gun/Fire");
     }
 
     public void GunReload()
     {
         combatWhiffSource.Stop();
-        combatHitSource.PlayOneShot(animSounds.bowPull);
+        PlaySound(combatHitSource, "Gun/Reload");
         OnGunLoad.Invoke();
     }
 
     public void ChargeStart()
     {
         combatWhiffSource.Stop();
-        combatHitSource.PlayOneShot(animSounds.chargeStart);
+        PlaySound(combatHitSource, "Charge/Start");
     }
 
     public void BlockSwitch()
@@ -264,12 +266,12 @@ public class AnimationFXHandler : MonoBehaviour
             // TODO: i think it would be nice to have different sounds for the diff blocks
             if (player.IsBlockingSlash())
             {
-                combatHitSource.PlayOneShot(animSounds.blockSwitch);
+                PlaySound(combatHitSource, "Block/Switch");
                 FlashColor(new Color(1, 1, 1, 0.5f));
             }
             else if (player.IsBlockingThrust())
             {
-                combatHitSource.PlayOneShot(animSounds.blockSwitch);
+                PlaySound(combatHitSource, "Block/Switch");
                 FlashColor(new Color(1, 1, 1, 0.5f));
             }
         }
@@ -380,24 +382,22 @@ public class AnimationFXHandler : MonoBehaviour
     #endregion
     #region Terrain Handling
 
-    public AudioClip GetFootStepFromTerrain(string materialName, bool isLeft)
+    public AudioClip GetFootStepFromTerrain(string materialSteppedOn, LeftOrRight leftOrRight)
     {
-        string clipName = "default_step";
-        string material = materialName.ToLower();
+        // Material corresponds to a physical material e.g. Water_Walkable
+        // We need to reduce this to an FX Material to get its sound effect
+        var materialNameSimplified = "Default";
         string[] allMaterials = typeof(FXController.FXMaterial).GetEnumNames();
-        foreach (string curMaterial in allMaterials)
+        foreach (string material in allMaterials)
         {
-            var curMaterialLower = curMaterial.ToLower();
-            if (material.Contains(curMaterialLower))
+            if (materialSteppedOn.ToLower().Contains(material.ToLower()))
             {
-                clipName = $"{curMaterialLower}_step";
+                materialNameSimplified = material;
                 break;
             }
         }
 
-        clipName += isLeft ? "L" : "R";
-        var clipField = typeof(AnimationFXSounds).GetField(clipName);
-        return (AudioClip)clipField.GetValue(animSounds);
+        return SoundFXAssetManager.GetSound("Step", materialNameSimplified, leftOrRight.ToString());
     }
 
     #endregion

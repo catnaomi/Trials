@@ -1,72 +1,100 @@
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class SoundFXAssetManager : MonoBehaviour
 {
-    public Dictionary<string, AudioClip> soundEffects;
+    public static SoundFXAssetManager instance;
+
+    public Dictionary<string, AudioClip> soundEffects = new Dictionary<string, AudioClip>();
 
     void Awake()
     {
+        if (instance != null)
+        {
+            Debug.LogError("Duplicated SoundFXAssetManager");
+        }
+        instance = this;
+        DontDestroyOnLoad(this);
+        
         // TODO: organize sound assets so that where possible name and path are identical
-        LoadSound("sword/swing/light",  "Effects/sword_swing1");
-        LoadSound("sword/swing/medium", "Effects/sword_swing1");
-        LoadSound("sword/swing/heavy", "Effects/sword_swing1");
-        LoadSound("shield/bash",  "Effects/sound_temp_bash");
-        LoadSound("shield/bash/hit", "Effects/sound_temp_bash_hit");
-        LoadSound("metal/clash", "Effects/sound_temp_clash");
-        LoadSound("bow/draw",  "Effects/bow-draw1");
-        LoadSound("bow/fire", "Effects/bow-fire");
-        LoadSound("bow/hit", "Effects/bow-hit1");
-        LoadSound("parry/start", "Effects/sword-parry01");
-        LoadSound("parry/success", "Effects/sword-parry02");
-        LoadSound("sword/blood",  "Effects/sword-bleed1");
-        LoadSound("sword/blood/crit",  "Effects/sword-bleed2");
-        LoadSound("sword/metal",  "Effects/metal-hit2");
-        LoadSound("sword/metal/crit",  "Effects/stone-break1");
-        LoadSound("sword/wood",  "Effects/metal-hit1");
-        LoadSound("sword/wood/crit",  "Effects/wood-break1");
-        LoadSound("sword/bleed",  "Effects/sword-bleed1");
-        LoadSound("dash", "Footsteps/dash1");
-        LoadSound("tap", "Footsteps/tap1");
-        LoadSound("thud", "Footsteps/thud1");
-        LoadSound("slide", "Footsteps/dirt-slide");
-        LoadSound("roll", "Footsteps/roll1");
-        LoadSound("slide/continuous", "Effects/slide");
-        LoadSound("splash/small", "Water/splash2");
-        LoadSound("splash/big", "Water/splash1");
-        LoadSound("slash/light", "Effects/sword_swing1");
-        LoadSound("slash/heavy", "Effects/sound_temp_sword_swing_light");
-        LoadSound("thrust/light", "Effects/sword_swing1");
-        LoadSound("thrust/heavy", "Effects/sound_temp_sword_swing_light");
-        LoadSound("bow/pull", "Effects/bow-draw1");
-        LoadSound("bow/fire", "Effects/bow-fire");
-        LoadSound("charge/start", "Effects/icecharge1");
-        LoadSound("block/switch", "Effects/click1");
-        LoadSound("step/default/left", "Footsteps/tile-stepL");
-        LoadSound("step/default/right", "Footsteps/tile-stepR");
-        LoadSound("step/stone/left", "Footsteps/stone-stepL");
-        LoadSound("step/stone/right", "Footsteps/stone-stepR");
-        LoadSound("step/grass/left", "Footsteps/grass-stepL");
-        LoadSound("step/grass/right", "Footsteps/grass-stepR");
-        LoadSound("step/dirt/left", "Footsteps/dirt-stepL");
-        LoadSound("step/dirt/right", "Footsteps/dirt-stepR");
-        LoadSound("step/tile/left", "Footsteps/tile-stepL");
-        LoadSound("step/tile/right", "Footsteps/tile-stepR");
-        LoadSound("step/water/left", "Footsteps/water-stepL");
-        LoadSound("step/water/right", "Footsteps/water-stepR");
+        LoadSound("Footsteps/dash1", "Dash");
+        LoadSound("Footsteps/tap1", "Tap");
+        LoadSound("Footsteps/thud1", "Thud");
+        LoadSound("Footsteps/dirt-slide", "Slide");
+        LoadSound("Footsteps/roll1", "Roll");
+        LoadSound("Effects/sound_temp_bash", "Shield/Bash");
+        LoadSound("Effects/sound_temp_clash", "Metal/Clash");
+        LoadSound("Effects/bow-fire", "Bow/Fire", "Gun/Fire");
+        LoadSound("Effects/bow-hit1", "Bow/Hit");
+        LoadSound("Effects/bow-draw1", "Bow/Draw", "Bow/Pull", "Gun/Reload"); // TODO: de-alias draw/pull
+        LoadSound("Effects/sword-parry01", "Parry/Start");
+        LoadSound("Effects/sword-parry02", "Parry/Success");
+        LoadSound("Effects/sword-bleed1", "Sword/Bleed", "Sword/Blood"); // TODO: de-alias
+        LoadSound("Effects/metal-hit2", "Sword/Metal");
+        LoadSound("Effects/metal-hit1", "Sword/Wood");
+        LoadSound("Effects/slide", "Slide/Continuous");
+        LoadSound("Water/splash2", "Splash/Small");
+        LoadSound("Water/splash1", "Splash/Big");
+        LoadSound("Effects/sword_swing1", "Slash/Light");
+        LoadSound("Effects/sword_swing1", "Thrust/Light");
+        LoadSound("Effects/sound_temp_sword_swing_light", "Slash/Heavy");
+        LoadSound("Effects/sound_temp_sword_swing_light", "Thrust/Heavy");
+        LoadSound("Effects/icecharge1", "Charge/Start");
+        LoadSound("Effects/click1", "Block/Switch");
+        LoadSound("Effects/sound_temp_bash_hit", "Shield/Bash/Hit");
+        LoadSound("Effects/sword-bleed2", "Sword/Blood/Crit");
+        LoadSound("Effects/stone-break1", "Sword/Metal/Crit");
+        LoadSound("Effects/wood-break1", "Sword/Wood/Crit");
+        LoadSound("Effects/sword_swing1", "Sword/Swing/Light", "Sword/Swing/Medium", "Sword/Swing/Heavy");
+        LoadSound("Footsteps/tile-stepL", "Step/Default/Left", "Step/Metal/Left", "Step/Ice/Left");
+        LoadSound("Footsteps/tile-stepR", "Step/Default/Right", "Step/Metal/Right", "Step/Ice/Right");
+        LoadSound("Footsteps/stone-stepL", "Step/Stone/Left");
+        LoadSound("Footsteps/stone-stepR", "Step/Stone/Right");
+        LoadSound("Footsteps/grass-stepL", "Step/Grass/Left");
+        LoadSound("Footsteps/grass-stepR", "Step/Grass/Right");
+        LoadSound("Footsteps/dirt-stepL", "Step/Dirt/Left");
+        LoadSound("Footsteps/dirt-stepR", "Step/Dirt/Right");
+        LoadSound("Footsteps/tile-stepL", "Step/Tile/Left");
+        LoadSound("Footsteps/tile-stepR", "Step/Tile/Right");
+        LoadSound("Footsteps/water-stepL", "Step/Water/Left");
+        LoadSound("Footsteps/water-stepR", "Step/Water/Right");
     }
 
-    void LoadSound(string name, string path)
+    void LoadSound(string path, params string[] names)
     {
+        if (path == null)
+        {
+            path = names[0];
+        }
+
         var audioClip = Resources.Load<AudioClip>(Path.Combine("Sounds", path));
-        if (audioClip != null)
+        if (audioClip == null)
+        {
+            Debug.LogError($"Couldn't load sound effect {path}!");
+            audioClip = AudioClip.Create("Empty Clip", 0, 2, 0, false);
+        }
+
+        foreach (var name in names)
         {
             soundEffects.Add(name, audioClip);
         }
-        else
+    }
+
+    public static AudioClip GetSound(string name)
+    {
+        return instance.soundEffects[name];
+    }
+
+    public static AudioClip GetSound(params string[] nameSections)
+    {
+        var fullName = nameSections[0];
+        foreach (var nameSection in new ArraySegment<string>(nameSections, 1, nameSections.Length - 1))
         {
-            Debug.LogError($"Couldn't load sound effect {path}!");
+            fullName += "/";
+            fullName += nameSection;
         }
+        return GetSound(fullName);
     }
 }

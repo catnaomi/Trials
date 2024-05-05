@@ -71,7 +71,12 @@ public class FXController : MonoBehaviour
 
     void Awake()
     {
+        if (instance != null)
+        {
+            Debug.LogError("Duplicated SoundFXAssetManager");
+        }
         instance = this;
+        DontDestroyOnLoad(this);
 
         fxDictionary = new Dictionary<FX, GameObject>()
         {
