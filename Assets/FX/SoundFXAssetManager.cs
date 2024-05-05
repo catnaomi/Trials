@@ -54,8 +54,8 @@ public class SoundFXAssetManager : MonoBehaviour
         LoadSound("Effects/stone-break1", "Sword/Stone/Critical", "Sword/Ice/Critical");
         
         LoadSound("Effects/sword_swing1", "Sword/Swing/Light", "Sword/Swing/Medium", "Sword/Swing/Heavy");
-        LoadSound("Footsteps/tile-stepL", "Step/Default/Left", "Step/Metal/Left", "Step/Ice/Left");
-        LoadSound("Footsteps/tile-stepR", "Step/Default/Right", "Step/Metal/Right", "Step/Ice/Right");
+        LoadSound("Footsteps/tile-stepL", "Step/Default/Left", "Step/Metal/Left", "Step/Ice/Left", "Step/Wood/Left");
+        LoadSound("Footsteps/tile-stepR", "Step/Default/Right", "Step/Metal/Right", "Step/Ice/Right", "Step/Wood/Right");
         LoadSound("Footsteps/stone-stepL", "Step/Stone/Left");
         LoadSound("Footsteps/stone-stepR", "Step/Stone/Right");
         LoadSound("Footsteps/grass-stepL", "Step/Grass/Left");
