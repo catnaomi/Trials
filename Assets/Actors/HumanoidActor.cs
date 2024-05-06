@@ -731,7 +731,7 @@ public class HumanoidActor : Actor
             kbForce = Vector3.zero,
             unblockable = true,
             breaksArmor = true,
-            hitClip = SoundFXAssetManager.GetSound("Shield/Bash/Hit"),
+            hitClip = SoundFXAssetManager.GetSound("Player/FallDamage"),
         };
         this.ProcessDamageKnockback(dk);
     }
