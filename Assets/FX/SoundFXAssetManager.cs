@@ -35,6 +35,7 @@ public class SoundFXAssetManager : MonoBehaviour
         LoadSound("Effects/slide", "Slide/Continuous");
         LoadSound("Water/splash2", "Splash/Small");
         LoadSound("Water/splash1", "Splash/Big");
+        LoadSound("Water/swim1", "Swim");
         LoadSound("Effects/sword_swing1", "Slash/Light");
         LoadSound("Effects/sword_swing1", "Thrust/Light");
         LoadSound("Effects/sound_temp_sword_swing_light", "Slash/Heavy");
