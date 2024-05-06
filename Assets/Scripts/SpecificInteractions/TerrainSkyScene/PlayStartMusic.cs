@@ -4,6 +4,6 @@ public class PlayStartMusic : MonoBehaviour
 {
     public void Execute()
     {
-        MusicController.instance.Play("outdoors");
+        MusicController.Play("outdoors");
     }
 }

@@ -106,11 +106,11 @@ public class MusicController : MonoBehaviour
         musicSource.PlayOneShot(track);
     }
 
-    public void Play(string trackName)
+    public static void Play(string trackName)
     {
-        if (tracks.TryGetValue(trackName, out AudioClip track))
+        if (instance.tracks.TryGetValue(trackName, out AudioClip track))
         {
-            Play(track);
+            instance.Play(track);
         }
         else
         {
@@ -120,8 +120,8 @@ public class MusicController : MonoBehaviour
                 track = (AudioClip)loadRequest.asset;
                 if (track != null)
                 {
-                    tracks.Add(trackName, track);
-                    Play(track);
+                    instance.tracks.Add(trackName, track);
+                    instance.Play(track);
                 }
                 else
                 {
@@ -131,9 +131,9 @@ public class MusicController : MonoBehaviour
         }
     }
 
-    public void Stop()
+    public static void Stop()
     {
-        playing = null;
-        musicSource.Stop();
+        instance.playing = null;
+        instance.musicSource.Stop();
     }
 }

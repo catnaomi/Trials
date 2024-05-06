@@ -539,11 +539,11 @@ public static class DebugReflectionMethods
 
     public static void PlayMusic(string trackName)
     {
-        MusicController.instance.Play(trackName);
+        MusicController.Play(trackName);
     }
     
     public static void StopMusic()
     {
-        MusicController.instance.Stop();
+        MusicController.Stop();
     }
 }
