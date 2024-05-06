@@ -152,7 +152,7 @@ public class LineSwordThrust : MonoBehaviour
 
         var soundSource = GetComponent<AudioSource>();
         soundSource.Stop();
-        FXController.PlaySwordHitSound(soundSource, FXController.FXMaterial.Blood, isCrit ? FXController.IsCritical.Critical : FXController.IsCritical.NoCritical);
+        FXController.PlaySwordHitSound(soundSource, FXController.FXMaterial.Blood, isCrit);
 
         float force = isCrit ? impulseCritMag : impulseMag;
         Shake(force);
@@ -162,7 +162,7 @@ public class LineSwordThrust : MonoBehaviour
     public void Block(Vector3 point)
     {
         bool isCrit = IsNextCrit();
-        FXController.CreateBlock(point, Quaternion.identity, 1f, isCrit ? FXController.IsCritical.Critical : FXController.IsCritical.NoCritical);
+        FXController.CreateBlock(point, Quaternion.identity, 1f, isCrit);
         float force = isCrit ? impulseCritMag : impulseMag;
         Shake(force * impulseBlockMult);
     }

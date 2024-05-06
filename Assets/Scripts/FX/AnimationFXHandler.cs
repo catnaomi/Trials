@@ -334,7 +334,7 @@ public class AnimationFXHandler : MonoBehaviour
 
             if (isSlash || isThrust || damage.hitClip != null)
             {
-                FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, isSlash, isCrit ? FXController.IsCritical.Critical : FXController.IsCritical.NoCritical, fxMaterial, damage.hitClip);
+                FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, isSlash, isCrit, fxMaterial, damage.hitClip);
             }
             FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, false);
         }
@@ -356,7 +356,7 @@ public class AnimationFXHandler : MonoBehaviour
 
             if (isSlash || isThrust)
             {
-                FXController.CreateBlock(actor.hitParticlePosition, Quaternion.identity, 1f, (isCrit || didTypedBlock) ? FXController.IsCritical.Critical : FXController.IsCritical.NoCritical);
+                FXController.CreateBlock(actor.hitParticlePosition, Quaternion.identity, 1f, (isCrit || didTypedBlock));
                 FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
             }
 

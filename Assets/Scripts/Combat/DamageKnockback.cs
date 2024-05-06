@@ -43,7 +43,7 @@ public class DamageKnockback
     [Header("FX")]
     public FXController.FXMaterial hitMaterial;
     public FXData fxData;
-    public AudioClip hitClip;
+    public AudioClip hitClip; // TODO: we should remove this, instead provide an identifier that affects the sound name, and get the sound from SoundFXAssetManager
     [Space(20)]
     [Header("Misc/Unused")]
     public bool disarm;

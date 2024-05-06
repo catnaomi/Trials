@@ -49,7 +49,6 @@ public class FXController : MonoBehaviour
     [Header("Sound Constants")]
     public float criticalHitVolume;
     public float noCriticalHitVolume;
-    Dictionary<IsCritical, float> hitVolumeFromIsCritical = new Dictionary<IsCritical, float>();
 
     ParticleSystem healParticle;
 
@@ -75,12 +74,6 @@ public class FXController : MonoBehaviour
         Water,
     }
 
-    public enum IsCritical
-    {
-        NoCritical,
-        Critical,
-    }
-    
     Dictionary<FX, GameObject> fxObjects;
 
     void Awake()
@@ -105,9 +98,6 @@ public class FXController : MonoBehaviour
         // Populate dictionaries filled by unity inspector values
         colorFromDamageType.Add(DamageType.TrueDamage, trueDamageColor);
         colorFromDamageType.Add(DamageType.Fire, fireDamageColor);
-
-        hitVolumeFromIsCritical.Add(IsCritical.NoCritical, noCriticalHitVolume);
-        hitVolumeFromIsCritical.Add(IsCritical.Critical, criticalHitVolume);
 
         if (PlayerActor.player != null)
         {
@@ -221,9 +211,10 @@ public class FXController : MonoBehaviour
         newFX.transform.rotation = Quaternion.LookRotation(direction);
     }
 
-    public static void PlaySwordHitSound(AudioSource source, FXMaterial material, IsCritical isCritical)
+    public static void PlaySwordHitSound(AudioSource source, FXMaterial material, bool isCritical)
     {
-        source.PlayOneShot(SoundFXAssetManager.GetSound("Sword", material.ToString(), isCritical.ToString()), instance.hitVolumeFromIsCritical[isCritical]);
+        var volume = isCritical ? instance.criticalHitVolume : instance.noCriticalHitVolume;
+        source.PlayOneShot(SoundFXAssetManager.GetSound("Sword", material.ToString(), isCritical ? "Critical" : "NoCritical"), volume);
     }
 
     public static Color GetColorFromDamageType(DamageType damageType)
@@ -250,7 +241,7 @@ public class FXController : MonoBehaviour
         ImpulseScreenShake(direction * mag);
     }
 
-    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, IsCritical isCritical, FXMaterial hurtMaterial, AudioClip soundOverride)
+    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCritical, FXMaterial hurtMaterial, AudioClip soundOverride)
     {
         GameObject particlePrefab;
         if (hurtMaterial == FXMaterial.Ice)
@@ -271,7 +262,7 @@ public class FXController : MonoBehaviour
             source.clip = soundOverride;
             source.Play();
         }
-        else if (isCritical == IsCritical.Critical) // TODO: why do we only play a sound if we are critical
+        else
         {
             AudioSource source = newFX.GetComponentInChildren<AudioSource>();
             PlaySwordHitSound(source, hurtMaterial, isCritical);
@@ -281,7 +272,7 @@ public class FXController : MonoBehaviour
         return newFX;
     }
     
-    public static GameObject CreateBlock(Vector3 position, Quaternion rotation, float duration, IsCritical isCritical)
+    public static GameObject CreateBlock(Vector3 position, Quaternion rotation, float duration, bool isCritical)
     {
         var newFX = CreateFX(FX.FX_Sparks, position, rotation, duration, null);
         AudioSource audioSource = newFX.GetComponentInChildren<AudioSource>();

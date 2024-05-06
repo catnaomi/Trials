@@ -538,27 +538,6 @@ public class HumanoidActor : Actor
 
     public bool Damage(DamageKnockback damageKnockback, bool isCritical)
     {
-        // account for resistances
-        //float critMult = (isCritical) ? damageKnockback.critData.criticalMultiplier : 1f;
-        //float totalDamage = (!isCritical) ? DamageKnockback.GetTotalMinusResistances(damageKnockback.healthDamage, damageKnockback.GetTypes(), this.attributes.resistances) : this.attributes.health.max;
-        /*
-        lastDamageTaken = totalDamage;
-        OnHurt.Invoke();
-
-
-        if (totalDamage <= 0)
-        {
-            return false;
-        }
-
-        //attributes.ReducePoise(damageKnockback.poiseDamage);
-        if (attributes.HasHealthRemaining())
-        {
-            attributes.ReduceAttribute(attributes.health, totalDamage);
-        }
-        */
-        
-
         return true;
     }
 
