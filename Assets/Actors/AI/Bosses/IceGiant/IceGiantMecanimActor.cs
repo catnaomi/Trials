@@ -10,13 +10,16 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     [Header("Position Reference")]
     public Transform RightHand;
     public Transform LeftHand;
-    public GameObject leftLeg;
-    public DamageablePoint leftLegWeakPoint;
-    public GameObject rightLeg;
-    public DamageablePoint rightLegWeakPoint;
     public DamageablePoint weakPoint;
+    public GameObject leftLeg;
+    public GameObject rightLeg;
+    public DamageablePoint leftLegWeakPoint;
+    public DamageablePoint rightLegWeakPoint;
     [SerializeField,ReadOnly] Collider leftLegCollider;
     [SerializeField,ReadOnly] Collider rightLegCollider;
+    public GameObject[] legs;
+    public DamageablePoint[] legWeakPoints;
+    public Collider[] legColliders;
     Vector3 rootDelta;
     Quaternion animatorRotation;
     [Header("Navigation & AI")]
@@ -118,15 +121,25 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         base.ActorStart();
         animator = this.GetComponent<Animator>();
         GenerateWeapons();
+
+       
         leftLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(leftLegWeakPoint));
         rightLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(rightLegWeakPoint));
         leftLegCollider = leftLegWeakPoint.GetComponent<Collider>();
         rightLegCollider = rightLegWeakPoint.GetComponent<Collider>();
+
+        legs = new GameObject[2]{ leftLeg, rightLeg };
+        legWeakPoints = new DamageablePoint[2]{ leftLegWeakPoint, rightLegWeakPoint };
+        legColliders = new Collider[2]{ leftLegCollider, rightLegCollider };
+
         weakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(weakPoint));
         if (TryGetComponent(out AnimationFXHandler fxHandler))
         {
-            fxHandler.OnStep[0].AddListener(StepShockwaveLeft);
-            fxHandler.OnStep[1].AddListener(StepShockwaveRight);
+            for (int legIndex = 0; legIndex < 2; legIndex++)
+            {
+                int legIndexByValue = legIndex;
+                fxHandler.OnStep[legIndexByValue].AddListener(() => StepShockwave(legIndexByValue));
+            }
         }
         nav = GetComponent<NavMeshAgent>();
         nav.enabled = false;
@@ -484,7 +497,6 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         ForceStopSpin();
         if (dead) return;
         getupClock = getupDelayUnharmed;
-        //EnableWeakPoint(true);
         weakPoint.StartCritVulnerability(getupDelayUnharmed);
         IsFallen = true;
         Fall = true;
@@ -495,7 +507,6 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     {
         IsFallen = false;
         weakPoint.StopCritVulnerability();
-        //EnableWeakPoint(false);
     }
     public void EnableWeakPoint(bool active)
     {
@@ -565,44 +576,45 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     {
         AttackAlternate = 1 - AttackAlternate;
     }
+
     public void StartReformFoot()
     {
-        bool isLeft = animator.GetCurrentAnimatorStateInfo(0).IsTag("STOMP_LEFT");
-        fx.PlayReformFoot(isLeft);
-        
+        int legIndex = animator.GetCurrentAnimatorStateInfo(0).IsTag("STOMP_LEFT") ? 0 : 1;
+        fx.PlayReformFoot(legIndex);
     }
 
     public void ReformFoot()
     {
-        bool isLeft = animator.GetCurrentAnimatorStateInfo(0).IsTag("STOMP_LEFT");
-        Transform foot = (isLeft) ? leftLeg.transform : rightLeg.transform;
-        DamageablePoint point = (isLeft) ? leftLegWeakPoint : rightLegWeakPoint;
+        int legIndex = animator.GetCurrentAnimatorStateInfo(0).IsTag("STOMP_LEFT") ? 0 : 1;
+        DamageablePoint point = legWeakPoints[legIndex];
         FixDamageablePoint(point);
     }
-    public void Stomp(int left)
+
+    public void Stomp()
     {
-        bool isLeft = animator.GetCurrentAnimatorStateInfo(0).IsTag("STOMP_LEFT");
-        Transform foot = (isLeft) ? leftLeg.transform : rightLeg.transform;
+        int legIndex = animator.GetCurrentAnimatorStateInfo(0).IsTag("STOMP_LEFT") ? 0 : 1;
+        Transform foot = legs[legIndex].transform;
 
         Vector3 position = foot.position;
-        position.y = this.transform.position.y;
+        position.y = transform.position.y;
 
         StartCoroutine(StompShockwaveRoutine(position));
 
-        fx.StompFX(isLeft);
-        
+        fx.StompFX(legIndex);
     }
+
     IEnumerator StompShockwaveRoutine(Vector3 position)
     {
         Shockwave(position, shockwaveRadius, new DamageKnockback(largeShockwave.GetDamage()), true);
         yield return null;
         Shockwave(position, groundShockwaveRadius, new DamageKnockback(groundShockwave.GetDamage()), true);
     }
+
     public void HandShockwaveIn()
     {
         fx.HandShockwaveInFX();
-
     }
+
     public void HandShockwaveOut()
     {
         Vector3 position = LeftHand.position;
@@ -610,26 +622,15 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         Shockwave(position, shockwaveRadius, new DamageKnockback(harmlessShockwave.GetDamage()), false);
 
         fx.HandShockwaveOutFX();
-
-    }
-    public void StepShockwaveLeft()
-    {
-        StepShockwave(-1);
     }
 
-    public void StepShockwaveRight()
+    public void StepShockwave(int legIndex)
     {
-        StepShockwave(1);
-    }
-
-    public void StepShockwave(int left)
-    {
-        bool isLeft = left == -1;
-        Transform foot = (isLeft) ? leftLeg.transform : rightLeg.transform;
+        Transform foot = legs[legIndex].transform;
         Vector3 position = foot.position;
         position.y = this.transform.position.y;
 
-        DamageablePoint point = (isLeft) ? leftLegWeakPoint : rightLegWeakPoint;
+        DamageablePoint point = legWeakPoints[legIndex];
 
         if (point.health.current > 0)
         {
