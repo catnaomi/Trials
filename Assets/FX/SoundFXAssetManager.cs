@@ -29,7 +29,7 @@ public class SoundFXAssetManager : MonoBehaviour
         LoadSound("Effects/sound_temp_clash", "Metal/Clash");
         LoadSound("Effects/bow-fire", "Bow/Fire", "Gun/Fire");
         LoadSound("Effects/bow-hit1", "Bow/Hit");
-        LoadSound("Effects/bow-draw1", "Bow/Draw", "Bow/Pull", "Gun/Reload"); // TODO: de-alias draw/pull
+        LoadSound("Effects/bow-draw1", "Bow/Pull", "Gun/Reload");
         LoadSound("Effects/sword-parry01", "Parry/Start");
         LoadSound("Effects/sword-parry02", "Parry/Success");
         LoadSound("Effects/slide", "Slide/Continuous");
