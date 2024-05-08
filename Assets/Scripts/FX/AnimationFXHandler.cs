@@ -63,16 +63,6 @@ public class AnimationFXHandler : MonoBehaviour
         OnStep = new[] {OnStepL, OnStepR};
     }
 
-    static void PlaySound(AudioSource source, string soundName)
-    {
-        source.PlayOneShot(SoundFXAssetManager.GetSound(soundName));
-    }
-
-    static void PlaySound(AudioSource source, params string[] soundNameParts)
-    {
-        source.PlayOneShot(SoundFXAssetManager.GetSound(soundNameParts));
-    }
-
     #region Footsteps
 
     public void Step(LeftOrRight leftOrRight)
@@ -111,7 +101,7 @@ public class AnimationFXHandler : MonoBehaviour
     public void Slide(int active)
     {
         footSourceHeavy.Stop();
-        PlaySound(footSourceHeavy, "Player/Slide/Slide");
+        SoundFXAssetManager.PlaySound(footSourceHeavy, "Player/Slide/Slide");
         if (active > 0)
         {
             OnSlideStart.Invoke();
@@ -125,19 +115,19 @@ public class AnimationFXHandler : MonoBehaviour
     public void Tap()
     {
         footSourceHeavy.Stop();
-        PlaySound(footSourceHeavy, "Player/Tap");
+        SoundFXAssetManager.PlaySound(footSourceHeavy, "Player/Tap");
     }
 
     public void Thud()
     {
         footSourceHeavy.Stop();
-        PlaySound(footSourceHeavy, "Player/Thud");
+        SoundFXAssetManager.PlaySound(footSourceHeavy, "Player/Thud");
     }
 
     public void Dash()
     {
         footSourceHeavy.Stop();
-        PlaySound(footSourceHeavy, "Player/Dash");
+        SoundFXAssetManager.PlaySound(footSourceHeavy, "Player/Dash");
         OnDashDust.Invoke();
     }
 
@@ -165,7 +155,7 @@ public class AnimationFXHandler : MonoBehaviour
     public void Roll()
     {
         footSourceHeavy.Stop();
-        PlaySound(footSourceHeavy, "Player/Roll");
+        SoundFXAssetManager.PlaySound(footSourceHeavy, "Player/Roll");
         
     }
 
@@ -179,19 +169,19 @@ public class AnimationFXHandler : MonoBehaviour
 
     public void Swim()
     {
-        PlaySound(waterSource, "Swim/Swim");
+        SoundFXAssetManager.PlaySound(waterSource, "Swim/Swim");
     }
 
     public void SplashBig()
     {
         waterSource.Stop();
-        PlaySound(waterSource, "Swim/Splash/Big");
+        SoundFXAssetManager.PlaySound(waterSource, "Swim/Splash/Big");
     }
 
     public void SplashSmall()
     {
         waterSource.Stop();
-        PlaySound(waterSource, "Swim/Splash/Small");
+        SoundFXAssetManager.PlaySound(waterSource, "Swim/Splash/Small");
     }
 
     #endregion
@@ -200,7 +190,7 @@ public class AnimationFXHandler : MonoBehaviour
     public void Swing(bool isSlash, bool isHeavy)
     {
         combatWhiffSource.Stop();
-        PlaySound(combatWhiffSource, isSlash ? "Slash" : "Thrust", isHeavy ? "Light" : "Heavy");
+        SoundFXAssetManager.PlaySound(combatWhiffSource, isSlash ? "Slash" : "Thrust", isHeavy ? "Light" : "Heavy");
     }
 
     public void SlashLight()
@@ -230,33 +220,33 @@ public class AnimationFXHandler : MonoBehaviour
 
     public void ArrowNock()
     {
-        PlaySound(combatWhiffSource, "Bow/Draw");
+        SoundFXAssetManager.PlaySound(combatWhiffSource, "Bow/Draw");
         OnArrowNock.Invoke();
     }
 
     public void ArrowFire()
     {
         combatWhiffSource.Stop();
-        PlaySound(combatHitSource, "Bow/Fire");
+        SoundFXAssetManager.PlaySound(combatHitSource, "Bow/Fire");
     }
 
     public void GunFire()
     {
         combatWhiffSource.Stop();
-        PlaySound(combatHitSource, "Gun/Fire");
+        SoundFXAssetManager.PlaySound(combatHitSource, "Gun/Fire");
     }
 
     public void GunReload()
     {
         combatWhiffSource.Stop();
-        PlaySound(combatHitSource, "Gun/Reload");
+        SoundFXAssetManager.PlaySound(combatHitSource, "Gun/Reload");
         OnGunLoad.Invoke();
     }
 
     public void ChargeStart()
     {
         combatWhiffSource.Stop();
-        PlaySound(combatHitSource, "Enemy/IceGiant/Charge");
+        SoundFXAssetManager.PlaySound(combatHitSource, "Enemy/IceGiant/Charge");
     }
 
     public void BlockSwitch()
@@ -268,14 +258,9 @@ public class AnimationFXHandler : MonoBehaviour
             direction.Normalize();
 
             // TODO: i think it would be nice to have different sounds for the diff blocks
-            if (player.IsBlockingSlash())
+            if (player.IsBlockingSlash() || player.IsBlockingThrust())
             {
-                PlaySound(combatHitSource, "Player/Block/Switch");
-                FlashColor(new Color(1, 1, 1, 0.5f));
-            }
-            else if (player.IsBlockingThrust())
-            {
-                PlaySound(combatHitSource, "Player/Block/Switch");
+                SoundFXAssetManager.PlaySound(combatHitSource, "Player/Block/Switch");
                 FlashColor(new Color(1, 1, 1, 0.5f));
             }
         }
@@ -335,15 +320,8 @@ public class AnimationFXHandler : MonoBehaviour
         DamageKnockback damage = actor.GetComponent<IDamageable>().GetLastTakenDamage();
         if (damage != null)
         {
-            bool isCrit = damage.didCrit;
-            bool isSlash = damage.isSlash;
-            bool isThrust = damage.isThrust || (damage.isRanged && damage.GetTypes().HasType(DamageType.Piercing));
-
-            if (isSlash || isThrust || damage.hitClip != null)
-            {
-                FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, isSlash, isCrit, fxMaterial, damage.hitClip);
-            }
-            FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, false);
+            FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, damage.isSlash, damage.didCrit, fxMaterial);
+            FXController.DamageScreenShake(actor.hitParticleDirection, damage.didCrit, false);
         }
     }
 

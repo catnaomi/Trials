@@ -26,6 +26,14 @@ public class FXController : MonoBehaviour
     public GameObject fx_circle;
     public GameObject fx_cross;
 
+    public struct SlashAndThrustPrefabs
+    {
+        public GameObject slashPrefab;
+        public GameObject thrustPrefab;
+    }
+
+    public Dictionary<FXMaterial, SlashAndThrustPrefabs> hitFXPrefabFromMaterial = new Dictionary<FXMaterial, SlashAndThrustPrefabs>();
+
     // Unity cannot serialize dictionaries so we manually populate them
     [Header("Damage Colors")]
     public Color trueDamageColor;
@@ -98,6 +106,15 @@ public class FXController : MonoBehaviour
         // Populate dictionaries filled by unity inspector values
         colorFromDamageType.Add(DamageType.TrueDamage, trueDamageColor);
         colorFromDamageType.Add(DamageType.Fire, fireDamageColor);
+
+        SlashAndThrustPrefabs bloodHitFXs;
+        bloodHitFXs.slashPrefab = fx_bleedSword;
+        bloodHitFXs.thrustPrefab = fx_bleedPoint;
+        hitFXPrefabFromMaterial.Add(FXMaterial.Blood, bloodHitFXs);
+        SlashAndThrustPrefabs iceHitFXs;
+        iceHitFXs.slashPrefab = fx_iceSlash;
+        iceHitFXs.thrustPrefab = fx_icePoint;
+        hitFXPrefabFromMaterial.Add(FXMaterial.Ice, iceHitFXs);
 
         if (PlayerActor.player != null)
         {
@@ -214,7 +231,7 @@ public class FXController : MonoBehaviour
     public static void PlaySwordHitSound(AudioSource source, FXMaterial material, bool isCritical)
     {
         var volume = isCritical ? instance.criticalHitVolume : instance.noCriticalHitVolume;
-        source.PlayOneShot(SoundFXAssetManager.GetSound("Sword", material.ToString(), isCritical ? "Critical" : "NoCritical"), volume);
+        SoundFXAssetManager.PlaySound(source, volume, "Sword", material.ToString(), isCritical ? "Critical" : "NoCritical");
     }
 
     public static Color GetColorFromDamageType(DamageType damageType)
@@ -241,32 +258,18 @@ public class FXController : MonoBehaviour
         ImpulseScreenShake(direction * mag);
     }
 
-    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCritical, FXMaterial hurtMaterial, AudioClip soundOverride)
+    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCritical, FXMaterial hurtMaterial)
     {
-        GameObject particlePrefab;
-        if (hurtMaterial == FXMaterial.Ice)
+        if (!instance.hitFXPrefabFromMaterial.TryGetValue(hurtMaterial, out var particlePrefabs))
         {
-            particlePrefab = isSlash ? instance.fx_iceSlash : instance.fx_icePoint;
+            particlePrefabs = instance.hitFXPrefabFromMaterial[FXMaterial.Blood];
         }
-        else
-        {
-            particlePrefab = isSlash ? instance.fx_bleedSword : instance.fx_bleedPoint;
-        }
-
+        var particlePrefab = isSlash ? particlePrefabs.slashPrefab : particlePrefabs.thrustPrefab;
         GameObject newFX = GameObject.Instantiate(particlePrefab);
         newFX.transform.position = position;
         newFX.transform.rotation = Quaternion.LookRotation(direction);
-        if (soundOverride != null) // TODO: could we not?
-        {
-            AudioSource source = newFX.GetComponentInChildren<AudioSource>();
-            source.clip = soundOverride;
-            source.Play();
-        }
-        else
-        {
-            AudioSource source = newFX.GetComponentInChildren<AudioSource>();
-            PlaySwordHitSound(source, hurtMaterial, isCritical);
-        }
+        AudioSource source = newFX.GetComponentInChildren<AudioSource>();
+        PlaySwordHitSound(source, hurtMaterial, isCritical);
 
         Destroy(newFX, 10f);
         return newFX;

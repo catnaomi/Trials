@@ -95,4 +95,25 @@ public class SoundFXAssetManager : MonoBehaviour
         }
         return GetSound(fullName);
     }
+
+    
+    public static void PlaySound(AudioSource source, string name)
+    {
+        source.PlayOneShot(GetSound(name));
+    }
+
+    public static void PlaySound(AudioSource source, params string[] nameParts)
+    {
+        source.PlayOneShot(GetSound(nameParts));
+    }
+
+    public static void PlaySound(AudioSource source, float volume, string name)
+    {
+        source.PlayOneShot(GetSound(name), volume);
+    }
+
+    public static void PlaySound(AudioSource source, float volume, params string[] nameParts)
+    {
+        source.PlayOneShot(GetSound(nameParts), volume);
+    }
 }
