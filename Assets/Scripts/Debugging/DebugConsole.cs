@@ -206,7 +206,7 @@ public class DebugConsole : MonoBehaviour
 
     public string CleanString(string dirtyString)
     {
-        HashSet<char> removeChars = new HashSet<char>(" ?&^$#@!()+-,:;<>�\'-_*");
+        HashSet<char> removeChars = new HashSet<char>(" ?&^$#@!()+-,:;<>\x2019\'-_*");
         StringBuilder result = new StringBuilder(dirtyString.Length);
         foreach (char c in dirtyString)
             if (!removeChars.Contains(c)) // prevent dirty chars
