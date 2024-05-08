@@ -42,11 +42,6 @@ public class StepParticleController : MonoBehaviour
 
     void Update()
     {
-        if (slideRipples == null)
-        {
-            return;
-        }
-
         foreach (AnimationFXHandler fxHandler in slideRipples.Keys)
         {
             if (slideRipples.TryGetValue(fxHandler, out ParticleSystem system))
