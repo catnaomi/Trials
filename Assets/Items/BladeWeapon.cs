@@ -162,30 +162,14 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
             thrustFX.SetTopPoint(InterfaceUtilities.FindRecursivelyActiveOnly(GetModel().transform, "_top"));
             thrustFX.SetBottomPoint(InterfaceUtilities.FindRecursivelyActiveOnly(GetModel().transform, "_bottom"));
             float staminaCost = this.GetStamCost() * 1;
+            var animationFXHandler = holder.gameObject.GetComponent<AnimationFXHandler>();
+            animationFXHandler.Swing(dk.isSlash, dk.fxData.isHeavyAttack);            
             if (dk.isSlash)
             {
-                var animationFXHandler = holder.gameObject.GetComponent<AnimationFXHandler>();
-                if (dk.fxData.isHeavyAttack)
-                {
-                    animationFXHandler.SlashHeavy(); // TODO: parameterize
-                }
-                else
-                {
-                    animationFXHandler.SlashLight();
-                }
                 slashFX.BeginSlash();
             }
             else if (dk.isThrust)
             {
-                var animationFXHandler = holder.gameObject.GetComponent<AnimationFXHandler>();
-                if (dk.fxData.isHeavyAttack)
-                {
-                    animationFXHandler.ThrustHeavy();
-                }
-                else
-                {
-                    animationFXHandler.ThrustLight();
-                }
                 thrustFX.BeginThrust();
             }
             hitboxes.SetDamage(dk);

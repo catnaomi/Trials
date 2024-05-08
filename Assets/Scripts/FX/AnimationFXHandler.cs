@@ -68,6 +68,11 @@ public class AnimationFXHandler : MonoBehaviour
         source.PlayOneShot(SoundFXAssetManager.GetSound(soundName));
     }
 
+    static void PlaySound(AudioSource source, params string[] soundNameParts)
+    {
+        source.PlayOneShot(SoundFXAssetManager.GetSound(soundNameParts));
+    }
+
     #region Footsteps
 
     public void Step(LeftOrRight leftOrRight)
@@ -192,28 +197,30 @@ public class AnimationFXHandler : MonoBehaviour
     #endregion
     #region Combat
 
-    public void SlashLight()
+    public void Swing(bool isSlash, bool isHeavy)
     {
         combatWhiffSource.Stop();
-        PlaySound(combatWhiffSource, "Slash/Light");
+        PlaySound(combatWhiffSource, isSlash ? "Slash" : "Thrust", isHeavy ? "Light" : "Heavy");
+    }
+
+    public void SlashLight()
+    {
+        Swing(true, false);
     }
 
     public void SlashHeavy()
     {
-        combatWhiffSource.Stop();
-        PlaySound(combatWhiffSource, "Slash/Heavy");
+        Swing(true, true);
     }
 
     public void ThrustLight()
     {
-        combatWhiffSource.Stop();
-        PlaySound(combatWhiffSource, "Thrust/Light");
+        Swing(false, false);
     }
 
     public void ThrustHeavy()
     {
-        combatWhiffSource.Stop();
-        PlaySound(combatWhiffSource, "Thrust/Heavy");
+        Swing(false, true);
     }
 
     public void ArrowDraw()
