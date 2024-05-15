@@ -1,18 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-4186685045049792219
-MonoBehaviour:
-  m_ObjectHideFlags: 11
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  version: 7
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -20,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: dojoWoodTrim
+  m_Name: dojoFloor
   m_Shader: {fileID: -6465566751694194690, guid: 2dfcd7da0bc944044949c0f62b92ce81,
     type: 3}
   m_Parent: {fileID: 0}
@@ -38,8 +25,8 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: 0b6bddf0f22194649b8742eb5a8d71fa, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 823acd2f0d1d93a46b84eae43754d9bf, type: 3}
+        m_Scale: {x: 3.5, y: 3.5}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
@@ -78,8 +65,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 0b6bddf0f22194649b8742eb5a8d71fa, type: 3}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 823acd2f0d1d93a46b84eae43754d9bf, type: 3}
+        m_Scale: {x: 3.5, y: 3.5}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
@@ -117,9 +104,10 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _AlphaToMask: 0
+    - _BandAlpha: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
-    - _Brightness: 0.1
+    - _Brightness: 0
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -130,29 +118,32 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _Edge1: 0
-    - _Edge2: 1
+    - _Edge1: -0.39
+    - _Edge2: 1.82
     - _EmissionStrength: 0
     - _EnvironmentReflections: 1
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
-    - _GradientBlendStrength: 0.5
+    - _GradientBlendStrength: 0.42
     - _GradientOnly: 0
     - _HIghlightEdge1: 0
     - _HighlightEdge2: 1
+    - _LightmapBand: 0
+    - _LightmapOnly: 0
     - _Metallic: 0
     - _Mode: 0
     - _NoiseOpacity: 0.25
     - _NormalStrength: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
+    - _PosterizeSteps: 24
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _ShadowEdge1: 0
+    - _ShadowEdge1: -0.59
     - _ShadowEdge2: 1
-    - _ShadowGradientOpacity: 0.5
+    - _ShadowGradientOpacity: 0.275
     - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -161,7 +152,10 @@ Material:
     - _Surface: 0
     - _TexBlendStrength: 0
     - _UVSec: 0
+    - _WordTile: 0
     - _WorkflowMode: 1
+    - _WorldRotation: 0
+    - _WorldTile: 0
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
@@ -169,4 +163,19 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _HighlightColor: {r: 0.003921569, g: 0.003921569, b: 0.003921569, a: 0}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    - _WorldOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _WorldTiling: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
+--- !u!114 &1726460502184924263
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  version: 7
