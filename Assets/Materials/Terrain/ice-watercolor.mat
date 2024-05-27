@@ -33,7 +33,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties: 
+  m_LockedProperties: _GradientBlendStrength
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -117,6 +117,7 @@ Material:
     m_Floats:
     - _AlphaClip: 0
     - _AlphaToMask: 0
+    - _BandAlpha: 0
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _Brightness: 0.5
@@ -137,22 +138,32 @@ Material:
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _GlowEdge1: 0
+    - _GlowEdge2: 1
+    - _GlowShadowMod: 1
+    - _GlowingMult: 1
     - _GradientBlendStrength: 0.38
     - _GradientOnly: 0
-    - _HIghlightEdge1: 0.82
-    - _HighlightEdge2: 1.39
+    - _HIghlightEdge1: 0.66
+    - _HighlightBand: 0.74
+    - _HighlightEdge2: 1.51
     - _HighlightOnly: 0
+    - _LightmapBand: -1
+    - _LightmapOnly: 0
     - _Metallic: 0
     - _NoiseOpacity: 0.489
     - _NormalStrength: 0.49
     - _OcclusionStrength: 1
     - _Parallax: 0.005
+    - _PosterizeSteps: 24
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _ShadowBand: -1
     - _ShadowEdge1: 0
     - _ShadowEdge2: 1
     - _ShadowGradientOpacity: 0.329
+    - _ShadowsOnly: 0
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -161,11 +172,15 @@ Material:
     - _Surface: 0
     - _TexBlendStrength: 0.33
     - _WorkflowMode: 1
+    - _WorldRotation: 0
+    - _WorldTile: 0
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.6629059, g: 0.762498, b: 0.7882353, a: 1}
+    - _BaseColor: {r: 0.63074994, g: 0.7951762, b: 0.84099996, a: 1}
     - _Color: {r: 0.8000001, g: 0.9960785, b: 0.9960785, a: 1}
-    - _EmissionColor: {r: 0.987208, g: 1.4004649, b: 1.4980394, a: 1}
-    - _HighlightColor: {r: 2.996078, g: 2.996078, b: 2.996078, a: 1}
+    - _EmissionColor: {r: 0.9882354, g: 1.4715889, b: 1.4980394, a: 1}
+    - _HighlightColor: {r: 2.9960783, g: 2.3818822, b: 2.3818822, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    - _WorldOffset: {r: 0, g: 0, b: 0, a: 0}
+    - _WorldTiling: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
