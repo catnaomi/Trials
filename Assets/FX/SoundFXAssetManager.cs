@@ -36,7 +36,7 @@ public class SoundFXAssetManager : MonoBehaviour
         LoadSound(null, "Sword/Blood/Critical");
         LoadSound(null, "Sword/Metal/Critical");
         LoadSound(null, "Sword/Wood/Critical");
-        LoadSound(null, "Sword/Stone/Critical", "Sword/Ice/Critical");
+        LoadSound(null, "Sword/Stone/Critical", "Sword/Ice/Critical", "Parry/Success");
 
         LoadSound(null, "Bow/Fire", "Gun/Fire");
         LoadSound(null, "Bow/Hit");

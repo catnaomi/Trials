@@ -200,9 +200,10 @@ public class FXController : MonoBehaviour
         CreateFromPrefab(instance.fx_circle, position, direction);
     }
 
-    public static void CreateParrySuccess(Vector3 position, Vector3 direction)
+    public static void CreateParrySuccess(Vector3 position, Vector3 direction, AudioSource parrySoundSource)
     {
         CreateFromPrefab(instance.fx_parry_success, position, direction);
+        SoundFXAssetManager.PlaySound(parrySoundSource, "Parry/Success");
     }
 
     public static GameObject CreateMiragiaParticleSingle(Vector3 position)

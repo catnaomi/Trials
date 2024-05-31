@@ -190,7 +190,7 @@ public class AnimationFXHandler : MonoBehaviour
     public void Swing(bool isSlash, bool isHeavy)
     {
         combatWhiffSource.Stop();
-        SoundFXAssetManager.PlaySound(combatWhiffSource, isSlash ? "Slash" : "Thrust", isHeavy ? "Light" : "Heavy");
+        SoundFXAssetManager.PlaySound(combatWhiffSource, isSlash ? "Slash" : "Thrust", isHeavy ? "Heavy" : "Light");
     }
 
     public void SlashLight()
@@ -295,7 +295,7 @@ public class AnimationFXHandler : MonoBehaviour
                 actor.transform.up * parryPosition.y +
                 actor.transform.forward * parryPosition.z;
             Vector3 rotation = actor.transform.forward;
-            FXController.CreateParrySuccess(position, rotation);
+            FXController.CreateParrySuccess(position, rotation, combatHitSource);
         }
     }
 
