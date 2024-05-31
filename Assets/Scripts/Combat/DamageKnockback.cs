@@ -145,7 +145,6 @@ public class DamageKnockback
     {
         this.kbForce = damageKnockback.kbForce.normalized * damageKnockback.kbForce.magnitude;
         this.stagger = damageKnockback.stagger;
-        this.hitClip = damageKnockback.hitClip;
         this.breaksArmor = damageKnockback.breaksArmor;
         this.kbRadial = damageKnockback.kbRadial;
         this.healthDamage = damageKnockback.healthDamage;

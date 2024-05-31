@@ -6,13 +6,16 @@ public class ThrowIKHandler : IKHandler
 {
     public override void OnIK(Animator animator)
     {
-        HumanoidActor actor = animator.GetComponent<HumanoidActor>();
+        Actor actor = animator.GetComponent<Actor>();
 
-        
-        Vector3 aimDir = actor.GetLaunchVector(actor.positionReference.Spine.transform.position);
-        
-        animator.SetLookAtWeight(1f, 0f, 0.5f);
+        if (actor.TryGetComponent<HumanoidPositionReference>(out var positionReference))
+        {
+            Vector3 aimDir = actor.GetLaunchVector(positionReference.Spine.transform.position);
 
-        animator.SetLookAtPosition(actor.positionReference.Head.transform.position + aimDir * 100f);
+            animator.SetLookAtWeight(1f, 0f, 0.5f);
+
+            animator.SetLookAtPosition(positionReference.Head.transform.position + aimDir * 100f);
+        }
+       
     }
 }
