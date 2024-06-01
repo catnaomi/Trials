@@ -276,11 +276,11 @@ public class FXController : MonoBehaviour
         return newFX;
     }
     
-    public static GameObject CreateBlock(Vector3 position, Quaternion rotation, float duration, bool isCritical)
+    public static GameObject CreateBlock(Vector3 position, Quaternion rotation, float duration, bool isTypedBlock)
     {
         var newFX = CreateFX(FX.FX_Sparks, position, rotation, duration, null);
         AudioSource audioSource = newFX.GetComponentInChildren<AudioSource>();
-        PlaySwordHitSound(audioSource, FXMaterial.Metal, isCritical);
+        PlaySwordHitSound(audioSource, FXMaterial.Metal, isTypedBlock);
         return newFX;
     }
 

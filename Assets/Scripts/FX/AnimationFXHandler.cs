@@ -341,7 +341,7 @@ public class AnimationFXHandler : MonoBehaviour
 
             if (isSlash || isThrust)
             {
-                FXController.CreateBlock(actor.hitParticlePosition, Quaternion.identity, 1f, (isCrit || didTypedBlock));
+                FXController.CreateBlock(actor.hitParticlePosition, Quaternion.identity, 1f, didTypedBlock);
                 FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
             }
 
