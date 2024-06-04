@@ -7,14 +7,13 @@ public class ClimbTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 {
     ClimbDetector climb;
     [SerializeField, ReadOnly] bool isFrozen;
-    // Start is called before the first frame update
+
     void Start()
     {
         climb = this.GetComponent<ClimbDetector>();
         climb.isDisabled = true;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (TimeTravelController.time != null && TimeTravelController.time.IsFreezing() && !isFrozen)
@@ -25,7 +24,8 @@ public class ClimbTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
         {
             StopFreeze();
         }
-    } 
+    }
+
     public void ClearTimeData()
     {
         // do nothing
@@ -79,7 +79,6 @@ public class ClimbTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public void StartRewind()
     {
-        //climb.ForceDismount();
     }
 
     public void StopFreeze()
@@ -94,7 +93,7 @@ public class ClimbTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
 
     public void StopRewind()
     {
-        
+
     }
 
     public void SetRegistered()

@@ -7,7 +7,7 @@ public class DamageablePointTimeTravelHandler : MonoBehaviour, IAffectedByTimeTr
     DamageablePoint point;
     bool isFrozen;
     bool registered;
-    // Start is called before the first frame update
+
     void Start()
     {
         point = this.GetComponent<DamageablePoint>();

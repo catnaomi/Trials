@@ -8,7 +8,7 @@ public class MecanimActorTimeTravelHandler : ActorTimeTravelHandler
     public bool runBaseFreeze = false;
     Animator animator;
     float oldSpeed;
-    // Start is called before the first frame update
+
     void Start()
     {
         actor = this.GetComponent<Actor>();

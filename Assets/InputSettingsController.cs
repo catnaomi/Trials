@@ -1,6 +1,4 @@
 using Cinemachine;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,9 +6,6 @@ public class InputSettingsController : MonoBehaviour
 {
     public PlayerInput playerInput;
     [ReadOnly] public string currentControlScheme;
-
-    //public float gamepad2Mouse = 1.3f;
-    //public float gamepad2MouseAim = 3f;
 
     public PlayerActor.VirtualCameras mouseVcams;
     public PlayerActor.VirtualCameras gamepadVcams;
@@ -22,7 +17,7 @@ public class InputSettingsController : MonoBehaviour
 
     Vector2 aim_speedsGamepad;
     Vector2 aim_speedsMouse;
-    //Vector2 climb_speeds;
+
     void Start()
     {
         if (playerInput == null)
@@ -34,8 +29,6 @@ public class InputSettingsController : MonoBehaviour
         aim_speedsMouse = new Vector2(((CinemachineFreeLook)mouseVcams.aim).m_XAxis.m_MaxSpeed, ((CinemachineFreeLook)mouseVcams.aim).m_YAxis.m_MaxSpeed);
 
         free_speedsMouse = new Vector2(((CinemachineFreeLook)mouseVcams.free).m_XAxis.m_MaxSpeed, ((CinemachineFreeLook)mouseVcams.free).m_YAxis.m_MaxSpeed);
-        //dialogue_speedsMouse = new Vector2(((CinemachineFreeLook)mouseVcams.dialogue).m_XAxis.m_MaxSpeed, ((CinemachineFreeLook)mouseVcams.dialogue).m_YAxis.m_MaxSpeed);
-
 
         if (playerInput != null)
         {
@@ -50,7 +43,7 @@ public class InputSettingsController : MonoBehaviour
                 CheckLook();
             };
         }
-        
+
         if (TimeTravelController.time != null)
         {
             TimeTravelController.time.OnSlowTimeStart.AddListener(OnStartSlowTime);
@@ -58,7 +51,6 @@ public class InputSettingsController : MonoBehaviour
         }
 
         fov = Camera.main.fieldOfView;
-
     }
 
     public void SetCameraBasedOnControlScheme()
@@ -89,7 +81,6 @@ public class InputSettingsController : MonoBehaviour
                 PlayerActor.player.vcam = gamepadVcams;
                 break;
         }
-
     }
 
     public void CheckLook()
@@ -123,7 +114,7 @@ public class InputSettingsController : MonoBehaviour
         PlayerActor.VirtualCameras vcam = (currentControlScheme == "Keyboard") ? mouseVcams : gamepadVcams;
         ((CinemachineFreeLook)vcam.aim).m_XAxis.m_MaxSpeed = speeds.x * multiplier;
         ((CinemachineFreeLook)vcam.aim).m_YAxis.m_MaxSpeed = speeds.y * multiplier;
-    } 
+    }
 
     public void ChangeVerticalFOV(float f)
     {
@@ -136,10 +127,12 @@ public class InputSettingsController : MonoBehaviour
         fov = Camera.HorizontalToVerticalFieldOfView(f, Camera.main.aspect);
         Camera.main.fieldOfView = fov;
     }
+
     public void OnStartSlowTime()
     {
         AdjustAimCameraSpeed(true);
     }
+
     public void OnStopSlowTime()
     {
         AdjustAimCameraSpeed(false);
