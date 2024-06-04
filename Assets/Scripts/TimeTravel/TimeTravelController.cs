@@ -869,7 +869,20 @@ public class TimeTravelController : MonoBehaviour
         return freeze;
     }
 
-
+    public static void EndTimePowers()
+    {
+        if (time != null)
+        {
+            if (time.IsRewinding())
+            {
+                time.CancelRewind();
+            }
+            if (time.IsFreezing())
+            {
+                time.StopFreeze();   
+            }
+        }
+    }
     public void StartInputLockout(float duration)
     {
         StartCoroutine(InputLockoutRoutine(duration));

@@ -288,6 +288,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
             this.StartTimer(1f, () => {
                 GetComponent<DojoBossInventoryTransformingController>().SetWeaponByName("Pipe");
+                TimeTravelController.EndTimePowers();
                 playLowHealthCutscene.Play();
                 playLowHealthCutscene.OnEnd.AddListener(() =>
                 {
