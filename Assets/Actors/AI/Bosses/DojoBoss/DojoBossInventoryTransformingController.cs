@@ -97,10 +97,11 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
             {
 
                 SetWeaponByIndex(i);
-                break;
+                return;
             }
         }
     }
+
     public void SetWeaponByIndex(int index)
     {
         currentIndex = index;
@@ -112,6 +113,7 @@ public class DojoBossInventoryTransformingController : MonoBehaviour, IHumanoidI
     {
         return currentWeapon;
     }
+
     void GenerateModels(WeaponStats stats)
     {
         if (GetWeaponModel() != null)

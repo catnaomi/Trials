@@ -4640,7 +4640,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         resurrecting = true;
         attributes.lives--;
 
-        StartCoroutine("ResurrectCoroutine");
+        StartCoroutine(ResurrectCoroutine());
         OnDie.Invoke();
     }
 

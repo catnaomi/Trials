@@ -1,4 +1,3 @@
-using Animancer;
 using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,12 +7,11 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
 using Random = UnityEngine.Random;
+using BK.HierarchyHeader;
 
 public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 {
-
     DojoBossInventoryTransformingController inventory;
-    bool isHitboxActive;
     HumanoidPositionReference positionReference;
     MecanimActorTimeTravelHandler timeHandler;
     CapsuleCollider capsuleC;
@@ -21,16 +19,25 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     CharacterController cc;
     NavMeshAgent nav;
 
-    CharacterController playerCC;
-
     ColliderMode collisionMode;
+
+    public enum WeaponState
+    {
+        None,           // 0
+        Quarterstaff,   // 1
+        Scimitar,       // 2
+        Greatsword,     // 3
+        Rapier,         // 4
+        Bow,            // 5
+        Hammer,         // 6
+        Daox2,          // 7
+        MagicStaff,     // 8
+        Spear           // 9
+    }
 
     public Collider CurrentCollider
     {
-        get
-        {
-            return GetCollider();
-        }
+        get => GetCollider();
     }
 
     [Header("Physics")]
@@ -45,6 +52,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     int successesThisPhase;
     public int attackSuccessesNeeded = 2;
     public int parrySuccessesNeeded = 2;
+    public float lowHealthThreshold = 0.5f;
+    public PlayTimelineWithActors playLowHealthCutscene;
     [Header("Animation Curves & Values")]
     public AnimationCurve lanceExtensionCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
     public Vector2 lanceExtensionMinMax = Vector2.up;
@@ -141,9 +150,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     public float speed = 5f;
     public float arenaRadius = 10f;
     public Transform arenaCenter;
-    [Header("Animancer")]
-    public Animancer.ClipTransition playerParryFailAnim;
-    public float freezeTimeout = 5f;
 
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool InCloseRange;
@@ -189,6 +195,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
     float randomClock = 0f;
     bool shouldRealign;
 
+    [Header("Inspector Debug")]
+    public bool setHalfHealth = false;
+
     enum CombatPhase
     {
         AttackPhase,
@@ -206,7 +215,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         None
     }
 
-    // Start is called before the first frame update
     public override void ActorStart()
     {
         base.ActorStart();
@@ -235,6 +243,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     public override void Update()
     {
+        if (setHalfHealth)
+        {
+            attributes.health.current = (attributes.health.max * lowHealthThreshold) - 1f;
+            setHalfHealth = false;
+        }
+
         if (!CanUpdate())
         {
             UpdateCollisionMode();
@@ -245,15 +259,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         ActorPostUpdate();
     }
-    // Update is called once per frame
+
     public override void ActorPostUpdate()
     {
-        /*
-        if (!inventory.IsMainDrawn())
-        {
-            //inventory.SetDrawn(Inventory.MainType, true);
-        }
-        */
         CheckTarget();
         UpdateCollisionMode();
         if (CombatTarget == null)
@@ -269,10 +277,31 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         InMeleeRange = dist <= meleeRange;
         AtLongRange = dist >= longRange;
 
-        // TODO: cutscene for low health!
-        if (!LowHealth && attributes.health.current <= attributes.health.max * 0.5f)
+        if (!LowHealth && attributes.health.current <= attributes.health.max * lowHealthThreshold)
         {
-            OnLowHealth();
+            TransitionPhase(CombatPhase.Idle);
+            stayInPhase = true;
+
+            PlayerActor.player.StartDialogue();
+            RealignToTarget();
+            StartTimeline();
+
+            this.StartTimer(1f, () => {
+                GetComponent<DojoBossInventoryTransformingController>().SetWeaponByName("Pipe");
+                TimeTravelController.EndTimePowers();
+                playLowHealthCutscene.Play();
+                playLowHealthCutscene.OnEnd.AddListener(() =>
+                {
+                    StopTimeline();
+                    PlayerActor.player.StopDialogue();
+                    stayInPhase = false;
+                });
+            });
+
+            parrySequenceIndex = maxParryFirstPhase + 1;
+            parryCurrentIndex = 0;
+            offenseGroup = maxAttackFirstPhase + 1;
+            LowHealth = true;
         }
 
         if (shouldRealign)
@@ -283,10 +312,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         else if (IsParrying())
         {
             RotateTowardsTarget();
-        }
-        if (randomClock <= 0f)
-        {
-            OnCycle();
         }
 
         PlayerIsProne = PlayerActor.player.IsProne();
@@ -306,7 +331,12 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             wasOnPillarLastFrame = IsOnPillar;
         }
     }
-
+    void TransitionPhase(CombatPhase newPhase)
+    {
+      currentPhase = newPhase;
+      timeInPhase = 0f;
+      successesThisPhase = 0;
+    }
 
     void CheckPhase()
     {
@@ -315,53 +345,38 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             if (timeInPhase >= minPhaseDuration && successesThisPhase >= attackSuccessesNeeded && !stayInPhase)
             {
-                currentPhase = CombatPhase.PillarPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.PillarPhase);
             }
             else if (timeInPhase >= maxPhaseDuration && !stayInPhase)
             {
-                //currentPhase = CombatPhase.PillarPhase;
-                currentPhase = CombatPhase.PillarPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.PillarPhase);
             }
         }
         else if (currentPhase == CombatPhase.ParryPhase)
         {
             if (timeInPhase >= minPhaseDuration && successesThisPhase >= parrySuccessesNeeded && !stayInPhase)
             {
-                currentPhase = CombatPhase.PillarPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.PillarPhase);
             }
             else if (timeInPhase >= maxPhaseDuration && !stayInPhase)
             {
-                //currentPhase = CombatPhase.PillarPhase;
-                currentPhase = CombatPhase.AttackPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.AttackPhase);
             }
         }
         else if (currentPhase == CombatPhase.PillarPhase)
         {
             if (successesThisPhase > 0 && !stayInPhase)
             {
-                currentPhase = CombatPhase.AttackPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.AttackPhase);
             }
         }
         else if (currentPhase == CombatPhase.Idle)
         {
             if (timeInPhase > 3f && !stayInPhase)
             {
-                currentPhase = CombatPhase.AttackPhase;
-                timeInPhase = 0f;
-                successesThisPhase = 0;
+                TransitionPhase(CombatPhase.AttackPhase);
             }
         }
-
     }
 
     void UpdateMecanimValues()
@@ -389,7 +404,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             xDirection = Vector3.Dot(this.transform.right, dir);
             yDirection = Vector3.Dot(this.transform.forward, dir);
         }
-
 
         animator.SetFloat("xDirection", xDirection);
         animator.SetFloat("yDirection", yDirection);
@@ -464,13 +478,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 DrawCircle.DrawWireSphere(nav.destination, 2f, Color.green, 0.25f);
             }
             yield return new WaitForSeconds(0.1f);
-        }
-    }
-    void OnCycle()
-    {
-        if (!IsParrying())
-        {
-
         }
     }
 
@@ -572,8 +579,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         OnFlinch = false;
         OnHeavyDamage = false;
         OnTimeDamage = false;
-
     }
+
     public void RotateTowardsTarget()
     {
         if (this.IsTimeStopped()) return;
@@ -792,6 +799,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             target.TakeDamage(this.GetLastDamage());
         }
     }
+
     public void BowFireStraight()
     {
         RealignToTarget();
@@ -808,6 +816,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         ArrowAvoidColliders(arrow.gameObject);
 
     }
+
     public void BowFireHoming()
     {
         RealignToTarget();
@@ -823,9 +832,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             point.y += bowBezierDistanceRatios[i].y;
             controlPoints[i] = point;
         }
-
-
-
 
         BezierProjectileController arrow = BezierProjectileController.Launch(homingArrowPrefab, origin, bezierDuration, this.transform, arrowDamage, controlPoints);
         
@@ -893,6 +899,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
         MarkWavesActive(waveDuration);
     }
+
     public void PillarShockwave()
     {
         if (Vector3.Distance(PlayerActor.player.transform.position, this.transform.position) < pillarShockwaveRange)
@@ -901,7 +908,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             damage.source = this.gameObject;
             PlayerActor.player.TakeDamage(damage);
             StartCoroutine(PushPlayerToRange(pillarShockwaveRange, pillarPushSpeed));
-
         }
     }
 
@@ -922,9 +928,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             }
         }
     }
+
     IEnumerator DelayScatter(GameObject arrow)
     {
-
         yield return new WaitForSeconds(scatterArrowDelay);
         if (this.IsTimeStopped())
         {
@@ -1059,6 +1065,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
         GenericProjectile wave = GenericProjectile.Launch(waveSinglePrefab, startPosition, Quaternion.LookRotation(dir), dir * waveArrowSpeed, this.transform, waveDamage);
     }
+
     public void MarkBeziersActive(float duration)
     {
         BeziersActive = true;
@@ -1194,7 +1201,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             {
                 ((IHitboxHandler)offHandWeapon).HitboxActive(false);
             }
-            isHitboxActive = false;
         }
         else if (active == 1)
         {
@@ -1202,7 +1208,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             {
                 ((IHitboxHandler)mainWeapon).HitboxActive(true);
             }
-            isHitboxActive = true;
             OnHitboxActive.Invoke();
         }
         else if (active == 2)
@@ -1211,7 +1216,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             {
                 ((IHitboxHandler)offHandWeapon).HitboxActive(true);
             }
-            isHitboxActive = true;
             OnHitboxActive.Invoke();
         }
         else if (active == 3)
@@ -1224,7 +1228,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             {
                 ((IHitboxHandler)offHandWeapon).HitboxActive(true);
             }
-            isHitboxActive = true;
             OnHitboxActive.Invoke();
         }
         else if (active == 4)
@@ -1233,11 +1236,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             {
                 ((IHitboxHandler)rangedWeapon).HitboxActive(true);
             }
-            isHitboxActive = true;
             OnHitboxActive.Invoke();
         }
-
-
     }
 
     void GetHandPositions()
@@ -1250,6 +1250,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
     public void ResetHandPositions()
     {
+        positionReference.MainHand.transform.localPosition = leftHandPos;
         positionReference.OffHand.transform.localPosition = rightHandPos;
         positionReference.MainHand.transform.localRotation = leftHandRot;
         positionReference.OffHand.transform.localRotation = rightHandRot;
@@ -1301,6 +1302,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         //new int[] {4,5,6},
         //new int[] {6,2,5,3,4},
     };
+
     public void Recoil()
     {
         // doesn't recoil
@@ -1311,6 +1313,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         base.Die();
         UpdateMecanimValues();
     }
+
     public void TakeDamage(DamageKnockback damage)
     {
         if (!this.IsAlive()) return;
@@ -1327,9 +1330,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         bool isCrit = IsCritVulnerable() || damage.critData.alwaysCritical;
         damage.didCrit = isCrit;
         damageAmount = damage.GetDamageAmount(isCrit);
-
         damageAmount = DamageKnockback.GetTotalMinusResistances(damageAmount, damage.unresistedMinimum, damage.GetTypes(), this.attributes.resistances);
-
 
         bool willKill = damageAmount >= attributes.health.current && !damage.cannotKill;
 
@@ -1367,7 +1368,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 OnBlock.Invoke();
                 damage.OnBlock.Invoke();
             }
-
         }
         else if (circleParrying && !damage.isThrust)
         {
@@ -1389,19 +1389,16 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 OnBlock.Invoke();
                 damage.OnBlock.Invoke();
             }
-
         }
         else if ((crossParrying && damage.isSlash) || (circleParrying && damage.isThrust))
         {
             ParrySuccess(damage, circleParrying);
 
-            //damage.didCrit = true;
             this.OnHurt.Invoke();
             damage.OnHitWeakness.Invoke();
             damage.OnCrit.Invoke();
             damage.OnBlock.Invoke();
             this.OnBlock.Invoke();
-            //StartCritVulnerability(clip.MaximumDuration / clip.Speed);
         }
         else if (IsOnPillar)
         {
@@ -1427,7 +1424,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
 
             this.OnHurt.Invoke();
             damage.OnHit.Invoke();
-
         }
         else if (!willKill)
         {
@@ -1485,7 +1481,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         }
     }
 
-
     public void StartCritVulnerability(float time)
     {
         if (totalCritTime >= DamageKnockback.MAX_CRITVULN_TIME) return;
@@ -1534,14 +1529,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         return isCritVuln;
     }
 
-    public void OnLowHealth()
-    {
-        parrySequenceIndex = maxParryFirstPhase + 1;
-        parryCurrentIndex = 0;
-        offenseGroup = maxAttackFirstPhase + 1;
-
-        LowHealth = true;
-    }
     public void SetParryValue()
     {
         string sequence = parryPatterns[parrySequenceIndex];
@@ -1577,8 +1564,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         {
             successesThisPhase++;
         }
-
     }
+
     public void IncrementParryIndex()
     {
         parryCurrentIndex++;
@@ -1590,8 +1577,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         int max = (!LowHealth) ? maxParryFirstPhase + 1 : parryPatterns.Length;
         parrySequenceIndex %= max;
         parryCurrentIndex = 0;
-
     }
+
     public void CrossParryFail(DamageKnockback damage)
     {
         OnParryFail.Invoke();
@@ -1599,32 +1586,8 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         damage.OnBlock.Invoke();
         Actor actor = damage.source.GetComponent<Actor>();
         RealignToTarget();
-        /*
-        float otherSpeed = 0f;
-        if (actor.TryGetComponent<Animancer.AnimancerComponent>(out Animancer.AnimancerComponent otherAnimancer))
-        {
-            otherSpeed = otherAnimancer.States.Current.Speed;
-            otherAnimancer.States.Current.Speed = 0.25f;
-        }
-        */
         actor.DeactivateHitboxes();
         ParryFail = true;
-
-        /*
-        animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-        AnimancerState hit = animancer.Play(CrossParryHit);
-
-        hit.Events.OnEnd = () =>
-        {
-            RealignToTarget();
-            cstate.attack = CrossParryFollowup.ProcessHumanoidAction(this, _MoveOnEnd);
-            if (otherAnimancer != null)
-            {
-                otherAnimancer.States.Current.Speed = otherSpeed;
-            }
-            crossParrying = false;
-        };
-        */
     }
 
     public void CircleParryFail(DamageKnockback damage)
@@ -1634,36 +1597,9 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         damage.OnBlock.Invoke();
         Actor actor = damage.source.GetComponent<Actor>();
         RealignToTarget();
-        /*
-        float otherSpeed = 0f;
-        if (actor.TryGetComponent<Animancer.AnimancerComponent>(out Animancer.AnimancerComponent otherAnimancer))
-        {
-            otherSpeed = otherAnimancer.States.Current.Speed;
-            otherAnimancer.States.Current.Speed = 0.25f;
-        }
-        */
         actor.DeactivateHitboxes();
         ParryFail = true;
-        /*
-        animancer.Layers[HumanoidAnimLayers.UpperBody].Stop();
-        AnimancerState hit = animancer.Play(CrossParryHit);
-
-        hit.Events.OnEnd = () =>
-        {
-            RealignToTarget();
-            cstate.attack = CrossParryFollowup.ProcessHumanoidAction(this, _MoveOnEnd);
-            if (otherAnimancer != null)
-            {
-                otherAnimancer.States.Current.Speed = otherSpeed;
-            }
-            crossParrying = false;
-        };
-        */
     }
-
-
-
-    
 
     public void ParrySuccess(DamageKnockback damage, bool wasCircle)
     {
@@ -1673,20 +1609,18 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         OnParrySuccess.Invoke();
     }
 
-
     public void StartPillarRise()
     {
         GameObject pillar = Instantiate(pillarPrefab);
         Vector3 pos = this.transform.position;
         pos.y = 0f;
         pillar.transform.position = pos;
-        //IsOnPillar = true;
         currentPillarIndex = pillars.Count;
         pillars.Add(pillar);
         StartCoroutine(PillarRiseRoutine(pillar));
         PillarShockwave();
-
     }
+
     IEnumerator PillarRiseRoutine(GameObject pillar)
     {
         float clock = 0f;
@@ -1702,7 +1636,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             clock += Time.fixedDeltaTime;
             float t = Mathf.Clamp01(clock / pillarRiseDuration);
             pillarPosition.y = pillarRiseCurve.Evaluate(t) * pillarHeight;
-            //yield return new WaitForFixedUpdate();
             pillar.transform.position = pillarPosition;
             MoveTo(pillarPosition);
             yield return new WaitForFixedUpdate();
@@ -1754,7 +1687,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         MoveTo(newPillar.transform.position);
         IsOnPillar = true;
         isPillarJumping = false;
-        
     }
 
     public void StartPillarHighJump()
@@ -1814,6 +1746,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         IsOnPillar = true;
         isPillarJumping = false;
     }
+
     public void StartPillarFall()
     {
         IsOnPillar = false;
@@ -1938,6 +1871,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             }
 
         }
+
         // keep qi in arena
         Vector3 arenaCenterPoint = Vector3.zero;
         if (arenaCenter != null)
@@ -1954,7 +1888,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
             this.transform.position = pos;
         }
         
-
         nav.nextPosition = this.transform.position;
     }
 
@@ -1986,7 +1919,6 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
                 capsuleC.enabled = false;
                 return;
         }
-        
     }
 
     public Collider GetCollider()
