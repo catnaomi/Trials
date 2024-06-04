@@ -8,14 +8,13 @@ public class DojoBossMessageHandler : MonoBehaviour
     public ParticleSystem dash;
     public ParticleSystem dashStart;
     public ParticleSystem jump;
-    bool dashing;
+
     public void StartDash()
     {
         dashStart.transform.position = GetPositionHoriz();
         dashStart.Play();
         dash.transform.position = GetPositionHoriz();
         dash.Play();
-
     }
 
     public void StopDash()
@@ -28,6 +27,7 @@ public class DojoBossMessageHandler : MonoBehaviour
         jump.transform.position = GetPositionHoriz();
         jump.Play();
     }
+
     void Update()
     {
         Vector3 pos = this.transform.position;
