@@ -10,8 +10,6 @@ public class CursorCam : MonoBehaviour
 {
     public PlayerActor player;
 
-    InputHandler inputHandler;
-
     public Vector3 unlockedOffset = new Vector3(4, 4, 4);
     public float verticalRotateSpeed = 180f;
     public float horizontalRotateSpeed = 180f;
@@ -24,7 +22,6 @@ public class CursorCam : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        inputHandler = InputHandler.main;
         playerLookVector = player.transform.forward;
     }
 

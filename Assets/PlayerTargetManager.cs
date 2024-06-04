@@ -9,7 +9,6 @@ using UnityEngine.Events;
 using System.Linq;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
-using UnityEditor.ShaderGraph.Internal;
 
 public class PlayerTargetManager : MonoBehaviour
 {

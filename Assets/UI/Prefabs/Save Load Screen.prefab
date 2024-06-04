@@ -31,7 +31,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1892596922780688367}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -107,7 +106,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1892596922780688367}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -247,7 +245,6 @@ RectTransform:
   - {fileID: 5275885364707181511}
   - {fileID: 429971091673280203}
   m_Father: {fileID: 6347275646167064843}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -406,7 +403,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1892596922780688367}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -486,7 +482,6 @@ RectTransform:
   - {fileID: 6347275647441273247}
   - {fileID: 6347275646697815049}
   m_Father: {fileID: 6347275646167064843}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -588,7 +583,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6347275646697815049}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -664,7 +658,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6347275646062710685}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -740,7 +733,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6347275646062710685}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -816,7 +808,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6347275646697815049}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -897,7 +888,6 @@ RectTransform:
   - {fileID: 6347275645940248072}
   - {fileID: 6347275646570485748}
   m_Father: {fileID: 6347275645594091224}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -988,7 +978,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6347275646062710689}
         m_TargetAssemblyTypeName: SaveDataDisplay, Assembly-CSharp
-        m_MethodName: LoadDataFromSave
+        m_MethodName: SaveLoadSlot
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1042,6 +1032,7 @@ MonoBehaviour:
       position: []
       rotation: []
       inWorld2: 0
+  saveLoadKind: 0
 --- !u!1 &6347275646167064842
 GameObject:
   m_ObjectHideFlags: 0
@@ -1057,7 +1048,7 @@ GameObject:
   - component: {fileID: 6347275646167064841}
   - component: {fileID: 6347275646167064840}
   m_Layer: 5
-  m_Name: Saves Screen
+  m_Name: Save Load Screen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1079,7 +1070,6 @@ RectTransform:
   - {fileID: 6347275645594091224}
   - {fileID: 1892596922780688367}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1144,10 +1134,6 @@ MonoBehaviour:
   OnUnfocus:
     m_PersistentCalls:
       m_Calls: []
-  saveControllerPrefab: {fileID: 3153745462788765620, guid: a4e0936d27b60e14db95da2412b8e5fe,
-    type: 3}
-  sceneLoaderPrefab: {fileID: 5816367072943520746, guid: 7e8a728f75169114681baeebaa27f890,
-    type: 3}
   previousView: {fileID: 0}
   displays:
   - {fileID: 6347275646062710689}
@@ -1156,6 +1142,7 @@ MonoBehaviour:
   OnCancelEvent:
     m_PersistentCalls:
       m_Calls: []
+  menuKind: 0
 --- !u!225 &6347275646167064841
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1215,7 +1202,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6347275646167064843}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1291,7 +1277,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6347275647441273247}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1367,7 +1352,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6347275646062710685}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1502,7 +1486,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6347275647441273247}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1583,7 +1566,6 @@ RectTransform:
   - {fileID: 6347275645933687137}
   - {fileID: 6347275646943989576}
   m_Father: {fileID: 6347275645594091224}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -1674,7 +1656,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6347275646697815048}
         m_TargetAssemblyTypeName: SaveDataDisplay, Assembly-CSharp
-        m_MethodName: LoadDataFromSave
+        m_MethodName: SaveLoadSlot
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1728,6 +1710,7 @@ MonoBehaviour:
       position: []
       rotation: []
       inWorld2: 0
+  saveLoadKind: 0
 --- !u!1 &6347275646943989573
 GameObject:
   m_ObjectHideFlags: 0
@@ -1759,7 +1742,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6347275646697815049}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -1894,7 +1876,6 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6347275647441273247}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -2034,7 +2015,6 @@ RectTransform:
   - {fileID: 6347275646493844962}
   - {fileID: 6347275647139796072}
   m_Father: {fileID: 6347275645594091224}
-  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -2125,7 +2105,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6347275647441273251}
         m_TargetAssemblyTypeName: SaveDataDisplay, Assembly-CSharp
-        m_MethodName: LoadDataFromSave
+        m_MethodName: SaveLoadSlot
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2179,3 +2159,4 @@ MonoBehaviour:
       position: []
       rotation: []
       inWorld2: 0
+  saveLoadKind: 0

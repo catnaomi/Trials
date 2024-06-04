@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -16,6 +14,7 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
     bool updateOnEndOfFrame;
     [Header("Data Preview")]
     [SerializeField, ReadOnly] SaveData data;
+    public SaveLoadKind saveLoadKind;
 
     public void SetMenuReference(SavesMenu menu)
     {
@@ -31,40 +30,42 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
     {
         if (data != null && data.IsDataValid())
         {
-            previewText.text = $"Prologue, name: Antiquity, "+
-                $"{data.playerWorldData.activeScene},"+
-                $"hp: {data.playerAttributeData.health.current}/{data.playerAttributeData.health.max},"+
-                $"charges {data.playerAttributeData.timeCharges.current}/{data.playerAttributeData.timeCharges.max},"+
+            previewText.text = $"Prologue, name: Antiquity, " +
+                $"{data.playerWorldData.activeScene}," +
+                $"hp: {data.playerAttributeData.health.current}/{data.playerAttributeData.health.max}," +
+                $"charges {data.playerAttributeData.timeCharges.current}/{data.playerAttributeData.timeCharges.max}," +
                 $"lives 3/3";
-            //uiButton.interactable = true;
         }
         else
         {
             if (!isDeleteButton)
             {
                 previewText.text = "New Game";
-               // uiButton.interactable = true;
             }
             else
             {
                 previewText.text = "Empty";
-                //uiButton.interactable = false;
             }
         }
     }
 
-    public void UpdateSaveData()
+    public void SaveLoadSlot()
     {
-        data = saveMenu.GetData(slot);
+        if (saveLoadKind == SaveLoadKind.save)
+        {
+            SaveDataToSave();
+        }
+        else
+        {
+            LoadDataFromSave();
+        }
     }
-
 
     public void LoadDataFromSave()
     {
         if (data != null && data.IsDataValid())
         {
-            SaveDataController.SetSlotStatic(slot);
-            SaveDataController.LoadSaveDataStatic(data);
+            SaveDataController.instance.Load(slot);
         }
         else
         {
@@ -72,21 +73,20 @@ public class SaveDataDisplay : MonoBehaviour, ICancelHandler
         }
     }
 
-    public void NewGameOnSave()
-    {
-        SaveDataController.SetSlotStatic(slot);
-        SaveDataController.NewGameStatic();
-    }
-
     public void SaveDataToSave()
     {
-        SaveDataController.SaveToSlot(slot);
+        SaveDataController.instance.Save(slot);
+    }
+
+    public void NewGameOnSave()
+    {
+        SaveDataController.instance.NewGame();
     }
 
     public void DeleteSave()
     {
         SaveDataController.DeleteSlot(slot);
-        UpdateSaveData();
+        data = null;
         UpdateUI();
     }
 

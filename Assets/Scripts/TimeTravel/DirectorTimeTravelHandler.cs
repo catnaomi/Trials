@@ -11,7 +11,7 @@ public class DirectorTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     bool directorPlaying;
     bool directorPaused;
     bool registered;
-    // Start is called before the first frame update
+
     void Start()
     {
         director = this.GetComponent<PlayableDirector>();
