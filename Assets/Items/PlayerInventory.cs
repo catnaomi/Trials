@@ -1226,6 +1226,32 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         return IsMainDrawn() || IsOffDrawn() || IsRangedDrawn();
     }
 
+    public bool AutoEquip(Equippable item)
+    {
+        if (item is BladeWeapon blade)
+        {
+            this.EquipMainWeapon(blade);
+            return true;
+        }
+        else if (item is RangedWeapon ranged)
+        {
+            this.EquipRangedWeapon(ranged);
+            return true;
+        }
+        else if (item is EquippableWeapon shield)
+        {
+            this.EquipOffHandWeapon(shield);
+            return true;
+        }
+        else if (item is Consumable consumable)
+        {
+            int slot = GetFirstEmptySlot();
+            if (slot < 0) slot = 0;
+            this.EquipToSlot(consumable, slot);
+            return true;
+        }
+        return false;
+    }
     public void UnequipWeapon(EquippableWeapon weapon)
     {
         if (weapon == null) return;

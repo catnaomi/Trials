@@ -116,6 +116,53 @@ public static class DebugReflectionMethods
         }
     }
 
+    public static void GP(string itemName)
+    {
+        GiveItem("player", itemName);
+    }
+    public static void GiveEquip(string itemName)
+    {
+        try
+        {
+            PlayerInventory targetInventory;
+            GameObject owner;
+            targetInventory = PlayerActor.player.GetInventory() as PlayerInventory;
+            owner = PlayerActor.player.gameObject;
+
+            Item item = Resources.Load<Item>("Items/" + itemName);
+            if (item == null)
+            {
+                Debug.LogError("Failed to load item + " + itemName);
+                return;
+            }
+
+            if (targetInventory != null)
+            {
+                targetInventory.Add(item);
+                if (item is Equippable)
+                {
+                    bool success = targetInventory.AutoEquip((Equippable)item);
+                    if (success)
+                    {
+                        Debug.Log("Added & Equipped " + item.name);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Added " + item.name + ". Did not Equip");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("Added " + item.name + ". Did not Equip");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+        }
+    }
+
     public static void GetAllObjectsOfType(string typeName)
     {
         try
