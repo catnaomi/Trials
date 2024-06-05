@@ -7,14 +7,13 @@ public class SaveData
     public PlayerAttributeData playerAttributeData;
     public YarnSaveData yarnData;
     public PlayerWorldData playerWorldData;
-    public SceneSaveData sceneSaveData;
+    public AllScenesSaveData allScenesSaveData;
 
     public bool IsDataValid()
     {
         if (this == null) return false;
         if (playerAttributeData == null || playerWorldData == null) return false;
         if (playerWorldData.activeScene == "") return false;
-        if (sceneSaveData == null) return false;
         return true;
     }
 }
