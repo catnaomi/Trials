@@ -13,11 +13,9 @@ public class StartMenu : MenuView
     public override void Focus()
     {
         base.Focus();
-        InputSystem.onAnyButtonPress.CallOnce((InputControl _) => FadeOut());
-    }
-    
-    void ShowSaveMenu()
-    {
-        savesMenu.Focus();
+        InputSystem.onAnyButtonPress.CallOnce((InputControl _) =>
+        {
+            PushMenu(savesMenu);
+        });
     }
 }

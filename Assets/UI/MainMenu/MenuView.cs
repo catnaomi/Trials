@@ -71,13 +71,21 @@ public class MenuView : MonoBehaviour
 
     public static void PushMenu(MenuView menu)
     {
+        System.Action AfterFadeCurrentMenu = delegate ()
+        {
+            currentlyFocused = menu;
+            menuStack.Push(menu);
+            menu.Focus();
+        };
+
         if (currentlyFocused != null)
         {
-            currentlyFocused.FadeOut();
+            currentlyFocused.FadeOut(AfterFadeCurrentMenu);
         }
-        currentlyFocused = menu;
-        menuStack.Push(menu);
-        menu.Focus();
+        else
+        {
+            AfterFadeCurrentMenu();
+        }
     }
 
     public static void PopMenu()
@@ -115,13 +123,13 @@ public class MenuView : MonoBehaviour
         FadeOut();
     }
 
-    public virtual void FadeIn()
+    public virtual void FadeIn(System.Action callback = null)
     {
-        fader.FadeIn();
+        fader.FadeIn(callback);
     }
 
-    public virtual void FadeOut()
+    public virtual void FadeOut(System.Action callback = null)
     {
-        fader.FadeOut();
+        fader.FadeOut(callback);
     }
 }
