@@ -88,7 +88,8 @@ public class FXController : MonoBehaviour
     {
         if (instance != null)
         {
-            throw new Exception("Duplicated FXController");
+            Destroy(gameObject);
+            return;
         }
         instance = this;
         DontDestroyOnLoad(this);

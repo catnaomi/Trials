@@ -13,7 +13,8 @@ public class SoundFXAssetManager : MonoBehaviour
     {
         if (instance != null)
         {
-            throw new Exception("Duplicated SoundFXAssetManager");
+            Destroy(gameObject);
+            return;
         }
         instance = this;
         DontDestroyOnLoad(this);
