@@ -10,6 +10,7 @@ public class IceGiantFXHelper : MonoBehaviour
     public ParticleSystem stompParticle;
     public ParticleSystem footReformParticleLeft;
     public ParticleSystem footReformParticleRight;
+    public ParticleSystem[] footReformParticles;
     public ParticleSystem stepParticle;
     public ParticleSystem stepSmallParticle;
     public ParticleSystem handOutParticle;
@@ -20,15 +21,14 @@ public class IceGiantFXHelper : MonoBehaviour
     public AudioClip splash1;
     public AudioClip splash2;
     bool splashAlternator;
-
     bool wasRotatingLastFrame;
-    // Start is called before the first frame update
+    
     void Start()
     {
-        actor = this.GetComponent<IceGiantMecanimActor>();
+        actor = GetComponent<IceGiantMecanimActor>();
+        footReformParticles = new ParticleSystem[2]{ footReformParticleLeft, footReformParticleRight };
     }
 
-    // Update is called once per frame
     void Update()
     {
         bool rotating = actor.IsRotating();
@@ -54,19 +54,16 @@ public class IceGiantFXHelper : MonoBehaviour
         }
     }
 
-    public void PlayReformFoot(bool isLeft)
+    public void PlayReformFoot(int legIndex)
     {
-        ParticleSystem particle = (isLeft) ? footReformParticleLeft : footReformParticleRight;
-        particle.Play();
+        footReformParticles[legIndex].Play();
     }
 
-    public void StompFX(bool isLeft)
+    public void StompFX(int legIndex)
     {
-
-        Transform foot = (isLeft) ? actor.leftLeg.transform : actor.rightLeg.transform;
-
+        Transform foot = actor.legs[legIndex].transform;
         Vector3 position = foot.position;
-        position.y = this.transform.position.y;
+        position.y = transform.position.y;
         PlayParticleAtPosition(stompParticle, position);
         PlayWaterExplosion();
     }

@@ -157,37 +157,27 @@ public class DebugConsole : MonoBehaviour
     public void RunMethod(string input)
     {
         if (input == "") return;
-        try
+        string[] split = Regex.Split(input, "(?<=^[^\"]*(?:\"[^\"]*\"[^\"]*)*) (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+
+        string command = split[0];
+
+        string[] args = split.Length > 1 ? new ArraySegment<string>(split, 1, split.Length-1).ToArray() : new string[0];
+
+        Type type = typeof(DebugReflectionMethods);
+
+        if (command.ToLower() == "help" && args.Length == 1)
         {
-            //string cleanInput = CleanString(input);
-            string[] split = Regex.Split(input, "(?<=^[^\"]*(?:\"[^\"]*\"[^\"]*)*) (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
-
-            string command = split[0];
-
-            string[] args = split.Length > 1 ? new ArraySegment<string>(split, 1, split.Length-1).ToArray() : new string[0];
-
-            Type type = typeof(DebugReflectionMethods);
-
-            if (command.ToLower() == "help" && args.Length == 1)
-            {
-                command = "helpm";
-            }
-            MethodInfo method = type.GetMethod(command, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Static);
-            if (method == null)
-            {
-                Debug.LogError("Command not found.");
-            }
-            else
-            {
-                method.Invoke(null, args);
-            }
+            command = "helpm";
         }
-        catch (Exception ex)
+        MethodInfo method = type.GetMethod(command, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Static);
+        if (method == null)
         {
-            
-            Debug.LogError(ex.GetType().ToString() + ": " + ex.Message);
+            Debug.LogError("Command not found.");
         }
-        
+        else
+        {
+            method.Invoke(null, args);
+        }
     }
 
     public void ToggleOpen()
@@ -216,7 +206,7 @@ public class DebugConsole : MonoBehaviour
 
     public string CleanString(string dirtyString)
     {
-        HashSet<char> removeChars = new HashSet<char>(" ?&^$#@!()+-,:;<>’\'-_*");
+        HashSet<char> removeChars = new HashSet<char>(" ?&^$#@!()+-,:;<>\x2019\'-_*");
         StringBuilder result = new StringBuilder(dirtyString.Length);
         foreach (char c in dirtyString)
             if (!removeChars.Contains(c)) // prevent dirty chars

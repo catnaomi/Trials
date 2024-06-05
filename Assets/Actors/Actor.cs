@@ -332,8 +332,9 @@ public class Actor : MonoBehaviour
 
     public virtual string GetCurrentGroundPhysicsMaterial()
     {
-        return "";
+        return "Default";
     }
+
     public void SetAdditionalMovement(Vector3 move)
     {
         moveAdditional = move;
