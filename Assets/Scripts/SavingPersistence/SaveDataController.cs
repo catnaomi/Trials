@@ -23,7 +23,6 @@ public class SaveDataController : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        DontDestroyOnLoad(this.gameObject);
     }
 
     void Update()
@@ -77,7 +76,11 @@ public class SaveDataController : MonoBehaviour
         if (readData != null)
         {
             // Need to resume the game or unity will actually die
-            TimeScaleController.instance.paused = false;
+            // but verify we have the controller, it won't exist on the main menu
+            if (TimeScaleController.instance != null)
+            {
+                TimeScaleController.instance.paused = false;
+            }
             StartCoroutine(LoadSaveDataRoutine(readData));
         }
     }
@@ -122,16 +125,14 @@ public class SaveDataController : MonoBehaviour
 
         PlayerPositioner.SetNextOverridePosition(position, rotation);
 
-        // set all variables and attributes
-        YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
-        PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
-        PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
-
         // load the next scene and the loading screen
         SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
         yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
-
-        // After scene load load our per scene data
+        
+        // after scene load apply remaining data
+        YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
+        PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
+        PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
         SceneSaveDataManager.LoadData(data.sceneSaveData);
         yield return new WaitForEndOfFrame();
     }

@@ -10,8 +10,9 @@ public class DialogueRunnerReference : MonoBehaviour
 
     private void Awake()
     {
-        runner = this.GetComponent<DialogueRunner>();
+        runner = GetComponent<DialogueRunner>();
     }
+
     private void OnDestroy()
     {
         runner = null;
