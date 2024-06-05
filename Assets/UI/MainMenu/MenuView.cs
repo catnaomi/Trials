@@ -63,6 +63,11 @@ public class MenuView : MonoBehaviour
         AfterMenuing();
     }
 
+    public static void ClearMenuStack()
+    {
+        menuStack.Clear();
+    }
+
     public static void AfterMenuing()
     {
         currentlyFocused = null;
