@@ -122,7 +122,6 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         animator = this.GetComponent<Animator>();
         GenerateWeapons();
 
-
         leftLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(leftLegWeakPoint));
         rightLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(rightLegWeakPoint));
         leftLegCollider = leftLegWeakPoint.GetComponent<Collider>();
