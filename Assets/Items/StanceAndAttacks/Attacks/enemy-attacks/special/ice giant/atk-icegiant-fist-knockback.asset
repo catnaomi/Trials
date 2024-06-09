@@ -37,14 +37,15 @@ MonoBehaviour:
       causesCritState: 0
       doesNotConsumeCritState: 0
       criticalExtensionTime: 0.25
-    breaksArmor: 0
-    unblockable: 0
-    disarm: 0
     isThrust: 0
     isSlash: 0
     isRanged: 0
     isParry: 0
+    breaksArmor: 0
+    unblockable: 0
+    jumpable: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
@@ -52,6 +53,7 @@ MonoBehaviour:
     cannotKill: 0
     stunTime: 1
     repositionLength: 1
+    repositionMaxDist: 0.25
     stagger: 1
     staggers:
       onHit: 5
@@ -63,12 +65,10 @@ MonoBehaviour:
       onTypedBlock: 2
     kbForce: {x: 0, y: 4, z: 5}
     kbRadial: 1
-    didCrit: 0
-    timeDelayed: 0
-    hitboxSource: {fileID: 0}
-    source: {fileID: 0}
-    originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
+    hitClip: {fileID: 0}
+    hitSoundName: Enemy/IceGiant/Smash
+    disarm: 0
     OnHit:
       m_PersistentCalls:
         m_Calls: []
@@ -81,7 +81,12 @@ MonoBehaviour:
     OnHitWeakness:
       m_PersistentCalls:
         m_Calls: []
-    hitClip: {fileID: 8300000, guid: 744b8e7511c5c8e4183ef7506cf63f5a, type: 3}
+    didCrit: 0
+    timeDelayed: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
   staminaCost: 0
   exitTime: -1
   cancelStartTime: 0

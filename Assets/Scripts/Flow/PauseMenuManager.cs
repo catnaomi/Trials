@@ -65,6 +65,7 @@ public class PauseMenuManager : MenuView
     {
         pauseMenuOpen = true;
         TimeScaleController.instance.paused = true;
+        MusicController.instance.paused = true;
         Focus();
     }
 
@@ -72,6 +73,7 @@ public class PauseMenuManager : MenuView
     {
         pauseMenuOpen = false;
         Unfocus();
+        MusicController.instance.paused = false;
         TimeScaleController.instance.paused = false;
     }
 

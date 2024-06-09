@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class DamageDisplay : MonoBehaviour
@@ -13,14 +11,13 @@ public class DamageDisplay : MonoBehaviour
     public float delay = 0.5f;
     float clock;
     public float damage;
-    // Start is called before the first frame update
+
     void Start()
     {
         text.color = new Color(0, 0, 0, 0);
         clock = 1f;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (clock < 1f)
@@ -41,11 +38,11 @@ public class DamageDisplay : MonoBehaviour
         }
     }
 
-    public void AddDamage(float dmg, DamageType type)
+    public void AddDamage(float additionalDamage, DamageType type)
     {
-        this.damage += dmg;
+        damage += additionalDamage;
         clock = -delay;
         text.text = Mathf.Round(this.damage).ToString();
-        text.color = FXController.GetColorForDamageType(type);
+        text.color = FXController.GetColorFromDamageType(type);
     }
 }
