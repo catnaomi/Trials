@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IceGiantIsDeadSaveLoader : SceneFlagSaveLoader
+public class IceGiantIsDeadSaveLoader : SceneDataLoader
 {
     public GameObject spawnTrigger;
 

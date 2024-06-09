@@ -25,7 +25,7 @@ public class SceneSaveDataManager : MonoBehaviour
 
     public void ApplyData()
     {
-        foreach (var loader in FindObjectsOfType<SceneFlagSaveLoader>())
+        foreach (var loader in FindObjectsOfType<SceneDataLoader>())
         {
             loader.LoadSceneData(data);
         }

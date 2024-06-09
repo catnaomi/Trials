@@ -1,4 +1,4 @@
-public class ShipHingeIsDownSaveLoader : SceneFlagSaveLoader
+public class ShipHingeIsDownSaveLoader : SceneDataLoader
 {
     public ShipHingeAnimationPlayer shipHingeAnimationPlayer;
 
