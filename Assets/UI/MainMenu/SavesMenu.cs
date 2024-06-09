@@ -14,18 +14,16 @@ public enum SaveLoadKind
 public class SavesMenu : MenuView
 {
     [Header("References")]
-    public MenuView previousView;
     public SaveDataDisplay[] displays;
-    CanvasGroupFader groupFade;
-    GameObject[] selectChildren;
-    public UnityEvent OnCancelEvent;
-
+    GameObject[] selectableChildren;
     public SaveLoadKind menuKind;
+
     public void SetMenuKind(SaveLoadKind kind)
     {
         menuKind = kind;
         SetChildrenSaveLoadKind();
     }
+
     public void SetChildrenSaveLoadKind()
     {
         foreach (var display in displays)
@@ -36,9 +34,7 @@ public class SavesMenu : MenuView
 
     public override void MenuStart()
     {
-        groupFade = this.GetComponent<CanvasGroupFader>();
-        groupFade.Hide();
-        selectChildren = GetComponentsInChildren<Selectable>().Select(s => s.gameObject).ToArray();
+        selectableChildren = GetComponentsInChildren<Selectable>().Select(s => s.gameObject).ToArray();
         SetChildrenSaveLoadKind();
         base.MenuStart();
     }
@@ -47,7 +43,6 @@ public class SavesMenu : MenuView
     {
         UpdateSlots();
         base.Focus();
-        FadeIn();
     }
 
     public void UpdateSlots()
@@ -63,30 +58,12 @@ public class SavesMenu : MenuView
 
     void OnGUI()
     {
-        if (focused)
+        if (IsFocused)
         {
-            if (EventSystem.current.currentSelectedGameObject == null || !selectChildren.Contains(EventSystem.current.currentSelectedGameObject))
+            if (EventSystem.current.currentSelectedGameObject == null || !selectableChildren.Contains(EventSystem.current.currentSelectedGameObject))
             {
                 EventSystem.current.SetSelectedGameObject(displays[0].gameObject);
             }
-        }
-    }
-
-    public void FadeIn()
-    {
-        groupFade.FadeIn();
-    }
-
-    public void FadeOut()
-    {
-        groupFade.FadeOut(ShowStartMenu);
-    }
-
-    void ShowStartMenu()
-    {
-        if (previousView != null)
-        {
-            previousView.Focus();
         }
     }
 
@@ -97,10 +74,9 @@ public class SavesMenu : MenuView
 
     public void OnCancel()
     {
-        if (focused)
+        if (IsFocused)
         {
-            FadeOut();
-            OnCancelEvent.Invoke();
+            PopMenu();
         }
     }
 }
