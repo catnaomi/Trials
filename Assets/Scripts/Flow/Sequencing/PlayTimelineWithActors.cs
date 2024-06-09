@@ -1,12 +1,9 @@
 using Cinemachine;
 using CustomUtilities;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Playables;
-using UnityEngine.Timeline;
 using Yarn.Unity;
 
 public class PlayTimelineWithActors : MonoBehaviour
@@ -59,10 +56,8 @@ public class PlayTimelineWithActors : MonoBehaviour
         {
             return bindingType == RuntimeBinding.PlayerGameObject;
         }
-
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         if (playerRefTransform != null)
@@ -80,18 +75,8 @@ public class PlayTimelineWithActors : MonoBehaviour
             return;
         }
         TimelineListener.Register(director);
-        /*
-        if (playOnAwake || director.playOnAwake)
-        {
-            if (TimelineListener.instance != null)
-            {
-                TimelineListener.instance.OnDirectorPlay(director);
-            }
-        } 
-        */
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (!playing && playOnAwake)
@@ -131,13 +116,13 @@ public class PlayTimelineWithActors : MonoBehaviour
         {
             PlayerActor.player.StartDialogue();
         }
-        director.stopped += (context) =>
+        director.stopped += (_) =>
         {
-            Stop(context);
+            Stop();
         };
     }
 
-    private void Stop(PlayableDirector d)
+    public void Stop()
     {
         playing = false;
         if (PlayerActor.player != null)
@@ -161,10 +146,6 @@ public class PlayTimelineWithActors : MonoBehaviour
         }
     }
 
-    public void Stop()
-    {
-        Stop(null);
-    }
     void SetBindings()
     {
         var bindings = director.GetTimelineBindings();

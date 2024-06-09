@@ -48,6 +48,7 @@ public class MenuView : MonoBehaviour
         if (shouldPause)
         {
             TimeScaleController.instance.paused = true;
+            MusicController.instance.paused = true;
         }
 
         PushMenu(menu);
@@ -72,6 +73,7 @@ public class MenuView : MonoBehaviour
     {
         currentlyFocused = null;
         TimeScaleController.instance.paused = false;
+        MusicController.instance.paused = false;
     }
 
     public static void PushMenu(MenuView menu)

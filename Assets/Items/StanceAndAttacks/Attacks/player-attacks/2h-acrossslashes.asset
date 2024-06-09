@@ -29,6 +29,7 @@ MonoBehaviour:
     _NormalizedStartTime: 0
   attackData:
     healthDamage: 1
+    unresistedMinimum: 1
     types: 0
     critData:
       criticalMultiplier: 1.25
@@ -36,17 +37,23 @@ MonoBehaviour:
       causesCritState: 0
       doesNotConsumeCritState: 0
       criticalExtensionTime: 0.25
-    breaksArmor: 0
-    unblockable: 0
-    disarm: 0
     isThrust: 0
     isSlash: 1
     isRanged: 0
+    isParry: 0
+    breaksArmor: 0
+    unblockable: 0
+    jumpable: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
     stunTime: 1
+    repositionLength: 1
+    repositionMaxDist: 0.25
     stagger: 1
     staggers:
       onHit: 2
@@ -54,12 +61,14 @@ MonoBehaviour:
       onCritical: 3
       onKill: 6
       onCounterHit: 0
+      onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
-    hitboxSource: {fileID: 0}
-    source: {fileID: 0}
-    originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
+    hitClip: {fileID: 0}
+    hitSoundName: 
+    disarm: 0
     OnHit:
       m_PersistentCalls:
         m_Calls: []
@@ -69,7 +78,15 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
-    hitClip: {fileID: 0}
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
   staminaCost: 0
   exitTime: -1
   cancelStartTime: 0
@@ -98,6 +115,7 @@ MonoBehaviour:
   currentIndex: 0
   damages:
   - healthDamage: 1
+    unresistedMinimum: 0
     types: 0
     critData:
       criticalMultiplier: 1
@@ -105,17 +123,23 @@ MonoBehaviour:
       causesCritState: 0
       doesNotConsumeCritState: 1
       criticalExtensionTime: 0.5
-    breaksArmor: 0
-    unblockable: 0
-    disarm: 0
     isThrust: 0
     isSlash: 1
     isRanged: 0
+    isParry: 0
+    breaksArmor: 0
+    unblockable: 0
+    jumpable: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
     stunTime: 0
+    repositionLength: 0
+    repositionMaxDist: 0
     stagger: 0
     staggers:
       onHit: 3
@@ -123,12 +147,14 @@ MonoBehaviour:
       onCritical: 4
       onKill: 5
       onCounterHit: 3
+      onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 2.5, z: 10}
     kbRadial: 0
-    hitboxSource: {fileID: 0}
-    source: {fileID: 0}
-    originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
+    hitClip: {fileID: 0}
+    hitSoundName: 
+    disarm: 0
     OnHit:
       m_PersistentCalls:
         m_Calls: []
@@ -138,8 +164,17 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
-    hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
   - healthDamage: 25
+    unresistedMinimum: 0
     types: 0
     critData:
       criticalMultiplier: 1
@@ -147,17 +182,23 @@ MonoBehaviour:
       causesCritState: 0
       doesNotConsumeCritState: 1
       criticalExtensionTime: 1.25
-    breaksArmor: 0
-    unblockable: 0
-    disarm: 0
     isThrust: 0
     isSlash: 1
     isRanged: 0
+    isParry: 0
+    breaksArmor: 0
+    unblockable: 0
+    jumpable: 0
     bouncesOffBlock: 0
+    bouncesOffTypedBlock: 0
     breaksBlock: 0
     canDamageSelf: 0
     cannotAutoFlinch: 0
+    cannotRecoil: 0
+    cannotKill: 0
     stunTime: 0
+    repositionLength: 0
+    repositionMaxDist: 0
     stagger: 0
     staggers:
       onHit: 2
@@ -165,12 +206,14 @@ MonoBehaviour:
       onCritical: 4
       onKill: 5
       onCounterHit: 2
+      onBlock: 0
+      onTypedBlock: 0
     kbForce: {x: 0, y: 2.5, z: 10}
     kbRadial: 0
-    hitboxSource: {fileID: 0}
-    source: {fileID: 0}
-    originPoint: {x: 0, y: 0, z: 0}
     hitMaterial: 0
+    hitClip: {fileID: 0}
+    hitSoundName: 
+    disarm: 0
     OnHit:
       m_PersistentCalls:
         m_Calls: []
@@ -180,5 +223,13 @@ MonoBehaviour:
     OnBlock:
       m_PersistentCalls:
         m_Calls: []
-    hitClip: {fileID: 8300000, guid: b731fe8829d13fc4485558f9e3979901, type: 3}
+    OnHitWeakness:
+      m_PersistentCalls:
+        m_Calls: []
+    didCrit: 0
+    timeDelayed: 0
+    hitboxSource: {fileID: 0}
+    source: {fileID: 0}
+    friendlyGroup: 0
+    originPoint: {x: 0, y: 0, z: 0}
   maxTimeBetweenAttacks: 0.5

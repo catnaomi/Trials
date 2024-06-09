@@ -145,11 +145,10 @@ public class HomingGroundProjectileController : Projectile
 
 
             hitbox.SetActive(false);
-            FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
+            FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, SoundFXAssetManager.GetSound("Bow/Hit"));
         }
         else if (hitbox.victims.Count > 0)
         {
-            //FXController.CreateFX(FXController.FX.FX_BleedPoint, feather.position, Quaternion.identity, 3f, FXController.clipDictionary["bow_hit"]);
             allowInteract = false;
         }
         EndFlight();
