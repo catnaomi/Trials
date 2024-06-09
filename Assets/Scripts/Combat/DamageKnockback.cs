@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System;
-using System.Collections.Generic;
 using UnityEngine.Events;
 using CustomUtilities;
 
@@ -43,7 +41,6 @@ public class DamageKnockback
     [Header("FX")]
     public FXController.FXMaterial hitMaterial;
     public FXData fxData;
-    public AudioClip hitClip;
     [Space(20)]
     [Header("Misc/Unused")]
     public bool disarm;
@@ -96,18 +93,19 @@ public class DamageKnockback
     {
         public bool isHeavyAttack;
     }
+
     public enum StaggerType
     {
-        None,           // 0
+        None,
         // hitsuns
-        Flinch,         // 1
-        StaggerSmall,   // 2
+        Flinch,
+        StaggerSmall,
         StaggerLarge,
-        Stumble,   // 3
+        Stumble,
         // knockouts
-        Knockdown,      // 4
-        SpinDeath,           // 5
-        Crumple,        // 6
+        Knockdown,
+        SpinDeath,
+        Crumple,
         FallOver,
         /*
         // on block
@@ -147,7 +145,6 @@ public class DamageKnockback
     {
         this.kbForce = damageKnockback.kbForce.normalized * damageKnockback.kbForce.magnitude;
         this.stagger = damageKnockback.stagger;
-        this.hitClip = damageKnockback.hitClip;
         this.breaksArmor = damageKnockback.breaksArmor;
         this.kbRadial = damageKnockback.kbRadial;
         this.healthDamage = damageKnockback.healthDamage;

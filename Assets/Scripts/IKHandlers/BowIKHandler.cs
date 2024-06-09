@@ -25,15 +25,7 @@ public class BowIKHandler : IKHandler
 
     public override void OnUpdate(Actor aactor)
     {
-        if (aactor is HumanoidActor actor)
-        {
-            Vector3 aimDir = actor.GetLaunchVector(actor.positionReference.Spine.transform.position);
-
-            Quaternion aimRot = Quaternion.LookRotation(aimDir, Vector3.up) * Quaternion.AngleAxis(90f, Vector3.up);
-
-            actor.positionReference.Spine.rotation = aimRot;
-        }
-        else if (aactor is PlayerActor player)
+        if (aactor is PlayerActor player)
         {
             
             Vector3 aimDir = player.GetLaunchVector(player.positionReference.Spine.transform.position); //player.smoothLaunchVector;
