@@ -221,7 +221,6 @@ GameObject:
   - component: {fileID: 5411773312235778942}
   - component: {fileID: 2076466857974750089}
   - component: {fileID: 697875163809136843}
-  - component: {fileID: 6328099174776361062}
   m_Layer: 5
   m_Name: Cancel
   m_TagString: Untagged
@@ -331,33 +330,6 @@ MonoBehaviour:
   m_Interactable: 1
   m_TargetGraphic: {fileID: 3401141877750216030}
   m_OnClick:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6347275646167064846}
-        m_TargetAssemblyTypeName: SavesMenu, Assembly-CSharp
-        m_MethodName: OnCancel
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
---- !u!114 &6328099174776361062
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3241000888735254626}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a9a5dca7b2d73847aa899644c46f6a1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  OnCancelEvent:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 6347275646167064846}
@@ -1126,15 +1098,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2872de72e13621b4e944f46af7fddaf3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  focusOnStart: 0
-  focused: 0
-  OnFocus:
-    m_PersistentCalls:
-      m_Calls: []
-  OnUnfocus:
-    m_PersistentCalls:
-      m_Calls: []
-  previousView: {fileID: 0}
+  autoStart: 0
   displays:
   - {fileID: 6347275646062710689}
   - {fileID: 6347275647441273251}
@@ -1168,9 +1132,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   fadeInDuration: 0.25
-  fadeInDelay: 0
   fadeOutDuration: 0.25
-  fadeOutDelay: 0
 --- !u!1 &6347275646261467643
 GameObject:
   m_ObjectHideFlags: 0
