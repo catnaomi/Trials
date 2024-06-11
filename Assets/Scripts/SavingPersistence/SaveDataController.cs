@@ -119,6 +119,9 @@ public class SaveDataController : MonoBehaviour
         FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
         yield return new WaitUntil(() => { return fadedToBlack; });
 
+        // remove any menus that were active as they will all be deloaded
+        MenuView.ClearMenuStack();
+
         // set the spawn location before we load the scene
         Vector3 position = NumberUtilities.ArrayToVector3(data.playerWorldData.position);
         Quaternion rotation = NumberUtilities.ArraytoQuaternion(data.playerWorldData.rotation);
