@@ -320,7 +320,6 @@ public class AnimationFXHandler : MonoBehaviour
         DamageKnockback damage = actor.GetComponent<IDamageable>().GetLastTakenDamage();
         if (damage != null)
         {
-            // TODO: should maybe use hitMaterial instead of fxMaterial
             FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, damage.isSlash, damage.didCrit, fxMaterial);
             FXController.DamageScreenShake(actor.hitParticleDirection, damage.didCrit, false);
         }

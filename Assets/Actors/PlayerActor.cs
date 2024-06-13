@@ -1314,6 +1314,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 if (lastAirTime > softLandingTime)
                 {
                     //xzVel = Vector3.zero;
+                    animationFXHandler.SplashBig();
                     AnimancerState astate = animancer.Play(swimDive);
                     StartCoroutine(DecelXZVel(1f));
                     speed = 0f;
@@ -1327,8 +1328,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 else
                 {
                     //walkAccelReal = swimAccel;
+                    animationFXHandler.SplashSmall();
                     state.swim = animancer.Play(swimAnim);
-                    animationFXHandler.SplashBig();
                 }
             }
             HandleAirAttacks();
