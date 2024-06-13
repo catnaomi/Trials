@@ -55,7 +55,7 @@ public class SaveDataController : MonoBehaviour
         data.playerAttributeData = PlayerSaveDataManager.GetAttributeData();
         data.yarnData = YarnSaveDataManager.GetSaveDataStatic();
         data.playerWorldData = PlayerSaveDataManager.GetWorldData();
-        data.sceneSaveData = SceneSaveDataManager.instance.data;
+        data.allScenesSaveData = SceneSaveDataManager.instance.data;
 
         string saveSlotPath = GetSaveSlotPath(slot);
         string json = JsonConvert.SerializeObject(data);
@@ -136,7 +136,7 @@ public class SaveDataController : MonoBehaviour
         YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
         PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
         PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
-        SceneSaveDataManager.LoadData(data.sceneSaveData);
+        SceneSaveDataManager.LoadData(data.allScenesSaveData);
         yield return new WaitForEndOfFrame();
     }
 

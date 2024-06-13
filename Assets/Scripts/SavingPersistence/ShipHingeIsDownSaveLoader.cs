@@ -1,12 +1,20 @@
-public class ShipHingeIsDownSaveLoader : SceneFlagSaveLoader
+public class ShipHingeIsDownSaveLoader : SceneDataLoader
 {
     public ShipHingeAnimationPlayer shipHingeAnimationPlayer;
 
-    public override void LoadFlag(bool flag)
+    public void SaveSceneData()
     {
-        shipHingeAnimationPlayer.PlayHasFallen();
+        SceneSaveDataManager.instance.data.dojo.isShipHingeDown = true;
+    }
 
-        // Attached to breakable target that lowers the bridge
-        gameObject.SetActive(false);
+    public override void LoadSceneData(AllScenesSaveData data)
+    {
+        if (data.dojo.isShipHingeDown)
+        {
+            shipHingeAnimationPlayer.PlayHasFallen();
+
+            // Attached to breakable target that lowers the bridge
+            gameObject.SetActive(false);
+        }
     }
 }

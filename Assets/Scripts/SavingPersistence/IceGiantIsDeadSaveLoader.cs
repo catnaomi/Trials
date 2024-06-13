@@ -2,13 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IceGiantIsDeadSaveLoader : SceneFlagSaveLoader
+public class IceGiantIsDeadSaveLoader : SceneDataLoader
 {
     public GameObject spawnTrigger;
 
-    public override void LoadFlag(bool flag)
+    public void SaveSceneData()
     {
-        if (flag)
+        SceneSaveDataManager.instance.data.dojo.isIceGiantDead = true;
+    }
+
+    public override void LoadSceneData(AllScenesSaveData data)
+    {
+        if (data.dojo.isIceGiantDead)
         {
             spawnTrigger.SetActive(false);
         }

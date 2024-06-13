@@ -122,7 +122,6 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         animator = this.GetComponent<Animator>();
         GenerateWeapons();
 
-       
         leftLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(leftLegWeakPoint));
         rightLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(rightLegWeakPoint));
         leftLegCollider = leftLegWeakPoint.GetComponent<Collider>();
@@ -149,7 +148,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         }
         nav.updatePosition = false;
         nav.updateRotation = false;
-        
+
         fx = this.GetComponent<IceGiantFXHelper>();
     }
 
@@ -230,7 +229,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             {
                 //stompCoroutine = StartCoroutine(StompTimer());
             }
-        } 
+        }
     }
 
     void SetTargetObjectActive()
@@ -279,7 +278,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
                 bool foundDestination = nav.SetDestination(targetPosition);
                 yield return new WaitWhile(() => nav.pathPending);
             }
-            
+
             yield return new WaitForSeconds(0.1f);
         }
     }
@@ -299,7 +298,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         }
         Vector3 diff = animator.rootPosition - this.transform.position;
         rootDelta = diff;
-        
+
         animatorRotation = animator.rootRotation;
     }
 
@@ -358,7 +357,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         if (isHitboxActive && CombatTarget != null)
         {
             handIKPosition = Vector3.MoveTowards(bonePosition, CombatTarget.transform.position, maxIKHandDistance);
-            
+
         }
         handIKPosition.y = bonePosition.y + ikHandOffset;
 
@@ -387,7 +386,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             {
                 StompLeft = false;
             }
-        }  
+        }
     }
 
     bool IsInWalkBounds(Vector3 position)
@@ -537,7 +536,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public override void Die()
     {
         if (dead) return;
-        isDeadSaveLoader.GetComponent<IceGiantIsDeadSaveLoader>().SaveFlag();
+        isDeadSaveLoader.GetComponent<IceGiantIsDeadSaveLoader>().SaveSceneData();
         Dead = dead = true;
         OnDie.Invoke();
         ForceStopSpin();
@@ -569,7 +568,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             OnHitboxActive.Invoke();
             AlternateAttacks();
         }
-        
+
     }
 
     public void AlternateAttacks()
@@ -640,7 +639,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         else
         {
             fx.StepFX(position, true);
-        }       
+        }
     }
 
     void Shockwave(Vector3 position, float radius, DamageKnockback damage, bool groundedOnly)
@@ -702,7 +701,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
             rightLegCollider.enabled = true;
             fx.SpinFXStop();
         }
-        
+
     }
 
     public void ForceStopSpin()
@@ -718,12 +717,12 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
     public void Recoil()
     {
-        
+
     }
 
     public void StartCritVulnerability(float time)
     {
-        
+
     }
 
     public void StopCritVulnerability()
@@ -738,7 +737,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
     public void GetParried()
     {
-        
+
     }
 
     public void StartInvulnerability(float duration)

@@ -92,7 +92,6 @@ public class FXController : MonoBehaviour
             return;
         }
         instance = this;
-        DontDestroyOnLoad(this);
 
         fxObjects = new Dictionary<FX, GameObject>()
         {
