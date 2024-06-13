@@ -23,7 +23,6 @@ public class SaveDataController : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        DontDestroyOnLoad(this.gameObject);
     }
 
     void Update()
@@ -56,7 +55,7 @@ public class SaveDataController : MonoBehaviour
         data.playerAttributeData = PlayerSaveDataManager.GetAttributeData();
         data.yarnData = YarnSaveDataManager.GetSaveDataStatic();
         data.playerWorldData = PlayerSaveDataManager.GetWorldData();
-        data.sceneSaveData = SceneSaveDataManager.instance.data;
+        data.allScenesSaveData = SceneSaveDataManager.instance.data;
 
         string saveSlotPath = GetSaveSlotPath(slot);
         string json = JsonConvert.SerializeObject(data);
@@ -77,7 +76,11 @@ public class SaveDataController : MonoBehaviour
         if (readData != null)
         {
             // Need to resume the game or unity will actually die
-            TimeScaleController.instance.paused = false;
+            // but verify we have the controller, it won't exist on the main menu
+            if (TimeScaleController.instance != null)
+            {
+                TimeScaleController.instance.paused = false;
+            }
             StartCoroutine(LoadSaveDataRoutine(readData));
         }
     }
@@ -116,23 +119,24 @@ public class SaveDataController : MonoBehaviour
         FadeToBlackController.FadeOut(1f, () => fadedToBlack = true, Color.black);
         yield return new WaitUntil(() => { return fadedToBlack; });
 
+        // remove any menus that were active as they will all be deloaded
+        MenuView.ClearMenuStack();
+
         // set the spawn location before we load the scene
         Vector3 position = NumberUtilities.ArrayToVector3(data.playerWorldData.position);
         Quaternion rotation = NumberUtilities.ArraytoQuaternion(data.playerWorldData.rotation);
 
         PlayerPositioner.SetNextOverridePosition(position, rotation);
 
-        // set all variables and attributes
-        YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
-        PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
-        PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
-
         // load the next scene and the loading screen
         SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
         yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
-
-        // After scene load load our per scene data
-        SceneSaveDataManager.LoadData(data.sceneSaveData);
+        
+        // after scene load apply remaining data
+        YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
+        PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
+        PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
+        SceneSaveDataManager.LoadData(data.allScenesSaveData);
         yield return new WaitForEndOfFrame();
     }
 

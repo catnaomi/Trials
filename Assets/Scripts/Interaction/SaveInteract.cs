@@ -15,23 +15,12 @@ public class SaveInteract : Interactable
     public void Save()
     {
         savesMenu = FindObjectOfType<SavesMenu>();
-        if (savesMenu == null) return;
-        savesMenu.Focus();
-
-        TimeScaleController.instance.paused = true;
+        MenuView.StartMenuing(savesMenu, true);
         SaveDataController.instance.OnSaveComplete.AddListener(FinishSaving);
-        savesMenu.OnCancelEvent.AddListener(SaveCancelled);
     }
 
     void FinishSaving()
     {
         savesMenu.UpdateSlots();
-    }
-
-    void SaveCancelled()
-    {
-        SaveDataController.instance.OnSaveComplete.RemoveListener(FinishSaving);
-        savesMenu.OnCancelEvent.RemoveListener(SaveCancelled);
-        TimeScaleController.instance.paused = false;
     }
 }

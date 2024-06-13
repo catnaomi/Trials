@@ -23,24 +23,18 @@ public class SceneLoader : MonoBehaviour
     public bool shouldReloadScenes;
     [SerializeField, ReadOnly] List<SceneLoadingData> sceneLoadingDatas;
 
-    public static bool isAfterFirstLoad;
-
     public static SceneLoader instance;
     bool loadingFromLoadScreen;
     public UnityEvent OnFinishLoad;
     public UnityEvent OnActiveSceneChange;
+
     private void Awake()
     {
-        if (instance == null)
+        if (instance != null)
         {
-            instance = this;
-            isAfterFirstLoad = false;
-            DontDestroyOnLoad(this);
+            throw new System.Exception("We are all going to die!!!!!!!!!!!!!!!!!! OH GOD");
         }
-        else
-        {
-            Destroy(this.gameObject);
-        }
+        instance = this;
     }
 
     void Start()
@@ -52,17 +46,13 @@ public class SceneLoader : MonoBehaviour
         OnFinishLoad.AddListener(ValidateDoubleInitScenes);
     }
 
-    private void Update()
-    {
-        isAfterFirstLoad = true;
-    }
     public void LoadScenes()
     {
         isLoadingComplete = false;
         isPreloadingComplete = false;
-        //StartCoroutine(DisableObjectsRoutine());
         StartCoroutine(LoadScenesThenSetActive());
     }
+
     IEnumerator LoadScenesRoutine()
     {
         isLoading = true;
@@ -230,10 +220,10 @@ public class SceneLoader : MonoBehaviour
         yield return new WaitForSeconds(delay);
         ReloadCurrentScene();
     }
+
     public void ReloadCurrentScene()
     {
 
-        isAfterFirstLoad = false;
         allowSceneActivation = false;
         loadOnStart = false;
         shouldLoadInitScene = true;
@@ -250,7 +240,6 @@ public class SceneLoader : MonoBehaviour
     {
         primarySceneToLoad = sceneName;
         secondaryScenesToLoad = new string[0];
-        isAfterFirstLoad = false;
         allowSceneActivation = true;
         loadOnStart = false;
         shouldLoadInitScene = true;
@@ -331,10 +320,12 @@ public class SceneLoader : MonoBehaviour
         yield return StartCoroutine(instance.LoadScenesRoutine());
         SceneManager.UnloadSceneAsync("_LoadScene");
     }
+
     public static AsyncOperation LoadSceneAdditively(string scene)
     {
         return SceneManager.LoadSceneAsync(scene, LoadSceneMode.Additive);
     }
+
     public static void EnsureScenesAreUnloaded(string primary, params string[] secondaries)
     {
         if (SceneManager.GetSceneByName(primary) != null)
@@ -358,7 +349,7 @@ public class SceneLoader : MonoBehaviour
         {
             operation = SceneManager.UnloadSceneAsync(scene);
         }
-        catch (System.ArgumentException ex)
+        catch (System.ArgumentException _)
         {
             Debug.LogWarning("Scene " + scene + " is not loaded!");
             yield break;
@@ -422,7 +413,6 @@ public class SceneLoader : MonoBehaviour
     }
 #endif
 
-
     static bool isScene_CurrentlyLoaded(string sceneName_no_extention)
     {
         for (int i = 0; i < SceneManager.sceneCount; ++i)
@@ -437,7 +427,6 @@ public class SceneLoader : MonoBehaviour
 
         return false;//scene not currently loaded in the $$anonymous$$erarchy
     }
-
 
     public static UnityEvent GetOnActiveSceneChange()
     {
@@ -472,6 +461,7 @@ public class SceneLoader : MonoBehaviour
         }
         return false;
     }
+
     public void ValidateDoubleInitScenes()
     {
         bool foundInit = false;
