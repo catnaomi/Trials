@@ -634,7 +634,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             else if (CheckWater())
             {
                 state.swim = animancer.Play(swimStart, 0.25f);
-                animationFXHandler.SplashBig();
+                animationFXHandler.SplashSmall();
             }
             if (isCarrying)
             {
