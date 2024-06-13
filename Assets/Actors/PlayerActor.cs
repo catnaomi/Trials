@@ -324,6 +324,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     [SerializeField]InputBuffer buffer;
     public UnityEvent onControlsChanged;
     public UnityEvent onNewCurrentInteractable;
+    [Header("Component Refs")]
+    public AnimationFXHandler animationFXHandler;
     [Header("Debug")]
     public bool isGoddess; // god mode
     public bool isBird; // fly mode
@@ -373,8 +375,9 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     private void Awake()
     {
-        positionReference = this.GetComponent<HumanoidPositionReference>();
+        positionReference = GetComponent<HumanoidPositionReference>();
         positionReference.LocateSlotsByName();
+        animationFXHandler = GetComponent<AnimationFXHandler>();
         player = this;
     }
 
@@ -631,7 +634,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             else if (CheckWater())
             {
                 state.swim = animancer.Play(swimStart, 0.25f);
-                this.gameObject.SendMessage("SplashBig");
+                animationFXHandler.SplashBig();
             }
             if (isCarrying)
             {
@@ -740,7 +743,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             else if (CheckWater())
             {
                 state.swim = animancer.Play(swimStart, 0.25f);
-                this.gameObject.SendMessage("SplashBig");
+                animationFXHandler.SplashBig();
                 exitEarly = true;
             }
             if (exitEarly)
@@ -925,7 +928,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (CheckWater())
             {
                 state.swim = animancer.Play(swimStart, 0.25f);
-                this.gameObject.SendMessage("SplashBig");
+                animationFXHandler.SplashBig();
                 stopBlock = true;
             }
             if (shouldDodge)
@@ -1076,7 +1079,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (CheckWater())
             {
                 state.swim = animancer.Play(swimAnim);
-                this.gameObject.SendMessage("SplashBig");
+                animationFXHandler.SplashBig();
             }
             if (attack && !animancer.Layers[HumanoidAnimLayers.UpperBody].IsAnyStatePlaying())
             {
@@ -1325,7 +1328,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                 {
                     //walkAccelReal = swimAccel;
                     state.swim = animancer.Play(swimAnim);
-                    this.gameObject.SendMessage("SplashBig");
+                    animationFXHandler.SplashBig();
                 }
             }
             HandleAirAttacks();
@@ -1872,7 +1875,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (CheckWater())
             {
                 state.swim = animancer.Play(swimAnim);
-                this.gameObject.SendMessage("SplashBig");
+                animationFXHandler.SplashBig();
             }
             animancer.Layers[0].ApplyAnimatorIK = true;
             applyMove = isGrounded;

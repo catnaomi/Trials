@@ -45,7 +45,7 @@ public class AnimationFXHandler : MonoBehaviour
     public UnityEvent OnGunLoad;
     Actor actor;
     bool didTypedBlock;
-    
+
     void Awake()
     {
         actor = GetComponent<Actor>();
@@ -156,7 +156,7 @@ public class AnimationFXHandler : MonoBehaviour
     {
         footSourceHeavy.Stop();
         SoundFXAssetManager.PlaySound(footSourceHeavy, "Player/Roll");
-        
+
     }
 
     public void Dust()
@@ -320,6 +320,7 @@ public class AnimationFXHandler : MonoBehaviour
         DamageKnockback damage = actor.GetComponent<IDamageable>().GetLastTakenDamage();
         if (damage != null)
         {
+            // TODO: should maybe use hitMaterial instead of fxMaterial
             FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, damage.isSlash, damage.didCrit, fxMaterial);
             FXController.DamageScreenShake(actor.hitParticleDirection, damage.didCrit, false);
         }
@@ -355,7 +356,7 @@ public class AnimationFXHandler : MonoBehaviour
                 {
                     FXController.CreateCircle(actor.hitParticlePosition, actor.hitParticleDirection);
                 }
-                
+
             }
         }
         didTypedBlock = false;
