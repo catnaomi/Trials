@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class ActivateAITrigger : MonoBehaviour
+public class ActivateAITrigger : MonoBehaviour, IEventVisualizable
 {
     public Actor[] actors;
 
@@ -12,6 +13,12 @@ public class ActivateAITrigger : MonoBehaviour
 
     public UnityEvent OnTrigger;
     bool triggered;
+
+    public GameObject[] GetEventTargets()
+    {
+        return actors.Where(actor => actor != null).Select(actor => actor.gameObject).ToArray();
+    }
+
     public void OnTriggerEnter(Collider other)
     {
         if (PlayerActor.player == null) return;

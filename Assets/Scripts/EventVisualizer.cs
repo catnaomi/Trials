@@ -57,15 +57,7 @@ public class EventVisualizer : MonoBehaviour
 
     public void CheckSpecialScripts(Component mono)
     {
-        if (mono is ActivateAITrigger aiTrigger)
-        {
-            foreach (Actor actor in aiTrigger.actors)
-            {
-                if (actor == null) continue;
-                targets.Add(actor.gameObject);
-            }
-        }
-        else if (mono is IEventVisualizable visualizable)
+        if (mono is IEventVisualizable visualizable)
         {
             targets.AddRange(visualizable.GetEventTargets());
         }

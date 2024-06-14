@@ -63,6 +63,13 @@ public class AnimationFXHandler : MonoBehaviour
         OnStep = new[] {OnStepL, OnStepR};
     }
 
+    private void Start()
+    {
+        if ((feet == null || feet.Length == 0) && this.TryGetComponent(out HumanoidPositionReference positionReference))
+        {
+            feet = new[] { positionReference.FootL, positionReference.FootR };
+        }
+    }
     #region Footsteps
 
     public void Step(LeftOrRight leftOrRight)
