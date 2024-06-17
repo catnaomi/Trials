@@ -45,7 +45,7 @@ public class AnimationFXHandler : MonoBehaviour
     public UnityEvent OnGunLoad;
     Actor actor;
     bool didTypedBlock;
-    
+
     void Awake()
     {
         actor = GetComponent<Actor>();
@@ -163,7 +163,7 @@ public class AnimationFXHandler : MonoBehaviour
     {
         footSourceHeavy.Stop();
         SoundFXAssetManager.PlaySound(footSourceHeavy, "Player/Roll");
-        
+
     }
 
     public void Dust()
@@ -362,7 +362,7 @@ public class AnimationFXHandler : MonoBehaviour
                 {
                     FXController.CreateCircle(actor.hitParticlePosition, actor.hitParticleDirection);
                 }
-                
+
             }
         }
         didTypedBlock = false;
