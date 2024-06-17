@@ -18,7 +18,7 @@ public class SoundFXAssetManager : MonoBehaviour
         }
         instance = this;
         DontDestroyOnLoad(this);
-        
+
         LoadSound(null, "Player/FallDamage");
         LoadSound(null, "Player/Dash");
         LoadSound(null, "Player/Tap");
@@ -27,7 +27,7 @@ public class SoundFXAssetManager : MonoBehaviour
         LoadSound(null, "Player/Block/Switch");
         LoadSound(null, "Player/Slide/Slide");
         LoadSound(null, "Player/Slide/Continuous");
-        
+
         LoadSound("Sword/Swing/Light", "Slash/Light", "Thrust/Light");
         LoadSound("Sword/Swing/Heavy", "Slash/Heavy", "Thrust/Heavy");
         LoadSound(null, "Sword/Blood/NoCritical");
@@ -44,10 +44,11 @@ public class SoundFXAssetManager : MonoBehaviour
         LoadSound(null, "Bow/Draw", "Gun/Reload");
 
         LoadSound(null, "Enemy/IceGiant/Charge");
-        
+
         LoadSound(null, "Swim/Swim");
         LoadSound(null, "Swim/Splash/Small");
         LoadSound(null, "Swim/Splash/Big");
+        LoadSound(null, "Swim/Splash/Bigger");
 
         LoadSound(null, "Step/Default/Left", "Step/Metal/Left", "Step/Ice/Left", "Step/Wood/Left");
         LoadSound(null, "Step/Default/Right", "Step/Metal/Right", "Step/Ice/Right", "Step/Wood/Right");
@@ -97,7 +98,7 @@ public class SoundFXAssetManager : MonoBehaviour
         return GetSound(fullName);
     }
 
-    
+
     public static void PlaySound(AudioSource source, string name)
     {
         source.PlayOneShot(GetSound(name));
