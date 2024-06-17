@@ -119,7 +119,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public override void ActorStart()
     {
         base.ActorStart();
-        animator = this.GetComponent<Animator>();
+        animator = GetComponent<Animator>();
         GenerateWeapons();
 
         leftLegWeakPoint.OnHurt.AddListener(() => TakeDamageFromDamagePoint(leftLegWeakPoint));
@@ -149,12 +149,12 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         nav.updatePosition = false;
         nav.updateRotation = false;
 
-        fx = this.GetComponent<IceGiantFXHelper>();
+        fx = GetComponent<IceGiantFXHelper>();
     }
 
     public void EnableActions()
     {
-        if (!this.gameObject.activeInHierarchy) return;
+        if (!gameObject.activeInHierarchy) return;
         actionsEnabled = true;
         nav.enabled = true;
         StartCoroutine(DestinationCoroutine());
@@ -183,13 +183,13 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         {
             Vector3 targetPosition = nav.destination;//CombatTarget.transform.position;
             DrawCircle.DrawWireSphere(targetPosition, 1, Color.magenta);
-            InCloseRange = Vector3.Distance(this.transform.position,  targetPosition) <= closeRange;
-            InMeleeRange = Vector3.Distance(this.transform.position,  targetPosition) <= meleeRange;
+            InCloseRange = Vector3.Distance(transform.position,  targetPosition) <= closeRange;
+            InMeleeRange = Vector3.Distance(transform.position,  targetPosition) <= meleeRange;
 
             TargetInBounds = walkableArea.bounds.Contains(CombatTarget.transform.position);
         }
 
-        AngleBetween = Vector3.SignedAngle(nav.desiredVelocity.normalized, this.transform.forward, -Vector3.up);
+        AngleBetween = Vector3.SignedAngle(nav.desiredVelocity.normalized, transform.forward, -Vector3.up);
         AngleBetweenAbs = Mathf.Abs(AngleBetween);
         UpdateMecanimValues();
     }
@@ -288,15 +288,15 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     {
         if (animator == null)
         {
-            animator = this.GetComponent<Animator>();
+            animator = GetComponent<Animator>();
         }
         if (!actionsEnabled)
         {
-            this.transform.position = animator.rootPosition;
-            this.transform.rotation = animator.rootRotation;
+            transform.position = animator.rootPosition;
+            transform.rotation = animator.rootRotation;
             return;
         }
-        Vector3 diff = animator.rootPosition - this.transform.position;
+        Vector3 diff = animator.rootPosition - transform.position;
         rootDelta = diff;
 
         animatorRotation = animator.rootRotation;
@@ -305,8 +305,8 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     void FixedUpdate()
     {
         if (!CanUpdate()) return;
-        this.transform.position += rootDelta;
-        this.transform.rotation = animatorRotation;
+        transform.position += rootDelta;
+        transform.rotation = animatorRotation;
         if (spinning)
         {
             spinVelocity = Mathf.MoveTowards(spinVelocity, spinAttackSpeed, spinAccel * Time.fixedDeltaTime);
@@ -317,11 +317,11 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         }
         if (spinVelocity != 0f)
         {
-            this.transform.Rotate(-Vector3.up, spinVelocity * Time.fixedDeltaTime);
+            transform.Rotate(-Vector3.up, spinVelocity * Time.fixedDeltaTime);
         }
         // rotations
 
-        float angle = Vector3.Angle(nav.desiredVelocity.normalized, this.transform.forward);
+        float angle = Vector3.Angle(nav.desiredVelocity.normalized, transform.forward);
 
         if (shouldRealign)
         {
@@ -335,17 +335,17 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         }
         else if (IsRotating() && nav.desiredVelocity.sqrMagnitude > 0)
         {
-            this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(nav.desiredVelocity.normalized), rotationSpeed * Time.fixedDeltaTime);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(nav.desiredVelocity.normalized), rotationSpeed * Time.fixedDeltaTime);
         }
         else if (IsMoving())
         {
             if (angle > minWalkRotationAngle && nav.desiredVelocity.sqrMagnitude > 0)
             {
-                this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(nav.desiredVelocity.normalized), walkRotationSpeed * Time.fixedDeltaTime);
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(nav.desiredVelocity.normalized), walkRotationSpeed * Time.fixedDeltaTime);
             }
         }
         // force stay inside walkable area
-        this.transform.position = walkableArea.ClosestPointOnBounds(this.transform.position);
+        transform.position = walkableArea.ClosestPointOnBounds(transform.position);
         nav.nextPosition = transform.position;
     }
 
@@ -404,24 +404,24 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         {
             leftHitboxes.DestroyAll();
         }
-        rightHitboxes = Hitbox.CreateHitboxLine(RightHand.position, RightHand.up, RightWeaponLength, RightWeaponRadius, RightHand, new DamageKnockback(tempDamage), this.gameObject);
-        leftHitboxes = Hitbox.CreateHitboxLine(LeftHand.position, LeftHand.up, LeftWeaponLength, LeftWeaponRadius, LeftHand, new DamageKnockback(tempDamage), this.gameObject);
+        rightHitboxes = Hitbox.CreateHitboxLine(RightHand.position, RightHand.up, RightWeaponLength, RightWeaponRadius, RightHand, new DamageKnockback(tempDamage), gameObject);
+        leftHitboxes = Hitbox.CreateHitboxLine(LeftHand.position, LeftHand.up, LeftWeaponLength, LeftWeaponRadius, LeftHand, new DamageKnockback(tempDamage), gameObject);
     }
     public override void RealignToTarget()
     {
-        this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(GetDirectionToTarget()), maxRealignAngle);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(GetDirectionToTarget()), maxRealignAngle);
         shouldRealign = true;
     }
 
     public override void RealignAwayTarget()
     {
-        this.transform.rotation = Quaternion.RotateTowards(this.transform.rotation, Quaternion.LookRotation(-GetDirectionToTarget()), maxRealignAngle);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(-GetDirectionToTarget()), maxRealignAngle);
         shouldRealignAway = true;
     }
 
     bool IsTargetBehind()
     {
-        return Vector3.Angle(GetDirectionToTarget(), this.transform.forward) > behindAngle;
+        return Vector3.Angle(GetDirectionToTarget(), transform.forward) > behindAngle;
     }
     public DamageKnockback GetLastDamage()
     {
@@ -617,7 +617,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public void HandShockwaveOut()
     {
         Vector3 position = LeftHand.position;
-        position.y = this.transform.position.y;
+        position.y = transform.position.y;
         Shockwave(position, shockwaveRadius, new DamageKnockback(harmlessShockwave.GetDamage()), false);
 
         fx.HandShockwaveOutFX();
@@ -627,7 +627,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     {
         Transform foot = legs[legIndex].transform;
         Vector3 position = foot.position;
-        position.y = this.transform.position.y;
+        position.y = transform.position.y;
 
         DamageablePoint point = legWeakPoints[legIndex];
 
@@ -647,10 +647,10 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
         Collider[] colliders = Physics.OverlapSphere(position, radius, Hitbox.GetHitboxMask());
         List<IDamageable> victims = new List<IDamageable>();
 
-        damage.source = this.gameObject;
+        damage.source = gameObject;
         foreach (Collider c in colliders)
         {
-            if (c.transform.root == this.transform) continue;
+            if (c.transform.root == transform) continue;
             if (c.TryGetComponent<IDamageable>(out IDamageable victim))
             {
                 if (victims.Contains(victim))
@@ -673,7 +673,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
                 {
                     continue;
                 }
-                else if (v.GetGameObject().transform.position.y - this.transform.position.y > nonActorGroundedThreshold)
+                else if (v.GetGameObject().transform.position.y - transform.position.y > nonActorGroundedThreshold)
                 {
                     continue;
                 }
@@ -757,7 +757,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
 
     public GameObject GetGameObject()
     {
-        return this.gameObject;
+        return gameObject;
     }
     public override bool IsAttacking()
     {

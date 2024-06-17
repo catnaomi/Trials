@@ -1,7 +1,5 @@
 using Cinemachine;
 using CustomUtilities;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class IceGiantFXHelper : MonoBehaviour
@@ -18,11 +16,9 @@ public class IceGiantFXHelper : MonoBehaviour
     public ParticleSystem smallIceParticle;
     public AudioSource waterExplosionSource;
     public AudioSource waterSplashSource;
-    public AudioClip splash1;
-    public AudioClip splash2;
     bool splashAlternator;
     bool wasRotatingLastFrame;
-    
+
     void Start()
     {
         actor = GetComponent<IceGiantMecanimActor>();
@@ -34,7 +30,7 @@ public class IceGiantFXHelper : MonoBehaviour
         bool rotating = actor.IsRotating();
         if (rotating && !wasRotatingLastFrame)
         {
-            spinHandParticle.transform.position = this.transform.position + this.transform.forward;
+            spinHandParticle.transform.position = transform.position + transform.forward;
             spinHandParticle.Play();
             spinHandParticle.GetComponent<AudioSource>().Play();
         }
@@ -71,15 +67,16 @@ public class IceGiantFXHelper : MonoBehaviour
     public void HandShockwaveInFX()
     {
         Vector3 position = actor.LeftHand.position;
-        position.y = this.transform.position.y;
+        position.y = transform.position.y;
         // activate particle only
         PlayParticleAtPosition(smallIceParticle, position);
         PlayWaterSplash();
     }
+
     public void HandShockwaveOutFX()
     {
         Vector3 position = actor.LeftHand.position;
-        position.y = this.transform.position.y;
+        position.y = transform.position.y;
         PlayParticleAtPosition(handOutParticle, position);
         PlayWaterSplash();
     }
@@ -97,6 +94,7 @@ public class IceGiantFXHelper : MonoBehaviour
         }
         PlayWaterSplash();
     }
+
     void PlayParticleAtPosition(ParticleSystem particle, Vector3 position)
     {
         particle.transform.position = position;
@@ -114,19 +112,13 @@ public class IceGiantFXHelper : MonoBehaviour
 
     public void PlayWaterExplosion()
     {
-        if (waterExplosionSource != null)
-        {
-            waterExplosionSource.Play();
-        }
+        SoundFXAssetManager.PlaySound(waterExplosionSource, "Swim/Splash/Bigger");
     }
 
     public void PlayWaterSplash()
     {
-        if (waterSplashSource != null)
-        {
-            waterSplashSource.PlayOneShot((splashAlternator) ? splash1 : splash2);
-            splashAlternator = !splashAlternator;
-        }
+        SoundFXAssetManager.PlaySound(waterSplashSource, "Swim/Splash", splashAlternator ? "Small" : "Big");
+        splashAlternator = !splashAlternator;
     }
 
     public void SpinFXStart()
