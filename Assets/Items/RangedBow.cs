@@ -303,13 +303,11 @@ public class RangedBow : RangedWeapon, IHitboxHandler
 
     public override GameObject GenerateModel()
     {
+        GameObject obj = base.GenerateModel();
         deadArrow = GameObject.Instantiate(deadArrowPrefab);
         deadArrow.SetActive(false);
-        GameObject obj = base.GenerateModel();
         line = model.GetComponentInChildren<LineRenderer>();
         bowString = model.GetComponentInChildren<BowStringHandler>();
-        //mount1 = model.transform.FindRecursively("bowTop");
-        //mount2 = model.transform.FindRecursively("bowBottom");
         return obj;
     }
 

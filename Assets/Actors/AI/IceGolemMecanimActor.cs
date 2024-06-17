@@ -13,11 +13,18 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     HumanoidPositionReference positionReference;
     ActorTimeTravelHandler timeTravelHandler;
     [ReadOnly, SerializeField] NavMeshAgent nav;
-    public float attackTimer = 2f;
+
+    [Header("Timers")]
+    [SerializeField] float attackTimer = 2f;
+    Coroutine attackTimerCoroutine;
     public float waterDashTimer = 3f;
+    Coroutine waterDashTimerCoroutine;
     public float specialAttackTimer = 90f;
+    Coroutine specialAttackTimerCoroutine;
     public bool isHitboxActive;
-    public UnityEvent OnHitboxActive;
+    [Space(10)]
+    [SerializeField] bool inspector_ResetTimers;
+
     [Header("Navigation")]
     public bool actionsEnabled;
     public float closeRange = 4f;
@@ -26,9 +33,6 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     public float endAmbushRange = 3f;
     bool shouldRealign;
     float shouldRotateAmount;
-
-
-    
     bool wasDashingLastFrame;
     [ReadOnly, SerializeField] bool isGrounded;
     [Header("Damageable")]
@@ -66,6 +70,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     [ReadOnly, SerializeField] bool Ambush;
     [Header("Events")]
     public UnityEvent StartDash;
+    public UnityEvent OnHitboxActive;
 
     public override void ActorStart()
     {
@@ -97,17 +102,25 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
 
     public override void ActorPostUpdate()
     {
-        base.ActorPostUpdate();
-        GetGrounded();
+        if (inspector_ResetTimers)
+        {
+            inspector_ResetTimers = false;
+            StartTimers();
+        }
         if (ActionsEnabled != actionsEnabled)
         {
             if (actionsEnabled)
             {
                 EnableActions();
             }
+            else
+            {
+                DisableActions();
+            }
             ActionsEnabled = actionsEnabled;
         }
-        if (IsHurt())
+
+        if (IsHurt() || !actionsEnabled)
         {
             UpdateMecanimValues();
             return;
@@ -318,6 +331,11 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
         }
         
     }
+
+    void FixedUpdate()
+    {
+        GetGrounded();
+    }
     /*
     * triggered by animation:
     * 0 = deactivate hitboxes
@@ -431,7 +449,7 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
 
     public bool GetGrounded()
     {
-        isGrounded = ActorUtilities.GetGrounded(this.transform, out RaycastHit hit);
+        isGrounded = ActorUtilities.GetGrounded(this.transform);
         return isGrounded;
     }
 
@@ -562,11 +580,31 @@ public class IceGolemMecanimActor : Actor, IAttacker, IDamageable, IAdjustRootMo
     {
         actionsEnabled = true;
         this.StartTimer(0.1f, true, SetDestination);
-        if (attackTimer > 0) this.StartTimer(attackTimer, true, BeginAttack);
-        if (waterDashTimer > 0) this.StartTimer(waterDashTimer, true, BeginWaterDash);
-        if (specialAttackTimer > 0) this.StartTimer(specialAttackTimer, true, BeginSpecialAttack);
+        StartTimers();
     }
 
+    public void DisableActions()
+    {
+        actionsEnabled = false;
+        StopTimers();
+        StopAllCoroutines();
+    }
+    void StartTimers()
+    {
+        StopTimers();
+
+        if (attackTimer > 0) attackTimerCoroutine = this.StartTimer(attackTimer, true, BeginAttack);
+        if (waterDashTimer > 0) waterDashTimerCoroutine = this.StartTimer(waterDashTimer, true, BeginWaterDash);
+        if (specialAttackTimer > 0) specialAttackTimerCoroutine = this.StartTimer(specialAttackTimer, true, BeginSpecialAttack);
+
+    }
+
+    void StopTimers()
+    {
+        if (attackTimerCoroutine != null) StopCoroutine(attackTimerCoroutine);
+        if (waterDashTimerCoroutine != null) StopCoroutine(waterDashTimerCoroutine);
+        if (specialAttackTimerCoroutine != null) StopCoroutine(specialAttackTimerCoroutine);
+    }
     public void StartInvulnerability(float duration)
     {
         ((IDamageable)damageHandler).StartInvulnerability(duration);

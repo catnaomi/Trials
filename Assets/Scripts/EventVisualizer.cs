@@ -11,6 +11,11 @@ public class EventVisualizer : MonoBehaviour
 
     private void OnValidate()
     {
+        Refresh();
+    }
+
+    public void Refresh()
+    {
 #if UNITY_EDITOR
         if (targets != null)
         {
@@ -20,11 +25,12 @@ public class EventVisualizer : MonoBehaviour
         {
             targets = new List<GameObject>();
         }
-        MonoBehaviour[] monoBehaviours = this.GetComponents<MonoBehaviour>();
+        Component[] monoBehaviours = this.GetComponents<Component>();
 
-        foreach (MonoBehaviour mono in monoBehaviours)
+        foreach (Component mono in monoBehaviours)
         {
-
+            if (mono == this) continue;
+            if (mono is Behaviour behaviour && !behaviour.enabled) continue;
             CheckSpecialScripts(mono);
 
             List<UnityEvent> properties = mono.GetType()
@@ -39,7 +45,7 @@ public class EventVisualizer : MonoBehaviour
                 for (int i = 0; i < eventCount; i++)
                 {
                     Object target = e.GetPersistentTarget(i);
-                    if (target is MonoBehaviour targetMono && !targets.Contains(targetMono.gameObject))
+                    if (target is Component targetMono && !targets.Contains(targetMono.gameObject))
                     {
                         targets.Add(targetMono.gameObject);
                     }
@@ -48,18 +54,10 @@ public class EventVisualizer : MonoBehaviour
         }
 #endif
     }
-    
-    public void CheckSpecialScripts(MonoBehaviour mono)
+
+    public void CheckSpecialScripts(Component mono)
     {
-        if (mono is ActivateAITrigger aiTrigger)
-        {
-            foreach (Actor actor in aiTrigger.actors)
-            {
-                if (actor == null) continue;
-                targets.Add(actor.gameObject);
-            }
-        }
-        else if (mono is IEventVisualizable visualizable)
+        if (mono is IEventVisualizable visualizable)
         {
             targets.AddRange(visualizable.GetEventTargets());
         }
