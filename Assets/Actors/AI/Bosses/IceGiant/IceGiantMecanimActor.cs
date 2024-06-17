@@ -81,7 +81,7 @@ public class IceGiantMecanimActor : Actor, IAttacker, IDamageable
     public GameObject rightTarget;
     public GameObject neutralTarget;
     [Header("Particles")]
-    public IceGiantFXHelper fx;
+    [ReadOnly] public IceGiantFXHelper fx;
     [Header("Mecanim Values")]
     [ReadOnly, SerializeField] bool Dead;
     [ReadOnly, SerializeField] bool IsFallen;
