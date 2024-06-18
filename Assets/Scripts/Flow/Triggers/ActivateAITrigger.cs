@@ -26,21 +26,8 @@ public class ActivateAITrigger : MonoBehaviour, IEventVisualizable
         {
             foreach (Actor actor in actors)
             {
-                // TODO: figure out a way that doesn't require the Navigating Humanoid Actor class.
                 if (actor == null || !actor.IsAlive() || !actor.gameObject.activeInHierarchy) continue;
-                if (actor is NavigatingHumanoidActor navActor)
-                {
-                    if (shouldAttackImmediately && !navActor.actionsEnabled)
-                    {
-                        attack.ProcessHumanoidAction(navActor, navActor.MoveOnEnd);
-                    }
-                    navActor.EnableActions();
-                }
-                else if (actor is INavigates navigates)
-                {
-                    navigates.EnableActions();
-                }
-
+                actor.gameObject.SendMessage("EnableActions");
             }
             if (!triggered)
             {
