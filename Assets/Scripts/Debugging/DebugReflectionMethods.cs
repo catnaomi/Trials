@@ -202,7 +202,7 @@ public static class DebugReflectionMethods
             return;
         }
         SceneLoader.ShouldReloadScenes(true);
-        SceneLoader.EnsureScenesAreLoaded(sceneName);
+        SceneLoader.LoadScenes(sceneName);
     }
 
     public static void LoadScene(string sceneName)
@@ -588,7 +588,7 @@ public static class DebugReflectionMethods
     {
         MusicController.Play(trackName);
     }
-    
+
     public static void StopMusic()
     {
         MusicController.Stop();

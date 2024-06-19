@@ -10,7 +10,6 @@ public class SceneLoader : MonoBehaviour
 
     public string primarySceneToLoad;
     public string[] secondaryScenesToLoad;
-    public bool loadOnStart;
     public bool allowSceneActivation;
     public string initSceneName = "_InitScene";
     public bool shouldLoadInitScene = true;
@@ -30,36 +29,51 @@ public class SceneLoader : MonoBehaviour
 
     private void Awake()
     {
-        if (instance != null)
-        {
-            throw new System.Exception("We are all going to die!!!!!!!!!!!!!!!!!! OH GOD");
-        }
         instance = this;
     }
 
-    void Start()
-    {
-        if (loadOnStart)
-        {
-            LoadScenes();
-        }
-        OnFinishLoad.AddListener(ValidateDoubleInitScenes);
-    }
-
-    public void LoadScenes()
-    {
-        isLoadingComplete = false;
-        isPreloadingComplete = false;
-        StartCoroutine(LoadScenesThenSetActive());
-    }
-
-    IEnumerator LoadScenesRoutine()
+    void StartLoad()
     {
         isLoading = true;
         isLoadingComplete = false;
         isPreloadingComplete = false;
         didSceneLoadFail = false;
+    }
 
+    public static void DelayReloadCurrentScene()
+    {
+        instance.StartLoad();
+        instance.StartCoroutine(instance.DelayReloadRoutine(5f));
+    }
+
+    public static void LoadScenes(string primary, params string[] secondaries)
+    {
+        if (instance.isLoading)
+        {
+            throw new System.Exception("Double load detected");
+        }
+        instance.StartLoad();
+        instance.primarySceneToLoad = primary;
+        instance.secondaryScenesToLoad = secondaries;
+        instance.StartCoroutine(instance.LoadScenesRoutine());
+    }
+
+    public static void LoadWithProgressBar(string primary, params string[] secondaries)
+    {
+        if (instance.isLoading)
+        {
+            throw new System.Exception("Double load detected");
+        }
+        instance.StartLoad();
+        instance.primarySceneToLoad = primary;
+        instance.secondaryScenesToLoad = secondaries;
+        instance.allowSceneActivation = false;
+        instance.loadingFromLoadScreen = true;
+        instance.StartCoroutine(instance.LoadingBarScene());
+    }
+
+    IEnumerator LoadScenesRoutine()
+    {
         if (loadingFromLoadScreen)
         {
             yield return new WaitForSecondsRealtime(1f);
@@ -71,10 +85,8 @@ public class SceneLoader : MonoBehaviour
             Debug.LogError(new System.ArgumentException("Primary Scene Name cannot be blank.", "primarySceneToLoad"));
             yield break;
         }
-        int indicesCount = secondaryScenesToLoad.Length + 1;
 
         // create scene loading objects
-
         if (sceneLoadingDatas != null)
         {
             sceneLoadingDatas.Clear();
@@ -197,22 +209,10 @@ public class SceneLoader : MonoBehaviour
             yield return null;
         }
 
-        SceneLoader.SetActiveScene(primarySceneToLoad);
+        SetActiveScene(primarySceneToLoad);
         isLoading = false;
         isLoadingComplete = true;
         OnFinishLoad.Invoke();
-    }
-
-    IEnumerator LoadScenesThenSetActive()
-    {
-        yield return StartCoroutine(LoadScenesRoutine());
-        SceneManager.SetActiveScene(SceneManager.GetSceneByName(primarySceneToLoad));
-        OnActiveSceneChange.Invoke();
-    }
-
-    public static void DelayReloadCurrentScene()
-    {
-        instance.StartCoroutine(instance.DelayReloadRoutine(5f));
     }
 
     public IEnumerator DelayReloadRoutine(float delay)
@@ -221,30 +221,18 @@ public class SceneLoader : MonoBehaviour
         ReloadCurrentScene();
     }
 
+    public static void LoadMainMenu()
+    {
+        instance.shouldLoadInitScene = false;
+        LoadWithProgressBar("MainMenu");
+    }
+
     public void ReloadCurrentScene()
     {
-
         allowSceneActivation = false;
-        loadOnStart = false;
         shouldLoadInitScene = true;
         shouldReloadScenes = true;
         LoadWithProgressBar(SceneManager.GetActiveScene().name);
-    }
-
-    public static void LoadSceneSingle(string sceneName)
-    {
-        instance.LoadSceneSingleInstance(sceneName);
-    }
-
-    public void LoadSceneSingleInstance(string sceneName)
-    {
-        primarySceneToLoad = sceneName;
-        secondaryScenesToLoad = new string[0];
-        allowSceneActivation = true;
-        loadOnStart = false;
-        shouldLoadInitScene = true;
-        shouldReloadScenes = true;
-        LoadScenes();
     }
 
     public float GetSceneLoadingProgress()
@@ -289,31 +277,6 @@ public class SceneLoader : MonoBehaviour
         }
     }
 
-    public static void EnsureScenesAreLoaded(string primary, params string[] secondaries)
-    {
-        if (instance.isLoading) return;
-        instance.primarySceneToLoad = primary;
-        instance.secondaryScenesToLoad = secondaries;
-        instance.StartCoroutine(instance.LoadScenesRoutine());
-    }
-
-    public static void LoadWithProgressBar(string primary, params string[] secondaries)
-    {
-        if (instance.isLoading) return;
-        instance.primarySceneToLoad = primary;
-        instance.secondaryScenesToLoad = secondaries;
-        instance.allowSceneActivation = false;
-        instance.loadingFromLoadScreen = true;
-        instance.StartCoroutine(instance.LoadingBarScene());
-    }
-
-    public static void LoadMainMenu()
-    {
-        if (instance.isLoading) return;
-        instance.shouldLoadInitScene = false;
-        LoadWithProgressBar("MainMenu");
-    }
-
     IEnumerator LoadingBarScene()
     {
         yield return SceneManager.LoadSceneAsync("_LoadScene", LoadSceneMode.Single);
@@ -349,7 +312,7 @@ public class SceneLoader : MonoBehaviour
         {
             operation = SceneManager.UnloadSceneAsync(scene);
         }
-        catch (System.ArgumentException _)
+        catch (System.ArgumentException)
         {
             Debug.LogWarning("Scene " + scene + " is not loaded!");
             yield break;
@@ -390,42 +353,39 @@ public class SceneLoader : MonoBehaviour
     public static bool IsSceneLoaded(string scene)
     {
 #if UNITY_EDITOR
-        return ifScene_CurrentlyLoaded_inEditor(scene);
+        return IsSceneLoadedEditor(scene);
 #else
-        return isScene_CurrentlyLoaded(scene);
+        return IsSceneLoadedBuild(scene);
 #endif
     }
 
 #if UNITY_EDITOR
-    static bool ifScene_CurrentlyLoaded_inEditor(string sceneName_no_extention)
+    static bool IsSceneLoadedEditor(string sceneName_no_extention)
     {
         for (int i = 0; i < UnityEditor.SceneManagement.EditorSceneManager.sceneCount; ++i)
         {
             var scene = UnityEditor.SceneManagement.EditorSceneManager.GetSceneAt(i);
-
             if (scene.name == sceneName_no_extention)
             {
-                return true;//the scene is already loaded
+                return true;
             }
         }
-        //scene not currently loaded in the $$anonymous$$erarchy:
         return false;
     }
 #endif
 
-    static bool isScene_CurrentlyLoaded(string sceneName_no_extention)
+    static bool IsSceneLoadedBuild(string sceneName_no_extention)
     {
         for (int i = 0; i < SceneManager.sceneCount; ++i)
         {
             Scene scene = SceneManager.GetSceneAt(i);
             if (scene.name == sceneName_no_extention)
             {
-                //the scene is already loaded
                 return true;
             }
         }
 
-        return false;//scene not currently loaded in the $$anonymous$$erarchy
+        return false;
     }
 
     public static UnityEvent GetOnActiveSceneChange()
@@ -438,51 +398,14 @@ public class SceneLoader : MonoBehaviour
         return instance.OnFinishLoad;
     }
 
-    public static bool IsSceneLoaderActive()
-    {
-        return instance != null;
-    }
-
     public static bool IsSceneLoadingComplete()
     {
-        return instance != null && instance.isLoadingComplete;
+        return instance.isLoadingComplete;
     }
 
     public static bool DoesSceneExist(string sceneName)
     {
-        //TODO: figure out best way to do this
-        return true;
-        for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
-        {
-            if (SceneManager.GetSceneByBuildIndex(i).name == sceneName)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void ValidateDoubleInitScenes()
-    {
-        bool foundInit = false;
-        int countLoaded = SceneManager.sceneCount;
-
-        for (int i = 0; i < countLoaded; i++)
-        {
-            Scene scene = SceneManager.GetSceneAt(i);
-            if (scene.name == "_InitScene")
-            {
-                if (!foundInit)
-                {
-                    foundInit = true;
-                }
-                else
-                {
-                    SceneManager.UnloadSceneAsync(scene);
-                    Debug.LogWarning("InitScene was loaded multiple times. Unloading.");
-                }
-            }
-        }
+        return SceneUtility.GetBuildIndexByScenePath(sceneName) != -1;
     }
 
     public static Scene[] GetAllOpenScenes()
