@@ -34,6 +34,10 @@ public class SceneLoader : MonoBehaviour
 
     void StartLoad()
     {
+        if (instance.isLoading)
+        {
+            throw new System.Exception("Double load detected");
+        }
         isLoading = true;
         isLoadingComplete = false;
         isPreloadingComplete = false;
@@ -48,10 +52,6 @@ public class SceneLoader : MonoBehaviour
 
     public static void LoadScenes(string primary, params string[] secondaries)
     {
-        if (instance.isLoading)
-        {
-            throw new System.Exception("Double load detected");
-        }
         instance.StartLoad();
         instance.primarySceneToLoad = primary;
         instance.secondaryScenesToLoad = secondaries;
@@ -60,10 +60,6 @@ public class SceneLoader : MonoBehaviour
 
     public static void LoadWithProgressBar(string primary, params string[] secondaries)
     {
-        if (instance.isLoading)
-        {
-            throw new System.Exception("Double load detected");
-        }
         instance.StartLoad();
         instance.primarySceneToLoad = primary;
         instance.secondaryScenesToLoad = secondaries;
