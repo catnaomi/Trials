@@ -131,11 +131,12 @@ public class SaveDataController : MonoBehaviour
         // load the next scene and the loading screen
         SceneLoader.LoadWithProgressBar(data.playerWorldData.activeScene);
         yield return new WaitUntil(SceneLoader.IsSceneLoadingComplete);
-        
+
         // after scene load apply remaining data
         YarnSaveDataManager.ApplyDataToMemory(data.yarnData);
         PlayerSaveDataManager.SetAttributeData(data.playerAttributeData);
         PlayerSaveDataManager.SetInventoryData(data.playerInventoryData);
+        PlayerSaveDataManager.SetWorldData(data.playerWorldData);
         SceneSaveDataManager.LoadData(data.allScenesSaveData);
         yield return new WaitForEndOfFrame();
     }
