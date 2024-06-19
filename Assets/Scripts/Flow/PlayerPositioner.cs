@@ -42,7 +42,7 @@ public class PlayerPositioner : MonoBehaviour
                         spawnRotation = spawnPoint.rotation;
                     }
                     SpawnPlayer(player);
-
+#if UNITY_EDITOR
                     if (consoleCommands != null)
                     {
                         foreach (var consoleCommand in consoleCommands)
@@ -50,6 +50,7 @@ public class PlayerPositioner : MonoBehaviour
                             DebugConsole.instance.RunMethod(consoleCommand);
                         }
                     }
+#endif
                 }
             }
         }
