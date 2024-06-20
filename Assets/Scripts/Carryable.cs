@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Events;
 
 public class Carryable : MonoBehaviour
@@ -9,12 +11,14 @@ public class Carryable : MonoBehaviour
 
     public float yOffset;
     public bool isBeingCarried;
-
+    public Vector3 eulerCarryRotationOffset;
     Rigidbody rigidbody;
 
     public bool playClipOnPickup;
     public Animancer.ClipTransition pickupClip;
+    NavMeshObstacle obstacle;
 
+    public float maximumVelocityForObstacle = 0f;
     public UnityEvent OnStopCarry;
     public UnityEvent OnStartCarry;
     public UnityEvent OnThrow;
@@ -23,6 +27,7 @@ public class Carryable : MonoBehaviour
     {
 
         rigidbody = this.GetComponent<Rigidbody>();
+        obstacle = this.GetComponent<NavMeshObstacle>();
     }
 
     // Update is called once per frame
@@ -33,6 +38,17 @@ public class Carryable : MonoBehaviour
             if (rigidbody != null && !rigidbody.isKinematic)
             {
                 rigidbody.isKinematic = true;
+            }
+            if (obstacle != null)
+            {
+                obstacle.enabled = false;
+            }
+        }
+        else
+        {
+            if (obstacle != null)
+            {
+                obstacle.enabled = rigidbody == null || rigidbody.velocity.magnitude < maximumVelocityForObstacle;
             }
         }
     }
@@ -89,7 +105,7 @@ public class Carryable : MonoBehaviour
     public virtual void SetCarryPosition(Vector3 position)
     {
         this.transform.position = position;
-        this.transform.rotation = Quaternion.LookRotation(player.transform.forward);
+        this.transform.rotation = Quaternion.LookRotation(player.transform.forward) * Quaternion.Euler(eulerCarryRotationOffset);
     }
 
     public float GetMass()

@@ -204,7 +204,7 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
             cc.enabled = false;
             if (!IsJumping() && carryable.carryPosition != Vector3.zero)
             {
-                this.transform.position = carryable.carryPosition;
+                //this.transform.position = carryable.carryPosition;
                 nav.isStopped = true;
                 nav.nextPosition = this.transform.position;
             }
@@ -515,6 +515,11 @@ public class MimicPotActor : Actor, INavigates, IDamageable, IAttacker, IHitboxH
         {
             cc.Move(nav.nextPosition - this.transform.position);
             nav.nextPosition = this.transform.position;
+        }
+
+        if (isCarried && !IsJumping() && carryable.carryPosition != Vector3.zero)
+        {
+            this.transform.position = carryable.carryPosition;
         }
     }
 

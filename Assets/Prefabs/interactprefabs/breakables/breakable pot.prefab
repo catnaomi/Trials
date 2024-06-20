@@ -114,6 +114,7 @@ MonoBehaviour:
   player: {fileID: 0}
   yOffset: 0.05
   isBeingCarried: 0
+  eulerCarryRotationOffset: {x: 0, y: 0, z: 0}
   playClipOnPickup: 1
   pickupClip:
     _FadeDuration: 0.25
@@ -124,6 +125,7 @@ MonoBehaviour:
     _Clip: {fileID: 0}
     _Speed: 1
     _NormalizedStartTime: NaN
+  maximumVelocityForObstacle: 0
   OnStopCarry:
     m_PersistentCalls:
       m_Calls: []
@@ -201,7 +203,6 @@ MonoBehaviour:
     kbForce: {x: 0, y: 1, z: 0}
     kbRadial: 0
     hitMaterial: 0
-    hitClip: {fileID: 0}
     disarm: 0
     OnHit:
       m_PersistentCalls:

@@ -321,6 +321,11 @@ PrefabInstance:
       propertyPath: health.baseValue
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 4013956763830427713, guid: 8f083315fa2a75947ab86f7218ad8af3,
+        type: 3}
+      propertyPath: resistances.weaknesses
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 4013956763830427714, guid: 8f083315fa2a75947ab86f7218ad8af3,
         type: 3}
       propertyPath: m_Enabled
@@ -501,7 +506,6 @@ MonoBehaviour:
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     hitMaterial: 0
-    hitClip: {fileID: 0}
     disarm: 0
     OnHit:
       m_PersistentCalls:
@@ -567,7 +571,6 @@ MonoBehaviour:
     kbForce: {x: 0, y: 0, z: 0}
     kbRadial: 0
     hitMaterial: 0
-    hitClip: {fileID: 0}
     disarm: 0
     OnHit:
       m_PersistentCalls:
@@ -598,9 +601,7 @@ MonoBehaviour:
   waterDashTimer: 10
   specialAttackTimer: 20
   isHitboxActive: 0
-  OnHitboxActive:
-    m_PersistentCalls:
-      m_Calls: []
+  inspector_ResetTimers: 0
   actionsEnabled: 0
   closeRange: 5
   meleeRange: 3
@@ -651,6 +652,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  OnHitboxActive:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &675521137
 MonoBehaviour:
   m_ObjectHideFlags: 0

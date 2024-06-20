@@ -2040,10 +2040,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             else
             {
-                //carryable.SetCarryPosition(this.transform.position + Vector3.up * (2f + carryable.yOffset));
+                // doing the below during fixed update
+                /*
                 Vector3 dirVector = (isDropping) ? this.transform.forward : Vector3.up;
                 Vector3 carryPos = ((positionReference.MainHand.transform.position + positionReference.OffHand.transform.position) / 2f) + (dirVector * carryable.yOffset);
                 carryable.SetCarryPosition(carryPos);
+                */
+
             }
             if (!Physics.GetIgnoreCollision(carryable.GetComponent<Collider>(), this.GetComponent<Collider>()))
             {
@@ -2249,6 +2252,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             {
                 cc.Move((velocity * Time.fixedDeltaTime) + animatorDelta);
             }
+        }
+
+        if (isCarrying && carryable != null)
+        {
+            Vector3 dirVector = (isDropping) ? this.transform.forward : Vector3.up;
+            Vector3 carryPos = ((positionReference.MainHand.transform.position + positionReference.OffHand.transform.position) / 2f) + (dirVector * carryable.yOffset);
+            carryable.SetCarryPosition(carryPos);
         }
     }
 
