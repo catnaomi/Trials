@@ -435,7 +435,6 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         landSoftAnim.Events.OnEnd = _MoveAndReset;
         swimEnd.Events.OnEnd = _MoveAndReset;
         animancer.Layers[HumanoidAnimLayers.UpperBody].SetMask(positionReference.upperBodyMask);
-        //animancer.Layers[HumanoidAnimLayers.UpperBody].IsAdditive = true;
         UpdateFromMoveset();
 
         inventory.OnChange.AddListener(() =>
@@ -452,10 +451,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         OnAttack.AddListener(ProcessWeaponDash);
         OnAttack.AddListener(ResetAttackCancelAction);
 
-        if (SceneLoader.IsSceneLoaderActive())
-        {
-            SceneLoader.GetOnActiveSceneChange().AddListener(SetNewSafePoint);
-        }
+        SceneLoader.GetOnActiveSceneChange().AddListener(SetNewSafePoint);
 
         bowBend = new AnimatedFloat(animancer, "_BowBend");
         cinemachineBrain = Camera.main.GetComponent<CinemachineBrain>();

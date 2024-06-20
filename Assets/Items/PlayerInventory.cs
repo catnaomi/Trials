@@ -1,10 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System;
 using System.Collections.Generic;
-using UnityEngine.Events;
-using CustomUtilities;
-using System.Diagnostics.Contracts;
 
 public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 {
@@ -13,8 +9,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     PlayerActor player;
     [ReadOnly] public EquippableWeapon MainWeapon;
     private bool MainIsDrawn;
-    //private bool TwoHanding;
-    
+
     [ReadOnly] public EquippableWeapon OffWeapon;
     private bool OffIsDrawn;
 
@@ -45,7 +40,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     }
     void Start()
     {
-        this.player = GetComponent<PlayerActor>();
+        player = GetComponent<PlayerActor>();
 
         // persist inventory data if available
         if (PlayerSaveDataManager.HasInventoryData())
@@ -212,7 +207,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
         MarkChanged();
         OnChange.Invoke();
-        
+
     }
     public void EquipMainWeapon(EquippableWeapon weapon)
     {
@@ -257,7 +252,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         }
         */
         OffIsDrawn = false;
-        
+
         GenerateModels();
         //ValidateHandedness(Inventory.OffType);
         PositionWeapon();
@@ -272,7 +267,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
         MarkChanged();
         OnChange.Invoke();
-        
+
     }
 
     public void EquipOffHandWeapon(EquippableWeapon weapon)
@@ -300,8 +295,8 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
         MarkChanged();
         OnChange.Invoke();
-       
-        
+
+
     }
 
     public void UnequipOffHandWeapon()
@@ -324,7 +319,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
         MarkChanged();
         OnChange.Invoke();
-       
+
     }
 
     public void EquipRangedWeapon(RangedWeapon weapon)
@@ -386,7 +381,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
 
         MarkChanged();
         OnChange.Invoke();
-        
+
     }
 
     public void UnequipRangedWeapon()
@@ -415,7 +410,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         //player.RotateOffWeapon(0f);
         PositionWeapon();
 
-        
+
         MarkChanged();
         OnChange.Invoke();
     }
@@ -446,7 +441,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         OffWeapon = null;
         RangedWeapon = null;
 
-       
+
         MarkChanged();
         OnChange.Invoke();
     }
@@ -525,7 +520,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             }
         }
 
-        bool isConflict = 
+        bool isConflict =
             (isMultipleDrawn && isAnyTwoHanded) ||
             (numberEquippedToRight >= 2) ||
             (numberEquippedToLeft >= 2);
@@ -538,9 +533,9 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
             RangedIsDrawn = (GetRangedWeapon() != null && prioritySlot == Inventory.RangedType);
             PositionWeapon();
             MarkChanged();
-        }   
+        }
     }
-    
+
     public void PositionWeapon()
     {
         // main
@@ -1204,7 +1199,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
         {
             UnequipWeapon(weapon);
         }
-        
+
     }
     public GameObject GetOffhandModel()
     {
@@ -1215,7 +1210,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
     {
         return MainWeapon.model;
     }
-    
+
     public GameObject GetRangedModel()
     {
         return GetRangedWeapon().model;
@@ -1268,7 +1263,7 @@ public class PlayerInventory : Inventory, IInventory, IHumanoidInventory
                 break;
         }
     }
-    
+
     public EquippableWeapon GetBlockWeapon()
     {
         if (IsOffEquipped() && GetOffWeapon().GetMoveset().overridesBlock)
@@ -1449,6 +1444,7 @@ public class PlayerInventoryData
         Slot3String = data.Slot3String;
         contentsString = data.contentsString;
     }
+
     public void CopyDataFromPlayerInventory(PlayerInventory inventory)
     {
         PlayerInventoryData data = this;
@@ -1526,7 +1522,6 @@ public class PlayerInventoryData
             {
                 this.contentsString[i] = contents[i].GetItemSaveString();
             }
-
         }
     }
 
@@ -1554,7 +1549,7 @@ public class PlayerInventoryData
         }
         inventory.SetContents(this.contents);
 
-        
+
         if (this.MainWeapon != null && this.MainWeapon is EquippableWeapon)
         {
             inventory.EquipMainWeapon((EquippableWeapon)this.MainWeapon, false);
@@ -1662,7 +1657,7 @@ public class PlayerInventoryData
                     this.contents.Add(item);
                 }
             }
-            
+
         }
     }
 

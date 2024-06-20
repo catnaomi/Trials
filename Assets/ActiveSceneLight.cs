@@ -1,16 +1,20 @@
+using CustomUtilities;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class TempCheckIfActiveScene : MonoBehaviour
+[RequireComponent(typeof(Light))]
+public class ActiveSceneLight : MonoBehaviour
 {
     float clock = 0f;
     bool listening;
+    Light light;
     private void Start()
     {
+        light = this.GetComponent<Light>();
         CheckListeners();
-        
+        StartCheckTimer();
     }
     // Start is called before the first frame update
     void OnEnable()
@@ -18,14 +22,11 @@ public class TempCheckIfActiveScene : MonoBehaviour
         Check();
     }
 
-    // Update is called once per frame
-    void Update()
+    void StartCheckTimer()
     {
-        clock += Time.deltaTime;
-        if (clock > 60f)
+        if (!listening)
         {
-            Check();
-            
+            this.StartTimer(60f, true, Check);
         }
     }
     public void CheckListeners()
@@ -44,13 +45,12 @@ public class TempCheckIfActiveScene : MonoBehaviour
     {
         if (this.gameObject.scene == SceneManager.GetActiveScene())
         {
-            this.GetComponent<Light>().enabled = true;
+            light.enabled = true;
         }
         else
         {
-            this.GetComponent<Light>().enabled = false;
+            light.enabled = false;
         }
-        clock = 0f;
         CheckListeners();
     }
 }
