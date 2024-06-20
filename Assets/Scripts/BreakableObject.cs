@@ -16,6 +16,8 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
     public UnityEvent OnBreak;
     public UnityEvent OnFail;
     public bool recoilOnFail = true;
+    public float breakDelay = -1f;
+    bool preventBreaks;
     DamageKnockback lastDamage;
     bool hasBeenBroken;
 
@@ -31,6 +33,19 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
     {
         startingHealth = health;
         UpdateHealthAttribute();
+    }
+
+    void Start()
+    {
+        if (breakDelay > 0)
+        {
+            preventBreaks = true;
+            this.StartTimer(breakDelay, () => preventBreaks = false);
+        }
+        else
+        {
+            preventBreaks = false;
+        }
     }
 
     public void Recoil()
@@ -50,6 +65,7 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
 
     public void TakeDamage(DamageKnockback damage)
     {
+        if (preventBreaks) return;
         lastDamage = damage; 
         if (damage.GetTypes().HasType(brokenByElements))
         {
