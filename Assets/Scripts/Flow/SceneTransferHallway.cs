@@ -93,6 +93,8 @@ public class SceneTransferHallway : MonoBehaviour
             if (!otherSideFound) yield return new WaitForSecondsRealtime(0.1f);
         } while (!otherSideFound);
 
+        yield return new WaitForEndOfFrame();
+
         if (other._center == null)
         {
             other.GetCenter();
@@ -104,7 +106,19 @@ public class SceneTransferHallway : MonoBehaviour
         Vector3 transferVector = other._center.position - _center.position;
 
         CinemachineBrain brain = FindObjectOfType<CinemachineBrain>();
-        brain.ActiveVirtualCamera.OnTargetObjectWarped(brain.ActiveVirtualCamera.Follow, transferVector);
+
+        var vcam = brain.ActiveVirtualCamera as CinemachineVirtualCameraBase;
+        if (vcam != null)
+        {
+
+            vcam.PreviousStateIsValid = false;
+            vcam.OnTargetObjectWarped(brain.ActiveVirtualCamera.Follow, transferVector);
+        }
+        else
+        {
+            Debug.Log("vcam null!");
+        }
+        
 
         IsTransferInProgress = false;
 
