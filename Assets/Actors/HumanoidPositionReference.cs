@@ -360,4 +360,9 @@ public class HumanoidPositionReference : MonoBehaviour
                 break;
         }
     }
+
+    public Vector3 HandMidpoint()
+    {
+        return (this.MainHand.transform.position + this.OffHand.transform.position) / 2;
+    }
 }

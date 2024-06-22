@@ -99,7 +99,8 @@ public class BezierProjectileController : Projectile
         if (!launched)
         {
             hitbox.SetActive(true);
-            hitbox.OnHitAnything.AddListener(OnArrowHit);
+            hitbox.events.OnHitActor.AddListener(OnArrowHitActor);
+            hitbox.events.OnHitTerrain.AddListener(OnArrowHitTerrain);
             launched = true;
             inFlight = true;
             tip.position = initPos;
@@ -135,22 +136,20 @@ public class BezierProjectileController : Projectile
         }
 
     }
-    private void OnArrowHit()
+
+    private void OnArrowHitTerrain(Hitbox contactBox, Collider hitTerrain)
     {
-        bool allowInteract = true;
+        hitbox.SetActive(false);
+        FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, SoundFXAssetManager.GetSound("Bow/Hit"));
 
-        if (hitbox.didHitTerrain)
-        {
-            hitbox.SetActive(false);
-            FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, SoundFXAssetManager.GetSound("Bow/Hit"));
-        }
-        else if (hitbox.victims.Count > 0)
-        {
-            allowInteract = false;
-        }
         EndFlight();
-
     }
+
+    private void OnArrowHitActor(Hitbox contactBox, IDamageable actor)
+    {
+        EndFlight();
+    }
+
 
     void Shockwave()
     {

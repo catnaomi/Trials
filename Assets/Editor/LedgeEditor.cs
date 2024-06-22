@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(Ledge))]
+[CustomEditor(typeof(Ledge)), CanEditMultipleObjects]
 public class LedgeEditor : Editor
 {
     Vector3 destination = Vector3.zero;

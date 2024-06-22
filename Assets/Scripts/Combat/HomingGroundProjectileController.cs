@@ -97,7 +97,8 @@ public class HomingGroundProjectileController : Projectile
         if (!launched)
         {
             hitbox.SetActive(true);
-            hitbox.OnHitAnything.AddListener(OnArrowHit);
+            hitbox.events.OnHitActor.AddListener(OnArrowHitActor);
+            hitbox.events.OnHitTerrain.AddListener(OnArrowHitTerrain);
             launched = true;
             inFlight = true;
             tip.position = initPos;
@@ -130,27 +131,27 @@ public class HomingGroundProjectileController : Projectile
             EndFlight();
         }
     }
-    private void OnArrowHit()
-    {
-        bool allowInteract = true;
-        
 
+    void CheckShockwave()
+    {
         if (Vector3.Distance(tip.transform.position, targetPoint) < shockwaveRadius)
         {
             Shockwave();
         }
-        else if (hitbox.didHitTerrain)
-        {
-            Debug.Log("hit terrain?");
+    }
 
+    private void OnArrowHitTerrain(Hitbox contactBox, Collider hitTerrain)
+    {
+        CheckShockwave();
+        hitbox.SetActive(false);
+        FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, SoundFXAssetManager.GetSound("Bow/Hit"));
 
-            hitbox.SetActive(false);
-            FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, SoundFXAssetManager.GetSound("Bow/Hit"));
-        }
-        else if (hitbox.victims.Count > 0)
-        {
-            allowInteract = false;
-        }
+        EndFlight();
+    }
+
+    private void OnArrowHitActor(Hitbox contactBox, IDamageable actor)
+    {
+        CheckShockwave();
         EndFlight();
     }
 

@@ -10,7 +10,10 @@ public class Carryable : MonoBehaviour
     public PlayerActor player;
 
     public float yOffset;
-    public bool isBeingCarried;
+    public Vector2 dropVector;
+    public float dropExtents;
+    public float heightOffset;
+    [ReadOnly] public bool isBeingCarried;
     public Vector3 eulerCarryRotationOffset;
     Rigidbody rigidbody;
 
@@ -118,5 +121,11 @@ public class Carryable : MonoBehaviour
         {
             return 1f;
         }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.gray;
+        Gizmos.DrawWireCube(this.transform.position + (Vector3.up * heightOffset), Vector3.one * dropExtents);
     }
 }

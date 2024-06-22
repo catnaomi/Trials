@@ -18,9 +18,9 @@ public class TransformingSubWeapon : BladeWeapon
 
 
         GenerateHitboxes();
-        hitboxes.OnHitTerrain.RemoveAllListeners();
-        hitboxes.OnHitTerrain.AddListener(TerrainContact);
-        hitboxes.OnHitWall.AddListener(WallContact);
+        hitboxes.events.OnHitTerrain.RemoveAllListeners();
+        hitboxes.events.OnHitTerrain.AddListener(TerrainContact);
+        hitboxes.events.OnHitWall.AddListener(WallContact);
 
         if (actor.TryGetComponent<AnimationFXHandler>(out AnimationFXHandler animationFXHandler))
         {

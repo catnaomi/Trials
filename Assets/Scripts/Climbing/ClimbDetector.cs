@@ -5,12 +5,19 @@ using UnityEngine.Events;
 
 public abstract class ClimbDetector : MonoBehaviour
 {
-    public bool inUse;
-    public bool isDisabled;
+    [field: SerializeField, ReadOnly, Header("Base Class")]
+    public bool InUse { get; set; }
+    [field: SerializeField]
+    public bool IsDisabled { get; set; }
     public Collider collider;
 
     public UnityEvent OnStartClimb;
     public UnityEvent OnStopClimb;
+
+    virtual protected void Awake()
+    {
+        collider = GetComponent<Collider>();
+    }
 
     public virtual Quaternion GetClimbRotation()
     {
@@ -28,11 +35,11 @@ public abstract class ClimbDetector : MonoBehaviour
     }
     public void ForceDismount()
     {
-        if (inUse)
+        if (InUse)
         {
             PlayerActor.player.UnsnapLedge();
             PlayerActor.player.StartClimbLockout();
-            inUse = false;
+            InUse = false;
         }
     }
 
@@ -47,12 +54,21 @@ public abstract class ClimbDetector : MonoBehaviour
     }
     public void DisableClimb()
     {
-        isDisabled = true;
+        IsDisabled = true;
     }
 
     public void EnableClimb()
     {
-        isDisabled = false;
+        IsDisabled = false;
+    }
+
+
+    public bool IsBeingClimbed()
+    {
+        return InUse &&
+            PlayerActor.player != null &&
+            PlayerActor.player.IsClimbing() && 
+            PlayerActor.player.currentClimb == this;
     }
 
     public virtual bool CheckPlayerCollision()
@@ -83,13 +99,13 @@ public abstract class ClimbDetector : MonoBehaviour
 
     public void StartClimb()
     {
-        inUse = true;
+        InUse = true;
         OnStartClimb.Invoke();
     }
 
     public void StopClimb()
     {
-        inUse = false;
+        InUse = false;
         OnStopClimb.Invoke();
     }
 }

@@ -12,6 +12,7 @@ using UnityEngine.InputSystem.Interactions;
 public class PlayerActor : Actor, IAttacker, IDamageable
 {
     [HideInInspector]public CharacterController cc;
+    public Rigidbody rb;
     public bool inStateMove;
     public Vector2 move;
     Vector2 moveSmoothed;
@@ -344,6 +345,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         public AnimancerState jump;
         public AnimancerState backflip;
         public AnimancerState climb;
+        public AnimancerState climbUp;
         public AnimancerState swim;
         public AnimancerState attack;
         public AnimancerState parry;
@@ -1604,9 +1606,16 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             else if (currentClimb is Ledge ledge)
             {
                 //((DirectionalMixerState)state.climb).ParameterX = move.x;
-                float dot = Mathf.Clamp(Vector3.Dot(stickDirection, ledge.GetClimbTangent()), -1f, 1f);
-                ((DirectionalMixerState)state.climb).ParameterX = dot;
-                state.climb.Speed = Mathf.Abs(dot) * climbSpeed;
+                if (ledge.allowShimmy)
+                {
+                    float dot = Mathf.Clamp(Vector3.Dot(stickDirection, ledge.GetClimbTangent()), -1f, 1f);
+                    ((DirectionalMixerState)state.climb).ParameterX = dot;
+                    state.climb.Speed = Mathf.Abs(dot) * climbSpeed;
+                }
+                if (ledge.autoClimb)
+                {
+                    ClimbUpLedge();
+                }
             }
             else if (currentClimb is Ladder ladder)
             {
@@ -1617,7 +1626,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     this.transform.position = ladder.endpoint.transform.position;
                     this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
                     ledgeSnap = false;
-                    animancer.Play(ladderClimbUp);
+                    state.climbUp = animancer.Play(ladderClimbUp);
                     StartClimbLockout();
                     ladder.StopClimb();
                 }
@@ -2170,9 +2179,14 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
     void FixedUpdate()
     {
-        if (disablePhysics) return;
+        if (disablePhysics)
+        {
+            SetRigidbody(false);
+            return;
+        }
         if (isBird)
         {
+            SetRigidbody(false);
             var flyVelocity = IsBlockHeld() ? flyFastVelocity : (IsJumpHeld() ? flySlowVelocity : 0.0f);
             transform.position += Camera.main.transform.forward * flyVelocity * Time.fixedDeltaTime;
             return;
@@ -2256,10 +2270,46 @@ public class PlayerActor : Actor, IAttacker, IDamageable
 
         if (isCarrying && carryable != null)
         {
-            Vector3 dirVector = (isDropping) ? this.transform.forward : Vector3.up;
-            Vector3 carryPos = ((positionReference.MainHand.transform.position + positionReference.OffHand.transform.position) / 2f) + (dirVector * carryable.yOffset);
-            carryable.SetCarryPosition(carryPos);
+            if (!isDropping)
+            {
+                Vector3 dirVector = Vector3.up;
+                Vector3 carryPos = positionReference.HandMidpoint() + (dirVector * carryable.yOffset);
+                carryable.SetCarryPosition(carryPos);
+            }
+            else
+            {
+                Vector3 forward = this.transform.forward;
+                Vector3 up = this.transform.up;
+                float heightMod = (0.5f * carryable.dropExtents);
+                Vector3 center = this.transform.position + up * heightMod;
+                Vector3 dirVector = (positionReference.HandMidpoint() - center).normalized;
+
+                float fDot = Vector3.Dot(forward, dirVector);
+                float uDot = Vector3.Dot(up, dirVector);
+
+
+                DrawCircle.DrawWireSphere(center, 0.1f, Color.magenta);
+                DrawCircle.DrawArc(center, up * carryable.dropVector.y, forward * carryable.dropVector.x, Color.magenta);
+                DrawCube.DrawWireCube(center + up * carryable.dropVector.y, Vector3.one * carryable.dropExtents, this.transform.rotation, Color.red);
+                DrawCube.DrawWireCube(center + forward * carryable.dropVector.x, Vector3.one * carryable.dropExtents, this.transform.rotation, Color.blue);
+                
+
+                Vector3 offset = fDot * forward * carryable.dropVector.x + uDot * up * carryable.dropVector.y;
+
+
+                Debug.DrawRay(center, offset, new Color(uDot, 0, fDot));
+
+                Vector3 carryPos = center + offset;
+                if (carryPos.y < center.y)
+                {
+                    carryPos.y = center.y;
+                }
+                carryPos += up * -carryable.heightOffset;
+                carryable.SetCarryPosition(carryPos);
+            }
         }
+
+        SetRigidbody(!IsClimbing() && !IsClimbingUp() && !IsSwimming() && !IsInDialogue());
     }
 
     public void DisablePhysics()
@@ -2276,6 +2326,13 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         disablePhysics = disabled;
     }
 
+    public void SetRigidbody(bool enabled)
+    {
+        if (rb != null && rb.gameObject != this.gameObject)
+        {
+            rb.gameObject.SetActive(enabled);
+        }
+    }
     #region GAME FLOW
 
     public void ProcessDeath()
@@ -2508,7 +2565,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         ledgeSnap = false;
         if (currentClimb != null)
         {
-            currentClimb.inUse = false;
+            currentClimb.InUse = false;
         }
         cc.enabled = true;
     }
@@ -2542,8 +2599,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         ledgeSnap = false;
         this.transform.position = climbSnapPoint;
-        animancer.Play(ledgeClimb);
-        currentClimb.StopClimb();
+        state.climbUp = animancer.Play(ledgeClimb);
+        //currentClimb.StopClimb();
         StartClimbLockout();
     }
 
@@ -3818,7 +3875,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public void StartDrop()
     {
         animancer.Layers[HumanoidAnimLayers.UpperBody].Weight = 0f;
-        state.carry = animancer.Play(dropAnim);
+        state.carry = animancer.Play(dropAnim, 0f);
         state.carry.Events.OnEnd = _MoveOnEnd;
         state.carry.Events.OnEnd += () =>
         {
@@ -5019,6 +5076,10 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         yVel = 0f;
         xzVel = Vector3.zero;
         animancer.Play(state.move, 0.25f);
+        if (currentClimb != null)
+        {
+            currentClimb.StopClimb();
+        }
     }
 
     void _OnHurtEnd()
@@ -5126,6 +5187,12 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     {
         if (animancer == null) return false;
         return animancer.States.Current == state.climb;
+    }
+
+    public bool IsClimbingUp()
+    {
+        if (animancer == null) return false;
+        return animancer.States.Current == state.climbUp;
     }
 
     public override bool ShouldDustOnStep()

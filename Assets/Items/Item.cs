@@ -11,7 +11,9 @@ public class Item : ScriptableObject
     [HideInInspector] public Actor holder;
     public int MaxStackSize = 0;
     public int Quantity = 1;
-    public string invID;
+    [SerializeField, Tooltip("Defaults to asset name if left blank")]
+    string invIdOverride;
+    public string InvId { get { return invIdOverride.Trim() == "" ? name : invIdOverride; } }
     public GameObject prefab;
     public Sprite displayImage;
     public Color displayColor = Color.white;
@@ -69,7 +71,7 @@ public class Item : ScriptableObject
 
     public bool ItemEqual(Item item)
     {
-        return item.itemName == this.itemName && item.invID == this.invID;
+        return item.itemName == this.itemName && item.InvId == this.InvId;
     }
 
 

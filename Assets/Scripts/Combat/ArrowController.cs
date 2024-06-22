@@ -45,7 +45,8 @@ public class ArrowController : Projectile
         if (!launched)
         {
             hitbox.SetActive(true);
-            hitbox.OnHitAnything.AddListener(OnArrowHit);
+            hitbox.events.OnHitActor.AddListener(OnArrowHitActor);
+            hitbox.events.OnHitTerrain.AddListener(OnArrowHitTerrain);
             launched = true;
             inFlight = true;
             tip.position = initPos;
@@ -70,41 +71,35 @@ public class ArrowController : Projectile
     {
         hitbox.SetActive(active);
     }
-    private void OnArrowHit()
+
+    private void OnArrowHitTerrain(Hitbox contactBox, Collider hitTerrain)
     {
-        bool allowInteract = true;
         EndFlight();
 
-        if (hitbox.didHitTerrain)
+        if (!ignoreStick)
         {
-            if (!ignoreStick)
-            {
-                tip.isKinematic = true;
-                feather.isKinematic = true;
+            tip.isKinematic = true;
+            feather.isKinematic = true;
 
-                Stick(hitbox.hitTerrain);
-            }
-            else
-            {
-                UnparentDontDestroy();
-                Destroy(tip.gameObject);
-            }
-            hitbox.SetActive(false);
-            FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, SoundFXAssetManager.GetSound("Bow/Hit"));
+            Stick(hitbox.hitTerrain);
         }
-        else if (hitbox.victims.Count > 0)
+        else
         {
             UnparentDontDestroy();
             Destroy(tip.gameObject);
-            allowInteract = false;
         }
-        if (allowInteract)
-        {
-            EnablePickup();
-        }
+        hitbox.SetActive(false);
+        FXController.CreateFX(FXController.FX.FX_Sparks, tip.position, Quaternion.identity, 3f, SoundFXAssetManager.GetSound("Bow/Hit"));
+
+        EnablePickup();
     }
 
-
+    private void OnArrowHitActor(Hitbox contactBox, IDamageable actor)
+    {
+        EndFlight();
+        UnparentDontDestroy();
+        Destroy(tip.gameObject);
+    }
     public void Stick(Collider hitCollider)
     {
         Vector3 stickPos;

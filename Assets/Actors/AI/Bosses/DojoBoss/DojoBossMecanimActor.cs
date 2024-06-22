@@ -781,7 +781,7 @@ public class DojoBossMecanimActor : Actor, IDamageable, IAttacker
         Vector3 size = Vector3.one * 2f;
         Collider[] colliders = Physics.OverlapBox(center, size * 0.5f, Quaternion.LookRotation(this.transform.forward), MaskReference.Actors);
 
-        DrawCube.ForDebug(center, size, Quaternion.LookRotation(this.transform.forward), damage.isSlash ? Color.red : Color.blue, 1f);
+        DrawCube.DrawWireCube(center, size, Quaternion.LookRotation(this.transform.forward), damage.isSlash ? Color.red : Color.blue, 1f);
 
         HashSet<IDamageable> targets = new HashSet<IDamageable>();
         foreach (Collider c in colliders)

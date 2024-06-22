@@ -29,7 +29,7 @@ public class ItemPickupUI : MonoBehaviour
 
     public void OnNewItem(Item item)
     {
-        if (activeDisplayMap.TryGetValue(item.invID, out ItemPickupDisplay activeDisplay) && activeDisplayMap[item.invID] != null && item.MaxStackSize > 0)
+        if (activeDisplayMap.TryGetValue(item.InvId, out ItemPickupDisplay activeDisplay) && activeDisplayMap[item.InvId] != null && item.MaxStackSize > 0)
         {
             activeDisplay.IncreaseNumberDisplay(item.Quantity);
             audioSource.Play();
@@ -40,7 +40,7 @@ public class ItemPickupUI : MonoBehaviour
             ItemPickupDisplay display = uiObj.GetComponent<ItemPickupDisplay>();
             uiObj.SetActive(true);
             display.SetItem(item);
-            activeDisplayMap[item.invID] = display;
+            activeDisplayMap[item.InvId] = display;
             audioSource.Play();
         }
         

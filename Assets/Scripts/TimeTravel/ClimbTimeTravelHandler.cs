@@ -11,7 +11,7 @@ public class ClimbTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     void Start()
     {
         climb = this.GetComponent<ClimbDetector>();
-        climb.isDisabled = true;
+        climb.IsDisabled = true;
     }
 
     void Update()
@@ -74,7 +74,7 @@ public class ClimbTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public void StartFreeze()
     {
         isFrozen = true;
-        climb.isDisabled = false;
+        climb.IsDisabled = false;
     }
 
     public void StartRewind()
@@ -84,11 +84,11 @@ public class ClimbTimeTravelHandler : MonoBehaviour, IAffectedByTimeTravel
     public void StopFreeze()
     {
         isFrozen = false;
-        if (climb.inUse)
+        if (climb.InUse)
         {
             climb.ForceDismount();
         }
-        climb.isDisabled = true;
+        climb.IsDisabled = true;
     }
 
     public void StopRewind()

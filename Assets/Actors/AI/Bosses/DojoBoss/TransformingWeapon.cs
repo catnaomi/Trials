@@ -23,9 +23,9 @@ public class TransformingWeapon : BladeWeapon
         thrustFX.pseudoParent = actor.transform;
 
         GenerateHitboxes();
-        hitboxes.OnHitTerrain.RemoveAllListeners();
-        hitboxes.OnHitTerrain.AddListener(TerrainContact);
-        hitboxes.OnHitWall.AddListener(WallContact);
+        hitboxes.events.OnHitTerrain.RemoveAllListeners();
+        hitboxes.events.OnHitTerrain.AddListener(TerrainContact);
+        hitboxes.events.OnHitWall.AddListener(WallContact);
     }
     
     public override Bounds GetBlockBounds()

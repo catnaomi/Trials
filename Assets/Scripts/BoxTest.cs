@@ -15,6 +15,6 @@ public class BoxTest : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        DrawCube.ForDebug(this.transform.position, this.transform.localScale, this.transform.rotation, color);
+        DrawCube.DrawWireCube(this.transform.position, this.transform.localScale, this.transform.rotation, color);
     }
 }

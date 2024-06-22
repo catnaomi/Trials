@@ -11,6 +11,7 @@ public class SceneTransferHallway : MonoBehaviour
     public string targetScene;
 
     public string identifierLetter = "A";
+
     [HideInInspector] public Transform _center;
 
     SceneTransferHallway other;

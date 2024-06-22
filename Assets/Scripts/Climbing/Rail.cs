@@ -38,15 +38,15 @@ public class Rail : ClimbDetector
     public override void SetClimb()
     {
         PlayerActor.player.SetRail(this);
-        inUse = true;
+        InUse = true;
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (isDisabled) return;
+        if (IsDisabled) return;
         if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor player))
         {
             player.SetRail(this);
-            inUse = true;
+            InUse = true;
         }
     }
 
@@ -57,7 +57,7 @@ public class Rail : ClimbDetector
             if (!player.IsClimbing())
             {
                 player.UnsetClimb(this);
-                inUse = false;
+                InUse = false;
             }
             //inUse = false;
         }
@@ -115,14 +115,14 @@ public class Rail : ClimbDetector
         {
             player.SetRail(left);
             left.snapPoint = -0.9f;
-            inUse = false;
+            InUse = false;
             return left.GetSnapPoint(climberWidth);
         }
         if (snapPoint < -1 && linkedRight && dir < 0)
         {
             player.SetRail(right);
             right.snapPoint = 0.9f;
-            inUse = false;
+            InUse = false;
             return right.GetSnapPoint(climberWidth);
         }
         snapPoint = Mathf.Clamp(snapPoint, -1f, 1f);

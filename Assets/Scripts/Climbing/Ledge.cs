@@ -6,6 +6,7 @@ public class Ledge : ClimbDetector
     readonly float MAX_AUTO_LEDGE_DISTANCE = 1f;
     Rigidbody ledge;
 
+    [Header("Ledge Data")]
     public Transform snap;
     public float verticalOffset = -0.5f;
     [Range(-1f,1f)]
@@ -14,7 +15,10 @@ public class Ledge : ClimbDetector
     private float length;
     [SerializeField, ReadOnly]
     private float dot;
-
+    [Header("Settings")]
+    public bool allowShimmy = true;
+    public bool autoClimb = false;
+    [Header("Links")]
     public bool linkedLeft;
     public Ledge left;
     public bool linkedRight;
@@ -22,7 +26,7 @@ public class Ledge : ClimbDetector
     bool isLeftLinkValid;
     bool isRightLinkValid;
     // Use this for initialization
-    void Awake()
+    protected override void Awake()
     {
         ledge = this.GetComponent<Rigidbody>();
         collider = this.GetComponent<Collider>();
@@ -32,18 +36,18 @@ public class Ledge : ClimbDetector
     public override void SetClimb()
     {
         PlayerActor.player.SetLedge(this);
-        inUse = true;
+        InUse = true;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (isDisabled) return;
+        if (IsDisabled) return;
         if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor player))
         {
             if (!player.IsClimbing())
             {
                 player.SetLedge(this);
-                inUse = true;
+                InUse = true;
             }
         }
     }
@@ -55,7 +59,7 @@ public class Ledge : ClimbDetector
             if (!player.IsClimbing())
             {
                 player.UnsetClimb(this);
-                inUse = false;
+                InUse = false;
             }
             //inUse = false;
         }
@@ -65,6 +69,7 @@ public class Ledge : ClimbDetector
         Gizmos.color = Color.red;
         Gizmos.DrawRay(this.transform.position, this.transform.forward);
     }
+
     public float GetLength()
     {
         length = snap.lossyScale.x;
@@ -98,14 +103,14 @@ public class Ledge : ClimbDetector
         {
             player.SetLedge(left);
             left.snapPoint = -0.9f;
-            inUse = false;
+            InUse = false;
             return left.GetSnapPoint(climberWidth);
         }
         if (snapPoint < -1 && linkedRight && dir < 0)
         {
             player.SetLedge(right);
             right.snapPoint = 0.9f;
-            inUse = false;
+            InUse = false;
             return right.GetSnapPoint(climberWidth);
         }
         snapPoint = Mathf.Clamp(snapPoint, -1f, 1f);

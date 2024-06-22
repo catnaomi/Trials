@@ -30,20 +30,20 @@ public class Ladder : ClimbDetector
     public override void SetClimb()
     {
         PlayerActor.player.SetLadder(this);
-        inUse = true;
+        InUse = true;
     }
     private void OnTriggerEnter(Collider other)
     {
-        if (isDisabled) return;
+        if (IsDisabled) return;
         if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor player))
         {
             player.SetLadder(this);
-            inUse = true;
+            InUse = true;
         }
         else if (other.transform.root.TryGetComponent<PlayerActor>(out PlayerActor playermov))
         {
             playermov.SetLadder(this);
-            inUse = true;
+            InUse = true;
         }
     }
 
@@ -54,7 +54,7 @@ public class Ladder : ClimbDetector
             if (!player.IsClimbing())
             {
                 player.UnsetClimb(this);
-                inUse = false;
+                InUse = false;
             }
             
         }
@@ -94,14 +94,14 @@ public class Ladder : ClimbDetector
         {
             player.SetLadder(down);
             down.snapPoint = -0.9f;
-            inUse = false;
+            InUse = false;
             return down.GetSnapPoint(climberHeight);
         }
         if (snapPoint < -1 && linkedUp && dir < 0)
         {
             player.SetLadder(up);
             up.snapPoint = 0.9f;
-            inUse = false;
+            InUse = false;
             return up.GetSnapPoint(climberHeight);
         }
         snapPoint = Mathf.Clamp(snapPoint, -1f,1f);

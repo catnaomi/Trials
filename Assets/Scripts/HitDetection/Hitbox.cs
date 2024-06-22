@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -15,19 +16,35 @@ public class Hitbox : MonoBehaviour
     public List<IDamageable> victims;
     public bool isActive;
 
-    public bool didHitTerrain;
-    public bool didHitHitbox;
-    public UnityEvent OnHitTerrain;
+    bool didHitTerrain;
+    bool didHitHitbox;
+    
     public Collider hitTerrain;
     public Hitbox clashedHitbox;
 
-    public UnityEvent OnHitActor;
-    public UnityEvent OnHitAnything;
-
-    public UnityEvent OnHitWall;
-    public UnityEvent OnHitHitbox;
+    
 
     public Vector3 deltaPosition;
+
+    public Events events;
+    [SerializeField]
+    public class Events
+    {
+        public UnityEvent<Hitbox, Collider> OnHitTerrain;
+        public UnityEvent<Hitbox, IDamageable> OnHitActor;
+        public UnityEvent<Hitbox, GameObject> OnHitAnything;
+        public UnityEvent<Hitbox, Collider> OnHitWall;
+        public UnityEvent<Hitbox, Hitbox> OnHitHitbox;
+
+        public Events()
+        {
+            OnHitTerrain = new();
+            OnHitActor = new();
+            OnHitAnything = new();
+            OnHitWall = new();
+            OnHitHitbox = new();
+        }
+    }
     public struct HitboxHistoryInfo
     {
         public Vector3 start;
@@ -38,29 +55,9 @@ public class Hitbox : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if (OnHitTerrain == null)
+        if (events == null)
         {
-            OnHitTerrain = new UnityEvent();
-        }
-
-        if (OnHitActor == null)
-        {
-            OnHitActor = new UnityEvent();
-        }
-
-        if (OnHitAnything == null)
-        {
-            OnHitAnything = new UnityEvent();
-        }
-
-        if (OnHitWall == null)
-        {
-            OnHitWall = new UnityEvent();
-        }
-
-        if (OnHitHitbox == null)
-        {
-            OnHitHitbox = new UnityEvent();
+            events = new();
         }
 
 
@@ -106,6 +103,10 @@ public class Hitbox : MonoBehaviour
 
             foreach (Collider hitCollider in Physics.OverlapSphere(end, radius, GetHitboxMask()))
             {
+                if (hitCollider.gameObject.tag == "IgnoreHitboxes")
+                {
+                    continue;
+                }
                 if (IsColliderTerrain(hitCollider))
                 {
                     if (!didHitTerrain)
@@ -115,10 +116,10 @@ public class Hitbox : MonoBehaviour
                         hitTerrain = hitCollider;
                         if (hitTerrain.gameObject.tag == "WeaponCollision")
                         {
-                            OnHitWall.Invoke();
+                            events.OnHitWall.Invoke(this,hitCollider);
                         }
-                        OnHitTerrain.Invoke();
-                        OnHitAnything.Invoke();
+                        events.OnHitTerrain.Invoke(this,hitCollider);
+                        events.OnHitAnything.Invoke(this,hitCollider.gameObject);
 
                         
                     }
@@ -129,7 +130,7 @@ public class Hitbox : MonoBehaviour
                     {
                         didHitHitbox = true;
                         clashedHitbox = other;
-                        OnHitHitbox.Invoke();
+                        events.OnHitHitbox.Invoke(this,clashedHitbox);
                     }
                     
                 }
@@ -157,10 +158,10 @@ public class Hitbox : MonoBehaviour
 
                             if (hitTerrain.gameObject.tag == "WeaponCollision")
                             {
-                                OnHitWall.Invoke();
+                                events.OnHitWall.Invoke(this,hitTerrain);
                             }
-                            OnHitTerrain.Invoke();
-                            OnHitAnything.Invoke();
+                            events.OnHitTerrain.Invoke(this,hitTerrain);
+                            events.OnHitAnything.Invoke(this,hitTerrain.gameObject);
                         }
                     }
                     else if (IsColliderHitbox(hit.collider, out Hitbox other))
@@ -169,7 +170,7 @@ public class Hitbox : MonoBehaviour
                         {
                             didHitHitbox = true;
                             clashedHitbox = other;
-                            OnHitHitbox.Invoke();
+                            events.OnHitHitbox.Invoke(this,clashedHitbox);
                         }
 
                     }
@@ -196,8 +197,8 @@ public class Hitbox : MonoBehaviour
                         hitActor.SetHitParticleVectors(collider.ClosestPoint(end), (end-start).normalized);
                         hitActor.TakeDamage(this.damageKnockback);
                         didHit = true;
-                        OnHitActor.Invoke();
-                        OnHitAnything.Invoke();
+                        events.OnHitActor.Invoke(this,hitActor);
+                        events.OnHitAnything.Invoke(this,hitActor.GetGameObject());
                     }
                 }
             }

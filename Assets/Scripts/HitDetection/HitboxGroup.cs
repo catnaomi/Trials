@@ -14,18 +14,15 @@ public class HitboxGroup
     public bool didHitTerrain;
     public bool didHitHitbox;
     public Hitbox terrainContactBox;
-    public UnityEvent OnHitTerrain;
-    public UnityEvent OnHitWall;
-    public UnityEvent OnHitHitbox;
+
+    public Hitbox.Events events;
 
     public HitboxGroup()
     {
         this.hitboxes = new List<Hitbox>();
         this.victims = new List<IDamageable>();
 
-        OnHitTerrain = new UnityEvent();
-        OnHitWall = new UnityEvent();
-        OnHitHitbox = new UnityEvent();
+        events = new();
     }
     public HitboxGroup(GameObject root) : this()
     {
@@ -37,43 +34,30 @@ public class HitboxGroup
         this.hitboxes = hitboxes;
         this.victims = new List<IDamageable>();
 
-        OnHitTerrain = new UnityEvent();
-        OnHitWall = new UnityEvent();
-        OnHitHitbox = new UnityEvent();
+        
+        events = new();
         foreach (Hitbox hitbox in this.hitboxes)
         {
-            hitbox.victims = this.victims;
-
-            hitbox.OnHitTerrain = new UnityEvent();
-
-            hitbox.OnHitTerrain.AddListener(() => { TerrainHit(hitbox); });
-
-            hitbox.OnHitWall = new UnityEvent();
-            
-            hitbox.OnHitWall.AddListener(() => { OnHitWall.Invoke(); });
-
-            hitbox.OnHitHitbox = new UnityEvent();
-
-            hitbox.OnHitHitbox.AddListener(() => { HitboxHit(hitbox); });
+            SetEvents(hitbox);
         }
     }
 
     public void Add(Hitbox hitbox)
     {
         hitboxes.Add(hitbox);
+        SetEvents(hitbox);
+    }
 
+    void SetEvents(Hitbox hitbox)
+    {
+        if (hitbox.events == null)
+            hitbox.events = new();
         hitbox.victims = this.victims;
-        hitbox.OnHitTerrain = new UnityEvent();
 
-        hitbox.OnHitTerrain.AddListener(() => { TerrainHit(hitbox); });
-
-        hitbox.OnHitWall = new UnityEvent();
-
-        hitbox.OnHitWall.AddListener(() => { OnHitWall.Invoke(); });
-
-        hitbox.OnHitHitbox = new UnityEvent();
-
-        hitbox.OnHitHitbox.AddListener(() => { HitboxHit(hitbox); });
+        hitbox.events.OnHitTerrain.AddListener(TerrainHit);
+        hitbox.events.OnHitWall.AddListener(events.OnHitWall.Invoke);
+        hitbox.events.OnHitHitbox.AddListener(HitboxHit);
+        hitbox.events.OnHitAnything.AddListener(events.OnHitAnything.Invoke);
     }
 
     public void SetRoot(GameObject root)
@@ -104,7 +88,7 @@ public class HitboxGroup
 
     float VERTICAL_TERRAIN_DOT_THRESHOLD = 0.01f;
     float VERTICAL_TERRAIN_BIAS = 1f;
-    private void TerrainHit(Hitbox contactBox)
+    private void TerrainHit(Hitbox contactBox, Collider hitTerrain)
     {
         if (!didHitTerrain)
         {
@@ -123,26 +107,26 @@ public class HitboxGroup
             DrawArrow.ForDebug(root.transform.position - dir.normalized * VERTICAL_TERRAIN_BIAS, dir.normalized * (contactBox.radius + dir.magnitude + VERTICAL_TERRAIN_BIAS), Color.red);
             //Debug.DrawRay(root.transform.position - dir.normalized * VERTICAL_TERRAIN_BIAS, dir.normalized * (contactBox.radius + dir.magnitude + VERTICAL_TERRAIN_BIAS), Color.red, 10f);
 #endif
-            if (contactBox.hitTerrain.Raycast(new Ray(root.transform.position - dir.normalized * VERTICAL_TERRAIN_BIAS, dir.normalized), out RaycastHit hit, contactBox.radius + dir.magnitude + VERTICAL_TERRAIN_BIAS))
+            if (hitTerrain.Raycast(new Ray(root.transform.position - dir.normalized * VERTICAL_TERRAIN_BIAS, dir.normalized), out RaycastHit hit, contactBox.radius + dir.magnitude + VERTICAL_TERRAIN_BIAS))
             {
                 float dot = Vector3.Dot(hit.normal, Vector3.up);
                 if (Mathf.Abs(dot) < VERTICAL_TERRAIN_DOT_THRESHOLD)
                 {
-                    OnHitWall.Invoke();
+                    events.OnHitWall.Invoke(contactBox, hitTerrain);
                 }
             }
 
-            OnHitTerrain.Invoke();
+            events.OnHitTerrain.Invoke(contactBox, hitTerrain);
         }
     }
 
-    public void HitboxHit(Hitbox contactBox)
+    public void HitboxHit(Hitbox contactBox, Hitbox hit)
     {
         if (!didHitHitbox)
         {
             didHitHitbox = true;
             terrainContactBox = contactBox;
-            OnHitHitbox.Invoke();
+            events.OnHitHitbox.Invoke(contactBox, hit);
         }
         
     }

@@ -36,6 +36,19 @@ public static class DrawCircle {
         DrawWireSphere(center, radius, Color.white);
     }
 
+    public static void DrawArc(Vector3 center, Vector3 fromDir, Vector3 toDir, Color color, float duration = 0f, int resolution = 36)
+    {
+        for (int i =0; i < resolution; i++)
+        {
+            float t1 = (float)i / (float)resolution;
+            float t2 = (float)((i - 1)%resolution) / (float)resolution;
+            Vector3 p1 = center + Vector3.Slerp(fromDir, toDir, t1);
+            Vector3 p2 = center + Vector3.Slerp(fromDir, toDir, t2);
+            Debug.DrawLine(p1, p2, color, duration);
+        }
+
+    }
+
     static Vector3 GetDegreePoint(int i, Vector3 normal, Vector3 up, float radius, float interval)
     {
         float degrees = interval * i;

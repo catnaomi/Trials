@@ -33,10 +33,10 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         GenerateHitboxes();
 
         SetTrails(false, false);
-        hitboxes.OnHitTerrain.RemoveAllListeners();
-        hitboxes.OnHitTerrain.AddListener(TerrainContact);
-        hitboxes.OnHitWall.AddListener(WallContact);
-        hitboxes.OnHitHitbox.AddListener(ClashContact);
+        hitboxes.events.OnHitTerrain.RemoveAllListeners();
+        hitboxes.events.OnHitTerrain.AddListener(TerrainContact);
+        hitboxes.events.OnHitWall.AddListener(WallContact);
+        hitboxes.events.OnHitHitbox.AddListener(ClashContact);
 
         top = InterfaceUtilities.FindRecursively(GetModel().transform, "_top");
         bottom = InterfaceUtilities.FindRecursively(GetModel().transform, "_bottom");
@@ -453,11 +453,8 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
         return 5f + (5f * weight) + chargeCost;
     }
 
-    protected void ClashContact()
+    protected void ClashContact(Hitbox contactBox, Hitbox otherBox)
     {
-        Hitbox contactBox = hitboxes.terrainContactBox;
-        Hitbox otherBox = contactBox.clashedHitbox;
-
         DamageKnockback thisDamage = contactBox.damageKnockback;
         DamageKnockback otherDamage = otherBox.damageKnockback;
 
@@ -475,17 +472,15 @@ public class BladeWeapon : EquippableWeapon, IHitboxHandler
             }
         }
     }
-    protected void WallContact()
+    protected void WallContact(Hitbox contactBox, Collider hitTerrain)
     {
         wall = true;
     }
-    protected void TerrainContact()
+    protected void TerrainContact(Hitbox contactBox, Collider hitTerrain)
     {
-        Hitbox contactBox = hitboxes.terrainContactBox;
-
         if (active && holder.TryGetComponent<HumanoidPositionReference>(out HumanoidPositionReference positionReference))
         {
-            Vector3 contactPoint = contactBox.hitTerrain.ClosestPoint((positionReference.MainHand.transform.position + positionReference.MainHand.transform.forward * (length / 2f)));
+            Vector3 contactPoint = hitTerrain.ClosestPoint((positionReference.MainHand.transform.position + positionReference.MainHand.transform.forward * (length / 2f)));
 
             FXController.CreateFX(FXController.FX.FX_Sparks,
                     contactPoint,

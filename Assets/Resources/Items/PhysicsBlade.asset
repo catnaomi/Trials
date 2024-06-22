@@ -9,19 +9,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f5b2d60248716348904e0a95c23587b, type: 3}
-  m_Name: DebugBladeFire
+  m_Script: {fileID: 11500000, guid: 1afc93f995b6bf541b4fd9e9991547e9, type: 3}
+  m_Name: PhysicsBlade
   m_EditorClassIdentifier: 
-  itemName: DebugBlade Fire
-  itemDesc: a weapon of choice for hot developers
+  itemName: Physics Blade
+  itemDesc: gravity gun real?
   holder: {fileID: 0}
   MaxStackSize: 1
   Quantity: 1
   invIdOverride: 
-  prefab: {fileID: 1804189005472518104, guid: f251dc646a8b5dc4ea23a4ea09af7651, type: 3}
+  prefab: {fileID: 7338320153744159085, guid: 9b855f9aea47de649b4456082843957b, type: 3}
   displayImage: {fileID: 21300000, guid: db06b6c4cc451d749a12788835a5bc2a, type: 3}
-  displayColor: {r: 1, g: 0, b: 0, a: 1}
-  isEquipped: 0
+  displayColor: {r: 1, g: 1, b: 1, a: 1}
+  isEquipped: 1
   EquippableMain: 1
   EquippableOff: 0
   EquippableRanged: 0
@@ -29,22 +29,22 @@ MonoBehaviour:
   TwoHanded: 1
   ParentLeft: 0
   MainHandEquipSlot: 1
-  OffHandEquipSlot: 2
+  OffHandEquipSlot: 3
   RangedEquipSlot: 0
   primaryStance:
-    blendStance: {fileID: 0}
-    blendMask: {fileID: 0}
-    blendWeight: 0
+    blendStance: {fileID: 11400000, guid: bc3ee41cd093cd446b3194fe194de551, type: 2}
+    blendMask: {fileID: 31900000, guid: a76c8a8495a438e44930e6f31bbc3edd, type: 2}
+    blendWeight: 1
     additive: 0
   secondaryStance:
     blendStance: {fileID: 0}
     blendMask: {fileID: 0}
     blendWeight: 0
     additive: 0
-  moveset: {fileID: 0}
-  size: 0
+  moveset: {fileID: 11400000, guid: d586729a6d4be9d4f9eb0498954a9f99, type: 2}
+  size: 1
   AttackSpeed: 1
-  weight: 3
+  weight: 2
   usesAmmunition: 0
   ammunitionReference: {fileID: 0}
   OnEquip:
@@ -54,10 +54,11 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   model: {fileID: 0}
-  baseDamage: 0
-  width: 0.25
-  length: 1.25
+  baseDamage: 1
+  width: 1
+  length: 1.5
   doubleSided: 0
   slashModifier: 1
   thrustModifier: 1
-  elements: 4032
+  elements: 64
+  force: 1000
