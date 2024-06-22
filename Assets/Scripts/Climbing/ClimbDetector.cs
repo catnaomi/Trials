@@ -9,6 +9,7 @@ public abstract class ClimbDetector : MonoBehaviour
     public bool InUse { get; set; }
     [field: SerializeField]
     public bool IsDisabled { get; set; }
+    public bool allowWhileRising = false;
     public Collider collider;
 
     public UnityEvent OnStartClimb;
@@ -38,7 +39,7 @@ public abstract class ClimbDetector : MonoBehaviour
         if (InUse)
         {
             PlayerActor.player.UnsnapLedge();
-            PlayerActor.player.StartClimbLockout();
+            PlayerActor.player.ClimbLockout();
             InUse = false;
         }
     }

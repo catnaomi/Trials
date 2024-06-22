@@ -16,7 +16,9 @@ public class StayRelativeToParent : MonoBehaviour
 
     private void FixedUpdate()
     {
-        rigidbody.MovePosition(this.transform.parent.position + offset);
-        rigidbody.MoveRotation(this.transform.parent.rotation);
+        Vector3 position = this.transform.parent.position + offset;
+        Quaternion rotation = Quaternion.LookRotation(this.transform.parent.forward);
+
+        rigidbody.Move(position, rotation);
     }
 }

@@ -5464,6 +5464,7 @@ MonoBehaviour:
   jumpVel: 6
   attackJumpVel: 7
   backflipSpeed: 5
+  climbDismountSpeed: 1
   isGrounded: 0
   airTime: 0
   groundBias: 0.1
@@ -5769,8 +5770,8 @@ MonoBehaviour:
       _NormalizedTimes: []
       _Callbacks: []
       _Names: []
-    _Clip: {fileID: 3620948995582406368, guid: 8816280a2b67cf64b9659d6e3dc72647, type: 3}
-    _Speed: 1
+    _Clip: {fileID: 7400000, guid: f4bbc280cc94cbd40b6b7ab935609781, type: 2}
+    _Speed: 1.5
     _NormalizedStartTime: 0
   ledgeStart:
     _FadeDuration: 0.25
@@ -41394,8 +41395,8 @@ Transform:
   m_GameObject: {fileID: 2757355004339713925}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0, y: 1.9419994, z: 0.16699934}
-  m_LocalScale: {x: 0.32398, y: 0.1, z: 1.5268252}
+  m_LocalPosition: {x: -0, y: 1.8056, z: 0.16699934}
+  m_LocalScale: {x: 0.32398, y: 0.37287, z: 1.5268252}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 307703049}
@@ -41445,9 +41446,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 0
   m_IsKinematic: 1
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 1
+  m_CollisionDetection: 3
 --- !u!114 &2757355004339713927
 MonoBehaviour:
   m_ObjectHideFlags: 0

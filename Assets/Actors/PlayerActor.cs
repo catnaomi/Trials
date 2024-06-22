@@ -98,6 +98,8 @@ public class PlayerActor : Actor, IAttacker, IDamageable
     public float attackJumpVel = 10f;
     public float backflipSpeed = 5f;
     [Space(5)]
+    public float climbDismountSpeed = 1f;
+    [Space(5)]
     [ReadOnly] public bool isGrounded;
     [ReadOnly] public float airTime = 0f;
     public float groundBias = 0f;
@@ -1294,22 +1296,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             }
             if (ledgeSnap)
             {
-                if (currentClimb is Ledge ledge)
-                {
-                    //animancer.Play(ledgeStart);
-                    state.climb = (DirectionalMixerState)animancer.Play(ledgeHang);
-                }
-                else if (currentClimb is Ladder ladder)
-                {
-                    state.climb = animancer.Play(ladderClimb);
-
-                }
-                else if (currentClimb is Rail rail)
-                {
-                    state.climb = animancer.Play(railWalk);
-                }
-                SnapToLedge();
-                StartCoroutine(DelayedSnapToLedge());
+                StartClimb();
             }
             if (CheckWater())
             {
@@ -1578,19 +1565,15 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             if (airTime > minAirTimeToAct)
             {
                 HandleAirAttacks();
-            }
-            /*
-            if (ledgeSnap && currentClimb is Ledge && currentClimb.transform.position.y > this.transform.position.y)
-            {
-                if (currentClimb.TryGetComponent<Ledge>(out Ledge ledge))
+                if (ledgeSnap && currentClimb != null && currentClimb.allowWhileRising)
                 {
-                    animancer.Play(ledgeStart);
-
+                    if (currentClimb is not Ledge || (currentClimb.transform.position.y > this.transform.position.y))
+                    {
+                        StartClimb();
+                    }
                 }
-                SnapToLedge();
-                StartCoroutine(DelayedSnapToLedge());
             }
-            */
+            
             animancer.Layers[0].ApplyAnimatorIK = true;
         }
         #endregion
@@ -1612,7 +1595,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     ((DirectionalMixerState)state.climb).ParameterX = dot;
                     state.climb.Speed = Mathf.Abs(dot) * climbSpeed;
                 }
-                if (ledge.autoClimb)
+                if (ledge.autoClimb && Vector3.Distance(this.transform.position, climbSnapPoint) < 0.01f)
                 {
                     ClimbUpLedge();
                 }
@@ -1627,7 +1610,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
                     this.transform.rotation = Quaternion.LookRotation(currentClimb.collider.transform.forward);
                     ledgeSnap = false;
                     state.climbUp = animancer.Play(ladderClimbUp);
-                    StartClimbLockout();
+                    ClimbLockout();
                     ladder.StopClimb();
                 }
             }
@@ -2570,11 +2553,32 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         cc.enabled = true;
     }
 
-    public void StartLedge()
+    public void StartClimb()
     {
-        state.climb = (DirectionalMixerState)animancer.Play(ledgeHang);
-    }
+        if (currentClimb is Ledge ledge)
+        {
+            //animancer.Play(ledgeStart);
+            if (animancer.States.Current == state.jump)
+            {
+                state.climb = (DirectionalMixerState)animancer.Play(ledgeHang, 0.25f);
+            }
+            else
+            {
+                state.climb = (DirectionalMixerState)animancer.Play(ledgeHang);
+            }
+        }
+        else if (currentClimb is Ladder ladder)
+        {
+            state.climb = animancer.Play(ladderClimb);
 
+        }
+        else if (currentClimb is Rail rail)
+        {
+            state.climb = animancer.Play(railWalk);
+        }
+        SnapToLedge();
+        StartCoroutine(DelayedSnapToLedge());
+    }
 
     public void StopClimbing()
     {
@@ -2585,7 +2589,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         cc.Move(Vector3.down * 0.5f);
         yVel = 0f;
         xzVel = Vector3.zero;
-        StartClimbLockout();
+        ClimbLockout();
         currentClimb.StopClimb();
     }
 
@@ -2601,7 +2605,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         this.transform.position = climbSnapPoint;
         state.climbUp = animancer.Play(ledgeClimb);
         //currentClimb.StopClimb();
-        StartClimbLockout();
+        ClimbLockout();
     }
 
     void SnapToLedge()
@@ -2670,11 +2674,11 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         }
     }
 
-    public void StartClimbLockout()
+    public void ClimbLockout()
     {
-        StartCoroutine(ClimbLockout());
+        StartCoroutine(ClimbLockoutRoutine());
     }
-    IEnumerator ClimbLockout()
+    IEnumerator ClimbLockoutRoutine()
     {
         allowClimb = false;
         yield return new WaitForSeconds(1f);
@@ -3007,7 +3011,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
             cc.Move(Vector3.down * 0.5f);
             yVel = 0f;
             xzVel = Vector3.zero;
-            StartClimbLockout();
+            ClimbLockout();
         }
         else
         {
@@ -3033,7 +3037,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         else if (!isGrounded && !allowClimb && (currentClimb == null && !currentClimb.AllowJumps()))
         {
             // what was this supposed to do...?
-            StartClimbLockout();
+            ClimbLockout();
             allowClimb = true;
         }
         else if (isGrounded || airTime < jumpBuffer || (IsClimbing() && currentClimb.AllowJumps()))
@@ -5074,7 +5078,7 @@ public class PlayerActor : Actor, IAttacker, IDamageable
         cc.enabled = true;
         airTime = 0f;
         yVel = 0f;
-        xzVel = Vector3.zero;
+        xzVel = this.transform.forward * climbDismountSpeed;
         animancer.Play(state.move, 0.25f);
         if (currentClimb != null)
         {
