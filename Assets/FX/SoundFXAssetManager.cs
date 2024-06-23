@@ -7,7 +7,7 @@ public class SoundFXAssetManager : MonoBehaviour
 {
     public static SoundFXAssetManager instance;
 
-    public Dictionary<string, AudioClip> soundEffects = new Dictionary<string, AudioClip>();
+    public Dictionary<string, AudioClip> soundEffects = new Dictionary<string, AudioClip>();    
 
     void Awake()
     {
@@ -18,7 +18,13 @@ public class SoundFXAssetManager : MonoBehaviour
         }
         instance = this;
         DontDestroyOnLoad(this);
+        LoadSoundAssets();
+        
+    }
 
+    public void LoadSoundAssets()
+    {
+        soundEffects.Clear();
         LoadSound(null, "Player/FallDamage");
         LoadSound(null, "Player/Dash");
         LoadSound(null, "Player/Tap");
@@ -33,11 +39,13 @@ public class SoundFXAssetManager : MonoBehaviour
         LoadSound(null, "Sword/Blood/NoCritical");
         LoadSound(null, "Sword/Metal/NoCritical");
         LoadSound(null, "Sword/Wood/NoCritical");
-        LoadSound(null, "Sword/Stone/NoCritical", "Sword/Ice/NoCritical");
+        LoadSound(null, "Sword/Stone/NoCritical");
         LoadSound(null, "Sword/Blood/Critical");
         LoadSound(null, "Sword/Metal/Critical");
         LoadSound(null, "Sword/Wood/Critical");
         LoadSound(null, "Sword/Stone/Critical", "Sword/Ice/Critical", "Parry/Success");
+        LoadSound(null, "Sword/Ice/NoCritical");
+
 
         LoadSound(null, "Bow/Fire", "Gun/Fire");
         LoadSound(null, "Bow/Hit");
