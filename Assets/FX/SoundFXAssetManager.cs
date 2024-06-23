@@ -75,6 +75,10 @@ public class SoundFXAssetManager : MonoBehaviour
             Debug.LogError($"Couldn't load sound effect {path}!");
             audioClip = AudioClip.Create("Empty Clip", 1, 2, 48000, false);
         }
+        else
+        {
+            audioClip.name = names[0];
+        }
 
         foreach (var name in names)
         {
