@@ -259,7 +259,7 @@ public class FXController : MonoBehaviour
         ImpulseScreenShake(direction * mag);
     }
 
-    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool isCritical, FXMaterial hurtMaterial)
+    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool didTink, bool isCritical, FXMaterial hurtMaterial)
     {
         if (!instance.hitFXPrefabFromMaterial.TryGetValue(hurtMaterial, out var particlePrefabs))
         {
