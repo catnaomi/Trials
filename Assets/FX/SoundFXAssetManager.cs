@@ -7,8 +7,7 @@ public class SoundFXAssetManager : MonoBehaviour
 {
     public static SoundFXAssetManager instance;
 
-    public Dictionary<string, AudioClip> soundEffects = new Dictionary<string, AudioClip>();
-
+    public Dictionary<string, AudioClip[]> soundEffects = new Dictionary<string, AudioClip[]>();
     void Awake()
     {
         if (instance != null)
@@ -18,7 +17,13 @@ public class SoundFXAssetManager : MonoBehaviour
         }
         instance = this;
         DontDestroyOnLoad(this);
+        LoadSoundAssets();
+        
+    }
 
+    public void LoadSoundAssets()
+    {
+        soundEffects.Clear();
         LoadSound(null, "Player/FallDamage");
         LoadSound(null, "Player/Dash");
         LoadSound(null, "Player/Tap");
@@ -28,16 +33,24 @@ public class SoundFXAssetManager : MonoBehaviour
         LoadSound(null, "Player/Slide/Slide");
         LoadSound(null, "Player/Slide/Continuous");
 
-        LoadSound("Sword/Swing/Light", "Slash/Light", "Thrust/Light");
-        LoadSound("Sword/Swing/Heavy", "Slash/Heavy", "Thrust/Heavy");
+        LoadSound("Sword/Swing/Light", "Slash/Light", "Thrust/Light", "Slash/Heavy", "Thrust/Heavy");
+        //LoadSound("Sword/Swing/Heavy", "Slash/Heavy", "Thrust/Heavy");
         LoadSound(null, "Sword/Blood/NoCritical");
         LoadSound(null, "Sword/Metal/NoCritical");
         LoadSound(null, "Sword/Wood/NoCritical");
-        LoadSound(null, "Sword/Stone/NoCritical", "Sword/Ice/NoCritical");
+        LoadSound(null, "Sword/Stone/NoCritical");
+        LoadSound(null, "Sword/Ice/NoCritical");
         LoadSound(null, "Sword/Blood/Critical");
         LoadSound(null, "Sword/Metal/Critical");
         LoadSound(null, "Sword/Wood/Critical");
-        LoadSound(null, "Sword/Stone/Critical", "Sword/Ice/Critical", "Parry/Success");
+        LoadSound(null, "Sword/Stone/Critical", "Parry/Success");
+        LoadSound(null, "Sword/Ice/Critical");
+        LoadSound(null, "Sword/Blood/Weak");
+        LoadSound(null, "Sword/Metal/Weak");
+        LoadSound(null, "Sword/Wood/Weak");
+        LoadSound(null, "Sword/Stone/Weak");
+        LoadSound(null, "Sword/Ice/Weak");
+
 
         LoadSound(null, "Bow/Fire", "Gun/Fire");
         LoadSound(null, "Bow/Hit");
@@ -75,16 +88,70 @@ public class SoundFXAssetManager : MonoBehaviour
             Debug.LogError($"Couldn't load sound effect {path}!");
             audioClip = AudioClip.Create("Empty Clip", 1, 2, 48000, false);
         }
-
+        audioClip.name = path;
         foreach (var name in names)
         {
-            soundEffects.Add(name, audioClip);
+            soundEffects.Add(name, new AudioClip[] { audioClip });
         }
+    }
+
+    void LoadSoundVariants(string path, int variationCount, params string[] names)
+    {
+        if (variationCount <= 0)
+        {
+            LoadSound(path, names);
+            return;
+        }
+
+        if (path == null)
+        {
+            path = names[0];
+        }
+
+        AudioClip[] clips = new AudioClip[variationCount];
+
+        for (int i = 0; i < variationCount; i++)
+        {
+            var audioClip = Resources.Load<AudioClip>(Path.Combine("Sounds", path+"_"+(i+1)));
+            if (audioClip == null)
+            {
+                Debug.LogError($"Couldn't load sound effect {path}!");
+                audioClip = AudioClip.Create("Empty Clip", 1, 2, 48000, false);
+            }
+            audioClip.name = path+"_"+(i+1);
+            clips[i] = audioClip;
+        }
+
+        List<string> totalNames = new List<string>();
+        totalNames.AddRange(names);
+
+        foreach (string name in names)
+        {
+            soundEffects.Add(name, clips);
+            for (int i = 0; i < variationCount; i++)
+            {
+                soundEffects.Add(name + "_" + (i + 1), new AudioClip[] { clips[i] });
+            }
+        }
+        
     }
 
     public static AudioClip GetSound(string name)
     {
-        return instance.soundEffects[name];
+        if (instance.soundEffects.ContainsKey(name) == false)
+        {
+            Debug.LogError($"Couldn't find sound effect {name}!");
+            return null;
+        }
+
+        if (instance.soundEffects.Count == 0)
+        {
+            return instance.soundEffects[name][0];
+        }
+        else
+        {
+            return instance.soundEffects[name][UnityEngine.Random.Range(0, instance.soundEffects[name].Length)];
+        }
     }
 
     public static AudioClip GetSound(params string[] nameSections)

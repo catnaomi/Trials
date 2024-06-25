@@ -2,6 +2,7 @@
 using System;
 using UnityEngine.Events;
 using CustomUtilities;
+using UnityEngine.UIElements.Experimental;
 
 [Serializable]
 public class DamageKnockback
@@ -51,9 +52,9 @@ public class DamageKnockback
     public UnityEvent OnBlock;
     public UnityEvent OnHitWeakness;
     [Header("Runtime Flags")]
-    [ReadOnly] public bool didCrit;
-    [ReadOnly] public bool timeDelayed;
-    [ReadOnly]
+    [ReadOnly] public Result result;
+    public bool timeDelayed {get => result.timeDelayed; set=> result.timeDelayed = value;} //I'm too tirede to shotgun program rn
+    public bool didCrit {get => result.didCrit; set=> result.didCrit = value;}
     public GameObject hitboxSource;
     [ReadOnly]
     public GameObject source;
@@ -89,6 +90,17 @@ public class DamageKnockback
         public float criticalExtensionTime;
     }
 
+    [Serializable]
+    public class Result
+    {
+       public bool didCrit;
+       public bool timeDelayed;
+       public bool didHitWeakness;
+       //public bool didBlock;
+       public bool didKill;
+       public float damageAmount;
+        // TODO: add more fields, dodging, blocking, etc
+    }
     public struct FXData
     {
         public bool isHeavyAttack;
@@ -134,13 +146,6 @@ public class DamageKnockback
         Heavy,
     }
 
-    //public bool breaksArmor;
-
-    public DamageKnockback(Vector3 force)
-    {
-        this.kbForce = force;
-    }
-
     public DamageKnockback(DamageKnockback damageKnockback)
     {
         this.kbForce = damageKnockback.kbForce.normalized * damageKnockback.kbForce.magnitude;
@@ -183,11 +188,13 @@ public class DamageKnockback
         this.OnCrit = damageKnockback.OnCrit ?? new UnityEvent();
         this.OnBlock = damageKnockback.OnBlock ?? new UnityEvent();
         this.OnHitWeakness = damageKnockback.OnHitWeakness ?? new UnityEvent();
+        result = new();
     }
 
     public DamageKnockback()
     {
         this.healthDamage = 0f;
+        result = new();
     }
 
     public static DamageKnockback GetDefaultDamage()
@@ -215,8 +222,8 @@ public class DamageKnockback
     
     public void Reset()
     {
-        didCrit = false;
-        timeDelayed = false;
+        result.didCrit = false;
+        result.timeDelayed = false;
     }
 
     public static readonly StaggerData StandardStaggerData = new StaggerData()

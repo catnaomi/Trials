@@ -370,7 +370,7 @@ public class WyrmActor : Actor, INavigates, IDamageable, IAttacker, IHitboxHandl
     {
         lastDamageTaken = damage;
         bool isCrit = (IsAttacking() && damage.GetTypes().HasType(DamageType.Piercing));
-        damage.didCrit = isCrit;
+        damage.result.didCrit = isCrit;
         float damageAmount = DamageKnockback.GetTotalMinusResistances(damage.GetDamageAmount(isCrit), damage.unresistedMinimum, damage.GetTypes(), this.attributes.resistances);
         if (this.IsTimeStopped())
         {
