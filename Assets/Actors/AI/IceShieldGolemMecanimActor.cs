@@ -212,12 +212,12 @@ public class IceShieldGolemMecanimActor : Actor, IAttacker, IDamageable
                     Break();
                     this.OnHurt.Invoke();
                     damage.OnCrit.Invoke();
-                    damage.didCrit = true;
+                    damage.result.didCrit = true;
                     
                 }
                 attributes.health.current-=4;
             }
-            else if (fail && !damage.timeDelayed)
+            else if (fail && !damage.result.timeDelayed)
             {
                 OnFail = true;
                 damage.OnBlock.Invoke();

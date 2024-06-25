@@ -122,6 +122,13 @@ public class FXController : MonoBehaviour
         }
     }
 
+    public enum DamageSoundState
+    {
+        NoCritical,
+        Critical,
+        Weak
+    }
+
     public static GameObject CreateFX(FX name, Vector3 position, Quaternion rotation, float duration)
     {
         return CreateFX(name, position, rotation, duration, null);
@@ -231,8 +238,13 @@ public class FXController : MonoBehaviour
 
     public static void PlaySwordHitSound(AudioSource source, FXMaterial material, bool isCritical)
     {
-        var volume = isCritical ? instance.criticalHitVolume : instance.noCriticalHitVolume;
-        SoundFXAssetManager.PlaySound(source, volume, "Sword", material.ToString(), isCritical ? "Critical" : "NoCritical");
+        PlaySwordHitSound(source, material, isCritical ? DamageSoundState.Critical : DamageSoundState.NoCritical);
+    }
+
+    public static void PlaySwordHitSound(AudioSource source, FXMaterial material, DamageSoundState state)
+    {
+        float volume = state == DamageSoundState.Critical ? instance.criticalHitVolume : instance.noCriticalHitVolume;
+        SoundFXAssetManager.PlaySound(source, volume, "Sword", material.ToString(), state.ToString());
     }
 
     public static Color GetColorFromDamageType(DamageType damageType)
@@ -259,7 +271,7 @@ public class FXController : MonoBehaviour
         ImpulseScreenShake(direction * mag);
     }
 
-    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, bool didTink, bool isCritical, FXMaterial hurtMaterial)
+    public static GameObject CreateBleed(Vector3 position, Vector3 direction, bool isSlash, DamageSoundState state, FXMaterial hurtMaterial)
     {
         if (!instance.hitFXPrefabFromMaterial.TryGetValue(hurtMaterial, out var particlePrefabs))
         {
@@ -270,7 +282,7 @@ public class FXController : MonoBehaviour
         newFX.transform.position = position;
         newFX.transform.rotation = Quaternion.LookRotation(direction);
         AudioSource source = newFX.GetComponentInChildren<AudioSource>();
-        PlaySwordHitSound(source, hurtMaterial, isCritical);
+        PlaySwordHitSound(source, hurtMaterial,state);
 
         Destroy(newFX, 10f);
         return newFX;
@@ -278,9 +290,14 @@ public class FXController : MonoBehaviour
     
     public static GameObject CreateBlock(Vector3 position, Quaternion rotation, float duration, bool isTypedBlock)
     {
+        return CreateBlock(position, rotation, duration, isTypedBlock, FXMaterial.Metal);
+    }
+
+    public static GameObject CreateBlock(Vector3 position, Quaternion rotation, float duration, bool isTypedBlock, FXMaterial material)
+    {
         var newFX = CreateFX(FX.FX_Sparks, position, rotation, duration, null);
         AudioSource audioSource = newFX.GetComponentInChildren<AudioSource>();
-        PlaySwordHitSound(audioSource, FXMaterial.Metal, isTypedBlock);
+        PlaySwordHitSound(audioSource, material, isTypedBlock);
         return newFX;
     }
 

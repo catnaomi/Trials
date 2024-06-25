@@ -88,7 +88,7 @@ public class SoundFXAssetManager : MonoBehaviour
             Debug.LogError($"Couldn't load sound effect {path}!");
             audioClip = AudioClip.Create("Empty Clip", 1, 2, 48000, false);
         }
-
+        audioClip.name = path;
         foreach (var name in names)
         {
             soundEffects.Add(name, new AudioClip[] { audioClip });
@@ -118,6 +118,7 @@ public class SoundFXAssetManager : MonoBehaviour
                 Debug.LogError($"Couldn't load sound effect {path}!");
                 audioClip = AudioClip.Create("Empty Clip", 1, 2, 48000, false);
             }
+            audioClip.name = path+"_"+(i+1);
             clips[i] = audioClip;
         }
 
@@ -142,6 +143,7 @@ public class SoundFXAssetManager : MonoBehaviour
             Debug.LogError($"Couldn't find sound effect {name}!");
             return null;
         }
+
         if (instance.soundEffects.Count == 0)
         {
             return instance.soundEffects[name][0];

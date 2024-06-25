@@ -327,7 +327,20 @@ public class AnimationFXHandler : MonoBehaviour
         DamageKnockback damage = actor.GetComponent<IDamageable>().GetLastTakenDamage();
         if (damage != null)
         {
-            FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, damage.isSlash, damage.didCrit, fxMaterial);
+            FXController.DamageSoundState state;
+            if (damage.didCrit)
+            {
+                state = FXController.DamageSoundState.Critical;
+            }
+            else if (damage.result.damageAmount <= 0f)
+            {
+                state = FXController.DamageSoundState.Weak;
+            }
+            else
+            {
+                state = FXController.DamageSoundState.NoCritical;
+            }
+            FXController.CreateBleed(actor.hitParticlePosition, actor.hitParticleDirection, damage.isSlash, state, fxMaterial);
             FXController.DamageScreenShake(actor.hitParticleDirection, damage.didCrit, false);
         }
     }
@@ -348,7 +361,7 @@ public class AnimationFXHandler : MonoBehaviour
 
             if (isSlash || isThrust)
             {
-                FXController.CreateBlock(actor.hitParticlePosition, Quaternion.identity, 1f, didTypedBlock);
+                FXController.CreateBlock(actor.hitParticlePosition, Quaternion.identity, 1f, didTypedBlock, fxMaterial);
                 FXController.DamageScreenShake(actor.hitParticleDirection, isCrit, true);
             }
 

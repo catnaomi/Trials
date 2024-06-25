@@ -123,7 +123,7 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
             return;
         }
         bool isCrit = IsCritVulnerable() || damage.critData.alwaysCritical;
-        damage.didCrit = isCrit;
+        damage.result.didCrit = isCrit;
         damageAmount = damage.GetDamageAmount(isCrit);
 
         actor.lastDamageTaken = damage;
@@ -183,17 +183,29 @@ public class HumanoidDamageHandler : IDamageable, IDamageHandler
         if (damage.GetTypes().HasType(dr.weaknesses))
         {
             damage.OnHitWeakness.Invoke();
+            damage.result.didHitWeakness = true;
         }
+        
+        /*
+        if (damage.GetTypes().HasType(dr.resistances))
+        {
+            damage.OnHitResistance.Invoke();
+            damage.result.didHitResistance = true;
+        }
+        */
 
         bool isArmored = actor.IsArmored() && !damage.breaksArmor;
         bool willInjure = actor.attributes.spareable && actor.attributes.HasHealthRemaining() && damageAmount >= actor.attributes.health.current;
         bool willKill = (!willInjure) && damageAmount >= actor.attributes.health.current;
         bool isCounterhit = actor.IsAttacking();
 
+        damage.result.didKill = willKill;
+
         lastDamageTaken = damage;
         lastDamage = damageAmount;
         damageTaken += lastDamage;
 
+        damage.result.damageAmount = damageTaken;
         actor.lastDamageTaken = damage;
         actor.lastDamageAmountTaken = damageAmount;
 
