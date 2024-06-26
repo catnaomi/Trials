@@ -1,3 +1,4 @@
+using Cinemachine;
 using UnityEngine;
 
 public class PlayerSaveDataManager : MonoBehaviour
@@ -192,6 +193,10 @@ public class PlayerSaveDataManager : MonoBehaviour
         {
             PortalManager.instance.Swap();
         }
+
+        var cameraBrain = FindObjectOfType<CinemachineBrain>();
+        var virtualCamera = cameraBrain.ActiveVirtualCamera as CinemachineVirtualCameraBase;
+        virtualCamera.ForceCameraPosition(worldData.cameraPosition.toVector3(), worldData.cameraRotation.toQuaternion());
     }
 
     public static void Clear()
