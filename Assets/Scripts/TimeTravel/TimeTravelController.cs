@@ -107,10 +107,7 @@ public class TimeTravelController : MonoBehaviour
             block = new MaterialPropertyBlock();
             bubbleInner.SetPropertyBlock(block);
         }
-        if (SceneLoader.IsSceneLoaderActive())
-        {
-            SceneLoader.GetOnActiveSceneChange().AddListener(ClearTimeDatas);
-        }
+        SceneLoader.GetOnActiveSceneChange().AddListener(ClearTimeDatas);
         if (PlayerActor.player != null)
         {
             lastPosition = PlayerActor.player.transform.position;
@@ -881,7 +878,7 @@ public class TimeTravelController : MonoBehaviour
             }
             if (time.IsFreezing())
             {
-                time.StopFreeze();   
+                time.StopFreeze();
             }
         }
     }

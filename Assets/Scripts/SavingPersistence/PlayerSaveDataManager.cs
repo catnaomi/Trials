@@ -14,8 +14,6 @@ public class PlayerSaveDataManager : MonoBehaviour
 
     bool inventoryChanged;
     bool attributesChanged;
-    public bool save;
-    public bool load;
 
     private void Awake()
     {
@@ -32,20 +30,6 @@ public class PlayerSaveDataManager : MonoBehaviour
         if (TimeTravelController.time != null)
         {
             TimeTravelController.time.OnChargeChanged.AddListener(MarkAttributeChange);
-        }
-    }
-
-    private void Update()
-    {
-        if (save)
-        {
-            save = false;
-            SaveData();
-        }
-        if (load)
-        {
-            load = false;
-            LoadData();
         }
     }
 
@@ -72,16 +56,6 @@ public class PlayerSaveDataManager : MonoBehaviour
     {
         attributesChanged = true;
     }
-    public void SaveData()
-    {
-        SaveInventoryData();
-        SaveAttributeData();
-    }
-
-    public void LoadData()
-    {
-        LoadInventoryData();
-    }
 
     public void SaveInventoryData()
     {
@@ -104,6 +78,7 @@ public class PlayerSaveDataManager : MonoBehaviour
         if (instance == null) return;
         instance.inventoryData = new PlayerInventoryData(data);
     }
+
     public static PlayerInventoryData GetInventoryData()
     {
         if (instance != null)
@@ -188,7 +163,7 @@ public class PlayerSaveDataManager : MonoBehaviour
     public void SaveWorldData()
     {
         if (PlayerActor.player == null || PortalManager.instance == null) return;
-        
+
         if (worldData == null)
         {
             worldData = new PlayerWorldData();
@@ -208,6 +183,15 @@ public class PlayerSaveDataManager : MonoBehaviour
             }
         }
         return null;
+    }
+
+    public static void SetWorldData(PlayerWorldData worldData)
+    {
+        instance.worldData = worldData;
+        if (worldData.inWorld2)
+        {
+            PortalManager.instance.Swap();
+        }
     }
 
     public static void Clear()

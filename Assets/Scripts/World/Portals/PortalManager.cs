@@ -17,20 +17,21 @@ public class PortalManager : MonoBehaviour
     public bool inWorld2 = false;
 
     public bool inspectorSwap;
+
     private void Awake()
     {
         instance = this;
         rt = new RenderTexture(Screen.width, Screen.height, 24);
         Shader.SetGlobalTexture("_TimeCrackTexture", rt);
-        Camera.main.cullingMask = !this.inWorld2 ? this.GetWorld1Mask() : this.GetWorld2Mask();
+        Camera.main.cullingMask = !inWorld2 ? GetWorld1Mask() : GetWorld2Mask();
         Camera.main.cullingMask |= portalObjectMask;
-        
     }
 
     private void Start()
     {
         WindowManager.instance.ScreenSizeChangeEventDelayed += UpdateTextureSizeToScreenSize;
     }
+
     private void Update()
     {
         if (inspectorSwap)
@@ -39,10 +40,12 @@ public class PortalManager : MonoBehaviour
             Swap();
         }
     }
+
     public void Swap()
     {
         inWorld2 = !inWorld2;
-        Camera.main.cullingMask = !this.inWorld2 ? this.GetWorld1Mask() : this.GetWorld2Mask();
+        Debug.Log($"Swapped to world {(inWorld2 ? '2' : '1')}");
+        Camera.main.cullingMask = !inWorld2 ? GetWorld1Mask() : GetWorld2Mask();
         Camera.main.cullingMask |= portalObjectMask;
         OnSwap.Invoke();
     }

@@ -36,7 +36,7 @@ public class SceneTransferHallway : MonoBehaviour
         SceneLoader.AllowSceneActivation(true);
         SceneLoader.ShouldReloadScenes(false);
         SceneLoader.ShouldLoadInitScene(false);
-        SceneLoader.EnsureScenesAreLoaded(thisScene, targetScene);
+        SceneLoader.LoadScenes(thisScene, targetScene);
     }
 
     // return true on success
@@ -66,7 +66,7 @@ public class SceneTransferHallway : MonoBehaviour
             IsTransferInProgress = true;
             StartCoroutine(TransferRoutine());
         }
-       
+
     }
 
     IEnumerator TransferRoutine()
