@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using CustomUtilities;
 using UnityEngine;
 using UnityEngine.Events;
@@ -35,12 +34,12 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
 
     public void Recoil()
     {
-        
+
     }
 
     public void StartCritVulnerability(float time)
     {
-        
+
     }
 
     public void StopCritVulnerability()
@@ -50,23 +49,23 @@ public class BreakableObject : MonoBehaviour, IDamageable, IHasHealthAttribute
 
     public void TakeDamage(DamageKnockback damage)
     {
-        lastDamage = damage; 
+        lastDamage = damage;
         if (damage.GetTypes().HasType(brokenByElements))
         {
             health -= damage.healthDamage;
             if (health <= 0)
             {
-                BreakObject();             
+                BreakObject();
             }
             UpdateHealthAttribute();
             return;
         }
         if (recoilOnFail)
         {
-            
+
             if (!damage.isRanged && !damage.cannotRecoil && damage.source.TryGetComponent<IDamageable>(out IDamageable damageable))
             {
-                damageable.Recoil();   
+                damageable.Recoil();
             }
             damage.OnBlock.Invoke();
         }
