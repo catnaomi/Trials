@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: player_Belt2
-  m_Shader: {fileID: -6465566751694194690, guid: a7098a958dd28654fb80953cec1e2a57,
+  m_Shader: {fileID: -6465566751694194690, guid: 1cff8bffe21677f41ad7a3a0fd844d37,
     type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -89,6 +89,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SpecularMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -110,16 +114,22 @@ Material:
     - _ClearCoatSmoothness: 0
     - _Cull: 2
     - _Cutoff: 0.5
+    - _DebugBand: 0
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _ENABLEDEBUGGING: 0
     - _EnvironmentReflections: 1
+    - _FresnelNoiseOpacity: 0
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _HighlightThreshold: 2
     - _Metallic: 0
     - _Mode: 0
-    - _NormalStrength: 0
+    - _NoiseOpacity: 0
+    - _NoiseScale: 50
+    - _NormalStrength: 1
     - _OcclusionStrength: 1
     - _Offset: 0.495
     - _Parallax: 0.02
@@ -127,19 +137,28 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _RimBrightness: 0.5
+    - _RimCutoff: 1
     - _RimPower: 1
-    - _Smoothness: 0.5
+    - _RimThreshold: 0.5
+    - _SceneShadowThreshold: 0
+    - _ShadowBlendStrength: 0.4
+    - _ShadowThreshold: 0.39
+    - _Smoothness: 0
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _Surface: 0
+    - _TextureBlendStrength: 1.5
     - _UVSec: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.1441285, g: 0.1946179, b: 0.26635566, a: 1}
+    - _BaseColor: {r: 0.35087058, g: 0.35356534, b: 0.3764706, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _HighlightColor: {r: 0.75, g: 0.75, b: 0.75, a: 1}
+    - _NoiseTiling: {r: 1, g: 1, b: 0, a: 0}
+    - _ShadowColor: {r: 0.08, g: 0.08, b: 0.08, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _Tinting: {r: 0.2830189, g: 0.2830189, b: 0.2830189, a: 0}
   m_BuildTextureStacks: []

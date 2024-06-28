@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: player_Pants
+  m_Name: munSword_blade
   m_Shader: {fileID: -6465566751694194690, guid: 1cff8bffe21677f41ad7a3a0fd844d37,
     type: 3}
   m_Parent: {fileID: 0}
@@ -25,11 +25,11 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 0e6b71cdb6fb82144a8ae1d9bc6133af, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: cf4cfa2b2a42f5c4b8edceb5ef0c0e1c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -48,12 +48,8 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _GlowMask:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: cf7902b868d92cb4cbb98dc55d6e1057, type: 3}
+        m_Texture: {fileID: 2800000, guid: 0e6b71cdb6fb82144a8ae1d9bc6133af, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -61,7 +57,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 1d82f8829a56ae6409df5018f664627c, type: 3}
+        m_Texture: {fileID: 2800000, guid: cf4cfa2b2a42f5c4b8edceb5ef0c0e1c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -95,7 +91,10 @@ Material:
     m_Ints: []
     m_Floats:
     - _AlphaClip: 0
+    - _AlphaToMask: 0
     - _Blend: 0
+    - _BlendModePreserveSpecular: 1
+    - _BlendOp: 0
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
@@ -105,52 +104,50 @@ Material:
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _DstBlendAlpha: 0
     - _ENABLEDEBUGGING: 0
     - _EnvironmentReflections: 1
     - _FresnelNoiseOpacity: 0
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
-    - _HighlightThreshold: 2
-    - _Metallic: 0.131
+    - _HighlightThreshold: 0.53
+    - _Metallic: 0
     - _Mode: 0
     - _NoiseOpacity: 0
     - _NoiseScale: 50
-    - _NormalStrength: 1
+    - _NormalStrength: 0
     - _OcclusionStrength: 1
-    - _Offset: 0.369
     - _Parallax: 0.02
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _RimBrightness: 0.53
     - _RimCutoff: 1
-    - _RimPower: 1
-    - _RimThreshold: 0.5
+    - _RimThreshold: 0.48
+    - _SampleGI: 0
     - _SceneShadowThreshold: 0
     - _ShadowBlendStrength: 0
-    - _ShadowThreshold: 0.67
+    - _ShadowThreshold: 0.39
     - _Smoothness: 0
-    - _SmoothnessTextureChannel: 1
+    - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _SrcBlendAlpha: 1
     - _Surface: 0
-    - _TextureBlendStrength: 1
+    - _TextureBlendStrength: 1.5
     - _UVSec: 0
-    - _WorkflowMode: 1
+    - _WorkflowMode: 0
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.03, g: 0.03, b: 0.03, a: 1}
-    - _Color: {r: 0.39, g: 0.39, b: 0.39, a: 1}
+    - _BaseColor: {r: 0.278, g: 0.278, b: 0.278, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _HighlightColor: {r: 0.184548, g: 0.273, b: 0.184548, a: 1}
+    - _HighlightColor: {r: 5.992157, g: 5.992157, b: 5.992157, a: 1}
     - _NoiseTiling: {r: 1, g: 1, b: 0, a: 0}
-    - _SceneShadowColor: {r: 0, g: 0, b: 0, a: 0}
-    - _ShadowColor: {r: 0.0097199995, g: 0.01, b: 0.009808666, a: 1}
+    - _ShadowColor: {r: 0.096999995, g: 0.096999995, b: 0.096999995, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
-    - _Tinting: {r: 0.13717647, g: 0.20784314, b: 0.13717647, a: 1}
   m_BuildTextureStacks: []
---- !u!114 &3637065966436929412
+--- !u!114 &2653412345281374077
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}

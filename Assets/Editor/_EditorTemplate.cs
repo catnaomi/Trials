@@ -5,7 +5,7 @@ using UnityEngine;
 
 /*
 [CustomEditor(typeof(CLASS))]
-public class EditorTemplate : Editor
+public class CLASSEditor : Editor
 {
     public override void OnInspectorGUI()
     {

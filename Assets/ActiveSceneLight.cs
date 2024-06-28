@@ -19,6 +19,7 @@ public class ActiveSceneLight : MonoBehaviour
     // Start is called before the first frame update
     void OnEnable()
     {
+        if (light == null)  light = this.GetComponent<Light>();
         Check();
     }
 
