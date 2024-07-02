@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 public class Interactable : MonoBehaviour
@@ -11,7 +9,9 @@ public class Interactable : MonoBehaviour
     public GameObject interactIcon;
     public int priority = 1;
     [ReadOnly] public bool isPlayerInside;
+
     [Header("Interact UI Settings")]
+    public Transform interactIconPositionOverride;
     public float interactIconHeight = 1f;
     public string prompt;
     public float maxDistance = -1;
@@ -28,7 +28,7 @@ public class Interactable : MonoBehaviour
     {
         if (interactionNode == null)
         {
-            interactionNode = this.GetComponent<Collider>();
+            interactionNode = GetComponent<Collider>();
         }
         if (!interactionNode.isTrigger)
         {
@@ -42,7 +42,6 @@ public class Interactable : MonoBehaviour
         GetMaxDistance();
     }
 
-    // Update is called once per frame
     private void OnTriggerEnter(Collider other)
     {
         player = other.GetComponentInParent<PlayerActor>();
@@ -50,7 +49,6 @@ public class Interactable : MonoBehaviour
         {
             player.AddInteractable(this);
             isPlayerInside = true;
-            //Debug.Log("Player enter!");
         }
     }
 
@@ -62,7 +60,6 @@ public class Interactable : MonoBehaviour
             eplayer.RemoveInteractable(this);
             this.SetIconVisiblity(false);
             isPlayerInside = false;
-            //Debug.Log("Player exit!");
         }
     }
 
@@ -79,7 +76,7 @@ public class Interactable : MonoBehaviour
         {
             interactIcon.SetActive(false);
         }
-        
+
     }
 
     void GetMaxDistance()

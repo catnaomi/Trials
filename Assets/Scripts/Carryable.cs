@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -49,7 +47,7 @@ public class Carryable : MonoBehaviour
             player.Carry(this);
             StartCarry();
         }
-        
+
     }
 
     public void Throw(Vector3 force)

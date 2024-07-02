@@ -5,30 +5,35 @@ using UnityEngine;
 public class InteractIconHandler : MonoBehaviour
 {
     public Transform child;
-    Interactable currentInteractable;
-    float distance;
     public float distanceOffset;
-    // Start is called before the first frame update
+
+    Interactable currentInteractable;
+
     void Start()
     {
         if (PlayerActor.player == null)
         {
-            this.enabled = false;
+            enabled = false;
             return;
         }
     }
 
     private void Update()
     {
-        distance = distanceOffset;
-        Vector3 center = Vector3.zero;
+        var distance = distanceOffset;
         currentInteractable = PlayerActor.player.highlightedInteractable;
-        if (currentInteractable != null && !PlayerActor.player.isMenuOpen) 
+        if (currentInteractable != null && !PlayerActor.player.isMenuOpen)
         {
             child.gameObject.SetActive(true);
-            distance += currentInteractable.interactIconHeight;
-            center = currentInteractable.transform.position;
-            this.transform.position = center + Vector3.up * distance;
+            if (currentInteractable.interactIconPositionOverride)
+            {
+                transform.position = currentInteractable.interactIconPositionOverride.position;
+            }
+            else
+            {
+                distance += currentInteractable.interactIconHeight;
+                transform.position = currentInteractable.transform.position + Vector3.up * distance;
+            }
         }
         else
         {
