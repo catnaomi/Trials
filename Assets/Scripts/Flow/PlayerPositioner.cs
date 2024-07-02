@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerPositioner : MonoBehaviour
@@ -13,7 +11,7 @@ public class PlayerPositioner : MonoBehaviour
     Vector3 spawnPosition;
     Quaternion spawnRotation;
 
-    // For game testing purposes run these console commands on spawn in
+    // For game testing purposes run these console commands on spawn in if we are in editor
     public string[] consoleCommands;
 
     void Start()

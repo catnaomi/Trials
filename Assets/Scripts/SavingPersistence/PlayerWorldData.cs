@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,13 +8,17 @@ public class PlayerWorldData
     public string activeScene;
     public float[] position;
     public float[] rotation;
+    public float[] cameraPosition;
+    public float[] cameraRotation;
     public bool inWorld2;
 
     public void GetWorldData(PortalManager portal, PlayerActor player)
     {
         inWorld2 = portal.inWorld2;
-        position = new float[] { player.transform.position.x , player.transform.position.y, player.transform.position.z };
-        rotation = new float[] { player.transform.rotation.x, player.transform.rotation.y, player.transform.rotation.z, player.transform.rotation.w };
+        position = player.transform.position.toFloatArray();
+        rotation = player.transform.rotation.toFloatArray();
+        cameraPosition = Camera.main.transform.position.toFloatArray();
+        cameraRotation = Camera.main.transform.rotation.toFloatArray();
         activeScene = SceneManager.GetActiveScene().name;
     }
 }

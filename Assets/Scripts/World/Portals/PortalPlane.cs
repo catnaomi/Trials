@@ -15,11 +15,11 @@ public class PortalPlane : MonoBehaviour
     [ReadOnly, SerializeField] private bool nearPlaneClipping;
     public float camErrorDist = 0.75f;
     public float range = 10f;
-    // Start is called before the first frame update
+
     void Start()
     {
-        plane = new Plane(this.transform.up, this.transform.position);
-        renderer = this.GetComponent<Renderer>();
+        plane = new Plane(transform.up, transform.position);
+        renderer = GetComponent<Renderer>();
         bounds = renderer.bounds;
     }
 
@@ -27,11 +27,11 @@ public class PortalPlane : MonoBehaviour
     {
         CheckPortalPlane();
     }
+
     void CheckPortalPlane()
     {
-        
-        if (this.gameObject.scene != SceneManager.GetActiveScene()) return;
-        withinBounds = Vector3.Distance(PlayerActor.player.transform.position, this.transform.position) < range || Vector3.Distance(Camera.main.transform.position, this.transform.position) < range;//IsWithinPlane(PlayerActor.player.transform.position);// IsWithinPlane(Camera.main.transform.position + Camera.main.nearClipPlane * Camera.main.transform.forward);
+        if (gameObject.scene != SceneManager.GetActiveScene()) return;
+        withinBounds = Vector3.Distance(PlayerActor.player.transform.position, transform.position) < range || Vector3.Distance(Camera.main.transform.position, transform.position) < range;//IsWithinPlane(PlayerActor.player.transform.position);// IsWithinPlane(Camera.main.transform.position + Camera.main.nearClipPlane * Camera.main.transform.forward);
         bool swap = false;
         bool render = true;
         if (withinBounds)
@@ -78,11 +78,9 @@ public class PortalPlane : MonoBehaviour
 
     bool IsWithinPlane(Vector3 position)
     {
-        Ray posray = new Ray(position, this.transform.up);
-        Ray negray = new Ray(position, -this.transform.up);
-        bool intersect = false;
-
-        intersect = bounds.IntersectRay(posray) || bounds.IntersectRay(negray);
+        Ray posray = new Ray(position, transform.up);
+        Ray negray = new Ray(position, -transform.up);
+        bool intersect = bounds.IntersectRay(posray) || bounds.IntersectRay(negray);
         return intersect;
     }
 
@@ -100,11 +98,5 @@ public class PortalPlane : MonoBehaviour
     {
         float distToPlane = Mathf.Abs(plane.GetDistanceToPoint(Camera.main.transform.position));
         return (distToPlane < camErrorDist) && IsWithinPlane(Camera.main.transform.position);
-        Vector3 min = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0f));
-        Vector3 max = Camera.main.ScreenToWorldPoint(new Vector3(Camera.main.pixelWidth, Camera.main.pixelHeight, Camera.main.nearClipPlane));
-        Bounds camBounds = new Bounds();
-        camBounds.SetMinMax(min, max);
-        bool intersect = bounds.Intersects(camBounds);
-        return intersect;
     }
 }
